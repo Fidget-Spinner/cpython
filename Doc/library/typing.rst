@@ -949,7 +949,7 @@ These can be used as types in annotations using ``[]``, each having a unique syn
       def is_str(val: Union[str, float]):
           # "isinstance" type guard
           if isinstance(val, str):
-              # Type of ``val`` is narrowed to ``str``
+              # Type of ``val`` is narrowed to ``str``.
               ...
           else:
               # Else, type of ``val`` is narrowed to ``float``.
