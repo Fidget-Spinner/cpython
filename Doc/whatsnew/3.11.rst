@@ -425,8 +425,15 @@ runtime. Other optimizations not under this project are listed in `Optimizations
 Faster Startup
 --------------
 
-Static objects
-~~~~~~~~~~~~~~
+Static Code objects
+~~~~~~~~~~~~~~~~~~~
+
+.. sectionauthor:: Kumar Aditya
+
+Python uses code objects to represent executable code for the interpreter
+which is allocated on heap by unmarshalling the bytecode. In Python 3.11,
+statically allocated code objects of the core modules are generated to speed up
+startup of interpreter by 10-15% as this process skips the unmarshalling phase.
 
 Freezing imports
 ~~~~~~~~~~~~~~~~
