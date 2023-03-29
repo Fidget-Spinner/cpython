@@ -419,10 +419,10 @@ __type_propagate_TYPE_SWAP(
     for (int i = 0; i < nlocals; i++) {
         _Py_TYPENODE_t *node_ptr = &(type_context->type_locals[i]);
         if (*node_ptr == src_child_test) {
-            *node_ptr = dst;
+            *node_ptr = dst_child_test;
         }
         else if (*node_ptr == dst_child_test) {
-            *node_ptr = src;
+            *node_ptr = src_child_test;
         }
     }
 
@@ -431,10 +431,10 @@ __type_propagate_TYPE_SWAP(
     for (int i = 0; i < nstack; i++) {
         _Py_TYPENODE_t *node_ptr = &(type_context->type_stack[i]);
         if (*node_ptr == src_child_test) {
-            *node_ptr = dst;
+            *node_ptr = dst_child_test;
         }
         else if (*node_ptr == dst_child_test) {
-            *node_ptr = src;
+            *node_ptr = src_child_test;
         }
     }
 
