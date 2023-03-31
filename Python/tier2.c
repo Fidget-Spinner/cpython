@@ -11,9 +11,9 @@
 #define BB_DEBUG 1
 #define TYPEPROP_DEBUG 1
 // Max typed version basic blocks per basic block
-#define MAX_BB_VERSIONS 5
+#define MAX_BB_VERSIONS 10
 
-#define OVERALLOCATE_FACTOR 4
+#define OVERALLOCATE_FACTOR 6
 
 
 /* Dummy types used by the types propagator */
@@ -658,7 +658,7 @@ _PyTier2_BBSpaceCheckAndReallocIfNeeded(PyCodeObject *co, Py_ssize_t space_reque
         // Note: overallocate
         Py_ssize_t new_size = sizeof(_PyTier2BBSpace) + (curr->water_level + space_requested) * 2;
 #if BB_DEBUG
-        fprintf(stderr, "Allocating new BB of size %lld\n", (int64_t)new_size);
+        fprintf(stderr, "Space requested: %lld, Allocating new BB of size %lld\n", (int64_t)space_requested, (int64_t)new_size);
 #endif
         // @TODO We can't Realloc, we actually need to do the linked list method.
         Py_UNREACHABLE();
@@ -917,16 +917,19 @@ write_bb_id(_PyBBBranchCache *cache, int bb_id, bool is_type_guard) {
 // NEED TO ADD TO THIS EVERY TIME WE ADD A NEW ONE.
 static int type_guard_ladder[256] = {
     -1,
-    BINARY_CHECK_INT,
     BINARY_CHECK_FLOAT,
+    BINARY_CHECK_INT,
+    -1,
+    UNARY_CHECK_FLOAT,
     -1,
 };
 
 // Type guard to index in the ladder.
 // KEEP IN SYNC WITH INDEX IN type_guard_ladder
 static int type_guard_to_index[256] = {
-    [BINARY_CHECK_INT] = 1,
-    [BINARY_CHECK_FLOAT] = 2,
+    [BINARY_CHECK_FLOAT] = 1,
+    [BINARY_CHECK_INT] = 2,
+    [UNARY_CHECK_FLOAT] = 4,
 };
 
 
@@ -1043,6 +1046,8 @@ emit_logical_branch(_PyTier2TypeContext *type_context, _Py_CODEUNIT *write_curr,
         _py_set_opcode(write_curr, BB_TEST_ITER);
         write_curr->op.arg = oparg & 0xFF;
         write_curr++;
+        // Initialize adaptive interpreter counter
+        write_curr->cache = adaptive_counter_warmup();
         write_curr = emit_cache_entries(write_curr, INLINE_CACHE_ENTRIES_FOR_ITER);
         type_propagate(BB_TEST_ITER, oparg, type_context, NULL);
         _py_set_opcode(write_curr, requires_extended_arg ? EXTENDED_ARG : NOP);
@@ -1113,8 +1118,13 @@ emit_scope_exit(_Py_CODEUNIT *write_curr, _Py_CODEUNIT exit,
 static inline _Py_CODEUNIT *
 emit_i(_Py_CODEUNIT *write_curr, int opcode, int oparg)
 {
+    if (oparg > 0xFF) {
+        _py_set_opcode(write_curr, EXTENDED_ARG);
+        write_curr->op.arg = (oparg >> 8) & 0xFF;
+        write_curr++;
+    }
     _py_set_opcode(write_curr, opcode);
-    write_curr->op.arg = oparg;
+    write_curr->op.arg = oparg & 0xFF;
     write_curr++;
     return write_curr;
 }
@@ -1198,7 +1208,9 @@ add_metadata_to_jump_2d_array(_PyTier2Info *t2_info, _PyTier2BBMetadata *meta,
 // CACHE (bb_id of the current BB << 1 | is_type_branch)
 // // The BINARY_ADD then goes to the next BB
 static inline _Py_CODEUNIT *
-infer_BINARY_OP_ADD(
+infer_BINARY_OP(
+    _Py_CODEUNIT *t2_start,
+    int oparg,
     bool *needs_guard,
     _Py_CODEUNIT *prev_type_guard,
     _Py_CODEUNIT raw_op,
@@ -1206,30 +1218,61 @@ infer_BINARY_OP_ADD(
     _PyTier2TypeContext *type_context,
     int bb_id)
 {
+    assert(oparg == NB_ADD || oparg == NB_SUBTRACT || oparg == NB_MULTIPLY);
+    bool is_first_instr = (write_curr == t2_start);
     *needs_guard = false;
     PyTypeObject *right = typenode_get_type(type_context->type_stack_ptr[-1]);
     PyTypeObject *left = typenode_get_type(type_context->type_stack_ptr[-2]);
     if (left == &PyLong_Type) {
         if (right == &PyLong_Type) {
-            write_curr->op.code = BINARY_OP_ADD_INT_REST;
+            int opcode = oparg == NB_ADD
+                ? BINARY_OP_ADD_INT_REST
+                : oparg == NB_SUBTRACT
+                ? BINARY_OP_SUBTRACT_INT_REST
+                : oparg == NB_MULTIPLY
+                ? BINARY_OP_MULTIPLY_INT_REST
+                : (Py_UNREACHABLE(), 1);
+            write_curr->op.code = opcode;
             write_curr++;
-            type_propagate(BINARY_OP_ADD_INT_REST, 0, type_context, NULL);
+            type_propagate(opcode, 0, type_context, NULL);
             return write_curr;
         }
     }
-    if (left == &PyRawFloat_Type) {
-        if (right == &PyRawFloat_Type) {
-            write_curr->op.code = BINARY_OP_ADD_FLOAT_UNBOXED;
+    if ((left == &PyRawFloat_Type || left == &PyFloat_Type) &&
+        (right == &PyRawFloat_Type || right == &PyFloat_Type)) {
+        int opcode = oparg == NB_ADD
+            ? BINARY_OP_ADD_FLOAT_UNBOXED
+            : oparg == NB_SUBTRACT
+            ? BINARY_OP_SUBTRACT_FLOAT_UNBOXED
+            : oparg == NB_MULTIPLY
+            ? BINARY_OP_MULTIPLY_FLOAT_UNBOXED
+            : (Py_UNREACHABLE(), 1);
+        if (right == &PyFloat_Type) {
+            write_curr->op.code = UNBOX_FLOAT;
+            write_curr->op.arg = 0;
             write_curr++;
-            type_propagate(BINARY_OP_ADD_FLOAT_UNBOXED, 0, type_context, NULL);
-            return write_curr;
+            type_propagate(UNBOX_FLOAT, 0, type_context, NULL);
         }
+        if (left == &PyFloat_Type) {
+            write_curr->op.code = UNBOX_FLOAT;
+            write_curr->op.arg = 1;
+            write_curr++;
+            type_propagate(UNBOX_FLOAT, 1, type_context, NULL);
+        }
+        write_curr->op.code = opcode;
+        write_curr++;
+        type_propagate(opcode, 0, type_context, NULL);
+        return write_curr;
     }
     // Unknown, time to emit the chain of guards.
-    if (prev_type_guard == NULL) {
+    // No type guard before this, or it's not the first in the new BB.
+    // First in new BB usually indicates it's already part of a pre-existing ladder.
+    if (prev_type_guard == NULL ||
+        (!is_first_instr && prev_type_guard != NULL &&
+            type_guard_ladder[type_guard_to_index[prev_type_guard->op.code] + 1] != -1)) {
         write_curr = rebox_stack(write_curr, type_context, 2);
         *needs_guard = true;
-        return emit_type_guard(write_curr, BINARY_CHECK_INT, bb_id);
+        return emit_type_guard(write_curr, BINARY_CHECK_FLOAT, bb_id);
     }
     else {
         int next_guard = type_guard_ladder[
@@ -1241,8 +1284,6 @@ infer_BINARY_OP_ADD(
         }
         // End of ladder, fall through
     }
-    // Unknown, just emit the same opcode, don't bother emitting guard.
-    // Fall through and let the code generator handle.
     return NULL;
 }
 
@@ -1280,14 +1321,14 @@ _PyTier2_Code_DetectAndEmitBB(
     );
 #define END() goto end;
 #define JUMPBY(x) i += x + 1;
-#define DISPATCH()        write_i = emit_i(write_i, specop, oparg); \
+#define DISPATCH()        write_i = emit_i(write_i, specop, curr->op.arg); \
                           write_i = copy_cache_entries(write_i, curr+1, caches); \
                           i += caches; \
                           type_propagate(opcode, oparg, starting_type_context, consts); \
                           continue;
 
 #define DISPATCH_REBOX(x) write_i = rebox_stack(write_i, starting_type_context, x); \
-                          write_i = emit_i(write_i, specop, oparg); \
+                          write_i = emit_i(write_i, specop, curr->op.arg); \
                           write_i = copy_cache_entries(write_i, curr+1, caches); \
                           i += caches; \
                           type_propagate(opcode, oparg, starting_type_context, consts); \
@@ -1357,6 +1398,17 @@ _PyTier2_Code_DetectAndEmitBB(
             }
             DISPATCH();
         }
+        case COPY: {
+            // Read-only, only for us to inspect the types. DO NOT MODIFY HERE.
+            // ONLY THE TYPES PROPAGATOR SHOULD MODIFY THEIR INTERNAL VALUES.
+            _Py_TYPENODE_t **type_stackptr = &starting_type_context->type_stack_ptr;
+            PyTypeObject *pop = typenode_get_type(*TYPESTACK_PEEK(1 + (oparg - 1)));
+            // Writing unboxed val to a boxed val. 
+            if (is_unboxed_type(pop)) {
+                opcode = specop = COPY_NO_INCREF;
+            }
+            DISPATCH();
+        }
         case LOAD_CONST: {
             if (TYPECONST_GET_RAWTYPE(oparg) == &PyFloat_Type) {
                 write_i->op.code = LOAD_CONST;
@@ -1407,6 +1459,42 @@ _PyTier2_Code_DetectAndEmitBB(
             }
             DISPATCH();
         }
+        case LOAD_FAST_CHECK: {
+            // Read-only, only for us to inspect the types. DO NOT MODIFY HERE.
+            // ONLY THE TYPES PROPAGATOR SHOULD MODIFY THEIR INTERNAL VALUES.
+            _Py_TYPENODE_t *type_locals = starting_type_context->type_locals;
+            // Writing unboxed val to a boxed val.
+            PyTypeObject *local = typenode_get_type(*TYPELOCALS_GET(oparg));
+            if (is_unboxed_type(local)) {
+                opcode = specop = LOAD_FAST_NO_INCREF;
+            }
+            else {
+                if (local == &PyFloat_Type) {
+                    write_i->op.code = LOAD_FAST;
+                    write_i->op.arg = oparg;
+                    write_i++;
+                    type_propagate(LOAD_FAST,
+                        oparg, starting_type_context, consts);
+                    write_i->op.code = UNBOX_FLOAT;
+                    write_i->op.arg = 0;
+                    write_i++;
+                    type_propagate(UNBOX_FLOAT, 0, starting_type_context, consts);
+                    write_i->op.code = STORE_FAST_UNBOXED_BOXED;
+                    write_i->op.arg = oparg;
+                    write_i++;
+                    type_propagate(STORE_FAST_UNBOXED_BOXED,
+                        oparg, starting_type_context, consts);
+                    write_i->op.code = LOAD_FAST_NO_INCREF;
+                    write_i->op.arg = oparg;
+                    write_i++;
+                    type_propagate(LOAD_FAST_NO_INCREF,
+                        oparg, starting_type_context, consts);
+                    continue;
+                }
+                opcode = specop = LOAD_FAST_CHECK;
+            }
+            DISPATCH();
+        }
         case STORE_FAST: {
             // Read-only, only for us to inspect the types. DO NOT MODIFY HERE.
             // ONLY THE TYPES PROPAGATOR SHOULD MODIFY THEIR INTERNAL VALUES.
@@ -1442,9 +1530,10 @@ _PyTier2_Code_DetectAndEmitBB(
         case BUILD_LIST:
             DISPATCH_REBOX(oparg);
         case BINARY_OP:
-            if (oparg == NB_ADD) {
+            if (oparg == NB_ADD || oparg == NB_SUBTRACT || oparg == NB_MULTIPLY) {
                 // Add operation. Need to check if we can infer types.
-                _Py_CODEUNIT *possible_next = infer_BINARY_OP_ADD(&needs_guard,
+                _Py_CODEUNIT *possible_next = infer_BINARY_OP(t2_start,
+                    oparg, &needs_guard,
                     prev_type_guard,
                     *curr,
                     write_i, starting_type_context,
@@ -1470,11 +1559,14 @@ _PyTier2_Code_DetectAndEmitBB(
         case UNARY_NOT:
         case UNARY_INVERT:
         case GET_LEN:
+        case UNPACK_SEQUENCE:
             DISPATCH_REBOX(1);
         case CALL_INTRINSIC_2:
         case BINARY_SUBSCR:
         case BINARY_SLICE:
             DISPATCH_REBOX(2);
+        case STORE_SUBSCR:
+            DISPATCH_REBOX(4);
         case STORE_SLICE:
             DISPATCH_REBOX(4);
         default:
@@ -1525,7 +1617,6 @@ _PyTier2_Code_DetectAndEmitBB(
                 virtual_start = true;
 
                 if (opcode == EXTENDED_ARG) {
-                    write_i = emit_i(write_i, specop, oparg);
                     // Note: EXTENDED_ARG could be a jump target!!!!!
                     specop = next_instr->op.code;
                     opcode = _PyOpcode_Deopt[specop];
@@ -1563,7 +1654,6 @@ _PyTier2_Code_DetectAndEmitBB(
                 END();
             }
             if (opcode == EXTENDED_ARG) {
-                write_i = emit_i(write_i, specop, oparg);
                 // Note: EXTENDED_ARG could be a jump target!!!!!
                 specop = next_instr->op.code;
                 opcode = _PyOpcode_Deopt[specop];
@@ -1802,6 +1892,8 @@ IS_OPTIMIZABLE_OPCODE(int opcode, int oparg)
     switch (_PyOpcode_Deopt[opcode]) {
     case BINARY_OP:
         switch (oparg) {
+        case NB_SUBTRACT:
+        case NB_MULTIPLY:
         case NB_ADD:
             // We want a specialised form, not the generic BINARY_OP.
             return opcode != _PyOpcode_Deopt[opcode];
@@ -2162,7 +2254,7 @@ _PyTier2_LocateJumpBackwardsBB(_PyInterpreterFrame *frame, uint16_t bb_id_tagged
     assert(typestack_level == stacklevel);
 #endif
     // The jump target
-    _Py_CODEUNIT *tier1_jump_target = meta->tier1_end + jumpby - ((curr-1)->op.code == EXTENDED_ARG && (curr-1)->op.arg > 0);
+    _Py_CODEUNIT *tier1_jump_target = meta->tier1_end + jumpby;
     *tier1_fallback = tier1_jump_target;
     // Be a pessimist and assume we need to write the entire rest of code into the BB.
     // The size of the BB generated will definitely be equal to or smaller than this.

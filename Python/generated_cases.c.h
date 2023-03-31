@@ -3,6 +3,24 @@
 //   Python/bytecodes.c
 // Do not edit!
 
+        #define UOP_BINARY_OP_MULTIPLY_INT_REST() \
+        do { \
+            STAT_INC(BINARY_OP, hit);\
+            prod = _PyLong_Multiply((PyLongObject *)left, (PyLongObject *)right);\
+            _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);\
+            _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);\
+            if (prod == NULL) goto pop_2_error;\
+        } while (0)
+
+        #define UOP_BINARY_OP_SUBTRACT_INT_REST() \
+        do { \
+            STAT_INC(BINARY_OP, hit);\
+            sub = _PyLong_Subtract((PyLongObject *)left, (PyLongObject *)right);\
+            _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);\
+            _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);\
+            if (sub == NULL) goto pop_2_error;\
+        } while (0)
+
         #define UOP_BINARY_OP_ADD_INT_REST() \
         do { \
             STAT_INC(BINARY_OP, hit);\
@@ -296,6 +314,17 @@
             assert(cframe.use_tracing == 0);
             DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
             DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
+            UOP_BINARY_OP_MULTIPLY_INT_REST();
+            STACK_SHRINK(1);
+            stack_pointer[-1] = prod;
+            next_instr += 1;
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_MULTIPLY_INT_REST) {
+            PyObject *right = stack_pointer[-1];
+            PyObject *left = stack_pointer[-2];
+            PyObject *prod;
             STAT_INC(BINARY_OP, hit);
             prod = _PyLong_Multiply((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -303,7 +332,6 @@
             if (prod == NULL) goto pop_2_error;
             STACK_SHRINK(1);
             stack_pointer[-1] = prod;
-            next_instr += 1;
             DISPATCH();
         }
 
@@ -331,6 +359,17 @@
             assert(cframe.use_tracing == 0);
             DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
             DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
+            UOP_BINARY_OP_SUBTRACT_INT_REST();
+            STACK_SHRINK(1);
+            stack_pointer[-1] = sub;
+            next_instr += 1;
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_SUBTRACT_INT_REST) {
+            PyObject *right = stack_pointer[-1];
+            PyObject *left = stack_pointer[-2];
+            PyObject *sub;
             STAT_INC(BINARY_OP, hit);
             sub = _PyLong_Subtract((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -338,7 +377,6 @@
             if (sub == NULL) goto pop_2_error;
             STACK_SHRINK(1);
             stack_pointer[-1] = sub;
-            next_instr += 1;
             DISPATCH();
         }
 
@@ -449,9 +487,14 @@
 
         TARGET(UNARY_CHECK_FLOAT) {
             PyObject *arg = stack_pointer[-(1 + oparg)];
+            PyObject *arg_unboxed;
             assert(cframe.use_tracing == 0);
             char is_successor = PyFloat_CheckExact(arg);
             bb_test = BB_TEST(is_successor, 0);
+            arg_unboxed = (is_successor
+                ? *((PyObject **)(&(((PyFloatObject *)arg)->ob_fval)))
+                : arg);
+            stack_pointer[-(1 + oparg)] = arg_unboxed;
             DISPATCH();
         }
 
@@ -464,6 +507,30 @@
             sum = *(PyObject **)(&temp);
             STACK_SHRINK(1);
             stack_pointer[-1] = sum;
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_SUBTRACT_FLOAT_UNBOXED) {
+            PyObject *right = stack_pointer[-1];
+            PyObject *left = stack_pointer[-2];
+            PyObject *sum;
+            STAT_INC(BINARY_OP, hit);
+            double temp = *(double *)(&(left)) - *(double *)(&(right));
+            sum = *(PyObject **)(&temp);
+            STACK_SHRINK(1);
+            stack_pointer[-1] = sum;
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_MULTIPLY_FLOAT_UNBOXED) {
+            PyObject *right = stack_pointer[-1];
+            PyObject *left = stack_pointer[-2];
+            PyObject *prod;
+            STAT_INC(BINARY_OP, hit);
+            double temp = *(double *)(&(left)) * *(double *)(&(right));
+            prod = *(PyObject **)(&temp);
+            STACK_SHRINK(1);
+            stack_pointer[-1] = prod;
             DISPATCH();
         }
 
@@ -2774,7 +2841,7 @@
             if (ADAPTIVE_COUNTER_IS_ZERO(cache->counter)) {
                 assert(cframe.use_tracing == 0);
                 next_instr--;
-                _Py_Specialize_ForIter(iter, next_instr, oparg);
+                _Py_Specialize_ForIter(iter, next_instr, oparg, 0);
                 DISPATCH_SAME_OPARG();
             }
             STAT_INC(FOR_ITER, deferred);
@@ -2808,8 +2875,20 @@
         }
 
         TARGET(BB_TEST_ITER) {
+            PREDICTED(BB_TEST_ITER);
             PyObject *iter = stack_pointer[-1];
             PyObject *next;
+            #if ENABLE_SPECIALIZATION
+            _PyForIterCache *cache = (_PyForIterCache *)next_instr;
+            if (ADAPTIVE_COUNTER_IS_ZERO(cache->counter)) {
+                assert(cframe.use_tracing == 0);
+                next_instr--;
+                _Py_Specialize_ForIter(iter, next_instr, oparg, 1);
+                DISPATCH_SAME_OPARG();
+            }
+            STAT_INC(BB_TEST_ITER, deferred);
+            DECREMENT_ADAPTIVE_COUNTER(cache->counter);
+            #endif  /* ENABLE_SPECIALIZATION */
             next = (*Py_TYPE(iter)->tp_iternext)(iter);
             if (next == NULL) {
                 if (_PyErr_Occurred(tstate)) {
@@ -2864,6 +2943,36 @@
             DISPATCH();
         }
 
+        TARGET(BB_TEST_ITER_LIST) {
+            PyObject *iter = stack_pointer[-1];
+            PyObject *next;
+            assert(cframe.use_tracing == 0);
+            DEOPT_IF(Py_TYPE(iter) != &PyListIter_Type, BB_TEST_ITER);
+            _PyListIterObject *it = (_PyListIterObject *)iter;
+            STAT_INC(FOR_ITER, hit);
+            PyListObject *seq = it->it_seq;
+            if (seq) {
+                if (it->it_index < PyList_GET_SIZE(seq)) {
+                    next = Py_NewRef(PyList_GET_ITEM(seq, it->it_index++));
+                    goto end_bb_iter_list;  // End of this instruction
+                }
+                it->it_seq = NULL;
+                Py_DECREF(seq);
+            }
+            Py_DECREF(iter);
+            STACK_SHRINK(1);
+            bb_test = BB_TEST(0, 2);
+            JUMPBY(INLINE_CACHE_ENTRIES_FOR_ITER);
+            DISPATCH();
+        end_bb_iter_list:
+            // Common case: no jump, leave it to the code generator
+            bb_test = BB_TEST(1, 0);
+            STACK_GROW(1);
+            stack_pointer[-1] = next;
+            next_instr += 1;
+            DISPATCH();
+        }
+
         TARGET(FOR_ITER_TUPLE) {
             PyObject *iter = stack_pointer[-1];
             PyObject *next;
@@ -2893,6 +3002,36 @@
             DISPATCH();
         }
 
+        TARGET(BB_TEST_ITER_TUPLE) {
+            PyObject *iter = stack_pointer[-1];
+            PyObject *next;
+            assert(cframe.use_tracing == 0);
+            _PyTupleIterObject *it = (_PyTupleIterObject *)iter;
+            DEOPT_IF(Py_TYPE(it) != &PyTupleIter_Type, BB_TEST_ITER);
+            STAT_INC(FOR_ITER, hit);
+            PyTupleObject *seq = it->it_seq;
+            if (seq) {
+                if (it->it_index < PyTuple_GET_SIZE(seq)) {
+                    next = Py_NewRef(PyTuple_GET_ITEM(seq, it->it_index++));
+                    goto end_test_iter_tuple;  // End of this instruction
+                }
+                it->it_seq = NULL;
+                Py_DECREF(seq);
+            }
+            Py_DECREF(iter);
+            STACK_SHRINK(1);
+            bb_test = BB_TEST(0, 2);
+            JUMPBY(INLINE_CACHE_ENTRIES_FOR_ITER);
+            DISPATCH();
+        end_test_iter_tuple:
+            // Common case: no jump, leave it to the code generator
+            bb_test = BB_TEST(1, 0);
+            STACK_GROW(1);
+            stack_pointer[-1] = next;
+            next_instr += 1;
+            DISPATCH();
+        }
+
         TARGET(FOR_ITER_RANGE) {
             PyObject *iter = stack_pointer[-1];
             PyObject *next;
@@ -2914,6 +3053,34 @@
             if (next == NULL) {
                 goto error;
             }
+            STACK_GROW(1);
+            stack_pointer[-1] = next;
+            next_instr += 1;
+            DISPATCH();
+        }
+
+        TARGET(BB_TEST_ITER_RANGE) {
+            PyObject *iter = stack_pointer[-1];
+            PyObject *next;
+            assert(cframe.use_tracing == 0);
+            _PyRangeIterObject *r = (_PyRangeIterObject *)iter;
+            DEOPT_IF(Py_TYPE(r) != &PyRangeIter_Type, BB_TEST_ITER);
+            STAT_INC(FOR_ITER, hit);
+            if (r->len <= 0) {
+                STACK_SHRINK(1);
+                Py_DECREF(r);
+                bb_test = BB_TEST(0, 2);
+                JUMPBY(INLINE_CACHE_ENTRIES_FOR_ITER);
+                DISPATCH();
+            }
+            long value = r->start;
+            r->start = value + r->step;
+            r->len--;
+            next = PyLong_FromLong(value);
+            if (next == NULL) {
+                goto error;
+            }
+            bb_test = BB_TEST(1, 0);
             STACK_GROW(1);
             stack_pointer[-1] = next;
             next_instr += 1;
@@ -3984,6 +4151,15 @@
             PyObject *top;
             assert(oparg > 0);
             top = Py_NewRef(bottom);
+            STACK_GROW(1);
+            stack_pointer[-1] = top;
+            DISPATCH();
+        }
+
+        TARGET(COPY_NO_INCREF) {
+            PyObject *bottom = stack_pointer[-(1 + (oparg - 1))];
+            PyObject *top;
+            assert(oparg > 0);
             STACK_GROW(1);
             stack_pointer[-1] = top;
             DISPATCH();
