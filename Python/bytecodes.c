@@ -318,21 +318,26 @@ dummy_func(
             char is_successor = PyFloat_CheckExact(left) && (Py_TYPE(left) == Py_TYPE(right));
             bb_test = BB_TEST(is_successor, 0);
 
-            left_unboxed = (is_successor
-                ? *((PyObject **)(&(((PyFloatObject *)left)->ob_fval)))
-                : left);
-            right_unboxed = (is_successor
-                ? *((PyObject **)(&(((PyFloatObject *)right)->ob_fval)))
-                : right);
+            if (is_successor) {
+                left_unboxed = *((PyObject **)(&(((PyFloatObject *)left)->ob_fval)));
+                right_unboxed = *((PyObject **)(&(((PyFloatObject *)right)->ob_fval)));
+                DECREF_INPUTS();
+            } else {
+                left_unboxed = left;
+                right_unboxed = right;
+            }
         }
 
         inst(UNARY_CHECK_FLOAT, (arg, unused[oparg] -- arg_unboxed : { <<= PyFloat_Type, PyRawFloat_Type}, unused[oparg])) {
             assert(cframe.use_tracing == 0);
             char is_successor = PyFloat_CheckExact(arg);
             bb_test = BB_TEST(is_successor, 0);
-            arg_unboxed = (is_successor
-                ? *((PyObject **)(&(((PyFloatObject *)arg)->ob_fval)))
-                : arg);
+            if (is_successor) {
+                arg_unboxed = *((PyObject **)(&(((PyFloatObject *)arg)->ob_fval)));
+                DECREF_INPUTS();
+            } else {
+                arg_unboxed = arg;
+            }
         }
 
         inst(BINARY_OP_ADD_FLOAT_UNBOXED, (left, right -- sum : PyRawFloat_Type)) {
