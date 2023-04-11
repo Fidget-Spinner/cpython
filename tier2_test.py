@@ -296,7 +296,7 @@ def test_loop_peeling(a):
 
 # This triggers loop peeling, because 
 # the first iteration `a` type is int
-# and the 2nd iteration `b` type is float
+# and the 2nd iteration `a` type is float
 # This should triger a JUMP_FORWARD in place of
 # a JUMP_BACKWARD_QUICK
 trigger_tier2(test_loop_peeling, (0,))
