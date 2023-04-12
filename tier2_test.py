@@ -313,9 +313,9 @@ assert insts[instidx + 1].opname == "BB_TEST_ITER_RANGE" # The loop predicate
 
 # We also need to make sure JUMP_FORWARD
 # jumped into the float-specialised loop body
-endidx, endfor = next(
+endidx, _ = next(
     (i,x) for i,x in enumerate(insts) 
-    if (x.opname == "END_FOR" and x.offset > jmp_target.offset))
+    if (x.opname == "JUMP_BACKWARD_QUICK" and x.offset > jmp_target.offset))
 # Check for existence of float-specialised instruction in loop body
 assert any(1 for _ in
     filter(lambda i: i.opname == 'BINARY_OP_ADD_FLOAT_UNBOXED', insts[instidx:endidx]))
