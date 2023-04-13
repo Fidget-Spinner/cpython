@@ -25,9 +25,9 @@ def writeinst(opc:str, arg:int=0):
     return bytes(inst)
 
 
-###################
-# Type prop tests #
-###################
+################################################
+# Type prop tests: TYPE_SET and TYPE_OVERWRITE #
+################################################
 
 def test_typeprop1(a):
     # Dummy code won't be ran
@@ -82,6 +82,10 @@ expected = [
 insts = dis.get_instructions(test_typeprop1, tier2=True)
 for x,y in zip(insts, expected):
     assert x.opname == y
+
+################################################
+# Type prop tests: TYPE_SWAP                   #
+################################################
 
 bytecode = b"".join([
     # Tests TYPE_SWAP
@@ -151,9 +155,10 @@ for x,y in zip(insts, expected):
 
 
 #######################################
-# Type guard                          #
+# Tests for: Type guard               #
 # + Float unboxing                    #
 # + Jump rewriting test               #
+# + Tier2 guard stability             #
 #######################################
 
 def test_guard_elimination(a,b):
@@ -319,4 +324,5 @@ endidx, _ = next(
 # Check for existence of float-specialised instruction in loop body
 assert any(1 for _ in
     filter(lambda i: i.opname == 'BINARY_OP_ADD_FLOAT_UNBOXED', insts[instidx:endidx]))
+
 
