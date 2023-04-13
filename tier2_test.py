@@ -269,10 +269,9 @@ for x,y in zip(insts, expected):
     assert x.opname == y.opname
 
 
-######################
-# Backward jump test #
-# + loop peeling     #
-######################
+##############################
+# Test: Backward jump offset #
+##############################
 
 def test_backwards_jump(a):
     for i in range(64):
@@ -293,6 +292,10 @@ instidx, jmp_target = next((i,x) for i,x in enumerate(insts) if x.offset == back
 assert jmp_target.opname == "NOP" # Space for an EXTENDED_ARG
 assert insts[instidx + 1].opname == "BB_TEST_ITER_RANGE" # The loop predicate
 
+
+######################
+# Test: Loop peeling #
+######################
 
 def test_loop_peeling(a):
     for i in range(64):
