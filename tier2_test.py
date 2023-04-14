@@ -329,3 +329,47 @@ assert any(1 for _ in
     filter(lambda i: i.opname == 'BINARY_OP_ADD_FLOAT_UNBOXED', insts[instidx:endidx]))
 
 
+##################################
+# Test: Container specialisation #
+##################################
+
+def test_container(l):
+    l[2] = l[0] + l[1]
+
+
+trigger_tier2(test_container, ([1,2,3,4],))
+insts = dis.get_instructions(test_container, tier2=True)
+expected = [
+    "RESUME_QUICK",
+    "LOAD_FAST",
+    "LOAD_CONST",
+
+    "CHECK_LIST",
+    "NOP",
+    "BB_BRANCH_IF_FLAG_UNSET", # Fallthrough!
+
+    # Type prop from const array: No type guard needed
+    "BINARY_SUBSCR_LIST_INT_REST",
+    "LOAD_FAST",
+    "LOAD_CONST",
+    # CHECK_LIST should eliminate the type guard here
+    "BINARY_SUBSCR_LIST_INT_REST",
+
+    # We haven't implemented type prop into container types
+    # so these checks should get generated
+    "BINARY_CHECK_FLOAT",
+    "NOP",
+    "BB_BRANCH_IF_FLAG_SET",
+    "BINARY_CHECK_INT",
+    "NOP",
+    "BB_BRANCH_IF_FLAG_UNSET",
+    "BINARY_OP_ADD_INT_REST",
+    
+    "LOAD_FAST",
+    "LOAD_CONST",
+    # CHECK_LIST should eliminate the type guard here
+    "STORE_SUBSCR_LIST_INT_REST",
+    "RETURN_CONST",
+]
+for x,y in zip(insts, expected):
+    assert x.opname == y
