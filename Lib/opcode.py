@@ -277,6 +277,12 @@ _nb_ops = [
 ]
 
 _specializations = {
+    "RESUME": [
+        "RESUME_QUICK",
+    ],
+    "JUMP_BACKWARD": [
+        "JUMP_BACKWARD_QUICK",
+    ],
     "BINARY_OP": [
         "BINARY_OP_ADD_FLOAT",
         "BINARY_OP_ADD_INT",
@@ -322,6 +328,11 @@ _specializations = {
         "FOR_ITER_TUPLE",
         "FOR_ITER_RANGE",
         "FOR_ITER_GEN",
+    ],
+    "BB_TEST_ITER": [
+        "BB_TEST_ITER_LIST",
+        "BB_TEST_ITER_TUPLE",
+        "BB_TEST_ITER_RANGE",
     ],
     "LOAD_ATTR": [
         # These potentially push [NULL, bound method] onto the stack.
@@ -398,6 +409,9 @@ _cache_format = {
     "FOR_ITER": {
         "counter": 1,
     },
+    "BB_TEST_ITER": {
+        "counter": 1,
+    },
     "LOAD_ATTR": {
         "counter": 1,
         "version": 2,
@@ -424,4 +438,85 @@ _cache_format = {
 
 _inline_cache_entries = [
     sum(_cache_format.get(opname[opcode], {}).values()) for opcode in range(256)
+]
+
+_macro_ops = [
+    'BINARY_OP_ADD_INT',
+    'BINARY_OP_SUBTRACT_INT',
+    'BINARY_OP_MULTIPLY_INT',
+    'BINARY_OP_ADD_FLOAT',
+    'BINARY_SUBSCR_LIST_INT',
+]
+_uops = [
+    # Tier 2 BB opcodes
+    # Frame creation
+    # 'BB_ENTER_FRAME',
+    # 'BB_EXIT_FRAME',
+    # Initial generic branching instruction.
+    'BB_BRANCH', # When both exits have not been generated.
+    # The BB_BRANCH transitions to one of these two.
+    # This happens when the fall through is generated, but not the other branch.
+    'BB_BRANCH_IF_FLAG_UNSET',  # When alternate exit is not yet generated.
+    'BB_BRANCH_IF_FLAG_SET',    # When successor exit is not yet generated.
+    # When both edges are generated
+    'BB_JUMP_IF_FLAG_UNSET',
+    'BB_JUMP_IF_FLAG_SET',
+    # The final form is that once both branches are generated, we can just
+    # override these instructions with a generic JUMP.
+
+    # These tests correspond to the jump instructions
+    # FOR_ITER's null (iterator) check
+    'BB_TEST_ITER',
+    'BB_TEST_ITER_RANGE',
+    'BB_TEST_ITER_LIST',
+    'BB_TEST_ITER_TUPLE',
+    # POP_JUMP_IF_FALSE, POP_JUMP_IF_TRUE
+    'BB_TEST_POP_IF_FALSE',
+    'BB_TEST_POP_IF_TRUE',
+    # POP_JUMP_IF_NOT_NONE, POP_JUMP_IF_NONE
+    'BB_TEST_POP_IF_NOT_NONE',
+    'BB_TEST_POP_IF_NONE',
+    # JUMP_BACKWARD
+    'BB_JUMP_BACKWARD_LAZY',
+
+    # Common type checks
+    # These instructions check that one operand is a certain type.
+    # Their oparg is the offset from TOS to read.
+    # 'UNARY_CHECK_INT',
+    # 'UNARY_CHECK_FLOAT',
+    # 'UNARY_CHECK_STR',
+
+    # These instructions check that both operands are a certain type.
+    # The benefit is that they save some dispatch overhead versus the
+    # single operand forms.
+    'BINARY_CHECK_INT',
+    'BINARY_CHECK_FLOAT',
+    'CHECK_LIST',
+
+    # These are guardless instructions
+    ## Arithmetic
+    'BINARY_OP_ADD_INT_REST',
+    'BINARY_OP_ADD_FLOAT_UNBOXED',
+    'BINARY_OP_SUBTRACT_INT_REST',
+    'BINARY_OP_SUBTRACT_FLOAT_UNBOXED',
+    'BINARY_OP_MULTIPLY_INT_REST',
+    'BINARY_OP_MULTIPLY_FLOAT_UNBOXED',
+
+    # Containers
+    'BINARY_SUBSCR_LIST_INT_REST',
+    'STORE_SUBSCR_LIST_INT_REST',
+
+    # Boxing / unboxing ops
+    'POP_TOP_NO_DECREF',
+    'UNBOX_FLOAT',
+    'BOX_FLOAT',
+    'COPY_NO_INCREF',
+    'LOAD_FAST_NO_INCREF',
+    # Storing a boxed value, overwriting an unboxed local.
+    'STORE_FAST_BOXED_UNBOXED',
+    # Storing an unboxed value, overwriting a boxed local.
+    'STORE_FAST_UNBOXED_BOXED',
+    # Storing an unboxed value, overwriting an unboxed local.
+    'STORE_FAST_UNBOXED_UNBOXED',
+    # The traditional STORE_FAST is storing a boxed value, overwriting a boxed local.
 ]

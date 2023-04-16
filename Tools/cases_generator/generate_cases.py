@@ -13,19 +13,36 @@ import re
 import sys
 import typing
 
+from enum import Enum, auto
+
 import lexer as lx
 import parser
 from parser import StackEffect
+from parser import TypeSrcLiteral, TypeSrcConst, TypeSrcLocals, TypeSrcStackInput
+from parser import LocalEffect
 
 HERE = os.path.dirname(__file__)
 ROOT = os.path.join(HERE, "../..")
 THIS = os.path.relpath(__file__, ROOT).replace(os.path.sep, posixpath.sep)
 
 DEFAULT_INPUT = os.path.relpath(os.path.join(ROOT, "Python/bytecodes.c"))
+
+# Tier 1 interpreter
 DEFAULT_OUTPUT = os.path.relpath(os.path.join(ROOT, "Python/generated_cases.c.h"))
 DEFAULT_METADATA_OUTPUT = os.path.relpath(
     os.path.join(ROOT, "Python/opcode_metadata.h")
 )
+
+# Tier 2 interpreter
+TIER2_MACRO_TO_MICRO_MAP_OUTPUT = os.path.relpath(
+    os.path.join(ROOT, "Include/internal/pycore_opcode_macro_to_micro.h")
+)
+
+# Tier 2 type propagator
+TIER2_TYPE_PROPAGATOR_OUTPUT = os.path.relpath(
+    os.path.join(ROOT, "Python/tier2_typepropagator.c.h")
+)
+
 BEGIN_MARKER = "// BEGIN BYTECODES //"
 END_MARKER = "// END BYTECODES //"
 RE_PREDICTED = (
@@ -33,6 +50,28 @@ RE_PREDICTED = (
 )
 UNUSED = "unused"
 BITS_PER_CODE_UNIT = 16
+
+TYPE_PROPAGATOR_FORBIDDEN = [
+    # Type propagator shouldn't see these
+    "FOR_ITER",
+    "SWAP",
+    # Not supported
+    "SEND",
+    "SEND_GEN",
+    "YIELD_VALUE",
+    "RAISE_VARARGS",
+    "PUSH_EXC_INFO",
+    "RERAISE",
+    "POP_EXCEPT",
+    "LOAD_DEREF",
+    "MAKE_CELL",
+    "DELETE_FAST",
+    "MATCH_MAPPING",
+    "MATCH_SEQUENCE",
+    "MATCH_KEYS",
+    "EXTENDED_ARG",
+    "WITH_EXCEPT_START",
+]
 
 arg_parser = argparse.ArgumentParser(
     description="Generate the code for the interpreter switch.",
@@ -49,6 +88,14 @@ arg_parser.add_argument(
 )
 arg_parser.add_argument(
     "input", nargs=argparse.REMAINDER, help="Instruction definition file(s)"
+)
+
+arg_parser.add_argument(
+    "-u",
+    action="store_true",
+    help=f"Generate macro to micro instruction map instead,"
+         f" along with the type for uop type guards"
+         f"changes output default to {TIER2_MACRO_TO_MICRO_MAP_OUTPUT}",
 )
 
 
@@ -109,6 +156,7 @@ class Formatter:
 
     stream: typing.TextIO
     prefix: str
+    postfix: str
     emit_line_directives: bool = False
     lineno: int  # Next line number, 1-based
     filename: str  # Slightly improved stream.filename
@@ -120,6 +168,7 @@ class Formatter:
     ) -> None:
         self.stream = stream
         self.prefix = " " * indent
+        self.postfix = ""
         self.emit_line_directives = emit_line_directives
         self.lineno = 1
         filename = os.path.relpath(self.stream.name, ROOT)
@@ -141,7 +190,7 @@ class Formatter:
 
     def emit(self, arg: str) -> None:
         if arg:
-            self.write_raw(f"{self.prefix}{arg}\n")
+            self.write_raw(f"{self.prefix}{arg}{self.postfix}\n")
         else:
             self.write_raw("\n")
 
@@ -230,7 +279,7 @@ class Instruction:
 
     # Parts of the underlying instruction definition
     inst: parser.InstDef
-    kind: typing.Literal["inst", "op", "legacy"]  # Legacy means no (input -- output)
+    kind: parser.INST_KINDS
     name: str
     block: parser.Block
     block_text: list[str]  # Block.text, less curlies, less PREDICT() calls
@@ -243,6 +292,7 @@ class Instruction:
     cache_effects: list[parser.CacheEffect]
     input_effects: list[StackEffect]
     output_effects: list[StackEffect]
+    local_effects: LocalEffect | None
     unmoved_names: frozenset[str]
     instr_fmt: str
 
@@ -266,6 +316,7 @@ class Instruction:
             effect for effect in inst.inputs if isinstance(effect, StackEffect)
         ]
         self.output_effects = inst.outputs  # For consistency/completeness
+        self.local_effects = inst.localeffect
         unmoved_names: set[str] = set()
         for ieffect, oeffect in zip(self.input_effects, self.output_effects):
             if ieffect.name == oeffect.name:
@@ -396,7 +447,10 @@ class Instruction:
         for line in self.block_text:
             out.set_lineno(self.block_line + offset, filename)
             offset += 1
-            if m := re.match(r"(\s*)ERROR_IF\((.+), (\w+)\);\s*(?://.*)?$", line):
+            if m := re.match(r"(\s*)U_INST\((.+)\);\s*$", line):
+                space, label = m.groups()
+                out.emit(f"UOP_{label}();")
+            elif m := re.match(r"(\s*)ERROR_IF\((.+), (\w+)\);\s*(?://.*)?$", line):
                 space, cond, label = m.groups()
                 space = extra + space
                 # ERROR_IF() must pop the inputs from the stack.
@@ -418,7 +472,7 @@ class Instruction:
                         f"{space}if ({cond}) {{ STACK_SHRINK({symbolic}); goto {label}; }}\n"
                     )
                 else:
-                    out.write_raw(f"{space}if ({cond}) goto {label};\n")
+                    out.write_raw(f"{space}if ({cond}) goto {label};{out.postfix}\n")
             elif m := re.match(r"(\s*)DECREF_INPUTS\(\);\s*(?://.*)?$", line):
                 out.reset_lineno()
                 space = extra + m.group(1)
@@ -435,8 +489,162 @@ class Instruction:
                         decref = "XDECREF" if ieff.cond else "DECREF"
                         out.write_raw(f"{space}Py_{decref}({ieff.name});\n")
             else:
-                out.write_raw(extra + line)
+                out.write_raw(extra + line.rstrip("\n") + out.postfix + "\n")
         out.reset_lineno()
+
+    def write_typeprop(self, out: Formatter) -> None:
+        """Write one instruction's type propagation rules"""
+
+        # TODO: Add SWAP to DSL
+
+        need_to_declare = []
+        # Stack input is used in local effect
+        if self.local_effects and \
+            isinstance(val := self.local_effects.value, TypeSrcStackInput):
+            need_to_declare.append(val.name)
+        # Stack input is used in output effect
+        for oeffect in self.output_effects:
+            if not (typ := oeffect.type_annotation): continue
+            ops = typ.ops
+            for op in ops:
+                if not isinstance(src := op.src, TypeSrcStackInput): continue
+                if oeffect.name in self.unmoved_names and oeffect.name == src.name:
+                    print(
+                        f"Warn: {self.name} type annotation for {oeffect.name} will be ignored "
+                        "as it is unmoved")
+                    continue
+                need_to_declare.append(src.name)
+
+        # Write input stack effect variable declarations and initializations
+        ieffects = list(reversed(self.input_effects))
+        usable_for_local_effect = {}
+        all_input_effect_names = {}
+        for i, ieffect in enumerate(ieffects):
+
+            if ieffect.name not in need_to_declare: continue
+
+            isize = string_effect_size(
+                list_effect_size([ieff for ieff in ieffects[: i + 1]])
+            )
+            all_input_effect_names[ieffect.name] = (ieffect, i)
+            dst = StackEffect(ieffect.name, "_Py_TYPENODE_t *")
+            if ieffect.size:
+                # TODO: Support more cases as needed
+                raise Exception("Type propagation across sized input effect not implemented")
+            elif ieffect.cond:
+                src = StackEffect(f"({ieffect.cond}) ? TYPESTACK_PEEK({isize}) : NULL", "_Py_TYPENODE_t *")
+            else:
+                usable_for_local_effect[ieffect.name] = ieffect
+                src = StackEffect(f"TYPESTACK_PEEK({isize})", "_Py_TYPENODE_t *")
+            out.declare(dst, src)
+
+        # Write localarr effect
+        if self.local_effects:
+
+            idx = self.local_effects.index
+            val = self.local_effects.value
+
+            typ_op = "TYPE_OVERWRITE"
+            dst = f"TYPELOCALS_GET({idx})"
+            match val:
+                case TypeSrcLiteral(name=valstr):
+                    if valstr == "NULL":
+                        src = "(_Py_TYPENODE_t *)_Py_TYPENODE_NULLROOT"
+                        flag = "true"
+                    else:
+                        src = f"(_Py_TYPENODE_t *)_Py_TYPENODE_MAKE_ROOT((_Py_TYPENODE_t)&{valstr})"
+                        flag = "true"
+                case TypeSrcStackInput(name=valstr):
+                    assert valstr in usable_for_local_effect, \
+                        "`cond` and `size` stackvar not supported for localeffect"
+                    src = valstr
+                    flag = "false"
+                # TODO: Support more cases as needed
+                case TypeSrcConst():
+                    raise Exception("Not implemented")
+                case TypeSrcLocals():
+                    raise Exception("Not implemented")
+                case _:
+                    typing.assert_never(val)
+            out.emit(f"{typ_op}({src}, {dst}, {flag});")
+
+        # Update stack size
+        out.stack_adjust(
+            0,
+            [ieff for ieff in self.input_effects],
+            [oeff for oeff in self.output_effects],
+        )
+
+        # Stack effect
+        oeffects = list(reversed(self.output_effects))
+        for i, oeffect in enumerate(oeffects):
+            osize = string_effect_size(
+                list_effect_size([oeff for oeff in oeffects[: i + 1]])
+            )
+            dst = f"TYPESTACK_PEEK({osize})"
+
+            # Check if it's even used
+            if oeffect.name == UNUSED: continue
+
+            # For now assume OVERWRITE with NULL
+            if oeffect.size:
+                op = "TYPE_OVERWRITE"
+                src = "(_Py_TYPENODE_t *)_Py_TYPENODE_NULLROOT"
+                flag = "true"
+                dst = f"TYPESTACK_PEEK({osize} - i)"
+                opstr = "".join([
+                    f"for (int i = 0; i < ({oeffect.size}); i++) {{"
+                    f"{op}({src}, {dst}, {flag});"
+                    f"}}"
+                ])
+                out.emit(opstr)
+                continue
+
+            # Check if there's type info
+            if typ := oeffect.type_annotation:
+                for op in typ.ops:
+                    match op.src:
+                        case TypeSrcLiteral(literal=valstr):
+                            if valstr == "NULL":
+                                src = "(_Py_TYPENODE_t *)_Py_TYPENODE_NULLROOT"
+                                flag = "true"
+                            else:
+                                src = f"(_Py_TYPENODE_t *)_Py_TYPENODE_MAKE_ROOT((_Py_TYPENODE_t)&{valstr})"
+                                flag = "true"
+                        case TypeSrcStackInput(name=valstr):
+                            assert valstr in need_to_declare
+                            assert oeffect.name not in self.unmoved_names
+                            src = valstr
+                            flag = "false"
+                        case TypeSrcConst(index=idx):
+                            src = f"(_Py_TYPENODE_t *)TYPECONST_GET({idx})"
+                            flag = "true"
+                        case TypeSrcLocals(index=idx):
+                            src = f"TYPELOCALS_GET({idx})"
+                            flag = "false"
+                        case _:
+                            typing.assert_never(op.src)
+
+                    opstr = f"{op.op}({src}, {dst}, {flag})"
+                    if oeffect.cond:
+                        out.emit(f"if ({oeffect.cond}) {{ {opstr}; }}")
+                    else:
+                        out.emit(f"{opstr};")
+                continue
+
+            # Don't touch unmoved stack vars
+            if oeffect.name in self.unmoved_names:
+                continue
+
+            # Just output null
+            typ_op = "TYPE_OVERWRITE"
+            src = "(_Py_TYPENODE_t *)_Py_TYPENODE_NULLROOT"
+            flag = "true"
+            opstr = f"{typ_op}({src}, {dst}, {flag})"
+            if oeffect.cond:
+                out.emit(f"if ({oeffect.cond}) {{ {opstr}; }}")
+            else:
+                out.emit(f"{opstr};")
 
 
 InstructionOrCacheEffect = Instruction | parser.CacheEffect
@@ -462,6 +670,10 @@ class Component:
 
             for var, oeffect in self.output_mapping:
                 out.assign(var, oeffect)
+
+    def write_typeprop(self, out: Formatter) -> None:
+        with out.block(""):
+            self.instr.write_typeprop(out)
 
 
 @dataclasses.dataclass
@@ -536,6 +748,8 @@ class Analyzer:
     super_instrs: dict[str, SuperInstruction]
     macros: dict[str, parser.Macro]
     macro_instrs: dict[str, MacroInstruction]
+    macro_instdefs: list[parser.InstDef]
+    u_insts: list[parser.InstDef]
     families: dict[str, parser.Family]
 
     def parse(self) -> None:
@@ -549,6 +763,9 @@ class Analyzer:
         self.instrs = {}
         self.supers = {}
         self.macros = {}
+        self.macro_instrs = {}
+        self.macro_instdefs = []
+        self.u_insts = []
         self.families = {}
 
         instrs_idx: dict[str, int] = dict()
@@ -615,6 +832,10 @@ class Analyzer:
                     self.instrs[name] = Instruction(thing)
                     instrs_idx[name] = len(self.everything)
                     self.everything.append(thing)
+                    if thing.kind == "macro_inst":
+                        self.macro_instdefs.append(thing)
+                    elif thing.kind == "u_inst":
+                        self.u_insts.append(thing)
                 case parser.Super(name):
                     self.supers[name] = thing
                     self.everything.append(thing)
@@ -751,6 +972,8 @@ class Analyzer:
             self.super_instrs[name] = self.analyze_super(super)
         for name, macro in self.macros.items():
             self.macro_instrs[name] = self.analyze_macro(macro)
+        for macro_instdef in self.macro_instdefs:
+            self.analyze_macro_instdefs(macro_instdef)
 
     def analyze_super(self, super: parser.Super) -> SuperInstruction:
         components = self.check_super_components(super)
@@ -794,6 +1017,11 @@ class Analyzer:
         return MacroInstruction(
             macro.name, stack, initial_sp, final_sp, format, macro, parts
         )
+
+    def analyze_macro_instdefs(self, macro_def: parser.InstDef):
+        for uop in macro_def.u_insts:
+            if uop not in self.instrs:
+                self.error(f"Unknown instruction {uop} in {macro_def!r}", macro_def)
 
     def analyze_instruction(
         self, instr: Instruction, stack: list[StackEffect], sp: int
@@ -949,6 +1177,34 @@ class Analyzer:
         write_function("pushed", pushed_data)
         self.out.emit("")
 
+    def write_typepropagator(self) -> None:
+        """Write the type propagator"""
+
+        with open(self.output_filename, "w") as f:
+            # Write provenance header
+            f.write(f"// This file is generated by {THIS} @TODO: make this a seperate argument\n")
+            f.write(self.from_source_files())
+            f.write(f"// Do not edit!\n")
+
+            # Create formatter
+            self.out = Formatter(f, 8)
+
+            for thing in self.everything:
+                if thing.name in TYPE_PROPAGATOR_FORBIDDEN:
+                    continue
+                match thing:
+                    case parser.InstDef(kind=kind, name=name):
+                        match kind:
+                            case "op": pass
+                            case _:
+                                self.write_instr_typeprop(self.instrs[name])
+                    case parser.Super(name=name):
+                        self.write_super_typeprop(self.super_instrs[name])
+                    case parser.Macro(name=name):
+                        self.write_macro_typeprop(self.macro_instrs[name])
+                    case _:
+                        typing.assert_never(thing)
+
     def from_source_files(self) -> str:
         paths = "\n//   ".join(
             os.path.relpath(filename, ROOT).replace(os.path.sep, posixpath.sep)
@@ -1010,8 +1266,9 @@ class Analyzer:
                     case OverriddenInstructionPlaceHolder():
                         continue
                     case parser.InstDef():
-                        if thing.kind != "op":
-                            self.write_metadata_for_inst(self.instrs[thing.name])
+                        if thing.kind == "op":
+                            continue
+                        self.write_metadata_for_inst(self.instrs[thing.name])
                     case parser.Super():
                         self.write_metadata_for_super(self.super_instrs[thing.name])
                     case parser.Macro():
@@ -1056,14 +1313,29 @@ class Analyzer:
             n_instrs = 0
             n_supers = 0
             n_macros = 0
+
+            # Single pass to hoist all the u_instructions to the top.
             for thing in self.everything:
                 match thing:
                     case OverriddenInstructionPlaceHolder():
                         self.write_overridden_instr_place_holder(thing)
                     case parser.InstDef():
-                        if thing.kind != "op":
-                            n_instrs += 1
-                            self.write_instr(self.instrs[thing.name])
+                        if thing.kind == "u_inst":
+                            self.write_u_inst_as_c_macro(
+                                self.instrs[thing.name])
+                    case _:
+                        pass
+
+            # Everything else
+            for thing in self.everything:
+                match thing:
+                    case parser.InstDef():
+                        match thing.kind:
+                            case "op":
+                                pass
+                            case _:
+                                n_instrs += 1
+                                self.write_instr(self.instrs[thing.name])
                     case parser.Super():
                         n_supers += 1
                         self.write_super(self.super_instrs[thing.name])
@@ -1100,6 +1372,16 @@ class Analyzer:
                 if instr.check_eval_breaker:
                     self.out.emit("CHECK_EVAL_BREAKER();")
                 self.out.emit(f"DISPATCH();")
+
+    def write_u_inst_as_c_macro(self, instr: Instruction) -> None:
+        name = instr.name
+        self.out.emit("")
+        self.out.emit(f"#define UOP_{name}() \\")
+        self.out.emit("do { \\")
+        self.out.postfix = "\\"
+        instr.write_body(self.out, 0)
+        self.out.postfix = ""
+        self.out.emit("} while (0)")
 
     def write_super(self, sup: SuperInstruction) -> None:
         """Write code for a super-instruction."""
@@ -1141,6 +1423,31 @@ class Analyzer:
                     f"static_assert({cache_size} == "
                     f'{cache_adjust}, "incorrect cache size");'
                 )
+
+    def write_instr_typeprop(self, instr: Instruction) -> None:
+        name = instr.name
+        self.out.emit("")
+        with self.out.block(f"TARGET({name})"):
+            instr.write_typeprop(self.out)
+            self.out.emit("break;")
+
+    def write_super_typeprop(self, sup: SuperInstruction) -> None:
+        # TODO: Support super instructions
+        #  Currently not support because of the need for NEXTOPARG
+        ...
+
+    def write_macro_typeprop(self, mac: MacroInstruction) -> None:
+        # TODO: Make the code emitted more efficient by
+        #  combining stack effect
+        name = mac.name
+        self.out.emit("")
+        with self.out.block(f"TARGET({name})"):
+            for comp in mac.parts:
+                if not isinstance(comp, Component): continue
+                comp.write_typeprop(self.out)
+            self.out.emit("break;")
+
+
 
     @contextlib.contextmanager
     def wrap_super_or_macro(self, up: SuperOrMacroInstruction):
@@ -1238,7 +1545,6 @@ def variable_used(node: parser.Node, name: str) -> bool:
         token.kind == "IDENTIFIER" and token.text == name for token in node.tokens
     )
 
-
 def main():
     """Parse command line, parse input, analyze, write output."""
     args = arg_parser.parse_args()  # Prints message and sys.exit(2) on error
@@ -1253,6 +1559,12 @@ def main():
         sys.exit(f"Found {a.errors} errors")
     a.write_instructions()  # Raises OSError if output can't be written
     a.write_metadata()
+    # a.output_filename = TIER2_MACRO_TO_MICRO_MAP_OUTPUT
+    # a.write_macromap_and_typedata()
+
+    # Quick hack. @TODO refactor
+    a.output_filename = TIER2_TYPE_PROPAGATOR_OUTPUT
+    a.write_typepropagator()
 
 
 if __name__ == "__main__":

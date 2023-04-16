@@ -1,8 +1,9 @@
 """Parser for bytecodes.inst."""
 
 from dataclasses import dataclass, field
-from typing import NamedTuple, Callable, TypeVar, Literal
+from typing import NamedTuple, Callable, TypeVar, Literal, get_args, TypeAlias
 
+import re
 import lexer as lx
 from plexer import PLexer
 
@@ -68,12 +69,52 @@ class Block(Node):
 
 
 @dataclass
+class TypeSrcLiteral(Node):
+    literal: str
+
+
+@dataclass
+class TypeSrcConst(Node):
+    index: str
+
+
+@dataclass
+class TypeSrcLocals(Node):
+    index: str
+
+
+@dataclass
+class TypeSrcStackInput(Node):
+    name: str
+
+
+TypeSrc: TypeAlias = (
+    TypeSrcLiteral 
+    | TypeSrcConst 
+    | TypeSrcLocals 
+    | TypeSrcStackInput
+)
+
+@dataclass
+class TypeOperation(Node):
+    op: Literal["TYPE_SET", "TYPE_OVERWRITE"]
+    src: TypeSrc
+
+@dataclass
+class TypeAnnotation(Node):
+    ops: tuple[TypeOperation]
+
+@dataclass
 class StackEffect(Node):
     name: str
     type: str = ""  # Optional `:type`
+    type_annotation: TypeAnnotation | None = None # Default is None
     cond: str = ""  # Optional `if (cond)`
     size: str = ""  # Optional `[size]`
     # Note: size cannot be combined with type or cond
+
+    def __eq__(self, other: 'StackEffect') -> bool:
+        return self.name == other.name
 
 
 @dataclass
@@ -88,6 +129,12 @@ class CacheEffect(Node):
 
 
 @dataclass
+class LocalEffect(Node):
+    index: str
+    value: TypeSrc
+
+
+@dataclass
 class OpName(Node):
     name: str
 
@@ -97,25 +144,48 @@ OutputEffect = StackEffect
 UOp = OpName | CacheEffect
 
 
+# Note: A mapping of macro_inst -> u_inst+ is created later.
+INST_KINDS: TypeAlias = Literal[
+    # Legacy means no (inputs -- outputs)
+    "legacy",
+    # This generates an instruction definition in the tier 1 and 2 interpreter.
+    "inst",
+    # This is a pseudo instruction used only internally by the cases generator.
+    "op",
+    # This generates an instruction definition strictly only in the
+    # tier 1 interpreter.
+    "macro_inst",
+    # This generates an instruction definition strictly only in the
+    # tier 2 interpreter.
+    "u_inst",
+]
+
+# Remove legacy
+INST_LABELS: tuple[INST_KINDS] = get_args(INST_KINDS)[1:]
+
+
 @dataclass
 class InstHeader(Node):
     override: bool
     register: bool
-    kind: Literal["inst", "op", "legacy"]  # Legacy means no (inputs -- outputs)
+    kind: INST_KINDS
     name: str
     inputs: list[InputEffect]
     outputs: list[OutputEffect]
+    localeffect: LocalEffect | None = None
 
 
 @dataclass
 class InstDef(Node):
     override: bool
     register: bool
-    kind: Literal["inst", "op", "legacy"]
+    kind: INST_KINDS
     name: str
     inputs: list[InputEffect]
     outputs: list[OutputEffect]
     block: Block
+    u_insts: list[str]
+    localeffect: LocalEffect | None = None
 
 
 @dataclass
@@ -128,7 +198,6 @@ class Super(Node):
 class Macro(Node):
     name: str
     uops: list[UOp]
-
 
 @dataclass
 class Family(Node):
@@ -153,8 +222,14 @@ class Parser(PLexer):
     def inst_def(self) -> InstDef | None:
         if hdr := self.inst_header():
             if block := self.block():
+                u_insts = []
+                if hdr.kind == "macro_inst":
+                    for line in block.text.splitlines():
+                        if m := re.match(r"(\s*)U_INST\((.+)\);\s*$", line):
+                            space, label = m.groups()
+                            u_insts.append(label)
                 return InstDef(
-                    hdr.override, hdr.register, hdr.kind, hdr.name, hdr.inputs, hdr.outputs, block
+                    hdr.override, hdr.register, hdr.kind, hdr.name, hdr.inputs, hdr.outputs, block, u_insts, hdr.localeffect
                 )
             raise self.make_syntax_error("Expected block")
         return None
@@ -167,7 +242,7 @@ class Parser(PLexer):
         # TODO: Make INST a keyword in the lexer.
         override = bool(self.expect(lx.OVERRIDE))
         register = bool(self.expect(lx.REGISTER))
-        if (tkn := self.expect(lx.IDENTIFIER)) and (kind := tkn.text) in ("inst", "op"):
+        if (tkn := self.expect(lx.IDENTIFIER)) and (kind := tkn.text) in INST_LABELS:
             if self.expect(lx.LPAREN) and (tkn := self.expect(lx.IDENTIFIER)):
                 name = tkn.text
                 if self.expect(lx.COMMA):
@@ -175,6 +250,11 @@ class Parser(PLexer):
                     if self.expect(lx.RPAREN):
                         if (tkn := self.peek()) and tkn.kind == lx.LBRACE:
                             return InstHeader(override, register, kind, name, inp, outp)
+                    elif self.expect(lx.COMMA):
+                        leffect = self.local_effect()
+                        if self.expect(lx.RPAREN):
+                            if (tkn := self.peek()) and tkn.kind == lx.LBRACE:
+                                return InstHeader(override, register, kind, name, inp, outp, leffect)
                 elif self.expect(lx.RPAREN) and kind == "inst":
                     # No legacy stack effect if kind is "op".
                     return InstHeader(override, register, "legacy", name, [], [])
@@ -205,7 +285,13 @@ class Parser(PLexer):
 
     @contextual
     def input(self) -> InputEffect | None:
-        return self.cache_effect() or self.stack_effect()
+        if r := self.cache_effect():
+            return r
+        r = self.stack_effect()
+        if r is None: return r
+        assert r.type_annotation is None, \
+            "Type annotations aren't allowed in input stack effect."
+        return r
 
     def outputs(self) -> list[OutputEffect] | None:
         # output (, output)*
@@ -242,9 +328,12 @@ class Parser(PLexer):
         #   IDENTIFIER [':' IDENTIFIER] ['if' '(' expression ')']
         # | IDENTIFIER '[' expression ']'
         if tkn := self.expect(lx.IDENTIFIER):
-            type_text = ""
+            _type = ""
+            has_type_annotation = False
+            type_annotation = None
             if self.expect(lx.COLON):
-                type_text = self.require(lx.IDENTIFIER).text.strip()
+                has_type_annotation = True
+                type_annotation = self.stackvar_typeannotation()
             cond_text = ""
             if self.expect(lx.IF):
                 self.require(lx.LPAREN)
@@ -254,14 +343,81 @@ class Parser(PLexer):
                 cond_text = cond.text.strip()
             size_text = ""
             if self.expect(lx.LBRACKET):
-                if type_text or cond_text:
+                # TODO: Support type annotation for size output
+                if has_type_annotation or cond_text:
                     raise self.make_syntax_error("Unexpected [")
                 if not (size := self.expression()):
                     raise self.make_syntax_error("Expected expression")
                 self.require(lx.RBRACKET)
-                type_text = "PyObject **"
+                _type = "PyObject **"
                 size_text = size.text.strip()
-            return StackEffect(tkn.text, type_text, cond_text, size_text)
+            return StackEffect(tkn.text, _type, type_annotation, cond_text, size_text)
+
+    @contextual
+    def stackvar_typesrc(self) -> TypeSrc | None:
+        if id := self.expect(lx.IDENTIFIER):
+            idstr = id.text.strip()
+            if not self.expect(lx.LBRACKET):
+                return TypeSrcLiteral(idstr)
+            if idstr not in ["locals", "consts"]: return
+            if id := self.expect(lx.IDENTIFIER):
+                index = id.text.strip()
+                self.require(lx.RBRACKET)
+                if idstr == "locals":
+                    return TypeSrcLocals(index)
+                return TypeSrcConst(index)
+        elif self.expect(lx.TIMES):
+            id = self.require(lx.IDENTIFIER)
+            return TypeSrcStackInput(id.text.strip())
+
+    @contextual
+    def stackvar_typeoperation(self) -> TypeOperation | None: 
+        if self.expect(lx.LSHIFTEQUAL):
+            src = self.stackvar_typesrc()
+            if src is None: return None
+            return TypeOperation("TYPE_SET", src)
+        src = self.stackvar_typesrc()
+        if src is None: return None
+        return TypeOperation("TYPE_OVERWRITE", src)
+
+    @contextual
+    def stackvar_typeannotation(self) -> TypeAnnotation | None:
+        ops = []
+        if self.expect(lx.LBRACE):
+            while True:
+                typ = self.stackvar_typeoperation()
+                ops.append(typ)
+                if typ is None: return None
+                if self.expect(lx.RBRACE):
+                    break
+                self.require(lx.COMMA)
+        else:
+            typ = self.stackvar_typeoperation()
+            if typ is None: return None
+            ops.append(typ)
+        return TypeAnnotation(tuple(ops))
+
+    @contextual
+    def local_effect(self) -> LocalEffect | None:
+        if tok := self.expect(lx.IDENTIFIER):
+            if tok.text.strip() != "locals":
+                return
+            self.require(lx.LBRACKET)
+            if id := self.expect(lx.IDENTIFIER):
+                index = id.text.strip()
+                self.require(lx.RBRACKET)
+                self.require(lx.EQUALS)
+                if self.expect(lx.TIMES): # stackvar
+                    value = self.require(lx.IDENTIFIER).text.strip()
+                    return LocalEffect(
+                        index, 
+                        TypeSrcStackInput(value)
+                    )
+                value = self.require(lx.IDENTIFIER).text.strip()
+                return LocalEffect(
+                    index,
+                    TypeSrcLiteral(value)
+                )
 
     @contextual
     def expression(self) -> Expression | None:
@@ -343,6 +499,16 @@ class Parser(PLexer):
                 raise self.make_syntax_error("Expected integer")
             else:
                 return OpName(tkn.text)
+
+    def u_insts(self) -> list[str] | None:
+        if tkn := self.expect(lx.IDENTIFIER):
+            u_insts = [tkn.text]
+            while self.expect(lx.PLUS):
+                if tkn := self.expect(lx.IDENTIFIER):
+                    u_insts.append(tkn.text)
+                else:
+                    raise self.make_syntax_error("Expected op name")
+            return u_insts
 
     @contextual
     def family_def(self) -> Family | None:

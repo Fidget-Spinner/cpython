@@ -105,13 +105,27 @@ def main(opcode_py, outfile='Include/opcode.h', internaloutfile='Include/interna
         specialized_opmap[name] = next_op
         opname_including_specialized[next_op] = name
         used[next_op] = True
+
     specialized_opmap['DO_TRACING'] = 255
     opname_including_specialized[255] = 'DO_TRACING'
     used[255] = True
 
+    # The Tier 2 ops
+    next_op = 1
+    uop_opmap = {}
+    # Add microops
+    for name in opcode['_uops']:
+        while used[next_op]:
+            next_op += 1
+        uop_opmap[name] = next_op
+        opname_including_specialized[next_op] = name
+        used[next_op] = True
+
     with open(outfile, 'w') as fobj, open(internaloutfile, 'w') as iobj:
         fobj.write(header)
         iobj.write(internal_header)
+
+        # Tier 1 opcodes
 
         for name in opname:
             if name in opmap:
@@ -126,8 +140,13 @@ def main(opcode_py, outfile='Include/opcode.h', internaloutfile='Include/interna
                 if op == MAX_PSEUDO_OPCODE:
                     fobj.write(DEFINE.format("MAX_PSEUDO_OPCODE", MAX_PSEUDO_OPCODE))
 
-
         for name, op in specialized_opmap.items():
+            if name not in uop_opmap:
+                fobj.write(DEFINE.format(name, op))
+
+        # Tier 2 opcodes
+        fobj.write("// Tier 2 interpreter ops\n")
+        for name, op in uop_opmap.items():
             fobj.write(DEFINE.format(name, op))
 
         iobj.write("\nextern const uint8_t _PyOpcode_Caches[256];\n")
@@ -177,6 +196,7 @@ def main(opcode_py, outfile='Include/opcode.h', internaloutfile='Include/interna
         fobj.write(f"#define ENABLE_SPECIALIZATION {int(ENABLE_SPECIALIZATION)}")
 
         iobj.write("\n")
+        # Tier 1 opnames
         iobj.write("#ifdef Py_DEBUG\n")
         iobj.write(f"static const char *const _PyOpcode_OpName[{NUM_OPCODES}] = {{\n")
         for op, name in enumerate(opname_including_specialized):
@@ -185,6 +205,8 @@ def main(opcode_py, outfile='Include/opcode.h', internaloutfile='Include/interna
             iobj.write(f'''    [{op}] = "{name}",\n''')
         iobj.write("};\n")
         iobj.write("#endif\n")
+
+        iobj.write("\n")
 
         iobj.write("\n")
         iobj.write("#define EXTRA_CASES \\\n")

@@ -68,7 +68,7 @@
         lastopcode = op; \
     } while (0)
 #else
-#define INSTRUCTION_START(op) (frame->prev_instr = next_instr++)
+#define INSTRUCTION_START(op) (frame->prev_instr = next_instr++); /* fprintf(stderr, "%d: %s\n", INSTR_OFFSET(), _PyOpcode_OpName[op]); */
 #endif
 
 #if USE_COMPUTED_GOTOS
@@ -140,7 +140,9 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 /* Code access macros */
 
 /* The integer overflow is checked by an assertion below. */
-#define INSTR_OFFSET() ((int)(next_instr - _PyCode_CODE(frame->f_code)))
+// TODO change this calculation when interpreter is bb aware.
+#define INSTR_OFFSET() ((int)(next_instr - \
+    (frame->f_code->_tier2_info == NULL ? _PyCode_CODE(frame->f_code) : frame->f_code->_tier2_info->_bb_space->u_code)))
 #define NEXTOPARG()  do { \
         _Py_CODEUNIT word = *next_instr; \
         opcode = word.op.code; \
@@ -249,6 +251,8 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #define SETLOCAL(i, value)      do { PyObject *tmp = GETLOCAL(i); \
                                      GETLOCAL(i) = value; \
                                      Py_XDECREF(tmp); } while (0)
+#define SETLOCAL_NO_DECREF(i, value) do { PyObject *tmp = GETLOCAL(i); \
+                                     GETLOCAL(i) = value;} while (0)
 
 #define GO_TO_INSTRUCTION(op) goto PREDICT_ID(op)
 

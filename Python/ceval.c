@@ -725,6 +725,8 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     _PyInterpreterFrame  entry_frame;
     PyObject *kwnames = NULL; // Borrowed reference. Reset by CALL instructions.
 
+    char bb_test = BB_TEST(0, 0);
+
     /* WARNING: Because the _PyCFrame lives on the C stack,
      * but can be accessed from a heap allocated object (tstate)
      * strict stack discipline must be maintained.
@@ -1008,7 +1010,7 @@ exception_unwind:
                 PyObject **stackbase = _PyFrame_Stackbase(frame);
                 while (stack_pointer > stackbase) {
                     PyObject *o = POP();
-                    Py_XDECREF(o);
+                     Py_XDECREF(o);
                 }
                 assert(STACK_LEVEL() == 0);
                 _PyFrame_SetStackPointer(frame, stack_pointer);

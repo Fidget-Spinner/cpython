@@ -346,7 +346,7 @@ _PyGen_yf(PyGenObject *gen)
             return NULL;
         }
         _Py_CODEUNIT next = frame->prev_instr[1];
-        if (next.op.code != RESUME || next.op.arg < 2)
+        if ((next.op.code != RESUME && next.op.code != RESUME_QUICK) || next.op.arg < 2)
         {
             /* Not in a yield from */
             return NULL;
@@ -382,7 +382,7 @@ gen_close(PyGenObject *gen, PyObject *args)
     /* It is possible for the previous instruction to not be a
      * YIELD_VALUE if the debugger has changed the lineno. */
     if (err == 0 && frame->prev_instr[0].op.code == YIELD_VALUE) {
-        assert(frame->prev_instr[1].op.code == RESUME);
+        assert(frame->prev_instr[1].op.code == RESUME || frame->prev_instr[1].op.code == RESUME_QUICK);
         int exception_handler_depth = frame->prev_instr[0].op.code;
         assert(exception_handler_depth > 0);
         /* We can safely ignore the outermost try block

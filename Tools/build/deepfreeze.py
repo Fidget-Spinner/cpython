@@ -260,7 +260,8 @@ class Printer:
             self.field(code, "co_posonlyargcount")
             self.field(code, "co_kwonlyargcount")
             # The following should remain in sync with _PyFrame_NumSlotsForCodeObject
-            self.write(f".co_framesize = {code.co_stacksize + len(localsplusnames)} + FRAME_SPECIALS_SIZE,")
+            self.write(f".co_framesize = {code.co_stacksize + len(localsplusnames)} + FRAME_SPECIALS_SIZE"
+                       f" + ({len(localsplusnames)} * sizeof(char) / sizeof(PyObject *) + 1),")
             self.field(code, "co_stacksize")
             self.field(code, "co_firstlineno")
             self.write(f".co_nlocalsplus = {len(localsplusnames)},")
@@ -277,6 +278,8 @@ class Printer:
             self.write(f".co_linetable = {co_linetable},")
             self.write(f"._co_cached = NULL,")
             self.write("._co_linearray = NULL,")
+            self.write("._tier2_warmup = -64,")
+            self.write("._tier2_info = NULL,")
             self.write(f".co_code_adaptive = {co_code_adaptive},")
             for i, op in enumerate(code.co_code[::2]):
                 if op == RESUME:

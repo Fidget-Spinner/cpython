@@ -6,6 +6,16 @@ extern "C" {
 
 #define CODE_MAX_WATCHERS 8
 
+typedef struct {
+    // Unique ID (for this code object) for this basic block. This indexes into
+    // the PyTier2Info bb_data field.
+    // The LSB indicates whether the bb branch is a type guard or not.
+    // To get the actual BB ID, do a right bit shift by one.
+    uint16_t bb_id_tagged;
+} _PyBBBranchCache;
+
+#define INLINE_CACHE_ENTRIES_BB_BRANCH CACHE_ENTRIES(_PyBBBranchCache)
+
 /* PEP 659
  * Specialization and quickening structs and helper functions
  */
@@ -238,7 +248,7 @@ extern void _Py_Specialize_CompareOp(PyObject *lhs, PyObject *rhs,
                                      _Py_CODEUNIT *instr, int oparg);
 extern void _Py_Specialize_UnpackSequence(PyObject *seq, _Py_CODEUNIT *instr,
                                           int oparg);
-extern void _Py_Specialize_ForIter(PyObject *iter, _Py_CODEUNIT *instr, int oparg);
+extern void _Py_Specialize_ForIter(PyObject *iter, _Py_CODEUNIT *instr, int oparg, char is_bb);
 extern void _Py_Specialize_Send(PyObject *receiver, _Py_CODEUNIT *instr);
 
 /* Finalizer function for static codeobjects used in deepfreeze.py */
@@ -246,6 +256,36 @@ extern void _PyStaticCode_Fini(PyCodeObject *co);
 /* Function to intern strings of codeobjects and quicken the bytecode */
 extern int _PyStaticCode_Init(PyCodeObject *co);
 
+/* Tier 2 interpreter */
+
+// gen_bb_is_successor:
+//   true = successor
+//   false = alternate
+// gen_bb_requires_pop (maximum 7):
+//   For tier2 type propagation, handling of jump instructions with
+//   runtime-dependent stack effect.
+//   This flag is used to determine if the type context of a new bb
+//   requires a stack element to be popped.
+#define BB_TEST(gen_bb_is_successor, gen_bb_requires_pop) \
+    (((gen_bb_is_successor) << 4) | (gen_bb_requires_pop))
+#define BB_TEST_IS_SUCCESSOR(bb_test) ((bb_test) >> 4)
+#define BB_TEST_GET_N_REQUIRES_POP(bb_test) ((bb_test) & 0b1111)
+
+extern _Py_CODEUNIT *_PyCode_Tier2Warmup(struct _PyInterpreterFrame *,
+    _Py_CODEUNIT *);
+extern _Py_CODEUNIT *_PyTier2_GenerateNextBB(
+    struct _PyInterpreterFrame *frame,
+    uint16_t bb_id_tagged,
+    _Py_CODEUNIT *curr_executing_instr,
+    int jumpby,
+    _Py_CODEUNIT **tier1_fallback,
+    char bb_flag);
+extern _Py_CODEUNIT *_PyTier2_LocateJumpBackwardsBB(
+    struct _PyInterpreterFrame *frame, uint16_t bb_id, int jumpby,
+    _Py_CODEUNIT **tier1_fallback, _Py_CODEUNIT *curr, int stacksize);
+extern void _PyTier2_RewriteForwardJump(_Py_CODEUNIT *bb_branch, _Py_CODEUNIT *target);
+extern void _PyTier2_RewriteBackwardJump(_Py_CODEUNIT *jump_backward_lazy, _Py_CODEUNIT *target);
+void _PyTier2TypeContext_Free(_PyTier2TypeContext *type_context);
 #ifdef Py_STATS
 
 
@@ -502,7 +542,6 @@ extern uint32_t _Py_next_func_version;
 #define COMPARISON_EQUALS 8
 
 #define COMPARISON_NOT_EQUALS (COMPARISON_UNORDERED | COMPARISON_LESS_THAN | COMPARISON_GREATER_THAN)
-
 
 #ifdef __cplusplus
 }

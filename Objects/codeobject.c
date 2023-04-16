@@ -424,7 +424,10 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
     /* derived values */
     co->co_nlocalsplus = nlocalsplus;
     co->co_nlocals = nlocals;
-    co->co_framesize = nlocalsplus + con->stacksize + FRAME_SPECIALS_SIZE;
+    co->co_framesize = nlocalsplus + con->stacksize + FRAME_SPECIALS_SIZE +
+        // + this because at the end of the frame, we store the bit masks
+        // that indicate whether this value is unboxed or not
+        (nlocalsplus * sizeof(char) / sizeof(PyObject *) + 1);
     co->co_ncellvars = ncellvars;
     co->co_nfreevars = nfreevars;
     co->co_version = _Py_next_func_version;
@@ -438,6 +441,8 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
 
     co->_co_linearray_entry_size = 0;
     co->_co_linearray = NULL;
+    co->_tier2_warmup = -64;
+    co->_tier2_info = NULL;
     memcpy(_PyCode_CODE(co), PyBytes_AS_STRING(con->code),
            PyBytes_GET_SIZE(con->code));
     int entry_point = 0;
@@ -445,6 +450,7 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
         _PyCode_CODE(co)[entry_point].op.code != RESUME) {
         entry_point++;
     }
+
     co->_co_firsttraceable = entry_point;
     _PyCode_Quicken(co);
     notify_code_watchers(PY_CODE_EVENT_CREATE, co);
@@ -870,7 +876,7 @@ PyCode_Addr2Line(PyCodeObject *co, int addrq)
     if (addrq < 0) {
         return co->co_firstlineno;
     }
-    assert(addrq >= 0 && addrq < _PyCode_NBYTES(co));
+    // assert(addrq >= 0 && addrq < _PyCode_NBYTES(co));
     if (co->_co_linearray) {
         return _PyCode_LineNumberFromArray(co, addrq / sizeof(_Py_CODEUNIT));
     }
@@ -1694,6 +1700,54 @@ code_new_impl(PyTypeObject *type, int argcount, int posonlyargcount,
 }
 
 static void
+code_tier2_fini(PyCodeObject *co)
+{
+    if (co->_tier2_info == NULL) {
+        return;
+    }
+    // @TODO:
+    //  Write a proper destructor for _PyTier2Info
+    //  and it's children structures.
+    //  Current implementation e.g., doesn't clear
+    //  bb_data
+    _PyTier2Info *t2_info = co->_tier2_info;
+    t2_info->_entry_bb = NULL;
+    if (t2_info->_bb_space != NULL) {
+        PyMem_Free(t2_info->_bb_space);
+        t2_info->_bb_space = NULL;
+    }
+    
+    if (t2_info->backward_jump_count > 0 &&
+        t2_info->backward_jump_offsets != NULL) {
+        PyMem_Free(t2_info->backward_jump_offsets);
+        t2_info->backward_jump_offsets = NULL;
+        _PyTier2BBStartTypeContextTriplet **backward_jump_target_bb_pairs = t2_info->backward_jump_target_bb_pairs;
+        //int backwards_jump_count = t2_info->backward_jump_count;
+        //for (int i = 0; i < backwards_jump_count; i++) {
+        //    PyMem_Free(backward_jump_target_bb_pairs[i]);
+        //}
+        PyMem_Free(backward_jump_target_bb_pairs);
+    }
+
+    t2_info->backward_jump_count = 0;
+    if (t2_info->bb_data != NULL && t2_info->bb_data_len > 0) {
+        PyMem_Free(t2_info->bb_data);
+    }
+    //if (t2_info->bb_data != NULL) {
+    //    for (int i = 0; i < t2_info->bb_data_curr; i++) {
+    //        if (t2_info->bb_data[i] != NULL) {
+    //            _PyTier2BBMetadata *meta = t2_info->bb_data[i];
+    //            //_PyTier2TypeContext_Free(meta->type_context);
+    //            //PyMem_Free(meta);
+    //        }
+    //    }
+    //    PyMem_Free(t2_info->bb_data);
+    //}
+    t2_info->bb_data_len = 0;
+    PyMem_Free(t2_info);
+}
+
+static void
 code_dealloc(PyCodeObject *co)
 {
     assert(Py_REFCNT(co) == 0);
@@ -1742,6 +1796,8 @@ code_dealloc(PyCodeObject *co)
     if (co->_co_linearray) {
         PyMem_Free(co->_co_linearray);
     }
+    code_tier2_fini(co);
+    co->_tier2_info = NULL;
     PyObject_Free(co);
 }
 
@@ -1955,9 +2011,21 @@ code_getcode(PyCodeObject *code, void *closure)
     return _PyCode_GetCode(code);
 }
 
+static PyObject *
+code_getcodetier2(PyCodeObject *code, void *closure)
+{
+    if (code->_tier2_info == NULL) {
+        return PyBytes_FromStringAndSize("", 0);
+    }
+    return PyBytes_FromStringAndSize(
+        (const char *)code->_tier2_info->_bb_space->u_code,
+        code->_tier2_info->_bb_space->water_level);
+}
+
 static PyGetSetDef code_getsetlist[] = {
     {"co_lnotab",         (getter)code_getlnotab,       NULL, NULL},
     {"_co_code_adaptive", (getter)code_getcodeadaptive, NULL, NULL},
+    {"_co_code_tier2",    (getter)code_getcodetier2,    NULL, NULL},
     // The following old names are kept for backward compatibility.
     {"co_varnames",       (getter)code_getvarnames,     NULL, NULL},
     {"co_cellvars",       (getter)code_getcellvars,     NULL, NULL},
@@ -2319,6 +2387,8 @@ _PyStaticCode_Fini(PyCodeObject *co)
         PyMem_Free(co->_co_cached);
         co->_co_cached = NULL;
     }
+    code_tier2_fini(co);
+    co->_tier2_info = NULL;
     co->co_extra = NULL;
     if (co->co_weakreflist != NULL) {
         PyObject_ClearWeakRefs((PyObject *)co);
