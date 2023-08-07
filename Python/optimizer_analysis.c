@@ -553,13 +553,13 @@ _Py_uop_analyze_and_optimize(
     for (int i = 0; i < trace_len; i++) {
         oparg = trace[i].oparg;
         opcode = trace[i].opcode;
-        #ifdef PARTITION_DEBUG
-        #ifdef Py_DEBUG
-            fprintf(stderr, "  [-] Type propagating across: %s{%d} : %d\n", 
-                (opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[opcode], 
-                opcode, oparg);
-        #endif
-        #endif
+#ifdef PARTITION_DEBUG
+#ifdef Py_DEBUG
+        fprintf(stderr, "  [-] Type propagating across: %s{%d} : %d\n",
+            (opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[opcode],
+            opcode, oparg);
+#endif
+#endif
         /*
         * The following are special cased:
             "LOAD_FAST",
