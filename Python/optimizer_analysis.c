@@ -880,7 +880,7 @@ _Py_uop_analyze_and_optimize(
             fprintf(stderr, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
         }
-        
+
 #if PARTITION_DEBUG
         print_ctx(ctx);
 #endif
@@ -987,7 +987,7 @@ _Py_uop_analyze_and_optimize(
         PyTuple_SET_ITEM(co_const_final, x, Py_NewRef(PyList_GET_ITEM(co_const_copy, x)));
     }
 
-    
+
     Py_SETREF(co->co_consts, co_const_final);
     Py_XDECREF(co_const_copy);
     memcpy(trace, temp_writebuffer, buffer_trace_len * sizeof(_PyUOpInstruction));
