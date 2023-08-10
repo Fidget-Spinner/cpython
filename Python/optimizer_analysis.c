@@ -1002,7 +1002,6 @@ _Py_uop_analyze_and_optimize(
 #if PARTITION_DEBUG
             fprintf(stderr, "Exit trace encountered, emitting the rest of the stubs\n");
 #endif
-            
             i++; // We've already emitted an EXIT_TRACE
             for (; i < trace_len; i++) {
 #if PARTITION_DEBUG
