@@ -609,11 +609,9 @@ number_jumps_and_targets(_PyUOpInstruction *trace, int trace_len, int *max_id)
 static int
 remove_duplicate_save_ips(_PyUOpInstruction *trace, int trace_len)
 {
-    _PyUOpInstruction *temp_trace = PyMem_New(_PyUOpInstruction, trace_len);
-    if (temp_trace == NULL) {
-        return trace_len;
-    }
-    int temp_trace_len = 0;
+    // Don't have to allocate a temporary trace array
+    // because the writer is guaranteed to be behind the reader.
+    int new_temp_len = 0;
 
     _PyUOpInstruction curr;
     for (int i = 0; i < trace_len; i++) {
@@ -621,16 +619,14 @@ remove_duplicate_save_ips(_PyUOpInstruction *trace, int trace_len)
         if (i < trace_len && curr.opcode == SAVE_IP && trace[i+1].opcode == SAVE_IP) {
             continue;
         }
-        temp_trace[temp_trace_len] = curr;
-        temp_trace_len++;
+        trace[new_temp_len] = curr;
+        new_temp_len++;
     }
-    memcpy(trace, temp_trace, temp_trace_len * sizeof(_PyUOpInstruction));
-    PyMem_Free(temp_trace);
 
 #if PARTITION_DEBUG
-    fprintf(stderr, "Removed %d SAVE_IPs\n", trace_len - temp_trace_len);
+    fprintf(stderr, "Removed %d SAVE_IPs\n", trace_len - new_temp_len);
 #endif
-    return temp_trace_len;
+    return new_temp_len;
 }
 
 /**
