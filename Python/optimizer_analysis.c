@@ -938,8 +938,9 @@ _Py_uop_analyze_and_optimize(
                 break;
             }
             else {
+                _Py_PARTITIONNODE_t *left = PEEK(2);
                 STACK_SHRINK(1);
-                PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+                PARTITIONNODE_OVERWRITE(left, PEEK(-(-1)), false);
                 break;
             }
 
@@ -960,8 +961,9 @@ _Py_uop_analyze_and_optimize(
                 break;
             }
             else {
+                _Py_PARTITIONNODE_t *left = PEEK(2);
                 STACK_SHRINK(1);
-                PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+                PARTITIONNODE_OVERWRITE(left, PEEK(-(-1)), false);
                 break;
             }
         }
@@ -981,8 +983,9 @@ _Py_uop_analyze_and_optimize(
                 break;
             }
             else {
+                _Py_PARTITIONNODE_t *left = PEEK(2);
                 STACK_SHRINK(1);
-                PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+                PARTITIONNODE_OVERWRITE(left, PEEK(-(-1)), false);
                 break;
             }
         }
