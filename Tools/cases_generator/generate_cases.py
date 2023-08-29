@@ -82,10 +82,6 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
     "STORE_FAST",
     "STORE_FAST_MAYBE_NULL",
     "COPY",
-    # Arithmetic
-    "_BINARY_OP_MULTIPLY_INT",
-    "_BINARY_OP_ADD_INT",
-    "_BINARY_OP_SUBTRACT_INT",
 }
 
 arg_parser = argparse.ArgumentParser(

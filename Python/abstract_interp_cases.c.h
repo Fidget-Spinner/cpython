@@ -18,28 +18,28 @@
 
         case PUSH_NULL: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case END_SEND: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case UNARY_NEGATIVE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case UNARY_NOT: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case TO_BOOL: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -48,36 +48,54 @@
         }
 
         case TO_BOOL_INT: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case TO_BOOL_LIST: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case TO_BOOL_NONE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case TO_BOOL_STR: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case TO_BOOL_ALWAYS_TRUE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case UNARY_INVERT: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _GUARD_BOTH_INT: {
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_INT: {
+            STACK_SHRINK(1);
+            PEEK(-(-1)) = NULL;
+            break;
+        }
+
+        case _BINARY_OP_ADD_INT: {
+            STACK_SHRINK(1);
+            PEEK(-(-1)) = NULL;
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_INT: {
+            STACK_SHRINK(1);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -87,19 +105,19 @@
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _BINARY_OP_ADD_FLOAT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -109,19 +127,19 @@
 
         case _BINARY_OP_ADD_UNICODE: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BINARY_SUBSCR: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BINARY_SLICE: {
             STACK_SHRINK(2);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -132,25 +150,25 @@
 
         case BINARY_SUBSCR_LIST_INT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BINARY_SUBSCR_STR_INT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BINARY_SUBSCR_TUPLE_INT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BINARY_SUBSCR_DICT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -185,13 +203,13 @@
         }
 
         case CALL_INTRINSIC_1: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_INTRINSIC_2: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -201,18 +219,18 @@
         }
 
         case GET_AITER: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case GET_ANEXT: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case GET_AWAITABLE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -223,13 +241,13 @@
 
         case LOAD_ASSERTION_ERROR: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case LOAD_BUILD_CLASS: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -268,7 +286,7 @@
 
         case UNPACK_EX: {
             STACK_GROW((oparg & 0xFF) + (oparg >> 8));
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - (oparg >> 8))), true);
+            PEEK(-(-1 - (oparg >> 8))) = NULL;
             break;
         }
 
@@ -293,20 +311,20 @@
 
         case _LOAD_LOCALS: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _LOAD_FROM_DICT_OR_GLOBALS: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case LOAD_GLOBAL: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - (oparg & 1 ? 1 : 0))), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-(oparg & 1 ? 1 : 0))), true);
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = NULL;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = NULL;
             break;
         }
 
@@ -321,16 +339,16 @@
         case _LOAD_GLOBAL_MODULE: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - (oparg & 1 ? 1 : 0))), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-(oparg & 1 ? 1 : 0))), true);
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = NULL;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = NULL;
             break;
         }
 
         case _LOAD_GLOBAL_BUILTINS: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - (oparg & 1 ? 1 : 0))), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-(oparg & 1 ? 1 : 0))), true);
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = NULL;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = NULL;
             break;
         }
 
@@ -343,13 +361,13 @@
         }
 
         case LOAD_FROM_DICT_OR_DEREF: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case LOAD_DEREF: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -365,21 +383,21 @@
         case BUILD_STRING: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BUILD_TUPLE: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BUILD_LIST: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -396,14 +414,14 @@
         case BUILD_SET: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BUILD_MAP: {
             STACK_SHRINK(oparg*2);
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -413,7 +431,7 @@
 
         case BUILD_CONST_KEY_MAP: {
             STACK_SHRINK(oparg);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -434,22 +452,22 @@
 
         case LOAD_SUPER_ATTR_ATTR: {
             STACK_SHRINK(2);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(0)), true);
+            PEEK(-(-1)) = NULL;
+            PEEK(-(0)) = NULL;
             break;
         }
 
         case LOAD_SUPER_ATTR_METHOD: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-2)), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-2)) = NULL;
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case LOAD_ATTR: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - (oparg & 1 ? 1 : 0))), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-(oparg & 1 ? 1 : 0))), true);
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = NULL;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = NULL;
             break;
         }
 
@@ -463,100 +481,100 @@
 
         case _LOAD_ATTR_INSTANCE_VALUE: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - (oparg & 1 ? 1 : 0))), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-(oparg & 1 ? 1 : 0))), true);
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = NULL;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = NULL;
             break;
         }
 
         case COMPARE_OP: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case COMPARE_OP_FLOAT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case COMPARE_OP_INT: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case COMPARE_OP_STR: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case IS_OP: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CONTAINS_OP: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CHECK_EG_MATCH: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-2)), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-2)) = NULL;
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CHECK_EXC_MATCH: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case IS_NONE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case GET_LEN: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case MATCH_CLASS: {
             STACK_SHRINK(2);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case MATCH_MAPPING: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case MATCH_SEQUENCE: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case MATCH_KEYS: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case GET_ITER: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case GET_YIELD_FROM_ITER: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -566,13 +584,13 @@
 
         case _IS_ITER_EXHAUSTED_LIST: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _ITER_NEXT_LIST: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -582,13 +600,13 @@
 
         case _IS_ITER_EXHAUSTED_TUPLE: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _ITER_NEXT_TUPLE: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -598,26 +616,26 @@
 
         case _IS_ITER_EXHAUSTED_RANGE: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _ITER_NEXT_RANGE: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case WITH_EXCEPT_START: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case PUSH_EXC_INFO: {
             STACK_GROW(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-2)), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-2)) = NULL;
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -636,33 +654,33 @@
         case _INIT_CALL_PY_EXACT_ARGS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case _PUSH_FRAME: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_TYPE_1: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_STR_1: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_TUPLE_1: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -674,95 +692,95 @@
         case CALL_NO_KW_BUILTIN_O: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_BUILTIN_FAST: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_LEN: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_ISINSTANCE: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_METHOD_DESCRIPTOR_O: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_METHOD_DESCRIPTOR_NOARGS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CALL_NO_KW_METHOD_DESCRIPTOR_FAST: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case MAKE_FUNCTION: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case SET_FUNCTION_ATTRIBUTE: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BUILD_SLICE: {
             STACK_SHRINK(((oparg == 3) ? 1 : 0));
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case CONVERT_VALUE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case FORMAT_SIMPLE: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case FORMAT_WITH_SPEC: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case BINARY_OP: {
             STACK_SHRINK(1);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-1)) = NULL;
             break;
         }
 
         case SWAP: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-2 - (oparg-2))), true);
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1)), true);
+            PEEK(-(-2 - (oparg-2))) = NULL;
+            PEEK(-(-1)) = NULL;
             break;
         }
 
@@ -793,6 +811,6 @@
         }
 
         case INSERT: {
-            PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)PARTITIONNODE_NULLROOT, PEEK(-(-1 - oparg)), true);
+            PEEK(-(-1 - oparg)) = NULL;
             break;
         }

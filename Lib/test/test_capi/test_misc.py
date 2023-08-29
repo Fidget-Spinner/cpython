@@ -2282,6 +2282,32 @@ def clear_executors(func):
         func.__code__ = func.__code__.replace()
 
 
+
+class TestUopsOptimization(unittest.TestCase):
+
+    def test_int_constant_propagation(self):
+        def testfunc(loops):
+            num = 0
+            while num < loops:
+                x = 0
+                y = 1
+                z = 2
+                a = x + y + z + x + y + z + x + y + z
+                num += 1
+            return a
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        res = None
+        with temporary_optimizer(opt):
+            res = testfunc(3)
+
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        self.assertEqual(res, 9)
+        binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+        self.assertEqual(len(binop_count), 1)
+
+
 class TestOptimizerAPI(unittest.TestCase):
 
     def test_get_set_optimizer(self):

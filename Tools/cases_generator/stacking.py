@@ -439,6 +439,5 @@ def _write_components_for_abstract_interp(
         for poke in mgr.pokes:
             if not poke.effect.size and poke.effect.name not in mgr.instr.unmoved_names:
                 out.emit(
-                    f"PARTITIONNODE_OVERWRITE((_Py_PARTITIONNODE_t *)"
-                    f"PARTITIONNODE_NULLROOT, PEEK(-({poke.offset.as_index()})), true);"
+                    f"PEEK(-({poke.offset.as_index()})) = NULL;"
                 )
