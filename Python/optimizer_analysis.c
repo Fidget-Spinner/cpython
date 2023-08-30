@@ -27,7 +27,6 @@
 
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
-    int id;
     char is_terminal;
     int opcode;
     Py_hash_t cached_hash;
@@ -56,27 +55,41 @@ sym_clear(PyObject *o)
     return 0;
 }
 
+static void
+sym_dealloc(PyObject *o)
+{
+    _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o;
+    PyObject_GC_UnTrack(o);
+    Py_ssize_t size = Py_SIZE(o);
+    for (Py_ssize_t i = 0; i < size; i++) {
+        Py_XDECREF(self->operands[i]);
+    }
+    Py_TYPE(o)->tp_free(o);
+}
+
 static PyTypeObject _Py_UOpsSymbolicExpression_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops symbolic expression",
     .tp_basicsize = sizeof(_Py_UOpsSymbolicExpression) - sizeof(_Py_UOpsSymbolicExpression *),
     .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_dealloc = (destructor)PyObject_GC_Del,
-    .tp_free = PyObject_Free,
+    .tp_dealloc = sym_dealloc,
+    .tp_free = PyObject_GC_Del,
     .tp_traverse = sym_traverse,
     .tp_clear = sym_clear,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION | Py_TPFLAGS_HAVE_GC
 };
 
 static _Py_UOpsSymbolicExpression*
-_Py_UOpsSymbolicExpression_New(int num_subexprs, ...)
+_Py_UOpsSymbolicExpression_New(bool is_terminal, int num_subexprs, ...)
 {
-    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
+    _Py_UOpsSymbolicExpression *self = PyObject_GC_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
                                                           num_subexprs);
     if (self == NULL) {
         return NULL;
     }
+
+    self->is_terminal = (char)is_terminal;
     // Setup
     va_list curr;
 
@@ -94,19 +107,58 @@ _Py_UOpsSymbolicExpression_New(int num_subexprs, ...)
 // Snapshot of _Py_UOpsAbstractInterpContext locals BEFORE a region.
 typedef struct _Py_UOpsAbstractStore {
     PyObject_VAR_HEAD
+    // The next store in the trace
+    struct _Py_UOpsAbstractStore *next;
     _Py_UOpsSymbolicExpression *registers[REGISTERS_COUNT];
     _Py_UOpsSymbolicExpression *locals[1];
 } _Py_UOpsAbstractStore;
+
+static void
+abstractstore_dealloc(PyObject *o)
+{
+    _Py_UOpsAbstractStore *self = (_Py_UOpsAbstractStore *)o;
+    Py_XDECREF(self->next);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
 
 static PyTypeObject _Py_UOpsAbstractStore_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops abstract store",
     .tp_basicsize = sizeof(_Py_UOpsAbstractStore) - sizeof(_Py_UOpsSymbolicExpression *),
     .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_dealloc = (destructor)PyObject_Del,
+    .tp_dealloc = abstractstore_dealloc,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
+
+static _Py_UOpsAbstractStore*
+_Py_UOpsAsbstractStore_New(int locals_len)
+{
+    _Py_UOpsAbstractStore *self = PyObject_NewVar(_Py_UOpsAbstractStore,
+                                                       &_Py_UOpsAbstractStore_Type,
+                                                       locals_len);
+    if (self == NULL) {
+        return NULL;
+    }
+
+    self->next = NULL;
+
+    for (int i = 0; i < REGISTERS_COUNT; i++) {
+        self->registers[i] = NULL;
+    }
+
+    // Initialize with the initial state of all local variables
+    for (int i = 0; i < locals_len; i++) {
+        _Py_UOpsSymbolicExpression *local = _Py_UOpsSymbolicExpression_New(true, 0);
+        if (local == NULL) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        self->locals[i] = local;
+    }
+
+    return self;
+}
 
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
@@ -134,7 +186,6 @@ abstractinterp_dealloc(PyObject *o)
     for (int i = 0; i < total; i++) {
         Py_XDECREF(self->locals_with_stack[i]);
     }
-    PyMem_Free(self->locals_with_stack);
     // No need to free stack because it is allocated together with the locals.
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
@@ -150,7 +201,8 @@ static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
 };
 
 _Py_UOpsAbstractInterpContext *
-_Py_UOpsAbstractInterpContext_New(int stack_len, int locals_len, int curr_stacklen)
+_Py_UOpsAbstractInterpContext_New(_Py_UOpsAbstractStore *store,
+                                  int stack_len, int locals_len, int curr_stacklen)
 {
     _Py_UOpsAbstractInterpContext *self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
                                                           &_Py_UOpsAbstractInterpContext_Type,
@@ -161,12 +213,15 @@ _Py_UOpsAbstractInterpContext_New(int stack_len, int locals_len, int curr_stackl
     // Setup
     self->stack_len = stack_len;
     self->locals_len = locals_len;
-    for (int i = 0; i < (locals_len + stack_len); i++) {
-        self->locals_with_stack[i] = NULL;
-    }
     self->locals = self->locals_with_stack;
     self->stack = self->locals_with_stack + locals_len;
     self->stack_pointer = self->stack + curr_stacklen;
+
+    memcpy(self->locals, store->locals, sizeof(_Py_UOpsSymbolicExpression *) * locals_len);
+
+    for (int i = 0; i < stack_len; i++) {
+        self->stack[i] = NULL;
+    }
     return self;
 }
 
@@ -322,6 +377,10 @@ op_is_pure(int opcode)
         case LOAD_FAST:
         case LOAD_CONST:
         case BINARY_OP_ADD_INT:
+        // Technically not fully pure, but because we restore state at
+        // impure boundaries, this will have no visible side effect
+        // to user Python code.
+        case STORE_FAST:
             return true;
         default:
             return false;
@@ -343,10 +402,11 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 static int
 uop_abstract_interpret_single_inst(
     PyCodeObject *co,
-    int opcode,
-    int oparg,
+    _PyUOpInstruction *inst,
     _Py_UOpsAbstractInterpContext *ctx,
-    PyObject *co_const_copy
+    PyObject *co_const_copy,
+    _PyUOpInstruction *jump_id_to_instruction,
+    int max_jump_id
 )
 {
 #ifdef Py_DEBUG
@@ -378,6 +438,21 @@ uop_abstract_interpret_single_inst(
 #endif
 #define PEEK(idx)              (((ctx->stack_pointer)[-(idx)]))
 #define GETLOCAL(idx)          ((ctx->locals[idx]))
+
+    int oparg = inst->oparg;
+    int opcode = inst->opcode;
+
+
+    // Is a special jump/target ID, decode that
+    if (opcode < 0 && opcode > max_jump_id) {
+        DPRINTF(2, "Special jump target/ID %d\n", opcode);
+        oparg = jump_id_to_instruction[-opcode].oparg;
+        opcode = jump_id_to_instruction[-opcode].opcode;
+    }
+
+    DPRINTF(2, "Abstract interpreting %s:%d\n",
+            (opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[opcode],
+            oparg);
     switch (opcode) {
 #include "abstract_interp_cases.c.h"
         // @TODO convert these to autogenerated using DSL
@@ -416,6 +491,7 @@ uop_abstract_interpret_single_inst(
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
     }
+    return 0;
 }
 
 static int
@@ -439,12 +515,17 @@ uop_abstract_interpret(
 #endif
 
     PyObject *co_const_copy = NULL;
-
-
+    _Py_UOpsAbstractInterpContext *ctx = NULL;
+    _Py_UOpsAbstractStore *store = NULL;
+    _Py_UOpsAbstractStore *first_store = NULL;
+    store = first_store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
+    if (store == NULL) {
+        goto abstract_error;
+    }
     int buffer_trace_len = 0;
 
-    _Py_UOpsAbstractInterpContext *ctx = _Py_UOpsAbstractInterpContext_New(
-        co->co_stacksize, co->co_nlocals, curr_stacklen);
+    ctx = _Py_UOpsAbstractInterpContext_New(
+        store, co->co_stacksize, co->co_nlocals, curr_stacklen);
     if (ctx == NULL) {
         goto abstract_error;
     }
@@ -459,40 +540,71 @@ uop_abstract_interpret(
         PyList_SET_ITEM(co_const_copy, x, Py_NewRef(PyTuple_GET_ITEM(co->co_consts, x)));
     }
 
-    int oparg;
-    int opcode;
+    _PyUOpInstruction *curr = trace;
+    _PyUOpInstruction *end = trace + trace_len;
 
-    for (int i = 0; i < trace_len; i++) {
-        oparg = trace[i].oparg;
-        opcode = trace[i].opcode;
+    while (curr < end) {
 
-        // Is a special jump/target ID, decode that
-        if (opcode < 0 && opcode > max_jump_id) {
-            DPRINTF(2, "Special jump target/ID %d\n", opcode);
-            oparg = jump_id_to_instruction[-opcode].oparg;
-            opcode = jump_id_to_instruction[-opcode].opcode;
-        }
+        // Form pure regions
+        while(op_is_pure(curr->opcode)) {
 
-        int err = uop_abstract_interpret_single_inst(co, opcode, oparg, ctx, co_const_copy);
-        if (err < 0) {
-            goto abstract_error;
-        }
-
-        if (opcode == EXIT_TRACE) {
-            // Copy the rest of the stubs over, then end.
-
-            DPRINTF(2, "Exit trace encountered, emitting the rest of the stubs\n");
-
-            i++; // We've already emitted an EXIT_TRACE
-            for (; i < trace_len; i++) {
-
-                DPRINTF(2, "Emitting %s\n", (opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[opcode]);
-
-                new_trace[buffer_trace_len] = trace[i];
-                buffer_trace_len++;
+            int err = uop_abstract_interpret_single_inst(
+                co, curr, ctx, co_const_copy,
+                jump_id_to_instruction, max_jump_id
+            );
+            if (err < 0) {
+                goto abstract_error;
             }
-            break;
+
+            if (curr->opcode == EXIT_TRACE) {
+                break;
+            }
+
+            curr++;
         }
+
+        // End of a pure region, create a new abstract store
+        if (curr->opcode != EXIT_TRACE) {
+            _Py_UOpsAbstractStore *temp = store;
+            store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
+            if (store == NULL) {
+                goto abstract_error;
+            }
+            // Transfer the reference over (note: No incref!)
+            temp->next = store;
+        }
+
+        // Form impure region
+        if(!op_is_pure(curr->opcode)) {
+
+            int err = uop_abstract_interpret_single_inst(
+                co, curr, ctx, co_const_copy,
+                jump_id_to_instruction, max_jump_id
+            );
+            if (err < 0) {
+                goto abstract_error;
+            }
+
+            if (curr->opcode == EXIT_TRACE) {
+                break;
+            }
+
+            curr++;
+
+            // End of an impure instruction, create a new abstract store
+            // TODO we can do some memory optimization here to not use abstract
+            // stores each time, since that's quite overkill.
+            if (curr->opcode != EXIT_TRACE) {
+                _Py_UOpsAbstractStore *temp = store;
+                store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
+                if (store == NULL) {
+                    goto abstract_error;
+                }
+                // Transfer the reference over (note: No incref!)
+                temp->next = store;
+            };
+        }
+
     }
     assert(STACK_SIZE() >= 0);
 
@@ -515,10 +627,12 @@ uop_abstract_interpret(
 
     Py_SETREF(co->co_consts, co_const_final);
     Py_XDECREF(co_const_copy);
+    Py_DECREF(first_store);
     return buffer_trace_len;
 
 abstract_error:
     Py_XDECREF(co_const_copy);
+    Py_XDECREF(first_store);
     Py_DECREF(ctx);
     if(PyErr_Occurred()) {
         PyErr_Clear();
@@ -566,9 +680,10 @@ _Py_uop_analyze_and_optimize(
     fix_jump_side_exits(temp_writebuffer, trace_len, jump_id_to_instruction, max_jump_id);
 
     // Fill in our new trace!
-    memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
+    // memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
 
-    return trace_len;
+    // TODO return new trace_len soon!
+    return original_trace_len;
 error:
     PyMem_Free(temp_writebuffer);
     PyMem_Free(jump_id_to_instruction);

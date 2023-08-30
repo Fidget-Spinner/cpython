@@ -2292,7 +2292,7 @@ class TestUopsOptimization(unittest.TestCase):
                 x = 0
                 y = 1
                 z = 2
-                a = x + y + z + x + y + z + x + y + z
+                a = x + y + z + x + y + z + x
                 num += 1
             return a
 
