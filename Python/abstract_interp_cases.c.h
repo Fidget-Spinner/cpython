@@ -68,6 +68,7 @@
             PyObject *value;
             value = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , value);
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -131,6 +132,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -176,6 +179,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -221,6 +226,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -330,6 +337,7 @@
             list = stack_pointer[-2 - (oparg-1)];
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , v, unused, list);
+            PEEK(-(-1 - (oparg-1))) = __sym_temp;
             break;
         }
 
@@ -340,6 +348,7 @@
             set = stack_pointer[-2 - (oparg-1)];
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , v, unused, set);
+            PEEK(-(-1 - (oparg-1))) = __sym_temp;
             break;
         }
 
@@ -428,6 +437,7 @@
             aiter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , aiter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -684,6 +694,7 @@
             list = stack_pointer[-2 - (oparg-1)];
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , iterable, unused, list);
+            PEEK(-(-1 - (oparg-1))) = __sym_temp;
             break;
         }
 
@@ -694,6 +705,7 @@
             set = stack_pointer[-2 - (oparg-1)];
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , iterable, unused, set);
+            PEEK(-(-1 - (oparg-1))) = __sym_temp;
             break;
         }
 
@@ -742,6 +754,7 @@
             dict = stack_pointer[-2 - (oparg - 1)];
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , update, unused, dict);
+            PEEK(-(-1 - (oparg - 1))) = __sym_temp;
             break;
         }
 
@@ -754,6 +767,10 @@
             callable = stack_pointer[-5 - (oparg - 1)];
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 6 , update, unused, dict, unused, unused, callable);
+            PEEK(-(-4 - (oparg - 1))) = __sym_temp;
+            PEEK(-(-3 - (oparg - 1))) = __sym_temp;
+            PEEK(-(-2 - (oparg - 1))) = __sym_temp;
+            PEEK(-(-1 - (oparg - 1))) = __sym_temp;
             break;
         }
 
@@ -766,6 +783,7 @@
             dict = stack_pointer[-3 - (oparg - 1)];
             STACK_SHRINK(2);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 4 , value, key, unused, dict);
+            PEEK(-(-1 - (oparg - 1))) = __sym_temp;
             break;
         }
 
@@ -816,6 +834,7 @@
             PyObject *owner;
             owner = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , owner);
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -823,6 +842,7 @@
             PyObject *owner;
             owner = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , owner);
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -930,6 +950,7 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -949,6 +970,7 @@
             obj = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , obj);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -973,6 +995,7 @@
             subject = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , subject);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -983,6 +1006,7 @@
             subject = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , subject);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -995,6 +1019,8 @@
             subject = stack_pointer[-2];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , keys, subject);
+            PEEK(-(-3)) = __sym_temp;
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1021,6 +1047,7 @@
             PyObject *iter;
             iter = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -1030,6 +1057,7 @@
             iter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1040,6 +1068,7 @@
             iter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1048,6 +1077,7 @@
             PyObject *iter;
             iter = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -1057,6 +1087,7 @@
             iter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1067,6 +1098,7 @@
             iter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1075,6 +1107,7 @@
             PyObject *iter;
             iter = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
@@ -1084,6 +1117,7 @@
             iter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1094,6 +1128,7 @@
             iter = stack_pointer[-1];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , iter);
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1108,6 +1143,10 @@
             exit_func = stack_pointer[-4];
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 4 , val, unused, lasti, exit_func);
+            PEEK(-(-5)) = __sym_temp;
+            PEEK(-(-4)) = __sym_temp;
+            PEEK(-(-3)) = __sym_temp;
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -1133,6 +1172,8 @@
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , unused, self_or_null, callable);
+            PEEK(-(-2 - oparg)) = __sym_temp;
+            PEEK(-(-1 - oparg)) = __sym_temp;
             break;
         }
 
@@ -1140,6 +1181,8 @@
             PyObject *callable;
             callable = stack_pointer[-2 - oparg];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , unused, unused, callable);
+            PEEK(-(-2 - oparg)) = __sym_temp;
+            PEEK(-(-1 - oparg)) = __sym_temp;
             break;
         }
 

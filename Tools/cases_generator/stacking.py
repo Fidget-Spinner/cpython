@@ -468,7 +468,7 @@ def _write_components_for_abstract_interp(
                 f"false, {len(mgr.peeks)} {var});"
             )
         for poke in mgr.pokes:
-            if not poke.effect.size and poke.effect.name not in mgr.instr.unmoved_names:
+            if not poke.effect.size and poke.effect.name:
                 out.emit(
                     f"PEEK(-({poke.offset.as_index()})) = __sym_temp;"
                 )
