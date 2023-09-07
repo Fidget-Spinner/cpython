@@ -29,6 +29,7 @@ typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     char is_terminal;
     int opcode;
+    PyObject *const_val;
     Py_hash_t cached_hash;
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
@@ -64,6 +65,7 @@ sym_dealloc(PyObject *o)
     for (Py_ssize_t i = 0; i < size; i++) {
         Py_XDECREF(self->operands[i]);
     }
+    Py_XDECREF(self->const_val);
     Py_TYPE(o)->tp_free(o);
 }
 
@@ -90,6 +92,9 @@ _Py_UOpsSymbolicExpression_New(bool is_terminal, int num_subexprs, ...)
     }
 
     self->is_terminal = (char)is_terminal;
+    self->const_val = NULL;
+    self->opcode = -1;
+
     // Setup
     va_list curr;
 
@@ -103,6 +108,23 @@ _Py_UOpsSymbolicExpression_New(bool is_terminal, int num_subexprs, ...)
 
     return self;
 }
+static inline _Py_UOpsSymbolicExpression*
+sym_init_var()
+{
+    return _Py_UOpsSymbolicExpression_New(true, 0);
+}
+
+static inline _Py_UOpsSymbolicExpression*
+sym_init_const(PyObject *const_val)
+{
+    _Py_UOpsSymbolicExpression *temp = _Py_UOpsSymbolicExpression_New(true, 0);
+    if (temp == NULL) {
+        return NULL;
+    }
+    temp->const_val = const_val;
+    return temp;
+}
+
 
 // Snapshot of _Py_UOpsAbstractInterpContext locals BEFORE a region.
 typedef struct _Py_UOpsAbstractStore {
@@ -149,15 +171,18 @@ _Py_UOpsAsbstractStore_New(int locals_len)
 
     // Initialize with the initial state of all local variables
     for (int i = 0; i < locals_len; i++) {
-        _Py_UOpsSymbolicExpression *local = _Py_UOpsSymbolicExpression_New(true, 0);
+        _Py_UOpsSymbolicExpression *local = sym_init_var();
         if (local == NULL) {
-            Py_DECREF(self);
-            return NULL;
+            goto error;
         }
         self->locals[i] = local;
     }
 
     return self;
+
+error:
+    Py_DECREF(self);
+    return NULL;
 }
 
 // Tier 2 types meta interpreter
@@ -376,7 +401,7 @@ op_is_pure(int opcode)
     switch(opcode) {
         case LOAD_FAST:
         case LOAD_CONST:
-        case BINARY_OP_ADD_INT:
+        case _BINARY_OP_ADD_INT:
         // Technically not fully pure, but because we restore state at
         // impure boundaries, this will have no visible side effect
         // to user Python code.
@@ -404,7 +429,7 @@ uop_abstract_interpret_single_inst(
     PyCodeObject *co,
     _PyUOpInstruction *inst,
     _Py_UOpsAbstractInterpContext *ctx,
-    PyObject *co_const_copy,
+    PyObject *sym_co_const_copy,
     _PyUOpInstruction *jump_id_to_instruction,
     int max_jump_id
 )
@@ -468,9 +493,9 @@ uop_abstract_interpret_single_inst(
             break;
         }
         case LOAD_CONST: {
-            PyObject *value = GETITEM(co_const_copy, oparg);
+            // TODO, keep a dictionary mapping constant values to their unique symbolic expression
             STACK_GROW(1);
-            PEEK(1) = (_Py_UOpsSymbolicExpression *)value;
+            PEEK(1) = (_Py_UOpsSymbolicExpression *)PyTuple_GET_ITEM(sym_co_const_copy, oparg);
             break;
         }
         case STORE_FAST:
@@ -487,11 +512,20 @@ uop_abstract_interpret_single_inst(
             break;
         }
 
+        // TODO SWAP
+
         default:
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
     }
+
+    assert(STACK_LEVEL() >= 0);
+
     return 0;
+
+error:
+    DPRINTF(1, "Encountered error in abstract interpreter\n");
+    return -1;
 }
 
 static int
@@ -514,30 +548,34 @@ uop_abstract_interpret(
     }
 #endif
 
-    PyObject *co_const_copy = NULL;
+    PyObject *sym_co_const_copy = NULL;
     _Py_UOpsAbstractInterpContext *ctx = NULL;
     _Py_UOpsAbstractStore *store = NULL;
     _Py_UOpsAbstractStore *first_store = NULL;
     store = first_store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
     if (store == NULL) {
-        goto abstract_error;
+        goto error;
     }
     int buffer_trace_len = 0;
 
     ctx = _Py_UOpsAbstractInterpContext_New(
         store, co->co_stacksize, co->co_nlocals, curr_stacklen);
     if (ctx == NULL) {
-        goto abstract_error;
+        goto error;
     }
 
     // We will be adding more constants due to constant propagation.
-    co_const_copy = PyList_New(PyTuple_Size(co->co_consts));
-    if (co_const_copy == NULL) {
-        goto abstract_error;
+    sym_co_const_copy = PyList_New(PyTuple_Size(co->co_consts));
+    if (sym_co_const_copy == NULL) {
+        goto error;
     }
     // Copy over the co_const tuple
     for (int x = 0; x < PyTuple_GET_SIZE(co->co_consts); x++) {
-        PyList_SET_ITEM(co_const_copy, x, Py_NewRef(PyTuple_GET_ITEM(co->co_consts, x)));
+        _Py_UOpsSymbolicExpression *temp = sym_init_const((PyTuple_GET_ITEM(co->co_consts, x)));
+        if (temp == NULL) {
+            goto error;
+        }
+        PyList_SET_ITEM(sym_co_const_copy, x, temp);
     }
 
     _PyUOpInstruction *curr = trace;
@@ -549,11 +587,11 @@ uop_abstract_interpret(
         while(op_is_pure(curr->opcode)) {
 
             int err = uop_abstract_interpret_single_inst(
-                co, curr, ctx, co_const_copy,
+                co, curr, ctx, sym_co_const_copy,
                 jump_id_to_instruction, max_jump_id
             );
             if (err < 0) {
-                goto abstract_error;
+                goto error;
             }
 
             if (curr->opcode == EXIT_TRACE) {
@@ -568,7 +606,7 @@ uop_abstract_interpret(
             _Py_UOpsAbstractStore *temp = store;
             store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
             if (store == NULL) {
-                goto abstract_error;
+                goto error;
             }
             // Transfer the reference over (note: No incref!)
             temp->next = store;
@@ -578,11 +616,11 @@ uop_abstract_interpret(
         if(!op_is_pure(curr->opcode)) {
 
             int err = uop_abstract_interpret_single_inst(
-                co, curr, ctx, co_const_copy,
+                co, curr, ctx, sym_co_const_copy,
                 jump_id_to_instruction, max_jump_id
             );
             if (err < 0) {
-                goto abstract_error;
+                goto error;
             }
 
             if (curr->opcode == EXIT_TRACE) {
@@ -598,7 +636,7 @@ uop_abstract_interpret(
                 _Py_UOpsAbstractStore *temp = store;
                 store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
                 if (store == NULL) {
-                    goto abstract_error;
+                    goto error;
                 }
                 // Transfer the reference over (note: No incref!)
                 temp->next = store;
@@ -606,7 +644,6 @@ uop_abstract_interpret(
         }
 
     }
-    assert(STACK_SIZE() >= 0);
 
 #ifdef Py_DEBUG
     if (buffer_trace_len < trace_len) {
@@ -616,22 +653,24 @@ uop_abstract_interpret(
 
     Py_DECREF(ctx);
 
-    PyObject *co_const_final = PyTuple_New(PyList_Size(co_const_copy));
+    PyObject *co_const_final = PyTuple_New(PyList_Size(sym_co_const_copy));
     if (co_const_final == NULL) {
-        goto abstract_error;
+        goto error;
     }
     // Copy over the co_const tuple
-    for (int x = 0; x < PyList_GET_SIZE(co_const_copy); x++) {
-        PyTuple_SET_ITEM(co_const_final, x, Py_NewRef(PyList_GET_ITEM(co_const_copy, x)));
+    for (int x = 0; x < PyList_GET_SIZE(sym_co_const_copy); x++) {
+        _Py_UOpsSymbolicExpression * temp = (_Py_UOpsSymbolicExpression *)PyList_GET_ITEM(sym_co_const_copy, x);
+        assert(temp->const_val != NULL);
+        PyTuple_SET_ITEM(co_const_final, x, Py_NewRef(temp->const_val));
     }
 
     Py_SETREF(co->co_consts, co_const_final);
-    Py_XDECREF(co_const_copy);
+    Py_XDECREF(sym_co_const_copy);
     Py_DECREF(first_store);
     return buffer_trace_len;
 
-abstract_error:
-    Py_XDECREF(co_const_copy);
+error:
+    Py_XDECREF(sym_co_const_copy);
     Py_XDECREF(first_store);
     Py_DECREF(ctx);
     if(PyErr_Occurred()) {

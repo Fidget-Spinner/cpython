@@ -430,14 +430,45 @@ def _write_components_for_abstract_interp(
     out: Formatter,
 ) -> None:
     managers = get_managers(parts)
+    all_vars: dict[str, StackEffect] = {}
     for mgr in managers:
+        for name, eff in mgr.collect_vars().items():
+            if name in all_vars:
+                # TODO: Turn this into an error -- variable conflict
+                assert all_vars[name] == eff, (
+                    name,
+                    mgr.instr.name,
+                    all_vars[name],
+                    eff,
+                )
+            else:
+                all_vars[name] = eff
+
+    # Declare all variables
+    for name, eff in all_vars.items():
+        out.declare(eff, None)
+
+    for mgr in managers:
+        for peek in mgr.peeks:
+            out.assign(
+                peek.effect,
+                peek.as_stack_effect(),
+            )
         if mgr is managers[-1]:
             out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
-        # NULL out the output stack effects
+        # Construct sym expression and write that to output
+        var = ', '.join(peek.effect.name for peek in mgr.peeks)
+        if var:
+            var = ', ' + var
+        if mgr.pokes:
+            out.emit(
+                f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
+                f"false, {len(mgr.peeks)} {var});"
+            )
         for poke in mgr.pokes:
             if not poke.effect.size and poke.effect.name not in mgr.instr.unmoved_names:
                 out.emit(
-                    f"PEEK(-({poke.offset.as_index()})) = NULL;"
+                    f"PEEK(-({poke.offset.as_index()})) = __sym_temp;"
                 )
