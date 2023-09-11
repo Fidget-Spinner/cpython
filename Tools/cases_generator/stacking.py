@@ -442,6 +442,10 @@ def _write_components_for_abstract_interp(
                     eff,
                 )
             else:
+                # TODO: Turn this into an error -- not supported
+                assert not eff.size, (
+                    f"Abstract interpreter does not support `{mgr.instr.name}` "
+                    f"due to sized input `{name}`")
                 all_vars[name] = eff
 
     # Declare all variables
@@ -459,13 +463,13 @@ def _write_components_for_abstract_interp(
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
         # Construct sym expression and write that to output
-        var = ', '.join(peek.effect.name for peek in mgr.peeks)
+        var = ', '.join(all_vars)
         if var:
             var = ', ' + var
         if mgr.pokes:
             out.emit(
                 f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                f"false, {len(mgr.peeks)} {var});"
+                f"false, {len(all_vars)} {var});"
             )
         for poke in mgr.pokes:
             if not poke.effect.size and poke.effect.name:

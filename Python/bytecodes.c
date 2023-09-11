@@ -180,19 +180,19 @@ dummy_func(
             LOAD_FAST,
         };
 
-        inst(LOAD_FAST_CHECK, (-- value)) {
+        tier2manual inst(LOAD_FAST_CHECK, (-- value)) {
             value = GETLOCAL(oparg);
             ERROR_IF(value == NULL, unbound_local_error);
             Py_INCREF(value);
         }
 
-        inst(LOAD_FAST, (-- value)) {
+        tier2manual inst(LOAD_FAST, (-- value)) {
             value = GETLOCAL(oparg);
             assert(value != NULL);
             Py_INCREF(value);
         }
 
-        inst(LOAD_FAST_AND_CLEAR, (-- value)) {
+        tier2manual inst(LOAD_FAST_AND_CLEAR, (-- value)) {
             value = GETLOCAL(oparg);
             // do not use SETLOCAL here, it decrefs the old value
             GETLOCAL(oparg) = NULL;
@@ -207,12 +207,12 @@ dummy_func(
             Py_INCREF(value2);
         }
 
-        inst(LOAD_CONST, (-- value)) {
+        tier2manual inst(LOAD_CONST, (-- value)) {
             value = GETITEM(FRAME_CO_CONSTS, oparg);
             Py_INCREF(value);
         }
 
-        inst(STORE_FAST, (value --)) {
+        tier2manual inst(STORE_FAST, (value --)) {
             SETLOCAL(oparg, value);
         }
 
@@ -387,7 +387,7 @@ dummy_func(
             DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
         }
 
-        op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Multiply((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -395,7 +395,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        op(_BINARY_OP_ADD_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_INT, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Add((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -403,7 +403,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        op(_BINARY_OP_SUBTRACT_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_SUBTRACT_INT, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Subtract((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -423,7 +423,7 @@ dummy_func(
             DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
         }
 
-        op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval *
@@ -431,7 +431,7 @@ dummy_func(
             DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
         }
 
-        op(_BINARY_OP_ADD_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_FLOAT, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval +
@@ -439,7 +439,7 @@ dummy_func(
             DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
         }
 
-        op(_BINARY_OP_SUBTRACT_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_SUBTRACT_FLOAT, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval -
@@ -3644,7 +3644,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        inst(COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
+        tier2manual inst(COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
             assert(oparg > 0);
             top = Py_NewRef(bottom);
         }
@@ -3668,7 +3668,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        inst(SWAP, (bottom, unused[oparg-2], top --
+        tier2manual inst(SWAP, (bottom, unused[oparg-2], top --
                     top, unused[oparg-2], bottom)) {
             assert(oparg >= 2);
         }
