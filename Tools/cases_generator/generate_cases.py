@@ -73,6 +73,21 @@ OPARG_SIZES = {
 
 INSTR_FMT_PREFIX = "INSTR_FMT_"
 
+# TODO: generate all these after updating the DSL
+SPECIALLY_HANDLED_ABSTRACT_INSTR = {
+    "LOAD_FAST",
+    "LOAD_FAST_CHECK",
+    "LOAD_FAST_AND_CLEAR",
+    "LOAD_CONST",
+    "STORE_FAST",
+    "STORE_FAST_MAYBE_NULL",
+    "COPY",
+    "POP_TOP",
+    "PUSH_NULL",
+    "END_SEND",
+    "SWAP",
+}
+
 arg_parser = argparse.ArgumentParser(
     description="Generate the code for the interpreter switch.",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -852,7 +867,7 @@ class Generator(Analyzer):
                         instr = AbstractInstruction(self.instrs[thing.name].inst)
                         if (not instr.is_viable_uop() 
                             or not instr.inst.pure
-                            or instr.inst.tier2manual):
+                            or thing.name in SPECIALLY_HANDLED_ABSTRACT_INSTR):
                             continue
                         self.out.emit("")
                         with self.out.block(f"case {thing.name}:"):

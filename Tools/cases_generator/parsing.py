@@ -108,7 +108,6 @@ class InstHeader(Node):
     override: bool
     register: bool
     pure: bool
-    tier2manual: bool
     kind: Literal["inst", "op"]
     name: str
     inputs: list[InputEffect]
@@ -120,7 +119,6 @@ class InstDef(Node):
     override: bool
     register: bool
     pure: bool
-    tier2manual: bool
     kind: Literal["inst", "op"]
     name: str
     inputs: list[InputEffect]
@@ -168,7 +166,6 @@ class Parser(PLexer):
                     hdr.override,
                     hdr.register,
                     hdr.pure,
-                    hdr.tier2manual,
                     hdr.kind,
                     hdr.name,
                     hdr.inputs,
@@ -180,14 +177,13 @@ class Parser(PLexer):
 
     @contextual
     def inst_header(self) -> InstHeader | None:
-        # [override] [pure] [tier2manual] inst(NAME)
-        #   | [override] [register] [pure] [tier2manual] inst(NAME, (inputs -- outputs))
-        #   | [override] [register] [pure] [tier2manual] op(NAME, (inputs -- outputs))
+        # [override] [pure] inst(NAME)
+        #   | [override] [register] [pure] inst(NAME, (inputs -- outputs))
+        #   | [override] [register] [pure] op(NAME, (inputs -- outputs))
         # TODO: Make INST a keyword in the lexer.
         override = bool(self.expect(lx.OVERRIDE))
         register = bool(self.expect(lx.REGISTER))
         pure = bool(self.expect(lx.PURE))
-        tier2manual = bool(self.expect(lx.TIER2MANUAL))
         if (tkn := self.expect(lx.IDENTIFIER)) and tkn.text in ("inst", "op"):
             kind = cast(Literal["inst", "op"], tkn.text)
             if self.expect(lx.LPAREN) and (tkn := self.expect(lx.IDENTIFIER)):
@@ -197,7 +193,7 @@ class Parser(PLexer):
                     if self.expect(lx.RPAREN):
                         if (tkn := self.peek()) and tkn.kind == lx.LBRACE:
                             return InstHeader(
-                                override, register, pure, tier2manual, 
+                                override, register, pure, 
                                 kind, name, inp, outp)
         return None
 
