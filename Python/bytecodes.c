@@ -180,19 +180,19 @@ dummy_func(
             LOAD_FAST,
         };
 
-        tier2manual inst(LOAD_FAST_CHECK, (-- value)) {
+        pure tier2manual inst(LOAD_FAST_CHECK, (-- value)) {
             value = GETLOCAL(oparg);
             ERROR_IF(value == NULL, unbound_local_error);
             Py_INCREF(value);
         }
 
-        tier2manual inst(LOAD_FAST, (-- value)) {
+        pure tier2manual inst(LOAD_FAST, (-- value)) {
             value = GETLOCAL(oparg);
             assert(value != NULL);
             Py_INCREF(value);
         }
 
-        tier2manual inst(LOAD_FAST_AND_CLEAR, (-- value)) {
+        pure tier2manual inst(LOAD_FAST_AND_CLEAR, (-- value)) {
             value = GETLOCAL(oparg);
             // do not use SETLOCAL here, it decrefs the old value
             GETLOCAL(oparg) = NULL;
@@ -207,12 +207,12 @@ dummy_func(
             Py_INCREF(value2);
         }
 
-        tier2manual inst(LOAD_CONST, (-- value)) {
+        pure tier2manual inst(LOAD_CONST, (-- value)) {
             value = GETITEM(FRAME_CO_CONSTS, oparg);
             Py_INCREF(value);
         }
 
-        tier2manual inst(STORE_FAST, (value --)) {
+        pure tier2manual inst(STORE_FAST, (value --)) {
             SETLOCAL(oparg, value);
         }
 
@@ -235,11 +235,11 @@ dummy_func(
             SETLOCAL(oparg2, value2);
         }
 
-        inst(POP_TOP, (value --)) {
+        pure tier2manual inst(POP_TOP, (value --)) {
             DECREF_INPUTS();
         }
 
-        inst(PUSH_NULL, (-- res)) {
+        pure tier2manual inst(PUSH_NULL, (-- res)) {
             res = NULL;
         }
 
@@ -258,7 +258,7 @@ dummy_func(
             DECREF_INPUTS();
         }
 
-        inst(END_SEND, (receiver, value -- value)) {
+        pure tier2manual inst(END_SEND, (receiver, value -- value)) {
             Py_DECREF(receiver);
         }
 
@@ -3644,7 +3644,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        tier2manual inst(COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
+        pure tier2manual inst(COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
             assert(oparg > 0);
             top = Py_NewRef(bottom);
         }
@@ -3668,7 +3668,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        tier2manual inst(SWAP, (bottom, unused[oparg-2], top --
+        pure tier2manual inst(SWAP, (bottom, unused[oparg-2], top --
                     top, unused[oparg-2], bottom)) {
             assert(oparg >= 2);
         }
