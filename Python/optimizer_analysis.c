@@ -206,8 +206,8 @@ abstractinterp_dealloc(PyObject *o)
     _Py_UOpsAbstractInterpContext *self = (_Py_UOpsAbstractInterpContext *)o;
     // Traverse all nodes and decref the root objects (if they are not NULL).
     // Note: stack is after locals so this is safe
-    int total = Py_SIZE(self);
-    for (int i = 0; i < total; i++) {
+    Py_ssize_t total = Py_SIZE(self);
+    for (Py_ssize_t i = 0; i < total; i++) {
         Py_XDECREF(self->locals_with_stack[i]);
     }
     // No need to free stack because it is allocated together with the locals.
@@ -314,7 +314,7 @@ number_jumps_and_targets(_PyUOpInstruction *trace, int trace_len, int *max_id)
     return jump_id_to_instruction;
 }
 
-// Remove contiguous SAVE_IPs, leaving only the last one before a non-SAVE_IP instruction.
+// Remove contiguous _SAVE_CURRENT_IPs, leaving only the last one before a non-_SAVE_CURRENT_IP instruction.
 static int
 remove_duplicate_save_ips(_PyUOpInstruction *trace, int trace_len)
 {
@@ -333,7 +333,7 @@ remove_duplicate_save_ips(_PyUOpInstruction *trace, int trace_len)
     _PyUOpInstruction curr;
     for (int i = 0; i < trace_len - 1; i++) {
         curr = trace[i];
-        if (curr.opcode == SAVE_IP && trace[i+1].opcode == SAVE_IP) {
+        if (curr.opcode == _SAVE_CURRENT_IP && trace[i+1].opcode == _SAVE_CURRENT_IP) {
             continue;
         }
         trace[new_temp_len] = curr;
@@ -341,7 +341,7 @@ remove_duplicate_save_ips(_PyUOpInstruction *trace, int trace_len)
     }
 
 
-    DPRINTF(2, "Removed %d SAVE_IPs\n", trace_len - new_temp_len);
+    DPRINTF(2, "Removed %d _SAVE_CURRENT_IPs\n", trace_len - new_temp_len);
 
     return new_temp_len;
 }
@@ -391,23 +391,6 @@ fix_jump_side_exits(_PyUOpInstruction *trace, int trace_len,
             trace[i].oparg = real_oparg;
             trace[i].opcode = real_opcode;
         }
-    }
-}
-
-static inline bool
-op_is_pure(int opcode)
-{
-    switch(opcode) {
-        case LOAD_FAST:
-        case LOAD_CONST:
-        case _BINARY_OP_ADD_INT:
-        // Technically not fully pure, but because we restore state at
-        // impure boundaries, this will have no visible side effect
-        // to user Python code.
-        case STORE_FAST:
-            return true;
-        default:
-            return false;
     }
 }
 
@@ -465,7 +448,7 @@ uop_abstract_interpret_single_inst(
 
     int oparg = inst->oparg;
     int opcode = inst->opcode;
-
+    _Py_UOpsSymbolicExpression **stack_pointer = ctx->stack_pointer;
 
     // Is a special jump/target ID, decode that
     if (opcode < 0 && opcode > max_jump_id) {
@@ -510,8 +493,19 @@ uop_abstract_interpret_single_inst(
             PEEK(1) = bottom;
             break;
         }
+        case POP_TOP: {
 
-        // TODO SWAP
+            break;
+        }
+        case PUSH_NULL: {
+
+            break;
+        }
+        case END_SEND: break;
+        case SWAP: {
+
+            break;
+        }
 
         default:
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
@@ -583,7 +577,7 @@ uop_abstract_interpret(
     while (curr < end) {
 
         // Form pure regions
-        while(op_is_pure(curr->opcode)) {
+        while(_PyOpcode_ispure(curr->opcode)) {
 
             int err = uop_abstract_interpret_single_inst(
                 co, curr, ctx, sym_co_const_copy,
@@ -593,7 +587,7 @@ uop_abstract_interpret(
                 goto error;
             }
 
-            if (curr->opcode == EXIT_TRACE) {
+            if (curr->opcode == _EXIT_TRACE) {
                 break;
             }
 
@@ -601,7 +595,7 @@ uop_abstract_interpret(
         }
 
         // End of a pure region, create a new abstract store
-        if (curr->opcode != EXIT_TRACE) {
+        if (curr->opcode != _EXIT_TRACE) {
             _Py_UOpsAbstractStore *temp = store;
             store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
             if (store == NULL) {
@@ -612,7 +606,7 @@ uop_abstract_interpret(
         }
 
         // Form impure region
-        if(!op_is_pure(curr->opcode)) {
+        if(!_PyOpcode_ispure(curr->opcode)) {
 
             int err = uop_abstract_interpret_single_inst(
                 co, curr, ctx, sym_co_const_copy,
@@ -622,7 +616,7 @@ uop_abstract_interpret(
                 goto error;
             }
 
-            if (curr->opcode == EXIT_TRACE) {
+            if (curr->opcode == _EXIT_TRACE) {
                 break;
             }
 
@@ -631,7 +625,7 @@ uop_abstract_interpret(
             // End of an impure instruction, create a new abstract store
             // TODO we can do some memory optimization here to not use abstract
             // stores each time, since that's quite overkill.
-            if (curr->opcode != EXIT_TRACE) {
+            if (curr->opcode != _EXIT_TRACE) {
                 _Py_UOpsAbstractStore *temp = store;
                 store = _Py_UOpsAsbstractStore_New(co->co_nlocals);
                 if (store == NULL) {
@@ -711,7 +705,7 @@ _Py_uop_analyze_and_optimize(
         goto error;
     }
 
-    // Pass: Remove duplicate SAVE_IPs
+    // Pass: Remove duplicate _SAVE_CURRENT_IPs
     trace_len = remove_duplicate_save_ips(temp_writebuffer, trace_len);
 
     // Final pass: fix jumps. This MUST be called as the last pass!

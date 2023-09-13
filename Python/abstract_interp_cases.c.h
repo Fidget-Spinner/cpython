@@ -4,73 +4,67 @@
 // Do not edit!
 
         case _BINARY_OP_MULTIPLY_INT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
+            left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
             PEEK(-(-1)) = __sym_temp;
             break;
         }
 
         case _BINARY_OP_ADD_INT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
+            left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
             PEEK(-(-1)) = __sym_temp;
             break;
         }
 
         case _BINARY_OP_SUBTRACT_INT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
+            left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
             PEEK(-(-1)) = __sym_temp;
             break;
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
+            left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
             PEEK(-(-1)) = __sym_temp;
             break;
         }
 
         case _BINARY_OP_ADD_FLOAT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
+            left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
             PEEK(-(-1)) = __sym_temp;
             break;
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
+            left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , right, left);
             PEEK(-(-1)) = __sym_temp;
             break;
         }

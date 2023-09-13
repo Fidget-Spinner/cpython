@@ -496,15 +496,10 @@ def write_pokes(mgr: EffectManager, out: Formatter) -> None:
 
 
 def write_single_instr_for_abstract_interp(instr: Instruction, out: Formatter) -> None:
-    try:
-        _write_components_for_abstract_interp(
-            [Component(instr, instr.active_caches)],
-            out,
-        )
-    except AssertionError as err:
-        raise AssertionError(
-            f"Error writing abstract instruction {instr.name}"
-        ) from err
+    _write_components_for_abstract_interp(
+        [Component(instr, instr.active_caches)],
+        out,
+    )
 
 
 def _write_components_for_abstract_interp(
@@ -514,7 +509,11 @@ def _write_components_for_abstract_interp(
     managers = get_managers(parts)
     all_vars: dict[str, StackEffect] = {}
     for mgr in managers:
-        for name, eff in mgr.collect_vars().items():
+        for stackitem in mgr.peeks:
+            eff = stackitem.effect
+            name = eff.name
+            if name == UNUSED:
+                continue
             if name in all_vars:
                 # TODO: Turn this into an error -- variable conflict
                 assert all_vars[name] == eff, (
@@ -532,6 +531,7 @@ def _write_components_for_abstract_interp(
 
     # Declare all variables
     for name, eff in all_vars.items():
+        eff.type = "_Py_UOpsSymbolicExpression *"
         out.declare(eff, None)
 
     for mgr in managers:
