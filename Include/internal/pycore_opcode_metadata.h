@@ -2170,3 +2170,31 @@ const uint8_t _PyOpcode_Deopt[256] = {
     case 255: \
         ;
 
+
+extern bool _PyOpcode_ispure(int opcode);
+#ifdef NEED_OPCODE_METADATA
+bool _PyOpcode_ispure(int opcode)  {
+    switch(opcode) {
+        case LOAD_FAST_CHECK:
+        case LOAD_FAST:
+        case LOAD_FAST_AND_CLEAR:
+        case LOAD_CONST:
+        case STORE_FAST:
+        case POP_TOP:
+        case PUSH_NULL:
+        case END_SEND:
+        case _BINARY_OP_MULTIPLY_INT:
+        case _BINARY_OP_ADD_INT:
+        case _BINARY_OP_SUBTRACT_INT:
+        case _BINARY_OP_MULTIPLY_FLOAT:
+        case _BINARY_OP_ADD_FLOAT:
+        case _BINARY_OP_SUBTRACT_FLOAT:
+        case COPY:
+        case SWAP:
+            return true;
+        default:
+            return false;
+    }
+}
+#endif // NEED_OPCODE_METADATA
+

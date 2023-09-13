@@ -82,6 +82,10 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
     "STORE_FAST",
     "STORE_FAST_MAYBE_NULL",
     "COPY",
+    "POP_TOP",
+    "PUSH_NULL",
+    "END_SEND",
+    "SWAP",
 }
 
 arg_parser = argparse.ArgumentParser(
@@ -226,6 +230,32 @@ class Generator(Analyzer):
 
         write_function("popped", popped_data)
         write_function("pushed", pushed_data)
+        self.out.emit("")
+
+    def write_tier2_metadata(self) -> None:
+
+        instrpure_data = []
+        for thing in self.everything:
+            if not isinstance(thing, parsing.InstDef):
+                continue
+            instr = self.instrs[thing.name]
+            ispure = instr.inst.pure
+            if ispure:
+                instrpure_data.append(instr)
+
+        with self.metadata_item(
+            # TODO: If more metadata is added, replace bool with a struct
+            f"bool _PyOpcode_ispure(int opcode)",
+            "",
+            ""
+        ):
+            with self.out.block("switch(opcode)"):
+                for instr in instrpure_data:
+                    self.out.emit(f"case {instr.name}:")
+                self.out.emit("    return true;")
+                self.out.emit("default:")
+                self.out.emit("    return false;")
+
         self.out.emit("")
 
     def from_source_files(self) -> str:
@@ -597,6 +627,8 @@ class Generator(Analyzer):
                         self.out.emit(f"case {op}: \\")
                 self.out.emit("    ;\n")
 
+            self.write_tier2_metadata()
+
         with open(pymetadata_filename, "w") as f:
             # Create formatter
             self.out = Formatter(f, 0, comment="#")
@@ -871,14 +903,14 @@ class Generator(Analyzer):
                         pass
                     case parsing.InstDef():
                         instr = AbstractInstruction(self.instrs[thing.name].inst)
-                        if (
-                            instr.is_viable_uop()
-                            and instr.name not in SPECIALLY_HANDLED_ABSTRACT_INSTR
-                        ):
-                            self.out.emit("")
-                            with self.out.block(f"case {thing.name}:"):
-                                instr.write(self.out, tier=TIER_TWO)
-                                self.out.emit("break;")
+                        if (not instr.is_viable_uop()
+                            or not instr.inst.pure
+                            or thing.name in SPECIALLY_HANDLED_ABSTRACT_INSTR):
+                            continue
+                        self.out.emit("")
+                        with self.out.block(f"case {thing.name}:"):
+                            instr.write(self.out, tier=TIER_TWO)
+                            self.out.emit("break;")
                     case parsing.Macro():
                         pass
                     case parsing.Pseudo():
