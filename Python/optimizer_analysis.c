@@ -494,16 +494,31 @@ uop_abstract_interpret_single_inst(
             break;
         }
         case POP_TOP: {
-
+            STACK_SHRINK(1);
             break;
         }
         case PUSH_NULL: {
-
+            _Py_UOpsSymbolicExpression *res;
+            res = NULL;
+            STACK_GROW(1);
+            stack_pointer[-1] = res;
             break;
         }
-        case END_SEND: break;
+        case END_SEND: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            STACK_SHRINK(1);
+            stack_pointer[-1] = value;
+            break;
+        }
         case SWAP: {
-
+            _Py_UOpsSymbolicExpression *top;
+            _Py_UOpsSymbolicExpression *bottom;
+            top = stack_pointer[-1];
+            bottom = stack_pointer[-2 - (oparg-2)];
+            assert(oparg >= 2);
+            stack_pointer[-2 - (oparg-2)] = top;
+            stack_pointer[-1] = bottom;
             break;
         }
 
