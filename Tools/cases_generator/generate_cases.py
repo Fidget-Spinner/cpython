@@ -68,7 +68,7 @@ OPARG_SIZES = {
     "OPARG_CACHE_4": 4,
     "OPARG_TOP": 5,
     "OPARG_BOTTOM": 6,
-    "OPARG_SAVE_IP": 7,
+    "OPARG_SET_IP": 7,
 }
 
 INSTR_FMT_PREFIX = "INSTR_FMT_"
@@ -152,6 +152,8 @@ class Generator(Analyzer):
             return str(n_effect)
 
         instr: AnyInstruction | None
+        popped: str | None = None
+        pushed: str | None = None
         match thing:
             case parsing.InstDef():
                 if thing.kind != "op" or self.instrs[thing.name].is_viable_uop():
@@ -169,7 +171,7 @@ class Generator(Analyzer):
                 instr = self.pseudo_instrs[thing.name]
                 # Calculate stack effect, and check that it's the the same
                 # for all targets.
-                for idx, target in enumerate(self.pseudos[thing.name].targets):
+                for target in self.pseudos[thing.name].targets:
                     target_instr = self.instrs.get(target)
                     # Currently target is always an instr. This could change
                     # in the future, e.g., if we have a pseudo targetting a
@@ -177,13 +179,14 @@ class Generator(Analyzer):
                     assert target_instr
                     target_popped = effect_str(target_instr.input_effects)
                     target_pushed = effect_str(target_instr.output_effects)
-                    if idx == 0:
+                    if popped is None:
                         popped, pushed = target_popped, target_pushed
                     else:
                         assert popped == target_popped
                         assert pushed == target_pushed
             case _:
                 assert_never(thing)
+        assert popped is not None and pushed is not None
         return instr, popped, pushed
 
     @contextlib.contextmanager
@@ -233,7 +236,7 @@ class Generator(Analyzer):
             except ValueError:
                 # May happen on Windows if root and temp on different volumes
                 pass
-            filenames.append(filename)
+            filenames.append(filename.replace(os.path.sep, posixpath.sep))
         paths = f"\n{self.out.comment}   ".join(filenames)
         return f"{self.out.comment} from:\n{self.out.comment}   {paths}\n"
 
@@ -248,12 +251,18 @@ class Generator(Analyzer):
         ops: list[tuple[bool, str]] = []  # (has_arg, name) for each opcode
         instrumented_ops: list[str] = []
 
+        specialized_ops = set()
+        for name, family in self.families.items():
+            specialized_ops.update(family.members)
+
         for instr in itertools.chain(
             [instr for instr in self.instrs.values() if instr.kind != "op"],
             self.macro_instrs.values(),
         ):
             assert isinstance(instr, (Instruction, MacroInstruction, PseudoInstruction))
             name = instr.name
+            if name in specialized_ops:
+                continue
             if name.startswith("INSTRUMENTED_"):
                 instrumented_ops.append(name)
             else:
@@ -275,7 +284,7 @@ class Generator(Analyzer):
 
         def map_op(op: int, name: str) -> None:
             assert op < len(opname)
-            assert opname[op] is None
+            assert opname[op] is None, (op, name)
             assert name not in opmap
             opname[op] = name
             opmap[name] = op
@@ -287,25 +296,31 @@ class Generator(Analyzer):
         # This helps catch cases where we attempt to execute a cache.
         map_op(17, "RESERVED")
 
-        # 166 is RESUME - it is hard coded as such in Tools/build/deepfreeze.py
-        map_op(166, "RESUME")
+        # 149 is RESUME - it is hard coded as such in Tools/build/deepfreeze.py
+        map_op(149, "RESUME")
+
+        # Specialized ops appear in their own section
+        # Instrumented opcodes are at the end of the valid range
+        min_internal = 150
+        min_instrumented = 254 - (len(instrumented_ops) - 1)
+        assert min_internal + len(specialized_ops) < min_instrumented
 
         next_opcode = 1
-
         for has_arg, name in sorted(ops):
             if name in opmap:
                 continue  # an anchored name, like CACHE
-            while opname[next_opcode] is not None:
-                next_opcode += 1
-            assert next_opcode < 255
             map_op(next_opcode, name)
-
             if has_arg and "HAVE_ARGUMENT" not in markers:
                 markers["HAVE_ARGUMENT"] = next_opcode
 
-        # Instrumented opcodes are at the end of the valid range
-        min_instrumented = 254 - (len(instrumented_ops) - 1)
-        assert next_opcode <= min_instrumented
+            while opname[next_opcode] is not None:
+                next_opcode += 1
+
+        assert next_opcode < min_internal
+
+        for i, op in enumerate(sorted(specialized_ops)):
+            map_op(min_internal + i, op)
+
         markers["MIN_INSTRUMENTED_OPCODE"] = min_instrumented
         for i, op in enumerate(instrumented_ops):
             map_op(min_instrumented + i, op)
@@ -372,6 +387,7 @@ class Generator(Analyzer):
         # Compute the set of all instruction formats.
         all_formats: set[str] = set()
         for thing in self.everything:
+            format: str | None = None
             match thing:
                 case OverriddenInstructionPlaceHolder():
                     continue
@@ -380,15 +396,16 @@ class Generator(Analyzer):
                 case parsing.Macro():
                     format = self.macro_instrs[thing.name].instr_fmt
                 case parsing.Pseudo():
-                    for idx, target in enumerate(self.pseudos[thing.name].targets):
+                    for target in self.pseudos[thing.name].targets:
                         target_instr = self.instrs.get(target)
                         assert target_instr
-                        if idx == 0:
+                        if format is None:
                             format = target_instr.instr_fmt
                         else:
                             assert format == target_instr.instr_fmt
                 case _:
                     assert_never(thing)
+            assert format is not None
             all_formats.add(format)
 
         # Turn it into a sorted list of enum values.
@@ -440,7 +457,7 @@ class Generator(Analyzer):
             with self.out.block("struct opcode_macro_expansion", ";"):
                 self.out.emit("int nuops;")
                 self.out.emit(
-                    "struct { int16_t uop; int8_t size; int8_t offset; } uops[8];"
+                    "struct { int16_t uop; int8_t size; int8_t offset; } uops[12];"
                 )
             self.out.emit("")
 
@@ -475,8 +492,7 @@ class Generator(Analyzer):
                         case OverriddenInstructionPlaceHolder():
                             continue
                         case parsing.InstDef():
-                            if thing.kind != "op":
-                                self.write_metadata_for_inst(self.instrs[thing.name])
+                            self.write_metadata_for_inst(self.instrs[thing.name])
                         case parsing.Macro():
                             self.write_metadata_for_macro(self.macro_instrs[thing.name])
                         case parsing.Pseudo():
@@ -535,6 +551,28 @@ class Generator(Analyzer):
             ):
                 for name in self.opmap:
                     self.out.emit(f'[{name}] = "{name}",')
+
+            with self.metadata_item(
+                f"const uint8_t _PyOpcode_Caches[256]",
+                "=",
+                ";",
+            ):
+                family_member_names: set[str] = set()
+                for family in self.families.values():
+                    family_member_names.update(family.members)
+                for instr in self.instrs.values():
+                    if (
+                        instr.name not in family_member_names
+                        and instr.cache_offset > 0
+                        and instr.kind == "inst"
+                        and not instr.name.startswith("INSTRUMENTED_")
+                    ):
+                        self.out.emit(f"[{instr.name}] = {instr.cache_offset},")
+                for mac in self.macro_instrs.values():
+                    if mac.name not in family_member_names and mac.cache_offset > 0:
+                        self.out.emit(f"[{mac.name}] = {mac.cache_offset},")
+                # Irregular case:
+                self.out.emit('[JUMP_BACKWARD] = 1,')
 
             deoptcodes = {}
             for name, op in self.opmap.items():
@@ -628,11 +666,11 @@ class Generator(Analyzer):
             seen.add(name)
 
         # These two are first by convention
-        add("EXIT_TRACE")
-        add("SAVE_IP")
+        add("_EXIT_TRACE")
+        add("_SET_IP")
 
         for instr in self.instrs.values():
-            if instr.kind == "op" and instr.is_viable_uop():
+            if instr.kind == "op":
                 add(instr.name)
 
     def write_macro_expansions(
@@ -657,8 +695,8 @@ class Generator(Analyzer):
                     )
                     return
                 if not part.active_caches:
-                    if part.instr.name == "SAVE_IP":
-                        size, offset = OPARG_SIZES["OPARG_SAVE_IP"], cache_offset
+                    if part.instr.name == "_SET_IP":
+                        size, offset = OPARG_SIZES["OPARG_SET_IP"], cache_offset
                     else:
                         size, offset = OPARG_SIZES["OPARG_FULL"], 0
                 else:

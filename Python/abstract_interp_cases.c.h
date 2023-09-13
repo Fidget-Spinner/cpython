@@ -7,7 +7,7 @@
             break;
         }
 
-        case RESUME: {
+        case RESUME_CHECK: {
             break;
         }
 
@@ -560,7 +560,7 @@
             break;
         }
 
-        case _LOAD_LOCALS: {
+        case LOAD_LOCALS: {
             PyObject *locals;
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 0 );
@@ -568,11 +568,19 @@
             break;
         }
 
-        case _LOAD_FROM_DICT_OR_GLOBALS: {
+        case LOAD_FROM_DICT_OR_GLOBALS: {
             PyObject *mod_or_class_dict;
             PyObject *v;
             mod_or_class_dict = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , mod_or_class_dict);
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_NAME: {
+            PyObject *v;
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 0 );
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -955,7 +963,7 @@
             break;
         }
 
-        case IS_NONE: {
+        case _IS_NONE: {
             PyObject *value;
             PyObject *b;
             value = stack_pointer[-1];
@@ -1159,6 +1167,28 @@
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 1 , new_exc);
             PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
+            PyObject *null;
+            PyObject *callable;
+            null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , unused, null, callable);
+            PEEK(-(-2 - oparg)) = __sym_temp;
+            PEEK(-(-1 - oparg)) = __sym_temp;
+            break;
+        }
+
+        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+            PyObject *callable;
+            PyObject *func;
+            PyObject *self;
+            callable = stack_pointer[-2 - oparg];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , unused, unused, callable);
+            PEEK(-(-2 - oparg)) = __sym_temp;
+            PEEK(-(-1 - oparg)) = __sym_temp;
             break;
         }
 
@@ -1468,23 +1498,23 @@
             break;
         }
 
-        case JUMP_TO_TOP: {
+        case _JUMP_TO_TOP: {
             break;
         }
 
-        case SAVE_IP: {
+        case _SET_IP: {
             break;
         }
 
-        case SAVE_CURRENT_IP: {
+        case _SAVE_CURRENT_IP: {
             break;
         }
 
-        case EXIT_TRACE: {
+        case _EXIT_TRACE: {
             break;
         }
 
-        case INSERT: {
+        case _INSERT: {
             PyObject *top;
             top = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , top, unused);
