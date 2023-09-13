@@ -865,7 +865,7 @@ class Generator(Analyzer):
                         pass
                     case parsing.InstDef():
                         instr = AbstractInstruction(self.instrs[thing.name].inst)
-                        if (not instr.is_viable_uop() 
+                        if (not instr.is_viable_uop()
                             or not instr.inst.pure
                             or thing.name in SPECIALLY_HANDLED_ABSTRACT_INSTR):
                             continue

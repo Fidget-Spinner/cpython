@@ -193,7 +193,7 @@ class Parser(PLexer):
                     if self.expect(lx.RPAREN):
                         if (tkn := self.peek()) and tkn.kind == lx.LBRACE:
                             return InstHeader(
-                                override, register, pure, 
+                                override, register, pure,
                                 kind, name, inp, outp)
         return None
 
