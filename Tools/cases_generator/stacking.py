@@ -534,7 +534,11 @@ def _write_components_for_abstract_interp(
 
     # Declare all variables
     for name, eff in all_vars.items():
+        # Temporarily set to symbolic expr
+        prev = eff.type
+        eff.type = "_Py_UOpsSymbolicExpression *"
         out.declare(eff, None)
+        eff.type = prev
 
     for mgr in managers:
         for peek in mgr.peeks:

@@ -4,8 +4,8 @@
 // Do not edit!
 
         case UNARY_NOT: {
-            PyObject *value;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *res;
             value = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , value, res);
             PEEK(-(-1)) = __sym_temp;
@@ -13,9 +13,9 @@
         }
 
         case _BINARY_OP_MULTIPLY_INT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
@@ -25,9 +25,9 @@
         }
 
         case _BINARY_OP_ADD_INT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
@@ -37,9 +37,9 @@
         }
 
         case _BINARY_OP_SUBTRACT_INT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
@@ -49,9 +49,9 @@
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
@@ -61,9 +61,9 @@
         }
 
         case _BINARY_OP_ADD_FLOAT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
@@ -73,9 +73,9 @@
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
@@ -85,9 +85,9 @@
         }
 
         case _BINARY_OP_ADD_UNICODE: {
-            PyObject *right;
-            PyObject *left;
-            PyObject *res;
+            _Py_UOpsSymbolicExpression *right;
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
