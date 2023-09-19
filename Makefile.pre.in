@@ -1887,7 +1887,7 @@ buildbottest: all
 		-@if which pybuildbot.identify >/dev/null 2>&1; then \
 			pybuildbot.identify "CC='$(CC)'" "CXX='$(CXX)'"; \
 		fi
-		$(TESTRUNNER) -j 1 -u all -W --slowest --fail-env-changed --timeout=$(TESTTIMEOUT) $(TESTOPTS)
+		$(TESTRUNNER) -j 1 -u all -W --slowest --fail-env-changed --fail-rerun --timeout=$(TESTTIMEOUT) $(TESTOPTS)
 
 # Like testall, but run Python tests with HOSTRUNNER directly.
 .PHONY: hostrunnertest
@@ -2141,7 +2141,8 @@ LIBSUBDIRS=	asyncio \
 TESTSUBDIRS=	idlelib/idle_test \
 		test \
 		test/audiodata \
-		test/capath \
+		test/certdata \
+		test/certdata/capath \
 		test/cjkencodings \
 		test/crashers \
 		test/data \
@@ -2160,6 +2161,7 @@ TESTSUBDIRS=	idlelib/idle_test \
 		test/test_dataclasses \
 		test/test_email \
 		test/test_email/data \
+		test/test_future_stmt \
 		test/test_import \
 		test/test_import/data \
 		test/test_import/data/circular_imports \
