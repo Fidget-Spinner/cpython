@@ -2183,12 +2183,14 @@ bool _PyOpcode_ispure(int opcode)  {
         case POP_TOP:
         case PUSH_NULL:
         case END_SEND:
+        case UNARY_NOT:
         case _BINARY_OP_MULTIPLY_INT:
         case _BINARY_OP_ADD_INT:
         case _BINARY_OP_SUBTRACT_INT:
         case _BINARY_OP_MULTIPLY_FLOAT:
         case _BINARY_OP_ADD_FLOAT:
         case _BINARY_OP_SUBTRACT_FLOAT:
+        case _BINARY_OP_ADD_UNICODE:
         case COPY:
         case SWAP:
             return true;

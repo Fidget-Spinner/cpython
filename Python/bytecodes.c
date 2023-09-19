@@ -294,7 +294,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        inst(UNARY_NOT, (value -- res)) {
+        pure inst(UNARY_NOT, (value -- res)) {
             assert(PyBool_Check(value));
             res = Py_IsFalse(value) ? Py_True : Py_False;
         }
@@ -474,7 +474,7 @@ dummy_func(
             DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP);
         }
 
-        op(_BINARY_OP_ADD_UNICODE, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_UNICODE, (unused/1, left, right -- res)) {
             STAT_INC(BINARY_OP, hit);
             res = PyUnicode_Concat(left, right);
             _Py_DECREF_SPECIALIZED(left, _PyUnicode_ExactDealloc);

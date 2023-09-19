@@ -3,6 +3,15 @@
 //   Python/bytecodes.c
 // Do not edit!
 
+        case UNARY_NOT: {
+            PyObject *value;
+            PyObject *res;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 2 , value, res);
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_INT: {
             PyObject *right;
             PyObject *left;
@@ -64,6 +73,18 @@
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
+            PyObject *right;
+            PyObject *left;
+            PyObject *res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(false, 3 , right, left, res);
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _BINARY_OP_ADD_UNICODE: {
             PyObject *right;
             PyObject *left;
             PyObject *res;
