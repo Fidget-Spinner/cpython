@@ -56,13 +56,13 @@ sym_hash(PyObject *o)
         return self->cached_hash;
     }
     // TODO a faster hash function that doesn't allocate?
-    PyObject *temp = _PyTuple_FromArray((PyObject **)self->operands, Py_SIZE(o));
+    PyObject *temp = PyTuple_New(Py_SIZE(o) + 2);
     if (temp == NULL) {
         return -1;
     }
-    int res = _PyTuple_Resize(&temp, Py_SIZE(o) + 2);
-    if (res < 0) {
-        return -1;
+    Py_ssize_t len = Py_SIZE(o);
+    for (Py_ssize_t i = 0; i < len; i++) {
+        PyTuple_SET_ITEM(temp, i, Py_NewRef(self->operands[i]));
     }
     PyObject *opcode = PyLong_FromLong(self->opcode);
     if (opcode == NULL) {
@@ -253,6 +253,7 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsAbstractStore *store,
 static _Py_UOpsSymbolicExpression *
 check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
 {
+    assert(ctx->sym_exprs_to_sym_exprs);
     // Check if this sym expr already exists
     PyObject *res = PyDict_GetItemWithError(
         (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
@@ -275,6 +276,7 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
         return self;
     }
     // There's an entry. Reuse that instead
+    Py_DECREF(self);
     return (_Py_UOpsSymbolicExpression *)res;
 }
 
@@ -282,7 +284,7 @@ static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
                                bool is_terminal, int opcode, int oparg, int num_subexprs, ...)
 {
-    _Py_UOpsSymbolicExpression *self = PyObject_GC_NewVar(_Py_UOpsSymbolicExpression,
+    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
                                                           num_subexprs);
     if (self == NULL) {
@@ -298,6 +300,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->opcode = opcode;
     self->oparg = oparg;
 
+    assert(Py_SIZE(self) >= num_subexprs);
     // Setup
     va_list curr;
 
@@ -315,8 +318,6 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
     va_end(curr);
 
-    assert(ctx->sym_exprs_to_sym_exprs);
-
     return check_uops_already_exists(ctx, self);
 }
 
@@ -325,7 +326,7 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
                                bool is_terminal, int opcode, int oparg, int num_subexprs,
                                _Py_UOpsSymbolicExpression **arr_start)
 {
-    _Py_UOpsSymbolicExpression *self = PyObject_GC_NewVar(_Py_UOpsSymbolicExpression,
+    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
                                                           num_subexprs);
     if (self == NULL) {
@@ -347,8 +348,6 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
         self->operands[i]->usage_count++;
     }
 
-
-    assert(ctx->sym_exprs_to_sym_exprs);
 
     return check_uops_already_exists(ctx, self);
 }
@@ -784,7 +783,8 @@ uop_abstract_interpret(
             }
             // Transfer the reference over (note: No incref!)
             temp->next = store;
-            ctx->curr_store = store;
+            ctx->curr_store = temp;
+            store = temp;
         }
 
         DPRINTF(3, "starting impure region\n")
@@ -816,7 +816,8 @@ uop_abstract_interpret(
                 }
                 // Transfer the reference over (note: No incref!)
                 temp->next = store;
-                ctx->curr_store = store;
+                ctx->curr_store = temp;
+                store = temp;
             };
         }
 
@@ -843,12 +844,10 @@ uop_abstract_interpret(
 
     Py_SETREF(co->co_consts, co_const_final);
     Py_XDECREF(sym_co_const_copy);
-    Py_DECREF(first_store);
     return buffer_trace_len;
 
 error:
     Py_XDECREF(sym_co_const_copy);
-    Py_XDECREF(first_store);
     Py_DECREF(ctx);
     if(PyErr_Occurred()) {
         PyErr_Clear();
@@ -873,10 +872,12 @@ _Py_uop_analyze_and_optimize(
         goto error;
     }
 
+    memcpy(temp_writebuffer, trace,  sizeof(_PyUOpInstruction) * original_trace_len);
+
     int max_jump_id = 0;
 
     // Pass: Jump target calculation and setup (preparation for relocation)
-    jump_id_to_instruction = number_jumps_and_targets(trace, trace_len, &max_jump_id);
+    jump_id_to_instruction = number_jumps_and_targets(temp_writebuffer, trace_len, &max_jump_id);
     if (jump_id_to_instruction == NULL) {
         goto error;
     }
