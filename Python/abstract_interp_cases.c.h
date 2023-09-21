@@ -6,7 +6,8 @@
         case UNARY_NOT: {
             _Py_UOpsSymbolicExpression *value;
             value = stack_pointer[-1];
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 1 , value);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -17,7 +18,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -28,7 +30,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -39,7 +42,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -50,7 +54,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -61,7 +66,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -72,7 +78,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -83,7 +90,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             STACK_SHRINK(1);
-            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, false, 2 , left, right);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
         }

@@ -560,7 +560,10 @@ def _write_components_for_abstract_interp(
         if mgr.pokes:
             out.emit(
                 f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                f"ctx, opcode, false, {len(all_input_vars)} {var});"
+                f"ctx, opcode, oparg, false, {len(all_input_vars)} {var});"
+            )
+            out.emit(
+                "if (__sym_temp == NULL) goto error;"
             )
         for poke in mgr.pokes:
             if not poke.effect.size and poke.effect.name:

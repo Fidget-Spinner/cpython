@@ -31,6 +31,7 @@ typedef struct _Py_UOpsSymbolicExpression {
     // Note: separated from refcnt so we don't have to deal with counting
     int usage_count;
     int opcode;
+    int oparg;
     PyObject *const_val;
     Py_hash_t cached_hash;
     char is_terminal;
@@ -80,10 +81,23 @@ sym_hash(PyObject *o)
         return self->cached_hash;
     }
     // TODO a faster hash function that doesn't allocate?
-    PyObject *temp = _PyTuple_FromArray(self->operands, Py_SIZE(o));
+    PyObject *temp = _PyTuple_FromArray(self->operands, Py_SIZE(o) + 2);
     if (temp == NULL) {
         return -1;
     }
+    PyObject *opcode = PyLong_FromLong(self->opcode);
+    if (opcode == NULL) {
+        Py_DECREF(temp);
+        return -1;
+    }
+    PyObject *oparg = PyLong_FromLong(self->oparg);
+    if (oparg == NULL) {
+        Py_DECREF(temp);
+        Py_DECREF(opcode);
+        return -1;
+    }
+    PyTuple_SET_ITEM(temp, Py_SIZE(o), opcode);
+    PyTuple_SET_ITEM(temp, Py_SIZE(o) + 1, oparg);
     Py_hash_t hash = PyObject_Hash(temp);
     Py_DECREF(temp);
     return hash;
@@ -98,6 +112,23 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     }
     _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o1;
     _Py_UOpsSymbolicExpression *other = (_Py_UOpsSymbolicExpression *)o2;
+    if (self->is_terminal != other->is_terminal) {
+        Py_RETURN_FALSE;
+    }
+
+    // Terminal ops are kinda like special sentinels.
+    // They are always considered unique, except for constant values
+    // which can be repeated
+    if (self->is_terminal && other->is_terminal) {
+        if (self->const_val && other->const_val) {
+            return PyObject_RichCompare(self->const_val, other->const_val, Py_EQ);
+        } else {
+            // Note: even if two LOAD_FAST have the same opcode and oparg,
+            // They are not the same because we are constructing a new terminal.
+            // All terminals except constants are unique.
+            Py_RETURN_FALSE;
+        }
+    }
     // Two symbolic expressions are the same iff
     // 1. Their opcodes are equal.
     // 2. Their constituent subexpressions are equal.
@@ -177,6 +208,8 @@ typedef struct _Py_UOpsAbstractInterpContext {
     PyListObject *sym_exprs;
     // Maps a sym_expr to itself, so we can do O(1) lookups of it later
     PyDictObject *sym_exprs_to_sym_exprs;
+    // Current ID to assign a new (non-duplicate) sym_expr
+    Py_ssize_t *sym_curr_id;
     _Py_UOpsSymbolicExpression *registers[REGISTERS_COUNT];
     // The following are abstract stack and locals.
     // points to one element after the abstract stack
@@ -238,6 +271,7 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsAbstractStore *store,
     self->locals = self->locals_with_stack;
     self->stack = self->locals_with_stack + locals_len;
     self->stack_pointer = self->stack + curr_stacklen;
+    self->sym_curr_id = 0;
 
     memcpy(self->locals, store->locals, sizeof(_Py_UOpsSymbolicExpression *) * locals_len);
 
@@ -250,7 +284,7 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsAbstractStore *store,
 
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
-                               bool is_terminal, int opcode, int num_subexprs, ...)
+                               bool is_terminal, int opcode, int oparg, int num_subexprs, ...)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_GC_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
@@ -266,6 +300,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->is_terminal = (char)is_terminal;
     self->const_val = NULL;
     self->opcode = opcode;
+    self->oparg = oparg;
 
     // Setup
     va_list curr;
@@ -280,13 +315,24 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     va_end(curr);
 
     // Check if this sym expr already exists
-    PyObject *res = PyDict_GetItemWithError((PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
+    PyObject *res = PyDict_GetItemWithError(
+        (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
     // No entry, return outselves.
     if (res == NULL) {
         if (PyErr_Occurred()) {
             Py_DECREF(self);
             return NULL;
         }
+        // If not, add it to our sym expression global book
+        int res = PyDict_SetItem((PyObject *)ctx->sym_exprs_to_sym_exprs,
+                                 (PyObject *)self, (PyObject *)self);
+        if (res < 0) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        // Assign an ID
+        self->idx = ctx->sym_curr_id;
+        ctx->sym_curr_id++;
         return self;
     }
     // There's an entry. Reuse that instead
@@ -295,15 +341,23 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
 
 static inline _Py_UOpsSymbolicExpression*
-sym_init_var(_Py_UOpsAbstractInterpContext *ctx)
+sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
 {
-    return _Py_UOpsSymbolicExpression_New(ctx, true, LOAD_FAST, 0);
+    return _Py_UOpsSymbolicExpression_New(ctx, true,
+                                          LOAD_FAST, locals_idx,
+                                          0);
 }
 
 static inline _Py_UOpsSymbolicExpression*
-sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val)
+sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx)
 {
-    _Py_UOpsSymbolicExpression *temp = _Py_UOpsSymbolicExpression_New(ctx, true, LOAD_CONST, 0);
+    _Py_UOpsSymbolicExpression *temp = _Py_UOpsSymbolicExpression_New(
+        ctx,
+        true,
+        LOAD_CONST,
+        const_idx,
+        0
+    );
     if (temp == NULL) {
         return NULL;
     }
@@ -329,7 +383,7 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx, int locals_len)
 
     // Initialize with the initial state of all local variables
     for (int i = 0; i < locals_len; i++) {
-        _Py_UOpsSymbolicExpression *local = sym_init_var(ctx);
+        _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
         if (local == NULL) {
             goto error;
         }
@@ -649,7 +703,7 @@ uop_abstract_interpret(
     }
     // Copy over the co_const tuple
     for (int x = 0; x < PyTuple_GET_SIZE(co->co_consts); x++) {
-        _Py_UOpsSymbolicExpression *temp = sym_init_const(ctx, (PyTuple_GET_ITEM(co->co_consts, x)));
+        _Py_UOpsSymbolicExpression *temp = sym_init_const(ctx, (PyTuple_GET_ITEM(co->co_consts, x)), x);
         if (temp == NULL) {
             goto error;
         }
