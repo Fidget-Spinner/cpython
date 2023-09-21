@@ -3,11 +3,168 @@
 //   Python/bytecodes.c
 // Do not edit!
 
+        case NOP: {
+            break;
+        }
+
+        case RESUME: {
+            break;
+        }
+
+        case RESUME_CHECK: {
+            break;
+        }
+
+        case INSTRUMENTED_RESUME: {
+            break;
+        }
+
+        case LOAD_FAST_LOAD_FAST: {
+            STACK_GROW(2);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case STORE_FAST_LOAD_FAST: {
+            _Py_UOpsSymbolicExpression *value1;
+            value1 = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value1);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case STORE_FAST_STORE_FAST: {
+            _Py_UOpsSymbolicExpression *value2;
+            _Py_UOpsSymbolicExpression *value1;
+            value1 = stack_pointer[-1];
+            value2 = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case INSTRUMENTED_END_FOR: {
+            _Py_UOpsSymbolicExpression *receiver;
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case INSTRUMENTED_END_SEND: {
+            _Py_UOpsSymbolicExpression *receiver;
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , receiver, value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case UNARY_NEGATIVE: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
         case UNARY_NOT: {
             _Py_UOpsSymbolicExpression *value;
             value = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
             if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL_BOOL: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL_INT: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL_LIST: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL_NONE: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL_STR: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case TO_BOOL_ALWAYS_TRUE: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case UNARY_INVERT: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _GUARD_BOTH_INT: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
             PEEK(-(-1)) = __sym_temp;
             break;
         }
@@ -48,6 +205,18 @@
             break;
         }
 
+        case _GUARD_BOTH_FLOAT: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_FLOAT: {
             _Py_UOpsSymbolicExpression *left;
             _Py_UOpsSymbolicExpression *right;
@@ -84,6 +253,18 @@
             break;
         }
 
+        case _GUARD_BOTH_UNICODE: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
         case _BINARY_OP_ADD_UNICODE: {
             _Py_UOpsSymbolicExpression *left;
             _Py_UOpsSymbolicExpression *right;
@@ -93,5 +274,1387 @@
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _BINARY_OP_INPLACE_ADD_UNICODE: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case BINARY_SUBSCR: {
+            _Py_UOpsSymbolicExpression *container;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , container, sub);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BINARY_SLICE: {
+            _Py_UOpsSymbolicExpression *container;
+            _Py_UOpsSymbolicExpression *start;
+            _Py_UOpsSymbolicExpression *stop;
+            stop = stack_pointer[-1];
+            start = stack_pointer[-2];
+            container = stack_pointer[-3];
+            STACK_SHRINK(2);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , container, start, stop);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case STORE_SLICE: {
+            _Py_UOpsSymbolicExpression *v;
+            _Py_UOpsSymbolicExpression *container;
+            _Py_UOpsSymbolicExpression *start;
+            _Py_UOpsSymbolicExpression *stop;
+            stop = stack_pointer[-1];
+            start = stack_pointer[-2];
+            container = stack_pointer[-3];
+            v = stack_pointer[-4];
+            STACK_SHRINK(4);
+            break;
+        }
+
+        case BINARY_SUBSCR_LIST_INT: {
+            _Py_UOpsSymbolicExpression *list;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            list = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , list, sub);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BINARY_SUBSCR_STR_INT: {
+            _Py_UOpsSymbolicExpression *str;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            str = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , str, sub);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BINARY_SUBSCR_TUPLE_INT: {
+            _Py_UOpsSymbolicExpression *tuple;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            tuple = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , tuple, sub);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BINARY_SUBSCR_DICT: {
+            _Py_UOpsSymbolicExpression *dict;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            dict = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , dict, sub);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BINARY_SUBSCR_GETITEM: {
+            _Py_UOpsSymbolicExpression *container;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , container, sub);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case STORE_SUBSCR: {
+            _Py_UOpsSymbolicExpression *v;
+            _Py_UOpsSymbolicExpression *container;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            v = stack_pointer[-3];
+            STACK_SHRINK(3);
+            break;
+        }
+
+        case STORE_SUBSCR_LIST_INT: {
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *list;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            list = stack_pointer[-2];
+            value = stack_pointer[-3];
+            STACK_SHRINK(3);
+            break;
+        }
+
+        case STORE_SUBSCR_DICT: {
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *dict;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            dict = stack_pointer[-2];
+            value = stack_pointer[-3];
+            STACK_SHRINK(3);
+            break;
+        }
+
+        case DELETE_SUBSCR: {
+            _Py_UOpsSymbolicExpression *container;
+            _Py_UOpsSymbolicExpression *sub;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case CALL_INTRINSIC_1: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case CALL_INTRINSIC_2: {
+            _Py_UOpsSymbolicExpression *value2;
+            _Py_UOpsSymbolicExpression *value1;
+            value1 = stack_pointer[-1];
+            value2 = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , value2, value1);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case INTERPRETER_EXIT: {
+            _Py_UOpsSymbolicExpression *retval;
+            retval = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _POP_FRAME: {
+            _Py_UOpsSymbolicExpression *retval;
+            retval = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case INSTRUMENTED_RETURN_VALUE: {
+            _Py_UOpsSymbolicExpression *retval;
+            retval = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case INSTRUMENTED_RETURN_CONST: {
+            break;
+        }
+
+        case GET_AITER: {
+            _Py_UOpsSymbolicExpression *obj;
+            obj = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , obj);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case GET_ANEXT: {
+            _Py_UOpsSymbolicExpression *aiter;
+            aiter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , aiter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case GET_AWAITABLE: {
+            _Py_UOpsSymbolicExpression *iterable;
+            iterable = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iterable);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case SEND: {
+            _Py_UOpsSymbolicExpression *receiver;
+            _Py_UOpsSymbolicExpression *v;
+            v = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , receiver, v);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case SEND_GEN: {
+            _Py_UOpsSymbolicExpression *receiver;
+            _Py_UOpsSymbolicExpression *v;
+            v = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , receiver, v);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case INSTRUMENTED_YIELD_VALUE: {
+            _Py_UOpsSymbolicExpression *retval;
+            retval = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , retval);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case YIELD_VALUE: {
+            _Py_UOpsSymbolicExpression *retval;
+            retval = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , retval);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case POP_EXCEPT: {
+            _Py_UOpsSymbolicExpression *exc_value;
+            exc_value = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case END_ASYNC_FOR: {
+            _Py_UOpsSymbolicExpression *awaitable;
+            _Py_UOpsSymbolicExpression *exc;
+            exc = stack_pointer[-1];
+            awaitable = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case CLEANUP_THROW: {
+            _Py_UOpsSymbolicExpression *sub_iter;
+            _Py_UOpsSymbolicExpression *last_sent_val;
+            _Py_UOpsSymbolicExpression *exc_value;
+            exc_value = stack_pointer[-1];
+            last_sent_val = stack_pointer[-2];
+            sub_iter = stack_pointer[-3];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , sub_iter, last_sent_val, exc_value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ASSERTION_ERROR: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_BUILD_CLASS: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case STORE_NAME: {
+            _Py_UOpsSymbolicExpression *v;
+            v = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case DELETE_NAME: {
+            break;
+        }
+
+        case UNPACK_SEQUENCE: {
+            _Py_UOpsSymbolicExpression *seq;
+            seq = stack_pointer[-1];
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , seq);
+            if (__sym_temp == NULL) goto error;
+            break;
+        }
+
+        case UNPACK_SEQUENCE_TWO_TUPLE: {
+            _Py_UOpsSymbolicExpression *seq;
+            seq = stack_pointer[-1];
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , seq);
+            if (__sym_temp == NULL) goto error;
+            break;
+        }
+
+        case UNPACK_SEQUENCE_TUPLE: {
+            _Py_UOpsSymbolicExpression *seq;
+            seq = stack_pointer[-1];
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , seq);
+            if (__sym_temp == NULL) goto error;
+            break;
+        }
+
+        case UNPACK_SEQUENCE_LIST: {
+            _Py_UOpsSymbolicExpression *seq;
+            seq = stack_pointer[-1];
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , seq);
+            if (__sym_temp == NULL) goto error;
+            break;
+        }
+
+        case UNPACK_EX: {
+            _Py_UOpsSymbolicExpression *seq;
+            seq = stack_pointer[-1];
+            STACK_GROW((oparg & 0xFF) + (oparg >> 8));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , seq);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg >> 8))) = __sym_temp;
+            break;
+        }
+
+        case STORE_ATTR: {
+            _Py_UOpsSymbolicExpression *v;
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            v = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case DELETE_ATTR: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case STORE_GLOBAL: {
+            _Py_UOpsSymbolicExpression *v;
+            v = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case DELETE_GLOBAL: {
+            break;
+        }
+
+        case LOAD_LOCALS: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_FROM_DICT_OR_GLOBALS: {
+            _Py_UOpsSymbolicExpression *mod_or_class_dict;
+            mod_or_class_dict = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , mod_or_class_dict);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_NAME: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_GLOBAL: {
+            STACK_GROW(1);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case _GUARD_GLOBALS_VERSION: {
+            break;
+        }
+
+        case _GUARD_BUILTINS_VERSION: {
+            break;
+        }
+
+        case _LOAD_GLOBAL_MODULE: {
+            STACK_GROW(1);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_GLOBAL_BUILTINS: {
+            STACK_GROW(1);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case DELETE_FAST: {
+            break;
+        }
+
+        case MAKE_CELL: {
+            break;
+        }
+
+        case DELETE_DEREF: {
+            break;
+        }
+
+        case LOAD_FROM_DICT_OR_DEREF: {
+            _Py_UOpsSymbolicExpression *class_dict;
+            class_dict = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , class_dict);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_DEREF: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case STORE_DEREF: {
+            _Py_UOpsSymbolicExpression *v;
+            v = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case COPY_FREE_VARS: {
+            break;
+        }
+
+        case SETUP_ANNOTATIONS: {
+            break;
+        }
+
+        case INSTRUMENTED_LOAD_SUPER_ATTR: {
+            STACK_SHRINK(2);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 0 );
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_SUPER_ATTR: {
+            _Py_UOpsSymbolicExpression *global_super;
+            _Py_UOpsSymbolicExpression *class;
+            _Py_UOpsSymbolicExpression *self;
+            self = stack_pointer[-1];
+            class = stack_pointer[-2];
+            global_super = stack_pointer[-3];
+            STACK_SHRINK(2);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , global_super, class, self);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_SUPER_ATTR_ATTR: {
+            _Py_UOpsSymbolicExpression *global_super;
+            _Py_UOpsSymbolicExpression *class;
+            _Py_UOpsSymbolicExpression *self;
+            self = stack_pointer[-1];
+            class = stack_pointer[-2];
+            global_super = stack_pointer[-3];
+            STACK_SHRINK(2);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , global_super, class, self);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            PEEK(-(0)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_SUPER_ATTR_METHOD: {
+            _Py_UOpsSymbolicExpression *global_super;
+            _Py_UOpsSymbolicExpression *class;
+            _Py_UOpsSymbolicExpression *self;
+            self = stack_pointer[-1];
+            class = stack_pointer[-2];
+            global_super = stack_pointer[-3];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , global_super, class, self);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case _GUARD_TYPE_VERSION: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_ATTR_INSTANCE_VALUE: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_MODULE: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_WITH_HINT: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_SLOT: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_CLASS: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(((oparg & 1) ? 1 : 0));
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = __sym_temp;
+            PEEK(-(-(oparg & 1 ? 1 : 0))) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_PROPERTY: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            PEEK(-(0)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            PEEK(-(0)) = __sym_temp;
+            break;
+        }
+
+        case STORE_ATTR_INSTANCE_VALUE: {
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case STORE_ATTR_WITH_HINT: {
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case STORE_ATTR_SLOT: {
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            STACK_SHRINK(2);
+            break;
+        }
+
+        case COMPARE_OP: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case COMPARE_OP_FLOAT: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case COMPARE_OP_INT: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case COMPARE_OP_STR: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case IS_OP: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case CONTAINS_OP: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case CHECK_EG_MATCH: {
+            _Py_UOpsSymbolicExpression *exc_value;
+            _Py_UOpsSymbolicExpression *match_type;
+            match_type = stack_pointer[-1];
+            exc_value = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , exc_value, match_type);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case CHECK_EXC_MATCH: {
+            _Py_UOpsSymbolicExpression *left;
+            _Py_UOpsSymbolicExpression *right;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , left, right);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case IMPORT_NAME: {
+            _Py_UOpsSymbolicExpression *level;
+            _Py_UOpsSymbolicExpression *fromlist;
+            fromlist = stack_pointer[-1];
+            level = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , level, fromlist);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case IMPORT_FROM: {
+            _Py_UOpsSymbolicExpression *from;
+            from = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , from);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case JUMP_FORWARD: {
+            break;
+        }
+
+        case JUMP_BACKWARD: {
+            break;
+        }
+
+        case ENTER_EXECUTOR: {
+            break;
+        }
+
+        case POP_JUMP_IF_FALSE: {
+            _Py_UOpsSymbolicExpression *cond;
+            cond = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case POP_JUMP_IF_TRUE: {
+            _Py_UOpsSymbolicExpression *cond;
+            cond = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _IS_NONE: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case JUMP_BACKWARD_NO_INTERRUPT: {
+            break;
+        }
+
+        case GET_LEN: {
+            _Py_UOpsSymbolicExpression *obj;
+            obj = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , obj);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case MATCH_CLASS: {
+            _Py_UOpsSymbolicExpression *subject;
+            _Py_UOpsSymbolicExpression *type;
+            _Py_UOpsSymbolicExpression *names;
+            names = stack_pointer[-1];
+            type = stack_pointer[-2];
+            subject = stack_pointer[-3];
+            STACK_SHRINK(2);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , subject, type, names);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case MATCH_MAPPING: {
+            _Py_UOpsSymbolicExpression *subject;
+            subject = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , subject);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case MATCH_SEQUENCE: {
+            _Py_UOpsSymbolicExpression *subject;
+            subject = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , subject);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case MATCH_KEYS: {
+            _Py_UOpsSymbolicExpression *subject;
+            _Py_UOpsSymbolicExpression *keys;
+            keys = stack_pointer[-1];
+            subject = stack_pointer[-2];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , subject, keys);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-3)) = __sym_temp;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case GET_ITER: {
+            _Py_UOpsSymbolicExpression *iterable;
+            iterable = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iterable);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case GET_YIELD_FROM_ITER: {
+            _Py_UOpsSymbolicExpression *iterable;
+            iterable = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iterable);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case FOR_ITER: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case INSTRUMENTED_FOR_ITER: {
+            break;
+        }
+
+        case _ITER_CHECK_LIST: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_JUMP_LIST: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _IS_ITER_EXHAUSTED_LIST: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_NEXT_LIST: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_CHECK_TUPLE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_JUMP_TUPLE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _IS_ITER_EXHAUSTED_TUPLE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_NEXT_TUPLE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_CHECK_RANGE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_JUMP_RANGE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _IS_ITER_EXHAUSTED_RANGE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _ITER_NEXT_RANGE: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case FOR_ITER_GEN: {
+            _Py_UOpsSymbolicExpression *iter;
+            iter = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , iter);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BEFORE_ASYNC_WITH: {
+            _Py_UOpsSymbolicExpression *mgr;
+            mgr = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , mgr);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BEFORE_WITH: {
+            _Py_UOpsSymbolicExpression *mgr;
+            mgr = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , mgr);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case WITH_EXCEPT_START: {
+            _Py_UOpsSymbolicExpression *exit_func;
+            _Py_UOpsSymbolicExpression *lasti;
+            _Py_UOpsSymbolicExpression *val;
+            val = stack_pointer[-1];
+            lasti = stack_pointer[-3];
+            exit_func = stack_pointer[-4];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , exit_func, lasti, val);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-5)) = __sym_temp;
+            PEEK(-(-4)) = __sym_temp;
+            PEEK(-(-3)) = __sym_temp;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case PUSH_EXC_INFO: {
+            _Py_UOpsSymbolicExpression *new_exc;
+            new_exc = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , new_exc);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_METHOD_WITH_VALUES: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_METHOD_NO_DICT: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            PEEK(-(0)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            PEEK(-(0)) = __sym_temp;
+            break;
+        }
+
+        case LOAD_ATTR_METHOD_LAZY_DICT: {
+            _Py_UOpsSymbolicExpression *owner;
+            owner = stack_pointer[-1];
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-2)) = __sym_temp;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case INSTRUMENTED_CALL: {
+            break;
+        }
+
+        case _CHECK_PEP_523: {
+            break;
+        }
+
+        case _PUSH_FRAME: {
+            _Py_UOpsSymbolicExpression *new_frame;
+            new_frame = (_PyInterpreterFrame *)stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , new_frame);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case EXIT_INIT_CHECK: {
+            _Py_UOpsSymbolicExpression *should_be_none;
+            should_be_none = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case INSTRUMENTED_CALL_KW: {
+            break;
+        }
+
+        case INSTRUMENTED_CALL_FUNCTION_EX: {
+            break;
+        }
+
+        case CALL_FUNCTION_EX: {
+            _Py_UOpsSymbolicExpression *func;
+            _Py_UOpsSymbolicExpression *callargs;
+            _Py_UOpsSymbolicExpression *kwargs = NULL;
+            if (oparg & 1) { kwargs = stack_pointer[-(oparg & 1 ? 1 : 0)]; }
+            callargs = stack_pointer[-1 - (oparg & 1 ? 1 : 0)];
+            func = stack_pointer[-3 - (oparg & 1 ? 1 : 0)];
+            STACK_SHRINK(((oparg & 1) ? 1 : 0));
+            STACK_SHRINK(2);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , func, callargs, kwargs);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case MAKE_FUNCTION: {
+            _Py_UOpsSymbolicExpression *codeobj;
+            codeobj = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , codeobj);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case SET_FUNCTION_ATTRIBUTE: {
+            _Py_UOpsSymbolicExpression *attr;
+            _Py_UOpsSymbolicExpression *func;
+            func = stack_pointer[-1];
+            attr = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , attr, func);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case RETURN_GENERATOR: {
+            break;
+        }
+
+        case BUILD_SLICE: {
+            _Py_UOpsSymbolicExpression *start;
+            _Py_UOpsSymbolicExpression *stop;
+            _Py_UOpsSymbolicExpression *step = NULL;
+            if (oparg == 3) { step = stack_pointer[-(oparg == 3 ? 1 : 0)]; }
+            stop = stack_pointer[-1 - (oparg == 3 ? 1 : 0)];
+            start = stack_pointer[-2 - (oparg == 3 ? 1 : 0)];
+            STACK_SHRINK(((oparg == 3) ? 1 : 0));
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 3 , start, stop, step);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case CONVERT_VALUE: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case FORMAT_SIMPLE: {
+            _Py_UOpsSymbolicExpression *value;
+            value = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 1 , value);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case FORMAT_WITH_SPEC: {
+            _Py_UOpsSymbolicExpression *value;
+            _Py_UOpsSymbolicExpression *fmt_spec;
+            fmt_spec = stack_pointer[-1];
+            value = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , value, fmt_spec);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case BINARY_OP: {
+            _Py_UOpsSymbolicExpression *lhs;
+            _Py_UOpsSymbolicExpression *rhs;
+            rhs = stack_pointer[-1];
+            lhs = stack_pointer[-2];
+            STACK_SHRINK(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, 2 , lhs, rhs);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case INSTRUMENTED_INSTRUCTION: {
+            break;
+        }
+
+        case INSTRUMENTED_JUMP_FORWARD: {
+            break;
+        }
+
+        case INSTRUMENTED_JUMP_BACKWARD: {
+            break;
+        }
+
+        case INSTRUMENTED_POP_JUMP_IF_TRUE: {
+            break;
+        }
+
+        case INSTRUMENTED_POP_JUMP_IF_FALSE: {
+            break;
+        }
+
+        case INSTRUMENTED_POP_JUMP_IF_NONE: {
+            break;
+        }
+
+        case INSTRUMENTED_POP_JUMP_IF_NOT_NONE: {
+            break;
+        }
+
+        case EXTENDED_ARG: {
+            break;
+        }
+
+        case CACHE: {
+            break;
+        }
+
+        case RESERVED: {
+            break;
+        }
+
+        case _POP_JUMP_IF_FALSE: {
+            _Py_UOpsSymbolicExpression *flag;
+            flag = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _POP_JUMP_IF_TRUE: {
+            _Py_UOpsSymbolicExpression *flag;
+            flag = stack_pointer[-1];
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _JUMP_TO_TOP: {
+            break;
+        }
+
+        case _SET_IP: {
+            break;
+        }
+
+        case _SAVE_CURRENT_IP: {
+            break;
+        }
+
+        case _EXIT_TRACE: {
             break;
         }

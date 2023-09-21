@@ -3895,7 +3895,7 @@ dummy_func(
             CHECK_EVAL_BREAKER();
         }
 
-        op(_SET_IP, (--)) {
+        pure op(_SET_IP, (--)) {
             frame->prev_instr = ip_offset + oparg;
         }
 

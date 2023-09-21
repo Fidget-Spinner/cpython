@@ -2308,14 +2308,14 @@ class TestUopsOptimization(unittest.TestCase):
                 x = 0
                 y = 1
                 z = 2
-                a = x + y + z + x + y + z + x
+                a = x + y + z
                 num += 1
             return a
 
         opt = _testinternalcapi.get_uop_optimizer()
         res = None
         with temporary_optimizer(opt):
-            res = testfunc(3)
+            res = testfunc(64)
 
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)

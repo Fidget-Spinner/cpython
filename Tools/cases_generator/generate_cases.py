@@ -846,9 +846,9 @@ class Generator(Analyzer):
             self.write_provenance_header()
             for instr in self.instrs.values():
                 instr = AbstractInstruction(instr.inst)
-                if (not instr.is_viable_uop()
-                    or not instr.inst.pure
-                    or instr.name in SPECIALLY_HANDLED_ABSTRACT_INSTR):
+                if (instr.name in SPECIALLY_HANDLED_ABSTRACT_INSTR
+                    # TODO handle variable stack opargs
+                    or any(eff.size for eff in instr.input_effects)):
                     continue
                 self.out.emit("")
                 with self.out.block(f"case {instr.name}:"):

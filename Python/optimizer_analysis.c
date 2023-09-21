@@ -38,38 +38,13 @@ typedef struct _Py_UOpsSymbolicExpression {
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
 
-static int
-sym_traverse(PyObject *o, visitproc visit, void *arg)
-{
-    _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o;
-    Py_ssize_t n = Py_SIZE(o);
-    for (Py_ssize_t i = 0; i < n; i++) {
-        Py_VISIT(self->operands[i]);
-    }
-    return 0;
-}
-
-static int
-sym_clear(PyObject *o)
-{
-    _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o;
-    Py_ssize_t n = Py_SIZE(o);
-    for (Py_ssize_t i = 0; i < n; i++) {
-        Py_CLEAR(self->operands[i]);
-    }
-    return 0;
-}
-
 static void
 sym_dealloc(PyObject *o)
 {
     _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o;
-    PyObject_GC_UnTrack(o);
-    Py_ssize_t size = Py_SIZE(o);
-    for (Py_ssize_t i = 0; i < size; i++) {
-        Py_XDECREF(self->operands[i]);
-    }
-    Py_XDECREF(self->const_val);
+    // Note: we are not decerfing the symbolic expressions because we only hold
+    // a borrowed ref to them. The symexprs are kept alive by the global table.
+    Py_CLEAR(self->const_val);
     Py_TYPE(o)->tp_free(o);
 }
 
@@ -81,8 +56,12 @@ sym_hash(PyObject *o)
         return self->cached_hash;
     }
     // TODO a faster hash function that doesn't allocate?
-    PyObject *temp = _PyTuple_FromArray(self->operands, Py_SIZE(o) + 2);
+    PyObject *temp = _PyTuple_FromArray((PyObject **)self->operands, Py_SIZE(o));
     if (temp == NULL) {
+        return -1;
+    }
+    int res = _PyTuple_Resize(&temp, Py_SIZE(o) + 2);
+    if (res < 0) {
         return -1;
     }
     PyObject *opcode = PyLong_FromLong(self->opcode);
@@ -100,6 +79,7 @@ sym_hash(PyObject *o)
     PyTuple_SET_ITEM(temp, Py_SIZE(o) + 1, oparg);
     Py_hash_t hash = PyObject_Hash(temp);
     Py_DECREF(temp);
+    self->cached_hash = hash;
     return hash;
 }
 
@@ -168,10 +148,8 @@ static PyTypeObject _Py_UOpsSymbolicExpression_Type = {
     .tp_hash = sym_hash,
     .tp_richcompare = sym_richcompare,
     .tp_dealloc = sym_dealloc,
-    .tp_free = PyObject_GC_Del,
-    .tp_traverse = sym_traverse,
-    .tp_clear = sym_clear,
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION | Py_TPFLAGS_HAVE_GC
+    .tp_free = PyObject_Free,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
 
@@ -180,8 +158,14 @@ typedef struct _Py_UOpsAbstractStore {
     PyObject_VAR_HEAD
     // The next store in the trace
     struct _Py_UOpsAbstractStore *next;
+
+    // The following are abstract stack and locals.
+    // points to one element after the abstract stack
+    _Py_UOpsSymbolicExpression **stack_pointer;
+    _Py_UOpsSymbolicExpression **stack;
+    _Py_UOpsSymbolicExpression **locals;
     _Py_UOpsSymbolicExpression *registers[REGISTERS_COUNT];
-    _Py_UOpsSymbolicExpression *locals[1];
+    _Py_UOpsSymbolicExpression *locals_with_stack[1];
 } _Py_UOpsAbstractStore;
 
 static void
@@ -189,6 +173,11 @@ abstractstore_dealloc(PyObject *o)
 {
     _Py_UOpsAbstractStore *self = (_Py_UOpsAbstractStore *)o;
     Py_XDECREF(self->next);
+    Py_ssize_t len = Py_SIZE(self);
+    // No need dealloc locals and stack. We only hold weak references to them.
+//    for (Py_ssize_t i = 0; i < len; i++) {
+//        Py_XDECREF(self->locals_with_stack[i]);
+//    }
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -205,44 +194,33 @@ static PyTypeObject _Py_UOpsAbstractStore_Type = {
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
     PyObject_VAR_HEAD
-    PyListObject *sym_exprs;
     // Maps a sym_expr to itself, so we can do O(1) lookups of it later
     PyDictObject *sym_exprs_to_sym_exprs;
     // Current ID to assign a new (non-duplicate) sym_expr
-    Py_ssize_t *sym_curr_id;
-    _Py_UOpsSymbolicExpression *registers[REGISTERS_COUNT];
-    // The following are abstract stack and locals.
-    // points to one element after the abstract stack
-    _Py_UOpsSymbolicExpression **stack_pointer;
+    Py_ssize_t sym_curr_id;
+
+    // Max stacklen
     int stack_len;
-    _Py_UOpsSymbolicExpression **stack;
     int locals_len;
-    _Py_UOpsSymbolicExpression **locals;
-
-    _Py_UOpsSymbolicExpression *locals_with_stack[1];
-
+    int curr_stacklen;
+    // Actual stack and locals are stored in the current abstract store
+    _Py_UOpsAbstractStore *curr_store;
 } _Py_UOpsAbstractInterpContext;
 
 static void
 abstractinterp_dealloc(PyObject *o)
 {
     _Py_UOpsAbstractInterpContext *self = (_Py_UOpsAbstractInterpContext *)o;
-    Py_DECREF(self->sym_exprs);
-    // Traverse all nodes and decref the root objects (if they are not NULL).
-    // Note: stack is after locals so this is safe
-    int total = Py_SIZE(self);
-    for (int i = 0; i < total; i++) {
-        Py_XDECREF(self->locals_with_stack[i]);
-    }
-    // No need to free stack because it is allocated together with the locals.
+    Py_DECREF(self->sym_exprs_to_sym_exprs);
+    Py_XDECREF(self->curr_store);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops abstract interpreter's context",
-    .tp_basicsize = sizeof(_Py_UOpsAbstractInterpContext) - sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
+    .tp_basicsize = sizeof(_Py_UOpsAbstractInterpContext),
+    .tp_itemsize = 0,
     .tp_dealloc = (destructor)abstractinterp_dealloc,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
@@ -259,27 +237,45 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsAbstractStore *store,
         return NULL;
     }
 
-    self->sym_exprs = PyList_New(10);
-    if (self->sym_exprs == NULL) {
+    self->sym_exprs_to_sym_exprs = (PyDictObject *)PyDict_New();
+    if (self->sym_exprs_to_sym_exprs == NULL) {
         Py_DECREF(self);
         return NULL;
     }
 
-    // Setup
     self->stack_len = stack_len;
     self->locals_len = locals_len;
-    self->locals = self->locals_with_stack;
-    self->stack = self->locals_with_stack + locals_len;
-    self->stack_pointer = self->stack + curr_stacklen;
-    self->sym_curr_id = 0;
+    self->curr_stacklen = curr_stacklen;
 
-    memcpy(self->locals, store->locals, sizeof(_Py_UOpsSymbolicExpression *) * locals_len);
-
-
-    for (int i = 0; i < stack_len; i++) {
-        self->stack[i] = NULL;
-    }
     return self;
+}
+
+static _Py_UOpsSymbolicExpression *
+check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
+{
+    // Check if this sym expr already exists
+    PyObject *res = PyDict_GetItemWithError(
+        (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
+    // No entry, return ourselves.
+    if (res == NULL) {
+        if (PyErr_Occurred()) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        // If not, add it to our sym expression global book
+        int res = PyDict_SetItem((PyObject *)ctx->sym_exprs_to_sym_exprs,
+                                 (PyObject *)self, (PyObject *)self);
+        if (res < 0) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        // Assign an ID
+        self->idx = ctx->sym_curr_id;
+        ctx->sym_curr_id++;
+        return self;
+    }
+    // There's an entry. Reuse that instead
+    return (_Py_UOpsSymbolicExpression *)res;
 }
 
 static _Py_UOpsSymbolicExpression*
@@ -308,35 +304,53 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     va_start(curr, num_subexprs);
 
     for (int i = 0; i < num_subexprs; i++) {
+        // Note: no incref here. symexprs are kept alive by the global expression
+        // table.
+        // We intentionally don't want to hold a reference to it so we don't
+        // need GC.
         self->operands[i] = va_arg(curr, _Py_UOpsSymbolicExpression *);
+        assert(self->operands[i]);
         self->operands[i]->usage_count++;
     }
 
     va_end(curr);
 
-    // Check if this sym expr already exists
-    PyObject *res = PyDict_GetItemWithError(
-        (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
-    // No entry, return outselves.
-    if (res == NULL) {
-        if (PyErr_Occurred()) {
-            Py_DECREF(self);
-            return NULL;
-        }
-        // If not, add it to our sym expression global book
-        int res = PyDict_SetItem((PyObject *)ctx->sym_exprs_to_sym_exprs,
-                                 (PyObject *)self, (PyObject *)self);
-        if (res < 0) {
-            Py_DECREF(self);
-            return NULL;
-        }
-        // Assign an ID
-        self->idx = ctx->sym_curr_id;
-        ctx->sym_curr_id++;
-        return self;
+    assert(ctx->sym_exprs_to_sym_exprs);
+
+    return check_uops_already_exists(ctx, self);
+}
+
+static _Py_UOpsSymbolicExpression*
+_Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
+                               bool is_terminal, int opcode, int oparg, int num_subexprs,
+                               _Py_UOpsSymbolicExpression **arr_start)
+{
+    _Py_UOpsSymbolicExpression *self = PyObject_GC_NewVar(_Py_UOpsSymbolicExpression,
+                                                          &_Py_UOpsSymbolicExpression_Type,
+                                                          num_subexprs);
+    if (self == NULL) {
+        return NULL;
     }
-    // There's an entry. Reuse that instead
-    return (_Py_UOpsSymbolicExpression *)res;
+
+
+    self->idx = -1;
+    self->cached_hash = -1;
+    self->usage_count = 0;
+    self->is_terminal = (char)is_terminal;
+    self->const_val = NULL;
+    self->opcode = opcode;
+    self->oparg = oparg;
+
+    // Setup
+    for (int i = 0; i < num_subexprs; i++) {
+        self->operands[i] = arr_start[i];
+        self->operands[i]->usage_count++;
+    }
+
+
+    assert(ctx->sym_exprs_to_sym_exprs);
+
+    return check_uops_already_exists(ctx, self);
 }
 
 
@@ -366,11 +380,11 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
 }
 
 static _Py_UOpsAbstractStore*
-_Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx, int locals_len)
+_Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx)
 {
     _Py_UOpsAbstractStore *self = PyObject_NewVar(_Py_UOpsAbstractStore,
                                                   &_Py_UOpsAbstractStore_Type,
-                                                  locals_len);
+                                                  ctx->locals_len + ctx->stack_len);
     if (self == NULL) {
         return NULL;
     }
@@ -381,8 +395,17 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx, int locals_len)
         self->registers[i] = NULL;
     }
 
+    // Setup
+    self->locals = self->locals_with_stack;
+    self->stack = self->locals_with_stack + ctx->locals_len;
+    self->stack_pointer = self->stack + ctx->curr_stacklen;
+
+    // Null out everything first
+    for (int i = 0; i < ctx->locals_len + ctx->stack_len; i++) {
+        self->locals_with_stack[i] = NULL;
+    }
     // Initialize with the initial state of all local variables
-    for (int i = 0; i < locals_len; i++) {
+    for (int i = 0; i < ctx->locals_len; i++) {
         _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
         if (local == NULL) {
             goto error;
@@ -390,12 +413,22 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx, int locals_len)
         self->locals[i] = local;
     }
 
+    // Initialize the stack as well
+    for (int i = 0; i < ctx->curr_stacklen; i++) {
+        _Py_UOpsSymbolicExpression *stackvar = sym_init_var(ctx, i);
+        if (stackvar == NULL) {
+            goto error;
+        }
+        self->stack[i] = stackvar;
+    }
+
     return self;
 
-    error:
+error:
     Py_DECREF(self);
     return NULL;
 }
+
 
 static inline bool
 op_is_jump(int opcode)
@@ -571,9 +604,9 @@ uop_abstract_interpret_single_inst(
     }
 #endif
 
-#define STACK_LEVEL()     ((int)(ctx->stack_pointer - ctx->stack))
+#define STACK_LEVEL()     ((int)(stack_pointer - ctx->curr_store->stack))
 #define STACK_SIZE()      (co->co_stacksize)
-#define BASIC_STACKADJ(n) (ctx->stack_pointer += n)
+#define BASIC_STACKADJ(n) (stack_pointer += n)
 
 #ifdef Py_DEBUG
 #define STACK_GROW(n)   do { \
@@ -590,13 +623,13 @@ uop_abstract_interpret_single_inst(
     #define STACK_GROW(n)          BASIC_STACKADJ(n)
 #define STACK_SHRINK(n)        BASIC_STACKADJ(-(n))
 #endif
-#define PEEK(idx)              (((ctx->stack_pointer)[-(idx)]))
-#define GETLOCAL(idx)          ((ctx->locals[idx]))
+#define PEEK(idx)              (((stack_pointer)[-(idx)]))
+#define GETLOCAL(idx)          ((ctx->curr_store->locals[idx]))
 
     int oparg = inst->oparg;
     int opcode = inst->opcode;
 
-    _Py_UOpsSymbolicExpression **stack_pointer = ctx->stack_pointer;
+    _Py_UOpsSymbolicExpression **stack_pointer = ctx->curr_store->stack_pointer;
 
     // Is a special jump/target ID, decode that
     if (opcode < 0 && opcode > max_jump_id) {
@@ -615,6 +648,7 @@ uop_abstract_interpret_single_inst(
         case LOAD_FAST_CHECK:
             STACK_GROW(1);
             PEEK(1) = GETLOCAL(oparg);
+            assert(PEEK(1));
             break;
         case LOAD_FAST_AND_CLEAR: {
             STACK_GROW(1);
@@ -625,7 +659,7 @@ uop_abstract_interpret_single_inst(
         case LOAD_CONST: {
             // TODO, keep a dictionary mapping constant values to their unique symbolic expression
             STACK_GROW(1);
-            PEEK(1) = (_Py_UOpsSymbolicExpression *)PyTuple_GET_ITEM(sym_co_const_copy, oparg);
+            PEEK(1) = (_Py_UOpsSymbolicExpression *)PyList_GET_ITEM(sym_co_const_copy, oparg);
             break;
         }
         case STORE_FAST:
@@ -648,8 +682,9 @@ uop_abstract_interpret_single_inst(
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
     }
-
-    ctx->stack_pointer = stack_pointer;
+    fprintf(stderr, "stack_pointer %p\n", stack_pointer);
+    ctx->curr_store->stack_pointer = stack_pointer;
+    ctx->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
 
 
@@ -684,17 +719,22 @@ uop_abstract_interpret(
     _Py_UOpsAbstractInterpContext *ctx = NULL;
     _Py_UOpsAbstractStore *store = NULL;
     _Py_UOpsAbstractStore *first_store = NULL;
-    store = first_store = _Py_UOpsAsbstractStore_New(ctx, co->co_nlocals);
-    if (store == NULL) {
-        goto error;
-    }
-    int buffer_trace_len = 0;
 
     ctx = _Py_UOpsAbstractInterpContext_New(
         store, co->co_stacksize, co->co_nlocals, curr_stacklen);
     if (ctx == NULL) {
         goto error;
     }
+
+    store = first_store = _Py_UOpsAsbstractStore_New(ctx);
+    if (store == NULL) {
+        goto error;
+    }
+    ctx->curr_store = store;
+    ctx->sym_curr_id = 0;
+
+    int buffer_trace_len = 0;
+
 
     // We will be adding more constants due to constant propagation.
     sym_co_const_copy = PyList_New(PyTuple_Size(co->co_consts));
@@ -714,6 +754,8 @@ uop_abstract_interpret(
     _PyUOpInstruction *end = trace + trace_len;
 
     while (curr < end) {
+
+        DPRINTF(3, "starting pure region\n")
 
         // Form pure regions
         while(_PyOpcode_ispure(curr->opcode)) {
@@ -736,14 +778,16 @@ uop_abstract_interpret(
         // End of a pure region, create a new abstract store
         if (curr->opcode != _EXIT_TRACE) {
             _Py_UOpsAbstractStore *temp = store;
-            store = _Py_UOpsAsbstractStore_New(ctx, co->co_nlocals);
+            store = _Py_UOpsAsbstractStore_New(ctx);
             if (store == NULL) {
                 goto error;
             }
             // Transfer the reference over (note: No incref!)
             temp->next = store;
+            ctx->curr_store = store;
         }
 
+        DPRINTF(3, "starting impure region\n")
         // Form impure region
         if(!_PyOpcode_ispure(curr->opcode)) {
 
@@ -766,12 +810,13 @@ uop_abstract_interpret(
             // stores each time, since that's quite overkill.
             if (curr->opcode != _EXIT_TRACE) {
                 _Py_UOpsAbstractStore *temp = store;
-                store = _Py_UOpsAsbstractStore_New(ctx, co->co_nlocals);
+                store = _Py_UOpsAsbstractStore_New(ctx);
                 if (store == NULL) {
                     goto error;
                 }
                 // Transfer the reference over (note: No incref!)
                 temp->next = store;
+                ctx->curr_store = store;
             };
         }
 

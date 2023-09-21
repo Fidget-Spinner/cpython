@@ -2218,6 +2218,7 @@ bool _PyOpcode_ispure(int opcode)  {
         case _BINARY_OP_ADD_UNICODE:
         case COPY:
         case SWAP:
+        case _SET_IP:
             return true;
         default:
             return false;
