@@ -126,7 +126,7 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
             // Note: even if two LOAD_FAST have the same opcode and oparg,
             // They are not the same because we are constructing a new terminal.
             // All terminals except constants are unique.
-            Py_RETURN_FALSE;
+            return self->idx == other->idx ? Py_True : Py_False;
         }
     }
     // Two symbolic expressions are the same iff
