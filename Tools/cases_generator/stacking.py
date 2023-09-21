@@ -514,15 +514,18 @@ def _write_components_for_abstract_interp(
     out: Formatter,
 ) -> None:
     managers = get_managers(parts)
-    all_vars: dict[str, StackEffect] = {}
+    all_input_vars: dict[str, StackEffect] = {}
     for mgr in managers:
-        for name, eff in mgr.collect_vars().items():
-            if name in all_vars:
+        for eff in mgr.instr.input_effects:
+            name = eff.name
+            if name == UNUSED:
+                continue
+            if name in all_input_vars:
                 # TODO: Turn this into an error -- variable conflict
-                assert all_vars[name] == eff, (
+                assert all_input_vars[name] == eff, (
                     name,
                     mgr.instr.name,
-                    all_vars[name],
+                    all_input_vars[name],
                     eff,
                 )
             else:
@@ -530,10 +533,10 @@ def _write_components_for_abstract_interp(
                 assert not eff.size, (
                     f"Abstract interpreter does not support `{mgr.instr.name}` "
                     f"due to sized input `{name}`")
-                all_vars[name] = eff
+                all_input_vars[name] = eff
 
     # Declare all variables
-    for name, eff in all_vars.items():
+    for name, eff in all_input_vars.items():
         # Temporarily set to symbolic expr
         prev = eff.type
         eff.type = "_Py_UOpsSymbolicExpression *"
@@ -551,13 +554,13 @@ def _write_components_for_abstract_interp(
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
         # Construct sym expression and write that to output
-        var = ', '.join(all_vars)
+        var = ', '.join(all_input_vars)
         if var:
             var = ', ' + var
         if mgr.pokes:
             out.emit(
                 f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                f"false, {len(all_vars)} {var});"
+                f"ctx, opcode, false, {len(all_input_vars)} {var});"
             )
         for poke in mgr.pokes:
             if not poke.effect.size and poke.effect.name:
