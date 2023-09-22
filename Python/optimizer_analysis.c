@@ -25,6 +25,11 @@
     #define DPRINTF(level, ...)
 #endif
 
+static bool
+_PyOpcode_isimmutable(int opcode)
+{
+    return false;
+}
 
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
@@ -36,6 +41,12 @@ typedef struct _Py_UOpsSymbolicExpression {
     PyObject *const_val;
     Py_hash_t cached_hash;
     char is_terminal;
+    // Whether its operands are immutable
+    char is_immutable;
+    // The store where this expression was first created.
+    // This matters for anything that isn't immutable
+    // void* because otherwx`ise need a forward decl of _Py_UOpsAbstractStore.
+    void *originating_store;
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
 
@@ -97,6 +108,18 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
         Py_RETURN_FALSE;
     }
 
+    if (self->is_immutable != other->is_immutable) {
+        Py_RETURN_FALSE;
+    }
+
+    if (!self->is_immutable) {
+        assert(self->originating_store != NULL);
+        assert(other->originating_store != NULL);
+        if (self->originating_store != other->originating_store) {
+            Py_RETURN_FALSE;
+        }
+    }
+
     // Terminal ops are kinda like special sentinels.
     // They are always considered unique, except for constant values
     // which can be repeated
@@ -112,7 +135,8 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     }
     // Two symbolic expressions are the same iff
     // 1. Their opcodes are equal.
-    // 2. Their constituent subexpressions are equal.
+    // 2. If they are mutable, they must be from the same store.
+    // 3. Their constituent subexpressions are equal.
     // For 2. we use a quick hack, and compare by their global ID. Note
     // that this ID is only populated later on, after we have determined the
     // expression is not a duplicate. The invariant that must hold is that
@@ -138,6 +162,7 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
             Py_RETURN_FALSE;
         }
     }
+
     Py_RETURN_TRUE;
 }
 
@@ -286,7 +311,8 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
 // Steals a reference to const_val
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
-                               bool is_terminal, int opcode, int oparg,
+                               bool is_terminal,
+                               int opcode, int oparg,
                                PyObject *const_val, int num_subexprs, ...)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
@@ -305,6 +331,10 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->opcode = opcode;
     self->oparg = oparg;
     self->const_val = const_val;
+    self->is_immutable = (char)_PyOpcode_isimmutable(opcode);
+    // Borrowed ref. We don't want to have to make our type GC as this will
+    // slow down things. This is guaranteed to be safe within our usage.
+    self->originating_store = ctx->curr_store;
 
     assert(Py_SIZE(self) >= num_subexprs);
     // Setup
