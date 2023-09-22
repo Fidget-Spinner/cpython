@@ -246,7 +246,7 @@ class AbstractInstruction(Instruction):
         active_caches: list[ActiveCacheEffect],
         tier: Tiers = TIER_ONE,
     ) -> None:
-        pass
+        super().write_body(out, dedent, active_caches, TIER_TWO)
 
 
 @dataclasses.dataclass

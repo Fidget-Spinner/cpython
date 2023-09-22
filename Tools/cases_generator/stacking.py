@@ -535,18 +535,24 @@ def _write_components_for_abstract_interp(
                     f"due to sized input `{name}`")
                 all_input_vars[name] = eff
 
+    # Mangle the input variables
+    mangled_input_vars = {f"__{k}":dataclasses.replace(v) for k, v in all_input_vars.items()}
+    for var in mangled_input_vars.values():
+        var.name = f"__{var.name}"
+        var.type = "_Py_UOpsSymbolicExpression *"
+
     # Declare all variables
-    for name, eff in all_input_vars.items():
-        # Temporarily set to symbolic expr
-        prev = eff.type
-        eff.type = "_Py_UOpsSymbolicExpression *"
+    for name, eff in mangled_input_vars.items():
         out.declare(eff, None)
-        eff.type = prev
 
     for mgr in managers:
         for peek in mgr.peeks:
+            if peek.effect.name == UNUSED:
+                continue
+            copy = dataclasses.replace(peek.effect)
+            copy.name = f"__{copy.name}"
             out.assign(
-                peek.effect,
+                copy,
                 peek.as_stack_effect(),
             )
         if mgr is managers[-1]:
@@ -554,14 +560,36 @@ def _write_components_for_abstract_interp(
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
         # Construct sym expression and write that to output
-        var = ', '.join(all_input_vars)
+        var = ", ".join(mangled_input_vars)
         if var:
-            var = ', ' + var
+            var = ", " + var
         if mgr.pokes:
-            out.emit(
-                f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                f"ctx, opcode, oparg, false, {len(all_input_vars)} {var});"
-            )
+            # If it's a pure op, and outputs only one thing (the constant), we can attempt a constant evaluation.
+            if mgr.instr.inst.pure and len(mgr.instr.output_effects) == 1:
+                output_var = mgr.instr.output_effects[0]
+                out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
+                predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
+                with out.block(f"if ({predicates})"):
+                    # Declare all variables
+                    for name, eff in all_input_vars.items():
+                        out.declare(eff, StackEffect(f"get_const(__{name})"))
+                    out.declare(output_var, None)
+                    mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE)
+                    out.emit(
+                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                        f"ctx, opcode, oparg, false, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+                    )
+                with out.block("else"):
+                    out.emit(
+                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                        f"ctx, opcode, oparg, false, NULL, {len(mangled_input_vars)} {var});"
+                    )
+            # Not a pure op, the usual
+            else:
+                out.emit(
+                    f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
+                    f"ctx, opcode, oparg, false, NULL, {len(mangled_input_vars)} {var});"
+                )
             out.emit(
                 "if (__sym_temp == NULL) goto error;"
             )

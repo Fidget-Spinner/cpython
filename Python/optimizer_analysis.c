@@ -8,6 +8,7 @@
 #include "pycore_long.h"
 #include "cpython/optimizer.h"
 #include "pycore_optimizer.h"
+#include "pycore_object.h"
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -254,6 +255,8 @@ static _Py_UOpsSymbolicExpression *
 check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
 {
     assert(ctx->sym_exprs_to_sym_exprs);
+    // First, constant fold if required.
+
     // Check if this sym expr already exists
     PyObject *res = PyDict_GetItemWithError(
         (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
@@ -280,9 +283,11 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
     return (_Py_UOpsSymbolicExpression *)res;
 }
 
+// Steals a reference to const_val
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
-                               bool is_terminal, int opcode, int oparg, int num_subexprs, ...)
+                               bool is_terminal, int opcode, int oparg,
+                               PyObject *const_val, int num_subexprs, ...)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
@@ -299,6 +304,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->const_val = NULL;
     self->opcode = opcode;
     self->oparg = oparg;
+    self->const_val = const_val;
 
     assert(Py_SIZE(self) >= num_subexprs);
     // Setup
@@ -358,7 +364,7 @@ sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
 {
     return _Py_UOpsSymbolicExpression_New(ctx, true,
                                           LOAD_FAST, locals_idx,
-                                          0);
+                                          NULL, 0);
 }
 
 static inline _Py_UOpsSymbolicExpression*
@@ -369,12 +375,12 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
         true,
         LOAD_CONST,
         const_idx,
+        const_val,
         0
     );
     if (temp == NULL) {
         return NULL;
     }
-    temp->const_val = const_val;
     return temp;
 }
 
@@ -434,6 +440,19 @@ op_is_jump(int opcode)
 {
     return (opcode == _POP_JUMP_IF_FALSE || opcode == _POP_JUMP_IF_TRUE);
 }
+
+static inline bool
+is_const(_Py_UOpsSymbolicExpression *expr)
+{
+    return expr->const_val != NULL;
+}
+
+static inline PyObject *
+get_const(_Py_UOpsSymbolicExpression *expr)
+{
+    return Py_NewRef(expr->const_val);
+}
+
 
 // Number the jump targets and the jump instructions with a unique (negative) ID.
 // This replaces the instruction's opcode in the trace with their negative IDs.
@@ -573,6 +592,26 @@ fix_jump_side_exits(_PyUOpInstruction *trace, int trace_len,
     }
 }
 
+#define DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dval, result) \
+do { \
+    if (Py_REFCNT(left) == 1) { \
+        ((PyFloatObject *)left)->ob_fval = (dval); \
+        _Py_DECREF_SPECIALIZED(right, _PyFloat_ExactDealloc);\
+        result = (left); \
+    } \
+    else if (Py_REFCNT(right) == 1)  {\
+        ((PyFloatObject *)right)->ob_fval = (dval); \
+        _Py_DECREF_NO_DEALLOC(left); \
+        result = (right); \
+    }\
+    else { \
+        result = PyFloat_FromDouble(dval); \
+        if ((result) == NULL) goto error; \
+        _Py_DECREF_NO_DEALLOC(left); \
+        _Py_DECREF_NO_DEALLOC(right); \
+    } \
+} while (0)
+
 #ifndef Py_DEBUG
 #define GETITEM(v, i) PyList_GET_ITEM((v), (i))
 #else
@@ -625,6 +664,7 @@ uop_abstract_interpret_single_inst(
 #define PEEK(idx)              (((stack_pointer)[-(idx)]))
 #define GETLOCAL(idx)          ((ctx->curr_store->locals[idx]))
 
+#define STAT_INC(opname, name) ((void)0)
     int oparg = inst->oparg;
     int opcode = inst->opcode;
 
@@ -676,7 +716,6 @@ uop_abstract_interpret_single_inst(
         }
 
         // TODO SWAP
-
         default:
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
@@ -689,6 +728,11 @@ uop_abstract_interpret_single_inst(
 
     return 0;
 
+pop_4_error:
+pop_3_error:
+pop_2_error:
+pop_1_error:
+deoptimize:
 error:
     DPRINTF(1, "Encountered error in abstract interpreter\n");
     return -1;
