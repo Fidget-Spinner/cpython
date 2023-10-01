@@ -1012,7 +1012,7 @@
             break;
         }
 
-        case LOAD_ATTR_SLOT: {
+        case _LOAD_ATTR_SLOT: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(((oparg & 1) ? 1 : 0));
@@ -1054,7 +1054,16 @@
             break;
         }
 
-        case STORE_ATTR_INSTANCE_VALUE: {
+        case _GUARD_DORV_VALUES: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _STORE_ATTR_INSTANCE_VALUE: {
             _Py_UOpsSymbolicExpression *__value;
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
@@ -1072,7 +1081,16 @@
             break;
         }
 
-        case STORE_ATTR_SLOT: {
+        case _GUARD_TYPE_VERSION_STORE: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _STORE_ATTR_SLOT: {
             _Py_UOpsSymbolicExpression *__value;
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
@@ -1515,7 +1533,25 @@
             break;
         }
 
-        case LOAD_ATTR_METHOD_WITH_VALUES: {
+        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _GUARD_KEYS_VERSION: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, false, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_ATTR_METHOD_WITH_VALUES: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(1);
@@ -1526,7 +1562,7 @@
             break;
         }
 
-        case LOAD_ATTR_METHOD_NO_DICT: {
+        case _LOAD_ATTR_METHOD_NO_DICT: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(1);

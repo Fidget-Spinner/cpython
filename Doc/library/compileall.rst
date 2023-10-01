@@ -31,7 +31,7 @@ compile Python sources.
 
    Positional arguments are files to compile or directories that contain
    source files, traversed recursively.  If no argument is given, behave as if
-   the command line was ``-l <directories from sys.path>``.
+   the command line was :samp:`-l {<directories from sys.path>}`.
 
 .. cmdoption:: -l
 
@@ -90,7 +90,7 @@ compile Python sources.
 .. cmdoption:: -j N
 
    Use *N* workers to compile the files within the given directory.
-   If ``0`` is used, then the result of :func:`os.cpu_count()`
+   If ``0`` is used, then the result of :func:`os.process_cpu_count()`
    will be used.
 
 .. cmdoption:: --invalidation-mode [timestamp|checked-hash|unchecked-hash]
