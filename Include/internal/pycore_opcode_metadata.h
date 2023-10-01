@@ -12,6 +12,7 @@
 
 #define IS_PSEUDO_INSTR(OP)  ( \
     ((OP) == LOAD_CLOSURE) || \
+    ((OP) == INIT_FAST) || \
     ((OP) == STORE_FAST_MAYBE_NULL) || \
     ((OP) == LOAD_SUPER_METHOD) || \
     ((OP) == LOAD_ZERO_SUPER_METHOD) || \
@@ -94,6 +95,8 @@ int _PyOpcode_num_popped(int opcode, int oparg, bool jump)  {
         case INSTRUMENTED_RESUME:
             return 0;
         case LOAD_CLOSURE:
+            return 0;
+        case INIT_FAST:
             return 0;
         case LOAD_FAST_CHECK:
             return 0;
@@ -652,6 +655,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
         case INSTRUMENTED_RESUME:
             return 0;
         case LOAD_CLOSURE:
+            return 1;
+        case INIT_FAST:
             return 1;
         case LOAD_FAST_CHECK:
             return 1;
@@ -1269,6 +1274,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [RESUME_CHECK] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },
     [INSTRUMENTED_RESUME] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG },
     [LOAD_CLOSURE] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG },
+    [INIT_FAST] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_ERROR_FLAG },
     [LOAD_FAST_CHECK] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_ERROR_FLAG },
     [LOAD_FAST] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG },
     [LOAD_FAST_AND_CLEAR] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG },
@@ -1748,9 +1754,9 @@ const char * const _PyOpcode_uop_name[OPCODE_UOP_NAME_SIZE] = {
 };
 #endif // NEED_OPCODE_METADATA
 
-extern const char *const _PyOpcode_OpName[268];
+extern const char *const _PyOpcode_OpName[269];
 #ifdef NEED_OPCODE_METADATA
-const char *const _PyOpcode_OpName[268] = {
+const char *const _PyOpcode_OpName[269] = {
     [CACHE] = "CACHE",
     [RESERVED] = "RESERVED",
     [RESUME] = "RESUME",
@@ -1959,6 +1965,7 @@ const char *const _PyOpcode_OpName[268] = {
     [INSTRUMENTED_POP_JUMP_IF_NONE] = "INSTRUMENTED_POP_JUMP_IF_NONE",
     [INSTRUMENTED_POP_JUMP_IF_NOT_NONE] = "INSTRUMENTED_POP_JUMP_IF_NOT_NONE",
     [INSTRUMENTED_LINE] = "INSTRUMENTED_LINE",
+    [INIT_FAST] = "INIT_FAST",
     [JUMP] = "JUMP",
     [JUMP_NO_INTERRUPT] = "JUMP_NO_INTERRUPT",
     [LOAD_CLOSURE] = "LOAD_CLOSURE",
@@ -2268,7 +2275,6 @@ extern bool _PyOpcode_ispure(int opcode);
 #ifdef NEED_OPCODE_METADATA
 bool _PyOpcode_ispure(int opcode)  {
     switch(opcode) {
-        case LOAD_FAST_CHECK:
         case LOAD_FAST:
         case LOAD_FAST_AND_CLEAR:
         case LOAD_CONST:
@@ -2287,6 +2293,28 @@ bool _PyOpcode_ispure(int opcode)  {
         case COPY:
         case SWAP:
         case _SET_IP:
+            return true;
+        default:
+            return false;
+    }
+}
+#endif // NEED_OPCODE_METADATA
+
+
+extern bool _PyOpcode_isguard(int opcode);
+#ifdef NEED_OPCODE_METADATA
+bool _PyOpcode_isguard(int opcode)  {
+    switch(opcode) {
+        case _GUARD_BOTH_INT:
+        case _GUARD_BOTH_UNICODE:
+        case _GUARD_GLOBALS_VERSION:
+        case _GUARD_BUILTINS_VERSION:
+        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT:
+        case _GUARD_KEYS_VERSION:
+        case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS:
+        case _CHECK_PEP_523:
+        case _CHECK_FUNCTION_EXACT_ARGS:
+        case _CHECK_STACK_SPACE:
             return true;
         default:
             return false;

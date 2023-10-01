@@ -194,7 +194,12 @@ dummy_func(
             LOAD_FAST,
         };
 
-        pure inst(LOAD_FAST_CHECK, (-- value)) {
+        // Represents a possibly uninitialized value
+        pseudo(INIT_FAST) = {
+            LOAD_FAST_CHECK,
+        };
+
+        inst(LOAD_FAST_CHECK, (-- value)) {
             value = GETLOCAL(oparg);
             ERROR_IF(value == NULL, unbound_local_error);
             Py_INCREF(value);
@@ -396,7 +401,7 @@ dummy_func(
             // BINARY_OP_INPLACE_ADD_UNICODE,  // See comments at that opcode.
         };
 
-        op(_GUARD_BOTH_INT, (left, right -- left, right)) {
+        guard op(_GUARD_BOTH_INT, (left, right -- left, right)) {
             DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
             DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
         }
@@ -468,7 +473,7 @@ dummy_func(
         macro(BINARY_OP_SUBTRACT_FLOAT) =
             _GUARD_BOTH_FLOAT + _BINARY_OP_SUBTRACT_FLOAT;
 
-        op(_GUARD_BOTH_UNICODE, (left, right -- left, right)) {
+        guard op(_GUARD_BOTH_UNICODE, (left, right -- left, right)) {
             DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP);
             DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP);
         }
@@ -1410,14 +1415,14 @@ dummy_func(
             null = NULL;
         }
 
-        op(_GUARD_GLOBALS_VERSION, (version/1 --)) {
+        guard op(_GUARD_GLOBALS_VERSION, (version/1 --)) {
             PyDictObject *dict = (PyDictObject *)GLOBALS();
             DEOPT_IF(!PyDict_CheckExact(dict), LOAD_GLOBAL);
             DEOPT_IF(dict->ma_keys->dk_version != version, LOAD_GLOBAL);
             assert(DK_IS_UNICODE(dict->ma_keys));
         }
 
-        op(_GUARD_BUILTINS_VERSION, (version/1 --)) {
+        guard op(_GUARD_BUILTINS_VERSION, (version/1 --)) {
             PyDictObject *dict = (PyDictObject *)BUILTINS();
             DEOPT_IF(!PyDict_CheckExact(dict), LOAD_GLOBAL);
             DEOPT_IF(dict->ma_keys->dk_version != version, LOAD_GLOBAL);
@@ -2787,7 +2792,7 @@ dummy_func(
             exc_info->exc_value = Py_NewRef(new_exc);
         }
 
-        op(_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT, (owner -- owner)) {
+        guard op(_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT, (owner -- owner)) {
             assert(Py_TYPE(owner)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
             PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(owner);
             DEOPT_IF(!_PyDictOrValues_IsValues(*dorv) &&
@@ -2795,7 +2800,7 @@ dummy_func(
                      LOAD_ATTR);
         }
 
-        op(_GUARD_KEYS_VERSION, (keys_version/2, owner -- owner)) {
+        guard op(_GUARD_KEYS_VERSION, (keys_version/2, owner -- owner)) {
             PyTypeObject *owner_cls = Py_TYPE(owner);
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
             DEOPT_IF(owner_heap_type->ht_cached_keys->dk_version !=
@@ -3001,7 +3006,7 @@ dummy_func(
             CHECK_EVAL_BREAKER();
         }
 
-        op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable, null, unused[oparg] -- callable, null, unused[oparg])) {
+        guard op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable, null, unused[oparg] -- callable, null, unused[oparg])) {
             DEOPT_IF(null != NULL, CALL);
             DEOPT_IF(Py_TYPE(callable) != &PyMethod_Type, CALL);
         }
@@ -3015,11 +3020,11 @@ dummy_func(
             Py_DECREF(callable);
         }
 
-        op(_CHECK_PEP_523, (--)) {
+        guard op(_CHECK_PEP_523, (--)) {
             DEOPT_IF(tstate->interp->eval_frame, CALL);
         }
 
-        op(_CHECK_FUNCTION_EXACT_ARGS, (func_version/2, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
+        guard op(_CHECK_FUNCTION_EXACT_ARGS, (func_version/2, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
             DEOPT_IF(!PyFunction_Check(callable), CALL);
             PyFunctionObject *func = (PyFunctionObject *)callable;
             DEOPT_IF(func->func_version != func_version, CALL);
@@ -3027,7 +3032,7 @@ dummy_func(
             DEOPT_IF(code->co_argcount != oparg + (self_or_null != NULL), CALL);
         }
 
-        op(_CHECK_STACK_SPACE, (callable, unused, unused[oparg] -- callable, unused, unused[oparg])) {
+        guard op(_CHECK_STACK_SPACE, (callable, unused, unused[oparg] -- callable, unused, unused[oparg])) {
             PyFunctionObject *func = (PyFunctionObject *)callable;
             PyCodeObject *code = (PyCodeObject *)func->func_code;
             DEOPT_IF(!_PyThreadState_HasStackSpace(tstate, code->co_framesize), CALL);

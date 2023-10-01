@@ -179,6 +179,8 @@ REGISTER = "REGISTER"
 kwds.append(REGISTER)
 PURE = "PURE"
 kwds.append(PURE)
+GUARD = "GUARD"
+kwds.append(GUARD)
 OFFSETOF = "OFFSETOF"
 kwds.append(OFFSETOF)
 RESTRICT = "RESTRICT"

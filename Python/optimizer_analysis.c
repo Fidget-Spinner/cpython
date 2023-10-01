@@ -28,24 +28,35 @@
 static bool
 _PyOpcode_isimmutable(int opcode)
 {
+    // TODO subscr tuple is immutable
     return false;
 }
+
+static bool
+_PyOpcode_isterminal(int opcode)
+{
+    return (opcode == LOAD_FAST ||
+            opcode == LOAD_FAST_CHECK ||
+            opcode == LOAD_FAST_AND_CLEAR ||
+            opcode == INIT_FAST ||
+            opcode == LOAD_CONST);
+}
+
 
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     Py_ssize_t idx;
+    // This value expression might not have been initialized yet (maybe NULL).
+    char maybe_noninitialized;
     // Note: separated from refcnt so we don't have to deal with counting
     int usage_count;
     int opcode;
     int oparg;
     PyObject *const_val;
     Py_hash_t cached_hash;
-    char is_terminal;
-    // Whether its operands are immutable
-    char is_immutable;
     // The store where this expression was first created.
     // This matters for anything that isn't immutable
-    // void* because otherwx`ise need a forward decl of _Py_UOpsAbstractStore.
+    // void* because otherwise need a forward decl of _Py_UOpsAbstractStore.
     void *originating_store;
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
@@ -104,15 +115,15 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     }
     _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o1;
     _Py_UOpsSymbolicExpression *other = (_Py_UOpsSymbolicExpression *)o2;
-    if (self->is_terminal != other->is_terminal) {
+    if (_PyOpcode_isterminal(self->opcode) != _PyOpcode_isterminal(other->opcode)) {
         Py_RETURN_FALSE;
     }
 
-    if (self->is_immutable != other->is_immutable) {
+    if (_PyOpcode_isimmutable(self->opcode) != _PyOpcode_isimmutable(other->opcode)) {
         Py_RETURN_FALSE;
     }
 
-    if (!self->is_immutable) {
+    if (!_PyOpcode_isimmutable(self->opcode)) {
         assert(self->originating_store != NULL);
         assert(other->originating_store != NULL);
         if (self->originating_store != other->originating_store) {
@@ -123,7 +134,7 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     // Terminal ops are kinda like special sentinels.
     // They are always considered unique, except for constant values
     // which can be repeated
-    if (self->is_terminal && other->is_terminal) {
+    if (_PyOpcode_isterminal(self->opcode) && _PyOpcode_isterminal(other->opcode)) {
         if (self->const_val && other->const_val) {
             return PyObject_RichCompare(self->const_val, other->const_val, Py_EQ);
         } else {
@@ -143,6 +154,8 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     // the subexpressions have already been checked for duplicates and their
     // id populated. This should always hold.
     // The symexpr's own id does not have to be populated yet.
+    // Note: WE DO NOT COMPARE THEIR CONST_VAL, BECAUSE THAT CAN BE POPULATED
+    // LATER.
     if (self->opcode != other->opcode) {
         Py_RETURN_FALSE;
     }
@@ -311,7 +324,6 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
 // Steals a reference to const_val
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
-                               bool is_terminal,
                                int opcode, int oparg,
                                PyObject *const_val, int num_subexprs, ...)
 {
@@ -326,12 +338,10 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
-    self->is_terminal = (char)is_terminal;
     self->const_val = NULL;
     self->opcode = opcode;
     self->oparg = oparg;
     self->const_val = const_val;
-    self->is_immutable = (char)_PyOpcode_isimmutable(opcode);
     // Borrowed ref. We don't want to have to make our type GC as this will
     // slow down things. This is guaranteed to be safe within our usage.
     self->originating_store = ctx->curr_store;
@@ -359,7 +369,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
-                               bool is_terminal, int opcode, int oparg, int num_subexprs,
+                               int opcode, int oparg, int num_subexprs,
                                _Py_UOpsSymbolicExpression **arr_start)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
@@ -373,7 +383,6 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
-    self->is_terminal = (char)is_terminal;
     self->const_val = NULL;
     self->opcode = opcode;
     self->oparg = oparg;
@@ -392,8 +401,8 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
 static inline _Py_UOpsSymbolicExpression*
 sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
 {
-    return _Py_UOpsSymbolicExpression_New(ctx, true,
-                                          LOAD_FAST, locals_idx,
+    return _Py_UOpsSymbolicExpression_New(ctx,
+                                          INIT_FAST, locals_idx,
                                           NULL, 0);
 }
 
@@ -402,7 +411,6 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
 {
     _Py_UOpsSymbolicExpression *temp = _Py_UOpsSymbolicExpression_New(
         ctx,
-        true,
         LOAD_CONST,
         const_idx,
         const_val,
@@ -713,11 +721,27 @@ uop_abstract_interpret_single_inst(
     switch (opcode) {
 #include "abstract_interp_cases.c.h"
         // @TODO convert these to autogenerated using DSL
-        case LOAD_FAST:
+        // Note: LOAD_FAST_CHECK is not pure!!!
         case LOAD_FAST_CHECK:
             STACK_GROW(1);
             PEEK(1) = GETLOCAL(oparg);
+            // Value might be uninitialized, and might error.
+            if(PEEK(1) == NULL || PEEK(1)->opcode == INIT_FAST) {
+                goto error;
+            }
+            break;
+        case LOAD_FAST:
+            STACK_GROW(1);
+            // Guaranteed by the CPython bytecode compiler to not be uninitialized
+            // replace with LOAD_FAST
+            if(GETLOCAL(oparg)->opcode == INIT_FAST) {
+                PEEK(1) = _Py_UOpsSymbolicExpression_New(ctx, LOAD_FAST, oparg, NULL, 1, GETLOCAL(oparg));
+            }
+            else {
+                PEEK(1) = GETLOCAL(oparg);
+            }
             assert(PEEK(1));
+
             break;
         case LOAD_FAST_AND_CLEAR: {
             STACK_GROW(1);

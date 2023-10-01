@@ -239,6 +239,7 @@ class Generator(Analyzer):
     def write_tier2_metadata(self) -> None:
 
         instrpure_data = []
+        instrguard_data = []
         for thing in self.everything:
             if not isinstance(thing, parsing.InstDef):
                 continue
@@ -246,6 +247,9 @@ class Generator(Analyzer):
             ispure = instr.inst.pure
             if ispure:
                 instrpure_data.append(instr)
+            isguard = instr.inst.guard
+            if isguard:
+                instrguard_data.append(instr)
 
         with self.metadata_item(
             # TODO: If more metadata is added, replace bool with a struct
@@ -255,6 +259,21 @@ class Generator(Analyzer):
         ):
             with self.out.block("switch(opcode)"):
                 for instr in instrpure_data:
+                    self.out.emit(f"case {instr.name}:")
+                self.out.emit("    return true;")
+                self.out.emit("default:")
+                self.out.emit("    return false;")
+
+        self.out.emit("")
+
+        with self.metadata_item(
+                # TODO: If more metadata is added, replace bool with a struct
+                f"bool _PyOpcode_isguard(int opcode)",
+                "",
+                ""
+        ):
+            with self.out.block("switch(opcode)"):
+                for instr in instrguard_data:
                     self.out.emit(f"case {instr.name}:")
                 self.out.emit("    return true;")
                 self.out.emit("default:")

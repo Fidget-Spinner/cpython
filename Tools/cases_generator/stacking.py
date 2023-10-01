@@ -577,18 +577,18 @@ def _write_components_for_abstract_interp(
                     mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE)
                     out.emit(
                         f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, opcode, oparg, false, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+                        f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
                     )
                 with out.block("else"):
                     out.emit(
                         f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, opcode, oparg, false, NULL, {len(mangled_input_vars)} {var});"
+                        f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
                     )
             # Not a pure op, the usual
             else:
                 out.emit(
                     f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, opcode, oparg, false, NULL, {len(mangled_input_vars)} {var});"
+                    f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
                 )
             out.emit(
                 "if (__sym_temp == NULL) goto error;"
