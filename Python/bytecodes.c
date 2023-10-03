@@ -401,12 +401,12 @@ dummy_func(
             // BINARY_OP_INPLACE_ADD_UNICODE,  // See comments at that opcode.
         };
 
-        guard op(_GUARD_BOTH_INT, (left, right -- left, right)) {
+        guard op(_GUARD_BOTH_INT, (left, right -- left: ~(PyLong_Type), right: ~(PyLong_Type))) {
             DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
             DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
         }
 
-        pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res: ~(PyLong_Type))) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Multiply((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -414,7 +414,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        pure op(_BINARY_OP_ADD_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_INT, (unused/1, left, right -- res: ~(PyLong_Type))) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Add((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -422,7 +422,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        pure op(_BINARY_OP_SUBTRACT_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_SUBTRACT_INT, (unused/1, left, right -- res: ~(PyLong_Type))) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Subtract((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -437,12 +437,12 @@ dummy_func(
         macro(BINARY_OP_SUBTRACT_INT) =
             _GUARD_BOTH_INT + _BINARY_OP_SUBTRACT_INT;
 
-        op(_GUARD_BOTH_FLOAT, (left, right -- left, right)) {
+        op(_GUARD_BOTH_FLOAT, (left, right -- left: ~(PyFloat_Type), right: ~(PyFloat_Type))) {
             DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP);
             DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
         }
 
-        pure op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res: ~(PyFloat_Type))) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval *
@@ -450,7 +450,7 @@ dummy_func(
             DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
         }
 
-        pure op(_BINARY_OP_ADD_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_FLOAT, (unused/1, left, right -- res: ~(PyFloat_Type))) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval +
@@ -458,7 +458,7 @@ dummy_func(
             DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
         }
 
-        pure op(_BINARY_OP_SUBTRACT_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_SUBTRACT_FLOAT, (unused/1, left, right -- res: ~(PyFloat_Type))) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval -
