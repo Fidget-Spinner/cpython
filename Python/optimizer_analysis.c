@@ -43,6 +43,80 @@ _PyOpcode_isterminal(int opcode)
 }
 
 
+typedef enum {
+    PYINT_TYPE = 0,
+    PYFLOAT_TYPE = 1,
+    PYUNICODE_TYPE = 2,
+    GUARD_GLOBALS_VERSION_TYPE = 3,
+    GUARD_BUILTINS_VERSION_TYPE = 4,
+    GUARD_DORV_VALUES_TYPE = 5, // not sure what is this
+    GUARD_TYPE_VERSION_STORE_TYPE = 6,
+    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 7, // not sure what is this
+    GUARD_KEYS_VERSION_TYPE = 8,
+    // CHECK_CALL_BOUND_METHOD_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
+    // CHECK_PEP_523_TYPE, // Environment check
+    // CHECK_FUNCTION_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
+    // CHECK_STACK_SPACE_TYPE // Environment check
+    INVALID_TYPE = -1
+} _Py_UOpsSymExprTypeEnum;
+
+#define MAX_TYPE 9
+typedef struct {
+    // bitmask of types
+    uint32_t types;
+    // auxillary data for the types
+    uint32_t aux[MAX_TYPE];
+} _Py_UOpsSymType;
+
+static _Py_UOpsSymExprTypeEnum 
+symtype_guard_to_type_enum(int guard_opcde) 
+{
+    switch (guard_opcde) {
+        case _GUARD_BOTH_INT: return PYINT_TYPE;
+        case _GUARD_BOTH_FLOAT: return PYFLOAT_TYPE;
+        case _GUARD_BOTH_UNICODE: return PYUNICODE_TYPE;
+        case _GUARD_GLOBALS_VERSION: return GUARD_GLOBALS_VERSION_TYPE;
+        case _GUARD_BUILTINS_VERSION: return GUARD_BUILTINS_VERSION_TYPE;
+        case _GUARD_DORV_VALUES: return GUARD_DORV_VALUES_TYPE;
+        case _GUARD_TYPE_VERSION_STORE: return GUARD_TYPE_VERSION_STORE_TYPE;
+        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: return GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
+        case _GUARD_KEYS_VERSION: return GUARD_KEYS_VERSION_TYPE;
+        default: Py_UNREACHABLE();
+    }
+}
+
+static bool
+symtype_passes_guard(_Py_UOpsSymType* sym_type, int guard_opcode, uint32_t aux) 
+{
+    _Py_UOpsSymExprTypeEnum typ = symtype_guard_to_type_enum(guard_opcode);
+    bool bit = (sym_type->types >> typ) & 1;
+    if (!bit) {
+        return false;
+    }
+
+    switch (typ) {
+        case PYINT_TYPE:
+        case PYFLOAT_TYPE:
+        case PYUNICODE_TYPE: 
+        case GUARD_DORV_VALUES_TYPE: 
+        case GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE: return true;
+        case GUARD_GLOBALS_VERSION_TYPE:
+        case GUARD_BUILTINS_VERSION_TYPE:
+        case GUARD_TYPE_VERSION_STORE_TYPE:
+        case GUARD_KEYS_VERSION_TYPE: return aux == sym_type->aux[typ];
+        default: Py_UNREACHABLE();
+    }
+}
+
+static
+symtype_set_from_guard(_Py_UOpsSymType* sym_type, int guard_opcode, uint32_t aux) 
+{
+    _Py_UOpsSymExprTypeEnum typ = symtype_guard_to_type_enum(guard_opcode);
+    sym_type->types |= 1 << typ;
+    sym_type->aux[typ] = aux;
+}
+
+
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     Py_ssize_t idx;
@@ -52,6 +126,8 @@ typedef struct _Py_UOpsSymbolicExpression {
     int usage_count;
     int opcode;
     int oparg;
+    // Type of the symbolic expression
+    _Py_UOpsSymType sym_type;
     PyObject *const_val;
     Py_hash_t cached_hash;
     // The store where this expression was first created.
@@ -338,7 +414,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
-    self->const_val = NULL;
+    self->sym_type.types = 0;
     self->opcode = opcode;
     self->oparg = oparg;
     self->const_val = const_val;
@@ -383,6 +459,7 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
+    self->sym_type.types = 0;
     self->const_val = NULL;
     self->opcode = opcode;
     self->oparg = oparg;
@@ -491,6 +568,11 @@ get_const(_Py_UOpsSymbolicExpression *expr)
     return Py_NewRef(expr->const_val);
 }
 
+static inline _Py_UOpsSymType *
+get_symtype(_Py_UOpsSymbolicExpression *expr)
+{
+    return &expr->sym_type;
+}
 
 // Number the jump targets and the jump instructions with a unique (negative) ID.
 // This replaces the instruction's opcode in the trace with their negative IDs.
