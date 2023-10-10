@@ -9,6 +9,7 @@
 #include "cpython/optimizer.h"
 #include "pycore_optimizer.h"
 #include "pycore_object.h"
+#include "pycore_dict.h"
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -47,12 +48,13 @@ typedef enum {
     PYINT_TYPE = 0,
     PYFLOAT_TYPE = 1,
     PYUNICODE_TYPE = 2,
-    GUARD_GLOBALS_VERSION_TYPE = 3,
-    GUARD_BUILTINS_VERSION_TYPE = 4,
-    GUARD_DORV_VALUES_TYPE = 5, // not sure what is this
-    GUARD_TYPE_VERSION_STORE_TYPE = 6,
-    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 7, // not sure what is this
-    GUARD_KEYS_VERSION_TYPE = 8,
+    // GUARD_GLOBALS_VERSION_TYPE,
+    // GUARD_BUILTINS_VERSION_TYPE,
+    GUARD_DORV_VALUES_TYPE = 3,
+    GUARD_TYPE_VERSION_STORE_TYPE = 4,
+    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 5,
+    GUARD_KEYS_VERSION_TYPE = 6,
+    GUARD_TYPE_VERSION_TYPE = 7,
     // CHECK_CALL_BOUND_METHOD_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
     // CHECK_PEP_523_TYPE, // Environment check
     // CHECK_FUNCTION_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
@@ -60,7 +62,7 @@ typedef enum {
     INVALID_TYPE = -1
 } _Py_UOpsSymExprTypeEnum;
 
-#define MAX_TYPE 9
+#define MAX_TYPE 7
 typedef struct {
     // bitmask of types
     uint32_t types;
@@ -68,6 +70,7 @@ typedef struct {
     uint32_t aux[MAX_TYPE];
 } _Py_UOpsSymType;
 
+/*
 static _Py_UOpsSymExprTypeEnum 
 symtype_guard_to_type_enum(int guard_opcde) 
 {
@@ -75,12 +78,11 @@ symtype_guard_to_type_enum(int guard_opcde)
         case _GUARD_BOTH_INT: return PYINT_TYPE;
         case _GUARD_BOTH_FLOAT: return PYFLOAT_TYPE;
         case _GUARD_BOTH_UNICODE: return PYUNICODE_TYPE;
-        case _GUARD_GLOBALS_VERSION: return GUARD_GLOBALS_VERSION_TYPE;
-        case _GUARD_BUILTINS_VERSION: return GUARD_BUILTINS_VERSION_TYPE;
         case _GUARD_DORV_VALUES: return GUARD_DORV_VALUES_TYPE;
         case _GUARD_TYPE_VERSION_STORE: return GUARD_TYPE_VERSION_STORE_TYPE;
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: return GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
         case _GUARD_KEYS_VERSION: return GUARD_KEYS_VERSION_TYPE;
+        case _GUARD_TYPE_VERSION: return GUARD_TYPE_VERSION_TYPE;
         default: Py_UNREACHABLE();
     }
 }
@@ -100,20 +102,57 @@ symtype_passes_guard(_Py_UOpsSymType* sym_type, int guard_opcode, uint32_t aux)
         case PYUNICODE_TYPE: 
         case GUARD_DORV_VALUES_TYPE: 
         case GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE: return true;
-        case GUARD_GLOBALS_VERSION_TYPE:
-        case GUARD_BUILTINS_VERSION_TYPE:
         case GUARD_TYPE_VERSION_STORE_TYPE:
+        case GUARD_TYPE_VERSION_TYPE:
         case GUARD_KEYS_VERSION_TYPE: return aux == sym_type->aux[typ];
         default: Py_UNREACHABLE();
     }
 }
+*/
 
 static
-symtype_set_from_guard(_Py_UOpsSymType* sym_type, int guard_opcode, uint32_t aux) 
+symtype_set_type(_Py_UOpsSymType* sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux) 
 {
-    _Py_UOpsSymExprTypeEnum typ = symtype_guard_to_type_enum(guard_opcode);
     sym_type->types |= 1 << typ;
     sym_type->aux[typ] = aux;
+}
+
+static
+symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
+{
+    if (Py_TYPE(obj) == &PyLong_Type) {
+        sym_type->types |= 1 << PYINT_TYPE;
+    } 
+    else if (Py_TYPE(obj) == &PyFloat_Type) {
+        sym_type->types |= 1 << PYFLOAT_TYPE;
+    }
+    else if (Py_TYPE(obj) == &PyUnicode_Type) {
+        sym_type->types |= 1 << PYUNICODE_TYPE;
+    }
+
+    if (Py_TYPE(obj)->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
+        PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(obj);
+
+        if (_PyDictOrValues_IsValues(*dorv) ||
+            _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
+            sym_type->types |= 1 << GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
+            
+            PyTypeObject *owner_cls = Py_TYPE(obj);
+            PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
+            sym_type->types |= 1 << GUARD_KEYS_VERSION_TYPE;
+            sym_type->aux[GUARD_KEYS_VERSION_TYPE] = owner_heap_type->ht_cached_keys->dk_version;
+        }
+
+        if (!_PyDictOrValues_IsValues(*dorv)) {
+            sym_type->types |= 1 << GUARD_DORV_VALUES_TYPE;
+        }
+    }
+
+    PyTypeObject *tp = Py_TYPE(obj);
+    sym_type->types |= 1 << GUARD_TYPE_VERSION_STORE_TYPE;
+    sym_type->aux[GUARD_TYPE_VERSION_STORE_TYPE] = tp->tp_version_tag;
+    sym_type->types |= 1 << GUARD_TYPE_VERSION_TYPE;
+    sym_type->aux[GUARD_TYPE_VERSION_TYPE] = tp->tp_version_tag;
 }
 
 
@@ -493,6 +532,7 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
         const_val,
         0
     );
+    symtype_set_from_const(&temp->sym_type, const_val);
     if (temp == NULL) {
         return NULL;
     }

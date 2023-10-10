@@ -146,6 +146,7 @@ class StackItem:
         return StackEffect(
             self.as_variable(lax=lax),
             self.effect.type if self.effect.size else "",
+            self.effect.typeprop,
             self.effect.cond,
             self.effect.size,
         )
@@ -185,10 +186,12 @@ class EffectManager:
         self.final_offset = pred.final_offset.clone() if pred else StackOffset()
         for eff in reversed(instr.input_effects):
             self.final_offset.deeper(eff)
-            self.peeks.append(StackItem(offset=self.final_offset.clone(), effect=eff))
+            self.peeks.append(
+                StackItem(offset=self.final_offset.clone(), effect=eff))
         self.min_offset = self.final_offset.clone()
         for eff in instr.output_effects:
-            self.pokes.append(StackItem(offset=self.final_offset.clone(), effect=eff))
+            self.pokes.append(
+                StackItem(offset=self.final_offset.clone(), effect=eff))
             self.final_offset.higher(eff)
 
         self.pred = pred
@@ -353,7 +356,8 @@ def write_single_instr(
             0,
         )
     except AssertionError as err:
-        raise AssertionError(f"Error writing instruction {instr.name}") from err
+        raise AssertionError(
+            f"Error writing instruction {instr.name}") from err
 
 
 def write_macro_instr(
@@ -370,7 +374,8 @@ def write_macro_instr(
             out.emit(f"PREDICTED({mac.name});")
         out.static_assert_family_size(mac.name, family, mac.cache_offset)
         try:
-            next_instr_is_set = write_components(parts, out, TIER_ONE, mac.cache_offset)
+            next_instr_is_set = write_components(
+                parts, out, TIER_ONE, mac.cache_offset)
         except AssertionError as err:
             raise AssertionError(f"Error writing macro {mac.name}") from err
         if not parts[-1].instr.always_exits:
@@ -509,11 +514,110 @@ def write_single_instr_for_abstract_interp(instr: Instruction, out: Formatter) -
         ) from err
 
 
+def _write_components_abstract_interp_impure_region(
+        managers: list[EffectManager],
+        _,
+        out: Formatter):
+    # For impure regions, we just output the stack effect
+    for mgr in managers:
+        if mgr is managers[-1]:
+            out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
+            # Use clone() since adjust_inverse() mutates final_offset
+            mgr.adjust_inverse(mgr.final_offset.clone())
+
+
+def _write_components_abstract_interp_pure_region(
+        managers: list[EffectManager],
+        input_vars: dict[str, StackEffect],
+        mangled_input_vars: dict[str, StackEffect],
+        out: Formatter):
+
+    # Declare all variables
+    for name, eff in mangled_input_vars.items():
+        out.declare(eff, None)
+
+    for mgr in managers:
+
+        # Initialise vars from stack
+        for peek in mgr.peeks:
+            if peek.effect.name == UNUSED:
+                continue
+            copy = dataclasses.replace(peek.effect)
+            copy.name = f"__{copy.name}"
+            out.assign(copy, peek.as_stack_effect())
+
+        # Adjust stack
+        if mgr is managers[-1]:
+            out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
+            # Use clone() since adjust_inverse() mutates final_offset
+            mgr.adjust_inverse(mgr.final_offset.clone())
+
+        # Construct sym expression and write that to output
+        var = ", ".join(mangled_input_vars)
+        if var:
+            var = ", " + var
+        if mgr.pokes:
+
+            assert len(
+                mgr.instr.output_effects) == 1, "Constant prop only handles 1 output effect"
+            output_var = mgr.instr.output_effects[0]
+            out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
+
+            # Pure op, we can attempt a constant evaluation.
+            predicates = " && ".join(
+                [f"is_const({var})" for var in mangled_input_vars])
+            with out.block(f"if ({predicates})"):
+                # Declare all variables
+                for name, eff in input_vars.items():
+                    out.declare(eff, StackEffect(f"get_const(__{name})"))
+                out.declare(output_var, None)
+                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE)
+                out.emit(
+                    f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                    f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+                )
+            # Otherwise, just create a new symbolic
+            with out.block("else"):
+                out.emit(
+                    f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                    f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+                )
+
+            out.emit(
+                "if (__sym_temp == NULL) goto error;"
+            )
+
+            # Pure op, we can perform type propagation
+            if (typ := output_var.typeprop) is not None:
+                typname, aux = typ
+                aux = 0 if aux is None else aux
+                out.emit(
+                    f"symtype_set_type(get_symtype(__sym_temp), {typname}, (uint32_t){aux});"
+                )
+
+        for poke in mgr.pokes:
+            if poke.effect.size or not poke.effect.name:
+                continue
+            out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
+
+
+def _write_components_abstract_interp_guard_region(
+        managers: list[EffectManager],
+        mangled_input_vars: dict[str, StackEffect],
+        out: Formatter):
+    # Okay what to do
+    ...
+
+
 def _write_components_for_abstract_interp(
     parts: list[Component],
     out: Formatter,
 ) -> None:
+
     managers = get_managers(parts)
+    inst = managers[0].instr.inst
+
+    # Collect all input vars
     all_input_vars: dict[str, StackEffect] = {}
     for mgr in managers:
         for eff in mgr.instr.input_effects:
@@ -536,65 +640,22 @@ def _write_components_for_abstract_interp(
                 all_input_vars[name] = eff
 
     # Mangle the input variables
-    mangled_input_vars = {f"__{k}":dataclasses.replace(v) for k, v in all_input_vars.items()}
+    mangled_input_vars = {f"__{k}": dataclasses.replace(
+        v) for k, v in all_input_vars.items()}
     for var in mangled_input_vars.values():
         var.name = f"__{var.name}"
         var.type = "_Py_UOpsSymbolicExpression *"
 
-    # Declare all variables
-    for name, eff in mangled_input_vars.items():
-        out.declare(eff, None)
+    if inst.pure:
+        _write_components_abstract_interp_pure_region(
+            managers, all_input_vars, mangled_input_vars, out)
+        return
 
-    for mgr in managers:
-        for peek in mgr.peeks:
-            if peek.effect.name == UNUSED:
-                continue
-            copy = dataclasses.replace(peek.effect)
-            copy.name = f"__{copy.name}"
-            out.assign(
-                copy,
-                peek.as_stack_effect(),
-            )
-        if mgr is managers[-1]:
-            out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
-            # Use clone() since adjust_inverse() mutates final_offset
-            mgr.adjust_inverse(mgr.final_offset.clone())
-        # Construct sym expression and write that to output
-        var = ", ".join(mangled_input_vars)
-        if var:
-            var = ", " + var
-        if mgr.pokes:
-            # If it's a pure op, and outputs only one thing (the constant), we can attempt a constant evaluation.
-            if mgr.instr.inst.pure and len(mgr.instr.output_effects) == 1:
-                output_var = mgr.instr.output_effects[0]
-                out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
-                predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
-                with out.block(f"if ({predicates})"):
-                    # Declare all variables
-                    for name, eff in all_input_vars.items():
-                        out.declare(eff, StackEffect(f"get_const(__{name})"))
-                    out.declare(output_var, None)
-                    mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE)
-                    out.emit(
-                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
-                    )
-                with out.block("else"):
-                    out.emit(
-                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
-                    )
-            # Not a pure op, the usual
-            else:
-                out.emit(
-                    f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
-                )
-            out.emit(
-                "if (__sym_temp == NULL) goto error;"
-            )
-        for poke in mgr.pokes:
-            if not poke.effect.size and poke.effect.name:
-                out.emit(
-                    f"PEEK(-({poke.offset.as_index()})) = __sym_temp;"
-                )
+    if inst.guard:
+        _write_components_abstract_interp_guard_region(
+            managers, mangled_input_vars, out)
+        return
+
+    _write_components_abstract_interp_impure_region(
+        managers, mangled_input_vars, out)
+    return
