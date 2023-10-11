@@ -92,11 +92,13 @@ static const PyConfigSpec PYCONFIG_SPEC[] = {
     SPEC(use_frozen_modules, UINT),
     SPEC(safe_path, UINT),
     SPEC(int_max_str_digits, INT),
+    SPEC(cpu_count, INT),
     SPEC(pathconfig_warnings, UINT),
     SPEC(program_name, WSTR),
     SPEC(pythonpath_env, WSTR_OPT),
     SPEC(home, WSTR_OPT),
     SPEC(platlibdir, WSTR),
+    SPEC(sys_path_0, WSTR_OPT),
     SPEC(module_search_paths_set, UINT),
     SPEC(module_search_paths, WSTR_LIST),
     SPEC(stdlib_dir, WSTR_OPT),
@@ -228,7 +230,11 @@ The following implementation-specific options are available:\n\
 \n\
 -X int_max_str_digits=number: limit the size of int<->str conversions.\n\
     This helps avoid denial of service attacks when parsing untrusted data.\n\
-    The default is sys.int_info.default_max_str_digits.  0 disables."
+    The default is sys.int_info.default_max_str_digits.  0 disables.\n\
+\n\
+-X cpu_count=[n|default]: Override the return value of os.cpu_count(),\n\
+    os.process_cpu_count(), and multiprocessing.cpu_count(). This can help users who need\n\
+    to limit resources in a container."
 
 #ifdef Py_STATS
 "\n\
@@ -266,6 +272,8 @@ static const char usage_envvars[] =
 "   locale coercion and locale compatibility warnings on stderr.\n"
 "PYTHONBREAKPOINT: if this variable is set to 0, it disables the default\n"
 "   debugger. It can be set to the callable of your debugger of choice.\n"
+"PYTHON_CPU_COUNT: Overrides the return value of os.process_cpu_count(),\n"
+"   os.cpu_count(), and multiprocessing.cpu_count() if set to a positive integer.\n"
 "PYTHONDEVMODE: enable the development mode.\n"
 "PYTHONPYCACHEPREFIX: root directory for bytecode cache (pyc) files.\n"
 "PYTHONWARNDEFAULTENCODING: enable opt-in EncodingWarning for 'encoding=None'.\n"
@@ -731,6 +739,8 @@ config_check_consistency(const PyConfig *config)
     assert(config->_is_python_build >= 0);
     assert(config->safe_path >= 0);
     assert(config->int_max_str_digits >= 0);
+    // cpu_count can be -1 if the user doesn't override it.
+    assert(config->cpu_count != 0);
     // config->use_frozen_modules is initialized later
     // by _PyConfig_InitImportConfig().
 #ifdef Py_STATS
@@ -770,6 +780,7 @@ PyConfig_Clear(PyConfig *config)
     CLEAR(config->exec_prefix);
     CLEAR(config->base_exec_prefix);
     CLEAR(config->platlibdir);
+    CLEAR(config->sys_path_0);
 
     CLEAR(config->filesystem_encoding);
     CLEAR(config->filesystem_errors);
@@ -830,6 +841,7 @@ _PyConfig_InitCompatConfig(PyConfig *config)
     config->int_max_str_digits = -1;
     config->_is_python_build = 0;
     config->code_debug_ranges = 1;
+    config->cpu_count = -1;
 }
 
 
@@ -1616,6 +1628,45 @@ config_read_env_vars(PyConfig *config)
 }
 
 static PyStatus
+config_init_cpu_count(PyConfig *config)
+{
+    const char *env = config_get_env(config, "PYTHON_CPU_COUNT");
+    if (env) {
+        int cpu_count = -1;
+        if (strcmp(env, "default") == 0) {
+            cpu_count = -1;
+        }
+        else if (_Py_str_to_int(env, &cpu_count) < 0 || cpu_count < 1) {
+            goto error;
+        }
+        config->cpu_count = cpu_count;
+    }
+
+    const wchar_t *xoption = config_get_xoption(config, L"cpu_count");
+    if (xoption) {
+        int cpu_count = -1;
+        const wchar_t *sep = wcschr(xoption, L'=');
+        if (sep) {
+            if (wcscmp(sep + 1, L"default") == 0) {
+                cpu_count = -1;
+            }
+            else if (config_wstr_to_int(sep + 1, &cpu_count) < 0 || cpu_count < 1) {
+                goto error;
+            }
+        }
+        else {
+            goto error;
+        }
+        config->cpu_count = cpu_count;
+    }
+    return _PyStatus_OK();
+
+error:
+    return _PyStatus_ERR("-X cpu_count=n option: n is missing or an invalid number, "
+                         "n must be greater than 0");
+}
+
+static PyStatus
 config_init_perf_profiling(PyConfig *config)
 {
     int active = 0;
@@ -1792,6 +1843,13 @@ config_read_complex_options(PyConfig *config)
 
     if (config->int_max_str_digits < 0) {
         status = config_init_int_max_str_digits(config);
+        if (_PyStatus_EXCEPTION(status)) {
+            return status;
+        }
+    }
+
+    if (config->cpu_count < 0) {
+        status = config_init_cpu_count(config);
         if (_PyStatus_EXCEPTION(status)) {
             return status;
         }
@@ -3051,6 +3109,7 @@ _Py_DumpPathConfig(PyThreadState *tstate)
     PySys_WriteStderr("  import site = %i\n", config->site_import);
     PySys_WriteStderr("  is in build tree = %i\n", config->_is_python_build);
     DUMP_CONFIG("stdlib dir", stdlib_dir);
+    DUMP_CONFIG("sys.path[0]", sys_path_0);
 #undef DUMP_CONFIG
 
 #define DUMP_SYS(NAME) \

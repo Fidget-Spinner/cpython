@@ -7,7 +7,7 @@ import sysconfig
 import time
 
 from test import support
-from test.support import os_helper
+from test.support import os_helper, MS_WINDOWS
 
 from .cmdline import _parse_args, Namespace
 from .findtests import findtests, split_test_packages, list_cases
@@ -24,7 +24,7 @@ from .utils import (
     printlist, get_temp_dir, get_work_dir, exit_timeout,
     display_header, cleanup_temp_dir, print_warning,
     is_cross_compiled, get_host_runner,
-    MS_WINDOWS, EXIT_TIMEOUT)
+    EXIT_TIMEOUT)
 
 
 class Regrtest:
@@ -106,8 +106,6 @@ class Regrtest:
         self.fail_env_changed: bool = ns.fail_env_changed
         self.fail_rerun: bool = ns.fail_rerun
         self.forever: bool = ns.forever
-        self.randomize: bool = ns.randomize
-        self.random_seed: int | None = ns.random_seed
         self.output_on_failure: bool = ns.verbose3
         self.timeout: float | None = ns.timeout
         if ns.huntrleaks:
@@ -128,6 +126,17 @@ class Regrtest:
         self.coverage: bool = ns.trace
         self.coverage_dir: StrPath | None = ns.coverdir
         self.tmp_dir: StrPath | None = ns.tempdir
+
+        # Randomize
+        self.randomize: bool = ns.randomize
+        self.random_seed: int | None =  (
+            ns.random_seed
+            if ns.random_seed is not None
+            else random.getrandbits(32)
+        )
+        if 'SOURCE_DATE_EPOCH' in os.environ:
+            self.randomize = False
+            self.random_seed = None
 
         # tests
         self.first_runtests: RunTests | None = None
@@ -209,10 +218,8 @@ class Regrtest:
                 print(f"Cannot find starting test: {self.starting_test}")
                 sys.exit(1)
 
+        random.seed(self.random_seed)
         if self.randomize:
-            if self.random_seed is None:
-                self.random_seed = random.randrange(100_000_000)
-            random.seed(self.random_seed)
             random.shuffle(selected)
 
         return (tuple(selected), tests)
@@ -434,8 +441,7 @@ class Regrtest:
                    or tests or self.cmdline_args)):
             display_header(self.use_resources, self.python_cmd)
 
-        if self.randomize:
-            print("Using random seed", self.random_seed)
+        print("Using random seed", self.random_seed)
 
         runtests = self.create_run_tests(selected)
         self.first_runtests = runtests
