@@ -110,34 +110,36 @@ symtype_passes_guard(_Py_UOpsSymType* sym_type, int guard_opcode, uint32_t aux)
 }
 */
 
-static
+static void
 symtype_set_type(_Py_UOpsSymType* sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux) 
 {
     sym_type->types |= 1 << typ;
     sym_type->aux[typ] = aux;
 }
 
-static
+static void
 symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
 {
-    if (Py_TYPE(obj) == &PyLong_Type) {
+    PyTypeObject *tp = obj->ob_type;
+
+    if (tp == &PyLong_Type) {
         sym_type->types |= 1 << PYINT_TYPE;
     } 
-    else if (Py_TYPE(obj) == &PyFloat_Type) {
+    else if (tp == &PyFloat_Type) {
         sym_type->types |= 1 << PYFLOAT_TYPE;
     }
-    else if (Py_TYPE(obj) == &PyUnicode_Type) {
+    else if (tp == &PyUnicode_Type) {
         sym_type->types |= 1 << PYUNICODE_TYPE;
     }
 
-    if (Py_TYPE(obj)->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
+    if (tp->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
         PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(obj);
 
         if (_PyDictOrValues_IsValues(*dorv) ||
             _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
             sym_type->types |= 1 << GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
             
-            PyTypeObject *owner_cls = Py_TYPE(obj);
+            PyTypeObject *owner_cls = tp;
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
             sym_type->types |= 1 << GUARD_KEYS_VERSION_TYPE;
             sym_type->aux[GUARD_KEYS_VERSION_TYPE] = owner_heap_type->ht_cached_keys->dk_version;
@@ -148,7 +150,6 @@ symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
         }
     }
 
-    PyTypeObject *tp = Py_TYPE(obj);
     sym_type->types |= 1 << GUARD_TYPE_VERSION_STORE_TYPE;
     sym_type->aux[GUARD_TYPE_VERSION_STORE_TYPE] = tp->tp_version_tag;
     sym_type->types |= 1 << GUARD_TYPE_VERSION_TYPE;
@@ -532,10 +533,10 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
         const_val,
         0
     );
-    symtype_set_from_const(&temp->sym_type, const_val);
     if (temp == NULL) {
         return NULL;
     }
+    symtype_set_from_const(&temp->sym_type, const_val);
     return temp;
 }
 
