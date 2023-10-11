@@ -67,7 +67,7 @@ typedef struct {
     // bitmask of types
     uint32_t types;
     // auxillary data for the types
-    uint32_t aux[MAX_TYPE];
+    uint32_t aux[MAX_TYPE + 1];
 } _Py_UOpsSymType;
 
 /*
