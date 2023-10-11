@@ -518,12 +518,60 @@ def _write_components_abstract_interp_impure_region(
         managers: list[EffectManager],
         _,
         out: Formatter):
-    # For impure regions, we just output the stack effect
+    ## For impure regions, we just output the stack effect
+    #for mgr in managers:
+    #    if mgr is managers[-1]:
+    #        out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
+    #        # Use clone() since adjust_inverse() mutates final_offset
+    #        mgr.adjust_inverse(mgr.final_offset.clone())
+
+    # Declare all variables
+    for name, eff in mangled_input_vars.items():
+        out.declare(eff, None)
+
     for mgr in managers:
+
+        # Initialise vars from stack
+        for peek in mgr.peeks:
+            if peek.effect.name == UNUSED:
+                continue
+            copy = dataclasses.replace(peek.effect)
+            copy.name = f"__{copy.name}"
+            out.assign(copy, peek.as_stack_effect())
+
+        # Adjust stack
         if mgr is managers[-1]:
             out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
+
+        # Construct sym expression and write that to output
+        var = ", ".join(mangled_input_vars)
+        if var:
+            var = ", " + var
+        if mgr.pokes:
+
+            out.emit(
+                f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+            )
+
+            out.emit(
+                "if (__sym_temp == NULL) goto error;"
+            )
+
+            # Pure op, we can perform type propagation
+            if (typ := output_var.typeprop) is not None:
+                typname, aux = typ
+                aux = 0 if aux is None else aux
+                out.emit(
+                    f"symtype_set_type(get_symtype(__sym_temp), {typname}, (uint32_t){aux});"
+                )
+
+        for poke in mgr.pokes:
+            if poke.effect.size or not poke.effect.name:
+                continue
+            out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
 
 
 def _write_components_abstract_interp_pure_region(

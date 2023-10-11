@@ -455,24 +455,31 @@
         }
 
         case UNPACK_SEQUENCE: {
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
             break;
         }
 
         case UNPACK_SEQUENCE_TWO_TUPLE: {
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
             break;
         }
 
         case UNPACK_SEQUENCE_TUPLE: {
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
             break;
         }
 
         case UNPACK_SEQUENCE_LIST: {
+            STACK_SHRINK(1);
+            STACK_GROW(oparg);
             break;
         }
 
         case UNPACK_EX: {
-            STACK_GROW(1);
-            STACK_GROW((oparg >> 8));
+            STACK_GROW((oparg & 0xFF) + (oparg >> 8));
             break;
         }
 
@@ -570,17 +577,19 @@
         }
 
         case INSTRUMENTED_LOAD_SUPER_ATTR: {
-            STACK_SHRINK(1);
+            STACK_SHRINK(2);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
             break;
         }
 
         case LOAD_SUPER_ATTR: {
-            STACK_SHRINK(1);
+            STACK_SHRINK(2);
+            STACK_GROW(((oparg & 1) ? 1 : 0));
             break;
         }
 
         case LOAD_SUPER_ATTR_ATTR: {
-            STACK_SHRINK(1);
+            STACK_SHRINK(2);
             break;
         }
 
@@ -914,7 +923,8 @@
         }
 
         case CALL_FUNCTION_EX: {
-            STACK_SHRINK(3);
+            STACK_SHRINK(((oparg & 1) ? 1 : 0));
+            STACK_SHRINK(2);
             break;
         }
 
@@ -932,7 +942,8 @@
         }
 
         case BUILD_SLICE: {
-            STACK_SHRINK(2);
+            STACK_SHRINK(((oparg == 3) ? 1 : 0));
+            STACK_SHRINK(1);
             break;
         }
 

@@ -71,7 +71,9 @@ class Block(Node):
 class StackEffect(Node):
     name: str = field(compare=False)  # __eq__ only uses type, cond, size
     type: str = ""  # Optional `:type`
-    typeprop: None | tuple[str, None | int] = None # Optional `(type, aux)`
+    # Optional `(type, aux)`
+    typeprop: None | tuple[str, None | int] = \
+        field(default_factory=lambda: None, init=True, compare=False, hash=False)
     cond: str = ""  # Optional `if (cond)`
     size: str = ""  # Optional `[size]`
     # Note: size cannot be combined with type or cond
@@ -81,11 +83,6 @@ class StackEffect(Node):
         while items and items[-1] == "":
             del items[-1]
         return f"StackEffect({', '.join(repr(item) for item in items)})"
-
-    def __eq__(self, other: 'StackEffect') -> bool:
-        sitems = [self.name, self.type, self.cond, self.size]
-        oitems = [self.name, self.type, self.cond, self.size]
-        return all(a == b for a,b in zip(sitems, oitems))
 
 @dataclass
 class Expression(Node):
