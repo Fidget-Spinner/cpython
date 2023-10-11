@@ -576,7 +576,7 @@ def _write_components_for_abstract_interp(
                     for name, eff in all_input_vars.items():
                         out.declare(eff, StackEffect(f"get_const(__{name})"))
                     out.declare(output_var, None)
-                    mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE)
+                    mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
                     out.emit(
                         f"__sym_temp = _Py_UOpsSymbolicExpression_New("
                         f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"

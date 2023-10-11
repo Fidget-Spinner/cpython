@@ -258,7 +258,7 @@ class AbstractInstruction(Instruction):
         tier: Tiers,
         family: parsing.Family | None,
     ) -> None:
-        super().write_body(out, dedent, active_caches, TIER_TWO)
+        super().write_body(out, dedent, active_caches, TIER_TWO, family)
 
 
 @dataclasses.dataclass

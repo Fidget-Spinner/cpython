@@ -403,8 +403,8 @@ dummy_func(
         };
 
         pure guard op(_GUARD_BOTH_INT, (left, right -- left, right)) {
-            DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
-            DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
+            DEOPT_IF(!PyLong_CheckExact(left));
+            DEOPT_IF(!PyLong_CheckExact(right));
         }
 
         pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res)) {

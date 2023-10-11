@@ -2352,6 +2352,7 @@ bool _PyOpcode_ispure(int opcode)  {
         case PUSH_NULL:
         case END_SEND:
         case UNARY_NOT:
+        case _GUARD_BOTH_INT:
         case _BINARY_OP_MULTIPLY_INT:
         case _BINARY_OP_ADD_INT:
         case _BINARY_OP_SUBTRACT_INT:
