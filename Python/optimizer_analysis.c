@@ -9,6 +9,7 @@
 #include "cpython/optimizer.h"
 #include "pycore_optimizer.h"
 #include "pycore_object.h"
+#include "pycore_dict.h"
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -705,6 +706,7 @@ uop_abstract_interpret_single_inst(
 #define STAT_INC(opname, name) ((void)0)
     int oparg = inst->oparg;
     int opcode = inst->opcode;
+    uint64_t operand = inst->operand;
 
     _Py_UOpsSymbolicExpression **stack_pointer = ctx->curr_store->stack_pointer;
 

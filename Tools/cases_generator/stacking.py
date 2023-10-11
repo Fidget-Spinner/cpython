@@ -566,26 +566,10 @@ def _write_components_for_abstract_interp(
         if var:
             var = ", " + var
         if mgr.pokes:
-            # If it's a pure op, and outputs only one thing (the constant), we can attempt a constant evaluation.
-            if mgr.instr.inst.pure and len(mgr.instr.output_effects) == 1:
-                output_var = mgr.instr.output_effects[0]
-                out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
-                predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
-                with out.block(f"if ({predicates})"):
-                    # Declare all variables
-                    for name, eff in all_input_vars.items():
-                        out.declare(eff, StackEffect(f"get_const(__{name})"))
-                    out.declare(output_var, None)
-                    mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
-                    out.emit(
-                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
-                    )
-                with out.block("else"):
-                    out.emit(
-                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
-                    )
+            # If it's a pure op or guard op and outputs only one thing (the constant), we can attempt a constant evaluation.
+            # Alternatively, if it's a guard op, try evaluate it too
+            if (mgr.instr.inst.pure and len(mgr.instr.output_effects) == 1) or mgr.instr.inst.guard:
+                try_constant_evaluate_body(all_input_vars, mangled_input_vars, mgr, out, var)
             # Not a pure op, the usual
             else:
                 out.emit(
@@ -600,3 +584,36 @@ def _write_components_for_abstract_interp(
                 out.emit(
                     f"PEEK(-({poke.offset.as_index()})) = __sym_temp;"
                 )
+
+
+def try_constant_evaluate_body(
+        all_input_vars: dict[str, StackEffect],
+        mangled_input_vars: dict[str, StackEffect],
+        mgr: list[EffectManager],
+        out: Formatter,
+        var: str
+):
+    output_var = mgr.instr.output_effects[0]
+    out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
+    predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
+    with out.block(f"if ({predicates})"):
+        # Declare all variables
+        for name, eff in all_input_vars.items():
+            out.declare(eff, StackEffect(f"get_const(__{name})"))
+        # Guards should have no output, they just pass through
+        if not mgr.instr.inst.guard:
+            out.declare(output_var, None)
+        mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
+        # Guard elimination - if we are successful, don't add it to the symexpr!
+        if mgr.instr.inst.guard:
+            out.emit("break;")
+        else:
+            out.emit(
+                f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+            )
+    with out.block("else"):
+        out.emit(
+            f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+            f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+        )
