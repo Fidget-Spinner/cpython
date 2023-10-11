@@ -178,14 +178,13 @@
                 PyObject *right = get_const(__right);
                 DEOPT_IF(!PyLong_CheckExact(left), _GUARD_BOTH_INT);
                 DEOPT_IF(!PyLong_CheckExact(right), _GUARD_BOTH_INT);
+                DPRINTF(2, "eliminated guard\n");
                 break;
             }
             else {
-                break;
+                goto guard_required;
             }
-            if (__sym_temp == NULL) goto error;
-            PEEK(-(-2)) = __sym_temp;
-            PEEK(-(-1)) = __sym_temp;
+            goto guard_required;
             break;
         }
 
@@ -368,14 +367,13 @@
                 PyObject *right = get_const(__right);
                 DEOPT_IF(!PyUnicode_CheckExact(left), _GUARD_BOTH_UNICODE);
                 DEOPT_IF(!PyUnicode_CheckExact(right), _GUARD_BOTH_UNICODE);
+                DPRINTF(2, "eliminated guard\n");
                 break;
             }
             else {
-                break;
+                goto guard_required;
             }
-            if (__sym_temp == NULL) goto error;
-            PEEK(-(-2)) = __sym_temp;
-            PEEK(-(-1)) = __sym_temp;
+            goto guard_required;
             break;
         }
 
@@ -843,10 +841,12 @@
         }
 
         case _GUARD_GLOBALS_VERSION: {
+            goto guard_required;
             break;
         }
 
         case _GUARD_BUILTINS_VERSION: {
+            goto guard_required;
             break;
         }
 
@@ -1580,13 +1580,13 @@
                 assert(Py_TYPE(owner)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
                 PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(owner);
                 DEOPT_IF(!_PyDictOrValues_IsValues(*dorv) && !_PyObject_MakeInstanceAttributesFromDict(owner, dorv), _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT);
+                DPRINTF(2, "eliminated guard\n");
                 break;
             }
             else {
-                break;
+                goto guard_required;
             }
-            if (__sym_temp == NULL) goto error;
-            PEEK(-(-1)) = __sym_temp;
+            goto guard_required;
             break;
         }
 
@@ -1600,13 +1600,13 @@
                 PyTypeObject *owner_cls = Py_TYPE(owner);
                 PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
                 DEOPT_IF(owner_heap_type->ht_cached_keys->dk_version != keys_version, _GUARD_KEYS_VERSION);
+                DPRINTF(2, "eliminated guard\n");
                 break;
             }
             else {
-                break;
+                goto guard_required;
             }
-            if (__sym_temp == NULL) goto error;
-            PEEK(-(-1)) = __sym_temp;
+            goto guard_required;
             break;
         }
 
@@ -1677,6 +1677,7 @@
         }
 
         case _CHECK_PEP_523: {
+            goto guard_required;
             break;
         }
 

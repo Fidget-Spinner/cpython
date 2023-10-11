@@ -455,7 +455,7 @@ sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, int opcode, int oparg, int nu
             opcode,
             oparg,
             num_stack_inputs,
-            &ctx->curr_store->stack_pointer[-(num_stack_inputs + 1)]
+            &ctx->curr_store->stack_pointer[-(num_stack_inputs)]
         );
 }
 
@@ -478,7 +478,7 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx)
     // Setup
 
     // Initialize the hoisted guards
-    self->hoisted_guards = PyList_New();
+    self->hoisted_guards = PyList_New(2);
     if (self->hoisted_guards == NULL) {
         return NULL;
     }
@@ -517,9 +517,9 @@ error:
 }
 
 static struct _Py_UopImpureInstruction*
-_Py_UOpsImupreInstruction_New(_Py_UOpsAbstractInterpContext *ctx)
+_Py_UOpsImpureInstruction_New(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *inst)
 {
-    _Py_UOpsAbstractStore *self = PyObject_NewVar(_Py_UopImpureInstruction,
+    _Py_UopImpureInstruction *self = PyObject_NewVar(_Py_UopImpureInstruction,
                                                   &_PyUOpsImpureInstruction_Type,
                                                   0);
     if (self == NULL) {
@@ -528,6 +528,8 @@ _Py_UOpsImupreInstruction_New(_Py_UOpsAbstractInterpContext *ctx)
     self->store_or_inst = 0;
     self->next = NULL;
 
+    self->inst = inst;
+
     return self;
 }
 
@@ -535,6 +537,12 @@ static inline bool
 op_is_jump(int opcode)
 {
     return (opcode == _POP_JUMP_IF_FALSE || opcode == _POP_JUMP_IF_TRUE);
+}
+
+static inline bool
+op_is_end(int opcode)
+{
+    return opcode == _EXIT_TRACE || op_is_jump(opcode);
 }
 
 static inline bool
@@ -688,6 +696,12 @@ fix_jump_side_exits(_PyUOpInstruction *trace, int trace_len,
     }
 }
 
+typedef enum {
+    ERROR,
+    NORMAL,
+    GUARD_REQUIRED,
+} AbstractInterpExitCodes;
+
 // 1 on success
 // 0 on failure
 // -1 on exception
@@ -753,6 +767,11 @@ do { \
         _Py_DECREF_NO_DEALLOC(right); \
     } \
 } while (0)
+
+#define DEOPT_IF(COND, INSTNAME) \
+    if ((COND)) {                \
+        goto guard_required;         \
+    }
 
 #ifndef Py_DEBUG
 #define GETITEM(v, i) PyTuple_GET_ITEM((v), (i))
@@ -856,7 +875,11 @@ uop_abstract_interpret_single_inst(
         case LOAD_CONST: {
             // TODO, keep a dictionary mapping constant values to their unique symbolic expression
             STACK_GROW(1);
-            PEEK(1) = (_Py_UOpsSymbolicExpression *)GETITEM(co->co_consts, oparg);
+            PEEK(1) = (_Py_UOpsSymbolicExpression *)sym_init_const(
+                ctx,
+                GETITEM(co->co_consts, oparg),
+                oparg
+            );
             break;
         }
         case STORE_FAST:
@@ -883,17 +906,19 @@ uop_abstract_interpret_single_inst(
     ctx->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
 
-
-    return 0;
+    return NORMAL;
 
 pop_4_error:
 pop_3_error:
 pop_2_error:
 pop_1_error:
-deoptimize:
 error:
     DPRINTF(1, "Encountered error in abstract interpreter\n");
-    return -1;
+    return ERROR;
+
+guard_required:
+    DPRINTF(2, "Guard is required\n");
+    return GUARD_REQUIRED;
 }
 
 static _Py_UOpsAbstractStore *
@@ -948,44 +973,85 @@ uop_abstract_interpret(
     _PyUOpInstruction *curr = trace;
     _PyUOpInstruction *end = trace + trace_len;
 
-    while (curr < end) {
+    while (curr < end && !op_is_end(curr->opcode)) {
 
         DPRINTF(3, "starting pure region\n")
 
         // Form pure regions
         while(_PyOpcode_ispure(curr->opcode) || _PyOpcode_isguard(curr->opcode)) {
 
-            int err = uop_abstract_interpret_single_inst(
+            int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
                 jump_id_to_instruction, max_jump_id
             );
-            if (err < 0) {
+            if (status == ERROR) {
                 goto error;
             }
 
-            if (curr->opcode == _EXIT_TRACE) {
-                break;
+            if (status == GUARD_REQUIRED) {
+                int res = try_hoist_guard(ctx, curr, prev_store_locals);
+                if (res < 0) {
+                    goto error;
+                }
+                // Cannot hoist the guard, break out of pure region formation.
+                if (res == 0) {
+                    DPRINTF(3, "breaking out due to guard\n");
+                    break;
+                }
+                DPRINTF(3, "hoisted guard!\n");
             }
 
             curr++;
-        }
 
-
-        if (_PyOpcode_isguard(curr->opcode)) {
-            int res = try_hoist_guard(ctx, curr, prev_store_locals);
-            if (res < 0) {
-                goto error;
-            }
-            // Cannot hoist the guard, break out of pure region formation.
-            if (res == 0) {
+            if (op_is_end(curr->opcode)) {
                 break;
             }
         }
 
+
+
         prev_store_locals = store->locals;
 
-        // End of a pure region, create a new abstract store
-        if (curr->opcode != _EXIT_TRACE) {
+        if (!op_is_end(curr->opcode)) {
+            break;
+        }
+
+        // Form impure region
+        while (!_PyOpcode_ispure(curr->opcode)) {
+            DPRINTF(3, "creating impure region\n")
+            DPRINTF(3, "opcode: %d\n", curr->opcode);
+            int num_stack_inputs = _PyOpcode_num_popped(curr->opcode, curr->oparg, false);
+            _Py_UOpsAbstractStore *temp = store;
+            _Py_UOpsSymbolicExpression *impure_inst =
+                _Py_UOpsSymbolicExpression_NewFromArray(
+                    ctx,
+                    curr->opcode,
+                    curr->oparg,
+                    num_stack_inputs,
+                    &ctx->curr_store->stack_pointer[-(num_stack_inputs)]
+                );
+            if (impure_inst == NULL) {
+                goto error;
+            }
+            store = _Py_UOpsImpureInstruction_New(ctx, impure_inst);
+            if (store == NULL) {
+                goto error;
+            }
+            // Transfer the reference over (note: No incref!)
+            temp->next = store;
+            ctx->curr_store = temp;
+            store = temp;
+
+            curr++;
+            if (op_is_end(curr->opcode)) {
+                break;
+            }
+        }
+        // End of an impure instruction, create a new abstract store for
+        // the next pure region.
+        // TODO we can do some memory optimization here to not use abstract
+        // stores each time, since that's quite overkill.
+        if (!op_is_end(curr->opcode)) {
             _Py_UOpsAbstractStore *temp = store;
             store = _Py_UOpsAsbstractStore_New(ctx);
             if (store == NULL) {
@@ -995,49 +1061,7 @@ uop_abstract_interpret(
             temp->next = store;
             ctx->curr_store = temp;
             store = temp;
-        }
-
-        DPRINTF(3, "starting impure region\n")
-        // Form impure region
-        if(!_PyOpcode_ispure(curr->opcode)) {
-
-
-            int num_stack_inputs = _PyOpcode_num_popped(curr->opcode, curr->oparg, false);
-            _Py_UOpsAbstractStore *temp = store;
-            store = (_Py_UOpsAbstractStore *)
-                _Py_UOpsSymbolicExpression_NewFromArray(
-                ctx,
-                curr->opcode,
-                curr->oparg,
-                num_stack_inputs,
-                &ctx->curr_store->stack_pointer[-(num_stack_inputs + 1)]
-            );
-            if (store == NULL) {
-                goto error;
-            }
-            // Transfer the reference over (note: No incref!)
-            temp->next = store;
-            ctx->curr_store = temp;
-            store = temp;
-
-            curr++;
-
-            // End of an impure instruction, create a new abstract store for
-            // the next pure region.
-            // TODO we can do some memory optimization here to not use abstract
-            // stores each time, since that's quite overkill.
-            if (curr->opcode != _EXIT_TRACE) {
-                _Py_UOpsAbstractStore *temp = store;
-                store = _Py_UOpsAsbstractStore_New(ctx);
-                if (store == NULL) {
-                    goto error;
-                }
-                // Transfer the reference over (note: No incref!)
-                temp->next = store;
-                ctx->curr_store = temp;
-                store = temp;
-            };
-        }
+        };
 
     }
 
