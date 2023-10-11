@@ -181,7 +181,7 @@
                 break;
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 2 , __left, __right);
+                break;
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-2)) = __sym_temp;
@@ -371,7 +371,7 @@
                 break;
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 2 , __left, __right);
+                break;
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-2)) = __sym_temp;
@@ -1583,7 +1583,7 @@
                 break;
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
+                break;
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
@@ -1603,7 +1603,7 @@
                 break;
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
+                break;
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;

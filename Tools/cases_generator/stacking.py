@@ -613,7 +613,10 @@ def try_constant_evaluate_body(
                 f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
             )
     with out.block("else"):
-        out.emit(
-            f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-            f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
-        )
+        if mgr.instr.inst.guard:
+            out.emit("break;")
+        else:
+            out.emit(
+                f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+            )
