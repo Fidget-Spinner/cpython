@@ -78,7 +78,9 @@ static void
 symtype_set_type(_Py_UOpsSymType* sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
 {
     sym_type->types |= 1 << typ;
-    sym_type->aux[typ] = aux;
+    if (typ <= MAX_TYPE_WITH_AUX) {
+        sym_type->aux[typ] = aux;
+    }
 }
 
 static void
@@ -87,13 +89,13 @@ symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
     PyTypeObject *tp = Py_TYPE(obj);
 
     if (tp == &PyLong_Type) {
-        sym_type->types |= 1 << PYINT_TYPE;
+        symtype_set_type(sym_type, PYINT_TYPE, 0);
     }
     else if (tp == &PyFloat_Type) {
-        sym_type->types |= 1 << PYFLOAT_TYPE;
+        symtype_set_type(sym_type, PYFLOAT_TYPE, 0);
     }
     else if (tp == &PyUnicode_Type) {
-        sym_type->types |= 1 << PYUNICODE_TYPE;
+        symtype_set_type(sym_type, PYUNICODE_TYPE, 0);
     }
 
     if (tp->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
@@ -101,23 +103,24 @@ symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
 
         if (_PyDictOrValues_IsValues(*dorv) ||
             _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
-            sym_type->types |= 1 << GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
+            symtype_set_type(sym_type, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, 0);
 
             PyTypeObject *owner_cls = tp;
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
-            sym_type->types |= 1 << GUARD_KEYS_VERSION_TYPE;
-            sym_type->aux[GUARD_KEYS_VERSION_TYPE] = owner_heap_type->ht_cached_keys->dk_version;
+            symtype_set_type(
+                sym_type,
+                GUARD_KEYS_VERSION_TYPE,
+                owner_heap_type->ht_cached_keys->dk_version
+            );
         }
 
         if (!_PyDictOrValues_IsValues(*dorv)) {
-            sym_type->types |= 1 << GUARD_DORV_VALUES_TYPE;
+            symtype_set_type(sym_type, GUARD_DORV_VALUES_TYPE, 0);
         }
     }
 
-    sym_type->types |= 1 << GUARD_TYPE_VERSION_STORE_TYPE;
-    sym_type->aux[GUARD_TYPE_VERSION_STORE_TYPE] = tp->tp_version_tag;
-    sym_type->types |= 1 << GUARD_TYPE_VERSION_TYPE;
-    sym_type->aux[GUARD_TYPE_VERSION_TYPE] = tp->tp_version_tag;
+    symtype_set_type(sym_type, GUARD_TYPE_VERSION_STORE_TYPE, tp->tp_version_tag);
+    symtype_set_type(sym_type, GUARD_TYPE_VERSION_TYPE, tp->tp_version_tag);
 }
 
 
