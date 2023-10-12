@@ -1089,10 +1089,6 @@ uop_abstract_interpret(
             }
 
             curr++;
-
-            if (op_is_end(curr->opcode)) {
-                break;
-            }
         }
 
 
