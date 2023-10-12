@@ -637,7 +637,7 @@ def _write_components_abstract_interp_guard_region(
     # TODO:
     # 1. Attempt to perform hoisting and guard elimination
     # 2. Type propagate for guard success
-    out.emit("goto guard_required")
+    out.emit("goto guard_required;")
 
 
 def _write_components_for_abstract_interp(

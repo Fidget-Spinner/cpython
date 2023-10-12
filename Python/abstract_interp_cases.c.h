@@ -168,7 +168,7 @@
         }
 
         case _GUARD_BOTH_INT: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -254,7 +254,7 @@
         }
 
         case _GUARD_BOTH_FLOAT: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -340,7 +340,7 @@
         }
 
         case _GUARD_BOTH_UNICODE: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -808,12 +808,12 @@
         }
 
         case _GUARD_GLOBALS_VERSION: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
         case _GUARD_BUILTINS_VERSION: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -949,7 +949,7 @@
         }
 
         case _GUARD_TYPE_VERSION: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -1065,7 +1065,7 @@
         }
 
         case _GUARD_DORV_VALUES: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -1531,12 +1531,12 @@
         }
 
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
         case _GUARD_KEYS_VERSION: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
@@ -1607,7 +1607,7 @@
         }
 
         case _CHECK_PEP_523: {
-            goto guard_required
+            goto guard_required;
             break;
         }
 
