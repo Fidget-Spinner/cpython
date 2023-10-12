@@ -186,12 +186,10 @@ class EffectManager:
         self.final_offset = pred.final_offset.clone() if pred else StackOffset()
         for eff in reversed(instr.input_effects):
             self.final_offset.deeper(eff)
-            self.peeks.append(
-                StackItem(offset=self.final_offset.clone(), effect=eff))
+            self.peeks.append(StackItem(offset=self.final_offset.clone(), effect=eff))
         self.min_offset = self.final_offset.clone()
         for eff in instr.output_effects:
-            self.pokes.append(
-                StackItem(offset=self.final_offset.clone(), effect=eff))
+            self.pokes.append(StackItem(offset=self.final_offset.clone(), effect=eff))
             self.final_offset.higher(eff)
 
         self.pred = pred
@@ -356,8 +354,7 @@ def write_single_instr(
             0,
         )
     except AssertionError as err:
-        raise AssertionError(
-            f"Error writing instruction {instr.name}") from err
+        raise AssertionError(f"Error writing instruction {instr.name}") from err
 
 
 def write_macro_instr(
@@ -374,8 +371,7 @@ def write_macro_instr(
             out.emit(f"PREDICTED({mac.name});")
         out.static_assert_family_size(mac.name, family, mac.cache_offset)
         try:
-            next_instr_is_set = write_components(
-                parts, out, TIER_ONE, mac.cache_offset)
+            next_instr_is_set = write_components(parts, out, TIER_ONE, mac.cache_offset)
         except AssertionError as err:
             raise AssertionError(f"Error writing macro {mac.name}") from err
         if not parts[-1].instr.always_exits:
@@ -640,8 +636,7 @@ def _write_components_for_abstract_interp(
                 all_input_vars[name] = eff
 
     # Mangle the input variables
-    mangled_input_vars = {f"__{k}": dataclasses.replace(
-        v) for k, v in all_input_vars.items()}
+    mangled_input_vars = {f"__{k}": dataclasses.replace(v) for k, v in all_input_vars.items()}
     for var in mangled_input_vars.values():
         var.name = f"__{var.name}"
         var.type = "_Py_UOpsSymbolicExpression *"
