@@ -270,7 +270,7 @@ class Parser(PLexer):
 
     @contextual
     def stack_effect(self) -> StackEffect | None:
-        #   IDENTIFIER [':' [IDENTIFIER [TIMES]] ['~' '(' IDENTIFIER ['-' IDENTIFIER] ')']] ['if' '(' expression ')']
+        #   IDENTIFIER [':' [IDENTIFIER [TIMES]] ['~' '(' IDENTIFIER ['+' IDENTIFIER] ')']] ['if' '(' expression ')']
         # | IDENTIFIER '[' expression ']'
         if tkn := self.expect(lx.IDENTIFIER):
             type_text = ""
@@ -284,7 +284,7 @@ class Parser(PLexer):
                     self.require(lx.LPAREN)
                     typeprop_text = self.require(lx.IDENTIFIER).text.strip()
                     aux = None
-                    if self.expect(lx.MINUS):
+                    if self.expect(lx.PLUS):
                         aux = self.require(lx.IDENTIFIER).text.strip()
                     typeprop = (typeprop_text, aux)
                     self.require(lx.RPAREN)

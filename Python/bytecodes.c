@@ -1866,7 +1866,7 @@ dummy_func(
             LOAD_ATTR,
         };
 
-        guard op(_GUARD_TYPE_VERSION, (type_version/2, owner: ~(GUARD_TYPE_VERSION_TYPE - type_version) -- owner)) {
+        guard op(_GUARD_TYPE_VERSION, (type_version/2, owner: ~(GUARD_TYPE_VERSION_TYPE + type_version) -- owner)) {
             PyTypeObject *tp = Py_TYPE(owner);
             assert(type_version != 0);
             DEOPT_IF(tp->tp_version_tag != type_version, LOAD_ATTR);
@@ -2095,7 +2095,7 @@ dummy_func(
             Py_DECREF(owner);
         }
 
-        guard op(_GUARD_TYPE_VERSION_STORE, (type_version/2, owner: ~(GUARD_TYPE_VERSION_STORE_TYPE - type_version) -- owner)) {
+        guard op(_GUARD_TYPE_VERSION_STORE, (type_version/2, owner: ~(GUARD_TYPE_VERSION_STORE_TYPE + type_version) -- owner)) {
             PyTypeObject *tp = Py_TYPE(owner);
             assert(type_version != 0);
             DEOPT_IF(tp->tp_version_tag != type_version, STORE_ATTR);
@@ -2800,7 +2800,7 @@ dummy_func(
                      LOAD_ATTR);
         }
 
-        guard op(_GUARD_KEYS_VERSION, (keys_version/2, owner: ~(GUARD_KEYS_VERSION_TYPE - keys_version) -- owner)) {
+        guard op(_GUARD_KEYS_VERSION, (keys_version/2, owner: ~(GUARD_KEYS_VERSION_TYPE + keys_version) -- owner)) {
             PyTypeObject *owner_cls = Py_TYPE(owner);
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
             DEOPT_IF(owner_heap_type->ht_cached_keys->dk_version !=
