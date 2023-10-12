@@ -45,16 +45,20 @@ _PyOpcode_isterminal(int opcode)
 
 
 typedef enum {
-    PYINT_TYPE = 0,
-    PYFLOAT_TYPE = 1,
-    PYUNICODE_TYPE = 2,
-    // GUARD_GLOBALS_VERSION_TYPE,
-    // GUARD_BUILTINS_VERSION_TYPE,
-    GUARD_DORV_VALUES_TYPE = 3,
-    GUARD_TYPE_VERSION_STORE_TYPE = 4,
-    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 5,
-    GUARD_KEYS_VERSION_TYPE = 6,
-    GUARD_TYPE_VERSION_TYPE = 7,
+    // Types with aux
+    GUARD_TYPE_VERSION_STORE_TYPE = 0,
+    GUARD_KEYS_VERSION_TYPE = 1,
+    GUARD_TYPE_VERSION_TYPE = 2,
+
+    // Types without aux
+    PYINT_TYPE = 3,
+    PYFLOAT_TYPE = 4,
+    PYUNICODE_TYPE = 5,
+    GUARD_DORV_VALUES_TYPE = 6,
+    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 7,
+
+    // GUARD_GLOBALS_VERSION_TYPE, / Environment check
+    // GUARD_BUILTINS_VERSION_TYPE, // Environment check
     // CHECK_CALL_BOUND_METHOD_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
     // CHECK_PEP_523_TYPE, // Environment check
     // CHECK_FUNCTION_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
@@ -62,56 +66,16 @@ typedef enum {
     INVALID_TYPE = -1
 } _Py_UOpsSymExprTypeEnum;
 
-#define MAX_TYPE 7
+#define MAX_TYPE_WITH_AUX 2
 typedef struct {
     // bitmask of types
     uint32_t types;
     // auxillary data for the types
-    uint32_t aux[MAX_TYPE + 1];
+    uint32_t aux[MAX_TYPE_WITH_AUX + 1];
 } _Py_UOpsSymType;
 
-/*
-static _Py_UOpsSymExprTypeEnum 
-symtype_guard_to_type_enum(int guard_opcde) 
-{
-    switch (guard_opcde) {
-        case _GUARD_BOTH_INT: return PYINT_TYPE;
-        case _GUARD_BOTH_FLOAT: return PYFLOAT_TYPE;
-        case _GUARD_BOTH_UNICODE: return PYUNICODE_TYPE;
-        case _GUARD_DORV_VALUES: return GUARD_DORV_VALUES_TYPE;
-        case _GUARD_TYPE_VERSION_STORE: return GUARD_TYPE_VERSION_STORE_TYPE;
-        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: return GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
-        case _GUARD_KEYS_VERSION: return GUARD_KEYS_VERSION_TYPE;
-        case _GUARD_TYPE_VERSION: return GUARD_TYPE_VERSION_TYPE;
-        default: Py_UNREACHABLE();
-    }
-}
-
-static bool
-symtype_passes_guard(_Py_UOpsSymType* sym_type, int guard_opcode, uint32_t aux) 
-{
-    _Py_UOpsSymExprTypeEnum typ = symtype_guard_to_type_enum(guard_opcode);
-    bool bit = (sym_type->types >> typ) & 1;
-    if (!bit) {
-        return false;
-    }
-
-    switch (typ) {
-        case PYINT_TYPE:
-        case PYFLOAT_TYPE:
-        case PYUNICODE_TYPE: 
-        case GUARD_DORV_VALUES_TYPE: 
-        case GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE: return true;
-        case GUARD_TYPE_VERSION_STORE_TYPE:
-        case GUARD_TYPE_VERSION_TYPE:
-        case GUARD_KEYS_VERSION_TYPE: return aux == sym_type->aux[typ];
-        default: Py_UNREACHABLE();
-    }
-}
-*/
-
 static void
-symtype_set_type(_Py_UOpsSymType* sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux) 
+symtype_set_type(_Py_UOpsSymType* sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
 {
     sym_type->types |= 1 << typ;
     sym_type->aux[typ] = aux;
@@ -120,11 +84,11 @@ symtype_set_type(_Py_UOpsSymType* sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_
 static void
 symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
 {
-    PyTypeObject *tp = obj->ob_type;
+    PyTypeObject *tp = Py_TYPE(obj);
 
     if (tp == &PyLong_Type) {
         sym_type->types |= 1 << PYINT_TYPE;
-    } 
+    }
     else if (tp == &PyFloat_Type) {
         sym_type->types |= 1 << PYFLOAT_TYPE;
     }
@@ -138,7 +102,7 @@ symtype_set_from_const(_Py_UOpsSymType* sym_type, PyObject* obj)
         if (_PyDictOrValues_IsValues(*dorv) ||
             _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
             sym_type->types |= 1 << GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE;
-            
+
             PyTypeObject *owner_cls = tp;
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
             sym_type->types |= 1 << GUARD_KEYS_VERSION_TYPE;
