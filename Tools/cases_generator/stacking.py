@@ -514,8 +514,8 @@ def write_single_instr_for_abstract_interp(instr: Instruction, out: Formatter) -
 
 def _write_components_abstract_interp_impure_region(
         managers: list[EffectManager],
-        mangled_input_vars,
-        out: Formatter):
+        mangled_input_vars: dict[str, StackEffect],
+        out: Formatter) -> None:
 
     # Declare all variables
     for _, eff in mangled_input_vars.items():
@@ -559,7 +559,7 @@ def _write_components_abstract_interp_pure_region(
         managers: list[EffectManager],
         input_vars: dict[str, StackEffect],
         mangled_input_vars: dict[str, StackEffect],
-        out: Formatter):
+        out: Formatter) -> None:
 
     # Declare all variables
     for name, eff in mangled_input_vars.items():
@@ -619,7 +619,7 @@ def _write_components_abstract_interp_pure_region(
             # Pure op, we can perform type propagation
             if (typ := output_var.typeprop) is not None:
                 typname, aux = typ
-                aux = 0 if aux is None else aux
+                aux = "0" if aux is None else aux
                 out.emit(
                     f"symtype_set_type(get_symtype(__sym_temp), {typname}, (uint32_t){aux});"
                 )
@@ -633,7 +633,7 @@ def _write_components_abstract_interp_pure_region(
 def _write_components_abstract_interp_guard_region(
         managers: list[EffectManager],
         mangled_input_vars: dict[str, StackEffect],
-        out: Formatter):
+        out: Formatter) -> None:
     # TODO:
     # 1. Attempt to perform hoisting and guard elimination
     # 2. Type propagate for guard success

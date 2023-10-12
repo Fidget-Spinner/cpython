@@ -72,7 +72,7 @@ class StackEffect(Node):
     name: str = field(compare=False)  # __eq__ only uses type, cond, size
     type: str = ""  # Optional `:type`
     # Optional `(type, aux)`
-    typeprop: None | tuple[str, None | int] = \
+    typeprop: None | tuple[str, None | str] = \
         field(default_factory=lambda: None, init=True, compare=False, hash=False)
     cond: str = ""  # Optional `if (cond)`
     size: str = ""  # Optional `[size]`
@@ -199,7 +199,7 @@ class Parser(PLexer):
                     if self.expect(lx.RPAREN):
                         if (tkn := self.peek()) and tkn.kind == lx.LBRACE:
                             is_in_typeprop = any(isinstance(i, StackEffect) and i.typeprop for i in inp)
-                            is_out_typeprop = any(isinstance(o, StackEffect) and o.typeprop for o in outp)
+                            is_out_typeprop = any(o.typeprop for o in outp)
                             if is_out_typeprop and not pure:
                                 self.make_syntax_error("Unexpected output typeprop annotation in non-pure opcode!")
                             if is_in_typeprop and not guard:
