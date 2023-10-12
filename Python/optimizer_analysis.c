@@ -784,9 +784,9 @@ fix_jump_side_exits(_PyUOpInstruction *trace, int trace_len,
 }
 
 typedef enum {
-    ERROR,
-    NORMAL,
-    GUARD_REQUIRED,
+    ABSTRACT_INTERP_ERROR,
+    ABSTRACT_INTERP_NORMAL,
+    ABSTRACT_INTERP_GUARD_REQUIRED,
 } AbstractInterpExitCodes;
 
 // 1 on success
@@ -993,7 +993,7 @@ uop_abstract_interpret_single_inst(
     ctx->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
 
-    return NORMAL;
+    return ABSTRACT_INTERP_NORMAL;
 
 pop_4_error:
 pop_3_error:
@@ -1001,11 +1001,11 @@ pop_2_error:
 pop_1_error:
 error:
     DPRINTF(1, "Encountered error in abstract interpreter\n");
-    return ERROR;
+    return ABSTRACT_INTERP_ERROR;
 
 guard_required:
     DPRINTF(2, "Guard is required\n");
-    return GUARD_REQUIRED;
+    return ABSTRACT_INTERP_GUARD_REQUIRED;
 }
 
 static _Py_UOpsAbstractStore *
@@ -1075,7 +1075,7 @@ uop_abstract_interpret(
                 goto error;
             }
 
-            if (status == GUARD_REQUIRED) {
+            if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
                 int res = try_hoist_guard(ctx, curr, prev_store_locals);
                 if (res < 0) {
                     goto error;
