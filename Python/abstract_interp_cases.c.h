@@ -973,7 +973,16 @@
             break;
         }
 
-        case LOAD_ATTR_MODULE: {
+        case _CHECK_ATTR_MODULE: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_ATTR_MODULE: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(((oparg & 1) ? 1 : 0));
@@ -984,7 +993,16 @@
             break;
         }
 
-        case LOAD_ATTR_WITH_HINT: {
+        case _CHECK_ATTR_WITH_HINT: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_ATTR_WITH_HINT: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(((oparg & 1) ? 1 : 0));
@@ -1006,7 +1024,16 @@
             break;
         }
 
-        case LOAD_ATTR_CLASS: {
+        case _CHECK_ATTR_CLASS: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_ATTR_CLASS: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(((oparg & 1) ? 1 : 0));
@@ -1057,11 +1084,6 @@
             __owner = stack_pointer[-1];
             __value = stack_pointer[-2];
             STACK_SHRINK(2);
-            break;
-        }
-
-        case _GUARD_TYPE_VERSION_STORE: {
-            goto guard_required
             break;
         }
 
@@ -1540,7 +1562,7 @@
             break;
         }
 
-        case LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+        case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
@@ -1550,7 +1572,7 @@
             break;
         }
 
-        case LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
+        case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
@@ -1560,7 +1582,16 @@
             break;
         }
 
-        case LOAD_ATTR_METHOD_LAZY_DICT: {
+        case _CHECK_ATTR_METHOD_LAZY_DICT: {
+            _Py_UOpsSymbolicExpression *__owner;
+            __owner = stack_pointer[-1];
+            _Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 1 , __owner);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_ATTR_METHOD_LAZY_DICT: {
             _Py_UOpsSymbolicExpression *__owner;
             __owner = stack_pointer[-1];
             STACK_GROW(1);

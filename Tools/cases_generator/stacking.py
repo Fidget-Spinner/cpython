@@ -352,14 +352,13 @@ def write_single_instr(
             out,
             tier,
             0,
+            instr.family,
         )
     except AssertionError as err:
         raise AssertionError(f"Error writing instruction {instr.name}") from err
 
 
-def write_macro_instr(
-    mac: MacroInstruction, out: Formatter, family: Family | None
-) -> None:
+def write_macro_instr(mac: MacroInstruction, out: Formatter) -> None:
     parts = [
         part
         for part in mac.parts
@@ -369,9 +368,11 @@ def write_macro_instr(
     with out.block(f"TARGET({mac.name})"):
         if mac.predicted:
             out.emit(f"PREDICTED({mac.name});")
-        out.static_assert_family_size(mac.name, family, mac.cache_offset)
+        out.static_assert_family_size(mac.name, mac.family, mac.cache_offset)
         try:
-            next_instr_is_set = write_components(parts, out, TIER_ONE, mac.cache_offset)
+            next_instr_is_set = write_components(
+                parts, out, TIER_ONE, mac.cache_offset, mac.family
+            )
         except AssertionError as err:
             raise AssertionError(f"Error writing macro {mac.name}") from err
         if not parts[-1].instr.always_exits:
@@ -387,6 +388,7 @@ def write_components(
     out: Formatter,
     tier: Tiers,
     cache_offset: int,
+    family: Family | None,
 ) -> bool:
     managers = get_managers(parts)
 
@@ -455,10 +457,10 @@ def write_components(
                 assert_no_pokes(managers)
 
         if len(parts) == 1:
-            mgr.instr.write_body(out, 0, mgr.active_caches, tier)
+            mgr.instr.write_body(out, 0, mgr.active_caches, tier, family)
         else:
             with out.block(""):
-                mgr.instr.write_body(out, -4, mgr.active_caches, tier)
+                mgr.instr.write_body(out, -4, mgr.active_caches, tier, family)
 
         if mgr is managers[-1] and not next_instr_is_set and not mgr.instr.always_exits:
             # Adjust the stack to its final depth, *then* write the
@@ -598,7 +600,7 @@ def _write_components_abstract_interp_pure_region(
                 for name, eff in input_vars.items():
                     out.declare(eff, StackEffect(f"get_const(__{name})"))
                 out.declare(output_var, None)
-                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE)
+                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
                 out.emit(
                     f"__sym_temp = _Py_UOpsSymbolicExpression_New("
                     f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
