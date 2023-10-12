@@ -1071,7 +1071,7 @@ uop_abstract_interpret(
                 co, curr, ctx,
                 jump_id_to_instruction, max_jump_id
             );
-            if (status == ERROR) {
+            if (status == ABSTRACT_INTERP_ERROR) {
                 goto error;
             }
 

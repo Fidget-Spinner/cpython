@@ -639,6 +639,42 @@ def _write_components_abstract_interp_guard_region(
     # 2. Type propagate for guard success
     out.emit("goto guard_required;")
 
+# Reference code: (remove later)
+# def try_constant_evaluate_body(
+#         all_input_vars: dict[str, StackEffect],
+#         mangled_input_vars: dict[str, StackEffect],
+#         mgr: list[EffectManager],
+#         out: Formatter,
+#         var: str
+# ):
+#     output_var = mgr.instr.output_effects[0]
+#     out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
+#     predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
+#     with out.block(f"if ({predicates})"):
+#         # Declare all variables
+#         for name, eff in all_input_vars.items():
+#             out.declare(eff, StackEffect(f"get_const(__{name})"))
+#         # Guards should have no output, they just pass through
+#         if not mgr.instr.inst.guard:
+#             out.declare(output_var, None)
+#         mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
+#         # Guard elimination - if we are successful, don't add it to the symexpr!
+#         if mgr.instr.inst.guard:
+#             out.emit('DPRINTF(2, "eliminated guard\\n");')
+#             out.emit("break;")
+#         else:
+#             out.emit(
+#                 f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+#                 f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+#             )
+#     with out.block("else"):
+#         if mgr.instr.inst.guard:
+#             out.emit("goto guard_required;")
+#         else:
+#             out.emit(
+#                 f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+#                 f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+#             )
 
 def _write_components_for_abstract_interp(
     parts: list[Component],

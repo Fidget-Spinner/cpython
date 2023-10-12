@@ -394,8 +394,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_MULTIPLY_INT
             {
@@ -419,8 +419,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_ADD_INT
             {
@@ -444,8 +444,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_SUBTRACT_INT
             {
@@ -469,8 +469,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_MULTIPLY_FLOAT
             {
@@ -494,8 +494,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_ADD_FLOAT
             {
@@ -519,8 +519,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_SUBTRACT_FLOAT
             {
@@ -544,8 +544,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_ADD_UNICODE
             {
@@ -568,8 +568,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP, BINARY_OP);
-                DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP, BINARY_OP);
+                DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP);
+                DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP);
             }
             // _BINARY_OP_INPLACE_ADD_UNICODE
             {

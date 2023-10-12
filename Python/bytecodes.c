@@ -403,8 +403,8 @@ dummy_func(
         };
 
         guard op(_GUARD_BOTH_INT, (left: ~(PYINT_TYPE), right: ~(PYINT_TYPE) -- left, right)) {
-            DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
-            DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
+            DEOPT_IF(!PyLong_CheckExact(left));
+            DEOPT_IF(!PyLong_CheckExact(right));
         }
 
         pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res: ~(PYINT_TYPE))) {
@@ -439,8 +439,8 @@ dummy_func(
             _GUARD_BOTH_INT + _BINARY_OP_SUBTRACT_INT;
 
         guard op(_GUARD_BOTH_FLOAT, (left: ~(PYFLOAT_TYPE), right: ~(PYFLOAT_TYPE) -- left, right)) {
-            DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP);
-            DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
+            DEOPT_IF(!PyFloat_CheckExact(left));
+            DEOPT_IF(!PyFloat_CheckExact(right));
         }
 
         pure op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res: ~(PYFLOAT_TYPE))) {
@@ -475,8 +475,8 @@ dummy_func(
             _GUARD_BOTH_FLOAT + _BINARY_OP_SUBTRACT_FLOAT;
 
         guard op(_GUARD_BOTH_UNICODE, (left: ~(PYUNICODE_TYPE), right: ~(PYUNICODE_TYPE) -- left, right)) {
-            DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP);
-            DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP);
+            DEOPT_IF(!PyUnicode_CheckExact(left));
+            DEOPT_IF(!PyUnicode_CheckExact(right));
         }
 
         pure op(_BINARY_OP_ADD_UNICODE, (unused/1, left, right -- res)) {
