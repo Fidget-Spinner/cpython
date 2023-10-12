@@ -71,6 +71,9 @@ class Block(Node):
 class StackEffect(Node):
     name: str = field(compare=False)  # __eq__ only uses type, cond, size
     type: str = ""  # Optional `:type`
+    # Optional `(type, aux)`
+    typeprop: None | tuple[str, None | int] = \
+        field(default_factory=lambda: None, init=True, compare=False, hash=False)
     cond: str = ""  # Optional `if (cond)`
     size: str = ""  # Optional `[size]`
     # Note: size cannot be combined with type or cond
@@ -80,7 +83,6 @@ class StackEffect(Node):
         while items and items[-1] == "":
             del items[-1]
         return f"StackEffect({', '.join(repr(item) for item in items)})"
-
 
 @dataclass
 class Expression(Node):
@@ -196,6 +198,12 @@ class Parser(PLexer):
                     inp, outp = self.io_effect()
                     if self.expect(lx.RPAREN):
                         if (tkn := self.peek()) and tkn.kind == lx.LBRACE:
+                            is_in_typeprop = any(isinstance(i, StackEffect) and i.typeprop for i in inp)
+                            is_out_typeprop = any(isinstance(o, StackEffect) and o.typeprop for o in outp)
+                            if is_out_typeprop and not pure:
+                                self.make_syntax_error("Unexpected output typeprop annotation in non-pure opcode!")
+                            if is_in_typeprop and not guard:
+                                self.make_syntax_error("Unexpected input typeprop annotation in non-guard opcode!")
                             return InstHeader(
                                 override, register, pure,
                                 guard, kind, name, inp, outp)
@@ -262,14 +270,24 @@ class Parser(PLexer):
 
     @contextual
     def stack_effect(self) -> StackEffect | None:
-        #   IDENTIFIER [':' IDENTIFIER [TIMES]] ['if' '(' expression ')']
+        #   IDENTIFIER [':' [IDENTIFIER [TIMES]] ['~' '(' IDENTIFIER ['+' IDENTIFIER] ')']] ['if' '(' expression ')']
         # | IDENTIFIER '[' expression ']'
         if tkn := self.expect(lx.IDENTIFIER):
             type_text = ""
+            typeprop = None
             if self.expect(lx.COLON):
-                type_text = self.require(lx.IDENTIFIER).text.strip()
-                if self.expect(lx.TIMES):
-                    type_text += " *"
+                if i := self.expect(lx.IDENTIFIER):
+                    type_text = i.text.strip()
+                    if self.expect(lx.TIMES):
+                        type_text += " *"
+                if self.expect(lx.NOT):
+                    self.require(lx.LPAREN)
+                    typeprop_text = self.require(lx.IDENTIFIER).text.strip()
+                    aux = None
+                    if self.expect(lx.PLUS):
+                        aux = self.require(lx.IDENTIFIER).text.strip()
+                    typeprop = (typeprop_text, aux)
+                    self.require(lx.RPAREN)
             cond_text = ""
             if self.expect(lx.IF):
                 self.require(lx.LPAREN)
@@ -286,7 +304,7 @@ class Parser(PLexer):
                 self.require(lx.RBRACKET)
                 type_text = "PyObject **"
                 size_text = size.text.strip()
-            return StackEffect(tkn.text, type_text, cond_text, size_text)
+            return StackEffect(tkn.text, type_text, typeprop, cond_text, size_text)
         return None
 
     @contextual

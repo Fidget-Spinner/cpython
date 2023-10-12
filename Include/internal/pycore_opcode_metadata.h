@@ -2375,9 +2375,12 @@ extern bool _PyOpcode_isguard(int opcode);
 bool _PyOpcode_isguard(int opcode)  {
     switch(opcode) {
         case _GUARD_BOTH_INT:
+        case _GUARD_BOTH_FLOAT:
         case _GUARD_BOTH_UNICODE:
         case _GUARD_GLOBALS_VERSION:
         case _GUARD_BUILTINS_VERSION:
+        case _GUARD_TYPE_VERSION:
+        case _GUARD_DORV_VALUES:
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT:
         case _GUARD_KEYS_VERSION:
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS:

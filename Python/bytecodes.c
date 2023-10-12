@@ -402,12 +402,12 @@ dummy_func(
             // BINARY_OP_INPLACE_ADD_UNICODE,  // See comments at that opcode.
         };
 
-        guard op(_GUARD_BOTH_INT, (left, right -- left, right)) {
-            DEOPT_IF(!PyLong_CheckExact(left));
-            DEOPT_IF(!PyLong_CheckExact(right));
+        guard op(_GUARD_BOTH_INT, (left: ~(PYINT_TYPE), right: ~(PYINT_TYPE) -- left, right)) {
+            DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP);
+            DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP);
         }
 
-        pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_MULTIPLY_INT, (unused/1, left, right -- res: ~(PYINT_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Multiply((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -415,7 +415,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        pure op(_BINARY_OP_ADD_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_INT, (unused/1, left, right -- res: ~(PYINT_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Add((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -423,7 +423,7 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        pure op(_BINARY_OP_SUBTRACT_INT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_SUBTRACT_INT, (unused/1, left, right -- res: ~(PYINT_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             res = _PyLong_Subtract((PyLongObject *)left, (PyLongObject *)right);
             _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
@@ -438,12 +438,12 @@ dummy_func(
         macro(BINARY_OP_SUBTRACT_INT) =
             _GUARD_BOTH_INT + _BINARY_OP_SUBTRACT_INT;
 
-        op(_GUARD_BOTH_FLOAT, (left, right -- left, right)) {
-            DEOPT_IF(!PyFloat_CheckExact(left));
-            DEOPT_IF(!PyFloat_CheckExact(right));
+        guard op(_GUARD_BOTH_FLOAT, (left: ~(PYFLOAT_TYPE), right: ~(PYFLOAT_TYPE) -- left, right)) {
+            DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP);
+            DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP);
         }
 
-        pure op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_MULTIPLY_FLOAT, (unused/1, left, right -- res: ~(PYFLOAT_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval *
@@ -451,7 +451,7 @@ dummy_func(
             DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
         }
 
-        pure op(_BINARY_OP_ADD_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_ADD_FLOAT, (unused/1, left, right -- res: ~(PYFLOAT_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval +
@@ -459,7 +459,7 @@ dummy_func(
             DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
         }
 
-        pure op(_BINARY_OP_SUBTRACT_FLOAT, (unused/1, left, right -- res)) {
+        pure op(_BINARY_OP_SUBTRACT_FLOAT, (unused/1, left, right -- res: ~(PYFLOAT_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             double dres =
                 ((PyFloatObject *)left)->ob_fval -
@@ -474,9 +474,9 @@ dummy_func(
         macro(BINARY_OP_SUBTRACT_FLOAT) =
             _GUARD_BOTH_FLOAT + _BINARY_OP_SUBTRACT_FLOAT;
 
-        guard op(_GUARD_BOTH_UNICODE, (left, right -- left, right)) {
-            DEOPT_IF(!PyUnicode_CheckExact(left));
-            DEOPT_IF(!PyUnicode_CheckExact(right));
+        guard op(_GUARD_BOTH_UNICODE, (left: ~(PYUNICODE_TYPE), right: ~(PYUNICODE_TYPE) -- left, right)) {
+            DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP);
+            DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP);
         }
 
         pure op(_BINARY_OP_ADD_UNICODE, (unused/1, left, right -- res)) {
@@ -1866,7 +1866,7 @@ dummy_func(
             LOAD_ATTR,
         };
 
-        op(_GUARD_TYPE_VERSION, (type_version/2, owner -- owner)) {
+        guard op(_GUARD_TYPE_VERSION, (type_version/2, owner: ~(GUARD_TYPE_VERSION_TYPE + type_version) -- owner)) {
             PyTypeObject *tp = Py_TYPE(owner);
             assert(type_version != 0);
             DEOPT_IF(tp->tp_version_tag != type_version);
@@ -2049,7 +2049,7 @@ dummy_func(
             DISPATCH_INLINED(new_frame);
         }
 
-        op(_GUARD_DORV_VALUES, (owner -- owner)) {
+        guard op(_GUARD_DORV_VALUES, (owner: ~(GUARD_DORV_VALUES_TYPE) -- owner)) {
             assert(Py_TYPE(owner)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
             PyDictOrValues dorv = *_PyObject_DictOrValuesPointer(owner);
             DEOPT_IF(!_PyDictOrValues_IsValues(dorv));
@@ -2808,13 +2808,13 @@ dummy_func(
             exc_info->exc_value = Py_NewRef(new_exc);
         }
 
-        guard op(_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT, (owner -- owner)) {
+        guard op(_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT, (owner: ~(GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE) -- owner)) {
             assert(Py_TYPE(owner)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
             PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(owner);
             DEOPT_IF(!_PyDictOrValues_IsValues(*dorv) && !_PyObject_MakeInstanceAttributesFromDict(owner, dorv));
         }
 
-        guard op(_GUARD_KEYS_VERSION, (keys_version/2, owner -- owner)) {
+        guard op(_GUARD_KEYS_VERSION, (keys_version/2, owner: ~(GUARD_KEYS_VERSION_TYPE + keys_version) -- owner)) {
             PyTypeObject *owner_cls = Py_TYPE(owner);
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
             DEOPT_IF(owner_heap_type->ht_cached_keys->dk_version != keys_version);

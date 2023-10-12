@@ -236,8 +236,8 @@
             PyObject *left;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            DEOPT_IF(!PyLong_CheckExact(left), _GUARD_BOTH_INT);
-            DEOPT_IF(!PyLong_CheckExact(right), _GUARD_BOTH_INT);
+            DEOPT_IF(!PyLong_CheckExact(left), BINARY_OP, _GUARD_BOTH_INT);
+            DEOPT_IF(!PyLong_CheckExact(right), BINARY_OP, _GUARD_BOTH_INT);
             break;
         }
 
@@ -294,8 +294,8 @@
             PyObject *left;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            DEOPT_IF(!PyFloat_CheckExact(left), _GUARD_BOTH_FLOAT);
-            DEOPT_IF(!PyFloat_CheckExact(right), _GUARD_BOTH_FLOAT);
+            DEOPT_IF(!PyFloat_CheckExact(left), BINARY_OP, _GUARD_BOTH_FLOAT);
+            DEOPT_IF(!PyFloat_CheckExact(right), BINARY_OP, _GUARD_BOTH_FLOAT);
             break;
         }
 
@@ -352,8 +352,8 @@
             PyObject *left;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            DEOPT_IF(!PyUnicode_CheckExact(left), _GUARD_BOTH_UNICODE);
-            DEOPT_IF(!PyUnicode_CheckExact(right), _GUARD_BOTH_UNICODE);
+            DEOPT_IF(!PyUnicode_CheckExact(left), BINARY_OP, _GUARD_BOTH_UNICODE);
+            DEOPT_IF(!PyUnicode_CheckExact(right), BINARY_OP, _GUARD_BOTH_UNICODE);
             break;
         }
 

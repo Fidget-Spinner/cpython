@@ -44,6 +44,84 @@ _PyOpcode_isterminal(int opcode)
 }
 
 
+typedef enum {
+    // Types with aux
+    GUARD_KEYS_VERSION_TYPE = 0,
+    GUARD_TYPE_VERSION_TYPE = 1,
+
+    // Types without aux
+    PYINT_TYPE = 2,
+    PYFLOAT_TYPE = 3,
+    PYUNICODE_TYPE = 4,
+    GUARD_DORV_VALUES_TYPE = 5,
+    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 6,
+
+    // GUARD_GLOBALS_VERSION_TYPE, / Environment check
+    // GUARD_BUILTINS_VERSION_TYPE, // Environment check
+    // CHECK_CALL_BOUND_METHOD_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
+    // CHECK_PEP_523_TYPE, // Environment check
+    // CHECK_FUNCTION_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
+    // CHECK_STACK_SPACE_TYPE // Environment check
+    INVALID_TYPE = -1
+} _Py_UOpsSymExprTypeEnum;
+
+#define MAX_TYPE_WITH_AUX 1
+typedef struct {
+    // bitmask of types
+    uint32_t types;
+    // auxillary data for the types
+    uint32_t aux[MAX_TYPE_WITH_AUX + 1];
+} _Py_UOpsSymType;
+
+static void
+symtype_set_type(_Py_UOpsSymType *sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
+{
+    sym_type->types |= 1 << typ;
+    if (typ <= MAX_TYPE_WITH_AUX) {
+        sym_type->aux[typ] = aux;
+    }
+}
+
+static void
+symtype_set_from_const(_Py_UOpsSymType *sym_type, PyObject *obj)
+{
+    PyTypeObject *tp = Py_TYPE(obj);
+
+    if (tp == &PyLong_Type) {
+        symtype_set_type(sym_type, PYINT_TYPE, 0);
+    }
+    else if (tp == &PyFloat_Type) {
+        symtype_set_type(sym_type, PYFLOAT_TYPE, 0);
+    }
+    else if (tp == &PyUnicode_Type) {
+        symtype_set_type(sym_type, PYUNICODE_TYPE, 0);
+    }
+
+    if (tp->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
+        PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(obj);
+
+        if (_PyDictOrValues_IsValues(*dorv) ||
+            _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
+            symtype_set_type(sym_type, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, 0);
+
+            PyTypeObject *owner_cls = tp;
+            PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
+            symtype_set_type(
+                sym_type,
+                GUARD_KEYS_VERSION_TYPE,
+                owner_heap_type->ht_cached_keys->dk_version
+            );
+        }
+
+        if (!_PyDictOrValues_IsValues(*dorv)) {
+            symtype_set_type(sym_type, GUARD_DORV_VALUES_TYPE, 0);
+        }
+    }
+
+    symtype_set_type(sym_type, GUARD_TYPE_VERSION_TYPE, tp->tp_version_tag);
+}
+
+
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     Py_ssize_t idx;
@@ -51,6 +129,8 @@ typedef struct _Py_UOpsSymbolicExpression {
     int usage_count;
     int opcode;
     int oparg;
+    // Type of the symbolic expression
+    _Py_UOpsSymType sym_type;
     PyObject *const_val;
     Py_hash_t cached_hash;
     // The store where this expression was first created.
@@ -362,7 +442,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
-    self->const_val = NULL;
+    self->sym_type.types = 0;
     self->opcode = opcode;
     self->oparg = oparg;
     self->const_val = const_val;
@@ -407,6 +487,7 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
+    self->sym_type.types = 0;
     self->const_val = NULL;
     self->opcode = opcode;
     self->oparg = oparg;
@@ -443,6 +524,7 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
     if (temp == NULL) {
         return NULL;
     }
+    symtype_set_from_const(&temp->sym_type, const_val);
     return temp;
 }
 
@@ -557,6 +639,11 @@ get_const(_Py_UOpsSymbolicExpression *expr)
     return Py_NewRef(expr->const_val);
 }
 
+static inline _Py_UOpsSymType *
+get_symtype(_Py_UOpsSymbolicExpression *expr)
+{
+    return &expr->sym_type;
+}
 
 // Number the jump targets and the jump instructions with a unique (negative) ID.
 // This replaces the instruction's opcode in the trace with their negative IDs.
@@ -697,9 +784,9 @@ fix_jump_side_exits(_PyUOpInstruction *trace, int trace_len,
 }
 
 typedef enum {
-    ERROR,
-    NORMAL,
-    GUARD_REQUIRED,
+    ABSTRACT_INTERP_ERROR,
+    ABSTRACT_INTERP_NORMAL,
+    ABSTRACT_INTERP_GUARD_REQUIRED,
 } AbstractInterpExitCodes;
 
 // 1 on success
@@ -906,7 +993,7 @@ uop_abstract_interpret_single_inst(
     ctx->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
 
-    return NORMAL;
+    return ABSTRACT_INTERP_NORMAL;
 
 pop_4_error:
 pop_3_error:
@@ -914,11 +1001,11 @@ pop_2_error:
 pop_1_error:
 error:
     DPRINTF(1, "Encountered error in abstract interpreter\n");
-    return ERROR;
+    return ABSTRACT_INTERP_ERROR;
 
 guard_required:
     DPRINTF(2, "Guard is required\n");
-    return GUARD_REQUIRED;
+    return ABSTRACT_INTERP_GUARD_REQUIRED;
 }
 
 static _Py_UOpsAbstractStore *
@@ -988,7 +1075,7 @@ uop_abstract_interpret(
                 goto error;
             }
 
-            if (status == GUARD_REQUIRED) {
+            if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
                 int res = try_hoist_guard(ctx, curr, prev_store_locals);
                 if (res < 0) {
                     goto error;
