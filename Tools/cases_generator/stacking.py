@@ -514,12 +514,42 @@ def _write_components_abstract_interp_impure_region(
         managers: list[EffectManager],
         mangled_input_vars,
         out: Formatter):
-    # For impure regions, we just output the stack effect
+
+    # Declare all variables
+    for _, eff in mangled_input_vars.items():
+        out.declare(eff, None)
+
     for mgr in managers:
+
+        # Initialise vars from stack
+        for peek in mgr.peeks:
+            if peek.effect.name == UNUSED:
+                continue
+            copy = dataclasses.replace(peek.effect)
+            copy.name = f"__{copy.name}"
+            out.assign(copy, peek.as_stack_effect())
+
+        # Adjust stack
         if mgr is managers[-1]:
             out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
+
+        # Construct sym expression and write that to output
+        var = ", ".join(mangled_input_vars)
+        if var:
+            var = ", " + var
+        out.emit(
+            f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+            f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+        )
+        out.emit("if (__sym_temp == NULL) goto error;")
+
+    for poke in mgr.pokes:
+        if poke.effect.size or not poke.effect.name:
+            continue
+        out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
+
 
 
 def _write_components_abstract_interp_pure_region(
@@ -601,8 +631,10 @@ def _write_components_abstract_interp_guard_region(
         managers: list[EffectManager],
         mangled_input_vars: dict[str, StackEffect],
         out: Formatter):
-    # Okay what to do
-    ...
+    # TODO:
+    # 1. Attempt to perform hoisting and guard elimination
+    # 2. Type propagate for guard success
+    out.emit("goto guard_required")
 
 
 def _write_components_for_abstract_interp(
