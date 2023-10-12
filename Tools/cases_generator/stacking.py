@@ -534,16 +534,17 @@ def _write_components_abstract_interp_impure_region(
             out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
-
-        # Construct sym expression and write that to output
-        var = ", ".join(mangled_input_vars)
-        if var:
-            var = ", " + var
-        out.emit(
-            f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-            f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
-        )
-        out.emit("if (__sym_temp == NULL) goto error;")
+        
+        if mgr.pokes:
+            # Construct sym expression and write that to output
+            var = ", ".join(mangled_input_vars)
+            if var:
+                var = ", " + var
+            out.emit(
+                f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
+                f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+            )
+            out.emit("if (__sym_temp == NULL) goto error;")
 
     for poke in mgr.pokes:
         if poke.effect.size or not poke.effect.name:
