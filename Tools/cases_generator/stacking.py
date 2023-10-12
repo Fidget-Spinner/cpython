@@ -534,7 +534,7 @@ def _write_components_abstract_interp_impure_region(
             out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
-        
+
         if mgr.pokes:
             # Construct sym expression and write that to output
             var = ", ".join(mangled_input_vars)
