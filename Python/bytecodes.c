@@ -808,7 +808,6 @@ dummy_func(
         }
 
         macro(RETURN_VALUE) =
-            _SET_IP +  // Tier 2 only; special-cased oparg
             _SAVE_CURRENT_IP +  // Sets frame->prev_instr
             _POP_FRAME;
 
@@ -833,7 +832,6 @@ dummy_func(
 
         macro(RETURN_CONST) =
             LOAD_CONST +
-            _SET_IP +  // Tier 2 only; special-cased oparg
             _SAVE_CURRENT_IP +  // Sets frame->prev_instr
             _POP_FRAME;
 
@@ -3104,7 +3102,6 @@ dummy_func(
             _CHECK_FUNCTION_EXACT_ARGS +
             _CHECK_STACK_SPACE +
             _INIT_CALL_PY_EXACT_ARGS +
-            _SET_IP +  // Tier 2 only; special-cased oparg
             _SAVE_CURRENT_IP +  // Sets frame->prev_instr
             _PUSH_FRAME;
 
@@ -3114,7 +3111,6 @@ dummy_func(
             _CHECK_FUNCTION_EXACT_ARGS +
             _CHECK_STACK_SPACE +
             _INIT_CALL_PY_EXACT_ARGS +
-            _SET_IP +  // Tier 2 only; special-cased oparg
             _SAVE_CURRENT_IP +  // Sets frame->prev_instr
             _PUSH_FRAME;
 
@@ -3213,7 +3209,7 @@ dummy_func(
             }
             Py_DECREF(tp);
             _PyInterpreterFrame *shim = _PyFrame_PushTrampolineUnchecked(
-                tstate, (PyCodeObject *)&_Py_InitCleanup, 1, 0);
+                tstate, (PyCodeObject *)&_Py_InitCleanup, 1);
             assert(_PyCode_CODE((PyCodeObject *)shim->f_executable)[1].op.code == EXIT_INIT_CHECK);
             /* Push self onto stack of shim */
             Py_INCREF(self);
@@ -3953,17 +3949,13 @@ dummy_func(
         }
 
         pure op(_SET_IP, (--)) {
+            TIER_TWO_ONLY
             frame->prev_instr = ip_offset + oparg;
         }
 
         op(_SAVE_CURRENT_IP, (--)) {
-            #if TIER_ONE
+            TIER_ONE_ONLY
             frame->prev_instr = next_instr - 1;
-            #endif
-            #if TIER_TWO
-            // Relies on a preceding _SET_IP
-            frame->prev_instr--;
-            #endif
         }
 
         op(_EXIT_TRACE, (--)) {
