@@ -831,7 +831,6 @@ try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
         return -1;
     }
     int res = PyList_Append(ctx->curr_store->hoisted_guards, (PyObject *)guard);
-    Py_DECREF(guard);
     return res < 0 ? -1 : 1;
 }
 
