@@ -139,15 +139,7 @@ class Instruction:
                 res = False
         return res
 
-    def write_body(
-        self,
-        out: Formatter,
-        dedent: int,
-        active_caches: list[ActiveCacheEffect],
-        tier: Tiers,
-        family: parsing.Family | None,
-    ) -> None:
-        """Write the instruction body."""
+    def write_variable_initializations(self, active_caches, out, tier):
         # Write cache effect variable declarations and initializations
         for active in active_caches:
             ceffect = active.effect
@@ -168,6 +160,18 @@ class Instruction:
                 )
             else:
                 out.emit(f"{typ}{ceffect.name} = ({typ.strip()})operand;")
+
+
+    def write_body(
+        self,
+        out: Formatter,
+        dedent: int,
+        active_caches: list[ActiveCacheEffect],
+        tier: Tiers,
+        family: parsing.Family | None,
+    ) -> None:
+        """Write the instruction body."""
+        self.write_variable_initializations(active_caches, out, tier)
 
         # Write the body, substituting a goto for ERROR_IF() and other stuff
         assert dedent <= 0

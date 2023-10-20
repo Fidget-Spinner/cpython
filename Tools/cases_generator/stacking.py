@@ -15,6 +15,7 @@ from instructions import (
     Component,
     Tiers,
     TIER_ONE,
+    TIER_TWO,
 )
 from parsing import StackEffect, CacheEffect, Family
 
@@ -514,44 +515,21 @@ def write_single_instr_for_abstract_interp(instr: Instruction, out: Formatter) -
 
 def _write_components_abstract_interp_impure_region(
         managers: list[EffectManager],
-        mangled_input_vars: dict[str, StackEffect],
         out: Formatter) -> None:
 
-    # Declare all variables
-    for _, eff in mangled_input_vars.items():
-        out.declare(eff, None)
+    # Simply make all outputs effects unknown
 
     for mgr in managers:
-
-        # Initialise vars from stack
-        for peek in mgr.peeks:
-            if peek.effect.name == UNUSED:
-                continue
-            copy = dataclasses.replace(peek.effect)
-            copy.name = f"__{copy.name}"
-            out.assign(copy, peek.as_stack_effect())
-
         # Adjust stack
         if mgr is managers[-1]:
             out.stack_adjust(mgr.final_offset.deep, mgr.final_offset.high)
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
 
-        if mgr.pokes:
-            # Construct sym expression and write that to output
-            var = ", ".join(mangled_input_vars)
-            if var:
-                var = ", " + var
-            out.emit(
-                f"_Py_UOpsSymbolicExpression *__sym_temp = _Py_UOpsSymbolicExpression_New("
-                f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
-            )
-            out.emit("if (__sym_temp == NULL) goto error;")
-
     for poke in mgr.pokes:
         if poke.effect.size or not poke.effect.name:
             continue
-        out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
+        out.emit(f"PEEK(-({poke.offset.as_index()})) = sym_init_unknown(ctx);")
 
 
 
@@ -600,7 +578,7 @@ def _write_components_abstract_interp_pure_region(
                 for name, eff in input_vars.items():
                     out.declare(eff, StackEffect(f"get_const(__{name})"))
                 out.declare(output_var, None)
-                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
+                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
                 out.emit(
                     f"__sym_temp = _Py_UOpsSymbolicExpression_New("
                     f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
@@ -616,12 +594,12 @@ def _write_components_abstract_interp_pure_region(
                 "if (__sym_temp == NULL) goto error;"
             )
 
-            # Pure op, we can perform type propagation
+            # Pure op, we can directly perform type propagation
             if (typ := output_var.typeprop) is not None:
                 typname, aux = typ
                 aux = "0" if aux is None else aux
                 out.emit(
-                    f"symtype_set_type(get_symtype(__sym_temp), {typname}, (uint32_t){aux});"
+                    f"sym_set_type(__sym_temp, {typname}, (uint32_t){aux});"
                 )
 
         for poke in mgr.pokes:
@@ -643,19 +621,57 @@ def _write_components_abstract_interp_guard_region(
         out.declare(eff, None)
 
     for mgr in managers:
+        # Initialise vars from stack
+        for peek in mgr.peeks:
+            if peek.effect.name == UNUSED:
+                continue
+            copy = dataclasses.replace(peek.effect)
+            copy.name = f"__{copy.name}"
+            out.assign(copy, peek.as_stack_effect())
         # If constant evaluation, directly evaluate the guard body
         predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
-        with out.block(f"if ({predicates})"):
-            # Declare all variables
-            for name, eff in all_input_vars.items():
-                out.declare(eff, StackEffect(f"get_const(__{name})"))
-            mgr.instr.write_body(out, -4, mgr.active_caches, TIER_ONE, mgr.instr.family)
-            # Guard elimination - if we are successful, don't add it to the symexpr!
-            out.emit('DPRINTF(2, "const eliminated guard\\n");')
-            out.emit("break;")
-        # Else try eliminate by types
-        with out.block("else"):
-            # TODO eliminate by types and type propagation
+        if predicates:
+            with out.block(f"if ({predicates})"):
+                # Declare all variables
+                for name, eff in all_input_vars.items():
+                    out.declare(eff, StackEffect(f"get_const(__{name})"))
+                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
+                # Guard elimination - if we are successful, don't add it to the symexpr!
+                out.emit('DPRINTF(2, "const eliminated guard\\n");')
+                out.emit("break;")
+        # Does the input specify typed inputs?
+        if any(input_var.typeprop for input_var in all_input_vars.values()):
+            # If the input types already match, eliminate the guard
+            # Read the cache information to check the auxillary type information
+            mgr.instr.write_variable_initializations(mgr.active_caches, out, TIER_TWO)
+
+            predicates = []
+            propagates = []
+            for peek in mgr.peeks:
+                if peek.effect.name == UNUSED:
+                    continue
+                out.declare(peek.effect, peek.as_stack_effect())
+            for input_var, input_effect in all_input_vars.items():
+                if (typ := input_effect.typeprop) is not None:
+                    typname, aux = typ
+                    aux = "0" if aux is None else aux
+                    # Check that the input type information match (including auxillary info)
+                    predicates.append(
+                        f"sym_matches_type((_Py_UOpsSymbolicExpression *){input_var}, {typname}, (uint32_t){aux})"
+                    )
+                    # Propagate mode - set the types
+                    propagates.append(
+                        f"sym_set_type((_Py_UOpsSymbolicExpression *){input_var}, {typname}, (uint32_t){aux});"
+                    )
+            with out.block("if (should_type_propagate)"):
+                for prop in propagates:
+                    out.emit(f"{prop};")
+            with out.block("else"):
+                with out.block(f"if ({' && '.join(predicates)})"):
+                    out.emit('DPRINTF(2, "type propagation eliminated guard\\n");')
+                    out.emit("break;")
+                out.emit("goto guard_required;")
+        else:
             out.emit("goto guard_required;")
 
 
@@ -700,11 +716,12 @@ def _write_components_for_abstract_interp(
             managers, all_input_vars, mangled_input_vars, out)
         return
 
-    if inst.guard:
+    elif inst.guard:
         _write_components_abstract_interp_guard_region(
             managers, all_input_vars, mangled_input_vars, out)
         return
 
-    _write_components_abstract_interp_impure_region(
-        managers, mangled_input_vars, out)
+    else:
+        _write_components_abstract_interp_impure_region(
+            managers, out)
     return

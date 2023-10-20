@@ -73,53 +73,7 @@ typedef struct {
     uint32_t aux[MAX_TYPE_WITH_AUX + 1];
 } _Py_UOpsSymType;
 
-static void
-symtype_set_type(_Py_UOpsSymType *sym_type, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
-{
-    sym_type->types |= 1 << typ;
-    if (typ <= MAX_TYPE_WITH_AUX) {
-        sym_type->aux[typ] = aux;
-    }
-}
 
-static void
-symtype_set_from_const(_Py_UOpsSymType *sym_type, PyObject *obj)
-{
-    PyTypeObject *tp = Py_TYPE(obj);
-
-    if (tp == &PyLong_Type) {
-        symtype_set_type(sym_type, PYINT_TYPE, 0);
-    }
-    else if (tp == &PyFloat_Type) {
-        symtype_set_type(sym_type, PYFLOAT_TYPE, 0);
-    }
-    else if (tp == &PyUnicode_Type) {
-        symtype_set_type(sym_type, PYUNICODE_TYPE, 0);
-    }
-
-    if (tp->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
-        PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(obj);
-
-        if (_PyDictOrValues_IsValues(*dorv) ||
-            _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
-            symtype_set_type(sym_type, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, 0);
-
-            PyTypeObject *owner_cls = tp;
-            PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
-            symtype_set_type(
-                sym_type,
-                GUARD_KEYS_VERSION_TYPE,
-                owner_heap_type->ht_cached_keys->dk_version
-            );
-        }
-
-        if (!_PyDictOrValues_IsValues(*dorv)) {
-            symtype_set_type(sym_type, GUARD_DORV_VALUES_TYPE, 0);
-        }
-    }
-
-    symtype_set_type(sym_type, GUARD_TYPE_VERSION_TYPE, tp->tp_version_tag);
-}
 
 
 typedef struct _Py_UOpsSymbolicExpression {
@@ -139,6 +93,7 @@ typedef struct _Py_UOpsSymbolicExpression {
     void *originating_store;
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
+
 
 static void
 sym_dealloc(PyObject *o)
@@ -502,12 +457,68 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     return check_uops_already_exists(ctx, self);
 }
 
+static void
+sym_set_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
+{
+    sym->sym_type.types |= 1 << typ;
+    if (typ <= MAX_TYPE_WITH_AUX) {
+        sym->sym_type.aux[typ] = aux;
+    }
+}
+
+static void
+sym_set_type_from_const(_Py_UOpsSymbolicExpression *sym, PyObject *obj)
+{
+    PyTypeObject *tp = Py_TYPE(obj);
+
+    if (tp == &PyLong_Type) {
+        sym_set_type(sym, PYINT_TYPE, 0);
+    }
+    else if (tp == &PyFloat_Type) {
+        sym_set_type(sym, PYFLOAT_TYPE, 0);
+    }
+    else if (tp == &PyUnicode_Type) {
+        sym_set_type(sym, PYUNICODE_TYPE, 0);
+    }
+
+    if (tp->tp_flags & Py_TPFLAGS_MANAGED_DICT) {
+        PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(obj);
+
+        if (_PyDictOrValues_IsValues(*dorv) ||
+            _PyObject_MakeInstanceAttributesFromDict(obj, dorv)) {
+            sym_set_type(sym, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, 0);
+
+            PyTypeObject *owner_cls = tp;
+            PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
+            sym_set_type(
+                sym,
+                GUARD_KEYS_VERSION_TYPE,
+                owner_heap_type->ht_cached_keys->dk_version
+            );
+        }
+
+        if (!_PyDictOrValues_IsValues(*dorv)) {
+            sym_set_type(sym, GUARD_DORV_VALUES_TYPE, 0);
+        }
+    }
+
+    sym_set_type(sym, GUARD_TYPE_VERSION_TYPE, tp->tp_version_tag);
+}
+
 
 static inline _Py_UOpsSymbolicExpression*
 sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
 {
     return _Py_UOpsSymbolicExpression_New(ctx,
                                           INIT_FAST, locals_idx,
+                                          NULL, 0);
+}
+
+static inline _Py_UOpsSymbolicExpression*
+sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx)
+{
+    return _Py_UOpsSymbolicExpression_New(ctx,
+                                          CACHE, 0,
                                           NULL, 0);
 }
 
@@ -524,7 +535,7 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
     if (temp == NULL) {
         return NULL;
     }
-    symtype_set_from_const(&temp->sym_type, const_val);
+    sym_set_type_from_const(temp, const_val);
     return temp;
 }
 
@@ -539,6 +550,18 @@ sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, int opcode, int oparg, int nu
             num_stack_inputs,
             &ctx->curr_store->stack_pointer[-(num_stack_inputs)]
         );
+}
+
+static inline bool
+sym_matches_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
+{
+    if (sym->sym_type.types != 1 << typ) {
+        return false;
+    }
+    if (typ <= MAX_TYPE_WITH_AUX) {
+        return sym->sym_type.aux[typ] == aux;
+    }
+    return true;
 }
 
 static _Py_UOpsAbstractStore*
@@ -584,7 +607,7 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx)
 
     // Initialize the stack as well
     for (int i = 0; i < ctx->curr_stacklen; i++) {
-        _Py_UOpsSymbolicExpression *stackvar = sym_init_var(ctx, i);
+        _Py_UOpsSymbolicExpression *stackvar = sym_init_unknown(ctx);
         if (stackvar == NULL) {
             goto error;
         }
@@ -637,12 +660,6 @@ static inline PyObject *
 get_const(_Py_UOpsSymbolicExpression *expr)
 {
     return Py_NewRef(expr->const_val);
-}
-
-static inline _Py_UOpsSymType *
-get_symtype(_Py_UOpsSymbolicExpression *expr)
-{
-    return &expr->sym_type;
 }
 
 // Number the jump targets and the jump instructions with a unique (negative) ID.
@@ -877,7 +894,8 @@ uop_abstract_interpret_single_inst(
     _PyUOpInstruction *inst,
     _Py_UOpsAbstractInterpContext *ctx,
     _PyUOpInstruction *jump_id_to_instruction,
-    int max_jump_id
+    int max_jump_id,
+    bool should_type_propagate
 )
 {
 #ifdef Py_DEBUG
@@ -1068,12 +1086,15 @@ uop_abstract_interpret(
 
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
-                jump_id_to_instruction, max_jump_id
+                jump_id_to_instruction, max_jump_id, false
             );
             if (status == ABSTRACT_INTERP_ERROR) {
                 goto error;
             }
 
+            // @TODO abstract interpret the guard with should_type_propagate=true
+            // to propgate its types forward!
+            // Make sure to copy the abstract store when doing that too
             if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
                 int res = try_hoist_guard(ctx, curr, prev_store_locals);
                 if (res < 0) {
@@ -1188,10 +1209,12 @@ _Py_uop_analyze_and_optimize(
     }
 
     // Pass: Abstract interpretation and symbolic analysis
-    trace_len = uop_abstract_interpret(co, trace, temp_writebuffer,
-                                       trace_len, curr_stacklen,
-                                       jump_id_to_instruction, max_jump_id);
-    if (trace_len < 0) {
+    _Py_UOpsAbstractStore *first_abstract_store = uop_abstract_interpret(
+        co, trace, temp_writebuffer,
+        trace_len, curr_stacklen,
+        jump_id_to_instruction, max_jump_id);
+
+    if (first_abstract_store == NULL || trace_len < 0) {
         goto error;
     }
 
