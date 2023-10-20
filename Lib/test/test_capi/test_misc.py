@@ -2421,6 +2421,50 @@ class TestUopsOptimization(unittest.TestCase):
         binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
         self.assertEqual(len(binop_count), 3)
 
+    def test_int_type_propagation(self):
+        def testfunc(loops):
+            num = 0
+            while num < loops:
+                x = num + num
+                y = 1
+                a = x + y
+                num += 1
+            return a
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        res = None
+        with temporary_optimizer(opt):
+            res = testfunc(64)
+
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        self.assertEqual(res, 3)
+        binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+        self.assertEqual(len(binop_count), 3)
+
+    def test_int_impure_region(self):
+        def testfunc(loops):
+            num = 0
+            while num < loops:
+                x = num + num
+                y = 1
+                x // 2
+                a = x + y
+                num += 1
+            return a
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        res = None
+        with temporary_optimizer(opt):
+            res = testfunc(64)
+
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        self.assertEqual(res, 3)
+        binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+        self.assertEqual(len(binop_count), 3)
+
+
 
 
 
