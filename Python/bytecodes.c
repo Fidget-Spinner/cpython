@@ -3966,6 +3966,19 @@ dummy_func(
             return frame;
         }
 
+        pure op(_LOAD_FAST_NO_INCREF, (-- value)) {
+            value = GETLOCAL(oparg);
+            assert(value != NULL);
+        }
+
+        pure op(_LOAD_CONST_IMMEDIATE, (op/4 -- value)) {
+            value = op;
+            Py_INCREF(value);
+        }
+
+        pure op(_SHRINK_STACK, (unused[oparg] --)) {
+        }
+
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {
             // Inserts TOS at position specified by oparg;
             memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));

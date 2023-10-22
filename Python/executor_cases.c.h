@@ -3284,6 +3284,30 @@
             break;
         }
 
+        case _LOAD_FAST_NO_INCREF: {
+            PyObject *value;
+            value = GETLOCAL(oparg);
+            assert(value != NULL);
+            STACK_GROW(1);
+            stack_pointer[-1] = value;
+            break;
+        }
+
+        case _LOAD_CONST_IMMEDIATE: {
+            PyObject *value;
+            PyObject *op = (PyObject *)operand;
+            value = op;
+            Py_INCREF(value);
+            STACK_GROW(1);
+            stack_pointer[-1] = value;
+            break;
+        }
+
+        case _SHRINK_STACK: {
+            STACK_SHRINK(oparg);
+            break;
+        }
+
         case _INSERT: {
             PyObject *top;
             top = stack_pointer[-1];

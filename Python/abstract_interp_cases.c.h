@@ -1363,3 +1363,38 @@
         case _EXIT_TRACE: {
             break;
         }
+
+        case _LOAD_FAST_NO_INCREF: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+            if (0) {
+                PyObject *value;
+                value = GETLOCAL(oparg);
+                assert(value != NULL);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, (PyObject *)value, 0 );
+            }
+            else {
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 0 );
+            }
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }
+
+        case _LOAD_CONST_IMMEDIATE: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+            if (0) {
+                PyObject *value;
+                PyObject *op = (PyObject *)operand;
+                value = op;
+                Py_INCREF(value);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, (PyObject *)value, 0 );
+            }
+            else {
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, NULL, 0 );
+            }
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
+            break;
+        }

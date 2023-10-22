@@ -573,7 +573,7 @@ def _write_components_abstract_interp_pure_region(
             # Pure op, we can attempt a constant evaluation.
             predicates = " && ".join(
                 [f"is_const({var})" for var in mangled_input_vars])
-            with out.block(f"if ({predicates})"):
+            with out.block(f"if ({predicates or 0})"):
                 # Declare all variables
                 for name, eff in input_vars.items():
                     out.declare(eff, StackEffect(f"get_const(__{name})"))

@@ -89,7 +89,10 @@
 #define _POP_JUMP_IF_TRUE 360
 #define _JUMP_TO_TOP 361
 #define _SAVE_CURRENT_IP 362
-#define _INSERT 363
+#define _LOAD_FAST_NO_INCREF 363
+#define _LOAD_CONST_IMMEDIATE 364
+#define _SHRINK_STACK 365
+#define _INSERT 366
 
 extern int _PyOpcode_num_popped(int opcode, int oparg, bool jump);
 #ifdef NEED_OPCODE_METADATA
@@ -661,6 +664,12 @@ int _PyOpcode_num_popped(int opcode, int oparg, bool jump)  {
             return 0;
         case _EXIT_TRACE:
             return 0;
+        case _LOAD_FAST_NO_INCREF:
+            return 0;
+        case _LOAD_CONST_IMMEDIATE:
+            return 0;
+        case _SHRINK_STACK:
+            return oparg;
         case _INSERT:
             return oparg + 1;
         default:
@@ -1239,6 +1248,12 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
             return 0;
         case _EXIT_TRACE:
             return 0;
+        case _LOAD_FAST_NO_INCREF:
+            return 1;
+        case _LOAD_CONST_IMMEDIATE:
+            return 1;
+        case _SHRINK_STACK:
+            return 0;
         case _INSERT:
             return oparg + 1;
         default:
@@ -1597,6 +1612,9 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [_SET_IP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_SAVE_CURRENT_IP] = { true, INSTR_FMT_IX, 0 },
     [_EXIT_TRACE] = { true, INSTR_FMT_IX, 0 },
+    [_LOAD_FAST_NO_INCREF] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG },
+    [_LOAD_CONST_IMMEDIATE] = { true, INSTR_FMT_IXC000, 0 },
+    [_SHRINK_STACK] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_INSERT] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
 };
 #endif // NEED_OPCODE_METADATA
@@ -1819,6 +1837,9 @@ const char * const _PyOpcode_uop_name[OPCODE_UOP_NAME_SIZE] = {
     [_POP_JUMP_IF_TRUE] = "_POP_JUMP_IF_TRUE",
     [_JUMP_TO_TOP] = "_JUMP_TO_TOP",
     [_SAVE_CURRENT_IP] = "_SAVE_CURRENT_IP",
+    [_LOAD_FAST_NO_INCREF] = "_LOAD_FAST_NO_INCREF",
+    [_LOAD_CONST_IMMEDIATE] = "_LOAD_CONST_IMMEDIATE",
+    [_SHRINK_STACK] = "_SHRINK_STACK",
     [_INSERT] = "_INSERT",
 };
 #endif // NEED_OPCODE_METADATA
@@ -2340,9 +2361,9 @@ const uint8_t _PyOpcode_Deopt[256] = {
         ;
 
 
-extern bool _PyOpcode_ispure(int opcode);
+extern bool _PyOpcode_ispure(uint32_t opcode);
 #ifdef NEED_OPCODE_METADATA
-bool _PyOpcode_ispure(int opcode)  {
+bool _PyOpcode_ispure(uint32_t opcode)  {
     switch(opcode) {
         case LOAD_FAST:
         case LOAD_FAST_AND_CLEAR:
@@ -2362,6 +2383,9 @@ bool _PyOpcode_ispure(int opcode)  {
         case COPY:
         case SWAP:
         case _SET_IP:
+        case _LOAD_FAST_NO_INCREF:
+        case _LOAD_CONST_IMMEDIATE:
+        case _SHRINK_STACK:
             return true;
         default:
             return false;
@@ -2370,9 +2394,9 @@ bool _PyOpcode_ispure(int opcode)  {
 #endif // NEED_OPCODE_METADATA
 
 
-extern bool _PyOpcode_isguard(int opcode);
+extern bool _PyOpcode_isguard(uint32_t opcode);
 #ifdef NEED_OPCODE_METADATA
-bool _PyOpcode_isguard(int opcode)  {
+bool _PyOpcode_isguard(uint32_t opcode)  {
     switch(opcode) {
         case _GUARD_BOTH_INT:
         case _GUARD_BOTH_FLOAT:

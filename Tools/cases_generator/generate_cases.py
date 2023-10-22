@@ -250,7 +250,7 @@ class Generator(Analyzer):
 
         with self.metadata_item(
             # TODO: If more metadata is added, replace bool with a struct
-            f"bool _PyOpcode_ispure(int opcode)",
+            f"bool _PyOpcode_ispure(uint32_t opcode)",
             "",
             ""
         ):
@@ -265,7 +265,7 @@ class Generator(Analyzer):
 
         with self.metadata_item(
                 # TODO: If more metadata is added, replace bool with a struct
-                f"bool _PyOpcode_isguard(int opcode)",
+                f"bool _PyOpcode_isguard(uint32_t opcode)",
                 "",
                 ""
         ):

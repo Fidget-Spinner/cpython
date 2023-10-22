@@ -27,14 +27,14 @@
 #endif
 
 static bool
-_PyOpcode_isimmutable(int opcode)
+_PyOpcode_isimmutable(uint32_t opcode)
 {
     // TODO subscr tuple is immutable
     return false;
 }
 
 static bool
-_PyOpcode_isterminal(int opcode)
+_PyOpcode_isterminal(uint32_t opcode)
 {
     return (opcode == LOAD_FAST ||
             opcode == LOAD_FAST_CHECK ||
@@ -81,15 +81,18 @@ typedef struct _Py_UOpsSymbolicExpression {
     Py_ssize_t idx;
     // Note: separated from refcnt so we don't have to deal with counting
     int usage_count;
-    int opcode;
-    int oparg;
+    int32_t opcode;
+    int32_t oparg;
+    // Only if the instruction is a special jump ID, then this will be populated.
+    int32_t jump_id_opcode;
+    int32_t jump_id_oparg;
     // Type of the symbolic expression
     _Py_UOpsSymType sym_type;
     PyObject *const_val;
     Py_hash_t cached_hash;
     // The store where this expression was first created.
     // This matters for anything that isn't immutable
-    // void* because otherwise need a forward decl of _Py_UOpsAbstractStore.
+    // void* because otherwise need a forward decl of _Py_UOpsPureStore.
     void *originating_store;
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
@@ -232,7 +235,7 @@ static PyTypeObject _Py_UOpsSymbolicExpression_Type = {
     void *next;
 
 // Snapshot of _Py_UOpsAbstractInterpContext locals BEFORE a region.
-typedef struct _Py_UOpsAbstractStore {
+typedef struct _Py_UOpsPureStore {
     PyObject_VAR_HEAD
     INSTRUCTION_STORE_HEAD
     // The preceding PyListObject of (hoisted guards)
@@ -246,20 +249,25 @@ typedef struct _Py_UOpsAbstractStore {
     _Py_UOpsSymbolicExpression **locals;
     _Py_UOpsSymbolicExpression *registers[REGISTERS_COUNT];
     _Py_UOpsSymbolicExpression *locals_with_stack[1];
-} _Py_UOpsAbstractStore;
+} _Py_UOpsPureStore;
 
-typedef struct _Py_UOpImpureStore {
+typedef struct _Py_UOpsImpureStore {
     PyObject_VAR_HEAD
     INSTRUCTION_STORE_HEAD
     // A contiguous block of impure instructions
     _PyUOpInstruction *start;
     _PyUOpInstruction *end; // (non-inclusive)
-} _Py_UOpImpureStore;
+} _Py_UOpsImpureStore;
+
+typedef struct _Py_UOpsStoreUnion {
+    PyObject_VAR_HEAD
+    INSTRUCTION_STORE_HEAD
+} _Py_UOpsStoreUnion;
 
 static void
-abstractstore_dealloc(PyObject *o)
+purestore_dealloc(PyObject *o)
 {
-    _Py_UOpsAbstractStore *self = (_Py_UOpsAbstractStore *)o;
+    _Py_UOpsPureStore *self = (_Py_UOpsPureStore *)o;
     Py_XDECREF(self->next);
     Py_DECREF(self->hoisted_guards);
     // No need dealloc locals and stack. We only hold weak references to them.
@@ -269,25 +277,25 @@ abstractstore_dealloc(PyObject *o)
 static void
 impurestore_dealloc(PyObject *o)
 {
-    _Py_UOpImpureStore *self = (_Py_UOpImpureStore *)o;
+    _Py_UOpsImpureStore *self = (_Py_UOpsImpureStore *)o;
     Py_XDECREF(self->next);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static PyTypeObject _Py_UOpsAbstractStore_Type = {
+static PyTypeObject _Py_UOpsPureStore_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    .tp_name = "uops abstract store",
-    .tp_basicsize = sizeof(_Py_UOpsAbstractStore) - sizeof(_Py_UOpsSymbolicExpression *),
+    .tp_name = "uops pure store",
+    .tp_basicsize = sizeof(_Py_UOpsPureStore) - sizeof(_Py_UOpsSymbolicExpression *),
     .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_dealloc = abstractstore_dealloc,
+    .tp_dealloc = purestore_dealloc,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
 static PyTypeObject _PyUOpsImpureStore_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    .tp_name = "a single impure instruction",
-    .tp_basicsize = sizeof(_Py_UOpImpureStore),
+    .tp_name = "uops impure store",
+    .tp_basicsize = sizeof(_Py_UOpsImpureStore),
     .tp_itemsize = 0,
     .tp_dealloc = (destructor)impurestore_dealloc,
     .tp_free = PyObject_Free,
@@ -307,7 +315,7 @@ typedef struct _Py_UOpsAbstractInterpContext {
     int locals_len;
     int curr_stacklen;
     // Actual stack and locals are stored in the current abstract store
-    _Py_UOpsAbstractStore *curr_store;
+    _Py_UOpsStoreUnion *curr_store;
 } _Py_UOpsAbstractInterpContext;
 
 static void
@@ -330,7 +338,7 @@ static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
 };
 
 _Py_UOpsAbstractInterpContext *
-_Py_UOpsAbstractInterpContext_New(_Py_UOpsAbstractStore *store,
+_Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store,
                                   int stack_len, int locals_len, int curr_stacklen)
 {
     _Py_UOpsAbstractInterpContext *self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
@@ -388,7 +396,7 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
 // Steals a reference to const_val
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
-                               int opcode, int oparg,
+                               uint32_t opcode, uint32_t oparg,
                                PyObject *const_val, int num_subexprs, ...)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
@@ -433,7 +441,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
-                               int opcode, int oparg, int num_subexprs,
+                               uint32_t opcode, uint32_t oparg, int num_subexprs,
                                _Py_UOpsSymbolicExpression **arr_start)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
@@ -545,15 +553,16 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
 }
 
 static inline _Py_UOpsSymbolicExpression*
-sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, int opcode, int oparg, int num_stack_inputs)
+sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, uint32_t opcode, uint32_t oparg, int num_stack_inputs)
 {
+    assert(ctx->curr_store->pure_or_impure);
     return
         _Py_UOpsSymbolicExpression_NewFromArray(
             ctx,
             opcode,
             oparg,
             num_stack_inputs,
-            &ctx->curr_store->stack_pointer[-(num_stack_inputs)]
+            &((_Py_UOpsPureStore *)ctx->curr_store)->stack_pointer[-(num_stack_inputs)]
         );
 }
 
@@ -569,11 +578,12 @@ sym_matches_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, u
     return true;
 }
 
-static _Py_UOpsAbstractStore*
+static _Py_UOpsPureStore*
 _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx)
 {
-    _Py_UOpsAbstractStore *self = PyObject_NewVar(_Py_UOpsAbstractStore,
-                                                  &_Py_UOpsAbstractStore_Type,
+    bool is_first_store = false;
+    _Py_UOpsPureStore *self = PyObject_NewVar(_Py_UOpsPureStore,
+                                              &_Py_UOpsPureStore_Type,
                                                   ctx->locals_len + ctx->stack_len);
     if (self == NULL) {
         return NULL;
@@ -589,7 +599,8 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx)
 
     // We are the first store
     if (ctx->curr_store == NULL) {
-        ctx->curr_store = self;
+        is_first_store = true;
+        ctx->curr_store = (_Py_UOpsStoreUnion *)self;
     }
     // Initialize the hoisted guards
     self->hoisted_guards = PyList_New(2);
@@ -626,7 +637,7 @@ _Py_UOpsAsbstractStore_New(_Py_UOpsAbstractInterpContext *ctx)
     }
 
     // Transfer ownership (no incref).
-    if (ctx->curr_store) {
+    if (!is_first_store) {
         ctx->curr_store->next = self;
     }
 
@@ -638,19 +649,19 @@ error:
 }
 
 // Steals a reference to next
-static struct _Py_UOpImpureStore*
+static struct _Py_UOpsImpureStore*
 _Py_UOpsImpureStore_New(_Py_UOpsAbstractInterpContext *ctx)
 {
-    _Py_UOpImpureStore *self = PyObject_NewVar(_Py_UOpImpureStore,
-                                               &_PyUOpsImpureStore_Type,
-                                               0);
+    _Py_UOpsImpureStore *self = PyObject_NewVar(_Py_UOpsImpureStore,
+                                                &_PyUOpsImpureStore_Type,
+                                                0);
     if (self == NULL) {
         return NULL;
     }
 
     // Transfer ownership (no incref)
     if (ctx->curr_store) {
-        ctx->curr_store->next = (_Py_UOpsAbstractStore *)self;
+        ctx->curr_store->next = (_Py_UOpsPureStore *)self;
     }
 
     self->pure_or_impure = 0;
@@ -661,13 +672,13 @@ _Py_UOpsImpureStore_New(_Py_UOpsAbstractInterpContext *ctx)
 }
 
 static inline bool
-op_is_jump(int opcode)
+op_is_jump(uint32_t opcode)
 {
     return (opcode == _POP_JUMP_IF_FALSE || opcode == _POP_JUMP_IF_TRUE);
 }
 
 static inline bool
-op_is_end(int opcode)
+op_is_end(uint32_t opcode)
 {
     return opcode == _EXIT_TRACE || op_is_jump(opcode);
 }
@@ -684,63 +695,6 @@ get_const(_Py_UOpsSymbolicExpression *expr)
     return Py_NewRef(expr->const_val);
 }
 
-// Number the jump targets and the jump instructions with a unique (negative) ID.
-// This replaces the instruction's opcode in the trace with their negative IDs.
-// Aids relocation later when we need to recompute jumps after optimization passes.
-static _PyUOpInstruction *
-number_jumps_and_targets(_PyUOpInstruction *trace, int trace_len, int *max_id)
-{
-    int jump_and_target_count = 0;
-    int jump_and_target_id = -1;
-    for (int i = 0; i < trace_len; i++) {
-        if (op_is_jump(trace[i].opcode)) {
-            // 1 for the jump, 1 for its target
-            jump_and_target_count += 2;
-        }
-    }
-
-    // +1 because 1-based indexing not zero based
-    _PyUOpInstruction *jump_id_to_instruction = PyMem_New(_PyUOpInstruction, jump_and_target_count + 1);
-    if (jump_id_to_instruction == NULL) {
-        return NULL;
-    }
-
-
-    for (int i = 0; i < trace_len; i++) {
-        if (op_is_jump(trace[i].opcode)) {
-            int target = trace[i].oparg;
-            int target_id = jump_and_target_id;
-
-            // 1 for the jump target
-            assert(jump_and_target_id < 0);
-            // Negative opcode!
-            assert(trace[target].opcode >= 0);
-            // Already assigned a jump ID
-            if (trace[target].opcode < 0) {
-                target_id = trace[target].opcode;
-            }
-            else {
-                // Else, assign a new jump ID.
-                jump_id_to_instruction[-target_id] = trace[target];
-                trace[target].opcode = target_id;
-                jump_and_target_id--;
-            }
-
-            // 1 for the jump
-            assert(jump_and_target_id < 0);
-            jump_id_to_instruction[-jump_and_target_id] = trace[i];
-            // Negative opcode!
-            assert(trace[i].opcode >= 0);
-            trace[i].opcode = jump_and_target_id;
-            jump_and_target_id--;
-            // Point the jump to the target ID.
-            trace[i].oparg = target_id;
-
-        }
-    }
-    *max_id = jump_and_target_id;
-    return jump_id_to_instruction;
-}
 
 // Remove contiguous SET_IPs, leaving only the last one before a non-SET_IP instruction.
 static int
@@ -774,53 +728,6 @@ remove_duplicate_set_ips(_PyUOpInstruction *trace, int trace_len)
     return new_temp_len;
 }
 
-/**
- * Fixes all side exits due to jumps. This MUST be called as the last
- * pass over the trace. Otherwise jumps will point to invalid ends.
- *
- * Runtime complexity of O(n*k), where n is trace length and k is number of jump
- * instructions. Since k is usually quite low, this is nearly linear.
-*/
-static void
-fix_jump_side_exits(_PyUOpInstruction *trace, int trace_len,
-                    _PyUOpInstruction *jump_id_to_instruction, int max_jump_id)
-{
-    for (int i = 0; i < trace_len; i++) {
-        int oparg = trace[i].oparg;
-        int opcode = trace[i].opcode;
-        // Indicates it's a jump target or jump instruction
-        if (opcode < 0 && opcode > max_jump_id) {
-            opcode = -opcode;
-            int real_opcode = jump_id_to_instruction[opcode].opcode;
-            if (op_is_jump(real_opcode)) {
-                trace[i].opcode = real_opcode;
-
-                // Search for our target ID.
-                int target_id = oparg;
-                for (int x = 0; x < trace_len; x++) {
-                    if (trace[x].opcode == target_id) {
-                        trace[i].oparg = x;
-                        break;
-                    }
-                }
-
-                assert(trace[i].oparg >= 0);
-            }
-        }
-    }
-
-    // Final pass to swap out all the jump target IDs with their actual targets.
-    for (int i = 0; i < trace_len; i++) {
-        int opcode = trace[i].opcode;
-        // Indicates it's a jump target or jump instruction
-        if (opcode < 0 && opcode > max_jump_id) {
-            int real_oparg = jump_id_to_instruction[-opcode].oparg;
-            int real_opcode = jump_id_to_instruction[-opcode].opcode;
-            trace[i].oparg = real_oparg;
-            trace[i].opcode = real_opcode;
-        }
-    }
-}
 
 typedef enum {
     ABSTRACT_INTERP_ERROR,
@@ -836,6 +743,8 @@ try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
                 _PyUOpInstruction *curr,
                 _Py_UOpsSymbolicExpression **prev_store_locals)
 {
+    assert(ctx->curr_store->pure_or_impure);
+    _Py_UOpsPureStore *curr_store = ((_Py_UOpsPureStore *)ctx->curr_store);
     bool can_hoist = true;
 
     // Try hoisting the guard.
@@ -851,7 +760,7 @@ try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
     }
     for (int i = 0; i < num_stack_inputs; i++) {
         bool input_present = false;
-        _Py_UOpsSymbolicExpression *input = ctx->curr_store->stack_pointer[-(i + 1)];
+        _Py_UOpsSymbolicExpression *input = curr_store->stack_pointer[-(i + 1)];
         for (int x = 0; x < ctx->locals_len; x++) {
             if (input == prev_store_locals[x]) {
                 input_present = true;
@@ -873,7 +782,7 @@ try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
     if (guard == NULL) {
         return -1;
     }
-    int res = PyList_Append(ctx->curr_store->hoisted_guards, (PyObject *)guard);
+    int res = PyList_Append(curr_store->hoisted_guards, (PyObject *)guard);
     return res < 0 ? -1 : 1;
 }
 
@@ -919,8 +828,6 @@ uop_abstract_interpret_single_inst(
     PyCodeObject *co,
     _PyUOpInstruction *inst,
     _Py_UOpsAbstractInterpContext *ctx,
-    _PyUOpInstruction *jump_id_to_instruction,
-    int max_jump_id,
     bool should_type_propagate
 )
 {
@@ -932,7 +839,7 @@ uop_abstract_interpret_single_inst(
     }
 #endif
 
-#define STACK_LEVEL()     ((int)(stack_pointer - ctx->curr_store->stack))
+#define STACK_LEVEL()     ((int)(stack_pointer - curr_store->stack))
 #define STACK_SIZE()      (co->co_stacksize)
 #define BASIC_STACKADJ(n) (stack_pointer += n)
 
@@ -952,21 +859,17 @@ uop_abstract_interpret_single_inst(
 #define STACK_SHRINK(n)        BASIC_STACKADJ(-(n))
 #endif
 #define PEEK(idx)              (((stack_pointer)[-(idx)]))
-#define GETLOCAL(idx)          ((ctx->curr_store->locals[idx]))
+#define GETLOCAL(idx)          ((curr_store->locals[idx]))
 
 #define STAT_INC(opname, name) ((void)0)
-    int oparg = inst->oparg;
-    int opcode = inst->opcode;
+    uint32_t oparg = inst->oparg;
+    uint32_t opcode = inst->opcode;
     uint64_t operand = inst->operand;
 
-    _Py_UOpsSymbolicExpression **stack_pointer = ctx->curr_store->stack_pointer;
+    assert(ctx->curr_store->pure_or_impure);
+    _Py_UOpsPureStore *curr_store = ((_Py_UOpsPureStore *)ctx->curr_store);
 
-    // Is a special jump/target ID, decode that
-    if (opcode < 0 && opcode > max_jump_id) {
-        DPRINTF(2, "Special jump target/ID %d\n", opcode);
-        oparg = jump_id_to_instruction[-opcode].oparg;
-        opcode = jump_id_to_instruction[-opcode].opcode;
-    }
+    _Py_UOpsSymbolicExpression **stack_pointer = curr_store->stack_pointer;
 
     DPRINTF(2, "Abstract interpreting %s:%d\n",
             (opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[opcode],
@@ -1031,7 +934,7 @@ uop_abstract_interpret_single_inst(
             Py_UNREACHABLE();
     }
     fprintf(stderr, "stack_pointer %p\n", stack_pointer);
-    ctx->curr_store->stack_pointer = stack_pointer;
+    curr_store->stack_pointer = stack_pointer;
     ctx->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
 
@@ -1049,15 +952,12 @@ guard_required:
     return ABSTRACT_INTERP_GUARD_REQUIRED;
 }
 
-static _Py_UOpsAbstractStore *
+static _Py_UOpsStoreUnion *
 uop_abstract_interpret(
     PyCodeObject *co,
     _PyUOpInstruction *trace,
-    _PyUOpInstruction *new_trace,
     int trace_len,
-    int curr_stacklen,
-    _PyUOpInstruction *jump_id_to_instruction,
-    int max_jump_id
+    int curr_stacklen
 )
 {
 
@@ -1070,8 +970,8 @@ uop_abstract_interpret(
 #endif
 
     _Py_UOpsAbstractInterpContext *ctx = NULL;
-    _Py_UOpsAbstractStore *store = NULL;
-    _Py_UOpsAbstractStore *first_store = NULL;
+    _Py_UOpsPureStore *store = NULL;
+    _Py_UOpsPureStore *first_store = NULL;
     _Py_UOpsSymbolicExpression **prev_store_locals = NULL;
     _Py_UOpsSymbolicExpression **prev_store_stack = NULL;
     // Just hold onto the first locals because we need to free them.
@@ -1110,7 +1010,7 @@ uop_abstract_interpret(
 
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
-                jump_id_to_instruction, max_jump_id, false
+                false
             );
             if (status == ABSTRACT_INTERP_ERROR) {
                 goto error;
@@ -1128,11 +1028,11 @@ uop_abstract_interpret(
                 }
                 DPRINTF(3, "hoisted guard!\n");
                 // Type propagate its information into this pure region
-                int status = uop_abstract_interpret_single_inst(
+                int stat = uop_abstract_interpret_single_inst(
                     co, curr, ctx,
-                    jump_id_to_instruction, max_jump_id, true
+                    true
                 );
-                assert(status == ABSTRACT_INTERP_NORMAL);
+                assert(stat == ABSTRACT_INTERP_NORMAL);
             }
 
             curr++;
@@ -1147,7 +1047,7 @@ uop_abstract_interpret(
         prev_store_stack = store->stack;
 
         DPRINTF(3, "creating impure region\n")
-        _Py_UOpImpureStore *impure_store = _Py_UOpsImpureStore_New(ctx);
+        _Py_UOpsImpureStore *impure_store = _Py_UOpsImpureStore_New(ctx);
         if (impure_store == NULL) {
             goto error;
         }
@@ -1158,14 +1058,14 @@ uop_abstract_interpret(
             goto error;
         }
 
-        ctx->curr_store = store;
+        ctx->curr_store = (_Py_UOpsStoreUnion *)store;
 
         assert(ctx->curr_store);
         // Form impure region
         impure_store->start = curr;
         while (curr < end && (!_PyOpcode_ispure(curr->opcode))) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
-            int num_stack_inputs = _PyOpcode_num_popped(curr->opcode, curr->oparg, false);
+            int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
             _Py_UOpsSymbolicExpression *impure_inst =
                 _Py_UOpsSymbolicExpression_NewFromArray(
                     ctx,
@@ -1180,7 +1080,7 @@ uop_abstract_interpret(
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
-                jump_id_to_instruction, max_jump_id, true
+                true
             );
             assert(status == ABSTRACT_INTERP_NORMAL || status == ABSTRACT_INTERP_GUARD_REQUIRED);
             curr++;
@@ -1195,7 +1095,7 @@ uop_abstract_interpret(
 
     Py_DECREF(ctx);
     PyMem_Free(first_temp_local_store);
-    return first_store;
+    return (_Py_UOpsStoreUnion *)first_store;
 
 error:
     if(PyErr_Occurred()) {
@@ -1204,6 +1104,96 @@ error:
     Py_DECREF(ctx);
     PyMem_Free(first_temp_local_store);
     return NULL;
+}
+
+int
+emit_uops_from_pure_store(
+    PyCodeObject *co,
+    _Py_UOpsPureStore *pure_store,
+    _PyUOpInstruction *original_trace,
+    _PyUOpInstruction *trace_writebuffer,
+    int trace_len
+)
+{
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+#endif
+
+}
+
+int
+emit_uops_from_impure_store(
+    PyCodeObject *co,
+    _Py_UOpsImpureStore *impure_store,
+    _PyUOpInstruction *original_trace,
+    _PyUOpInstruction *trace_writebuffer,
+    int trace_len
+)
+{
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+#endif
+
+}
+
+int
+emit_uops_from_stores(
+    PyCodeObject *co,
+    _Py_UOpsStoreUnion *first_store,
+    _PyUOpInstruction *original_trace,
+    _PyUOpInstruction *trace_writebuffer,
+    int trace_len
+)
+{
+
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+#endif
+
+    int new_tracelen = 0;
+
+    // Emission is simple: traverse the linked list of stores:
+    // - For pure stores, emit their final states.
+    //     - For hoisted guards of pure stores, emit the stuff they need,
+    //       at the end, adjust the stack back to the level we need.
+    // - For impure stores, just emit them directly.
+
+    _Py_UOpsStoreUnion *curr_store = first_store;
+    while(curr_store != NULL) {
+        if (curr_store->pure_or_impure) {
+            emit_uops_from_pure_store(co,
+                                      (_Py_UOpsPureStore *)curr_store,
+                                      original_trace,
+                                      trace_writebuffer,
+                                      trace_len);
+        }
+        else {
+            emit_uops_from_impure_store(co,
+                                      (_Py_UOpsImpureStore *)curr_store,
+                                      original_trace,
+                                      trace_writebuffer,
+                                      trace_len);
+        }
+    }
+
+
+
+    // Simple solution for jumps like _POP_JUMP_IF_TRUE or _POP_JUMP_IF_FALSE:
+    // Just find the original jump target and emit everything from the
+    // start to the end, for the side exit stub.
+
 }
 
 int
@@ -1216,28 +1206,17 @@ _Py_uop_analyze_and_optimize(
 {
     int original_trace_len = trace_len;
     _PyUOpInstruction *temp_writebuffer = NULL;
-    _PyUOpInstruction *jump_id_to_instruction = NULL;
 
     temp_writebuffer = PyMem_New(_PyUOpInstruction, trace_len * OVERALLOCATE_FACTOR);
     if (temp_writebuffer == NULL) {
         goto error;
     }
 
-    memcpy(temp_writebuffer, trace,  sizeof(_PyUOpInstruction) * original_trace_len);
-
-    int max_jump_id = 0;
-
-    // Pass: Jump target calculation and setup (preparation for relocation)
-    jump_id_to_instruction = number_jumps_and_targets(temp_writebuffer, trace_len, &max_jump_id);
-    if (jump_id_to_instruction == NULL) {
-        goto error;
-    }
 
     // Pass: Abstract interpretation and symbolic analysis
-    _Py_UOpsAbstractStore *first_abstract_store = uop_abstract_interpret(
-        co, trace, temp_writebuffer,
-        trace_len, curr_stacklen,
-        jump_id_to_instruction, max_jump_id);
+    _Py_UOpsStoreUnion *first_abstract_store = uop_abstract_interpret(
+        co, trace,
+        trace_len, curr_stacklen);
 
     if (first_abstract_store == NULL || trace_len < 0) {
         goto error;
@@ -1246,9 +1225,6 @@ _Py_uop_analyze_and_optimize(
     // Pass: Remove duplicate SET_IP
     trace_len = remove_duplicate_set_ips(temp_writebuffer, trace_len);
 
-    // Final pass: fix jumps. This MUST be called as the last pass!
-    fix_jump_side_exits(temp_writebuffer, trace_len, jump_id_to_instruction, max_jump_id);
-
     // Fill in our new trace!
     // memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
 
@@ -1256,6 +1232,5 @@ _Py_uop_analyze_and_optimize(
     return original_trace_len;
 error:
     PyMem_Free(temp_writebuffer);
-    PyMem_Free(jump_id_to_instruction);
     return original_trace_len;
 }
