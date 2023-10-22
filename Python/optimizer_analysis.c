@@ -309,6 +309,8 @@ typedef struct _Py_UOpsAbstractInterpContext {
     PyDictObject *sym_exprs_to_sym_exprs;
     // Current ID to assign a new (non-duplicate) sym_expr
     Py_ssize_t sym_curr_id;
+    // Symbolic version of co_consts
+    PyObject *sym_consts;
 
     // Max stacklen
     int stack_len;
@@ -324,6 +326,7 @@ abstractinterp_dealloc(PyObject *o)
     _Py_UOpsAbstractInterpContext *self = (_Py_UOpsAbstractInterpContext *)o;
     Py_DECREF(self->sym_exprs_to_sym_exprs);
     Py_XDECREF(self->curr_store);
+    Py_DECREF(self->sym_consts);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -337,8 +340,12 @@ static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
+static inline _Py_UOpsSymbolicExpression*
+sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx);
+
+
 _Py_UOpsAbstractInterpContext *
-_Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store,
+_Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store, PyObject *co_consts,
                                   int stack_len, int locals_len, int curr_stacklen)
 {
     _Py_UOpsAbstractInterpContext *self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
@@ -348,18 +355,40 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store,
         return NULL;
     }
 
+    PyObject *sym_consts = NULL;
+
+    self->sym_consts = NULL;
+    self->curr_store = NULL;
+
     self->sym_exprs_to_sym_exprs = (PyDictObject *)PyDict_New();
     if (self->sym_exprs_to_sym_exprs == NULL) {
-        Py_DECREF(self);
-        return NULL;
+        goto error;
     }
 
+    Py_ssize_t co_const_len = PyTuple_GET_SIZE(co_consts);
+    sym_consts = PyTuple_New(co_const_len);
+    if (sym_consts == NULL) {
+        goto error;
+    }
+    for (Py_ssize_t i = 0; i < co_const_len; i++) {
+        _Py_UOpsSymbolicExpression *res = sym_init_const(self, PyTuple_GET_ITEM(co_consts, i), i);
+        if (res == NULL) {
+            goto error;
+        }
+        PyTuple_SET_ITEM(sym_consts, i, res);
+    }
+
+    self->sym_consts = sym_consts;
     self->stack_len = stack_len;
     self->locals_len = locals_len;
     self->curr_stacklen = curr_stacklen;
-    self->curr_store = NULL;
 
     return self;
+
+error:
+    Py_XDECREF(sym_consts);
+    Py_DECREF(self);
+    return NULL;
 }
 
 static _Py_UOpsSymbolicExpression *
@@ -902,11 +931,7 @@ uop_abstract_interpret_single_inst(
         case LOAD_CONST: {
             // TODO, symbolify all the constants and load from there directly.
             STACK_GROW(1);
-            PEEK(1) = (_Py_UOpsSymbolicExpression *)sym_init_const(
-                ctx,
-                GETITEM(co->co_consts, oparg),
-                oparg
-            );
+            PEEK(1) = (_Py_UOpsSymbolicExpression *)GETITEM(ctx->sym_consts, oparg);
             break;
         }
         case STORE_FAST:
@@ -968,6 +993,7 @@ uop_abstract_interpret(
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
 #endif
+    // Initialize the symbolic consts
 
     _Py_UOpsAbstractInterpContext *ctx = NULL;
     _Py_UOpsPureStore *store = NULL;
@@ -978,7 +1004,7 @@ uop_abstract_interpret(
     _Py_UOpsSymbolicExpression **first_temp_local_store = NULL;
 
     ctx = _Py_UOpsAbstractInterpContext_New(
-        NULL, co->co_stacksize, co->co_nlocals, curr_stacklen);
+        NULL, co->co_consts, co->co_stacksize, co->co_nlocals, curr_stacklen);
     if (ctx == NULL) {
         goto error;
     }
@@ -1186,6 +1212,7 @@ emit_uops_from_stores(
                                       trace_writebuffer,
                                       trace_len);
         }
+        curr_store = curr_store->next;
     }
 
 
