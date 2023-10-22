@@ -248,12 +248,13 @@ typedef struct _Py_UOpsAbstractStore {
     _Py_UOpsSymbolicExpression *locals_with_stack[1];
 } _Py_UOpsAbstractStore;
 
-typedef struct _Py_UopImpureStore {
+typedef struct _Py_UOpImpureStore {
     PyObject_VAR_HEAD
     INSTRUCTION_STORE_HEAD
-    // A PyListObject of impure _Py_UOpsSymbolicExpression
-    PyObject *insts;
-} _Py_UopImpureStore;
+    // A contiguous block of impure instructions
+    _PyUOpInstruction *start;
+    _PyUOpInstruction *end; // (non-inclusive)
+} _Py_UOpImpureStore;
 
 static void
 abstractstore_dealloc(PyObject *o)
@@ -268,9 +269,8 @@ abstractstore_dealloc(PyObject *o)
 static void
 impurestore_dealloc(PyObject *o)
 {
-    _Py_UopImpureStore *self = (_Py_UopImpureStore *)o;
+    _Py_UOpImpureStore *self = (_Py_UOpImpureStore *)o;
     Py_XDECREF(self->next);
-    Py_DECREF(self->insts);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -287,7 +287,7 @@ static PyTypeObject _Py_UOpsAbstractStore_Type = {
 static PyTypeObject _PyUOpsImpureStore_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "a single impure instruction",
-    .tp_basicsize = sizeof(_Py_UopImpureStore),
+    .tp_basicsize = sizeof(_Py_UOpImpureStore),
     .tp_itemsize = 0,
     .tp_dealloc = (destructor)impurestore_dealloc,
     .tp_free = PyObject_Free,
@@ -637,11 +637,11 @@ error:
     return NULL;
 }
 
-// Steals a reference to next and insts
-static struct _Py_UopImpureStore*
-_Py_UOpsImpureInstruction_New(_Py_UOpsAbstractInterpContext *ctx, PyObject *insts)
+// Steals a reference to next
+static struct _Py_UOpImpureStore*
+_Py_UOpsImpureStore_New(_Py_UOpsAbstractInterpContext *ctx)
 {
-    _Py_UopImpureStore *self = PyObject_NewVar(_Py_UopImpureStore,
+    _Py_UOpImpureStore *self = PyObject_NewVar(_Py_UOpImpureStore,
                                                &_PyUOpsImpureStore_Type,
                                                0);
     if (self == NULL) {
@@ -656,7 +656,6 @@ _Py_UOpsImpureInstruction_New(_Py_UOpsAbstractInterpContext *ctx, PyObject *inst
     self->pure_or_impure = 0;
     self->next = NULL;
 
-    self->insts = insts;
 
     return self;
 }
@@ -1148,12 +1147,8 @@ uop_abstract_interpret(
         prev_store_stack = store->stack;
 
         DPRINTF(3, "creating impure region\n")
-        PyObject *impure_insts = PyList_New(4);
-        if (impure_insts == NULL) {
-            goto error;
-        }
-        store = (_Py_UOpsAbstractStore *)_Py_UOpsImpureInstruction_New(ctx, impure_insts);
-        if (store == NULL) {
+        _Py_UOpImpureStore *impure_store = _Py_UOpsImpureStore_New(ctx);
+        if (impure_store == NULL) {
             goto error;
         }
         // Create a new abstract store to keep track of stack and local effects for
@@ -1165,9 +1160,9 @@ uop_abstract_interpret(
 
         ctx->curr_store = store;
 
-
         assert(ctx->curr_store);
         // Form impure region
+        impure_store->start = curr;
         while (curr < end && (!_PyOpcode_ispure(curr->opcode))) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
             int num_stack_inputs = _PyOpcode_num_popped(curr->opcode, curr->oparg, false);
@@ -1182,9 +1177,6 @@ uop_abstract_interpret(
             if (impure_inst == NULL) {
                 goto error;
             }
-            if (PyList_Append(impure_insts, (PyObject *)impure_inst) < 0) {
-                goto error;
-            }
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
@@ -1193,6 +1185,7 @@ uop_abstract_interpret(
             assert(status == ABSTRACT_INTERP_NORMAL || status == ABSTRACT_INTERP_GUARD_REQUIRED);
             curr++;
         }
+        impure_store->end = curr;
 
         if (curr >= end || op_is_end(curr->opcode)) {
             break;
