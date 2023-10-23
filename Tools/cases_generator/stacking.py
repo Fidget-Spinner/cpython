@@ -642,7 +642,7 @@ def _write_components_abstract_interp_guard_region(
         # Does the input specify typed inputs?
         if any(input_var.typeprop for input_var in all_input_vars.values()):
             # If the input types already match, eliminate the guard
-            # Read the cache information to check the auxillary type information
+            # Read the cache information to check the auxiliary type information
             mgr.instr.write_variable_initializations(mgr.active_caches, out, TIER_TWO)
 
             predicates = []
@@ -655,7 +655,7 @@ def _write_components_abstract_interp_guard_region(
                 if (typ := input_effect.typeprop) is not None:
                     typname, aux = typ
                     aux = "0" if aux is None else aux
-                    # Check that the input type information match (including auxillary info)
+                    # Check that the input type information match (including auxiliary info)
                     predicates.append(
                         f"sym_matches_type((_Py_UOpsSymbolicExpression *){input_var}, {typname}, (uint32_t){aux})"
                     )
