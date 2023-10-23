@@ -3979,6 +3979,11 @@ dummy_func(
         pure op(_SHRINK_STACK, (unused[oparg] --)) {
         }
 
+        pure op(_SWAP_AND_POP, (target[oparg], tos -- target[oparg])) {
+            Py_DECREF(*target);
+            *target = tos;
+        }
+
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {
             // Inserts TOS at position specified by oparg;
             memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));

@@ -252,15 +252,17 @@ typedef struct _Py_UOpsPureStore {
     // The preceding PyListObject of (hoisted guards)
     // Consists of _Py_UOpsSymbolicExpression
     PyObject *hoisted_guards;
+
     // Initial locals state. Needed to reconstruct hoisted guards later.
     _Py_UOpsSymbolicExpression **initial_locals;
+    // Initial stack state, needed to calculate the diff to emit.
+    _Py_UOpsSymbolicExpression **initial_stack;
 
     // The following are abstract stack and locals.
     // points to one element after the abstract stack
     _Py_UOpsSymbolicExpression **stack_pointer;
     _Py_UOpsSymbolicExpression **stack;
     _Py_UOpsSymbolicExpression **locals;
-    _Py_UOpsSymbolicExpression *registers[REGISTERS_COUNT];
     _Py_UOpsSymbolicExpression *locals_with_stack[1];
 } _Py_UOpsPureStore;
 
@@ -283,7 +285,6 @@ purestore_dealloc(PyObject *o)
     _Py_UOpsPureStore *self = (_Py_UOpsPureStore *)o;
     Py_XDECREF(self->next);
     Py_DECREF(self->hoisted_guards);
-    PyMem_Free(self->initial_locals);
     // No need dealloc locals and stack. We only hold weak references to them.
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
@@ -408,6 +409,10 @@ error:
 static _Py_UOpsSymbolicExpression *
 check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
 {
+    // Unknown opcodes are treated as always unique
+    if (self->opcode == CACHE) {
+        return self;
+    }
     assert(ctx->sym_exprs_to_sym_exprs);
 
     // Check if this sym expr already exists
@@ -433,6 +438,7 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
     }
     // There's an entry. Reuse that instead
     Py_DECREF(self);
+    ((_Py_UOpsSymbolicExpression *)res)->usage_count++;
     return (_Py_UOpsSymbolicExpression *)res;
 }
 
@@ -634,16 +640,13 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
     bool is_first_store = false;
     _Py_UOpsPureStore *self = PyObject_NewVar(_Py_UOpsPureStore,
                                               &_Py_UOpsPureStore_Type,
-                                                  ctx->locals_len + ctx->stack_len);
+                                              (ctx->locals_len + ctx->stack_len) * 2);
     if (self == NULL) {
         return NULL;
     }
     self->pure_or_impure = 1;
     self->next = NULL;
 
-    for (int i = 0; i < REGISTERS_COUNT; i++) {
-        self->registers[i] = NULL;
-    }
 
     // Setup
 
@@ -659,15 +662,11 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
         return NULL;
     }
 
-    self->initial_locals = PyMem_New(_Py_UOpsSymbolicExpression *, ctx->locals_len);
-    if (self->initial_locals == NULL) {
-        goto error;
-    }
-
-
     self->locals = self->locals_with_stack;
     self->stack = self->locals_with_stack + ctx->locals_len;
     self->stack_pointer = self->stack + ctx->curr_stacklen;
+    self->initial_locals = self->stack + ctx->stack_len;
+    self->initial_stack = self->initial_locals + ctx->locals_len;
 
     // Null out everything first
     for (int i = 0; i < ctx->locals_len + ctx->stack_len; i++) {
@@ -798,8 +797,7 @@ typedef enum {
 // -1 on exception
 static int
 try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
-                _PyUOpInstruction *curr,
-                _Py_UOpsSymbolicExpression **prev_store_locals)
+                _PyUOpInstruction *curr)
 {
     assert(ctx->curr_store->pure_or_impure);
     _Py_UOpsPureStore *curr_store = ((_Py_UOpsPureStore *)ctx->curr_store);
@@ -821,7 +819,7 @@ try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
         bool input_present = false;
         _Py_UOpsSymbolicExpression *input = curr_store->stack_pointer[-(i + 1)];
         for (int x = 0; x < ctx->locals_len; x++) {
-            if (input == prev_store_locals[x]) {
+            if (input == curr_store->initial_locals[x]) {
                 input_present = true;
                 break;
             }
@@ -1028,7 +1026,6 @@ uop_abstract_interpret(
     _Py_UOpsAbstractInterpContext *ctx = NULL;
     _Py_UOpsPureStore *store = NULL;
     _Py_UOpsPureStore *first_store = NULL;
-    _Py_UOpsSymbolicExpression **prev_store_locals = NULL;
     _Py_UOpsSymbolicExpression **prev_store_stack = NULL;
     // Just hold onto the first locals because we need to free them.
     _Py_UOpsSymbolicExpression **first_temp_local_store = NULL;
@@ -1045,13 +1042,9 @@ uop_abstract_interpret(
     }
     ctx->sym_curr_id = 0;
 
-    first_temp_local_store = prev_store_locals =
-        PyMem_New(_Py_UOpsSymbolicExpression *, ctx->locals_len);
-    if (prev_store_locals == NULL) {
-        return NULL;
-    }
     // Copy over the current locals
-    memcpy(first_store->initial_locals, first_store->locals, ctx->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
+    memcpy(store->initial_locals, store->locals, ctx->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
+    memcpy(store->initial_stack, store->stack, ctx->stack_len * sizeof(_Py_UOpsSymbolicExpression *));
 
 
     _PyUOpInstruction *curr = trace;
@@ -1073,7 +1066,7 @@ uop_abstract_interpret(
             }
 
             if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
-                int res = try_hoist_guard(ctx, curr, prev_store_locals);
+                int res = try_hoist_guard(ctx, curr);
                 if (res < 0) {
                     goto error;
                 }
@@ -1118,7 +1111,8 @@ uop_abstract_interpret(
         assert(ctx->curr_store);
         // Form impure region
         impure_store->start = curr;
-        while (curr < end && (!_PyOpcode_ispure(curr->opcode))) {
+        // SET_IP shouldn't break and form a new region.
+        while (curr < end && (!_PyOpcode_ispure(curr->opcode) || curr->opcode == _SET_IP)) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
             _Py_UOpsSymbolicExpression *impure_inst =
@@ -1147,7 +1141,8 @@ uop_abstract_interpret(
         }
 
         // Copy over the current locals
-        memcpy(first_store->initial_locals, store->locals, ctx->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
+        memcpy(store->initial_locals, store->locals, ctx->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
+        memcpy(store->initial_stack, store->stack, ctx->stack_len * sizeof(_Py_UOpsSymbolicExpression *));
 
 
     }
@@ -1188,7 +1183,8 @@ emit_i(_PyUOpInstruction *trace_writebuffer, int curr_i, _PyUOpInstruction inst)
 
 static int
 compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
-                   _Py_UOpsSymbolicExpression *sym)
+                   _Py_UOpsSymbolicExpression *sym, _Py_UOpsPureStore *store,
+                   bool use_locals)
 {
     _PyUOpInstruction inst;
     // Since CPython is a stack machine, just compile in the order
@@ -1201,6 +1197,19 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
         // TODO memory leak.
         inst.operand = (uint64_t)Py_NewRef(sym->const_val);
         return emit_i(trace_writebuffer, new_trace_len, inst);
+    }
+
+    // If sym is already in locals, just reuse that.
+    if (use_locals) {
+        int locals_len = (int)(store->stack - store->locals);
+        for (int i = 0; i < locals_len; i++) {
+            if (sym == store->locals[i]) {
+                inst.opcode = LOAD_FAST;
+                inst.oparg = i;
+                inst.operand = 0;
+                return emit_i(trace_writebuffer, new_trace_len, inst);
+            }
+        }
     }
 
     if (_PyOpcode_isterminal(sym->opcode)) {
@@ -1221,7 +1230,11 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
         if (sym->operands[i] == NULL) {
             continue;
         }
-        new_trace_len += compile_sym_to_uops(trace_writebuffer, new_trace_len, sym->operands[i]);
+        new_trace_len = compile_sym_to_uops(
+            trace_writebuffer,
+            new_trace_len,
+            sym->operands[i],
+            store, use_locals);
     }
 
     // Finally, emit the operation itself.
@@ -1296,12 +1309,22 @@ emit_uops_from_pure_store(
     // Due to CPython's stack machine style, this will naturally produce
     // stack-valid code.
 
+    DPRINTF(2, "==EMITTING LOCALS==:\n");
     // Final state of the locals.
     // TODO make sure we don't blow the stack!!!!
     for (int locals_i = 0; locals_i < locals_len; locals_i++) {
+        // If no change in locals, don't emit:
+        if (pure_store->locals[locals_i] == pure_store->initial_locals[locals_i]) {
+            continue;
+        }
         _PyUOpInstruction store_fast = {STORE_FAST, locals_i, 0};
 
-        new_trace_len = compile_sym_to_uops(trace_writebuffer, new_trace_len, pure_store->locals[locals_i]);
+        new_trace_len = compile_sym_to_uops(
+            trace_writebuffer,
+            new_trace_len,
+            pure_store->locals[locals_i],
+            pure_store,
+            false);
         _PyUOpInstruction prev_i = trace_writebuffer[new_trace_len-1];
         // Micro optimizations -- if LOAD_FAST then STORE_FAST, get rid of that
         if (prev_i.opcode == LOAD_FAST && prev_i.oparg == locals_i) {
@@ -1310,11 +1333,24 @@ emit_uops_from_pure_store(
         }
         new_trace_len = emit_i(trace_writebuffer, new_trace_len, store_fast);
     }
+    DPRINTF(2, "==================\n");
+    DPRINTF(2, "==EMITTING STACK==:\n");
+    int stack_len = pure_store->stack_pointer - pure_store->stack;
+    for (int stack_i = 0; stack_i < stack_len; stack_i++) {
+        // If no change in stack, don't emit:
+        // Do we need _SWAP_AND_POP just to be safe?
+        if (pure_store->stack[stack_i] == pure_store->initial_stack[stack_i]) {
+            continue;
+        }
 
-    // Final state of the stack.
-    for (int locals_i = 0; locals_i < locals_len; locals_i++) {
-        new_trace_len = compile_sym_to_uops(trace_writebuffer, new_trace_len, pure_store->stack[locals_i]);
+        new_trace_len = compile_sym_to_uops(
+            trace_writebuffer,
+            new_trace_len,
+            pure_store->stack[stack_i],
+            pure_store,
+            true);
     }
+    DPRINTF(2, "==================\n");
 
     return new_trace_len;
 }
@@ -1336,7 +1372,7 @@ emit_uops_from_impure_store(
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
 #endif
-
+    return new_trace_len;
 }
 
 static int
