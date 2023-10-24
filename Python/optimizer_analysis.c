@@ -737,7 +737,7 @@ op_is_jump(uint32_t opcode)
 static inline bool
 op_is_end(uint32_t opcode)
 {
-    return opcode == _EXIT_TRACE || op_is_jump(opcode);
+    return opcode == _EXIT_TRACE;
 }
 
 static inline bool
@@ -752,6 +752,45 @@ get_const(_Py_UOpsSymbolicExpression *expr)
     return Py_NewRef(expr->const_val);
 }
 
+static int
+copy_over_exit_stubs(_PyUOpInstruction *old_trace, int old_trace_len,
+                     _PyUOpInstruction *new_trace, int new_trace_len)
+{
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+    DPRINTF(3, "EMITTING SIDE EXIT STUBS\n");
+#endif
+
+    int new_trace_len_copy = new_trace_len;
+    for (int i = 0; i < new_trace_len_copy; i++) {
+        _PyUOpInstruction inst = new_trace[i];
+        if (op_is_jump(inst.opcode)) {
+            // Find target in original trace
+            _PyUOpInstruction *target = old_trace + inst.oparg;
+            // Point to inst to the new stub
+            inst.oparg = new_trace_len;
+            // Start emitting exit stub from there
+            do {
+                DPRINTF(3, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
+                        (int)(new_trace_len),
+                        (target->opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[target->opcode],
+                        target->oparg,
+                        target->operand);
+
+                new_trace[new_trace_len] = *target;
+                new_trace_len++;
+                target++;
+            }
+            while(!op_is_end((target-1)->opcode));
+
+        }
+    }
+    return new_trace_len;
+}
 
 // Remove contiguous SET_IPs, leaving only the last one before a non-SET_IP instruction.
 static int
@@ -1095,10 +1134,14 @@ uop_abstract_interpret(
         prev_store_stack = store->stack;
 
         DPRINTF(3, "creating impure region\n")
+        // The last instruction of the previous region should be a _SET_IP
+        assert((curr-1)->opcode == _SET_IP);
+        curr--;
         _Py_UOpsImpureStore *impure_store = _Py_UOpsImpureStore_New(ctx);
         if (impure_store == NULL) {
             goto error;
         }
+        ctx->curr_store = (_Py_UOpsStoreUnion *)impure_store;
         // Create a new abstract store to keep track of stack and local effects for
         // the next pure region.
         store = _Py_UOpsPureStore_New(ctx);
@@ -1133,6 +1176,9 @@ uop_abstract_interpret(
             );
             assert(status == ABSTRACT_INTERP_NORMAL || status == ABSTRACT_INTERP_GUARD_REQUIRED);
             curr++;
+            if (op_is_end(curr->opcode)) {
+                break;
+            }
         }
         impure_store->end = curr;
 
@@ -1261,6 +1307,7 @@ emit_uops_from_pure_store(
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
 #endif
+    DPRINTF(3, "EMITTING PURE REGION\n");
     int locals_len = co->co_nlocals;
 
     int stack_grown = 0;
@@ -1296,12 +1343,14 @@ emit_uops_from_pure_store(
 
     }
 
-    // Shrink stack after checking guards.
-    // TODO on any deoptimize, the stack needs to be popped by the deopt too.
-    _PyUOpInstruction stack_shrink = {_SHRINK_STACK, stack_grown, 0};
+    if (stack_grown) {
+        // Shrink stack after checking guards.
+        // TODO on any deoptimize, the stack needs to be popped by the deopt too.
+        _PyUOpInstruction stack_shrink = {_SHRINK_STACK, stack_grown, 0};
 
-    new_trace_len = emit_i(trace_writebuffer, new_trace_len,
-                           stack_shrink);
+        new_trace_len = emit_i(trace_writebuffer, new_trace_len,
+                               stack_shrink);
+    }
 
     // 2. Emit the pure region itself.
     // Need to emit in the following order:
@@ -1371,8 +1420,28 @@ emit_uops_from_impure_store(
     if (uop_debug != NULL && *uop_debug >= '0') {
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
+    DPRINTF(3, "EMITTING IMPURE REGION\n");
 #endif
-    return new_trace_len;
+    Py_ssize_t len = (impure_store->end - impure_store->start);
+    assert(impure_store->start->opcode == _SET_IP);
+
+#if Py_DEBUG
+    for (Py_ssize_t i = 0; i < len; i++) {
+        _PyUOpInstruction inst = impure_store->start[i];
+        DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
+                (int)(trace_len + i),
+                (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
+                inst.oparg,
+                inst.operand);
+    }
+#endif
+
+    memcpy(
+        trace_writebuffer + new_trace_len,
+        impure_store->start,
+        len* sizeof(_PyUOpInstruction)
+    );
+    return new_trace_len + (int)len;
 }
 
 static int
@@ -1384,14 +1453,6 @@ emit_uops_from_stores(
     int trace_len
 )
 {
-
-#ifdef Py_DEBUG
-    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
-    int lltrace = 0;
-    if (uop_debug != NULL && *uop_debug >= '0') {
-        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
-    }
-#endif
 
     int new_trace_len = 0;
 
@@ -1420,11 +1481,6 @@ emit_uops_from_stores(
         curr_store = curr_store->next;
     }
 
-
-
-    // Simple solution for jumps like _POP_JUMP_IF_TRUE or _POP_JUMP_IF_FALSE:
-    // Just find the original jump target and emit everything from the
-    // start to the end, for the side exit stub.
 
     return new_trace_len;
 }
@@ -1461,11 +1517,14 @@ _Py_uop_analyze_and_optimize(
     // Pass: Remove duplicate SET_IP
     trace_len = remove_duplicate_set_ips(temp_writebuffer, trace_len);
 
-    // Fill in our new trace!
-    // memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
+    // Pass: fix up side exit stubs. This MUST be called as the last pass!
+    trace_len = copy_over_exit_stubs(trace, original_trace_len, temp_writebuffer, trace_len);
 
-    // TODO return new trace_len soon!
-    return original_trace_len;
+    // Fill in our new trace!
+    memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
+
+    PyMem_Free(temp_writebuffer);
+    return trace_len;
 error:
     PyMem_Free(temp_writebuffer);
     return original_trace_len;
