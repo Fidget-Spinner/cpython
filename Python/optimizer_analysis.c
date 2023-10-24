@@ -737,7 +737,7 @@ op_is_jump(uint32_t opcode)
 static inline bool
 op_is_end(uint32_t opcode)
 {
-    return opcode == _EXIT_TRACE;
+    return opcode == _EXIT_TRACE || opcode == _JUMP_TO_TOP;
 }
 
 static inline bool
@@ -772,7 +772,7 @@ copy_over_exit_stubs(_PyUOpInstruction *old_trace, int old_trace_len,
             // Find target in original trace
             _PyUOpInstruction *target = old_trace + inst.oparg;
             // Point to inst to the new stub
-            inst.oparg = new_trace_len;
+            (&new_trace[i])->oparg = new_trace_len;
             // Start emitting exit stub from there
             do {
                 DPRINTF(3, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
@@ -1517,6 +1517,11 @@ _Py_uop_analyze_and_optimize(
     // Pass: Remove duplicate SET_IP
     trace_len = remove_duplicate_set_ips(temp_writebuffer, trace_len);
 
+    // Add the _JUMP_TO_TOP
+    _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
+    temp_writebuffer[trace_len] = jump_to_top;
+    trace_len++;
+
     // Pass: fix up side exit stubs. This MUST be called as the last pass!
     trace_len = copy_over_exit_stubs(trace, original_trace_len, temp_writebuffer, trace_len);
 
@@ -1524,6 +1529,7 @@ _Py_uop_analyze_and_optimize(
     memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
 
     PyMem_Free(temp_writebuffer);
+
     return trace_len;
 error:
     PyMem_Free(temp_writebuffer);
