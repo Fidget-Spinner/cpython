@@ -650,6 +650,7 @@ def _write_components_abstract_interp_guard_region(
             for peek in mgr.peeks:
                 if peek.effect.name == UNUSED:
                     continue
+                peek.effect.type = "_Py_UOpsSymbolicExpression *"
                 out.declare(peek.effect, peek.as_stack_effect())
             for input_var, input_effect in all_input_vars.items():
                 if (typ := input_effect.typeprop) is not None:

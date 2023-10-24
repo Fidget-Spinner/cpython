@@ -386,7 +386,7 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store, PyObject *co_consts,
         goto error;
     }
     for (Py_ssize_t i = 0; i < co_const_len; i++) {
-        _Py_UOpsSymbolicExpression *res = sym_init_const(self, PyTuple_GET_ITEM(co_consts, i), i);
+        _Py_UOpsSymbolicExpression *res = sym_init_const(self, PyTuple_GET_ITEM(co_consts, i), (int)i);
         if (res == NULL) {
             goto error;
         }
@@ -958,7 +958,7 @@ uop_abstract_interpret_single_inst(
 #define GETLOCAL(idx)          ((curr_store->locals[idx]))
 
 #define STAT_INC(opname, name) ((void)0)
-    uint32_t oparg = inst->oparg;
+    int oparg = inst->oparg;
     uint32_t opcode = inst->opcode;
     uint64_t operand = inst->operand;
 
@@ -1271,7 +1271,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
     }
 
     // Compile each operand
-    int operands_count = Py_SIZE(sym);
+    Py_ssize_t operands_count = Py_SIZE(sym);
     for (int i = 0; i < operands_count; i++) {
         if (sym->operands[i] == NULL) {
             continue;
@@ -1318,7 +1318,7 @@ emit_uops_from_pure_store(
         // For each guard, emit the prerequisite loads
         _Py_UOpsSymbolicExpression *guard = (_Py_UOpsSymbolicExpression *)
             PyList_GET_ITEM(hoisted_guards, i);
-        int guard_operands_count = Py_SIZE(guard);
+        Py_ssize_t guard_operands_count = Py_SIZE(guard);
         int load_fast_count = 0;
         for (int guard_op_idx = 0; guard_op_idx < guard_operands_count; guard_op_idx++) {
             _Py_UOpsSymbolicExpression *guard_operand = guard->operands[guard_op_idx];
@@ -1384,7 +1384,7 @@ emit_uops_from_pure_store(
     }
     DPRINTF(2, "==================\n");
     DPRINTF(2, "==EMITTING STACK==:\n");
-    int stack_len = pure_store->stack_pointer - pure_store->stack;
+    int stack_len = (int)(pure_store->stack_pointer - pure_store->stack);
     for (int stack_i = 0; stack_i < stack_len; stack_i++) {
         // If no change in stack, don't emit:
         // Do we need _SWAP_AND_POP just to be safe?
@@ -1425,7 +1425,7 @@ emit_uops_from_impure_store(
     Py_ssize_t len = (impure_store->end - impure_store->start);
     assert(impure_store->start->opcode == _SET_IP);
 
-#if Py_DEBUG
+#ifdef Py_DEBUG
     for (Py_ssize_t i = 0; i < len; i++) {
         _PyUOpInstruction inst = impure_store->start[i];
         DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
