@@ -2406,7 +2406,10 @@ class TestUopsOptimization(unittest.TestCase):
                 x = 0
                 y = 1
                 z = 2
-                a = x + y + z + x + y + z
+                a = y
+                b = a
+                c = b
+                a = x + y + z + x + y + z + c
                 num += 1
             return a
 
@@ -2417,7 +2420,7 @@ class TestUopsOptimization(unittest.TestCase):
 
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
-        self.assertEqual(res, 6)
+        self.assertEqual(res, 7)
         binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
         self.assertEqual(len(binop_count), 1)
 
