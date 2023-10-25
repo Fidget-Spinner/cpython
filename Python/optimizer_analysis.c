@@ -792,39 +792,6 @@ copy_over_exit_stubs(_PyUOpInstruction *old_trace, int old_trace_len,
     return new_trace_len;
 }
 
-// Remove contiguous SET_IPs, leaving only the last one before a non-SET_IP instruction.
-static int
-remove_duplicate_set_ips(_PyUOpInstruction *trace, int trace_len)
-{
-#ifdef Py_DEBUG
-    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
-    int lltrace = 0;
-    if (uop_debug != NULL && *uop_debug >= '0') {
-        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
-    }
-#endif
-
-    // Don't have to allocate a temporary trace array
-    // because the writer is guaranteed to be behind the reader.
-    int new_temp_len = 0;
-
-    _PyUOpInstruction curr;
-    for (int i = 0; i < trace_len - 1; i++) {
-        curr = trace[i];
-        if (curr.opcode == _SET_IP && trace[i+1].opcode == _SET_IP) {
-            continue;
-        }
-        trace[new_temp_len] = curr;
-        new_temp_len++;
-    }
-
-
-    DPRINTF(2, "Removed %d SET_IPs\n", trace_len - new_temp_len);
-
-    return new_temp_len;
-}
-
-
 typedef enum {
     ABSTRACT_INTERP_ERROR,
     ABSTRACT_INTERP_NORMAL,
@@ -1503,9 +1470,6 @@ _Py_uop_analyze_and_optimize(
 
     // Compile the stores
     trace_len = emit_uops_from_stores(co, first_abstract_store, trace, temp_writebuffer, trace_len);
-
-    // Pass: Remove duplicate SET_IP
-    trace_len = remove_duplicate_set_ips(temp_writebuffer, trace_len);
 
     // Add the _JUMP_TO_TOP
     _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
