@@ -1367,6 +1367,7 @@ emit_uops_from_pure_store(
         // Micro optimizations -- if LOAD_FAST then STORE_FAST, get rid of that
         if (prev_i.opcode == LOAD_FAST && prev_i.oparg == locals_i) {
             new_trace_len--;
+            DPRINTF(3, "LOAD_FAST to be followed by STORE_FAST, ignoring LOAD_FAST. \n");
             continue;
         }
         new_trace_len = emit_i(trace_writebuffer, new_trace_len, store_fast);
@@ -1418,7 +1419,7 @@ emit_uops_from_impure_store(
     for (Py_ssize_t i = 0; i < len; i++) {
         _PyUOpInstruction inst = impure_store->start[i];
         DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
-                (int)(trace_len + i),
+                (int)(new_trace_len + i),
                 (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
                 inst.oparg,
                 inst.operand);
