@@ -1158,17 +1158,6 @@ uop_abstract_interpret(
         while (curr < end && (!_PyOpcode_ispure(curr->opcode) || curr->opcode == _SET_IP)) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
-            _Py_UOpsSymbolicExpression *impure_inst =
-                _Py_UOpsSymbolicExpression_NewFromArray(
-                    ctx,
-                    curr->opcode,
-                    curr->oparg,
-                    num_stack_inputs,
-                    &prev_store_stack[-(num_stack_inputs)]
-                );
-            if (impure_inst == NULL) {
-                goto error;
-            }
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
