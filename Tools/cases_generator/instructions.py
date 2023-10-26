@@ -139,7 +139,11 @@ class Instruction:
                 res = False
         return res
 
-    def write_variable_initializations(self, active_caches, out, tier):
+    def write_variable_initializations(
+            self,
+            active_caches: list[ActiveCacheEffect],
+            out: Formatter,
+            tier: int) -> None:
         # Write cache effect variable declarations and initializations
         for active in active_caches:
             ceffect = active.effect

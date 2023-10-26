@@ -629,9 +629,9 @@ def _write_components_abstract_interp_guard_region(
             copy.name = f"__{copy.name}"
             out.assign(copy, peek.as_stack_effect())
         # If constant evaluation, directly evaluate the guard body
-        predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
-        if predicates:
-            with out.block(f"if ({predicates})"):
+        predicates_str = " && ".join([f"is_const({var})" for var in mangled_input_vars])
+        if predicates_str:
+            with out.block(f"if ({predicates_str})"):
                 # Declare all variables
                 for name, eff in all_input_vars.items():
                     out.declare(eff, StackEffect(f"get_const(__{name})"))
