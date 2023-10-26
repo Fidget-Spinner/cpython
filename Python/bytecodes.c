@@ -3024,7 +3024,7 @@ dummy_func(
             CHECK_EVAL_BREAKER();
         }
 
-        guard op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable, null, unused[oparg] -- callable, null, unused[oparg])) {
+        guard op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable: ~(PYMETHOD_TYPE), null: ~(PYNULL_TYPE), unused[oparg] -- callable, null, unused[oparg])) {
             DEOPT_IF(null != NULL);
             DEOPT_IF(Py_TYPE(callable) != &PyMethod_Type);
         }
@@ -3042,7 +3042,7 @@ dummy_func(
             DEOPT_IF(tstate->interp->eval_frame);
         }
 
-        guard op(_CHECK_FUNCTION_EXACT_ARGS, (func_version/2, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
+        op(_CHECK_FUNCTION_EXACT_ARGS, (func_version/2, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
             DEOPT_IF(!PyFunction_Check(callable));
             PyFunctionObject *func = (PyFunctionObject *)callable;
             DEOPT_IF(func->func_version != func_version);
@@ -3050,7 +3050,7 @@ dummy_func(
             DEOPT_IF(code->co_argcount != oparg + (self_or_null != NULL));
         }
 
-        guard op(_CHECK_STACK_SPACE, (callable, unused, unused[oparg] -- callable, unused, unused[oparg])) {
+        op(_CHECK_STACK_SPACE, (callable, unused, unused[oparg] -- callable, unused, unused[oparg])) {
             PyFunctionObject *func = (PyFunctionObject *)callable;
             PyCodeObject *code = (PyCodeObject *)func->func_code;
             DEOPT_IF(!_PyThreadState_HasStackSpace(tstate, code->co_framesize));

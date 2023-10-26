@@ -2417,8 +2417,6 @@ bool _PyOpcode_isguard(uint32_t opcode)  {
         case _GUARD_KEYS_VERSION:
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS:
         case _CHECK_PEP_523:
-        case _CHECK_FUNCTION_EXACT_ARGS:
-        case _CHECK_STACK_SPACE:
             return true;
         default:
             return false;

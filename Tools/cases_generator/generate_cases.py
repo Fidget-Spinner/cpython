@@ -88,7 +88,8 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
 
     # Shouldn't appear in abstract interpreter
     "_LOAD_FAST_NO_INCREF",
-    "_LOAD_CONST_IMMEDIATE"
+    "_LOAD_CONST_IMMEDIATE",
+    "_SWAP_AND_POP"
 }
 
 arg_parser = argparse.ArgumentParser(
@@ -865,9 +866,7 @@ class Generator(Analyzer):
             self.write_provenance_header()
             for instr in self.instrs.values():
                 instr = AbstractInstruction(instr.inst)
-                if (instr.name in SPECIALLY_HANDLED_ABSTRACT_INSTR
-                    # TODO handle variable stack opargs
-                    or any(eff.size for eff in instr.input_effects)):
+                if instr.name in SPECIALLY_HANDLED_ABSTRACT_INSTR:
                     continue
                 self.out.emit("")
                 with self.out.block(f"case {instr.name}:"):
