@@ -92,7 +92,8 @@
 #define _LOAD_FAST_NO_INCREF 363
 #define _LOAD_CONST_IMMEDIATE 364
 #define _SHRINK_STACK 365
-#define _INSERT 366
+#define _SWAP_AND_POP 366
+#define _INSERT 367
 
 extern int _PyOpcode_num_popped(int opcode, int oparg, bool jump);
 #ifdef NEED_OPCODE_METADATA
@@ -670,6 +671,8 @@ int _PyOpcode_num_popped(int opcode, int oparg, bool jump)  {
             return 0;
         case _SHRINK_STACK:
             return oparg;
+        case _SWAP_AND_POP:
+            return oparg + 1;
         case _INSERT:
             return oparg + 1;
         default:
@@ -1254,6 +1257,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
             return 1;
         case _SHRINK_STACK:
             return 0;
+        case _SWAP_AND_POP:
+            return oparg;
         case _INSERT:
             return oparg + 1;
         default:
@@ -1615,6 +1620,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [_LOAD_FAST_NO_INCREF] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_LOCAL_FLAG },
     [_LOAD_CONST_IMMEDIATE] = { true, INSTR_FMT_IXC000, 0 },
     [_SHRINK_STACK] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
+    [_SWAP_AND_POP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_INSERT] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
 };
 #endif // NEED_OPCODE_METADATA
@@ -1840,6 +1846,7 @@ const char * const _PyOpcode_uop_name[OPCODE_UOP_NAME_SIZE] = {
     [_LOAD_FAST_NO_INCREF] = "_LOAD_FAST_NO_INCREF",
     [_LOAD_CONST_IMMEDIATE] = "_LOAD_CONST_IMMEDIATE",
     [_SHRINK_STACK] = "_SHRINK_STACK",
+    [_SWAP_AND_POP] = "_SWAP_AND_POP",
     [_INSERT] = "_INSERT",
 };
 #endif // NEED_OPCODE_METADATA
@@ -2386,6 +2393,7 @@ bool _PyOpcode_ispure(uint32_t opcode)  {
         case _LOAD_FAST_NO_INCREF:
         case _LOAD_CONST_IMMEDIATE:
         case _SHRINK_STACK:
+        case _SWAP_AND_POP:
             return true;
         default:
             return false;
@@ -2409,8 +2417,6 @@ bool _PyOpcode_isguard(uint32_t opcode)  {
         case _GUARD_KEYS_VERSION:
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS:
         case _CHECK_PEP_523:
-        case _CHECK_FUNCTION_EXACT_ARGS:
-        case _CHECK_STACK_SPACE:
             return true;
         default:
             return false;

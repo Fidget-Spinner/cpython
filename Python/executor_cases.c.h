@@ -3308,6 +3308,17 @@
             break;
         }
 
+        case _SWAP_AND_POP: {
+            PyObject *tos;
+            PyObject **target;
+            tos = stack_pointer[-1];
+            target = stack_pointer - 1 - oparg;
+            Py_DECREF(*target);
+            *target = tos;
+            STACK_SHRINK(1);
+            break;
+        }
+
         case _INSERT: {
             PyObject *top;
             top = stack_pointer[-1];

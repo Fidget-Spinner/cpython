@@ -500,6 +500,8 @@ def write_pokes(mgr: EffectManager, out: Formatter) -> None:
                 poke.effect,
             )
 
+def mangle_name(name: str) -> str:
+    return f"___{name}"
 
 def write_single_instr_for_abstract_interp(instr: Instruction, out: Formatter) -> None:
     try:
@@ -550,7 +552,7 @@ def _write_components_abstract_interp_pure_region(
             if peek.effect.name == UNUSED:
                 continue
             copy = dataclasses.replace(peek.effect)
-            copy.name = f"__{copy.name}"
+            copy.name = mangle_name(copy.name)
             out.assign(copy, peek.as_stack_effect())
 
         # Adjust stack
@@ -576,7 +578,7 @@ def _write_components_abstract_interp_pure_region(
             with out.block(f"if ({predicates or 0})"):
                 # Declare all variables
                 for name, eff in input_vars.items():
-                    out.declare(eff, StackEffect(f"get_const(__{name})"))
+                    out.declare(eff, StackEffect(f"get_const({mangle_name(name)})"))
                 out.declare(output_var, None)
                 mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
                 out.emit(
@@ -626,15 +628,15 @@ def _write_components_abstract_interp_guard_region(
             if peek.effect.name == UNUSED:
                 continue
             copy = dataclasses.replace(peek.effect)
-            copy.name = f"__{copy.name}"
+            copy.name = mangle_name(copy.name)
             out.assign(copy, peek.as_stack_effect())
         # If constant evaluation, directly evaluate the guard body
-        predicates = " && ".join([f"is_const({var})" for var in mangled_input_vars])
-        if predicates:
-            with out.block(f"if ({predicates})"):
+        predicates_str = " && ".join([f"is_const({var})" for var in mangled_input_vars])
+        if predicates_str:
+            with out.block(f"if ({predicates_str})"):
                 # Declare all variables
                 for name, eff in all_input_vars.items():
-                    out.declare(eff, StackEffect(f"get_const(__{name})"))
+                    out.declare(eff, StackEffect(f"get_const({mangle_name(name)})"))
                 mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
                 # Guard elimination - if we are successful, don't add it to the symexpr!
                 out.emit('DPRINTF(2, "const eliminated guard\\n");')
@@ -650,6 +652,7 @@ def _write_components_abstract_interp_guard_region(
             for peek in mgr.peeks:
                 if peek.effect.name == UNUSED:
                     continue
+                peek.effect.type = "_Py_UOpsSymbolicExpression *"
                 out.declare(peek.effect, peek.as_stack_effect())
             for input_var, input_effect in all_input_vars.items():
                 if (typ := input_effect.typeprop) is not None:
@@ -699,16 +702,15 @@ def _write_components_for_abstract_interp(
                     eff,
                 )
             else:
-                # TODO: Turn this into an error -- not supported
-                assert not eff.size, (
-                    f"Abstract interpreter does not support `{mgr.instr.name}` "
-                    f"due to sized input `{name}`")
+                if eff.size:
+                    assert not (inst.pure or inst.guard), \
+                        f"Abstract Interpreter: `{inst.name}` not supported due to sized input `{name}` in pure or guard"
                 all_input_vars[name] = eff
 
     # Mangle the input variables
-    mangled_input_vars = {f"__{k}": dataclasses.replace(v) for k, v in all_input_vars.items()}
+    mangled_input_vars = {mangle_name(k): dataclasses.replace(v) for k, v in all_input_vars.items()}
     for var in mangled_input_vars.values():
-        var.name = f"__{var.name}"
+        var.name = mangle_name(var.name)
         var.type = "_Py_UOpsSymbolicExpression *"
 
     if inst.pure:

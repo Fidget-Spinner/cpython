@@ -30,6 +30,9 @@ static inline bool
 _PyOpcode_isimmutable(uint32_t opcode)
 {
     // TODO subscr tuple is immutable
+    switch (opcode) {
+        case PUSH_NULL: true;
+    }
     return false;
 }
 
@@ -59,8 +62,11 @@ typedef enum {
     PYINT_TYPE = 2,
     PYFLOAT_TYPE = 3,
     PYUNICODE_TYPE = 4,
-    GUARD_DORV_VALUES_TYPE = 5,
-    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 6,
+    NULL_TYPE = 5,
+    PYMETHOD_TYPE = 6,
+    GUARD_DORV_VALUES_TYPE = 7,
+    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 8,
+
 
     // GUARD_GLOBALS_VERSION_TYPE, / Environment check
     // GUARD_BUILTINS_VERSION_TYPE, // Environment check
@@ -386,7 +392,7 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store, PyObject *co_consts,
         goto error;
     }
     for (Py_ssize_t i = 0; i < co_const_len; i++) {
-        _Py_UOpsSymbolicExpression *res = sym_init_const(self, PyTuple_GET_ITEM(co_consts, i), i);
+        _Py_UOpsSymbolicExpression *res = sym_init_const(self, PyTuple_GET_ITEM(co_consts, i), (int)i);
         if (res == NULL) {
             goto error;
         }
@@ -485,6 +491,32 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     }
 
     va_end(curr);
+
+    return check_uops_already_exists(ctx, self);
+}
+
+static _Py_UOpsSymbolicExpression*
+_Py_UOpsSymbolicExpression_NewSingleton(
+    _Py_UOpsAbstractInterpContext *ctx,
+    uint32_t opcode, uint32_t oparg)
+{
+    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
+                                                          &_Py_UOpsSymbolicExpression_Type,
+                                                          0);
+    if (self == NULL) {
+        return NULL;
+    }
+
+
+    self->idx = -1;
+    self->cached_hash = -1;
+    self->usage_count = 0;
+    self->sym_type.types = 0;
+    self->opcode = opcode;
+    self->oparg = oparg;
+    self->operand = 0;
+    self->const_val = NULL;
+    self->originating_store = 0;
 
     return check_uops_already_exists(ctx, self);
 }
@@ -792,39 +824,6 @@ copy_over_exit_stubs(_PyUOpInstruction *old_trace, int old_trace_len,
     return new_trace_len;
 }
 
-// Remove contiguous SET_IPs, leaving only the last one before a non-SET_IP instruction.
-static int
-remove_duplicate_set_ips(_PyUOpInstruction *trace, int trace_len)
-{
-#ifdef Py_DEBUG
-    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
-    int lltrace = 0;
-    if (uop_debug != NULL && *uop_debug >= '0') {
-        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
-    }
-#endif
-
-    // Don't have to allocate a temporary trace array
-    // because the writer is guaranteed to be behind the reader.
-    int new_temp_len = 0;
-
-    _PyUOpInstruction curr;
-    for (int i = 0; i < trace_len - 1; i++) {
-        curr = trace[i];
-        if (curr.opcode == _SET_IP && trace[i+1].opcode == _SET_IP) {
-            continue;
-        }
-        trace[new_temp_len] = curr;
-        new_temp_len++;
-    }
-
-
-    DPRINTF(2, "Removed %d SET_IPs\n", trace_len - new_temp_len);
-
-    return new_temp_len;
-}
-
-
 typedef enum {
     ABSTRACT_INTERP_ERROR,
     ABSTRACT_INTERP_NORMAL,
@@ -958,7 +957,7 @@ uop_abstract_interpret_single_inst(
 #define GETLOCAL(idx)          ((curr_store->locals[idx]))
 
 #define STAT_INC(opname, name) ((void)0)
-    uint32_t oparg = inst->oparg;
+    int oparg = inst->oparg;
     uint32_t opcode = inst->opcode;
     uint64_t operand = inst->operand;
 
@@ -1017,6 +1016,14 @@ uop_abstract_interpret_single_inst(
 
         case POP_TOP: {
             STACK_SHRINK(1);
+            break;
+        }
+
+        case PUSH_NULL: {
+            STACK_GROW(1);
+            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, PUSH_NULL, 0);
+            sym_set_type(null_sym, NULL_TYPE, 0);
+            PEEK(1) = null_sym;
             break;
         }
 
@@ -1158,17 +1165,6 @@ uop_abstract_interpret(
         while (curr < end && (!_PyOpcode_ispure(curr->opcode) || curr->opcode == _SET_IP)) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
-            _Py_UOpsSymbolicExpression *impure_inst =
-                _Py_UOpsSymbolicExpression_NewFromArray(
-                    ctx,
-                    curr->opcode,
-                    curr->oparg,
-                    num_stack_inputs,
-                    &prev_store_stack[-(num_stack_inputs)]
-                );
-            if (impure_inst == NULL) {
-                goto error;
-            }
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
@@ -1271,7 +1267,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
     }
 
     // Compile each operand
-    int operands_count = Py_SIZE(sym);
+    Py_ssize_t operands_count = Py_SIZE(sym);
     for (int i = 0; i < operands_count; i++) {
         if (sym->operands[i] == NULL) {
             continue;
@@ -1318,7 +1314,7 @@ emit_uops_from_pure_store(
         // For each guard, emit the prerequisite loads
         _Py_UOpsSymbolicExpression *guard = (_Py_UOpsSymbolicExpression *)
             PyList_GET_ITEM(hoisted_guards, i);
-        int guard_operands_count = Py_SIZE(guard);
+        Py_ssize_t guard_operands_count = Py_SIZE(guard);
         int load_fast_count = 0;
         for (int guard_op_idx = 0; guard_op_idx < guard_operands_count; guard_op_idx++) {
             _Py_UOpsSymbolicExpression *guard_operand = guard->operands[guard_op_idx];
@@ -1378,13 +1374,14 @@ emit_uops_from_pure_store(
         // Micro optimizations -- if LOAD_FAST then STORE_FAST, get rid of that
         if (prev_i.opcode == LOAD_FAST && prev_i.oparg == locals_i) {
             new_trace_len--;
+            DPRINTF(3, "LOAD_FAST to be followed by STORE_FAST, ignoring LOAD_FAST. \n");
             continue;
         }
         new_trace_len = emit_i(trace_writebuffer, new_trace_len, store_fast);
     }
     DPRINTF(2, "==================\n");
     DPRINTF(2, "==EMITTING STACK==:\n");
-    int stack_len = pure_store->stack_pointer - pure_store->stack;
+    int stack_len = (int)(pure_store->stack_pointer - pure_store->stack);
     for (int stack_i = 0; stack_i < stack_len; stack_i++) {
         // If no change in stack, don't emit:
         // Do we need _SWAP_AND_POP just to be safe?
@@ -1425,11 +1422,11 @@ emit_uops_from_impure_store(
     Py_ssize_t len = (impure_store->end - impure_store->start);
     assert(impure_store->start->opcode == _SET_IP);
 
-#if Py_DEBUG
+#ifdef Py_DEBUG
     for (Py_ssize_t i = 0; i < len; i++) {
         _PyUOpInstruction inst = impure_store->start[i];
         DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
-                (int)(trace_len + i),
+                (int)(new_trace_len + i),
                 (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
                 inst.oparg,
                 inst.operand);
@@ -1513,9 +1510,6 @@ _Py_uop_analyze_and_optimize(
 
     // Compile the stores
     trace_len = emit_uops_from_stores(co, first_abstract_store, trace, temp_writebuffer, trace_len);
-
-    // Pass: Remove duplicate SET_IP
-    trace_len = remove_duplicate_set_ips(temp_writebuffer, trace_len);
 
     // Add the _JUMP_TO_TOP
     _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
