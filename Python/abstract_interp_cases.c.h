@@ -1344,10 +1344,10 @@
             _Py_UOpsSymbolicExpression *callable = (_Py_UOpsSymbolicExpression *)stack_pointer[-2 - oparg];
             if (should_type_propagate) {
                 sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0);;
-                sym_set_type((_Py_UOpsSymbolicExpression *)null, PYNULL_TYPE, (uint32_t)0);;
+                sym_set_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0);;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)null, PYNULL_TYPE, (uint32_t)0)) {
+                if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0)) {
                     DPRINTF(2, "type propagation eliminated guard\n");
                     break;
                 }

@@ -62,7 +62,7 @@ typedef enum {
     PYINT_TYPE = 2,
     PYFLOAT_TYPE = 3,
     PYUNICODE_TYPE = 4,
-    PYNULL_TYPE = 5,
+    NULL_TYPE = 5,
     PYMETHOD_TYPE = 6,
     GUARD_DORV_VALUES_TYPE = 7,
     GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 8,
@@ -1022,7 +1022,7 @@ uop_abstract_interpret_single_inst(
         case PUSH_NULL: {
             STACK_GROW(1);
             _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, PUSH_NULL, 0);
-            sym_set_type(null_sym, PYNULL_TYPE, 0);
+            sym_set_type(null_sym, NULL_TYPE, 0);
             PEEK(1) = null_sym;
             break;
         }

@@ -3024,7 +3024,7 @@ dummy_func(
             CHECK_EVAL_BREAKER();
         }
 
-        guard op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable: ~(PYMETHOD_TYPE), null: ~(PYNULL_TYPE), unused[oparg] -- callable, null, unused[oparg])) {
+        guard op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable: ~(PYMETHOD_TYPE), null: ~(NULL_TYPE), unused[oparg] -- callable, null, unused[oparg])) {
             DEOPT_IF(null != NULL);
             DEOPT_IF(Py_TYPE(callable) != &PyMethod_Type);
         }
