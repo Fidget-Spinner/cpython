@@ -1021,7 +1021,7 @@ uop_abstract_interpret_single_inst(
 
         case PUSH_NULL: {
             STACK_GROW(1);
-            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(PUSH_NULL, 0);
+            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, PUSH_NULL, 0);
             sym_set_type(null_sym, PYNULL_TYPE, 0);
             PEEK(1) = null_sym;
             break;
