@@ -987,6 +987,18 @@ uop_abstract_interpret_single_inst(
             break;
         }
 
+        case PUSH_NULL: {
+            STACK_GROW(1);
+            PEEK(1) = _Py_UOpsSymbolicExpression_New(
+                ctx,
+                PUSH_NULL,
+                0,
+                NULL,
+                0
+            );
+            break;
+        }
+
         // TODO SWAP
         default:
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
