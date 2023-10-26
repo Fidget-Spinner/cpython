@@ -30,6 +30,9 @@ static inline bool
 _PyOpcode_isimmutable(uint32_t opcode)
 {
     // TODO subscr tuple is immutable
+    switch (opcode) {
+        case PUSH_NULL: true;
+    }
     return false;
 }
 
@@ -488,6 +491,32 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     }
 
     va_end(curr);
+
+    return check_uops_already_exists(ctx, self);
+}
+
+static _Py_UOpsSymbolicExpression*
+_Py_UOpsSymbolicExpression_NewSingleton(
+    _Py_UOpsAbstractInterpContext *ctx,
+    uint32_t opcode, uint32_t oparg)
+{
+    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
+                                                          &_Py_UOpsSymbolicExpression_Type,
+                                                          0);
+    if (self == NULL) {
+        return NULL;
+    }
+
+
+    self->idx = -1;
+    self->cached_hash = -1;
+    self->usage_count = 0;
+    self->sym_type.types = 0;
+    self->opcode = opcode;
+    self->oparg = oparg;
+    self->operand = 0;
+    self->const_val = NULL;
+    self->originating_store = 0;
 
     return check_uops_already_exists(ctx, self);
 }
@@ -992,7 +1021,7 @@ uop_abstract_interpret_single_inst(
 
         case PUSH_NULL: {
             STACK_GROW(1);
-            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_New(ctx, PUSH_NULL, 0, NULL, 0);
+            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(PUSH_NULL, 0);
             sym_set_type(null_sym, PYNULL_TYPE, 0);
             PEEK(1) = null_sym;
             break;
