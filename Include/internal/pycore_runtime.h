@@ -10,6 +10,7 @@ extern "C" {
 
 #include "pycore_atexit.h"          // struct _atexit_runtime_state
 #include "pycore_ceval_state.h"     // struct _ceval_runtime_state
+#include "pycore_crossinterp.h"   // struct _xidregistry
 #include "pycore_faulthandler.h"    // struct _faulthandler_runtime_state
 #include "pycore_floatobject.h"     // struct _Py_float_runtime_state
 #include "pycore_import.h"          // struct _import_runtime_state
@@ -87,7 +88,7 @@ typedef struct _Py_DebugOffsets {
     struct _interpreter_frame {
         off_t previous;
         off_t executable;
-        off_t prev_instr;
+        off_t instr_ptr;
         off_t localsplus;
         off_t owner;
     } interpreter_frame;
