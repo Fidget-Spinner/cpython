@@ -1245,7 +1245,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
     if (use_locals) {
         int locals_len = (int)(store->stack - store->locals);
         for (int i = 0; i < locals_len; i++) {
-            if (sym == store->locals[i]) {
+            if (sym == store->initial_locals[i]) {
                 inst.opcode = LOAD_FAST;
                 inst.oparg = i;
                 inst.operand = 0;
