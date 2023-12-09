@@ -239,10 +239,10 @@ class Generator(Analyzer):
             if not isinstance(thing, parsing.InstDef):
                 continue
             instr = self.instrs[thing.name]
-            ispure = instr.inst.pure
+            ispure = "pure" in instr.inst.annotations
             if ispure:
                 instrpure_data.append(instr)
-            isguard = instr.inst.guard
+            isguard = "guard" in instr.inst.annotations
             if isguard:
                 instrguard_data.append(instr)
 

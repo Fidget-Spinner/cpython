@@ -691,6 +691,9 @@ def _write_components_for_abstract_interp(
     managers = get_managers(parts)
     inst = managers[0].instr.inst
 
+    pure = "pure" in inst.annotations
+    guard = "guard" in inst.annotations
+
     # Collect all input vars
     all_input_vars: dict[str, StackEffect] = {}
     for mgr in managers:
@@ -708,7 +711,7 @@ def _write_components_for_abstract_interp(
                 )
             else:
                 if eff.size:
-                    assert not (inst.pure or inst.guard), \
+                    assert not (pure or guard), \
                         f"Abstract Interpreter: `{inst.name}` not supported due to sized input `{name}` in pure or guard"
                 all_input_vars[name] = eff
 
@@ -718,12 +721,12 @@ def _write_components_for_abstract_interp(
         var.name = mangle_name(var.name)
         var.type = "_Py_UOpsSymbolicExpression *"
 
-    if inst.pure:
+    if pure:
         _write_components_abstract_interp_pure_region(
             managers, all_input_vars, mangled_input_vars, out)
         return
 
-    elif inst.guard:
+    elif guard:
         _write_components_abstract_interp_guard_region(
             managers, all_input_vars, mangled_input_vars, out)
         return
