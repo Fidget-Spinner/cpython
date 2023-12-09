@@ -29,6 +29,7 @@ extern "C" {
 #include "pycore_list.h"          // struct _Py_list_state
 #include "pycore_object_state.h"  // struct _py_object_state
 #include "pycore_obmalloc.h"      // struct _obmalloc_state
+#include "pycore_tstate.h"        // _PyThreadStateImpl
 #include "pycore_tuple.h"         // struct _Py_tuple_state
 #include "pycore_typeobject.h"    // struct types_state
 #include "pycore_unicodeobject.h" // struct _Py_unicode_state
@@ -153,8 +154,8 @@ struct _is {
     Py_ssize_t co_extra_user_count;
     freefunc co_extra_freefuncs[MAX_CO_EXTRA_USERS];
 
-    // XXX Remove this field once we have a tp_* slot.
-    struct _xidregistry xidregistry;
+    /* cross-interpreter data and utils */
+    struct _xi_state xi;
 
 #ifdef HAVE_FORK
     PyObject *before_forkers;
@@ -200,7 +201,6 @@ struct _is {
     uint32_t next_func_version;
 
     _Py_GlobalMonitors monitors;
-    bool f_opcode_trace_set;
     bool sys_profile_initialized;
     bool sys_trace_initialized;
     Py_ssize_t sys_profiling_threads; /* Count of threads with c_profilefunc set */
@@ -211,8 +211,8 @@ struct _is {
     struct _Py_interp_cached_objects cached_objects;
     struct _Py_interp_static_objects static_objects;
 
-   /* the initial PyInterpreterState.threads.head */
-    PyThreadState _initial_thread;
+    /* the initial PyInterpreterState.threads.head */
+    _PyThreadStateImpl _initial_thread;
     Py_ssize_t _interactive_src_count;
 };
 

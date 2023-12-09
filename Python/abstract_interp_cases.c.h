@@ -71,7 +71,12 @@
             break;
         }
 
-        case TO_BOOL: {
+        case _SPECIALIZE_TO_BOOL: {
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _TO_BOOL: {
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
@@ -155,7 +160,7 @@
                 res = _PyLong_Multiply((PyLongObject *)left, (PyLongObject *)right);
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
-                if (res == NULL) goto pop_2_error;
+                if (res == NULL) goto pop_2_error_tier_two;
                 __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, (PyObject *)res, 2 , ___left, ___right);
             }
             else {
@@ -182,7 +187,7 @@
                 res = _PyLong_Add((PyLongObject *)left, (PyLongObject *)right);
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
-                if (res == NULL) goto pop_2_error;
+                if (res == NULL) goto pop_2_error_tier_two;
                 __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, (PyObject *)res, 2 , ___left, ___right);
             }
             else {
@@ -209,7 +214,7 @@
                 res = _PyLong_Subtract((PyLongObject *)left, (PyLongObject *)right);
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
-                if (res == NULL) goto pop_2_error;
+                if (res == NULL) goto pop_2_error_tier_two;
                 __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, (PyObject *)res, 2 , ___left, ___right);
             }
             else {
@@ -375,7 +380,7 @@
                 res = PyUnicode_Concat(left, right);
                 _Py_DECREF_SPECIALIZED(left, _PyUnicode_ExactDealloc);
                 _Py_DECREF_SPECIALIZED(right, _PyUnicode_ExactDealloc);
-                if (res == NULL) goto pop_2_error;
+                if (res == NULL) goto pop_2_error_tier_two;
                 __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, opcode, oparg, (PyObject *)res, 2 , ___left, ___right);
             }
             else {
@@ -391,7 +396,13 @@
             break;
         }
 
-        case BINARY_SUBSCR: {
+        case _SPECIALIZE_BINARY_SUBSCR: {
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _BINARY_SUBSCR: {
             STACK_SHRINK(1);
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
@@ -450,7 +461,13 @@
             break;
         }
 
-        case STORE_SUBSCR: {
+        case _SPECIALIZE_STORE_SUBSCR: {
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _STORE_SUBSCR: {
             STACK_SHRINK(3);
             break;
         }
@@ -522,7 +539,13 @@
             break;
         }
 
-        case SEND: {
+        case _SPECIALIZE_SEND: {
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _SEND: {
             PEEK(-(-2)) = sym_init_unknown(ctx);
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
@@ -587,7 +610,12 @@
             break;
         }
 
-        case UNPACK_SEQUENCE: {
+        case _SPECIALIZE_UNPACK_SEQUENCE: {
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _UNPACK_SEQUENCE: {
             STACK_SHRINK(1);
             STACK_GROW(oparg);
             break;
@@ -617,7 +645,12 @@
             break;
         }
 
-        case STORE_ATTR: {
+        case _SPECIALIZE_STORE_ATTR: {
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _STORE_ATTR: {
             STACK_SHRINK(2);
             break;
         }
@@ -653,7 +686,11 @@
             break;
         }
 
-        case LOAD_GLOBAL: {
+        case _SPECIALIZE_LOAD_GLOBAL: {
+            break;
+        }
+
+        case _LOAD_GLOBAL: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
             PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
@@ -805,7 +842,14 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR: {
+        case _SPECIALIZE_LOAD_SUPER_ATTR: {
+            PEEK(-(-3)) = sym_init_unknown(ctx);
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _LOAD_SUPER_ATTR: {
             STACK_SHRINK(2);
             STACK_GROW(((oparg & 1) ? 1 : 0));
             PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
@@ -827,7 +871,12 @@
             break;
         }
 
-        case LOAD_ATTR: {
+        case _SPECIALIZE_LOAD_ATTR: {
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _LOAD_ATTR: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
             PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
             PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
@@ -839,14 +888,14 @@
             ___owner = stack_pointer[-1];
             if (is_const(___owner)) {
                 PyObject *owner = get_const(___owner);
-                uint32_t type_version = (uint32_t)operand;
+                uint32_t type_version = (uint32_t)CURRENT_OPERAND();
                 PyTypeObject *tp = Py_TYPE(owner);
                 assert(type_version != 0);
                 DEOPT_IF(tp->tp_version_tag != type_version, _GUARD_TYPE_VERSION);
                 DPRINTF(2, "const eliminated guard\n");
                 break;
             }
-            uint32_t type_version = (uint32_t)operand;
+            uint32_t type_version = (uint32_t)CURRENT_OPERAND();
             _Py_UOpsSymbolicExpression *owner = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
             if (should_type_propagate) {
                 sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_TYPE_VERSION_TYPE, (uint32_t)type_version);;
@@ -968,7 +1017,13 @@
             break;
         }
 
-        case COMPARE_OP: {
+        case _SPECIALIZE_COMPARE_OP: {
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _COMPARE_OP: {
             STACK_SHRINK(1);
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
@@ -1041,12 +1096,12 @@
             break;
         }
 
-        case POP_JUMP_IF_FALSE: {
+        case _POP_JUMP_IF_FALSE: {
             STACK_SHRINK(1);
             break;
         }
 
-        case POP_JUMP_IF_TRUE: {
+        case _POP_JUMP_IF_TRUE: {
             STACK_SHRINK(1);
             break;
         }
@@ -1105,7 +1160,19 @@
             break;
         }
 
-        case FOR_ITER: {
+        case _SPECIALIZE_FOR_ITER: {
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _FOR_ITER: {
+            STACK_GROW(1);
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _FOR_ITER_TIER_TWO: {
             STACK_GROW(1);
             PEEK(-(-2)) = sym_init_unknown(ctx);
             PEEK(-(-1)) = sym_init_unknown(ctx);
@@ -1126,9 +1193,7 @@
             break;
         }
 
-        case _IS_ITER_EXHAUSTED_LIST: {
-            STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
+        case _GUARD_NOT_EXHAUSTED_LIST: {
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
@@ -1150,9 +1215,7 @@
             break;
         }
 
-        case _IS_ITER_EXHAUSTED_TUPLE: {
-            STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
+        case _GUARD_NOT_EXHAUSTED_TUPLE: {
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
@@ -1174,9 +1237,7 @@
             break;
         }
 
-        case _IS_ITER_EXHAUSTED_RANGE: {
-            STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
+        case _GUARD_NOT_EXHAUSTED_RANGE: {
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
@@ -1256,14 +1317,14 @@
             ___owner = stack_pointer[-1];
             if (is_const(___owner)) {
                 PyObject *owner = get_const(___owner);
-                uint32_t keys_version = (uint32_t)operand;
+                uint32_t keys_version = (uint32_t)CURRENT_OPERAND();
                 PyTypeObject *owner_cls = Py_TYPE(owner);
                 PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
                 DEOPT_IF(owner_heap_type->ht_cached_keys->dk_version != keys_version, _GUARD_KEYS_VERSION);
                 DPRINTF(2, "const eliminated guard\n");
                 break;
             }
-            uint32_t keys_version = (uint32_t)operand;
+            uint32_t keys_version = (uint32_t)CURRENT_OPERAND();
             _Py_UOpsSymbolicExpression *owner = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
             if (should_type_propagate) {
                 sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_KEYS_VERSION_TYPE, (uint32_t)keys_version);;
@@ -1320,7 +1381,13 @@
             break;
         }
 
-        case CALL: {
+        case _SPECIALIZE_CALL: {
+            PEEK(-(-2 - oparg)) = sym_init_unknown(ctx);
+            PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _CALL: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
             PEEK(-(-1)) = sym_init_unknown(ctx);
@@ -1387,7 +1454,8 @@
         }
 
         case _PUSH_FRAME: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            STACK_SHRINK(1);
+            PEEK(-(0)) = sym_init_unknown(ctx);
             break;
         }
 
@@ -1568,7 +1636,13 @@
             break;
         }
 
-        case BINARY_OP: {
+        case _SPECIALIZE_BINARY_OP: {
+            PEEK(-(-2)) = sym_init_unknown(ctx);
+            PEEK(-(-1)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _BINARY_OP: {
             STACK_SHRINK(1);
             PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
@@ -1614,12 +1688,22 @@
             break;
         }
 
-        case _POP_JUMP_IF_FALSE: {
+        case _GUARD_IS_TRUE_POP: {
             STACK_SHRINK(1);
             break;
         }
 
-        case _POP_JUMP_IF_TRUE: {
+        case _GUARD_IS_FALSE_POP: {
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _GUARD_IS_NONE_POP: {
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _GUARD_IS_NOT_NONE_POP: {
             STACK_SHRINK(1);
             break;
         }
@@ -1647,5 +1731,9 @@
 
         case _INSERT: {
             PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
+            break;
+        }
+
+        case _CHECK_VALIDITY: {
             break;
         }

@@ -52,6 +52,10 @@ _PyOpcode_isunknown(uint32_t opcode)
     return (opcode == CACHE);
 }
 
+static inline bool
+is_bookkeeping_opcode(int opcode) {
+    return (opcode == _SET_IP || opcode == _CHECK_VALIDITY);
+}
 
 typedef enum {
     // Types with aux
@@ -956,6 +960,10 @@ uop_abstract_interpret_single_inst(
 #define PEEK(idx)              (((stack_pointer)[-(idx)]))
 #define GETLOCAL(idx)          ((curr_store->locals[idx]))
 
+#define CURRENT_OPARG() (oparg)
+
+#define CURRENT_OPERAND() (operand)
+
 #define STAT_INC(opname, name) ((void)0)
     int oparg = inst->oparg;
     uint32_t opcode = inst->opcode;
@@ -1039,10 +1047,9 @@ uop_abstract_interpret_single_inst(
 
     return ABSTRACT_INTERP_NORMAL;
 
-pop_4_error:
-pop_3_error:
-pop_2_error:
-pop_1_error:
+pop_2_error_tier_two:
+    STACK_SHRINK(1);
+    STACK_SHRINK(1);
 error:
     DPRINTF(1, "Encountered error in abstract interpreter\n");
     return ABSTRACT_INTERP_ERROR;
@@ -1101,7 +1108,9 @@ uop_abstract_interpret(
         DPRINTF(3, "starting pure region\n")
 
         // Form pure regions
-        while(curr < end && (_PyOpcode_ispure(curr->opcode) || _PyOpcode_isguard(curr->opcode))) {
+        while(curr < end && (_PyOpcode_ispure(curr->opcode) ||
+            _PyOpcode_isguard(curr->opcode) ||
+            is_bookkeeping_opcode(curr->opcode))) {
 
             int status = uop_abstract_interpret_single_inst(
                 co, curr, ctx,
@@ -1141,9 +1150,10 @@ uop_abstract_interpret(
         prev_store_stack = store->stack;
 
         DPRINTF(3, "creating impure region\n")
-        // The last instruction of the previous region should be a _SET_IP
-        assert((curr-1)->opcode == _SET_IP);
-        curr--;
+        // The last instruction of the previous region should be a _CHECK_VALIDITY
+        assert((curr-1)->opcode == _CHECK_VALIDITY);
+        assert((curr-2)->opcode == _SET_IP);
+        curr-=2;
         _Py_UOpsImpureStore *impure_store = _Py_UOpsImpureStore_New(ctx);
         if (impure_store == NULL) {
             goto error;
@@ -1162,7 +1172,8 @@ uop_abstract_interpret(
         // Form impure region
         impure_store->start = curr;
         // SET_IP shouldn't break and form a new region.
-        while (curr < end && (!_PyOpcode_ispure(curr->opcode) || curr->opcode == _SET_IP)) {
+        while (curr < end && (!_PyOpcode_ispure(curr->opcode) ||
+            is_bookkeeping_opcode(curr->opcode))) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
             // Adjust the stack and such
@@ -1481,16 +1492,56 @@ emit_uops_from_stores(
 
     return new_trace_len;
 }
+static void
+remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
+{
+    // Note that we don't enter stubs, those SET_IPs are needed.
+    int last_set_ip = -1;
+    bool maybe_invalid = false;
+    for (int pc = 0; pc < buffer_size; pc++) {
+        int opcode = buffer[pc].opcode;
+        if (opcode == _SET_IP) {
+            buffer[pc].opcode = NOP;
+            last_set_ip = pc;
+        }
+        else if (opcode == _CHECK_VALIDITY) {
+            if (maybe_invalid) {
+                maybe_invalid = false;
+            }
+            else {
+                buffer[pc].opcode = NOP;
+            }
+        }
+        else if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE) {
+            break;
+        }
+        else {
+            if (OPCODE_HAS_ESCAPES(opcode)) {
+                maybe_invalid = true;
+                if (last_set_ip >= 0) {
+                    buffer[last_set_ip].opcode = _SET_IP;
+                }
+            }
+            if (OPCODE_HAS_ERROR(opcode) || opcode == _PUSH_FRAME) {
+                if (last_set_ip >= 0) {
+                    buffer[last_set_ip].opcode = _SET_IP;
+                }
+            }
+        }
+    }
+}
+
 
 int
 _Py_uop_analyze_and_optimize(
     PyCodeObject *co,
-    _PyUOpInstruction *trace,
-    int trace_len,
+    _PyUOpInstruction *buffer,
+    int buffer_size,
     int curr_stacklen
 )
 {
-    int original_trace_len = trace_len;
+    int original_trace_len = buffer_size;
+    int trace_len = buffer_size;
     _PyUOpInstruction *temp_writebuffer = NULL;
 
     temp_writebuffer = PyMem_New(_PyUOpInstruction, trace_len * OVERALLOCATE_FACTOR);
@@ -1501,15 +1552,15 @@ _Py_uop_analyze_and_optimize(
 
     // Pass: Abstract interpretation and symbolic analysis
     _Py_UOpsStoreUnion *first_abstract_store = uop_abstract_interpret(
-        co, trace,
+        co, buffer,
         trace_len, curr_stacklen);
 
-    if (first_abstract_store == NULL || trace_len < 0) {
+    if (first_abstract_store == NULL) {
         goto error;
     }
 
     // Compile the stores
-    trace_len = emit_uops_from_stores(co, first_abstract_store, trace, temp_writebuffer, trace_len);
+    trace_len = emit_uops_from_stores(co, first_abstract_store, buffer, temp_writebuffer, trace_len);
 
     // Add the _JUMP_TO_TOP
     _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
@@ -1517,15 +1568,17 @@ _Py_uop_analyze_and_optimize(
     trace_len++;
 
     // Pass: fix up side exit stubs. This MUST be called as the last pass!
-    trace_len = copy_over_exit_stubs(trace, original_trace_len, temp_writebuffer, trace_len);
+    trace_len = copy_over_exit_stubs(buffer, original_trace_len, temp_writebuffer, trace_len);
 
     // Fill in our new trace!
-    memcpy(trace, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
+    memcpy(buffer, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
 
     PyMem_Free(temp_writebuffer);
 
-    return trace_len;
+    remove_unneeded_uops(buffer, buffer_size);
+
+    return 0;
 error:
     PyMem_Free(temp_writebuffer);
-    return original_trace_len;
+    return -1;
 }

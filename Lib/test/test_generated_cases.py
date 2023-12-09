@@ -118,17 +118,19 @@ class TestGeneratedCases(unittest.TestCase):
 
         with open(self.temp_output_filename) as temp_output:
             lines = temp_output.readlines()
-            while lines and lines[0].startswith("// "):
+            while lines and lines[0].startswith(("// ", "#", "    #", "\n")):
                 lines.pop(0)
+            while lines and lines[-1].startswith(("#", "\n")):
+                lines.pop(-1)
         actual = "".join(lines)
-        # if actual.rstrip() != expected.rstrip():
+        # if actual.strip() != expected.strip():
         #     print("Actual:")
         #     print(actual)
         #     print("Expected:")
         #     print(expected)
         #     print("End")
 
-        self.assertEqual(actual.rstrip(), expected.rstrip())
+        self.assertEqual(actual.strip(), expected.strip())
 
     def test_inst_no_args(self):
         input = """
@@ -403,19 +405,6 @@ class TestGeneratedCases(unittest.TestCase):
         family(OP, INLINE_CACHE_ENTRIES_OP) = { OP3 };
     """
         output = """
-        TARGET(OP1) {
-            _Py_CODEUNIT *this_instr = frame->instr_ptr = next_instr;
-            next_instr += 2;
-            INSTRUCTION_STATS(OP1);
-            PyObject *right;
-            PyObject *left;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            uint16_t counter = read_u16(&this_instr[1].cache);
-            op1(left, right);
-            DISPATCH();
-        }
-
         TARGET(OP) {
             frame->instr_ptr = next_instr;
             next_instr += 6;
@@ -445,6 +434,19 @@ class TestGeneratedCases(unittest.TestCase):
             DISPATCH();
         }
 
+        TARGET(OP1) {
+            _Py_CODEUNIT *this_instr = frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(OP1);
+            PyObject *right;
+            PyObject *left;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            uint16_t counter = read_u16(&this_instr[1].cache);
+            op1(left, right);
+            DISPATCH();
+        }
+
         TARGET(OP3) {
             frame->instr_ptr = next_instr;
             next_instr += 6;
@@ -459,6 +461,44 @@ class TestGeneratedCases(unittest.TestCase):
             res = op3(arg2, left, right);
             STACK_SHRINK(2);
             stack_pointer[-1] = res;
+            DISPATCH();
+        }
+    """
+        self.run_cases_test(input, output)
+
+    def test_pseudo_instruction_no_flags(self):
+        input = """
+        pseudo(OP) = {
+            OP1,
+        };
+
+        inst(OP1, (--)) {
+        }
+    """
+        output = """
+        TARGET(OP1) {
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
+            INSTRUCTION_STATS(OP1);
+            DISPATCH();
+        }
+    """
+        self.run_cases_test(input, output)
+
+    def test_pseudo_instruction_with_flags(self):
+        input = """
+        pseudo(OP, (HAS_ARG, HAS_JUMP)) = {
+            OP1,
+        };
+
+        inst(OP1, (--)) {
+        }
+    """
+        output = """
+        TARGET(OP1) {
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
+            INSTRUCTION_STATS(OP1);
             DISPATCH();
         }
     """
@@ -702,6 +742,49 @@ class TestGeneratedCases(unittest.TestCase):
             ham();
             DISPATCH();
         }
+        """
+        self.run_cases_test(input, output)
+
+    def test_annotated_inst(self):
+        input = """
+        guard inst(OP, (--)) {
+            ham();
+        }
+        """
+        output = """
+        TARGET(OP) {
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
+            INSTRUCTION_STATS(OP);
+            ham();
+            DISPATCH();
+        }
+        """
+        self.run_cases_test(input, output)
+
+    def test_annotated_op(self):
+        input = """
+        guard op(OP, (--)) {
+            spam();
+        }
+        macro(M) = OP;
+        """
+        output = """
+        TARGET(M) {
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
+            INSTRUCTION_STATS(M);
+            spam();
+            DISPATCH();
+        }
+        """
+        self.run_cases_test(input, output)
+
+        input = """
+        guard register specializing op(OP, (--)) {
+            spam();
+        }
+        macro(M) = OP;
         """
         self.run_cases_test(input, output)
 
