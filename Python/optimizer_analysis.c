@@ -1248,9 +1248,17 @@ error:
     return NULL;
 }
 
+typedef struct _Py_UOpsEmitter {
+    _PyUOpInstruction *writebuffer;
+    _PyUOpInstruction *writebuffer_end;
+    // Calculated from writebuffer_end + n_scratch_slots
+    int n_scratch_slots;
+    int curr_i;
+} _Py_UOpsEmitter;
+
 static inline int
-emit_i(_PyUOpInstruction *trace_writebuffer, _PyUOpInstruction *writebuffer_end,
-       int curr_i, _PyUOpInstruction inst)
+emit_i(_Py_UOpsEmitter *emitter,
+       _PyUOpInstruction inst)
 {
 #ifdef Py_DEBUG
     char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
@@ -1259,26 +1267,35 @@ emit_i(_PyUOpInstruction *trace_writebuffer, _PyUOpInstruction *writebuffer_end,
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
 #endif
-    if (curr_i < 0) {
+    if (emitter->curr_i < 0) {
         return -1;
     }
-    if (trace_writebuffer + curr_i >= writebuffer_end) {
+    if (emitter->writebuffer + emitter->curr_i >= emitter->writebuffer_end) {
         return -1;
     }
     DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
-            curr_i,
+            emitter->curr_i,
             (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
             inst.oparg,
             inst.operand);
-    trace_writebuffer[curr_i] = inst;
-    return curr_i + 1;
+    emitter->writebuffer[emitter->curr_i] = inst;
+    emitter->curr_i++;
+    return 0;
+}
+
+static inline int
+emit_common(_PyUOpInstruction *trace_writebuffer,
+       _PyUOpInstruction *writebuffer_end,
+       int curr_i,
+       _PyUOpInstruction inst)
+{
+
 }
 
 static int
-compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer,
-                    _PyUOpInstruction *writebuffer_end,
-                    int new_trace_len,
-                   _Py_UOpsSymbolicExpression *sym, _Py_UOpsPureStore *store,
+compile_sym_to_uops(_Py_UOpsEmitter *emitter,
+                   _Py_UOpsSymbolicExpression *sym,
+                   _Py_UOpsPureStore *store,
                    bool use_locals)
 {
     _PyUOpInstruction inst;
@@ -1291,7 +1308,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer,
         inst.oparg = 0;
         // TODO memory leak.
         inst.operand = (uint64_t)Py_NewRef(sym->const_val);
-        return emit_i(trace_writebuffer, writebuffer_end, new_trace_len, inst);
+        return emit_i(emitter, inst);
     }
 
 
@@ -1299,6 +1316,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer,
     // If this is used elsewhere, store it in a scratch slot.
     if (sym->usage_count > 1 && sym->emitted_count < (sym->usage_count - 1)) {
         sym->emitted_count++;
+        // First check - is it already in a scratch slot somewhere?
 
     }
 
@@ -1312,7 +1330,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer,
                 inst.opcode = LOAD_FAST;
                 inst.oparg = i;
                 inst.operand = 0;
-                return emit_i(trace_writebuffer, writebuffer_end, new_trace_len, inst);
+                return emit_i(emitter, inst);
             }
         }
     }
@@ -1321,11 +1339,11 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer,
         // These are for unknown stack entries.
         if (_PyOpcode_isunknown(sym->inst.opcode)) {
             // Leave it be. These are initial values from the start
-            return new_trace_len;
+            return;
         }
         inst = sym->inst;
         inst.opcode = sym->inst.opcode == INIT_FAST ? LOAD_FAST : sym->inst.opcode;
-        return emit_i(trace_writebuffer, writebuffer_end, new_trace_len, inst);
+        return emit_i(emitter, inst);
     }
 
     // Compile each operand
@@ -1335,25 +1353,23 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer,
             continue;
         }
         // TODO Py_EnterRecursiveCall ?
-        new_trace_len = compile_sym_to_uops(
-            trace_writebuffer,
-            writebuffer_end,
-            new_trace_len,
+        if (compile_sym_to_uops(
+            emitter,
             sym->operands[i],
-            store, use_locals);
+            store, use_locals) < 0) {
+            return -1;
+        }
     }
 
     // Finally, emit the operation itself.
-    return emit_i(trace_writebuffer, writebuffer_end, new_trace_len, sym->inst);
+    return emit_i(emitter, sym->inst);
 }
 
 static int
 emit_uops_from_pure_store(
     PyCodeObject *co,
     _Py_UOpsPureStore *pure_store,
-    _PyUOpInstruction *trace_writebuffer,
-    _PyUOpInstruction *writebuffer_end,
-    int new_trace_len
+    _Py_UOpsEmitter *emitter
 )
 {
 #ifdef Py_DEBUG
@@ -1381,11 +1397,10 @@ emit_uops_from_pure_store(
             // Search local for the thing
             for (int locals_idx = 0; locals_idx < locals_len; locals_idx++) {
                 if (guard_operand == pure_store->initial_locals[locals_idx]) {
-                    _PyUOpInstruction load_fast = {_LOAD_FAST_NO_INCREF, locals_idx, 0};
-                    new_trace_len = emit_i(trace_writebuffer,
-                                           writebuffer_end,
-                                           new_trace_len,
-                                           load_fast);
+                    _PyUOpInstruction load_fast = {_LOAD_FAST_NO_INCREF, locals_idx, 0, 0};
+                    if (emit_i(emitter,load_fast) < 0) {
+                        return -1;
+                    }
                     load_fast_count++;
                     break;
                 }
@@ -1395,8 +1410,9 @@ emit_uops_from_pure_store(
         assert(load_fast_count == guard_operands_count);
         stack_grown += load_fast_count;
         // Now, time to emit the guard itself
-        new_trace_len = emit_i(trace_writebuffer, writebuffer_end, new_trace_len,
-                               guard->inst);
+        if (emit_i(emitter, guard->inst) < 0) {
+            return -1;
+        }
 
     }
 
@@ -1405,8 +1421,9 @@ emit_uops_from_pure_store(
         // TODO HIGH PRIORITY on any deoptimize, the stack needs to be popped by the deopt too.
         _PyUOpInstruction stack_shrink = {_SHRINK_STACK, stack_grown, 0};
 
-        new_trace_len = emit_i(trace_writebuffer, writebuffer_end, new_trace_len,
-                               stack_shrink);
+        if (emit_i(emitter, stack_shrink) < 0) {
+            return -1;
+        }
     }
 
     // 2. Emit the pure region itself.
@@ -1423,22 +1440,24 @@ emit_uops_from_pure_store(
         if (pure_store->locals[locals_i] == pure_store->initial_locals[locals_i]) {
             continue;
         }
-        new_trace_len = compile_sym_to_uops(
-            trace_writebuffer,
-            writebuffer_end,
-            new_trace_len,
+        if (compile_sym_to_uops(
+            emitter,
             pure_store->locals[locals_i],
             pure_store,
-            false);
-        _PyUOpInstruction prev_i = trace_writebuffer[new_trace_len-1];
+            false) < 0) {
+            return -1;
+        }
+        _PyUOpInstruction prev_i = emitter->writebuffer[emitter->curr_i-1];
         // Micro optimizations -- if LOAD_FAST then STORE_FAST, get rid of that
         if (prev_i.opcode == LOAD_FAST && prev_i.oparg == locals_i) {
-            new_trace_len--;
+            emitter->curr_i--;
             DPRINTF(3, "LOAD_FAST to be followed by STORE_FAST, ignoring LOAD_FAST. \n");
             continue;
         }
         _PyUOpInstruction store_fast = {STORE_FAST, locals_i, 0, 0};
-        new_trace_len = emit_i(trace_writebuffer, writebuffer_end, new_trace_len, store_fast);
+        if (emit_i(emitter, store_fast) < 0) {
+            return -1;
+        }
     }
     DPRINTF(2, "==================\n");
     DPRINTF(2, "==EMITTING STACK==:\n");
@@ -1450,26 +1469,24 @@ emit_uops_from_pure_store(
             continue;
         }
 
-        new_trace_len = compile_sym_to_uops(
-            trace_writebuffer,
-            writebuffer_end,
-            new_trace_len,
+        if (compile_sym_to_uops(
+            emitter,
             pure_store->stack[stack_i],
             pure_store,
-            true);
+            true) < 0) {
+            return -1;
+        }
     }
     DPRINTF(2, "==================\n");
 
-    return new_trace_len;
+    return 0;
 }
 
 static int
 emit_uops_from_impure_store(
     PyCodeObject *co,
     _Py_UOpsImpureStore *impure_store,
-    _PyUOpInstruction *trace_writebuffer,
-    _PyUOpInstruction *writebuffer_end,
-    int new_trace_len
+    _Py_UOpsEmitter *emitter
 )
 {
 #ifdef Py_DEBUG
@@ -1483,27 +1500,30 @@ emit_uops_from_impure_store(
     Py_ssize_t len = (impure_store->end - impure_store->start);
     assert(impure_store->start->opcode == _SET_IP);
 
+    if (emitter->writebuffer + len >= emitter->writebuffer_end) {
+        return -1;
+    }
+
 #ifdef Py_DEBUG
     for (Py_ssize_t i = 0; i < len; i++) {
         _PyUOpInstruction inst = impure_store->start[i];
         DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
-                (int)(new_trace_len + i),
+                (int)(emitter->curr_i + i),
                 (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
                 inst.oparg,
                 inst.operand);
     }
 #endif
 
-    if (trace_writebuffer + len >= writebuffer_end) {
-        return -1;
-    }
 
     memcpy(
-        trace_writebuffer + new_trace_len,
+        emitter->writebuffer + emitter->curr_i,
         impure_store->start,
-        len* sizeof(_PyUOpInstruction)
+        len * sizeof(_PyUOpInstruction)
     );
-    return new_trace_len + (int)len;
+
+    emitter->curr_i += len;
+    return 0;
 }
 
 static int
@@ -1515,7 +1535,12 @@ emit_uops_from_stores(
 )
 {
 
-    int new_trace_len = 0;
+    _Py_UOpsEmitter emitter = {
+        trace_writebuffer,
+        writebuffer_end,
+        0,
+        0,
+    };
 
     // Emission is simple: traverse the linked list of stores:
     // - For pure stores, emit their final states.
@@ -1526,24 +1551,28 @@ emit_uops_from_stores(
     _Py_UOpsStoreUnion *curr_store = first_store;
     while(curr_store != NULL) {
         if (curr_store->pure_or_impure) {
-            new_trace_len = emit_uops_from_pure_store(co,
+            if (emit_uops_from_pure_store(co,
                                       (_Py_UOpsPureStore *)curr_store,
-                                      trace_writebuffer,
-                                      writebuffer_end,
-                                      new_trace_len);
+                                      &emitter) < 0) {
+                return -1;
+            }
         }
         else {
-            new_trace_len = emit_uops_from_impure_store(co,
+            if (emit_uops_from_impure_store(co,
                                       (_Py_UOpsImpureStore *)curr_store,
-                                      trace_writebuffer,
-                                      writebuffer_end,
-                                      new_trace_len);
+                                      &emitter) < 0) {
+                return -1;
+            }
         }
         curr_store = curr_store->next;
     }
 
-
-    return new_trace_len;
+    // Add the _JUMP_TO_TOP at the end of the trace.
+    _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
+    if (emit_i(&emitter, jump_to_top) < 0) {
+        return -1;
+    }
+    return emitter.curr_i;
 }
 static void
 remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
@@ -1624,15 +1653,8 @@ _Py_uop_analyze_and_optimize(
         goto error;
     }
 
-    // Add the _JUMP_TO_TOP
-    _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
-    trace_len = emit_i(temp_writebuffer, writebuffer_end, trace_len, jump_to_top);
-    if (trace_len < 0) {
-        goto error;
-    }
-
     // Pass: fix up side exit stubs. This MUST be called as the last pass!
-    trace_len = copy_over_exit_stubs(buffer, original_trace_len, temp_writebuffer, trace_len);
+    // trace_len = copy_over_exit_stubs(buffer, original_trace_len, temp_writebuffer, trace_len);
 
     // Fill in our new trace!
     memcpy(buffer, temp_writebuffer, trace_len * sizeof(_PyUOpInstruction));
