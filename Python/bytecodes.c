@@ -4036,24 +4036,29 @@ dummy_func(
         }
 
         pure op(_LOAD_FAST_NO_INCREF, (-- value)) {
+            TIER_TWO_ONLY
             value = GETLOCAL(oparg);
             assert(value != NULL);
         }
 
         pure op(_LOAD_CONST_IMMEDIATE, (obj/4 -- value)) {
+            TIER_TWO_ONLY
             value = obj;
             Py_INCREF(value);
         }
 
         pure op(_SHRINK_STACK, (unused[oparg] --)) {
+            TIER_TWO_ONLY
         }
 
         pure op(_SWAP_AND_POP, (target[oparg], tos -- target[oparg])) {
+            TIER_TWO_ONLY
             Py_DECREF(*target);
             *target = tos;
         }
 
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {
+            TIER_TWO_ONLY
             // Inserts TOS at position specified by oparg;
             memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));
         }

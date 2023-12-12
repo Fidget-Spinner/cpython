@@ -3367,6 +3367,7 @@
         case _LOAD_FAST_NO_INCREF: {
             oparg = CURRENT_OPARG();
             PyObject *value;
+            TIER_TWO_ONLY
             value = GETLOCAL(oparg);
             assert(value != NULL);
             STACK_GROW(1);
@@ -3377,6 +3378,7 @@
         case _LOAD_CONST_IMMEDIATE: {
             PyObject *value;
             PyObject *obj = (PyObject *)CURRENT_OPERAND();
+            TIER_TWO_ONLY
             value = obj;
             Py_INCREF(value);
             STACK_GROW(1);
@@ -3386,6 +3388,7 @@
 
         case _SHRINK_STACK: {
             oparg = CURRENT_OPARG();
+            TIER_TWO_ONLY
             STACK_SHRINK(oparg);
             break;
         }
@@ -3396,6 +3399,7 @@
             PyObject **target;
             tos = stack_pointer[-1];
             target = stack_pointer - 1 - oparg;
+            TIER_TWO_ONLY
             Py_DECREF(*target);
             *target = tos;
             STACK_SHRINK(1);
@@ -3406,6 +3410,7 @@
             oparg = CURRENT_OPARG();
             PyObject *top;
             top = stack_pointer[-1];
+            TIER_TWO_ONLY
             // Inserts TOS at position specified by oparg;
             memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));
             stack_pointer[-1 - oparg] = top;
