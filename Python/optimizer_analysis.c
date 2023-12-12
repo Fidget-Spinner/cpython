@@ -142,7 +142,7 @@ sym_hash(PyObject *o)
         return self->cached_hash;
     }
     // TODO a faster hash function that doesn't allocate?
-    PyObject *temp = PyTuple_New(Py_SIZE(o) + 4);
+    PyObject *temp = PyTuple_New(Py_SIZE(o) + 2);
     if (temp == NULL) {
         return -1;
     }
@@ -161,25 +161,9 @@ sym_hash(PyObject *o)
         Py_DECREF(opcode);
         return -1;
     }
-    PyObject *target = PyLong_FromLong(self->inst.target);
-    if (target == NULL) {
-        Py_DECREF(temp);
-        Py_DECREF(opcode);
-        Py_DECREF(oparg);
-        return -1;
-    }
-    PyObject *operand = PyLong_FromLong(self->inst.operand);
-    if (operand == NULL) {
-        Py_DECREF(temp);
-        Py_DECREF(opcode);
-        Py_DECREF(oparg);
-        Py_DECREF(target);
-        return -1;
-    }
+    // Note: DO NOT add target here, because we rearrange exits anyways.
     PyTuple_SET_ITEM(temp, Py_SIZE(o), opcode);
     PyTuple_SET_ITEM(temp, Py_SIZE(o) + 1, oparg);
-    PyTuple_SET_ITEM(temp, Py_SIZE(o) + 2, target);
-    PyTuple_SET_ITEM(temp, Py_SIZE(o) + 3, operand);
     Py_hash_t hash = PyObject_Hash(temp);
     Py_DECREF(temp);
     self->cached_hash = hash;
@@ -242,7 +226,7 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     // LATER.
     if ((self_opcode != other_opcode)
         || (self->inst.oparg != other->inst.oparg)
-        || (self->inst.target != other->inst.target)
+        // NOTE: TARGET NOT HERE BECAUSE WE RERRANGE CODE ANYWAYS
         || (self->inst.operand != other->inst.operand)) {
         Py_RETURN_FALSE;
     }
