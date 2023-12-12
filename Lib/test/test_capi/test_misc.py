@@ -2628,7 +2628,7 @@ class TestUopsOptimization(unittest.TestCase):
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
         binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
-        self.assertEqual(len(binop_count), 3)
+        self.assertEqual(len(binop_count), 2)
 
 
 class TestOptimizerAPI(unittest.TestCase):
