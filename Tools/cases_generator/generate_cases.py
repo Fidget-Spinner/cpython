@@ -89,7 +89,9 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
     # Shouldn't appear in abstract interpreter
     "_LOAD_FAST_NO_INCREF",
     "_LOAD_CONST_IMMEDIATE",
-    "_SWAP_AND_POP"
+    "_SWAP_AND_POP",
+    "_STORE_COMMON",
+    "_LOAD_COMMON",
 }
 
 arg_parser = argparse.ArgumentParser(

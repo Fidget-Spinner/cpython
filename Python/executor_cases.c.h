@@ -3406,6 +3406,26 @@
             break;
         }
 
+        case _STORE_COMMON: {
+            PyObject *value;
+            value = stack_pointer[-1];
+            PyObject *addr = (PyObject *)CURRENT_OPERAND();
+            TIER_TWO_ONLY
+            *((PyObject **)addr) = value;
+            STACK_SHRINK(1);
+            break;
+        }
+
+        case _LOAD_COMMON: {
+            PyObject *value;
+            PyObject *addr = (PyObject *)CURRENT_OPERAND();
+            TIER_TWO_ONLY
+            value = *((PyObject **)addr);
+            STACK_GROW(1);
+            stack_pointer[-1] = value;
+            break;
+        }
+
         case _INSERT: {
             oparg = CURRENT_OPARG();
             PyObject *top;

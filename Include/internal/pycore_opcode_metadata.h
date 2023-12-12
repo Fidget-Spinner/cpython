@@ -124,8 +124,10 @@
 #define _LOAD_CONST_IMMEDIATE 395
 #define _SHRINK_STACK 396
 #define _SWAP_AND_POP 397
-#define _INSERT 398
-#define _CHECK_VALIDITY 399
+#define _STORE_COMMON 398
+#define _LOAD_COMMON 399
+#define _INSERT 400
+#define _CHECK_VALIDITY 401
 
 extern int _PyOpcode_num_popped(int opcode, int oparg, bool jump);
 #ifdef NEED_OPCODE_METADATA
@@ -767,6 +769,10 @@ int _PyOpcode_num_popped(int opcode, int oparg, bool jump)  {
             return oparg;
         case _SWAP_AND_POP:
             return oparg + 1;
+        case _STORE_COMMON:
+            return 1;
+        case _LOAD_COMMON:
+            return 0;
         case _INSERT:
             return oparg + 1;
         case _CHECK_VALIDITY:
@@ -1417,6 +1423,10 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
             return 0;
         case _SWAP_AND_POP:
             return oparg;
+        case _STORE_COMMON:
+            return 0;
+        case _LOAD_COMMON:
+            return 1;
         case _INSERT:
             return oparg + 1;
         case _CHECK_VALIDITY:
@@ -1815,6 +1825,8 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [_LOAD_CONST_IMMEDIATE] = { true, INSTR_FMT_IXC000, 0 },
     [_SHRINK_STACK] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_SWAP_AND_POP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
+    [_STORE_COMMON] = { true, INSTR_FMT_IXC000, 0 },
+    [_LOAD_COMMON] = { true, INSTR_FMT_IXC000, 0 },
     [_INSERT] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_CHECK_VALIDITY] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },
 };
@@ -2084,6 +2096,8 @@ const char * const _PyOpcode_uop_name[OPCODE_UOP_NAME_SIZE] = {
     [_LOAD_CONST_IMMEDIATE] = "_LOAD_CONST_IMMEDIATE",
     [_SHRINK_STACK] = "_SHRINK_STACK",
     [_SWAP_AND_POP] = "_SWAP_AND_POP",
+    [_STORE_COMMON] = "_STORE_COMMON",
+    [_LOAD_COMMON] = "_LOAD_COMMON",
     [_INSERT] = "_INSERT",
     [_CHECK_VALIDITY] = "_CHECK_VALIDITY",
 };
@@ -2632,6 +2646,8 @@ bool _PyOpcode_ispure(uint32_t opcode)  {
         case _LOAD_CONST_IMMEDIATE:
         case _SHRINK_STACK:
         case _SWAP_AND_POP:
+        case _STORE_COMMON:
+        case _LOAD_COMMON:
             return true;
         default:
             return false;

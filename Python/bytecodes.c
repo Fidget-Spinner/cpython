@@ -2705,6 +2705,7 @@ dummy_func(
             DEOPT_IF(r->len <= 0);
         }
 
+        // TODO this is not pure but we should still be able to type propagate
         op(_ITER_NEXT_RANGE, (iter -- iter, next: ~(PYINT_TYPE))) {
             _PyRangeIterObject *r = (_PyRangeIterObject *)iter;
             assert(Py_TYPE(r) == &PyRangeIter_Type);
@@ -4055,6 +4056,16 @@ dummy_func(
             TIER_TWO_ONLY
             Py_DECREF(*target);
             *target = tos;
+        }
+
+        pure op(_STORE_COMMON, (addr/4, value --)) {
+            TIER_TWO_ONLY
+            *((PyObject **)addr) = value;
+        }
+
+        pure op(_LOAD_COMMON, (addr/4 -- value)) {
+            TIER_TWO_ONLY
+            value = *((PyObject **)addr);
         }
 
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {

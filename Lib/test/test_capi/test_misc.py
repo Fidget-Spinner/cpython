@@ -2402,7 +2402,7 @@ class TestUopsOptimization(unittest.TestCase):
             while num < loops:
                 x = num + num
                 y = 1
-                a = (num + num) + y
+                a = x + y
                 num += 1
             return a
 
@@ -2438,7 +2438,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 3)
     #
-    # def test_int_impure_region(self):
+    # def test_int_impure_region_attr(self):
     #     class A:
     #         foo = 1
     #     def testfunc(loops):
@@ -2460,7 +2460,27 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 3)
-
+    # def test_int_large_pure_region_attr(self):
+    #     class A:
+    #         foo = 1
+    #     def testfunc(loops):
+    #         num = 0
+    #         while num < loops:
+    #             x = num + num + num - num + num - num + num + num + num - num + num - num
+    #             y = 1
+    #             a = x + num + num + num
+    #             num += 1
+    #         return a
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     res = None
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(64)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+    #     self.assertEqual(len(binop_count), 3)
 
 
 
