@@ -3563,8 +3563,9 @@
             value = stack_pointer[-1];
             PyObject * addr = (PyObject *)CURRENT_OPERAND();
             TIER_TWO_ONLY
+            PyObject *tmp = *((PyObject **)addr);
             *((PyObject **)addr) = value;
-            stack_pointer += -1;
+            // Py_XDECREF(tmp);
             break;
         }
 
@@ -3573,6 +3574,7 @@
             PyObject * addr = (PyObject *)CURRENT_OPERAND();
             TIER_TWO_ONLY
             value = *((PyObject **)addr);
+            Py_INCREF(value);
             stack_pointer[0] = value;
             stack_pointer += 1;
             break;

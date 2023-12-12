@@ -498,7 +498,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
     self->idx = -1;
     self->cached_hash = -1;
-    self->usage_count = 0;
+    self->usage_count = 1;
     self->emitted_count = 0;
     self->sym_type.types = 0;
     self->inst = inst;
@@ -1251,9 +1251,21 @@ error:
 typedef struct _Py_UOpsEmitter {
     _PyUOpInstruction *writebuffer;
     _PyUOpInstruction *writebuffer_end;
-    // Calculated from writebuffer_end + n_scratch_slots
-    int n_scratch_slots;
     int curr_i;
+    // Calculated from writebuffer_end + n_scratch_slots
+    // Note: each slot is 128 bit instruction, so it can hold 2 64 bit
+    // PyObjects
+    int n_scratch_slots;
+    int max_scratch_slots;
+    // A dict mapping the common expressions to the slots indexes.
+    PyObject *common_syms;
+
+    // Layed out in reverse order.
+    // The first scratch slot is the last entry of the buffer, counting
+    // backwards. Ie scratch_start > scratch_end
+    PyObject **scratch_start;
+    PyObject **scratch_end;
+    PyObject **scratch_available;
 } _Py_UOpsEmitter;
 
 static inline int
@@ -1283,20 +1295,87 @@ emit_i(_Py_UOpsEmitter *emitter,
     return 0;
 }
 
-static inline int
-emit_common(_PyUOpInstruction *trace_writebuffer,
-       _PyUOpInstruction *writebuffer_end,
-       int curr_i,
-       _PyUOpInstruction inst)
-{
+static int
+compile_sym_to_uops(_Py_UOpsEmitter *emitter,
+                    _Py_UOpsSymbolicExpression *sym,
+                    _Py_UOpsPureStore *store,
+                    bool use_locals, bool do_cse);
 
+// Find a slot to store the result of a common subexpression.
+static int
+compile_common_sym(_Py_UOpsEmitter *emitter,
+            _Py_UOpsSymbolicExpression *sym,
+           _Py_UOpsPureStore *store,
+           bool use_locals)
+{
+    sym->emitted_count++;
+
+    PyObject *idx = PyDict_GetItem(emitter->common_syms, (PyObject *)sym);
+    // Present - just use that
+    if (idx != NULL) {
+        long index = PyLong_AsLong(idx);
+        assert(!PyErr_Occurred());
+        PyObject **addr = emitter->scratch_start - index;
+        _PyUOpInstruction load_common = {_LOAD_COMMON, 0, 0, (uint64_t)addr};
+        if(emit_i(emitter, load_common) < 0) {
+            return -1;
+        }
+        return 0;
+    }
+
+    // Not present, emit the whole thing, then store that
+    if (compile_sym_to_uops(emitter, sym, store, use_locals, false) < 0) {
+        return -1;
+    }
+
+    // Not really used - not worth to store it.
+    if (!(sym->usage_count > 1 && sym->emitted_count < (sym->usage_count))){
+        return 0;
+    }
+    // No space left, TODO evict something based on usage count.
+    // And store there.
+    if (emitter->n_scratch_slots >= emitter->max_scratch_slots) {
+        return 0;
+    }
+
+    // If there's space, expand the scratch slot.
+    emitter->scratch_end--;
+    // Grow backwards.
+    while ((char *)emitter->writebuffer_end > (char *)emitter->scratch_end) {
+        emitter->writebuffer_end--;
+    }
+    emitter->n_scratch_slots++;
+    PyObject **available = emitter->scratch_available;
+    assert(available >= emitter->scratch_end);
+    emitter->scratch_available--;
+
+    *available = NULL;
+    // TODO memory leak
+    _PyUOpInstruction store_common = {_STORE_COMMON, 0, 0, (uint64_t)available};
+    if(emit_i(emitter, store_common) < 0) {
+        return -1;
+    }
+    long index = (long)(emitter->scratch_start - available);
+    assert(index >= 0);
+    idx = PyLong_FromLong(index);
+    if (idx == NULL) {
+        return -1;
+    }
+    if (PyDict_SetItem(emitter->common_syms, (PyObject *)sym, idx) < 0) {
+        PyErr_Clear();
+        Py_DECREF(idx);
+        return -1;
+    }
+    Py_DECREF(idx);
+    return 0;
 }
 
 static int
 compile_sym_to_uops(_Py_UOpsEmitter *emitter,
                    _Py_UOpsSymbolicExpression *sym,
                    _Py_UOpsPureStore *store,
-                   bool use_locals)
+                   bool use_locals,
+                   bool do_cse)
 {
     _PyUOpInstruction inst;
     // Since CPython is a stack machine, just compile in the order
@@ -1313,11 +1392,8 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
 
 
     // Common subexpression elimination.
-    // If this is used elsewhere, store it in a scratch slot.
-    if (sym->usage_count > 1 && sym->emitted_count < (sym->usage_count - 1)) {
-        sym->emitted_count++;
-        // First check - is it already in a scratch slot somewhere?
-
+    if (do_cse && !_PyOpcode_isterminal(sym->inst.opcode) && sym->usage_count > 1) {
+        return compile_common_sym(emitter, sym, store, use_locals);
     }
 
     // If sym is already in locals, just reuse that.
@@ -1356,7 +1432,7 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
         if (compile_sym_to_uops(
             emitter,
             sym->operands[i],
-            store, use_locals) < 0) {
+            store, use_locals, true) < 0) {
             return -1;
         }
     }
@@ -1444,7 +1520,7 @@ emit_uops_from_pure_store(
             emitter,
             pure_store->locals[locals_i],
             pure_store,
-            false) < 0) {
+            false, true) < 0) {
             return -1;
         }
         _PyUOpInstruction prev_i = emitter->writebuffer[emitter->curr_i-1];
@@ -1473,7 +1549,7 @@ emit_uops_from_pure_store(
             emitter,
             pure_store->stack[stack_i],
             pure_store,
-            true) < 0) {
+            true, true) < 0) {
             return -1;
         }
     }
@@ -1535,11 +1611,23 @@ emit_uops_from_stores(
 )
 {
 
+    PyObject *sym_store = PyDict_New();
+    if (sym_store == NULL) {
+        return -1;
+    }
+
     _Py_UOpsEmitter emitter = {
         trace_writebuffer,
         writebuffer_end,
         0,
         0,
+        // Should not use more than 20% of the space for common expressions.
+        (writebuffer_end - trace_writebuffer) / 5,
+        sym_store,
+        // One wasted object, but it's fine I'd rather not use that to prevent logic bugs.
+        (PyObject **)(writebuffer_end - 1),
+        (PyObject **)(writebuffer_end - 1),
+        (PyObject **)(writebuffer_end - 1),
     };
 
     // Emission is simple: traverse the linked list of stores:
@@ -1566,6 +1654,8 @@ emit_uops_from_stores(
         }
         curr_store = curr_store->next;
     }
+
+    Py_DECREF(sym_store);
 
     // Add the _JUMP_TO_TOP at the end of the trace.
     _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
@@ -1624,7 +1714,6 @@ _Py_uop_analyze_and_optimize(
     int original_trace_len = buffer_size;
     int trace_len = buffer_size;
     _PyUOpInstruction *temp_writebuffer = NULL;
-    _PyUOpInstruction *writebuffer_end = buffer + buffer_size;
 
     temp_writebuffer = PyMem_New(_PyUOpInstruction, trace_len * OVERALLOCATE_FACTOR);
     if (temp_writebuffer == NULL) {
@@ -1641,6 +1730,7 @@ _Py_uop_analyze_and_optimize(
         goto error;
     }
 
+    _PyUOpInstruction *writebuffer_end = temp_writebuffer + buffer_size;
     // Compile the stores
     trace_len = emit_uops_from_stores(
         co,

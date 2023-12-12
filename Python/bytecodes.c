@@ -4054,14 +4054,17 @@ dummy_func(
             *target = tos;
         }
 
-        pure op(_STORE_COMMON, (addr/4, value --)) {
+        pure op(_STORE_COMMON, (addr/4, value -- value)) {
             TIER_TWO_ONLY
+            PyObject *tmp = *((PyObject **)addr);
             *((PyObject **)addr) = value;
+            Py_XDECREF(tmp);
         }
 
         pure op(_LOAD_COMMON, (addr/4 -- value)) {
             TIER_TWO_ONLY
             value = *((PyObject **)addr);
+            Py_INCREF(value);
         }
 
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {

@@ -1323,7 +1323,7 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
         case _SWAP_AND_POP:
             return oparg;
         case _STORE_COMMON:
-            return 0;
+            return 1;
         case _LOAD_COMMON:
             return 1;
         case _INSERT:
@@ -1724,7 +1724,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [_LOAD_CONST_IMMEDIATE] = { true, INSTR_FMT_IXC000, 0 },
     [_SHRINK_STACK] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_SWAP_AND_POP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
-    [_STORE_COMMON] = { true, INSTR_FMT_IXC000, 0 },
+    [_STORE_COMMON] = { true, INSTR_FMT_IXC000, HAS_ESCAPES_FLAG },
     [_LOAD_COMMON] = { true, INSTR_FMT_IXC000, 0 },
     [_INSERT] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_CHECK_VALIDITY] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },

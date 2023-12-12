@@ -2533,8 +2533,7 @@ class TestUopsOptimization(unittest.TestCase):
             num = 0
             while num < loops:
                 x = num + num
-                y = 1
-                a = x + y
+                a = x + 1
                 num += 1
             return a
 
