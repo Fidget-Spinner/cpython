@@ -3521,64 +3521,60 @@
         }
 
         case _LOAD_FAST_NO_INCREF: {
-            oparg = CURRENT_OPARG();
             PyObject *value;
-            TIER_TWO_ONLY
+            oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             assert(value != NULL);
-            STACK_GROW(1);
-            stack_pointer[-1] = value;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
             break;
         }
 
         case _LOAD_CONST_IMMEDIATE: {
             PyObject *value;
-            PyObject *obj = (PyObject *)CURRENT_OPERAND();
-            TIER_TWO_ONLY
+            PyObject * obj = (PyObject *)CURRENT_OPERAND();
             value = obj;
             Py_INCREF(value);
-            STACK_GROW(1);
-            stack_pointer[-1] = value;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
             break;
         }
 
         case _SHRINK_STACK: {
             oparg = CURRENT_OPARG();
-            TIER_TWO_ONLY
-            STACK_SHRINK(oparg);
+            stack_pointer += -oparg;
             break;
         }
 
         case _SWAP_AND_POP: {
-            oparg = CURRENT_OPARG();
             PyObject *tos;
             PyObject **target;
+            oparg = CURRENT_OPARG();
             tos = stack_pointer[-1];
-            target = stack_pointer - 1 - oparg;
-            TIER_TWO_ONLY
+            target = &stack_pointer[-1 - oparg];
             Py_DECREF(*target);
             *target = tos;
-            STACK_SHRINK(1);
+            stack_pointer += -1;
             break;
         }
 
         case _STORE_COMMON: {
             PyObject *value;
             value = stack_pointer[-1];
-            PyObject *addr = (PyObject *)CURRENT_OPERAND();
+            PyObject * addr = (PyObject *)CURRENT_OPERAND();
             TIER_TWO_ONLY
             *((PyObject **)addr) = value;
-            STACK_SHRINK(1);
+            stack_pointer += -1;
             break;
         }
 
         case _LOAD_COMMON: {
             PyObject *value;
-            PyObject *addr = (PyObject *)CURRENT_OPERAND();
+            PyObject * addr = (PyObject *)CURRENT_OPERAND();
             TIER_TWO_ONLY
             value = *((PyObject **)addr);
-            STACK_GROW(1);
-            stack_pointer[-1] = value;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
             break;
         }
 
@@ -3586,7 +3582,6 @@
             PyObject *top;
             oparg = CURRENT_OPARG();
             top = stack_pointer[-1];
-            TIER_TWO_ONLY
             // Inserts TOS at position specified by oparg;
             memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));
             stack_pointer[-1 - oparg] = top;

@@ -259,8 +259,14 @@ extern "C" {
 #define _GUARD_IS_NOT_NONE_POP 391
 #define _JUMP_TO_TOP 392
 #define _SAVE_RETURN_OFFSET 393
-#define _INSERT 394
-#define _CHECK_VALIDITY 395
+#define _LOAD_FAST_NO_INCREF 394
+#define _LOAD_CONST_IMMEDIATE 395
+#define _SHRINK_STACK 396
+#define _SWAP_AND_POP 397
+#define _STORE_COMMON 398
+#define _LOAD_COMMON 399
+#define _INSERT 400
+#define _CHECK_VALIDITY 401
 
 #ifdef __cplusplus
 }
