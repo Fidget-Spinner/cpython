@@ -588,13 +588,13 @@ def _write_components_abstract_interp_pure_region(
                 mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
                 out.emit(
                     f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, opcode, oparg, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+                    f"ctx, *inst, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
                 )
             # Otherwise, just create a new symbolic
             with out.block("else"):
                 out.emit(
                     f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, opcode, oparg, NULL, {len(mangled_input_vars)} {var});"
+                    f"ctx, *inst, NULL, {len(mangled_input_vars)} {var});"
                 )
 
             out.emit(

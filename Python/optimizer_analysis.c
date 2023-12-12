@@ -57,6 +57,12 @@ is_bookkeeping_opcode(int opcode) {
     return (opcode == _SET_IP || opcode == _CHECK_VALIDITY);
 }
 
+// These opcodes just adjust the stack.
+static inline bool
+is_dataonly_opcode(int opcode) {
+    return (opcode == POP_TOP);
+}
+
 typedef enum {
     // Types with aux
     GUARD_KEYS_VERSION_TYPE = 0,
@@ -97,8 +103,7 @@ typedef struct _Py_UOpsSymbolicExpression {
     Py_ssize_t idx;
     // Note: separated from refcnt so we don't have to deal with counting
     int usage_count;
-    uint32_t opcode;
-    uint32_t oparg;
+    _PyUOpInstruction inst;
 
     // Only populated by guards
     uint64_t operand;
@@ -133,7 +138,7 @@ sym_hash(PyObject *o)
         return self->cached_hash;
     }
     // TODO a faster hash function that doesn't allocate?
-    PyObject *temp = PyTuple_New(Py_SIZE(o) + 2);
+    PyObject *temp = PyTuple_New(Py_SIZE(o) + 4);
     if (temp == NULL) {
         return -1;
     }
@@ -141,19 +146,36 @@ sym_hash(PyObject *o)
     for (Py_ssize_t i = 0; i < len; i++) {
         PyTuple_SET_ITEM(temp, i, Py_NewRef(self->operands[i]));
     }
-    PyObject *opcode = PyLong_FromLong(self->opcode);
+    PyObject *opcode = PyLong_FromLong(self->inst.opcode);
     if (opcode == NULL) {
         Py_DECREF(temp);
         return -1;
     }
-    PyObject *oparg = PyLong_FromLong(self->oparg);
+    PyObject *oparg = PyLong_FromLong(self->inst.oparg);
     if (oparg == NULL) {
         Py_DECREF(temp);
         Py_DECREF(opcode);
         return -1;
     }
+    PyObject *target = PyLong_FromLong(self->inst.target);
+    if (target == NULL) {
+        Py_DECREF(temp);
+        Py_DECREF(opcode);
+        Py_DECREF(oparg);
+        return -1;
+    }
+    PyObject *operand = PyLong_FromLong(self->inst.operand);
+    if (operand == NULL) {
+        Py_DECREF(temp);
+        Py_DECREF(opcode);
+        Py_DECREF(oparg);
+        Py_DECREF(target);
+        return -1;
+    }
     PyTuple_SET_ITEM(temp, Py_SIZE(o), opcode);
     PyTuple_SET_ITEM(temp, Py_SIZE(o) + 1, oparg);
+    PyTuple_SET_ITEM(temp, Py_SIZE(o) + 2, target);
+    PyTuple_SET_ITEM(temp, Py_SIZE(o) + 3, operand);
     Py_hash_t hash = PyObject_Hash(temp);
     Py_DECREF(temp);
     self->cached_hash = hash;
@@ -167,17 +189,21 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     if (Py_TYPE(o1) != Py_TYPE(o2)) {
         Py_RETURN_FALSE;
     }
+
     _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o1;
     _Py_UOpsSymbolicExpression *other = (_Py_UOpsSymbolicExpression *)o2;
-    if (_PyOpcode_isterminal(self->opcode) != _PyOpcode_isterminal(other->opcode)) {
+
+    int self_opcode = self->inst.opcode;
+    int other_opcode = other->inst.opcode;
+    if (_PyOpcode_isterminal(self_opcode) != _PyOpcode_isterminal(other_opcode)) {
         Py_RETURN_FALSE;
     }
 
-    if (_PyOpcode_isimmutable(self->opcode) != _PyOpcode_isimmutable(other->opcode)) {
+    if (_PyOpcode_isimmutable(self_opcode) != _PyOpcode_isimmutable(other_opcode)) {
         Py_RETURN_FALSE;
     }
 
-    if (!_PyOpcode_isimmutable(self->opcode)) {
+    if (!_PyOpcode_isimmutable(self_opcode)) {
         assert(self->originating_store != NULL);
         assert(other->originating_store != NULL);
         if (self->originating_store != other->originating_store) {
@@ -188,7 +214,7 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     // Terminal ops are kinda like special sentinels.
     // They are always considered unique, except for constant values
     // which can be repeated
-    if (_PyOpcode_isterminal(self->opcode) && _PyOpcode_isterminal(other->opcode)) {
+    if (_PyOpcode_isterminal(self_opcode) && _PyOpcode_isterminal(other_opcode)) {
         if (self->const_val && other->const_val) {
             return PyObject_RichCompare(self->const_val, other->const_val, Py_EQ);
         } else {
@@ -210,13 +236,13 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     // The symexpr's own id does not have to be populated yet.
     // Note: WE DO NOT COMPARE THEIR CONST_VAL, BECAUSE THAT CAN BE POPULATED
     // LATER.
-    if (self->opcode != other->opcode) {
+    if ((self_opcode != other_opcode)
+        || (self->inst.oparg != other->inst.oparg)
+        || (self->inst.target != other->inst.target)
+        || (self->inst.operand != other->inst.operand)) {
         Py_RETURN_FALSE;
     }
 
-    if (self->operand != other->operand) {
-        Py_RETURN_FALSE;
-    }
     Py_ssize_t self_len = Py_SIZE(self);
     Py_ssize_t other_len = Py_SIZE(other);
     if (self_len != other_len) {
@@ -420,7 +446,7 @@ static _Py_UOpsSymbolicExpression *
 check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
 {
     // Unknown opcodes are treated as always unique
-    if (self->opcode == CACHE) {
+    if (self->inst.opcode == CACHE) {
         return self;
     }
     assert(ctx->sym_exprs_to_sym_exprs);
@@ -455,7 +481,7 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
 // Steals a reference to const_val
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
-                               uint32_t opcode, uint32_t oparg,
+                               _PyUOpInstruction inst,
                                PyObject *const_val, int num_subexprs, ...)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
@@ -470,8 +496,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->cached_hash = -1;
     self->usage_count = 0;
     self->sym_type.types = 0;
-    self->opcode = opcode;
-    self->oparg = oparg;
+    self->inst = inst;
     self->operand = 0;
     self->const_val = const_val;
     // Borrowed ref. We don't want to have to make our type GC as this will
@@ -502,7 +527,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_NewSingleton(
     _Py_UOpsAbstractInterpContext *ctx,
-    uint32_t opcode, uint32_t oparg)
+    _PyUOpInstruction inst)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
@@ -516,8 +541,7 @@ _Py_UOpsSymbolicExpression_NewSingleton(
     self->cached_hash = -1;
     self->usage_count = 0;
     self->sym_type.types = 0;
-    self->opcode = opcode;
-    self->oparg = oparg;
+    self->inst = inst;
     self->operand = 0;
     self->const_val = NULL;
     self->originating_store = 0;
@@ -527,7 +551,7 @@ _Py_UOpsSymbolicExpression_NewSingleton(
 
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
-                               uint32_t opcode, uint32_t oparg, int num_subexprs,
+                                _PyUOpInstruction inst, int num_subexprs,
                                _Py_UOpsSymbolicExpression **arr_start)
 {
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
@@ -543,8 +567,7 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     self->usage_count = 0;
     self->sym_type.types = 0;
     self->const_val = NULL;
-    self->opcode = opcode;
-    self->oparg = oparg;
+    self->inst = inst;
 
     // Setup
     for (int i = 0; i < num_subexprs; i++) {
@@ -608,26 +631,28 @@ sym_set_type_from_const(_Py_UOpsSymbolicExpression *sym, PyObject *obj)
 static inline _Py_UOpsSymbolicExpression*
 sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
 {
+    _PyUOpInstruction inst = {INIT_FAST, locals_idx, 0, 0};
     return _Py_UOpsSymbolicExpression_New(ctx,
-                                          INIT_FAST, locals_idx,
+                                          inst,
                                           NULL, 0);
 }
 
 static inline _Py_UOpsSymbolicExpression*
 sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx)
 {
+    _PyUOpInstruction inst = {CACHE, 0, 0, 0};
     return _Py_UOpsSymbolicExpression_New(ctx,
-                                          CACHE, 0,
+                                          inst,
                                           NULL, 0);
 }
 
 static inline _Py_UOpsSymbolicExpression*
 sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx)
 {
+    _PyUOpInstruction inst = {LOAD_CONST, const_idx, 0, 0};
     _Py_UOpsSymbolicExpression *temp = _Py_UOpsSymbolicExpression_New(
         ctx,
-        LOAD_CONST,
-        const_idx,
+        inst,
         const_val,
         0
     );
@@ -646,8 +671,7 @@ sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *guard,
     _Py_UOpsSymbolicExpression *res =
         _Py_UOpsSymbolicExpression_NewFromArray(
             ctx,
-            guard->opcode,
-            guard->oparg,
+            *guard,
             num_stack_inputs,
             &((_Py_UOpsPureStore *)ctx->curr_store)->stack_pointer[-(num_stack_inputs)]
         );
@@ -985,7 +1009,7 @@ uop_abstract_interpret_single_inst(
             STACK_GROW(1);
             PEEK(1) = GETLOCAL(oparg);
             // Value might be uninitialized, and might error.
-            if(PEEK(1) == NULL || PEEK(1)->opcode == INIT_FAST) {
+            if(PEEK(1) == NULL || PEEK(1)->inst.opcode == INIT_FAST) {
                 goto error;
             }
             break;
@@ -1029,7 +1053,8 @@ uop_abstract_interpret_single_inst(
 
         case PUSH_NULL: {
             STACK_GROW(1);
-            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, PUSH_NULL, 0);
+            _PyUOpInstruction inst = {PUSH_NULL, 0, 0, 0};
+            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, inst);
             sym_set_type(null_sym, NULL_TYPE, 0);
             PEEK(1) = null_sym;
             break;
@@ -1040,7 +1065,7 @@ uop_abstract_interpret_single_inst(
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
     }
-    fprintf(stderr, "stack_pointer %p\n", stack_pointer);
+    DPRINTF(2, "stack_pointer %p\n", stack_pointer);
     curr_store->stack_pointer = stack_pointer;
     ctx->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
@@ -1173,7 +1198,8 @@ uop_abstract_interpret(
         impure_store->start = curr;
         // SET_IP shouldn't break and form a new region.
         while (curr < end && (!_PyOpcode_ispure(curr->opcode) ||
-            is_bookkeeping_opcode(curr->opcode))) {
+            is_bookkeeping_opcode(curr->opcode) ||
+            is_dataonly_opcode(curr->opcode))) {
             DPRINTF(3, "impure opcode: %d\n", curr->opcode);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
             // Adjust the stack and such
@@ -1253,10 +1279,12 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
     }
 
     // If sym is already in locals, just reuse that.
+    // TODO use a dict here.
     if (use_locals) {
         int locals_len = (int)(store->stack - store->locals);
         for (int i = 0; i < locals_len; i++) {
-            if (sym == store->initial_locals[i]) {
+            // NOTE: This is the current locals, not the initial one!z
+            if (sym == store->locals[i]) {
                 inst.opcode = LOAD_FAST;
                 inst.oparg = i;
                 inst.operand = 0;
@@ -1265,15 +1293,14 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
         }
     }
 
-    if (_PyOpcode_isterminal(sym->opcode)) {
+    if (_PyOpcode_isterminal(sym->inst.opcode)) {
         // These are for unknown stack entries.
-        if (_PyOpcode_isunknown(sym->opcode)) {
+        if (_PyOpcode_isunknown(sym->inst.opcode)) {
             // Leave it be. These are initial values from the start
             return new_trace_len;
         }
-        inst.opcode = sym->opcode == INIT_FAST ? LOAD_FAST : sym->opcode;
-        inst.oparg = sym->oparg;
-        inst.operand = sym->operand;
+        inst = sym->inst;
+        inst.opcode = sym->inst.opcode == INIT_FAST ? LOAD_FAST : sym->inst.opcode;
         return emit_i(trace_writebuffer, new_trace_len, inst);
     }
 
@@ -1283,6 +1310,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
         if (sym->operands[i] == NULL) {
             continue;
         }
+        // TODO Py_EnterRecursiveCall ?
         new_trace_len = compile_sym_to_uops(
             trace_writebuffer,
             new_trace_len,
@@ -1291,10 +1319,7 @@ compile_sym_to_uops(_PyUOpInstruction *trace_writebuffer, int new_trace_len,
     }
 
     // Finally, emit the operation itself.
-    inst.opcode = sym->opcode;
-    inst.oparg = sym->oparg;
-    inst.operand = sym->operand;
-    return emit_i(trace_writebuffer, new_trace_len, inst);
+    return emit_i(trace_writebuffer, new_trace_len, sym->inst);
 }
 
 static int
@@ -1344,9 +1369,8 @@ emit_uops_from_pure_store(
         assert(load_fast_count == guard_operands_count);
         stack_grown += load_fast_count;
         // Now, time to emit the guard itself
-        _PyUOpInstruction guard_i = {guard->opcode, guard->oparg, guard->operand};
         new_trace_len = emit_i(trace_writebuffer, new_trace_len,
-                               guard_i);
+                               guard->inst);
 
     }
 

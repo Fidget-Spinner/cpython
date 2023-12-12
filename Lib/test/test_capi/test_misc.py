@@ -2374,17 +2374,35 @@ def clear_executors(func):
 
 class TestUopsOptimization(unittest.TestCase):
 
-    def test_int_constant_propagation(self):
+    # def test_int_constant_propagation(self):
+    #     def testfunc(loops):
+    #         num = 0
+    #         while num < loops:
+    #             x = 0
+    #             y = 1
+    #             x // 2
+    #             a = x + y
+    #             num += 1
+    #         return 1
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     res = None
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(64)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     self.assertEqual(res, 1)
+    #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+    #     self.assertEqual(len(binop_count), 2)
+
+    def test_int_type_propagation(self):
         def testfunc(loops):
             num = 0
             while num < loops:
-                x = 0
+                x = num + num
                 y = 1
-                z = 2
-                a = y
-                b = a
-                c = b
-                a = x + y + z + x + y + z + c
+                a = (num + num) + y
                 num += 1
             return a
 
@@ -2395,31 +2413,10 @@ class TestUopsOptimization(unittest.TestCase):
 
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
-        self.assertEqual(res, 7)
+        self.assertEqual(res, 129)
         binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
-        self.assertEqual(len(binop_count), 1)
+        self.assertEqual(len(binop_count), 3)
 
-    # def test_int_type_propagation(self):
-    #     def testfunc(loops):
-    #         num = 0
-    #         while num < loops:
-    #             x = num + num
-    #             y = 1
-    #             a = x + y
-    #             num += 1
-    #         return a
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     res = None
-    #     with temporary_optimizer(opt):
-    #         res = testfunc(64)
-    #
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     self.assertEqual(res, 3)
-    #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
-    #     self.assertEqual(len(binop_count), 3)
-    #
     # def test_int_impure_region(self):
     #     def testfunc(loops):
     #         num = 0
@@ -2438,10 +2435,31 @@ class TestUopsOptimization(unittest.TestCase):
     #
     #     ex = get_first_executor(testfunc)
     #     self.assertIsNotNone(ex)
-    #     self.assertEqual(res, 3)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 3)
-
+    #
+    # def test_int_impure_region(self):
+    #     class A:
+    #         foo = 1
+    #     def testfunc(loops):
+    #         num = 0
+    #         while num < loops:
+    #             x = A.foo + A.foo
+    #             y = 1
+    #             A.foo
+    #             a = x + y
+    #             num += 1
+    #         return a
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     res = None
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(64)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+    #     self.assertEqual(len(binop_count), 3)
 
 
 

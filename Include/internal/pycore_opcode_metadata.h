@@ -2628,7 +2628,6 @@ bool _PyOpcode_ispure(uint32_t opcode)  {
         case _BINARY_OP_ADD_UNICODE:
         case COPY:
         case SWAP:
-        case _SET_IP:
         case _LOAD_FAST_NO_INCREF:
         case _LOAD_CONST_IMMEDIATE:
         case _SHRINK_STACK:
