@@ -1577,7 +1577,6 @@ emit_uops_from_stores(
 static void
 remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
 {
-    // Note that we don't enter stubs, those SET_IPs are needed.
     int last_set_ip = -1;
     bool maybe_invalid = false;
     for (int pc = 0; pc < buffer_size; pc++) {
