@@ -4058,7 +4058,8 @@ dummy_func(
             TIER_TWO_ONLY
             PyObject *tmp = *((PyObject **)addr);
             *((PyObject **)addr) = value;
-            Py_XDECREF(tmp);
+            // TODO find out why this segfaults
+            // Py_XDECREF(tmp);
         }
 
         pure op(_LOAD_COMMON, (addr/4 -- value)) {
