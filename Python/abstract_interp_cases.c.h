@@ -1712,6 +1712,10 @@
             break;
         }
 
+        case _JUMP_ABSOLUTE: {
+            break;
+        }
+
         case _SET_IP: {
             break;
         }
@@ -1726,6 +1730,10 @@
 
         case _SHRINK_STACK: {
             STACK_SHRINK(oparg);
+            break;
+        }
+
+        case _SETUP_TIER2_FRAME: {
             break;
         }
 

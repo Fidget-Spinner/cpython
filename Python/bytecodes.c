@@ -4016,6 +4016,11 @@ dummy_func(
             CHECK_EVAL_BREAKER();
         }
 
+        op(_JUMP_ABSOLUTE, (pc/4 --)) {
+            next_uop = (_PyUOpInstruction *)pc;
+            CHECK_EVAL_BREAKER();
+        }
+
         op(_SET_IP, (--)) {
             TIER_TWO_ONLY
             // TODO: Put the code pointer in `operand` to avoid indirection via `frame`
@@ -4066,6 +4071,10 @@ dummy_func(
             TIER_TWO_ONLY
             value = *((PyObject **)addr);
             Py_INCREF(value);
+        }
+
+        op(_SETUP_TIER2_FRAME, (scratch_size/4 --)) {
+            DEOPT_IF(!_PyFrame_ConvertToTier2(tstate, frame, oparg, scratch_size) != 0);
         }
 
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {

@@ -654,6 +654,8 @@ int _PyOpcode_num_popped(int opcode, int oparg, bool jump)  {
             return 1;
         case _JUMP_TO_TOP:
             return 0;
+        case _JUMP_ABSOLUTE:
+            return 0;
         case _SET_IP:
             return 0;
         case _SAVE_RETURN_OFFSET:
@@ -671,6 +673,8 @@ int _PyOpcode_num_popped(int opcode, int oparg, bool jump)  {
         case _STORE_COMMON:
             return 1;
         case _LOAD_COMMON:
+            return 0;
+        case _SETUP_TIER2_FRAME:
             return 0;
         case _INSERT:
             return oparg + 1;
@@ -1308,6 +1312,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
             return 0;
         case _JUMP_TO_TOP:
             return 0;
+        case _JUMP_ABSOLUTE:
+            return 0;
         case _SET_IP:
             return 0;
         case _SAVE_RETURN_OFFSET:
@@ -1326,6 +1332,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg, bool jump)  {
             return 1;
         case _LOAD_COMMON:
             return 1;
+        case _SETUP_TIER2_FRAME:
+            return 0;
         case _INSERT:
             return oparg + 1;
         case _CHECK_VALIDITY:
@@ -1717,6 +1725,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [_GUARD_IS_NONE_POP] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },
     [_GUARD_IS_NOT_NONE_POP] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },
     [_JUMP_TO_TOP] = { true, INSTR_FMT_IX, HAS_EVAL_BREAK_FLAG },
+    [_JUMP_ABSOLUTE] = { true, INSTR_FMT_IXC000, HAS_EVAL_BREAK_FLAG },
     [_SET_IP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_ESCAPES_FLAG },
     [_SAVE_RETURN_OFFSET] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_EXIT_TRACE] = { true, INSTR_FMT_IX, 0 },
@@ -1724,8 +1733,9 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[OPCODE_METADATA_SIZE] = {
     [_LOAD_CONST_IMMEDIATE] = { true, INSTR_FMT_IXC000, 0 },
     [_SHRINK_STACK] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_SWAP_AND_POP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
-    [_STORE_COMMON] = { true, INSTR_FMT_IXC000, HAS_ESCAPES_FLAG },
+    [_STORE_COMMON] = { true, INSTR_FMT_IXC000, 0 },
     [_LOAD_COMMON] = { true, INSTR_FMT_IXC000, 0 },
+    [_SETUP_TIER2_FRAME] = { true, INSTR_FMT_IBC000, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG },
     [_INSERT] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [_CHECK_VALIDITY] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },
 };
@@ -1990,6 +2000,7 @@ const char * const _PyOpcode_uop_name[OPCODE_UOP_NAME_SIZE] = {
     [_GUARD_IS_NONE_POP] = "_GUARD_IS_NONE_POP",
     [_GUARD_IS_NOT_NONE_POP] = "_GUARD_IS_NOT_NONE_POP",
     [_JUMP_TO_TOP] = "_JUMP_TO_TOP",
+    [_JUMP_ABSOLUTE] = "_JUMP_ABSOLUTE",
     [_SAVE_RETURN_OFFSET] = "_SAVE_RETURN_OFFSET",
     [_LOAD_FAST_NO_INCREF] = "_LOAD_FAST_NO_INCREF",
     [_LOAD_CONST_IMMEDIATE] = "_LOAD_CONST_IMMEDIATE",
@@ -1997,6 +2008,7 @@ const char * const _PyOpcode_uop_name[OPCODE_UOP_NAME_SIZE] = {
     [_SWAP_AND_POP] = "_SWAP_AND_POP",
     [_STORE_COMMON] = "_STORE_COMMON",
     [_LOAD_COMMON] = "_LOAD_COMMON",
+    [_SETUP_TIER2_FRAME] = "_SETUP_TIER2_FRAME",
     [_INSERT] = "_INSERT",
     [_CHECK_VALIDITY] = "_CHECK_VALIDITY",
 };

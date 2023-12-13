@@ -3495,6 +3495,13 @@
             break;
         }
 
+        case _JUMP_ABSOLUTE: {
+            PyObject * pc = (PyObject *)CURRENT_OPERAND();
+            next_uop = (_PyUOpInstruction *)pc;
+            CHECK_EVAL_BREAKER();
+            break;
+        }
+
         case _SET_IP: {
             oparg = CURRENT_OPARG();
             TIER_TWO_ONLY
@@ -3565,6 +3572,7 @@
             TIER_TWO_ONLY
             PyObject *tmp = *((PyObject **)addr);
             *((PyObject **)addr) = value;
+            // TODO find out why this segfaults
             // Py_XDECREF(tmp);
             break;
         }
@@ -3577,6 +3585,13 @@
             Py_INCREF(value);
             stack_pointer[0] = value;
             stack_pointer += 1;
+            break;
+        }
+
+        case _SETUP_TIER2_FRAME: {
+            oparg = CURRENT_OPARG();
+            PyObject * scratch_size = (PyObject *)CURRENT_OPERAND();
+            if (!_PyFrame_ConvertToTier2(tstate, frame, oparg, scratch_size) != 0) goto deoptimize;
             break;
         }
 
