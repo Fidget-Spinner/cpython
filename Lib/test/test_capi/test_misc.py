@@ -2544,6 +2544,7 @@ class TestUopsOptimization(unittest.TestCase):
     #
     #     ex = get_first_executor(testfunc)
     #     self.assertIsNotNone(ex)
+    #     # TODO should be 127, one extra iteration for some reason
     #     self.assertEqual(res, 129)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 3)

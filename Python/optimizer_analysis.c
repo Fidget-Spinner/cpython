@@ -17,7 +17,6 @@
 #include <stddef.h>
 
 #define OVERALLOCATE_FACTOR 2
-#define REGISTERS_COUNT 3
 
 #ifdef Py_DEBUG
     #define DPRINTF(level, ...) \
@@ -105,6 +104,11 @@ typedef struct _Py_UOpsSymbolicExpression {
     // How many times this is nested as a subexpression of another
     // expression. Used for CSE.
     int usage_count;
+    // Counts how many symbolic expressions nest this one
+    // (ie points to this one). Slightly different from usage count
+    // as usage count can extend to expressions outside this store as well.
+    // In most cases, this is just usage_count - 1.
+    int in_degree;
     // How many of this expression we have emitted so far. Only used for CSE.
     int emitted_count;
     _PyUOpInstruction inst;
@@ -483,6 +487,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 1;
+    self->in_degree = 0;
     self->emitted_count = 0;
     self->sym_type.types = 0;
     self->inst = inst;
@@ -506,6 +511,10 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         self->operands[i] = va_arg(curr, _Py_UOpsSymbolicExpression *);
         assert(self->operands[i]);
         self->operands[i]->usage_count++;
+        // Constant values shouldn't calculate their in degrees. Makes no sense to.
+        if (self->operands[i]->const_val == NULL) {
+            self->operands[i]->in_degree++;
+        }
     }
 
     va_end(curr);
@@ -529,6 +538,7 @@ _Py_UOpsSymbolicExpression_NewSingleton(
     self->idx = -1;
     self->cached_hash = -1;
     self->usage_count = 0;
+    self->in_degree = 0;
     self->sym_type.types = 0;
     self->inst = inst;
     self->operand = 0;
@@ -562,6 +572,10 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     for (int i = 0; i < num_subexprs; i++) {
         self->operands[i] = arr_start[i];
         self->operands[i]->usage_count++;
+        // Constant values shouldn't calculate their in degrees. Makes no sense to.
+        if (self->operands[i]->const_val == NULL) {
+            self->operands[i]->in_degree++;
+        }
     }
 
 
@@ -717,8 +731,9 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
     self->initial_locals = self->stack + ctx->stack_len;
     self->initial_stack = self->initial_locals + ctx->locals_len;
 
+    int total_len = (ctx->locals_len + ctx->stack_len) * 2;
     // Null out everything first
-    for (int i = 0; i < ctx->locals_len + ctx->stack_len; i++) {
+    for (int i = 0; i < total_len; i++) {
         self->locals_with_stack[i] = NULL;
     }
     // Initialize with the initial state of all local variables
@@ -1250,6 +1265,7 @@ typedef struct _Py_UOpsEmitter {
     PyObject **scratch_start;
     PyObject **scratch_end;
     PyObject **scratch_available;
+
 } _Py_UOpsEmitter;
 
 static inline int
@@ -1269,7 +1285,7 @@ emit_i(_Py_UOpsEmitter *emitter,
     if (emitter->writebuffer + emitter->curr_i >= emitter->writebuffer_end) {
         return -1;
     }
-    DPRINTF(2, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
+    DPRINTF(3, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
             emitter->curr_i,
             (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
             inst.oparg,
@@ -1425,6 +1441,22 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
     return emit_i(emitter, sym->inst);
 }
 
+// Note: when we start supporting loop optimization,
+// this code will break as it assumes a DAG.
+static void
+decrement_in_degree(_Py_UOpsSymbolicExpression *e)
+{
+    e->in_degree--;
+    Py_ssize_t operand_count = Py_SIZE(e);
+    for (Py_ssize_t i = 0; i < operand_count; i++) {
+        _Py_UOpsSymbolicExpression *o = e->operands[i];
+        // Avoid self referential operands skip
+        if (e != o) {
+            decrement_in_degree(o);
+        }
+    }
+}
+
 static int
 emit_uops_from_pure_store(
     PyCodeObject *co,
@@ -1495,30 +1527,62 @@ emit_uops_from_pure_store(
     DPRINTF(2, "==EMITTING LOCALS==:\n");
     // Final state of the locals.
     // TODO make sure we don't blow the stack!!!!
+    // We need to emit the locals in topological order.
+    // That is, we emit locals that other locals do not rely on first.
+    // This allows us to have no data conflicts.
+
+    // First, we need to indicate we want to use these, so decrement its in degree.
     for (int locals_i = 0; locals_i < locals_len; locals_i++) {
-        // If no change in locals, don't emit:
-        if (pure_store->locals[locals_i] == pure_store->initial_locals[locals_i]) {
-            continue;
-        }
-        if (compile_sym_to_uops(
-            emitter,
-            pure_store->locals[locals_i],
-            pure_store,
-            false, true) < 0) {
-            return -1;
-        }
-        _PyUOpInstruction prev_i = emitter->writebuffer[emitter->curr_i-1];
-        // Micro optimizations -- if LOAD_FAST then STORE_FAST, get rid of that
-        if (prev_i.opcode == LOAD_FAST && prev_i.oparg == locals_i) {
-            emitter->curr_i--;
-            DPRINTF(3, "LOAD_FAST to be followed by STORE_FAST, ignoring LOAD_FAST. \n");
-            continue;
-        }
-        _PyUOpInstruction store_fast = {STORE_FAST, locals_i, 0, 0};
-        if (emit_i(emitter, store_fast) < 0) {
-            return -1;
+        decrement_in_degree(pure_store->locals[locals_i]);
+    }
+    bool done = false;
+    while (!done) {
+        done = true;
+        for (int locals_i = 0; locals_i < locals_len; locals_i++) {
+            _Py_UOpsSymbolicExpression *local = pure_store->locals[locals_i];
+            _Py_UOpsSymbolicExpression *initial_local = pure_store->initial_locals[locals_i];
+            // If no change in locals, don't emit:
+            if (local == initial_local) {
+                continue;
+            }
+            done = false;
+
+            DPRINTF(3, "In degree: i: %d deg: %d\n", locals_i, initial_local ? initial_local->in_degree : -999);
+            // If this local does not depend on anything else, ie its
+            // in_degree is 0, then emit it.
+            // Might be < 0 for things like constants, where the in degree
+            // is irrelevant.
+            if (initial_local == NULL || initial_local->in_degree <= 0 ||
+                (local != NULL && local->const_val != NULL)) {
+                if (compile_sym_to_uops(
+                    emitter,
+                    local,
+                    pure_store,
+                    false, true) < 0) {
+                    return -1;
+                }
+
+                // After that, reduce the in_degree of all its constituents.
+                decrement_in_degree(local);
+
+                // Mark as done.
+                pure_store->initial_locals[locals_i] = local;
+
+                _PyUOpInstruction prev_i = emitter->writebuffer[emitter->curr_i-1];
+                // Micro optimizations -- if LOAD_FAST then STORE_FAST, get rid of that
+                if (prev_i.opcode == LOAD_FAST && prev_i.oparg == locals_i) {
+                    emitter->curr_i--;
+                    DPRINTF(3, "LOAD_FAST to be followed by STORE_FAST, ignoring LOAD_FAST. \n");
+                    continue;
+                }
+                _PyUOpInstruction store_fast = {STORE_FAST, locals_i, 0, 0};
+                if (emit_i(emitter, store_fast) < 0) {
+                    return -1;
+                }
+            }
         }
     }
+
     DPRINTF(2, "==================\n");
     DPRINTF(2, "==EMITTING STACK==:\n");
     int stack_len = (int)(pure_store->stack_pointer - pure_store->stack);
@@ -1600,6 +1664,7 @@ emit_uops_from_stores(
         return -1;
     }
 
+
     _Py_UOpsEmitter emitter = {
         trace_writebuffer,
         writebuffer_end,
@@ -1611,7 +1676,7 @@ emit_uops_from_stores(
         // One wasted object, but it's fine I'd rather not use that to prevent logic bugs.
         (PyObject **)(writebuffer_end - 1),
         (PyObject **)(writebuffer_end - 1),
-        (PyObject **)(writebuffer_end - 1),
+        (PyObject **)(writebuffer_end - 1)
     };
 
     // Emission is simple: traverse the linked list of stores:
@@ -1626,14 +1691,14 @@ emit_uops_from_stores(
             if (emit_uops_from_pure_store(co,
                                       (_Py_UOpsPureStore *)curr_store,
                                       &emitter) < 0) {
-                return -1;
+                goto error;
             }
         }
         else {
             if (emit_uops_from_impure_store(co,
                                       (_Py_UOpsImpureStore *)curr_store,
                                       &emitter) < 0) {
-                return -1;
+                goto error;
             }
         }
         curr_store = curr_store->next;
@@ -1647,6 +1712,10 @@ emit_uops_from_stores(
         return -1;
     }
     return emitter.curr_i;
+
+error:
+    Py_DECREF(sym_store);
+    return -1;
 }
 static void
 remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
