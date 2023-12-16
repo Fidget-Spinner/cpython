@@ -435,7 +435,7 @@ error:
 }
 
 static _Py_UOpsSymbolicExpression *
-check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
+check_sym_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
 {
     // Unknown opcodes are treated as always unique
     if (self->inst.opcode == CACHE) {
@@ -444,15 +444,11 @@ check_uops_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicEx
     assert(ctx->sym_exprs_to_sym_exprs);
 
     // Check if this sym expr already exists
-    PyObject *res = PyDict_GetItemWithError(
+    PyObject *res = PyDict_GetItem(
         (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
     // No entry, return ourselves.
     if (res == NULL) {
-        if (PyErr_Occurred()) {
-            Py_DECREF(self);
-            return NULL;
-        }
-        // If not, add it to our sym expression global book
+        // Add it to our sym expression global book
         int res = PyDict_SetItem((PyObject *)ctx->sym_exprs_to_sym_exprs,
                                  (PyObject *)self, (PyObject *)self);
         if (res < 0) {
@@ -519,7 +515,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
     va_end(curr);
 
-    return check_uops_already_exists(ctx, self);
+    return check_sym_already_exists(ctx, self);
 }
 
 static _Py_UOpsSymbolicExpression*
@@ -545,7 +541,7 @@ _Py_UOpsSymbolicExpression_NewSingleton(
     self->const_val = NULL;
     self->originating_store = 0;
 
-    return check_uops_already_exists(ctx, self);
+    return check_sym_already_exists(ctx, self);
 }
 
 static _Py_UOpsSymbolicExpression*
@@ -579,7 +575,7 @@ _Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
     }
 
 
-    return check_uops_already_exists(ctx, self);
+    return check_sym_already_exists(ctx, self);
 }
 
 static void
@@ -1450,11 +1446,21 @@ decrement_in_degree(_Py_UOpsSymbolicExpression *e)
     Py_ssize_t operand_count = Py_SIZE(e);
     for (Py_ssize_t i = 0; i < operand_count; i++) {
         _Py_UOpsSymbolicExpression *o = e->operands[i];
-        // Avoid self referential operands skip
-        if (e != o) {
-            decrement_in_degree(o);
-        }
+        decrement_in_degree(o);
     }
+}
+
+// Counts the number of references e has to comp.
+static int
+count_references_to(_Py_UOpsSymbolicExpression *e, _Py_UOpsSymbolicExpression *comp)
+{
+    int res =  e == comp ? 1 : 0;
+    Py_ssize_t operand_count = Py_SIZE(e);
+    for (Py_ssize_t i = 0; i < operand_count; i++) {
+        _Py_UOpsSymbolicExpression *o = e->operands[i];
+        res += count_references_to(o, comp);
+    }
+    return res;
 }
 
 static int
@@ -1506,6 +1512,8 @@ emit_uops_from_pure_store(
             return -1;
         }
 
+        decrement_in_degree(guard);
+
     }
 
     if (stack_grown) {
@@ -1531,12 +1539,10 @@ emit_uops_from_pure_store(
     // That is, we emit locals that other locals do not rely on first.
     // This allows us to have no data conflicts.
 
-    // First, we need to indicate we want to use these, so decrement its in degree.
-    for (int locals_i = 0; locals_i < locals_len; locals_i++) {
-        decrement_in_degree(pure_store->locals[locals_i]);
-    }
     bool done = false;
-    while (!done) {
+    // The hard upper bound to number of loops we need should be
+    // the number of locals.
+    for (int loops = 0; loops < locals_len && !done; loops++) {
         done = true;
         for (int locals_i = 0; locals_i < locals_len; locals_i++) {
             _Py_UOpsSymbolicExpression *local = pure_store->locals[locals_i];
@@ -1552,8 +1558,11 @@ emit_uops_from_pure_store(
             // in_degree is 0, then emit it.
             // Might be < 0 for things like constants, where the in degree
             // is irrelevant.
-            if (initial_local == NULL || initial_local->in_degree <= 0 ||
-                (local != NULL && local->const_val != NULL)) {
+            int initial_local_in_degree = initial_local == NULL ? -999 : initial_local->in_degree;
+            if (initial_local_in_degree <= 0 ||
+                (local != NULL &&
+                    (local->const_val != NULL ||
+                        count_references_to(local, initial_local) == initial_local_in_degree))) {
                 if (compile_sym_to_uops(
                     emitter,
                     local,
@@ -1581,6 +1590,11 @@ emit_uops_from_pure_store(
                 }
             }
         }
+    }
+
+    // Error could not resolve the DAG
+    if (!done) {
+        return -1;
     }
 
     DPRINTF(2, "==================\n");
