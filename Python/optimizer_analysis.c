@@ -1411,7 +1411,7 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
         // These are for unknown stack entries.
         if (_PyOpcode_isunknown(sym->inst.opcode)) {
             // Leave it be. These are initial values from the start
-            return;
+            return 0;
         }
         inst = sym->inst;
         inst.opcode = sym->inst.opcode == INIT_FAST ? LOAD_FAST : sym->inst.opcode;
@@ -1660,7 +1660,7 @@ emit_uops_from_impure_store(
         len * sizeof(_PyUOpInstruction)
     );
 
-    emitter->curr_i += len;
+    emitter->curr_i += (int)len;
     return 0;
 }
 
@@ -1685,7 +1685,7 @@ emit_uops_from_stores(
         0,
         0,
         // Should not use more than 20% of the space for common expressions.
-        (writebuffer_end - trace_writebuffer) / 5,
+        (int)((writebuffer_end - trace_writebuffer) / 5),
         sym_store,
         // One wasted object, but it's fine I'd rather not use that to prevent logic bugs.
         (PyObject **)(writebuffer_end - 1),

@@ -4074,7 +4074,7 @@ dummy_func(
         }
 
         op(_SETUP_TIER2_FRAME, (scratch_size/4 --)) {
-            DEOPT_IF(!_PyFrame_ConvertToTier2(tstate, frame, oparg, scratch_size) != 0);
+            DEOPT_IF(!_PyFrame_ConvertToTier2(tstate, frame, oparg, (int)(Py_ssize_t)scratch_size) != 0);
         }
 
         op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {
