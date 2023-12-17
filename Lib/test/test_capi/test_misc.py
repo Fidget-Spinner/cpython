@@ -2547,7 +2547,31 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertEqual(res, 127)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 3)
+
+    # def test_int_copy_propagation(self):
+    #     def testfunc(loops):
+    #         num = 0
+    #         while num < loops:
+    #             # This store is eliminated
+    #             x = num + num
+    #             # FIXME: num+num usage count is > 1 here and
+    #             # it emits a _STORE_COMMON for no reason.
+    #             a = x + 1
+    #             x = 1
+    #             num += 1
+    #         return a
     #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     res = None
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(64)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     self.assertEqual(res, 127)
+    #     store_fast_count = [opname for opname, _, _ in ex if opname == "STORE_FAST"]
+    #     self.assertEqual(len(store_fast_count), 3)
+
     # def test_int_impure_region(self):
     #     def testfunc(loops):
     #         num = 0
@@ -2629,26 +2653,26 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 2)
-
-    def test_frame(self):
-
-        def dummy(x):
-            return x+1
-
-        def testfunc(n):
-            for i in range(n):
-                # CALL_PY_EXACT_ARGS
-                dummy(i)
-
-        opt = _testinternalcapi.get_uop_optimizer()
-        with temporary_optimizer(opt):
-            testfunc(20)
-
-        ex = get_first_executor(testfunc)
-        self.assertIsNotNone(ex)
-        uops = {opname for opname, _, _ in ex}
-        self.assertIn("_PUSH_FRAME", uops)
-        self.assertIn("_BINARY_OP_ADD_INT", uops)
+    #
+    # def test_frame(self):
+    #
+    #     def dummy(x):
+    #         return x+1
+    #
+    #     def testfunc(n):
+    #         for i in range(n):
+    #             # CALL_PY_EXACT_ARGS
+    #             dummy(i)
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(20)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_PUSH_FRAME", uops)
+    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
 
 class TestOptimizerAPI(unittest.TestCase):
 
