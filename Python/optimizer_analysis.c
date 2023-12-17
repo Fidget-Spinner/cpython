@@ -55,7 +55,8 @@ _PyOpcode_isunknown(uint32_t opcode)
 
 static inline bool
 is_bookkeeping_opcode(int opcode) {
-    return (opcode == _SET_IP || opcode == _CHECK_VALIDITY);
+    return (opcode == _SET_IP ||
+        opcode == _CHECK_VALIDITY);
 }
 
 // These opcodes just adjust the stack.
@@ -103,8 +104,6 @@ typedef struct {
 } _Py_UOpsSymType;
 
 
-
-
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     Py_ssize_t idx;
@@ -132,6 +131,13 @@ typedef struct _Py_UOpsSymbolicExpression {
     // This matters for anything that isn't immutable
     // void* because otherwise need a forward decl of _Py_UOpsPureStore.
     void *originating_store;
+
+    // What guard to emit upon emitting this instruction.
+    // After it is emitted, it no longer needs to be emitted again.
+    // This can form a chain of guards.
+    // Borrowed ref.
+    struct _Py_UOpsSymbolicExpression *guard_to_emit;
+
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
 
@@ -195,6 +201,11 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
 
     int self_opcode = self->inst.opcode;
     int other_opcode = other->inst.opcode;
+
+    if (self->const_val && other->const_val) {
+        return PyObject_RichCompare(self->const_val, other->const_val, Py_EQ);
+    }
+
     if (_PyOpcode_isterminal(self_opcode) != _PyOpcode_isterminal(other_opcode)) {
         Py_RETURN_FALSE;
     }
@@ -215,14 +226,10 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
     // They are always considered unique, except for constant values
     // which can be repeated
     if (_PyOpcode_isterminal(self_opcode) && _PyOpcode_isterminal(other_opcode)) {
-        if (self->const_val && other->const_val) {
-            return PyObject_RichCompare(self->const_val, other->const_val, Py_EQ);
-        } else {
-            // Note: even if two LOAD_FAST have the same opcode and oparg,
-            // They are not the same because we are constructing a new terminal.
-            // All terminals except constants are unique.
-            return self->idx == other->idx ? Py_True : Py_False;
-        }
+        // Note: even if two LOAD_FAST have the same opcode and oparg,
+        // They are not the same because we are constructing a new terminal.
+        // All terminals except constants are unique.
+        return self->idx == other->idx ? Py_True : Py_False;
     }
     // Two symbolic expressions are the same iff
     // 1. Their opcodes are equal.
@@ -260,6 +267,18 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
         }
     }
 
+    // DONT CHECK THE GUARDS ARE THE SAME. GUARDS CAN DIFFER
+    // BECAUSER OF INFO GAINED IN TYPE PROP.
+    // Finally, check if the guards it needs are the same
+//    _Py_UOpsSymbolicExpression *self_guard = self->guard_to_emit;
+//    _Py_UOpsSymbolicExpression *other_guard = other->guard_to_emit;
+//    while (self_guard != NULL || other_guard != NULL) {
+//        if (self_guard != other_guard) {
+//            Py_RETURN_FALSE;
+//        }
+//        self_guard = self_guard->guard_to_emit;
+//        other_guard = other_guard->guard_to_emit;
+//    }
     Py_RETURN_TRUE;
 }
 
@@ -285,9 +304,6 @@ static PyTypeObject _Py_UOpsSymbolicExpression_Type = {
 typedef struct _Py_UOpsPureStore {
     PyObject_VAR_HEAD
     INSTRUCTION_STORE_HEAD
-    // The preceding PyListObject of (hoisted guards)
-    // Consists of _Py_UOpsSymbolicExpression
-    PyObject *hoisted_guards;
 
     // Initial locals state. Needed to reconstruct hoisted guards later.
     _Py_UOpsSymbolicExpression **initial_locals;
@@ -320,7 +336,6 @@ purestore_dealloc(PyObject *o)
 {
     _Py_UOpsPureStore *self = (_Py_UOpsPureStore *)o;
     Py_XDECREF(self->next);
-    Py_DECREF(self->hoisted_guards);
     // No need dealloc locals and stack. We only hold weak references to them.
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
@@ -505,6 +520,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
                                int num_subexprs, ...)
 {
     int total_subexprs = num_arr + num_subexprs;
+
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
                                                           total_subexprs);
@@ -522,14 +538,16 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->inst = inst;
     self->operand = 0;
     self->const_val = const_val;
+    self->guard_to_emit = NULL;
     // Borrowed ref. We don't want to have to make our type GC as this will
     // slow down things. This is guaranteed to be safe within our usage.
     self->originating_store = ctx->curr_store;
 
     assert(Py_SIZE(self) >= num_subexprs);
-    int i = 0;
 
     // Setup
+    int i = 0;
+    _Py_UOpsSymbolicExpression **operands = self->operands;
     va_list curr;
 
     va_start(curr, num_subexprs);
@@ -539,24 +557,54 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         // table.
         // We intentionally don't want to hold a reference to it so we don't
         // need GC.
-        self->operands[i] = va_arg(curr, _Py_UOpsSymbolicExpression *);
-        assert(self->operands[i]);
-        self->operands[i]->usage_count++;
+        operands[i] = va_arg(curr, _Py_UOpsSymbolicExpression *);
+        assert(operands[i]);
+        operands[i]->usage_count++;
         // Constant values shouldn't calculate their in degrees. Makes no sense to.
-        if (self->operands[i]->const_val == NULL) {
-            self->operands[i]->in_degree++;
+        if (operands[i]->const_val == NULL) {
+            operands[i]->in_degree++;
         }
     }
 
     va_end(curr);
 
     for (; i < total_subexprs; i++) {
-        self->operands[i] = arr_start[i];
-        self->operands[i]->usage_count++;
+        operands[i] = arr_start[i];
+        operands[i]->usage_count++;
         // Constant values shouldn't calculate their in degrees. Makes no sense to.
-        if (self->operands[i]->const_val == NULL) {
-            self->operands[i]->in_degree++;
+        if (operands[i]->const_val == NULL) {
+            operands[i]->in_degree++;
         }
+    }
+
+    // Check - are the operands all actually pointing to the same guard?
+    // Fuse the guard into the operand. This is only sound
+    // because know all guards lead to an operation.
+    _Py_UOpsSymbolicExpression *maybe_guard = total_subexprs > 0 ? operands[0] : NULL;
+    bool is_guard = total_subexprs > 0 &&
+        _PyOpcode_isguard(maybe_guard->inst.opcode) &&
+        ((int)Py_SIZE(maybe_guard) == total_subexprs);
+    for (Py_ssize_t i = 1; i < total_subexprs && is_guard; i++) {
+        is_guard = maybe_guard == operands[i];
+    }
+
+    // Fuse the guard, routing the guard operands through.
+    if (is_guard) {
+        for (Py_ssize_t i = 0; i < total_subexprs; i++) {
+            operands[i] = maybe_guard->operands[i];
+        }
+        // We are not the first guard, add to the chain.
+        if (self->guard_to_emit != NULL) {
+            _Py_UOpsSymbolicExpression *curr = self->guard_to_emit;
+            while (curr->guard_to_emit != NULL) {
+                curr = curr->guard_to_emit;
+            }
+            curr->guard_to_emit = maybe_guard;
+        } else {
+            self->guard_to_emit = maybe_guard;
+        }
+        maybe_guard->usage_count = 0;
+        maybe_guard->in_degree = 0;
     }
 
 
@@ -590,13 +638,20 @@ _Py_UOpsSymbolicExpression_NewSingleton(
 }
 
 
-static void
+static inline void
 sym_set_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
 {
     sym->sym_type.types |= 1 << typ;
     if (typ <= MAX_TYPE_WITH_AUX) {
         sym->sym_type.aux[typ] = aux;
     }
+}
+
+static inline void
+sym_copy_type(_Py_UOpsSymbolicExpression *from_sym, _Py_UOpsSymbolicExpression *to_sym)
+{
+    to_sym->sym_type = from_sym->sym_type;
+    to_sym->const_val = Py_NewRef(from_sym->const_val);
 }
 
 static void
@@ -715,6 +770,7 @@ sym_matches_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, u
     return true;
 }
 
+// If from store is not NULL, copy type information over from it.
 static _Py_UOpsPureStore*
 _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
 {
@@ -736,11 +792,6 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
     if (ctx->curr_store == NULL) {
         is_first_store = true;
         ctx->curr_store = (_Py_UOpsStoreUnion *)self;
-    }
-    // Initialize the hoisted guards
-    self->hoisted_guards = PyList_New(0);
-    if (self->hoisted_guards == NULL) {
-        return NULL;
     }
 
     self->locals = self->locals_with_stack;
@@ -786,6 +837,8 @@ error:
     Py_DECREF(self);
     return NULL;
 }
+
+
 
 // Steals a reference to next
 static struct _Py_UOpsImpureStore*
@@ -880,56 +933,6 @@ typedef enum {
     ABSTRACT_INTERP_GUARD_REQUIRED,
 } AbstractInterpExitCodes;
 
-// 1 on success
-// 0 on failure
-// -1 on exception
-static int
-try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
-                _PyUOpInstruction *curr)
-{
-    assert(ctx->curr_store->pure_or_impure);
-    _Py_UOpsPureStore *curr_store = ((_Py_UOpsPureStore *)ctx->curr_store);
-    bool can_hoist = true;
-    int locals_idx = -1;
-
-    // Try hoisting the guard.
-    // A guard can be hoisted IFF all its inputs are in the initial
-    // locals state, or are constants.
-    // TODO constant input
-    // Global state guards can't be hoisted.
-    // Assumption: state guards are those that have no stack effect.
-
-    int num_stack_inputs = _PyOpcode_num_popped(curr->opcode, curr->opcode, false);
-    if (num_stack_inputs == 0) {
-        return 0;
-    }
-    for (int i = 0; i < num_stack_inputs; i++) {
-        bool input_present = false;
-        _Py_UOpsSymbolicExpression *input = curr_store->stack_pointer[-(i + 1)];
-        for (int x = 0; x < ctx->frame->locals_len; x++) {
-            if (input == curr_store->initial_locals[x]) {
-                input_present = true;
-                break;
-            }
-        }
-        if (!input_present) {
-            can_hoist = false;
-            break;
-        }
-    }
-    // Get out of the pure region formation if cannot hoist.
-    if (!can_hoist) {
-        return 0;
-    }
-    // Yay can hoist
-    _Py_UOpsSymbolicExpression *guard =
-        sym_init_guard(ctx, curr, num_stack_inputs);
-    if (guard == NULL) {
-        return -1;
-    }
-    int res = PyList_Append(curr_store->hoisted_guards, (PyObject *)guard);
-    return res < 0 ? -1 : 1;
-}
 
 #define DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dval, result) \
 do { \
@@ -972,8 +975,7 @@ static int
 uop_abstract_interpret_single_inst(
     PyCodeObject *co,
     _PyUOpInstruction *inst,
-    _Py_UOpsAbstractInterpContext *ctx,
-    bool should_type_propagate
+    _Py_UOpsAbstractInterpContext *ctx
 )
 {
 #ifdef Py_DEBUG
@@ -1178,30 +1180,10 @@ uop_abstract_interpret(
             is_bookkeeping_opcode(curr->opcode))) {
 
             int status = uop_abstract_interpret_single_inst(
-                co, curr, ctx,
-                false
+                co, curr, ctx
             );
             if (status == ABSTRACT_INTERP_ERROR) {
                 goto error;
-            }
-
-            if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
-                int res = try_hoist_guard(ctx, curr);
-                if (res < 0) {
-                    goto error;
-                }
-                // Cannot hoist the guard, break out of pure region formation.
-                if (res == 0) {
-                    DPRINTF(3, "breaking out due to guard\n");
-                    break;
-                }
-                DPRINTF(3, "hoisted guard!\n");
-                // Type propagate its information into this pure region
-                int stat = uop_abstract_interpret_single_inst(
-                    co, curr, ctx,
-                    true
-                );
-                assert(stat == ABSTRACT_INTERP_NORMAL);
             }
 
             curr++;
@@ -1240,12 +1222,13 @@ uop_abstract_interpret(
         while (curr < end && (!_PyOpcode_ispure(curr->opcode) ||
             is_bookkeeping_opcode(curr->opcode) ||
             is_dataonly_opcode(curr->opcode))) {
-            DPRINTF(3, "impure opcode: %d\n", curr->opcode);
+            DPRINTF(3, "Impure instruction %s:%d\n",
+                    (curr->opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[curr->opcode],
+                    curr->oparg);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(
-                co, curr, ctx,
-                true
+                co, curr, ctx
             );
             assert(status == ABSTRACT_INTERP_NORMAL || status == ABSTRACT_INTERP_GUARD_REQUIRED);
             curr++;
@@ -1458,7 +1441,7 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
 
     // Compile each operand
     Py_ssize_t operands_count = Py_SIZE(sym);
-    for (int i = 0; i < operands_count; i++) {
+    for (Py_ssize_t i = 0; i < operands_count; i++) {
         if (sym->operands[i] == NULL) {
             continue;
         }
@@ -1469,6 +1452,15 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
             store, use_locals, true) < 0) {
             return -1;
         }
+    }
+
+    // Emit any guards the operation might need.
+    _Py_UOpsSymbolicExpression *curr_guard = sym->guard_to_emit;
+    while (curr_guard != NULL) {
+        if (emit_i(emitter, curr_guard->inst) < 0) {
+            return -1;
+        }
+        curr_guard = curr_guard->guard_to_emit;
     }
 
     // Finally, emit the operation itself.
@@ -1518,53 +1510,7 @@ emit_uops_from_pure_store(
     DPRINTF(3, "EMITTING PURE REGION\n");
     int locals_len = co->co_nlocals;
 
-    int stack_grown = 0;
-    // 1. Emit the hoisted guard region.
-    PyObject *hoisted_guards = pure_store->hoisted_guards;
-    Py_ssize_t len = PyList_GET_SIZE(hoisted_guards);
-    for (Py_ssize_t i = 0; i < len; i++) {
-        // For each guard, emit the prerequisite loads
-        _Py_UOpsSymbolicExpression *guard = (_Py_UOpsSymbolicExpression *)
-            PyList_GET_ITEM(hoisted_guards, i);
-        Py_ssize_t guard_operands_count = Py_SIZE(guard);
-        int load_fast_count = 0;
-        for (int guard_op_idx = 0; guard_op_idx < guard_operands_count; guard_op_idx++) {
-            _Py_UOpsSymbolicExpression *guard_operand = guard->operands[guard_op_idx];
-            // Search local for the thing
-            for (int locals_idx = 0; locals_idx < locals_len; locals_idx++) {
-                if (guard_operand == pure_store->initial_locals[locals_idx]) {
-                    _PyUOpInstruction load_fast = {_LOAD_FAST_NO_INCREF, locals_idx, 0, 0};
-                    if (emit_i(emitter,load_fast) < 0) {
-                        return -1;
-                    }
-                    load_fast_count++;
-                    break;
-                }
-            }
-            // Todo: search consts for the thing
-        }
-        assert(load_fast_count == guard_operands_count);
-        stack_grown += load_fast_count;
-        // Now, time to emit the guard itself
-        if (emit_i(emitter, guard->inst) < 0) {
-            return -1;
-        }
-
-        decrement_in_degree(guard);
-
-    }
-
-    if (stack_grown) {
-        // Shrink stack after checking guards.
-        // TODO HIGH PRIORITY on any deoptimize, the stack needs to be popped by the deopt too.
-        _PyUOpInstruction stack_shrink = {_SHRINK_STACK, stack_grown, 0};
-
-        if (emit_i(emitter, stack_shrink) < 0) {
-            return -1;
-        }
-    }
-
-    // 2. Emit the pure region itself.
+    // Emit the pure region itself.
     // Need to emit in the following order:
     // Locals first, then followed by stack, from bottom to top of stack.
     // Due to CPython's stack machine style, this will naturally produce
@@ -1733,8 +1679,6 @@ emit_uops_from_stores(
 
     // Emission is simple: traverse the linked list of stores:
     // - For pure stores, emit their final states.
-    //     - For hoisted guards of pure stores, emit the stuff they need,
-    //       at the end, adjust the stack back to the level we need.
     // - For impure stores, just emit them directly.
 
     _Py_UOpsStoreUnion *curr_store = first_store;

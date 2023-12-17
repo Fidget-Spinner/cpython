@@ -574,17 +574,8 @@ def _write_components_abstract_interp_pure_region(
 
         # Construct sym expression and write that to output
 
-        # Grab variadic inputs that depend on things like oparg or cache
-        arr_var = [(name, var) for name, var in mangled_input_vars.items() if var.size]
-        assert len(arr_var) <= 1, "Can have at most one array input from oparg/cache"
-        arr_var_name = arr_var[0][0] if len(arr_var) == 1 else None
-        arr_var_size = (arr_var[0][1].size or 0) if arr_var_name is not None else 0
-        if arr_var_name is not None:
-            del mangled_input_vars[arr_var_name]
+        arr_var_name, arr_var_size, var = get_subexpressions(mangled_input_vars)
 
-        var = ", ".join(mangled_input_vars)
-        if var:
-            var = ", " + var
         if mgr.pokes:
 
             assert len(
@@ -639,6 +630,22 @@ def _write_components_abstract_interp_pure_region(
             if poke.effect.size or not poke.effect.name:
                 continue
             out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
+
+
+# Returns a tuple of a pointer to an array of subexpressions, the length of said array
+# and a string containing the join of all other subexpressions obtained from stack input.
+# This grabs variadic inputs that depend on things like oparg or cache
+def get_subexpressions(mangled_input_vars) -> tuple[str, int, str]:
+    arr_var = [(name, var) for name, var in mangled_input_vars.items() if var.size]
+    assert len(arr_var) <= 1, "Can have at most one array input from oparg/cache"
+    arr_var_name = arr_var[0][0] if len(arr_var) == 1 else None
+    arr_var_size = (arr_var[0][1].size or 0) if arr_var_name is not None else 0
+    if arr_var_name is not None:
+        del mangled_input_vars[arr_var_name]
+    var = ", ".join(mangled_input_vars)
+    if var:
+        var = ", " + var
+    return arr_var_name, arr_var_size, var
 
 
 def _write_components_abstract_interp_guard_region(
@@ -702,19 +709,29 @@ def _write_components_abstract_interp_guard_region(
                     )
                     # Propagate mode - set the types
                     propagates.append(
-                        f"sym_set_type((_Py_UOpsSymbolicExpression *){input_var}, {typname}, (uint32_t){aux});"
+                        f"sym_set_type((_Py_UOpsSymbolicExpression *){input_var}, {typname}, (uint32_t){aux})"
                     )
-            with out.block("if (should_type_propagate)"):
+            with out.block(f"if ({' && '.join(predicates)})"):
+                out.emit('DPRINTF(2, "type propagation eliminated guard\\n");')
+                out.emit("break;")
+            with out.block(f"else"):
                 for prop in propagates:
                     out.emit(f"{prop};")
-            with out.block("else"):
-                with out.block(f"if ({' && '.join(predicates)})"):
-                    out.emit('DPRINTF(2, "type propagation eliminated guard\\n");')
-                    out.emit("break;")
-                out.emit("goto guard_required;")
-        else:
-            out.emit("goto guard_required;")
-
+                out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
+                arr_var_name, arr_var_size, var = get_subexpressions(mangled_input_vars)
+                out.emit(
+                    f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                    f"ctx, *inst, NULL, {arr_var_size}, {arr_var_name or 'NULL'}, "
+                    f"{len(mangled_input_vars)} {var}"
+                    f");"
+                )
+                out.emit(
+                    "if (__sym_temp == NULL) goto error;"
+                )
+                for poke in mgr.pokes:
+                    if poke.effect.size or not poke.effect.name:
+                        continue
+                    out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
 
 def _write_components_for_abstract_interp(
     parts: list[Component],

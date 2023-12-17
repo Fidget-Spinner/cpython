@@ -2544,8 +2544,7 @@ class TestUopsOptimization(unittest.TestCase):
     #
     #     ex = get_first_executor(testfunc)
     #     self.assertIsNotNone(ex)
-    #     # TODO should be 127, one extra iteration for some reason
-    #     self.assertEqual(res, 129)
+    #     self.assertEqual(res, 127)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 3)
     #
@@ -2611,12 +2610,11 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 11)
-
+    #
     # def test_int_cse(self):
     #     def testfunc(loops):
     #         num = 0
     #         while num < loops:
-    #             # TODO data dependency not ordered correctly
     #             x = num + num
     #             y = num + num
     #             num += 1

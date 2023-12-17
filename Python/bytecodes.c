@@ -804,7 +804,7 @@ dummy_func(
         // We definitely pop the return value off the stack on entry.
         // We also push it onto the stack on exit, but that's a
         // different frame, and it's accounted for by _PUSH_FRAME.
-        op(_POP_FRAME, (retval --)) {
+        pure op(_POP_FRAME, (retval --)) {
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
@@ -3096,7 +3096,7 @@ dummy_func(
             Py_DECREF(callable);
         }
 
-        guard op(_CHECK_PEP_523, (--)) {
+        mandatory guard op(_CHECK_PEP_523, (--)) {
             DEOPT_IF(tstate->interp->eval_frame);
         }
 
@@ -3132,7 +3132,7 @@ dummy_func(
         // The 'unused' output effect represents the return value
         // (which will be pushed when the frame returns).
         // It is needed so CALL_PY_EXACT_ARGS matches its family.
-        op(_PUSH_FRAME, (new_frame: _PyInterpreterFrame* -- unused if (0))) {
+        pure op(_PUSH_FRAME, (new_frame: _PyInterpreterFrame* -- unused if (0))) {
             // Write it out explicitly because it's subtly different.
             // Eventually this should be the only occurrence of this code.
             assert(tstate->interp->eval_frame == NULL);
@@ -4027,7 +4027,8 @@ dummy_func(
             frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(frame)) + oparg;
         }
 
-        op(_SAVE_RETURN_OFFSET, (--)) {
+        // Not exactly a guard, but not pure either, is just required.
+        mandatory guard op(_SAVE_RETURN_OFFSET, (--)) {
             #if TIER_ONE
             frame->return_offset = (uint16_t)(next_instr - this_instr);
             #endif
@@ -4086,6 +4087,7 @@ dummy_func(
             TIER_TWO_ONLY
             DEOPT_IF(!current_executor->base.vm_data.valid);
         }
+
 
 
 // END BYTECODES //

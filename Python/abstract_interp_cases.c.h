@@ -129,16 +129,18 @@
             }
             _Py_UOpsSymbolicExpression *right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
             _Py_UOpsSymbolicExpression *left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)left, PYINT_TYPE, (uint32_t)0);;
-                sym_set_type((_Py_UOpsSymbolicExpression *)right, PYINT_TYPE, (uint32_t)0);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)left, PYINT_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)right, PYINT_TYPE, (uint32_t)0)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)left, PYINT_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)right, PYINT_TYPE, (uint32_t)0)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)left, PYINT_TYPE, (uint32_t)0);
+                sym_set_type((_Py_UOpsSymbolicExpression *)right, PYINT_TYPE, (uint32_t)0);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-2)) = __sym_temp;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -239,16 +241,18 @@
             }
             _Py_UOpsSymbolicExpression *right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
             _Py_UOpsSymbolicExpression *left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)left, PYFLOAT_TYPE, (uint32_t)0);;
-                sym_set_type((_Py_UOpsSymbolicExpression *)right, PYFLOAT_TYPE, (uint32_t)0);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)left, PYFLOAT_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)right, PYFLOAT_TYPE, (uint32_t)0)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)left, PYFLOAT_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)right, PYFLOAT_TYPE, (uint32_t)0)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)left, PYFLOAT_TYPE, (uint32_t)0);
+                sym_set_type((_Py_UOpsSymbolicExpression *)right, PYFLOAT_TYPE, (uint32_t)0);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-2)) = __sym_temp;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -349,16 +353,18 @@
             }
             _Py_UOpsSymbolicExpression *right = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
             _Py_UOpsSymbolicExpression *left = (_Py_UOpsSymbolicExpression *)stack_pointer[-2];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)left, PYUNICODE_TYPE, (uint32_t)0);;
-                sym_set_type((_Py_UOpsSymbolicExpression *)right, PYUNICODE_TYPE, (uint32_t)0);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)left, PYUNICODE_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)right, PYUNICODE_TYPE, (uint32_t)0)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)left, PYUNICODE_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)right, PYUNICODE_TYPE, (uint32_t)0)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)left, PYUNICODE_TYPE, (uint32_t)0);
+                sym_set_type((_Py_UOpsSymbolicExpression *)right, PYUNICODE_TYPE, (uint32_t)0);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-2)) = __sym_temp;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -679,12 +685,10 @@
         }
 
         case _GUARD_GLOBALS_VERSION: {
-            goto guard_required;
             break;
         }
 
         case _GUARD_BUILTINS_VERSION: {
-            goto guard_required;
             break;
         }
 
@@ -863,15 +867,16 @@
             }
             uint32_t type_version = (uint32_t)CURRENT_OPERAND();
             _Py_UOpsSymbolicExpression *owner = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_TYPE_VERSION_TYPE, (uint32_t)type_version);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_TYPE_VERSION_TYPE, (uint32_t)type_version)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_TYPE_VERSION_TYPE, (uint32_t)type_version)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_TYPE_VERSION_TYPE, (uint32_t)type_version);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 1 , ___owner);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -951,15 +956,16 @@
                 break;
             }
             _Py_UOpsSymbolicExpression *owner = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_TYPE, (uint32_t)0);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_TYPE, (uint32_t)0)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_TYPE, (uint32_t)0)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_TYPE, (uint32_t)0);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 1 , ___owner);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -1232,15 +1238,16 @@
                 break;
             }
             _Py_UOpsSymbolicExpression *owner = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, (uint32_t)0);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, (uint32_t)0)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, (uint32_t)0)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, (uint32_t)0);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 1 , ___owner);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -1259,15 +1266,16 @@
             }
             uint32_t keys_version = (uint32_t)CURRENT_OPERAND();
             _Py_UOpsSymbolicExpression *owner = (_Py_UOpsSymbolicExpression *)stack_pointer[-1];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_KEYS_VERSION_TYPE, (uint32_t)keys_version);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_KEYS_VERSION_TYPE, (uint32_t)keys_version)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)owner, GUARD_KEYS_VERSION_TYPE, (uint32_t)keys_version)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_KEYS_VERSION_TYPE, (uint32_t)keys_version);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 1 , ___owner);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-1)) = __sym_temp;
             }
             break;
         }
@@ -1339,16 +1347,18 @@
             }
             _Py_UOpsSymbolicExpression *null = (_Py_UOpsSymbolicExpression *)stack_pointer[-1 - oparg];
             _Py_UOpsSymbolicExpression *callable = (_Py_UOpsSymbolicExpression *)stack_pointer[-2 - oparg];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0);;
-                sym_set_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0) && sym_matches_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0);
+                sym_set_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___callable, ___null);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-2 - oparg)) = __sym_temp;
+                PEEK(-(-1 - oparg)) = __sym_temp;
             }
             break;
         }
@@ -1384,15 +1394,17 @@
             uint32_t func_version = (uint32_t)CURRENT_OPERAND();
             _Py_UOpsSymbolicExpression *self_or_null = (_Py_UOpsSymbolicExpression *)stack_pointer[-1 - oparg];
             _Py_UOpsSymbolicExpression *callable = (_Py_UOpsSymbolicExpression *)stack_pointer[-2 - oparg];
-            if (should_type_propagate) {
-                sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version);;
+            if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version)) {
+                DPRINTF(2, "type propagation eliminated guard\n");
+                break;
             }
             else {
-                if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version)) {
-                    DPRINTF(2, "type propagation eliminated guard\n");
-                    break;
-                }
-                goto guard_required;
+                sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version);
+                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___callable, ___self_or_null);
+                if (__sym_temp == NULL) goto error;
+                PEEK(-(-2 - oparg)) = __sym_temp;
+                PEEK(-(-1 - oparg)) = __sym_temp;
             }
             break;
         }
@@ -1678,6 +1690,7 @@
         }
 
         case _SAVE_RETURN_OFFSET: {
+            goto guard_required;
             break;
         }
 
