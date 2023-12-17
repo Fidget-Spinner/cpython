@@ -21,13 +21,13 @@
 
         case LOAD_FAST_LOAD_FAST: {
             STACK_GROW(2);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case STORE_FAST_LOAD_FAST: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -43,12 +43,12 @@
 
         case INSTRUMENTED_END_SEND: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case UNARY_NEGATIVE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -61,10 +61,10 @@
                 PyObject *res;
                 assert(PyBool_Check(value));
                 res = Py_IsFalse(value) ? Py_True : Py_False;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 1 , ___value);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 1 , ___value);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 1 , ___value);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 1 , ___value);
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
@@ -72,47 +72,45 @@
         }
 
         case _SPECIALIZE_TO_BOOL: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _TO_BOOL: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case TO_BOOL_BOOL: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case TO_BOOL_INT: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case TO_BOOL_LIST: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case TO_BOOL_NONE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case TO_BOOL_STR: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case TO_BOOL_ALWAYS_TRUE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case UNARY_INVERT: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -161,10 +159,10 @@
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYINT_TYPE, (uint32_t)0);
@@ -188,10 +186,10 @@
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYINT_TYPE, (uint32_t)0);
@@ -215,10 +213,10 @@
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYINT_TYPE, (uint32_t)0);
@@ -271,10 +269,10 @@
                     ((PyFloatObject *)left)->ob_fval *
                     ((PyFloatObject *)right)->ob_fval;
                 DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYFLOAT_TYPE, (uint32_t)0);
@@ -298,10 +296,10 @@
                     ((PyFloatObject *)left)->ob_fval +
                     ((PyFloatObject *)right)->ob_fval;
                 DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYFLOAT_TYPE, (uint32_t)0);
@@ -325,10 +323,10 @@
                     ((PyFloatObject *)left)->ob_fval -
                     ((PyFloatObject *)right)->ob_fval;
                 DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYFLOAT_TYPE, (uint32_t)0);
@@ -381,10 +379,10 @@
                 _Py_DECREF_SPECIALIZED(left, _PyUnicode_ExactDealloc);
                 _Py_DECREF_SPECIALIZED(right, _PyUnicode_ExactDealloc);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, 0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
@@ -397,20 +395,18 @@
         }
 
         case _SPECIALIZE_BINARY_SUBSCR: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _BINARY_SUBSCR: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BINARY_SLICE: {
             STACK_SHRINK(2);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -421,49 +417,45 @@
 
         case BINARY_SUBSCR_LIST_INT: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BINARY_SUBSCR_STR_INT: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BINARY_SUBSCR_TUPLE_INT: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BINARY_SUBSCR_DICT: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BINARY_SUBSCR_GETITEM: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LIST_APPEND: {
             STACK_SHRINK(1);
-            PEEK(-(-1 - (oparg-1))) = sym_init_unknown(ctx);
             break;
         }
 
         case SET_ADD: {
             STACK_SHRINK(1);
-            PEEK(-(-1 - (oparg-1))) = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_STORE_SUBSCR: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
@@ -488,13 +480,13 @@
         }
 
         case CALL_INTRINSIC_1: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_INTRINSIC_2: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -504,11 +496,6 @@
         }
 
         case INTERPRETER_EXIT: {
-            STACK_SHRINK(1);
-            break;
-        }
-
-        case _POP_FRAME: {
             STACK_SHRINK(1);
             break;
         }
@@ -523,47 +510,42 @@
         }
 
         case GET_AITER: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case GET_ANEXT: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case GET_AWAITABLE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_SEND: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _SEND: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case SEND_GEN: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case INSTRUMENTED_YIELD_VALUE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case YIELD_VALUE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -584,20 +566,20 @@
 
         case CLEANUP_THROW: {
             STACK_SHRINK(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_ASSERTION_ERROR: {
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_BUILD_CLASS: {
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -611,7 +593,6 @@
         }
 
         case _SPECIALIZE_UNPACK_SEQUENCE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
@@ -641,12 +622,11 @@
 
         case UNPACK_EX: {
             STACK_GROW((oparg & 0xFF) + (oparg >> 8));
-            PEEK(-(-1 - (oparg >> 8))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg >> 8)] = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_STORE_ATTR: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
@@ -671,18 +651,18 @@
 
         case LOAD_LOCALS: {
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_FROM_DICT_OR_GLOBALS: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_NAME: {
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -693,8 +673,8 @@
         case _LOAD_GLOBAL: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
@@ -711,16 +691,16 @@
         case _LOAD_GLOBAL_MODULE: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_GLOBAL_BUILTINS: {
             STACK_GROW(1);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
@@ -737,13 +717,13 @@
         }
 
         case LOAD_FROM_DICT_OR_DEREF: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_DEREF: {
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -759,47 +739,45 @@
         case BUILD_STRING: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BUILD_TUPLE: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BUILD_LIST: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case LIST_EXTEND: {
             STACK_SHRINK(1);
-            PEEK(-(-1 - (oparg-1))) = sym_init_unknown(ctx);
             break;
         }
 
         case SET_UPDATE: {
             STACK_SHRINK(1);
-            PEEK(-(-1 - (oparg-1))) = sym_init_unknown(ctx);
             break;
         }
 
         case BUILD_SET: {
             STACK_SHRINK(oparg);
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BUILD_MAP: {
             STACK_SHRINK(oparg*2);
             STACK_GROW(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -809,77 +787,65 @@
 
         case BUILD_CONST_KEY_MAP: {
             STACK_SHRINK(oparg);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case DICT_UPDATE: {
             STACK_SHRINK(1);
-            PEEK(-(-1 - (oparg - 1))) = sym_init_unknown(ctx);
             break;
         }
 
         case DICT_MERGE: {
             STACK_SHRINK(1);
-            PEEK(-(-4 - (oparg - 1))) = sym_init_unknown(ctx);
-            PEEK(-(-3 - (oparg - 1))) = sym_init_unknown(ctx);
-            PEEK(-(-2 - (oparg - 1))) = sym_init_unknown(ctx);
-            PEEK(-(-1 - (oparg - 1))) = sym_init_unknown(ctx);
             break;
         }
 
         case MAP_ADD: {
             STACK_SHRINK(2);
-            PEEK(-(-1 - (oparg - 1))) = sym_init_unknown(ctx);
             break;
         }
 
         case INSTRUMENTED_LOAD_SUPER_ATTR: {
             STACK_SHRINK(2);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_LOAD_SUPER_ATTR: {
-            PEEK(-(-3)) = sym_init_unknown(ctx);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_SUPER_ATTR: {
             STACK_SHRINK(2);
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_SUPER_ATTR_ATTR: {
             STACK_SHRINK(2);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
-            PEEK(-(0)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
+            stack_pointer[0] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_SUPER_ATTR_METHOD: {
             STACK_SHRINK(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_LOAD_ATTR: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
@@ -911,69 +877,65 @@
         }
 
         case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case _CHECK_ATTR_MODULE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_MODULE: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case _CHECK_ATTR_WITH_HINT: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_WITH_HINT: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_SLOT: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case _CHECK_ATTR_CLASS: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_CLASS: {
             STACK_GROW(((oparg & 1) ? 1 : 0));
-            PEEK(-(-1 - (oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
-            PEEK(-(-(oparg & 1 ? 1 : 0))) = sym_init_unknown(ctx);
+            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
+            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_ATTR_PROPERTY: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
-            PEEK(-(0)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
+            stack_pointer[0] = sym_init_unknown(ctx);
             break;
         }
 
         case LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
-            PEEK(-(0)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
+            stack_pointer[0] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1018,69 +980,65 @@
         }
 
         case _SPECIALIZE_COMPARE_OP: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _COMPARE_OP: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case COMPARE_OP_FLOAT: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case COMPARE_OP_INT: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case COMPARE_OP_STR: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case IS_OP: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CONTAINS_OP: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CHECK_EG_MATCH: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CHECK_EXC_MATCH: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case IMPORT_NAME: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case IMPORT_FROM: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1107,7 +1065,7 @@
         }
 
         case _IS_NONE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1117,65 +1075,57 @@
 
         case GET_LEN: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case MATCH_CLASS: {
             STACK_SHRINK(2);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case MATCH_MAPPING: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case MATCH_SEQUENCE: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case MATCH_KEYS: {
             STACK_GROW(1);
-            PEEK(-(-3)) = sym_init_unknown(ctx);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case GET_ITER: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case GET_YIELD_FROM_ITER: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_FOR_ITER: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _FOR_ITER: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _FOR_ITER_TIER_TWO: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1184,106 +1134,89 @@
         }
 
         case _ITER_CHECK_LIST: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_JUMP_LIST: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_NEXT_LIST: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_CHECK_TUPLE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_JUMP_TUPLE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_NEXT_TUPLE: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_CHECK_RANGE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_JUMP_RANGE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _ITER_NEXT_RANGE: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case FOR_ITER_GEN: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BEFORE_ASYNC_WITH: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case BEFORE_WITH: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case WITH_EXCEPT_START: {
             STACK_GROW(1);
-            PEEK(-(-5)) = sym_init_unknown(ctx);
-            PEEK(-(-4)) = sym_init_unknown(ctx);
-            PEEK(-(-3)) = sym_init_unknown(ctx);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case PUSH_EXC_INFO: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1341,39 +1274,38 @@
 
         case _LOAD_ATTR_METHOD_WITH_VALUES: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_METHOD_NO_DICT: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
-            PEEK(-(0)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
+            stack_pointer[0] = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
-            PEEK(-(0)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
+            stack_pointer[0] = sym_init_unknown(ctx);
             break;
         }
 
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _LOAD_ATTR_METHOD_LAZY_DICT: {
             STACK_GROW(1);
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-2] = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1382,15 +1314,13 @@
         }
 
         case _SPECIALIZE_CALL: {
-            PEEK(-(-2 - oparg)) = sym_init_unknown(ctx);
-            PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
             break;
         }
 
         case _CALL: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1424,8 +1354,8 @@
         }
 
         case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
-            PEEK(-(-2 - oparg)) = sym_init_unknown(ctx);
-            PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
+            stack_pointer[-2 - oparg] = sym_init_unknown(ctx);
+            stack_pointer[-1 - oparg] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1435,62 +1365,91 @@
         }
 
         case _CHECK_FUNCTION_EXACT_ARGS: {
-            PEEK(-(-2 - oparg)) = sym_init_unknown(ctx);
-            PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
+            _Py_UOpsSymbolicExpression *___callable;
+            _Py_UOpsSymbolicExpression *___self_or_null;
+            ___self_or_null = stack_pointer[-1 - oparg];
+            ___callable = stack_pointer[-2 - oparg];
+            if (is_const(___callable) && is_const(___self_or_null)) {
+                PyObject *callable = get_const(___callable);
+                PyObject *self_or_null = get_const(___self_or_null);
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND();
+                DEOPT_IF(!PyFunction_Check(callable), _CHECK_FUNCTION_EXACT_ARGS);
+                PyFunctionObject *func = (PyFunctionObject *)callable;
+                DEOPT_IF(func->func_version != func_version, _CHECK_FUNCTION_EXACT_ARGS);
+                PyCodeObject *code = (PyCodeObject *)func->func_code;
+                DEOPT_IF(code->co_argcount != oparg + (self_or_null != NULL), _CHECK_FUNCTION_EXACT_ARGS);
+                DPRINTF(2, "const eliminated guard\n");
+                break;
+            }
+            uint32_t func_version = (uint32_t)CURRENT_OPERAND();
+            _Py_UOpsSymbolicExpression *self_or_null = (_Py_UOpsSymbolicExpression *)stack_pointer[-1 - oparg];
+            _Py_UOpsSymbolicExpression *callable = (_Py_UOpsSymbolicExpression *)stack_pointer[-2 - oparg];
+            if (should_type_propagate) {
+                sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version);;
+            }
+            else {
+                if (sym_matches_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version)) {
+                    DPRINTF(2, "type propagation eliminated guard\n");
+                    break;
+                }
+                goto guard_required;
+            }
             break;
         }
 
         case _CHECK_STACK_SPACE: {
-            PEEK(-(-2 - oparg)) = sym_init_unknown(ctx);
-            PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
+            goto guard_required;
             break;
         }
 
         case _INIT_CALL_PY_EXACT_ARGS: {
+            _Py_UOpsSymbolicExpression *___callable;
+            _Py_UOpsSymbolicExpression *___self_or_null;
+            _Py_UOpsSymbolicExpression **___args;
+            ___args = stack_pointer - oparg;
+            ___self_or_null = stack_pointer[-1 - oparg];
+            ___callable = stack_pointer[-2 - oparg];
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
-            break;
-        }
-
-        case _PUSH_FRAME: {
-            STACK_SHRINK(1);
-            PEEK(-(0)) = sym_init_unknown(ctx);
+            _Py_UOpsSymbolicExpression *__sym_temp = NULL;
+            __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, oparg, ___args, 2 , ___callable, ___self_or_null);
+            if (__sym_temp == NULL) goto error;
+            PEEK(-(-1)) = __sym_temp;
             break;
         }
 
         case CALL_PY_WITH_DEFAULTS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_TYPE_1: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_STR_1: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_TUPLE_1: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_ALLOC_AND_ENTER_INIT: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1502,77 +1461,77 @@
         case CALL_BUILTIN_CLASS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_BUILTIN_O: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_BUILTIN_FAST: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_BUILTIN_FAST_WITH_KEYWORDS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_LEN: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_ISINSTANCE: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_LIST_APPEND: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_METHOD_DESCRIPTOR_O: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_METHOD_DESCRIPTOR_NOARGS: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CALL_METHOD_DESCRIPTOR_FAST: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1583,7 +1542,7 @@
         case CALL_KW: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(2);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1594,18 +1553,18 @@
         case CALL_FUNCTION_EX: {
             STACK_SHRINK(((oparg & 1) ? 1 : 0));
             STACK_SHRINK(2);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case MAKE_FUNCTION: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case SET_FUNCTION_ATTRIBUTE: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1616,35 +1575,33 @@
         case BUILD_SLICE: {
             STACK_SHRINK(((oparg == 3) ? 1 : 0));
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case CONVERT_VALUE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case FORMAT_SIMPLE: {
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case FORMAT_WITH_SPEC: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
         case _SPECIALIZE_BINARY_OP: {
-            PEEK(-(-2)) = sym_init_unknown(ctx);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
             break;
         }
 
         case _BINARY_OP: {
             STACK_SHRINK(1);
-            PEEK(-(-1)) = sym_init_unknown(ctx);
+            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -1738,7 +1695,7 @@
         }
 
         case _INSERT: {
-            PEEK(-(-1 - oparg)) = sym_init_unknown(ctx);
+            stack_pointer[-1 - oparg] = sym_init_unknown(ctx);
             break;
         }
 

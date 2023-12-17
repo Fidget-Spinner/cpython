@@ -2551,6 +2551,7 @@ bool _PyOpcode_ispure(uint32_t opcode)  {
         case _BINARY_OP_ADD_FLOAT:
         case _BINARY_OP_SUBTRACT_FLOAT:
         case _BINARY_OP_ADD_UNICODE:
+        case _INIT_CALL_PY_EXACT_ARGS:
         case COPY:
         case SWAP:
         case _LOAD_FAST_NO_INCREF:
@@ -2582,6 +2583,8 @@ bool _PyOpcode_isguard(uint32_t opcode)  {
         case _GUARD_KEYS_VERSION:
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS:
         case _CHECK_PEP_523:
+        case _CHECK_FUNCTION_EXACT_ARGS:
+        case _CHECK_STACK_SPACE:
             return true;
         default:
             return false;

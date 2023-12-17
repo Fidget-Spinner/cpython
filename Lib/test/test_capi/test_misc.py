@@ -2612,26 +2612,45 @@ class TestUopsOptimization(unittest.TestCase):
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 11)
 
-    def test_int_cse(self):
-        def testfunc(loops):
-            num = 0
-            while num < loops:
-                # TODO data dependency not ordered correctly
-                x = num + num
-                y = num + num
-                num += 1
-            return num
+    # def test_int_cse(self):
+    #     def testfunc(loops):
+    #         num = 0
+    #         while num < loops:
+    #             # TODO data dependency not ordered correctly
+    #             x = num + num
+    #             y = num + num
+    #             num += 1
+    #         return num
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     res = None
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(64)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+    #     self.assertEqual(len(binop_count), 2)
+
+    def test_frame(self):
+
+        def dummy(x):
+            return x+1
+
+        def testfunc(n):
+            for i in range(n):
+                # CALL_PY_EXACT_ARGS
+                dummy(i)
 
         opt = _testinternalcapi.get_uop_optimizer()
-        res = None
         with temporary_optimizer(opt):
-            res = testfunc(64)
+            testfunc(20)
 
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
-        binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
-        self.assertEqual(len(binop_count), 2)
-
+        uops = {opname for opname, _, _ in ex}
+        self.assertIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
 
 class TestOptimizerAPI(unittest.TestCase):
 

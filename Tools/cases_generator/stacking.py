@@ -533,10 +533,14 @@ def _write_components_abstract_interp_impure_region(
             # Use clone() since adjust_inverse() mutates final_offset
             mgr.adjust_inverse(mgr.final_offset.clone())
 
+    unknown = StackEffect("sym_init_unknown(ctx)")
     for poke in mgr.pokes:
-        if poke.effect.size or not poke.effect.name:
-            continue
-        out.emit(f"PEEK(-({poke.offset.as_index()})) = sym_init_unknown(ctx);")
+        if not poke.effect.size and poke.effect.name not in mgr.instr.unmoved_names:
+            out.assign(
+                poke.as_stack_effect(),
+                unknown,
+            )
+        # out.emit(f"PEEK(-({poke.offset.as_index()})) = sym_init_unknown(ctx);")
 
 
 
@@ -544,7 +548,9 @@ def _write_components_abstract_interp_pure_region(
         managers: list[EffectManager],
         input_vars: dict[str, StackEffect],
         mangled_input_vars: dict[str, StackEffect],
-        out: Formatter) -> None:
+        out: Formatter,
+        mandatory = False,
+) -> None:
 
     # Declare all variables
     for name, eff in mangled_input_vars.items():
@@ -567,6 +573,15 @@ def _write_components_abstract_interp_pure_region(
             mgr.adjust_inverse(mgr.final_offset.clone())
 
         # Construct sym expression and write that to output
+
+        # Grab variadic inputs that depend on things like oparg or cache
+        arr_var = [(name, var) for name, var in mangled_input_vars.items() if var.size]
+        assert len(arr_var) <= 1, "Can have at most one array input from oparg/cache"
+        arr_var_name = arr_var[0][0] if len(arr_var) == 1 else None
+        arr_var_size = (arr_var[0][1].size or 0) if arr_var_name is not None else 0
+        if arr_var_name is not None:
+            del mangled_input_vars[arr_var_name]
+
         var = ", ".join(mangled_input_vars)
         if var:
             var = ", " + var
@@ -577,25 +592,36 @@ def _write_components_abstract_interp_pure_region(
             output_var = mgr.instr.output_effects[0]
             out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
 
-            # Pure op, we can attempt a constant evaluation.
-            predicates = " && ".join(
-                [f"is_const({var})" for var in mangled_input_vars])
-            with out.block(f"if ({predicates or 0})"):
-                # Declare all variables
-                for name, eff in input_vars.items():
-                    out.declare(eff, StackEffect(f"get_const({mangle_name(name)})"))
-                out.declare(output_var, None)
-                mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
+            if mandatory:
                 out.emit(
                     f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, *inst, (PyObject *){output_var.name}, {len(mangled_input_vars)} {var});"
+                    f"ctx, *inst, NULL, {arr_var_size}, {arr_var_name or 'NULL'}, {len(mangled_input_vars)} {var});"
                 )
-            # Otherwise, just create a new symbolic
-            with out.block("else"):
-                out.emit(
-                    f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, *inst, NULL, {len(mangled_input_vars)} {var});"
-                )
+            else:
+                # Pure op, we can attempt a constant evaluation.
+                predicates = " && ".join(
+                    [f"is_const({var})" for var in mangled_input_vars])
+                with out.block(f"if ({predicates or 0})"):
+                    # Declare all variables
+                    for name, eff in input_vars.items():
+                        out.declare(eff, StackEffect(f"get_const({mangle_name(name)})"))
+                    out.declare(output_var, None)
+                    mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
+                    out.emit(
+                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                        f"ctx, *inst, (PyObject *){output_var.name}, "
+                        f"{arr_var_size}, {arr_var_name or 'NULL'}, "
+                        f"{len(mangled_input_vars)} {var}"
+                        f");"
+                    )
+                # Otherwise, just create a new symbolic
+                with out.block("else"):
+                    out.emit(
+                        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+                        f"ctx, *inst, NULL, {arr_var_size}, {arr_var_name or 'NULL'}, "
+                        f"{len(mangled_input_vars)} {var}"
+                        f");"
+                    )
 
             out.emit(
                 "if (__sym_temp == NULL) goto error;"
@@ -619,9 +645,16 @@ def _write_components_abstract_interp_guard_region(
         managers: list[EffectManager],
         all_input_vars: dict[str, StackEffect],
         mangled_input_vars: dict[str, StackEffect],
-        out: Formatter) -> None:
+        out: Formatter,
+        mandatory=False,
+) -> None:
     # 1. Attempt to perform guard elimination
     # 2. Type propagate for guard success
+
+    # This guard is mandatory, it cannot be eliminated or moved.
+    if mandatory:
+        out.emit("goto guard_required;")
+        return
 
     # Declare all variables
     for name, eff in mangled_input_vars.items():
@@ -710,25 +743,22 @@ def _write_components_for_abstract_interp(
                     eff,
                 )
             else:
-                if eff.size:
-                    assert not (pure or guard), \
-                        f"Abstract Interpreter: `{inst.name}` not supported due to sized input `{name}` in pure or guard"
                 all_input_vars[name] = eff
 
     # Mangle the input variables
     mangled_input_vars = {mangle_name(k): dataclasses.replace(v) for k, v in all_input_vars.items()}
     for var in mangled_input_vars.values():
         var.name = mangle_name(var.name)
-        var.type = "_Py_UOpsSymbolicExpression *"
+        var.type = "_Py_UOpsSymbolicExpression **" if var.size else "_Py_UOpsSymbolicExpression *"
 
     if pure:
         _write_components_abstract_interp_pure_region(
-            managers, all_input_vars, mangled_input_vars, out)
+            managers, all_input_vars, mangled_input_vars, out, "mandatory" in inst.annotations)
         return
 
     elif guard:
         _write_components_abstract_interp_guard_region(
-            managers, all_input_vars, mangled_input_vars, out)
+            managers, all_input_vars, mangled_input_vars, out, "mandatory" in inst.annotations)
         return
 
     else:

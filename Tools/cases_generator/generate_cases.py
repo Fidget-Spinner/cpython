@@ -85,6 +85,8 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
     "PUSH_NULL",
     "END_SEND",
     "SWAP",
+    "_PUSH_FRAME",
+    "_POP_FRAME",
 
     # Shouldn't appear in abstract interpreter
     "_LOAD_FAST_NO_INCREF",

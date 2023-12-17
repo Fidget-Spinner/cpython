@@ -10,6 +10,7 @@
 #include "pycore_optimizer.h"
 #include "pycore_object.h"
 #include "pycore_dict.h"
+#include "pycore_function.h"
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -30,7 +31,8 @@ _PyOpcode_isimmutable(uint32_t opcode)
 {
     // TODO subscr tuple is immutable
     switch (opcode) {
-        case PUSH_NULL: true;
+        case PUSH_NULL:
+            return true;
     }
     return false;
 }
@@ -62,19 +64,25 @@ is_dataonly_opcode(int opcode) {
     return (opcode == POP_TOP);
 }
 
+
 typedef enum {
     // Types with aux
     GUARD_KEYS_VERSION_TYPE = 0,
     GUARD_TYPE_VERSION_TYPE = 1,
+    // TODO improvement: to be more exact, this actually needs to encode oparg
+    // info as well, see _CHECK_FUNCTION_EXACT_ARGS.
+    // However, since oparg is tied to code object is tied to function version,
+    // it should be safe if function version matches.
+    PYFUNCTION_TYPE_VERSION_TYPE = 2,
 
     // Types without aux
-    PYINT_TYPE = 2,
-    PYFLOAT_TYPE = 3,
-    PYUNICODE_TYPE = 4,
-    NULL_TYPE = 5,
-    PYMETHOD_TYPE = 6,
-    GUARD_DORV_VALUES_TYPE = 7,
-    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 8,
+    PYINT_TYPE = 3,
+    PYFLOAT_TYPE = 4,
+    PYUNICODE_TYPE = 5,
+    NULL_TYPE = 6,
+    PYMETHOD_TYPE = 7,
+    GUARD_DORV_VALUES_TYPE = 8,
+    GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE = 9,
 
 
     // GUARD_GLOBALS_VERSION_TYPE, / Environment check
@@ -86,7 +94,7 @@ typedef enum {
     INVALID_TYPE = -1
 } _Py_UOpsSymExprTypeEnum;
 
-#define MAX_TYPE_WITH_AUX 1
+#define MAX_TYPE_WITH_AUX 2
 typedef struct {
     // bitmask of types
     uint32_t types;
@@ -345,6 +353,14 @@ static PyTypeObject _PyUOpsImpureStore_Type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
+typedef struct _Py_UOpsAbstractFrame {
+    struct _Py_UOpsAbstractFrame *prev;
+    // Max stacklen
+    int stack_len;
+    int locals_len;
+    int curr_stacklen;
+} _Py_UOpsAbstractFrame;
+
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
     PyObject_VAR_HEAD
@@ -354,11 +370,8 @@ typedef struct _Py_UOpsAbstractInterpContext {
     Py_ssize_t sym_curr_id;
     // Symbolic version of co_consts
     PyObject *sym_consts;
+    _Py_UOpsAbstractFrame *frame;
 
-    // Max stacklen
-    int stack_len;
-    int locals_len;
-    int curr_stacklen;
     // Actual stack and locals are stored in the current abstract store
     // Borrowed reference
     _Py_UOpsStoreUnion *curr_store;
@@ -387,8 +400,8 @@ static inline _Py_UOpsSymbolicExpression*
 sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx);
 
 
-_Py_UOpsAbstractInterpContext *
-_Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store, PyObject *co_consts,
+static _Py_UOpsAbstractInterpContext *
+_Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
                                   int stack_len, int locals_len, int curr_stacklen)
 {
     _Py_UOpsAbstractInterpContext *self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
@@ -397,7 +410,7 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store, PyObject *co_consts,
     if (self == NULL) {
         return NULL;
     }
-
+    _Py_UOpsAbstractFrame *frame = NULL;
     PyObject *sym_consts = NULL;
 
     self->sym_consts = NULL;
@@ -422,16 +435,29 @@ _Py_UOpsAbstractInterpContext_New(_Py_UOpsPureStore *store, PyObject *co_consts,
     }
 
     self->sym_consts = sym_consts;
-    self->stack_len = stack_len;
-    self->locals_len = locals_len;
-    self->curr_stacklen = curr_stacklen;
+
+    frame = PyMem_Malloc(sizeof(_Py_UOpsAbstractFrame));
+    if (frame == NULL) {
+        goto error;
+    }
+    frame->stack_len = stack_len;
+    frame->locals_len = locals_len;
+    frame->curr_stacklen = curr_stacklen;
+    self->frame = frame;
 
     return self;
 
 error:
     Py_XDECREF(sym_consts);
     Py_DECREF(self);
+    PyMem_Free(frame);
     return NULL;
+}
+
+static void
+_Py_UOpsAbstractInterpContext_FramePush(_Py_UOpsAbstractInterpContext *ctx)
+{
+
 }
 
 static _Py_UOpsSymbolicExpression *
@@ -467,14 +493,21 @@ check_sym_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExp
 }
 
 // Steals a reference to const_val
+// Creates a symbolic expression consisting of subexpressoins
+// from arr_start and va_list.
+// The order is
+// <va_list elements left to right>, <arr_start elements left to right>
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
                                _PyUOpInstruction inst,
-                               PyObject *const_val, int num_subexprs, ...)
+                               PyObject *const_val, int num_arr,
+                               _Py_UOpsSymbolicExpression **arr_start,
+                               int num_subexprs, ...)
 {
+    int total_subexprs = num_arr + num_subexprs;
     _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
                                                           &_Py_UOpsSymbolicExpression_Type,
-                                                          num_subexprs);
+                                                          total_subexprs);
     if (self == NULL) {
         return NULL;
     }
@@ -494,12 +527,14 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->originating_store = ctx->curr_store;
 
     assert(Py_SIZE(self) >= num_subexprs);
+    int i = 0;
+
     // Setup
     va_list curr;
 
     va_start(curr, num_subexprs);
 
-    for (int i = 0; i < num_subexprs; i++) {
+    for (; i < num_subexprs; i++) {
         // Note: no incref here. symexprs are kept alive by the global expression
         // table.
         // We intentionally don't want to hold a reference to it so we don't
@@ -514,6 +549,16 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     }
 
     va_end(curr);
+
+    for (; i < total_subexprs; i++) {
+        self->operands[i] = arr_start[i];
+        self->operands[i]->usage_count++;
+        // Constant values shouldn't calculate their in degrees. Makes no sense to.
+        if (self->operands[i]->const_val == NULL) {
+            self->operands[i]->in_degree++;
+        }
+    }
+
 
     return check_sym_already_exists(ctx, self);
 }
@@ -544,39 +589,6 @@ _Py_UOpsSymbolicExpression_NewSingleton(
     return check_sym_already_exists(ctx, self);
 }
 
-static _Py_UOpsSymbolicExpression*
-_Py_UOpsSymbolicExpression_NewFromArray(_Py_UOpsAbstractInterpContext *ctx,
-                                _PyUOpInstruction inst, int num_subexprs,
-                               _Py_UOpsSymbolicExpression **arr_start)
-{
-    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
-                                                          &_Py_UOpsSymbolicExpression_Type,
-                                                          num_subexprs);
-    if (self == NULL) {
-        return NULL;
-    }
-
-
-    self->idx = -1;
-    self->cached_hash = -1;
-    self->usage_count = 0;
-    self->sym_type.types = 0;
-    self->const_val = NULL;
-    self->inst = inst;
-
-    // Setup
-    for (int i = 0; i < num_subexprs; i++) {
-        self->operands[i] = arr_start[i];
-        self->operands[i]->usage_count++;
-        // Constant values shouldn't calculate their in degrees. Makes no sense to.
-        if (self->operands[i]->const_val == NULL) {
-            self->operands[i]->in_degree++;
-        }
-    }
-
-
-    return check_sym_already_exists(ctx, self);
-}
 
 static void
 sym_set_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
@@ -633,7 +645,10 @@ sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
     _PyUOpInstruction inst = {INIT_FAST, locals_idx, 0, 0};
     return _Py_UOpsSymbolicExpression_New(ctx,
                                           inst,
-                                          NULL, 0);
+                                          NULL,
+                                          0,
+                                          NULL,
+                                          0);
 }
 
 static inline _Py_UOpsSymbolicExpression*
@@ -642,7 +657,10 @@ sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx)
     _PyUOpInstruction inst = {CACHE, 0, 0, 0};
     return _Py_UOpsSymbolicExpression_New(ctx,
                                           inst,
-                                          NULL, 0);
+                                          NULL,
+                                          0,
+                                          NULL,
+                                          0);
 }
 
 static inline _Py_UOpsSymbolicExpression*
@@ -653,6 +671,8 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
         ctx,
         inst,
         const_val,
+        0,
+        NULL,
         0
     );
     if (temp == NULL) {
@@ -668,11 +688,13 @@ sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *guard,
 {
     assert(ctx->curr_store->pure_or_impure);
     _Py_UOpsSymbolicExpression *res =
-        _Py_UOpsSymbolicExpression_NewFromArray(
+        _Py_UOpsSymbolicExpression_New(
             ctx,
             *guard,
+            NULL,
             num_stack_inputs,
-            &((_Py_UOpsPureStore *)ctx->curr_store)->stack_pointer[-(num_stack_inputs)]
+            &((_Py_UOpsPureStore *)ctx->curr_store)->stack_pointer[-(num_stack_inputs)],
+            0
         );
     if (res == NULL) {
         return NULL;
@@ -699,7 +721,7 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
     bool is_first_store = false;
     _Py_UOpsPureStore *self = PyObject_NewVar(_Py_UOpsPureStore,
                                               &_Py_UOpsPureStore_Type,
-                                              (ctx->locals_len + ctx->stack_len) * 2);
+                                              (ctx->frame->locals_len + ctx->frame->stack_len) * 2);
     if (self == NULL) {
         return NULL;
     }
@@ -722,18 +744,18 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
     }
 
     self->locals = self->locals_with_stack;
-    self->stack = self->locals_with_stack + ctx->locals_len;
-    self->stack_pointer = self->stack + ctx->curr_stacklen;
-    self->initial_locals = self->stack + ctx->stack_len;
-    self->initial_stack = self->initial_locals + ctx->locals_len;
+    self->stack = self->locals_with_stack + ctx->frame->locals_len;
+    self->stack_pointer = self->stack + ctx->frame->curr_stacklen;
+    self->initial_locals = self->stack + ctx->frame->stack_len;
+    self->initial_stack = self->initial_locals + ctx->frame->locals_len;
 
-    int total_len = (ctx->locals_len + ctx->stack_len) * 2;
+    int total_len = (ctx->frame->locals_len + ctx->frame->stack_len) * 2;
     // Null out everything first
     for (int i = 0; i < total_len; i++) {
         self->locals_with_stack[i] = NULL;
     }
     // Initialize with the initial state of all local variables
-    for (int i = 0; i < ctx->locals_len; i++) {
+    for (int i = 0; i < ctx->frame->locals_len; i++) {
         // TODO copy over immutables
         _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
         if (local == NULL) {
@@ -744,7 +766,7 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx)
 
 
     // Initialize the stack as well
-    for (int i = 0; i < ctx->curr_stacklen; i++) {
+    for (int i = 0; i < ctx->frame->curr_stacklen; i++) {
         // TODO copy over the immutables
         _Py_UOpsSymbolicExpression *stackvar = sym_init_unknown(ctx);
         if (stackvar == NULL) {
@@ -884,7 +906,7 @@ try_hoist_guard(_Py_UOpsAbstractInterpContext *ctx,
     for (int i = 0; i < num_stack_inputs; i++) {
         bool input_present = false;
         _Py_UOpsSymbolicExpression *input = curr_store->stack_pointer[-(i + 1)];
-        for (int x = 0; x < ctx->locals_len; x++) {
+        for (int x = 0; x < ctx->frame->locals_len; x++) {
             if (input == curr_store->initial_locals[x]) {
                 input_present = true;
                 break;
@@ -1062,6 +1084,22 @@ uop_abstract_interpret_single_inst(
             break;
         }
 
+        case _PUSH_FRAME: {
+            // TOS is the new frame.
+            STACK_SHRINK(1);
+
+            break;
+        }
+
+        case _POP_FRAME: {
+            _Py_UOpsSymbolicExpression *retval = PEEK(1);
+            STACK_SHRINK(1);
+            // Pop old frame.
+
+            // Push retval into new frame.
+            STACK_GROW(1);
+            PEEK(1) = retval;
+        }
         // TODO SWAP
         default:
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
@@ -1069,7 +1107,7 @@ uop_abstract_interpret_single_inst(
     }
     DPRINTF(2, "stack_pointer %p\n", stack_pointer);
     curr_store->stack_pointer = stack_pointer;
-    ctx->curr_stacklen = STACK_LEVEL();
+    ctx->frame->curr_stacklen = STACK_LEVEL();
     assert(STACK_LEVEL() >= 0);
 
     return ABSTRACT_INTERP_NORMAL;
@@ -1111,7 +1149,7 @@ uop_abstract_interpret(
     _Py_UOpsSymbolicExpression **first_temp_local_store = NULL;
 
     ctx = _Py_UOpsAbstractInterpContext_New(
-        NULL, co->co_consts, co->co_stacksize, co->co_nlocals, curr_stacklen);
+        co->co_consts, co->co_stacksize, co->co_nlocals, curr_stacklen);
     if (ctx == NULL) {
         goto error;
     }
@@ -1123,8 +1161,8 @@ uop_abstract_interpret(
     ctx->sym_curr_id = 0;
 
     // Copy over the current locals
-    memcpy(store->initial_locals, store->locals, ctx->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
-    memcpy(store->initial_stack, store->stack, ctx->stack_len * sizeof(_Py_UOpsSymbolicExpression *));
+    memcpy(store->initial_locals, store->locals, ctx->frame->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
+    memcpy(store->initial_stack, store->stack, ctx->frame->stack_len * sizeof(_Py_UOpsSymbolicExpression *));
 
 
     _PyUOpInstruction *curr = trace;
@@ -1222,8 +1260,8 @@ uop_abstract_interpret(
         }
 
         // Copy over the current locals
-        memcpy(store->initial_locals, store->locals, ctx->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
-        memcpy(store->initial_stack, store->stack, ctx->stack_len * sizeof(_Py_UOpsSymbolicExpression *));
+        memcpy(store->initial_locals, store->locals, ctx->frame->locals_len * sizeof(_Py_UOpsSymbolicExpression *));
+        memcpy(store->initial_stack, store->stack, ctx->frame->stack_len * sizeof(_Py_UOpsSymbolicExpression *));
 
 
     }
