@@ -2512,7 +2512,6 @@ class TestUopsOptimization(unittest.TestCase):
     #         while num < loops:
     #             x = 0
     #             y = 1
-    #             x // 2
     #             a = x + y
     #             num += 1
     #         return 1
@@ -2526,7 +2525,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     self.assertEqual(res, 1)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
-    #     self.assertEqual(len(binop_count), 2)
+    #     self.assertEqual(len(binop_count), 1)
     #
     # def test_int_type_propagation(self):
     #     def testfunc(loops):
