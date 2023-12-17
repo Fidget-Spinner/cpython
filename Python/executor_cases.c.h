@@ -3591,7 +3591,7 @@
         case _SETUP_TIER2_FRAME: {
             oparg = CURRENT_OPARG();
             PyObject * scratch_size = (PyObject *)CURRENT_OPERAND();
-            if (!_PyFrame_ConvertToTier2(tstate, frame, oparg, scratch_size) != 0) goto deoptimize;
+            if (!_PyFrame_ConvertToTier2(tstate, frame, oparg, (int)(Py_ssize_t)scratch_size) != 0) goto deoptimize;
             break;
         }
 
