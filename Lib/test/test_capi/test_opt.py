@@ -689,16 +689,36 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
     #     self.assertEqual(len(binop_count), 2)
+
+    # TODO FIX ME
+    # def test_int_cse_loop(self):
+    #     def testfunc(loops):
+    #         for i in range(loops):
+    #             x = i + i
+    #             y = i + i
+    #         return loops
     #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     res = None
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(64)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
+    #     self.assertEqual(len(binop_count), 2)
+
     def test_frame(self):
 
         def dummy(x):
             return x+1
 
         def testfunc(n):
-            for i in range(n):
+            num = 0
+            while num < n:
                 # CALL_PY_EXACT_ARGS
-                dummy(i)
+                x = dummy(num)
+                num += 1
 
         opt = _testinternalcapi.get_uop_optimizer()
         with temporary_optimizer(opt):

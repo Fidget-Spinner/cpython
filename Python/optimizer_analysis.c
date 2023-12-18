@@ -369,14 +369,20 @@ typedef struct _Py_UOpsAbstractFrame {
 
 
 static void
+abstractframe_free_self(_Py_UOpsAbstractFrame *frame)
+{
+    Py_DECREF(frame->sym_consts);
+    PyMem_Free(frame);
+}
+
+static void
 abstractframe_free(_Py_UOpsAbstractFrame *frame)
 {
     _Py_UOpsAbstractFrame *curr_frame = frame;
     while (curr_frame != NULL) {
         _Py_UOpsAbstractFrame *prev = curr_frame;
-        Py_DECREF(frame->sym_consts);
         curr_frame = curr_frame->prev;
-        PyMem_Free(prev);
+        abstractframe_free_self(prev);
     }
 }
 
@@ -493,7 +499,59 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
     frame->stack_len = stack_len;
     frame->locals_len = locals_len;
     frame->curr_stacklen = curr_stacklen;
+    frame->prev = NULL;
     return frame;
+}
+
+static inline bool
+sym_is_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ);
+static inline uint32_t
+sym_type_get_aux(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ);
+
+static inline PyFunctionObject *
+extract_func_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
+{
+    switch(frame_sym->inst.opcode) {
+        case _INIT_CALL_PY_EXACT_ARGS:
+        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+            _Py_UOpsSymbolicExpression *callable_sym = frame_sym->operands[0];
+            if (!sym_is_type(callable_sym, PYFUNCTION_TYPE_VERSION_TYPE)) {
+                return NULL;
+            }
+            int32_t func_version = sym_type_get_aux(callable_sym, PYFUNCTION_TYPE_VERSION_TYPE);
+            PyFunctionObject *func = _PyFunction_LookupByVersion(func_version);
+            if (func == NULL) {
+                return NULL;
+            }
+            return func;
+        }
+        default:
+            return NULL;
+    }
+}
+
+static inline _Py_UOpsSymbolicExpression*
+extract_self_or_null_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
+{
+    switch(frame_sym->inst.opcode) {
+        case _INIT_CALL_PY_EXACT_ARGS:
+        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS:
+            return frame_sym->operands[1];
+        default:
+            return NULL;
+    }
+}
+
+static inline _Py_UOpsSymbolicExpression**
+extract_args_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
+{
+    switch(frame_sym->inst.opcode) {
+        case _INIT_CALL_PY_EXACT_ARGS:
+        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS:
+            return &frame_sym->operands[2];
+        default:
+            return NULL;
+    }
 }
 
 static _Py_UOpsPureStore*
@@ -503,13 +561,11 @@ _Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx);
 static int
 _Py_UOpsAbstractInterpContext_FramePush(
     _Py_UOpsAbstractInterpContext *ctx,
-    uint32_t func_version
+    _Py_UOpsSymbolicExpression *frame_sym
 )
 {
-    PyFunctionObject *func = _PyFunction_LookupByVersion(func_version);
-    if (func == NULL) {
-        return -1;
-    }
+    // Extract func version from the frame symbolic
+    PyFunctionObject *func = extract_func_from_sym(frame_sym);
     PyCodeObject *co = (PyCodeObject *)func->func_code;
     _Py_UOpsAbstractFrame *frame = _Py_UOpsAbstractFrame_New(ctx,
         co->co_consts, co->co_stacksize, co->co_nlocals, 0);
@@ -519,11 +575,10 @@ _Py_UOpsAbstractInterpContext_FramePush(
     frame->prev = ctx->frame;
     ctx->frame = frame;
 
-    _Py_UOpsPureStore* store = _Py_UOpsPureStore_New(ctx);
-    if (store == NULL) {
-        return -1;
-    }
-    ctx->curr_store = (_Py_UOpsStoreUnion *)store;
+//    _Py_UOpsPureStore* store = _Py_UOpsPureStore_New(ctx);
+//    if (store == NULL) {
+//        return -1;
+//    }
     return 0;
 }
 
@@ -535,12 +590,11 @@ _Py_UOpsAbstractInterpContext_FramePop(
     _Py_UOpsAbstractFrame *frame = ctx->frame;
     ctx->frame = frame->prev;
     assert(ctx->frame != NULL);
-    abstractframe_free(frame);
-    _Py_UOpsPureStore* store = _Py_UOpsPureStore_New(ctx);
-    if (store == NULL) {
-        return -1;
-    }
-    ctx->curr_store = (_Py_UOpsStoreUnion *)store;
+    abstractframe_free_self(frame);
+//    _Py_UOpsPureStore* store = _Py_UOpsPureStore_New(ctx);
+//    if (store == NULL) {
+//        return -1;
+//    }
     return 0;
 }
 
@@ -801,13 +855,21 @@ sym_is_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ)
 static inline bool
 sym_matches_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, uint32_t aux)
 {
-    if ((sym->sym_type.types & (1 << typ)) == 0) {
+    if (!sym_is_type(sym, typ)) {
         return false;
     }
     if (typ <= MAX_TYPE_WITH_AUX) {
         return sym->sym_type.aux[typ] == aux;
     }
     return true;
+}
+
+static inline uint32_t
+sym_type_get_aux(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ)
+{
+    assert(sym_is_type(sym, typ));
+    assert(typ <= MAX_TYPE_WITH_AUX);
+    return sym->sym_type.aux[typ];
 }
 
 // If from store is not NULL, copy type information over from it.
@@ -1072,7 +1134,6 @@ uop_abstract_interpret_single_inst(
             oparg);
     switch (opcode) {
 #include "abstract_interp_cases.c.h"
-        // @TODO convert these to autogenerated using DSL
         // Note: LOAD_FAST_CHECK is not pure!!!
         case LOAD_FAST_CHECK:
             STACK_GROW(1);
@@ -1134,8 +1195,24 @@ uop_abstract_interpret_single_inst(
             // TOS is the new frame.
             _Py_UOpsSymbolicExpression *frame_sym = PEEK(1);
             STACK_SHRINK(1);
+            curr_store->stack_pointer = stack_pointer;
+            ctx->frame->curr_stacklen = STACK_LEVEL();
             if (_Py_UOpsAbstractInterpContext_FramePush(ctx, frame_sym) != 0){
                 goto error;
+            }
+            _Py_UOpsSymbolicExpression *self_or_null = extract_self_or_null_from_sym(frame_sym);
+            assert(self_or_null != NULL);
+            _Py_UOpsSymbolicExpression **args = extract_args_from_sym(frame_sym);
+            assert(args != NULL);
+            int argcount = oparg;
+            // Bound method fiddling, same as _INIT_CALL_PY_EXACT_ARGS
+            if (!sym_is_type(self_or_null, NULL_TYPE)) {
+                args--;
+                argcount++;
+            }
+            _Py_UOpsPureStore *new_store = (_Py_UOpsPureStore *)ctx->curr_store;
+            for (int i = 0; i < argcount; i++) {
+                new_store->locals[i] = args[i];
             }
             break;
         }
@@ -1143,6 +1220,8 @@ uop_abstract_interpret_single_inst(
         case _POP_FRAME: {
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
             STACK_SHRINK(1);
+            curr_store->stack_pointer = stack_pointer;
+            ctx->frame->curr_stacklen = STACK_LEVEL();
             // Pop old frame.
             if (_Py_UOpsAbstractInterpContext_FramePop(ctx) != 0){
                 goto error;
@@ -1152,6 +1231,7 @@ uop_abstract_interpret_single_inst(
             // Push retval into new frame.
             STACK_GROW(1);
             PEEK(1) = retval;
+            break;
         }
         // TODO SWAP
         default:
