@@ -12,6 +12,7 @@
 #include "pycore_dict.h"
 #include "pycore_function.h"
 
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -120,8 +121,6 @@ typedef struct _Py_UOpsSymbolicExpression {
     int emitted_count;
     _PyUOpInstruction inst;
 
-    // Only populated by guards
-    uint64_t operand;
 
     // Type of the symbolic expression
     _Py_UOpsSymType sym_type;
@@ -269,16 +268,6 @@ sym_richcompare(PyObject *o1, PyObject *o2, int op)
 
     // DONT CHECK THE GUARDS ARE THE SAME. GUARDS CAN DIFFER
     // BECAUSER OF INFO GAINED IN TYPE PROP.
-    // Finally, check if the guards it needs are the same
-//    _Py_UOpsSymbolicExpression *self_guard = self->guard_to_emit;
-//    _Py_UOpsSymbolicExpression *other_guard = other->guard_to_emit;
-//    while (self_guard != NULL || other_guard != NULL) {
-//        if (self_guard != other_guard) {
-//            Py_RETURN_FALSE;
-//        }
-//        self_guard = self_guard->guard_to_emit;
-//        other_guard = other_guard->guard_to_emit;
-//    }
     Py_RETURN_TRUE;
 }
 
@@ -370,11 +359,26 @@ static PyTypeObject _PyUOpsImpureStore_Type = {
 
 typedef struct _Py_UOpsAbstractFrame {
     struct _Py_UOpsAbstractFrame *prev;
+    // Symbolic version of co_consts
+    PyObject *sym_consts;
     // Max stacklen
     int stack_len;
     int locals_len;
     int curr_stacklen;
 } _Py_UOpsAbstractFrame;
+
+
+static void
+abstractframe_free(_Py_UOpsAbstractFrame *frame)
+{
+    _Py_UOpsAbstractFrame *curr_frame = frame;
+    while (curr_frame != NULL) {
+        _Py_UOpsAbstractFrame *prev = curr_frame;
+        Py_DECREF(frame->sym_consts);
+        curr_frame = curr_frame->prev;
+        PyMem_Free(prev);
+    }
+}
 
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
@@ -383,8 +387,6 @@ typedef struct _Py_UOpsAbstractInterpContext {
     PyDictObject *sym_exprs_to_sym_exprs;
     // Current ID to assign a new (non-duplicate) sym_expr
     Py_ssize_t sym_curr_id;
-    // Symbolic version of co_consts
-    PyObject *sym_consts;
     _Py_UOpsAbstractFrame *frame;
 
     // Actual stack and locals are stored in the current abstract store
@@ -397,7 +399,7 @@ abstractinterp_dealloc(PyObject *o)
 {
     _Py_UOpsAbstractInterpContext *self = (_Py_UOpsAbstractInterpContext *)o;
     Py_DECREF(self->sym_exprs_to_sym_exprs);
-    Py_DECREF(self->sym_consts);
+    abstractframe_free(self->frame);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -411,9 +413,9 @@ static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
-static inline _Py_UOpsSymbolicExpression*
-sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx);
-
+static inline _Py_UOpsAbstractFrame *
+_Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
+                          PyObject *co_consts, int stack_len, int locals_len, int curr_stacklen);
 
 static _Py_UOpsAbstractInterpContext *
 _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
@@ -426,9 +428,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
         return NULL;
     }
     _Py_UOpsAbstractFrame *frame = NULL;
-    PyObject *sym_consts = NULL;
 
-    self->sym_consts = NULL;
     self->curr_store = NULL;
 
     self->sym_exprs_to_sym_exprs = (PyDictObject *)PyDict_New();
@@ -436,52 +436,123 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
         goto error;
     }
 
-    Py_ssize_t co_const_len = PyTuple_GET_SIZE(co_consts);
-    sym_consts = PyTuple_New(co_const_len);
-    if (sym_consts == NULL) {
+    frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen);
+    if (frame == NULL) {
         goto error;
     }
+    self->frame = frame;
+
+    return self;
+
+error:
+    Py_DECREF(self);
+    return NULL;
+}
+
+static inline _Py_UOpsSymbolicExpression*
+sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx);
+
+static inline PyObject *
+create_sym_consts(_Py_UOpsAbstractInterpContext *ctx, PyObject *co_consts)
+{
+    Py_ssize_t co_const_len = PyTuple_GET_SIZE(co_consts);
+    PyObject *sym_consts = PyTuple_New(co_const_len);
+    if (sym_consts == NULL) {
+        return NULL;
+    }
     for (Py_ssize_t i = 0; i < co_const_len; i++) {
-        _Py_UOpsSymbolicExpression *res = sym_init_const(self, PyTuple_GET_ITEM(co_consts, i), (int)i);
+        _Py_UOpsSymbolicExpression *res = sym_init_const(ctx, PyTuple_GET_ITEM(co_consts, i), (int)i);
         if (res == NULL) {
             goto error;
         }
         PyTuple_SET_ITEM(sym_consts, i, res);
     }
 
-    self->sym_consts = sym_consts;
-
-    frame = PyMem_Malloc(sizeof(_Py_UOpsAbstractFrame));
-    if (frame == NULL) {
-        goto error;
-    }
-    frame->stack_len = stack_len;
-    frame->locals_len = locals_len;
-    frame->curr_stacklen = curr_stacklen;
-    self->frame = frame;
-
-    return self;
-
+    return sym_consts;
 error:
-    Py_XDECREF(sym_consts);
-    Py_DECREF(self);
-    PyMem_Free(frame);
+    Py_DECREF(sym_consts);
     return NULL;
 }
 
-static void
-_Py_UOpsAbstractInterpContext_FramePush(_Py_UOpsAbstractInterpContext *ctx)
+static inline _Py_UOpsAbstractFrame *
+_Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
+                          PyObject *co_consts, int stack_len, int locals_len, int curr_stacklen)
 {
+    _Py_UOpsAbstractFrame *frame = PyMem_Malloc(sizeof(_Py_UOpsAbstractFrame));
+    if (frame == NULL) {
+        return NULL;
+    }
+    PyObject *sym_consts = create_sym_consts(ctx, co_consts);
+    if (sym_consts == NULL) {
+        PyMem_Free(frame);
+        return NULL;
+    }
 
+
+    frame->sym_consts = sym_consts;
+    frame->stack_len = stack_len;
+    frame->locals_len = locals_len;
+    frame->curr_stacklen = curr_stacklen;
+    return frame;
+}
+
+static _Py_UOpsPureStore*
+_Py_UOpsPureStore_New(_Py_UOpsAbstractInterpContext *ctx);
+
+// 0 on success, anything else is error.
+static int
+_Py_UOpsAbstractInterpContext_FramePush(
+    _Py_UOpsAbstractInterpContext *ctx,
+    uint32_t func_version
+)
+{
+    PyFunctionObject *func = _PyFunction_LookupByVersion(func_version);
+    if (func == NULL) {
+        return -1;
+    }
+    PyCodeObject *co = (PyCodeObject *)func->func_code;
+    _Py_UOpsAbstractFrame *frame = _Py_UOpsAbstractFrame_New(ctx,
+        co->co_consts, co->co_stacksize, co->co_nlocals, 0);
+    if (frame == NULL) {
+        return -1;
+    }
+    frame->prev = ctx->frame;
+    ctx->frame = frame;
+
+    _Py_UOpsPureStore* store = _Py_UOpsPureStore_New(ctx);
+    if (store == NULL) {
+        return -1;
+    }
+    ctx->curr_store = (_Py_UOpsStoreUnion *)store;
+    return 0;
+}
+
+static int
+_Py_UOpsAbstractInterpContext_FramePop(
+    _Py_UOpsAbstractInterpContext *ctx
+)
+{
+    _Py_UOpsAbstractFrame *frame = ctx->frame;
+    ctx->frame = frame->prev;
+    assert(ctx->frame != NULL);
+    abstractframe_free(frame);
+    _Py_UOpsPureStore* store = _Py_UOpsPureStore_New(ctx);
+    if (store == NULL) {
+        return -1;
+    }
+    ctx->curr_store = (_Py_UOpsStoreUnion *)store;
+    return 0;
 }
 
 static _Py_UOpsSymbolicExpression *
 check_sym_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
 {
     // Unknown opcodes are treated as always unique
-    if (self->inst.opcode == CACHE) {
+    // Guards are always unique.
+    if (self->inst.opcode == CACHE || _PyOpcode_isguard(self->inst.opcode)) {
         return self;
     }
+
     assert(ctx->sym_exprs_to_sym_exprs);
 
     // Check if this sym expr already exists
@@ -515,7 +586,9 @@ check_sym_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExp
 static _Py_UOpsSymbolicExpression*
 _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
                                _PyUOpInstruction inst,
-                               PyObject *const_val, int num_arr,
+                               PyObject *const_val,
+                               _Py_UOpsSymbolicExpression *guard_to_emit,
+                               int num_arr,
                                _Py_UOpsSymbolicExpression **arr_start,
                                int num_subexprs, ...)
 {
@@ -536,9 +609,8 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->emitted_count = 0;
     self->sym_type.types = 0;
     self->inst = inst;
-    self->operand = 0;
     self->const_val = const_val;
-    self->guard_to_emit = NULL;
+    self->guard_to_emit = guard_to_emit;
     // Borrowed ref. We don't want to have to make our type GC as this will
     // slow down things. This is guaranteed to be safe within our usage.
     self->originating_store = ctx->curr_store;
@@ -559,10 +631,14 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         // need GC.
         operands[i] = va_arg(curr, _Py_UOpsSymbolicExpression *);
         assert(operands[i]);
-        operands[i]->usage_count++;
-        // Constant values shouldn't calculate their in degrees. Makes no sense to.
-        if (operands[i]->const_val == NULL) {
-            operands[i]->in_degree++;
+
+        // Guards just forward their operands so are not part of usages.
+        if (!_PyOpcode_isguard(inst.opcode)) {
+            operands[i]->usage_count++;
+            // Constant values shouldn't calculate their in degrees. Makes no sense to.
+            if (operands[i]->const_val == NULL) {
+                operands[i]->in_degree++;
+            }
         }
     }
 
@@ -570,43 +646,16 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
     for (; i < total_subexprs; i++) {
         operands[i] = arr_start[i];
-        operands[i]->usage_count++;
-        // Constant values shouldn't calculate their in degrees. Makes no sense to.
-        if (operands[i]->const_val == NULL) {
-            operands[i]->in_degree++;
-        }
-    }
-
-    // Check - are the operands all actually pointing to the same guard?
-    // Fuse the guard into the operand. This is only sound
-    // because know all guards lead to an operation.
-    _Py_UOpsSymbolicExpression *maybe_guard = total_subexprs > 0 ? operands[0] : NULL;
-    bool is_guard = total_subexprs > 0 &&
-        _PyOpcode_isguard(maybe_guard->inst.opcode) &&
-        ((int)Py_SIZE(maybe_guard) == total_subexprs);
-    for (Py_ssize_t i = 1; i < total_subexprs && is_guard; i++) {
-        is_guard = maybe_guard == operands[i];
-    }
-
-    // Fuse the guard, routing the guard operands through.
-    if (is_guard) {
-        for (Py_ssize_t i = 0; i < total_subexprs; i++) {
-            operands[i] = maybe_guard->operands[i];
-        }
-        // We are not the first guard, add to the chain.
-        if (self->guard_to_emit != NULL) {
-            _Py_UOpsSymbolicExpression *curr = self->guard_to_emit;
-            while (curr->guard_to_emit != NULL) {
-                curr = curr->guard_to_emit;
+        assert(operands[i]);
+        // Guards just forward their operands so are not part of usages.
+        if (!_PyOpcode_isguard(inst.opcode)) {
+            operands[i]->usage_count++;
+            // Constant values shouldn't calculate their in degrees. Makes no sense to.
+            if (operands[i]->const_val == NULL) {
+                operands[i]->in_degree++;
             }
-            curr->guard_to_emit = maybe_guard;
-        } else {
-            self->guard_to_emit = maybe_guard;
         }
-        maybe_guard->usage_count = 0;
-        maybe_guard->in_degree = 0;
     }
-
 
     return check_sym_already_exists(ctx, self);
 }
@@ -630,7 +679,6 @@ _Py_UOpsSymbolicExpression_NewSingleton(
     self->in_degree = 0;
     self->sym_type.types = 0;
     self->inst = inst;
-    self->operand = 0;
     self->const_val = NULL;
     self->originating_store = 0;
 
@@ -701,6 +749,7 @@ sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx)
     return _Py_UOpsSymbolicExpression_New(ctx,
                                           inst,
                                           NULL,
+                                          NULL,
                                           0,
                                           NULL,
                                           0);
@@ -712,6 +761,7 @@ sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx)
     _PyUOpInstruction inst = {CACHE, 0, 0, 0};
     return _Py_UOpsSymbolicExpression_New(ctx,
                                           inst,
+                                          NULL,
                                           NULL,
                                           0,
                                           NULL,
@@ -726,6 +776,7 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
         ctx,
         inst,
         const_val,
+        NULL,
         0,
         NULL,
         0
@@ -737,25 +788,14 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
     return temp;
 }
 
-static inline _Py_UOpsSymbolicExpression*
-sym_init_guard(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *guard,
-               int num_stack_inputs)
+
+static inline bool
+sym_is_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ)
 {
-    assert(ctx->curr_store->pure_or_impure);
-    _Py_UOpsSymbolicExpression *res =
-        _Py_UOpsSymbolicExpression_New(
-            ctx,
-            *guard,
-            NULL,
-            num_stack_inputs,
-            &((_Py_UOpsPureStore *)ctx->curr_store)->stack_pointer[-(num_stack_inputs)],
-            0
-        );
-    if (res == NULL) {
-        return NULL;
+    if ((sym->sym_type.types & (1 << typ)) == 0) {
+        return false;
     }
-    res->operand = guard->operand;
-    return res;
+    return true;
 }
 
 static inline bool
@@ -975,7 +1015,9 @@ static int
 uop_abstract_interpret_single_inst(
     PyCodeObject *co,
     _PyUOpInstruction *inst,
-    _Py_UOpsAbstractInterpContext *ctx
+    _Py_UOpsAbstractInterpContext *ctx,
+    _Py_UOpsSymbolicExpression **guard,
+    _Py_UOpsSymbolicExpression *guard_to_emit
 )
 {
 #ifdef Py_DEBUG
@@ -1021,8 +1063,9 @@ uop_abstract_interpret_single_inst(
 
     assert(ctx->curr_store->pure_or_impure);
     _Py_UOpsPureStore *curr_store = ((_Py_UOpsPureStore *)ctx->curr_store);
-
     _Py_UOpsSymbolicExpression **stack_pointer = curr_store->stack_pointer;
+
+    _Py_UOpsSymbolicExpression *guard_to_add = NULL;
 
     DPRINTF(2, "Abstract interpreting %s:%d\n",
             (opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[opcode],
@@ -1055,7 +1098,8 @@ uop_abstract_interpret_single_inst(
         case LOAD_CONST: {
             // TODO, symbolify all the constants and load from there directly.
             STACK_GROW(1);
-            PEEK(1) = (_Py_UOpsSymbolicExpression *)GETITEM(ctx->sym_consts, oparg);
+            PEEK(1) = (_Py_UOpsSymbolicExpression *)GETITEM(
+                ctx->frame->sym_consts, oparg);
             break;
         }
         case STORE_FAST:
@@ -1088,8 +1132,11 @@ uop_abstract_interpret_single_inst(
 
         case _PUSH_FRAME: {
             // TOS is the new frame.
+            _Py_UOpsSymbolicExpression *frame_sym = PEEK(1);
             STACK_SHRINK(1);
-
+            if (_Py_UOpsAbstractInterpContext_FramePush(ctx, frame_sym) != 0){
+                goto error;
+            }
             break;
         }
 
@@ -1097,7 +1144,11 @@ uop_abstract_interpret_single_inst(
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
             STACK_SHRINK(1);
             // Pop old frame.
-
+            if (_Py_UOpsAbstractInterpContext_FramePop(ctx) != 0){
+                goto error;
+            }
+            curr_store = ((_Py_UOpsPureStore *)ctx->curr_store);
+            stack_pointer = curr_store->stack_pointer;
             // Push retval into new frame.
             STACK_GROW(1);
             PEEK(1) = retval;
@@ -1107,6 +1158,7 @@ uop_abstract_interpret_single_inst(
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();
     }
+
     DPRINTF(2, "stack_pointer %p\n", stack_pointer);
     curr_store->stack_pointer = stack_pointer;
     ctx->frame->curr_stacklen = STACK_LEVEL();
@@ -1122,7 +1174,10 @@ error:
     return ABSTRACT_INTERP_ERROR;
 
 guard_required:
+    assert(_PyOpcode_isguard(opcode));
+    *guard = guard_to_add;
     return ABSTRACT_INTERP_GUARD_REQUIRED;
+
 }
 
 static _Py_UOpsStoreUnion *
@@ -1175,15 +1230,37 @@ uop_abstract_interpret(
         DPRINTF(3, "starting pure region\n")
 
         // Form pure regions
+        _Py_UOpsSymbolicExpression *first_guard = NULL;
+        _Py_UOpsSymbolicExpression *last_guard_in_chain = NULL;
+        _Py_UOpsSymbolicExpression *guard_to_add = NULL;
         while(curr < end && (_PyOpcode_ispure(curr->opcode) ||
             _PyOpcode_isguard(curr->opcode) ||
             is_bookkeeping_opcode(curr->opcode))) {
 
             int status = uop_abstract_interpret_single_inst(
-                co, curr, ctx
+                co, curr, ctx, &guard_to_add, first_guard
             );
             if (status == ABSTRACT_INTERP_ERROR) {
                 goto error;
+            }
+
+            if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
+                if (first_guard == NULL) {
+                    first_guard = guard_to_add;
+                }
+                else {
+                    assert(last_guard_in_chain != NULL);
+                    last_guard_in_chain->guard_to_emit = guard_to_add;
+                }
+                last_guard_in_chain = guard_to_add;
+            }
+            else {
+                first_guard = last_guard_in_chain = guard_to_add = NULL;
+            }
+
+            if (!_PyOpcode_isguard(curr->opcode)) {
+
+                first_guard = NULL;
             }
 
             curr++;
@@ -1226,11 +1303,14 @@ uop_abstract_interpret(
                     (curr->opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[curr->opcode],
                     curr->oparg);
             int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
+            _Py_UOpsSymbolicExpression *unused = NULL;
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(
-                co, curr, ctx
+                co, curr, ctx, &unused, NULL
             );
-            assert(status == ABSTRACT_INTERP_NORMAL || status == ABSTRACT_INTERP_GUARD_REQUIRED);
+            if (status == ABSTRACT_INTERP_ERROR) {
+                goto error;
+            }
             curr++;
             if (op_is_end(curr->opcode)) {
                 break;

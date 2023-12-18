@@ -586,7 +586,7 @@ def _write_components_abstract_interp_pure_region(
             if mandatory:
                 out.emit(
                     f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, *inst, NULL, {arr_var_size}, {arr_var_name or 'NULL'}, {len(mangled_input_vars)} {var});"
+                    f"ctx, *inst, NULL, guard_to_emit, {arr_var_size}, {arr_var_name or 'NULL'}, {len(mangled_input_vars)} {var});"
                 )
             else:
                 # Pure op, we can attempt a constant evaluation.
@@ -600,7 +600,7 @@ def _write_components_abstract_interp_pure_region(
                     mgr.instr.write_body(out, -4, mgr.active_caches, TIER_TWO, mgr.instr.family)
                     out.emit(
                         f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, *inst, (PyObject *){output_var.name}, "
+                        f"ctx, *inst, (PyObject *){output_var.name}, guard_to_emit,"
                         f"{arr_var_size}, {arr_var_name or 'NULL'}, "
                         f"{len(mangled_input_vars)} {var}"
                         f");"
@@ -609,7 +609,8 @@ def _write_components_abstract_interp_pure_region(
                 with out.block("else"):
                     out.emit(
                         f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                        f"ctx, *inst, NULL, {arr_var_size}, {arr_var_name or 'NULL'}, "
+                        f"ctx, *inst, NULL, guard_to_emit, "
+                        f"{arr_var_size}, {arr_var_name or 'NULL'}, "
                         f"{len(mangled_input_vars)} {var}"
                         f");"
                     )
@@ -660,7 +661,7 @@ def _write_components_abstract_interp_guard_region(
 
     # This guard is mandatory, it cannot be eliminated or moved.
     if mandatory:
-        out.emit("goto guard_required;")
+        guard_required(out)
         return
 
     # Declare all variables
@@ -714,24 +715,24 @@ def _write_components_abstract_interp_guard_region(
             with out.block(f"if ({' && '.join(predicates)})"):
                 out.emit('DPRINTF(2, "type propagation eliminated guard\\n");')
                 out.emit("break;")
+            # else we need the guard
             with out.block(f"else"):
                 for prop in propagates:
                     out.emit(f"{prop};")
-                out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
-                arr_var_name, arr_var_size, var = get_subexpressions(mangled_input_vars)
-                out.emit(
-                    f"__sym_temp = _Py_UOpsSymbolicExpression_New("
-                    f"ctx, *inst, NULL, {arr_var_size}, {arr_var_name or 'NULL'}, "
-                    f"{len(mangled_input_vars)} {var}"
-                    f");"
-                )
-                out.emit(
-                    "if (__sym_temp == NULL) goto error;"
-                )
-                for poke in mgr.pokes:
-                    if poke.effect.size or not poke.effect.name:
-                        continue
-                    out.emit(f"PEEK(-({poke.offset.as_index()})) = __sym_temp;")
+                guard_required(out)
+
+
+def guard_required(out):
+    out.emit("_Py_UOpsSymbolicExpression *__sym_temp = NULL;")
+    out.emit(
+        f"__sym_temp = _Py_UOpsSymbolicExpression_New("
+        f"ctx, *inst, NULL, NULL, 0, NULL, 0"
+        f");"
+    )
+    out.emit("if (__sym_temp == NULL) goto error;")
+    out.emit("guard_to_add = __sym_temp;")
+    out.emit("goto guard_required;")
+
 
 def _write_components_for_abstract_interp(
     parts: list[Component],
