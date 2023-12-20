@@ -22,6 +22,10 @@ class Properties:
     uses_locals: bool
     has_free: bool
 
+    pure: bool
+    guard: bool
+    mandatory: bool
+
     def dump(self, indent: str) -> None:
         print(indent, end="")
         text = ", ".join([f"{key}: {value}" for (key, value) in self.__dict__.items()])
@@ -45,6 +49,10 @@ class Properties:
             uses_co_names=any(p.uses_co_names for p in properties),
             uses_locals=any(p.uses_locals for p in properties),
             has_free=any(p.has_free for p in properties),
+
+            pure=all(p.pure for p in properties),
+            guard=all(p.guard for p in properties),
+            mandatory=any(p.mandatory for p in properties),
         )
 
 
@@ -64,6 +72,10 @@ SKIP_PROPERTIES = Properties(
     uses_co_names=False,
     uses_locals=False,
     has_free=False,
+
+    pure=False,
+    guard=False,
+    mandatory=False,
 )
 
 
@@ -366,6 +378,10 @@ def compute_properties(op: parser.InstDef) -> Properties:
         uses_locals=(variable_used(op, "GETLOCAL") or variable_used(op, "SETLOCAL"))
         and not has_free,
         has_free=has_free,
+
+        pure="pure" in op.annotations,
+        guard="guard" in op.annotations,
+        mandatory="mandatory" in op.annotations,
     )
 
 

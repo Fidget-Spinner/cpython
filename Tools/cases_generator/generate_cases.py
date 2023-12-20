@@ -230,7 +230,6 @@ class Generator(Analyzer):
         self.out.emit("")
 
     def write_tier2_metadata(self) -> None:
-
         instrpure_data = []
         instrguard_data = []
         for thing in self.everything:
@@ -573,7 +572,6 @@ class Generator(Analyzer):
                         self.out.emit(f"case {op}: \\")
                 self.out.emit("    ;\n")
 
-            self.write_tier2_metadata()
 
         with open(pymetadata_filename, "w") as f:
             # Create formatter
@@ -622,6 +620,8 @@ class Generator(Analyzer):
 
             for name in ["MIN_INSTRUMENTED_OPCODE", "HAVE_ARGUMENT"]:
                 self.out.emit(f"{name} = {self.markers[name]}")
+
+            self.write_tier2_metadata()
 
     def write_pseudo_instrs(self) -> None:
         """Write the IS_PSEUDO_INSTR macro"""
@@ -849,6 +849,8 @@ class Generator(Analyzer):
             for instr in self.instrs.values():
                 instr = AbstractInstruction(instr.inst)
                 if instr.name in SPECIALLY_HANDLED_ABSTRACT_INSTR:
+                    continue
+                if "TIER_ONE_ONLY" in [l.strip() for l in instr.block_text]:
                     continue
                 self.out.emit("")
                 with self.out.block(f"case {instr.name}:"):

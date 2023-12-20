@@ -11,6 +11,8 @@
 #include "pycore_object.h"
 #include "pycore_dict.h"
 #include "pycore_function.h"
+#include "pycore_uop_metadata.h"
+#include "pycore_uop_ids.h"
 
 
 #include <stdarg.h>
@@ -603,7 +605,7 @@ check_sym_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExp
 {
     // Unknown opcodes are treated as always unique
     // Guards are always unique.
-    if (self->inst.opcode == CACHE || _PyOpcode_isguard(self->inst.opcode)) {
+    if (self->inst.opcode == CACHE || _PyOpcode_isguard[self->inst.opcode]) {
         return self;
     }
 
@@ -687,7 +689,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         assert(operands[i]);
 
         // Guards just forward their operands so are not part of usages.
-        if (!_PyOpcode_isguard(inst.opcode)) {
+        if (!_PyOpcode_isguard[inst.opcode]) {
             operands[i]->usage_count++;
             // Constant values shouldn't calculate their in degrees. Makes no sense to.
             if (operands[i]->const_val == NULL) {
@@ -702,7 +704,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         operands[i] = arr_start[i];
         assert(operands[i]);
         // Guards just forward their operands so are not part of usages.
-        if (!_PyOpcode_isguard(inst.opcode)) {
+        if (!_PyOpcode_isguard[inst.opcode]) {
             operands[i]->usage_count++;
             // Constant values shouldn't calculate their in degrees. Makes no sense to.
             if (operands[i]->const_val == NULL) {
@@ -1254,7 +1256,7 @@ error:
     return ABSTRACT_INTERP_ERROR;
 
 guard_required:
-    assert(_PyOpcode_isguard(opcode));
+    assert(_PyOpcode_isguard[opcode]);
     *guard = guard_to_add;
     return ABSTRACT_INTERP_GUARD_REQUIRED;
 
@@ -1313,8 +1315,8 @@ uop_abstract_interpret(
         _Py_UOpsSymbolicExpression *first_guard = NULL;
         _Py_UOpsSymbolicExpression *last_guard_in_chain = NULL;
         _Py_UOpsSymbolicExpression *guard_to_add = NULL;
-        while(curr < end && (_PyOpcode_ispure(curr->opcode) ||
-            _PyOpcode_isguard(curr->opcode) ||
+        while(curr < end && (_PyOpcode_ispure[curr->opcode] ||
+            _PyOpcode_isguard[curr->opcode] ||
             is_bookkeeping_opcode(curr->opcode))) {
 
             int status = uop_abstract_interpret_single_inst(
@@ -1338,7 +1340,7 @@ uop_abstract_interpret(
                 first_guard = last_guard_in_chain = guard_to_add = NULL;
             }
 
-            if (!_PyOpcode_isguard(curr->opcode)) {
+            if (!_PyOpcode_isguard[curr->opcode]) {
 
                 first_guard = NULL;
             }
@@ -1376,13 +1378,13 @@ uop_abstract_interpret(
         // Form impure region
         impure_store->start = curr;
         // SET_IP shouldn't break and form a new region.
-        while (curr < end && (!_PyOpcode_ispure(curr->opcode) ||
+        while (curr < end && (!_PyOpcode_ispure[curr->opcode] ||
             is_bookkeeping_opcode(curr->opcode) ||
             is_dataonly_opcode(curr->opcode))) {
             DPRINTF(3, "Impure instruction %s:%d\n",
                     (curr->opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[curr->opcode],
                     curr->oparg);
-            int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg, false);
+            int num_stack_inputs = _PyOpcode_num_popped((int)curr->opcode, (int)curr->oparg);
             _Py_UOpsSymbolicExpression *unused = NULL;
             // Adjust the stack and such
             int status = uop_abstract_interpret_single_inst(

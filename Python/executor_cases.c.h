@@ -3357,7 +3357,7 @@
         }
 
         case _JUMP_ABSOLUTE: {
-            PyObject * pc = (PyObject *)CURRENT_OPERAND();
+            PyObject *pc = (PyObject *)CURRENT_OPERAND();
             next_uop = (_PyUOpInstruction *)pc;
             CHECK_EVAL_BREAKER();
             break;
@@ -3400,7 +3400,7 @@
 
         case _LOAD_CONST_IMMEDIATE: {
             PyObject *value;
-            PyObject * obj = (PyObject *)CURRENT_OPERAND();
+            PyObject *obj = (PyObject *)CURRENT_OPERAND();
             value = obj;
             Py_INCREF(value);
             stack_pointer[0] = value;
@@ -3429,7 +3429,7 @@
         case _STORE_COMMON: {
             PyObject *value;
             value = stack_pointer[-1];
-            PyObject * addr = (PyObject *)CURRENT_OPERAND();
+            PyObject *addr = (PyObject *)CURRENT_OPERAND();
             TIER_TWO_ONLY
             PyObject *tmp = *((PyObject **)addr);
             *((PyObject **)addr) = value;
@@ -3440,7 +3440,7 @@
 
         case _LOAD_COMMON: {
             PyObject *value;
-            PyObject * addr = (PyObject *)CURRENT_OPERAND();
+            PyObject *addr = (PyObject *)CURRENT_OPERAND();
             TIER_TWO_ONLY
             value = *((PyObject **)addr);
             Py_INCREF(value);
@@ -3451,7 +3451,7 @@
 
         case _SETUP_TIER2_FRAME: {
             oparg = CURRENT_OPARG();
-            PyObject * scratch_size = (PyObject *)CURRENT_OPERAND();
+            PyObject *scratch_size = (PyObject *)CURRENT_OPERAND();
             if (!_PyFrame_ConvertToTier2(tstate, frame, oparg, (int)(Py_ssize_t)scratch_size) != 0) goto deoptimize;
             break;
         }

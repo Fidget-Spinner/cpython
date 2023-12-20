@@ -1634,6 +1634,7 @@ Python/optimizer.o: \
 
 Python/optimizer_analysis.o: \
 		$(srcdir)/Include/internal/pycore_opcode_metadata.h \
+		$(srcdir)/Include/internal/pycore_uop_metadata.h \
 		$(srcdir)/Include/internal/pycore_optimizer.h
 
 Python/frozen.o: $(FROZEN_FILES_OUT)
@@ -1893,6 +1894,7 @@ PYTHON_HEADERS= \
 		$(srcdir)/Include/internal/pycore_unionobject.h \
 		$(srcdir)/Include/internal/pycore_unicodeobject.h \
 		$(srcdir)/Include/internal/pycore_unicodeobject_generated.h \
+		$(srcdir)/Include/internal/pycore_uop_metadata.h \
 		$(srcdir)/Include/internal/pycore_uops.h \
 		$(srcdir)/Include/internal/pycore_warnings.h \
 		$(srcdir)/Include/internal/pycore_weakref.h \

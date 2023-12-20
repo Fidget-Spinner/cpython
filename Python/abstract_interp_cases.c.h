@@ -7,10 +7,6 @@
             break;
         }
 
-        case RESUME: {
-            break;
-        }
-
         case RESUME_CHECK: {
             break;
         }
@@ -36,17 +32,6 @@
             break;
         }
 
-        case INSTRUMENTED_END_FOR: {
-            STACK_SHRINK(2);
-            break;
-        }
-
-        case INSTRUMENTED_END_SEND: {
-            STACK_SHRINK(1);
-            stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
         case UNARY_NEGATIVE: {
             stack_pointer[-1] = sym_init_unknown(ctx);
             break;
@@ -68,10 +53,6 @@
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
-            break;
-        }
-
-        case _SPECIALIZE_TO_BOOL: {
             break;
         }
 
@@ -391,16 +372,8 @@
                 __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
+            sym_set_type(__sym_temp, PYUNICODE_TYPE, (uint32_t)0);
             PEEK(-(-1)) = __sym_temp;
-            break;
-        }
-
-        case _BINARY_OP_INPLACE_ADD_UNICODE: {
-            STACK_SHRINK(2);
-            break;
-        }
-
-        case _SPECIALIZE_BINARY_SUBSCR: {
             break;
         }
 
@@ -461,10 +434,6 @@
             break;
         }
 
-        case _SPECIALIZE_STORE_SUBSCR: {
-            break;
-        }
-
         case _STORE_SUBSCR: {
             STACK_SHRINK(3);
             break;
@@ -496,16 +465,6 @@
             break;
         }
 
-        case RAISE_VARARGS: {
-            STACK_SHRINK(oparg);
-            break;
-        }
-
-        case INTERPRETER_EXIT: {
-            STACK_SHRINK(1);
-            break;
-        }
-
         case INSTRUMENTED_RETURN_VALUE: {
             STACK_SHRINK(1);
             break;
@@ -531,10 +490,6 @@
             break;
         }
 
-        case _SPECIALIZE_SEND: {
-            break;
-        }
-
         case _SEND: {
             stack_pointer[-1] = sym_init_unknown(ctx);
             break;
@@ -550,30 +505,8 @@
             break;
         }
 
-        case YIELD_VALUE: {
-            stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
         case POP_EXCEPT: {
             STACK_SHRINK(1);
-            break;
-        }
-
-        case RERAISE: {
-            STACK_SHRINK(1);
-            break;
-        }
-
-        case END_ASYNC_FOR: {
-            STACK_SHRINK(2);
-            break;
-        }
-
-        case CLEANUP_THROW: {
-            STACK_SHRINK(1);
-            stack_pointer[-2] = sym_init_unknown(ctx);
-            stack_pointer[-1] = sym_init_unknown(ctx);
             break;
         }
 
@@ -595,10 +528,6 @@
         }
 
         case DELETE_NAME: {
-            break;
-        }
-
-        case _SPECIALIZE_UNPACK_SEQUENCE: {
             break;
         }
 
@@ -629,10 +558,6 @@
         case UNPACK_EX: {
             STACK_GROW((oparg & 0xFF) + (oparg >> 8));
             stack_pointer[-1 - (oparg >> 8)] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case _SPECIALIZE_STORE_ATTR: {
             break;
         }
 
@@ -669,10 +594,6 @@
         case LOAD_NAME: {
             STACK_GROW(1);
             stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case _SPECIALIZE_LOAD_GLOBAL: {
             break;
         }
 
@@ -816,18 +737,6 @@
             break;
         }
 
-        case _SPECIALIZE_LOAD_SUPER_ATTR: {
-            break;
-        }
-
-        case _LOAD_SUPER_ATTR: {
-            STACK_SHRINK(2);
-            STACK_GROW(((oparg & 1) ? 1 : 0));
-            stack_pointer[-1 - (oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
-            stack_pointer[-(oparg & 1 ? 1 : 0)] = sym_init_unknown(ctx);
-            break;
-        }
-
         case LOAD_SUPER_ATTR_ATTR: {
             STACK_SHRINK(2);
             stack_pointer[-1] = sym_init_unknown(ctx);
@@ -839,10 +748,6 @@
             STACK_SHRINK(1);
             stack_pointer[-2] = sym_init_unknown(ctx);
             stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case _SPECIALIZE_LOAD_ATTR: {
             break;
         }
 
@@ -987,10 +892,6 @@
             break;
         }
 
-        case _SPECIALIZE_COMPARE_OP: {
-            break;
-        }
-
         case _COMPARE_OP: {
             STACK_SHRINK(1);
             stack_pointer[-1] = sym_init_unknown(ctx);
@@ -1038,27 +939,7 @@
             break;
         }
 
-        case IMPORT_NAME: {
-            STACK_SHRINK(1);
-            stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case IMPORT_FROM: {
-            STACK_GROW(1);
-            stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case JUMP_FORWARD: {
-            break;
-        }
-
         case JUMP_BACKWARD: {
-            break;
-        }
-
-        case ENTER_EXECUTOR: {
             break;
         }
 
@@ -1074,10 +955,6 @@
 
         case _IS_NONE: {
             stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case JUMP_BACKWARD_NO_INTERRUPT: {
             break;
         }
 
@@ -1118,10 +995,6 @@
 
         case GET_YIELD_FROM_ITER: {
             stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case _SPECIALIZE_FOR_ITER: {
             break;
         }
 
@@ -1325,10 +1198,6 @@
             break;
         }
 
-        case _SPECIALIZE_CALL: {
-            break;
-        }
-
         case _CALL: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
@@ -1524,13 +1393,6 @@
             break;
         }
 
-        case CALL_LIST_APPEND: {
-            STACK_SHRINK(oparg);
-            STACK_SHRINK(1);
-            stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
         case CALL_METHOD_DESCRIPTOR_O: {
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
@@ -1592,10 +1454,6 @@
             break;
         }
 
-        case RETURN_GENERATOR: {
-            break;
-        }
-
         case BUILD_SLICE: {
             STACK_SHRINK(((oparg == 3) ? 1 : 0));
             STACK_SHRINK(1);
@@ -1616,10 +1474,6 @@
         case FORMAT_WITH_SPEC: {
             STACK_SHRINK(1);
             stack_pointer[-1] = sym_init_unknown(ctx);
-            break;
-        }
-
-        case _SPECIALIZE_BINARY_OP: {
             break;
         }
 
@@ -1654,18 +1508,6 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NOT_NONE: {
-            break;
-        }
-
-        case EXTENDED_ARG: {
-            break;
-        }
-
-        case CACHE: {
-            break;
-        }
-
-        case RESERVED: {
             break;
         }
 

@@ -493,7 +493,7 @@ dummy_func(
             DEOPT_IF(!PyUnicode_CheckExact(right));
         }
 
-        pure op(_BINARY_OP_ADD_UNICODE, (left, right -- res: ~(PYFLOAT_TYPE))) {
+        pure op(_BINARY_OP_ADD_UNICODE, (left, right -- res: ~(PYUNICODE_TYPE))) {
             STAT_INC(BINARY_OP, hit);
             res = PyUnicode_Concat(left, right);
             _Py_DECREF_SPECIALIZED(left, _PyUnicode_ExactDealloc);
