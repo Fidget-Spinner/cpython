@@ -2221,6 +2221,21 @@ class ClinicParserTest(TestCase):
                 expected_error = f"{annotation} method cannot define parameters"
                 self.expect_failure(block, expected_error)
 
+    def test_setter_docstring(self):
+        block = """
+            module foo
+            class Foo "" ""
+            @setter
+            Foo.property
+
+            foo
+
+            bar
+            [clinic start generated code]*/
+        """
+        expected_error = "docstrings are only supported for @getter, not @setter"
+        self.expect_failure(block, expected_error)
+
     def test_duplicate_getset(self):
         annotations = ["@getter", "@setter"]
         for annotation in annotations:
@@ -2248,6 +2263,17 @@ class ClinicParserTest(TestCase):
                 """
                 expected_error = "Cannot apply both @getter and @setter to the same function!"
                 self.expect_failure(block, expected_error, lineno=3)
+
+    def test_getset_no_class(self):
+        for annotation in "@getter", "@setter":
+            with self.subTest(annotation=annotation):
+                block = f"""
+                    module m
+                    {annotation}
+                    m.func
+                """
+                expected_error = "@getter and @setter must be methods"
+                self.expect_failure(block, expected_error, lineno=2)
 
     def test_duplicate_coexist(self):
         err = "Called @coexist twice"
