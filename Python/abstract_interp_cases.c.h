@@ -46,10 +46,10 @@
                 PyObject *res;
                 assert(PyBool_Check(value));
                 res = Py_IsFalse(value) ? Py_True : Py_False;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 1 , ___value);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 1 , ___value);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 1 , ___value);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 1 , ___value);
             }
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
@@ -117,10 +117,6 @@
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)left, PYINT_TYPE, (uint32_t)0);
                 sym_set_type((_Py_UOpsSymbolicExpression *)right, PYINT_TYPE, (uint32_t)0);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -142,10 +138,10 @@
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYINT_TYPE, (uint32_t)0);
@@ -169,10 +165,10 @@
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYINT_TYPE, (uint32_t)0);
@@ -196,10 +192,10 @@
                 _Py_DECREF_SPECIALIZED(right, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left, (destructor)PyObject_Free);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYINT_TYPE, (uint32_t)0);
@@ -229,10 +225,6 @@
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)left, PYFLOAT_TYPE, (uint32_t)0);
                 sym_set_type((_Py_UOpsSymbolicExpression *)right, PYFLOAT_TYPE, (uint32_t)0);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -254,10 +246,10 @@
                     ((PyFloatObject *)left)->ob_fval *
                     ((PyFloatObject *)right)->ob_fval;
                 DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYFLOAT_TYPE, (uint32_t)0);
@@ -281,10 +273,10 @@
                     ((PyFloatObject *)left)->ob_fval +
                     ((PyFloatObject *)right)->ob_fval;
                 DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYFLOAT_TYPE, (uint32_t)0);
@@ -308,10 +300,10 @@
                     ((PyFloatObject *)left)->ob_fval -
                     ((PyFloatObject *)right)->ob_fval;
                 DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYFLOAT_TYPE, (uint32_t)0);
@@ -341,10 +333,6 @@
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)left, PYUNICODE_TYPE, (uint32_t)0);
                 sym_set_type((_Py_UOpsSymbolicExpression *)right, PYUNICODE_TYPE, (uint32_t)0);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -366,10 +354,10 @@
                 _Py_DECREF_SPECIALIZED(left, _PyUnicode_ExactDealloc);
                 _Py_DECREF_SPECIALIZED(right, _PyUnicode_ExactDealloc);
                 if (res == NULL) goto pop_2_error_tier_two;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res, guard_to_emit,0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, (PyObject *)res,0, NULL, 2 , ___left, ___right);
             }
             else {
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, 0, NULL, 2 , ___left, ___right);
+                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, 0, NULL, 2 , ___left, ___right);
             }
             if (__sym_temp == NULL) goto error;
             sym_set_type(__sym_temp, PYUNICODE_TYPE, (uint32_t)0);
@@ -778,10 +766,6 @@
             }
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_TYPE_VERSION_TYPE, (uint32_t)type_version);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -868,10 +852,6 @@
             }
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_TYPE, (uint32_t)0);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -1119,10 +1099,6 @@
             }
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_DORV_VALUES_INST_ATTR_FROM_DICT_TYPE, (uint32_t)0);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -1148,10 +1124,6 @@
             }
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)owner, GUARD_KEYS_VERSION_TYPE, (uint32_t)keys_version);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -1227,10 +1199,6 @@
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYMETHOD_TYPE, (uint32_t)0);
                 sym_set_type((_Py_UOpsSymbolicExpression *)null, NULL_TYPE, (uint32_t)0);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
@@ -1243,10 +1211,6 @@
         }
 
         case _CHECK_PEP_523: {
-            _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-            __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-            if (__sym_temp == NULL) goto error;
-            guard_to_add = __sym_temp;
             goto guard_required;
             break;
         }
@@ -1277,20 +1241,12 @@
             }
             else {
                 sym_set_type((_Py_UOpsSymbolicExpression *)callable, PYFUNCTION_TYPE_VERSION_TYPE, (uint32_t)func_version);
-                _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-                __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-                if (__sym_temp == NULL) goto error;
-                guard_to_add = __sym_temp;
                 goto guard_required;
             }
             break;
         }
 
         case _CHECK_STACK_SPACE: {
-            _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-            __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-            if (__sym_temp == NULL) goto error;
-            guard_to_add = __sym_temp;
             goto guard_required;
             break;
         }
@@ -1305,7 +1261,7 @@
             STACK_SHRINK(oparg);
             STACK_SHRINK(1);
             _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-            __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, guard_to_emit, oparg, ___args, 2 , ___callable, ___self_or_null);
+            __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, oparg, ___args, 2 , ___callable, ___self_or_null);
             if (__sym_temp == NULL) goto error;
             PEEK(-(-1)) = __sym_temp;
             break;
@@ -1544,10 +1500,6 @@
         }
 
         case _SAVE_RETURN_OFFSET: {
-            _Py_UOpsSymbolicExpression *__sym_temp = NULL;
-            __sym_temp = _Py_UOpsSymbolicExpression_New(ctx, *inst, NULL, NULL, 0, NULL, 0);
-            if (__sym_temp == NULL) goto error;
-            guard_to_add = __sym_temp;
             goto guard_required;
             break;
         }
