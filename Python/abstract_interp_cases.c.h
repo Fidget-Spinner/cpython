@@ -594,10 +594,12 @@
         }
 
         case _GUARD_GLOBALS_VERSION: {
+            goto guard_required;
             break;
         }
 
         case _GUARD_BUILTINS_VERSION: {
+            goto guard_required;
             break;
         }
 

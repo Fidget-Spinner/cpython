@@ -1205,8 +1205,7 @@ uop_abstract_interpret(
 
         if (!_PyOpcode_ispure[curr->opcode] &&
             !is_bookkeeping_opcode(curr->opcode) &&
-            // Eliminated guard
-            !(_PyOpcode_isguard[curr->opcode] && status != ABSTRACT_INTERP_GUARD_REQUIRED)) {
+            !_PyOpcode_isguard[(curr)->opcode]) {
             DPRINTF(2, "Impure ");
             if (first_impure) {
                 // Emit the state of the stack first.
@@ -1220,8 +1219,10 @@ uop_abstract_interpret(
                     ctx->frame->stack[i] = new_stack;
                 }
                 // The last instruction of the previous region should be a _CHECK_VALIDITY
-                assert((curr-1)->opcode == _CHECK_VALIDITY);
-                assert((curr-2)->opcode == _SET_IP);
+                if((curr-1)->opcode == _CHECK_VALIDITY && (curr-2)->opcode == _SET_IP) {
+                    ir_plain_inst(ctx->ir, *(curr-2));
+                    ir_plain_inst(ctx->ir, *(curr-1));
+                }
                 ir_plain_inst(ctx->ir, *(curr-2));
                 ir_plain_inst(ctx->ir, *(curr-1));
             }
@@ -1238,6 +1239,25 @@ uop_abstract_interpret(
         );
         if (status == ABSTRACT_INTERP_ERROR) {
             goto error;
+        }
+        else if (status == ABSTRACT_INTERP_GUARD_REQUIRED) {
+            DPRINTF(2, "GUARD\n");
+            // Emit the state of the stack first.
+            int stack_entries = ctx->frame->stack_pointer - ctx->frame->stack;
+            for (int i = 0; i < stack_entries; i++) {
+                ir_store(ctx->ir, ctx->frame->stack[i], -2);
+                _Py_UOpsSymbolicExpression *new_stack = sym_init_unknown(ctx);
+                if (new_stack == NULL) {
+                    goto error;
+                }
+                ctx->frame->stack[i] = new_stack;
+            }
+            // The last instruction of the previous region should be a _CHECK_VALIDITY
+            if((curr-1)->opcode == _CHECK_VALIDITY && (curr-2)->opcode == _SET_IP) {
+                ir_plain_inst(ctx->ir, *(curr-2));
+                ir_plain_inst(ctx->ir, *(curr-1));
+            }
+            ir_plain_inst(ctx->ir, *curr);
         }
 
         curr++;

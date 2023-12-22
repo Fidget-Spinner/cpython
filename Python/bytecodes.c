@@ -1463,14 +1463,14 @@ dummy_func(
             builtins_version/1 +
             _LOAD_GLOBAL;
 
-        guard op(_GUARD_GLOBALS_VERSION, (version/1 --)) {
+        mandatory guard op(_GUARD_GLOBALS_VERSION, (version/1 --)) {
             PyDictObject *dict = (PyDictObject *)GLOBALS();
             DEOPT_IF(!PyDict_CheckExact(dict));
             DEOPT_IF(dict->ma_keys->dk_version != version);
             assert(DK_IS_UNICODE(dict->ma_keys));
         }
 
-        guard op(_GUARD_BUILTINS_VERSION, (version/1 --)) {
+        mandatory guard op(_GUARD_BUILTINS_VERSION, (version/1 --)) {
             PyDictObject *dict = (PyDictObject *)BUILTINS();
             DEOPT_IF(!PyDict_CheckExact(dict));
             DEOPT_IF(dict->ma_keys->dk_version != version);
