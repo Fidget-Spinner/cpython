@@ -3388,16 +3388,6 @@
             break;
         }
 
-        case _LOAD_FAST_NO_INCREF: {
-            PyObject *value;
-            oparg = CURRENT_OPARG();
-            value = GETLOCAL(oparg);
-            assert(value != NULL);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            break;
-        }
-
         case _LOAD_CONST_IMMEDIATE: {
             PyObject *value;
             PyObject *obj = (PyObject *)CURRENT_OPERAND();
@@ -3411,18 +3401,6 @@
         case _SHRINK_STACK: {
             oparg = CURRENT_OPARG();
             stack_pointer += -oparg;
-            break;
-        }
-
-        case _SWAP_AND_POP: {
-            PyObject *tos;
-            PyObject **target;
-            oparg = CURRENT_OPARG();
-            tos = stack_pointer[-1];
-            target = &stack_pointer[-1 - oparg];
-            Py_DECREF(*target);
-            *target = tos;
-            stack_pointer += -1;
             break;
         }
 

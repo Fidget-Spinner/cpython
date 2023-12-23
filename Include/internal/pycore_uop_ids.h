@@ -230,16 +230,14 @@ extern "C" {
 #define _JUMP_TO_TOP 377
 #define _JUMP_ABSOLUTE 378
 #define _SAVE_RETURN_OFFSET 379
-#define _LOAD_FAST_NO_INCREF 380
-#define _LOAD_CONST_IMMEDIATE 381
-#define _SHRINK_STACK 382
-#define _SWAP_AND_POP 383
-#define _STORE_COMMON 384
-#define _LOAD_COMMON 385
-#define _SETUP_TIER2_FRAME 386
-#define _INSERT 387
-#define _CHECK_VALIDITY 388
-#define MAX_UOP_ID 388
+#define _LOAD_CONST_IMMEDIATE 380
+#define _SHRINK_STACK 381
+#define _STORE_COMMON 382
+#define _LOAD_COMMON 383
+#define _SETUP_TIER2_FRAME 384
+#define _INSERT 385
+#define _CHECK_VALIDITY 386
+#define MAX_UOP_ID 386
 
 #ifdef __cplusplus
 }

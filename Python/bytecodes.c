@@ -4057,22 +4057,12 @@ dummy_func(
             DEOPT_IF(1);
         }
 
-        pure op(_LOAD_FAST_NO_INCREF, (-- value)) {
-            value = GETLOCAL(oparg);
-            assert(value != NULL);
-        }
-
         pure op(_LOAD_CONST_IMMEDIATE, (obj/4 -- value)) {
             value = obj;
             Py_INCREF(value);
         }
 
         pure op(_SHRINK_STACK, (unused[oparg] --)) {
-        }
-
-        pure op(_SWAP_AND_POP, (target[oparg], tos -- target[oparg])) {
-            Py_DECREF(*target);
-            *target = tos;
         }
 
         pure op(_STORE_COMMON, (addr/4, value -- value)) {

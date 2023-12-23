@@ -1881,9 +1881,9 @@ is_pseudo_target(int pseudo, int target) {
     return false;
 }
 
-extern const uint8_t _PyOpcode_ispure[471];
+extern const uint8_t _PyOpcode_ispure[469];
 #ifdef NEED_OPCODE_METADATA
-const uint8_t _PyOpcode_ispure[471] = {
+const uint8_t _PyOpcode_ispure[469] = {
     [LOAD_FAST] = 1,
     [LOAD_FAST_AND_CLEAR] = 1,
     [LOAD_CONST] = 1,
@@ -1907,19 +1907,17 @@ const uint8_t _PyOpcode_ispure[471] = {
     [_POP_FRAME] = 1,
     [_INIT_CALL_PY_EXACT_ARGS] = 1,
     [_PUSH_FRAME] = 1,
-    [_LOAD_FAST_NO_INCREF] = 1,
     [_LOAD_CONST_IMMEDIATE] = 1,
     [_SHRINK_STACK] = 1,
-    [_SWAP_AND_POP] = 1,
     [_STORE_COMMON] = 1,
     [_LOAD_COMMON] = 1,
 };
 
 #endif // NEED_OPCODE_METADATA
 
-extern const uint8_t _PyOpcode_isguard[471];
+extern const uint8_t _PyOpcode_isguard[469];
 #ifdef NEED_OPCODE_METADATA
-const uint8_t _PyOpcode_isguard[471] = {
+const uint8_t _PyOpcode_isguard[469] = {
     [_GUARD_BOTH_INT] = 1,
     [_GUARD_BOTH_FLOAT] = 1,
     [_GUARD_BOTH_UNICODE] = 1,

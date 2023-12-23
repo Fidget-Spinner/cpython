@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import lexer
 import parser
 from typing import Optional
@@ -100,6 +100,8 @@ class StackItem:
     condition: str | None
     size: str
     peek: bool = False
+    typeprop: None | tuple[str, None | str] = \
+        field(default_factory=lambda: None, init=True, compare=False, hash=False)
 
     def __str__(self) -> str:
         cond = f" if ({self.condition})" if self.condition else ""
@@ -271,7 +273,7 @@ def override_error(
 
 
 def convert_stack_item(item: parser.StackEffect) -> StackItem:
-    return StackItem(item.name, item.type, item.cond, (item.size or "1"))
+    return StackItem(item.name, item.type, item.cond, (item.size or "1"), typeprop=item.typeprop)
 
 
 def analyze_stack(op: parser.InstDef) -> StackEffect:
