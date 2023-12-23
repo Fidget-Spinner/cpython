@@ -302,6 +302,17 @@ static PyTypeObject _Py_UOps_SSA_IR_Type = {
 static void
 ir_store(_Py_UOps_SSA_IR *ir, _Py_UOpsSymbolicExpression *expr, int store_fast_idx)
 {
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+    DPRINTF(3, "ir_store: #%d, expr: %s oparg: %d, operand: %p\n", store_fast_idx,
+            (expr->inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[expr->inst.opcode],
+                        expr->inst.oparg,
+                        (void *)expr->inst.operand);
+#endif
     _Py_UOpsSSAEntry *entry = &ir->entries[ir->curr_write];
     entry->symbolic_or_plain = 1;
     entry->assignment_target = store_fast_idx;
@@ -312,6 +323,17 @@ ir_store(_Py_UOps_SSA_IR *ir, _Py_UOpsSymbolicExpression *expr, int store_fast_i
 static void
 ir_plain_inst(_Py_UOps_SSA_IR *ir, _PyUOpInstruction inst)
 {
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+    DPRINTF(3, "ir_inst: opcode: %s oparg: %d, operand: %p\n",
+            (inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[inst.opcode],
+                        inst.oparg,
+                        (void *)inst.operand);
+#endif
     _Py_UOpsSSAEntry *entry = &ir->entries[ir->curr_write];
     entry->symbolic_or_plain = 0;
     entry->inst = inst;
@@ -337,7 +359,7 @@ static void
 abstractframe_dealloc(_Py_UOpsAbstractFrame *self)
 {
     Py_DECREF(self->sym_consts);
-    Py_DECREF(self->prev);
+    Py_XDECREF(self->prev);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -360,6 +382,8 @@ typedef struct _Py_UOpsAbstractInterpContext {
     PyDictObject *sym_exprs_to_sym_exprs;
     // Current ID to assign a new (non-duplicate) sym_expr
     Py_ssize_t sym_curr_id;
+    // Stores the symbolic for the upcoming new frame that is about to be created.
+    _Py_UOpsSymbolicExpression *new_frame_sym;
     _Py_UOpsAbstractFrame *frame;
 
     int curr_region_id;
@@ -428,6 +452,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
 
     self->sym_exprs_to_sym_exprs = sym_exprs_to_sym_exprs;
     self->ir = ir;
+    self->new_frame_sym = NULL;
     frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen);
     self->frame = frame;
 
@@ -541,8 +566,7 @@ static inline PyFunctionObject *
 extract_func_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
 {
     switch(frame_sym->inst.opcode) {
-        case _INIT_CALL_PY_EXACT_ARGS:
-        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+        case _INIT_CALL_PY_EXACT_ARGS: {
             _Py_UOpsSymbolicExpression *callable_sym = frame_sym->operands[0];
             if (!sym_is_type(callable_sym, PYFUNCTION_TYPE_VERSION_TYPE)) {
                 return NULL;
@@ -564,7 +588,6 @@ extract_self_or_null_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
 {
     switch(frame_sym->inst.opcode) {
         case _INIT_CALL_PY_EXACT_ARGS:
-        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS:
             return frame_sym->operands[1];
         default:
             return NULL;
@@ -576,7 +599,6 @@ extract_args_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
 {
     switch(frame_sym->inst.opcode) {
         case _INIT_CALL_PY_EXACT_ARGS:
-        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS:
             return &frame_sym->operands[2];
         default:
             return NULL;
@@ -590,8 +612,12 @@ _Py_UOpsAbstractInterpContext_FramePush(
     _Py_UOpsSymbolicExpression *frame_sym
 )
 {
+    assert(frame_sym != NULL);
     // Extract func version from the frame symbolic
     PyFunctionObject *func = extract_func_from_sym(frame_sym);
+    if (func == NULL) {
+        return -1;
+    }
     PyCodeObject *co = (PyCodeObject *)func->func_code;
     _Py_UOpsAbstractFrame *frame = _Py_UOpsAbstractFrame_New(ctx,
         co->co_consts, co->co_stacksize, co->co_nlocals, 0);
@@ -612,6 +638,7 @@ _Py_UOpsAbstractInterpContext_FramePop(
     _Py_UOpsAbstractFrame *frame = ctx->frame;
     ctx->frame = frame->prev;
     assert(ctx->frame != NULL);
+    frame->prev = NULL;
     Py_DECREF(frame);
     return 0;
 }
@@ -698,19 +725,16 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         // need GC.
         operands[i] = va_arg(curr, _Py_UOpsSymbolicExpression *);
         assert(operands[i]);
-
-        // Guards just forward their operands so are not part of usages.
-        if (!_PyOpcode_isguard[inst.opcode]) {
-            operands[i]->usage_count++;
-        }
     }
 
     va_end(curr);
 
-    for (; i < total_subexprs; i++) {
-        operands[i] = arr_start[i];
-        assert(operands[i]);
-        // Guards just forward their operands so are not part of usages.
+    for (int x = 0; x < num_arr; x++) {
+        operands[i+x] = arr_start[x];
+        assert(operands[i+x]);
+    }
+
+    for (int i = 0; i < total_subexprs; i++) {
         if (!_PyOpcode_isguard[inst.opcode]) {
             operands[i]->usage_count++;
         }
@@ -1109,13 +1133,15 @@ uop_abstract_interpret_single_inst(
             _Py_UOpsSymbolicExpression *frame_sym = PEEK(1);
             STACK_SHRINK(1);
             ctx->frame->stack_pointer = stack_pointer;
-            if (_Py_UOpsAbstractInterpContext_FramePush(ctx, frame_sym) != 0){
+            if (_Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym) != 0){
                 goto error;
             }
-            _Py_UOpsSymbolicExpression *self_or_null = extract_self_or_null_from_sym(frame_sym);
+            stack_pointer = ctx->frame->stack_pointer;
+            _Py_UOpsSymbolicExpression *self_or_null = extract_self_or_null_from_sym(ctx->new_frame_sym);
             assert(self_or_null != NULL);
-            _Py_UOpsSymbolicExpression **args = extract_args_from_sym(frame_sym);
+            _Py_UOpsSymbolicExpression **args = extract_args_from_sym(ctx->new_frame_sym);
             assert(args != NULL);
+            ctx->new_frame_sym = NULL;
             int argcount = oparg;
             // Bound method fiddling, same as _INIT_CALL_PY_EXACT_ARGS
             if (!sym_is_type(self_or_null, NULL_TYPE)) {
@@ -1123,8 +1149,9 @@ uop_abstract_interpret_single_inst(
                 argcount++;
             }
             for (int i = 0; i < argcount; i++) {
-                ctx->frame->locals[i] = args[i];
+                sym_copy_type(args[i], ctx->frame->locals[i]);
             }
+            goto required;
             break;
         }
 
@@ -1139,7 +1166,8 @@ uop_abstract_interpret_single_inst(
             stack_pointer = ctx->frame->stack_pointer;
             // Push retval into new frame.
             STACK_GROW(1);
-            PEEK(1) = retval;
+            sym_copy_type(retval, PEEK(1));
+            goto required;
             break;
         }
         // TODO SWAP
@@ -1148,6 +1176,10 @@ uop_abstract_interpret_single_inst(
             Py_UNREACHABLE();
     }
 
+    // Store the frame symbolic to extract information later
+    if (opcode == _INIT_CALL_PY_EXACT_ARGS) {
+        ctx->new_frame_sym = PEEK(1);
+    }
     DPRINTF(2, "stack_pointer %p\n", stack_pointer);
     ctx->frame->stack_pointer = stack_pointer;
     assert(STACK_LEVEL() >= 0);
@@ -1163,6 +1195,11 @@ error:
 
 guard_required:
     assert(_PyOpcode_isguard[opcode]);
+required:
+    DPRINTF(2, "stack_pointer %p\n", stack_pointer);
+    ctx->frame->stack_pointer = stack_pointer;
+    assert(STACK_LEVEL() >= 0);
+
     return ABSTRACT_INTERP_GUARD_REQUIRED;
 
 }
@@ -1206,7 +1243,7 @@ uop_abstract_interpret(
         if (!_PyOpcode_ispure[curr->opcode] &&
             !is_bookkeeping_opcode(curr->opcode) &&
             !_PyOpcode_isguard[(curr)->opcode]) {
-            DPRINTF(2, "Impure ");
+            DPRINTF(2, "Impure\n");
             if (first_impure) {
                 // Emit the state of the stack first.
                 int stack_entries = ctx->frame->stack_pointer - ctx->frame->stack;
@@ -1223,8 +1260,6 @@ uop_abstract_interpret(
                     ir_plain_inst(ctx->ir, *(curr-2));
                     ir_plain_inst(ctx->ir, *(curr-1));
                 }
-                ir_plain_inst(ctx->ir, *(curr-2));
-                ir_plain_inst(ctx->ir, *(curr-1));
             }
             first_impure = false;
             ctx->curr_region_id++;
@@ -1250,6 +1285,8 @@ uop_abstract_interpret(
                 if (new_stack == NULL) {
                     goto error;
                 }
+                // Since this is a guard, copy over the type info
+                sym_copy_type(ctx->frame->stack[i], new_stack);
                 ctx->frame->stack[i] = new_stack;
             }
             // The last instruction of the previous region should be a _CHECK_VALIDITY
