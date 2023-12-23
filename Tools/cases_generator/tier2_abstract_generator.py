@@ -260,34 +260,34 @@ def _write_body_abstract_interp_guard_uop(
         return
     # If the input types already match, eliminate the guard
     # Read the cache information to check the auxiliary type information
-    # predicates = []
-    # propagates = []
-    #
-    # for input_var in mangled_uop.stack.inputs:
-    #     if (typ := input_var.typeprop) is not None:
-    #         typname, aux = typ
-    #         aux = "0" if aux is None else aux
-    #         # Check that the input type information match (including auxiliary info)
-    #         predicates.append(
-    #             f"sym_matches_type((_Py_UOpsSymbolicExpression *){input_var.name}, {typname}, (uint32_t){aux})"
-    #         )
-    #         # Propagate mode - set the types
-    #         propagates.append(
-    #             f"sym_set_type((_Py_UOpsSymbolicExpression *){input_var.name}, {typname}, (uint32_t){aux})"
-    #         )
-    #
-    # out.emit("// Type guard elimination \n")
-    # out.emit(f"if ({' && '.join(predicates)}){{\n")
-    # out.emit('DPRINTF(2, "type propagation eliminated guard\\n");\n')
-    # out.emit("break;\n")
-    # out.emit("}\n")
-    # # Else we need the guard
-    # out.emit("else {\n")
-    # out.emit("// Type propagation \n")
-    # for prop in propagates:
-    #     out.emit(f"{prop};\n")
-    # out.emit("goto guard_required;\n")
-    # out.emit("}\n")
+    predicates = []
+    propagates = []
+
+    for input_var in mangled_uop.stack.inputs:
+        if (typ := input_var.typeprop) is not None:
+            typname, aux = typ
+            aux = "0" if aux is None else aux
+            # Check that the input type information match (including auxiliary info)
+            predicates.append(
+                f"sym_matches_type((_Py_UOpsSymbolicExpression *){input_var.name}, {typname}, (uint32_t){aux})"
+            )
+            # Propagate mode - set the types
+            propagates.append(
+                f"sym_set_type((_Py_UOpsSymbolicExpression *){input_var.name}, {typname}, (uint32_t){aux})"
+            )
+
+    out.emit("// Type guard elimination \n")
+    out.emit(f"if ({' && '.join(predicates)}){{\n")
+    out.emit('DPRINTF(2, "type propagation eliminated guard\\n");\n')
+    out.emit("break;\n")
+    out.emit("}\n")
+    # Else we need the guard
+    out.emit("else {\n")
+    out.emit("// Type propagation \n")
+    for prop in propagates:
+        out.emit(f"{prop};\n")
+    out.emit("goto guard_required;\n")
+    out.emit("}\n")
 
 
 
