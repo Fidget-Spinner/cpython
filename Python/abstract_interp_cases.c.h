@@ -576,7 +576,7 @@
         }
 
         case _UNPACK_EX: {
-            stack_pointer += -1;
+            stack_pointer += (oparg >> 8) + (oparg & 0xFF);
             break;
         }
 
@@ -784,7 +784,7 @@
             _Py_UOpsSymbolicExpression *__attr_;
             __attr_ = sym_init_unknown(ctx);
             stack_pointer[-3] = __attr_;
-            stack_pointer += -2;
+            stack_pointer += -2 + ((0) ? 1 : 0);
             break;
         }
 
@@ -1274,6 +1274,7 @@
             _Py_UOpsSymbolicExpression *__attr_;
             __attr_ = sym_init_unknown(ctx);
             stack_pointer[-1] = __attr_;
+            stack_pointer += ((0) ? 1 : 0);
             break;
         }
 
@@ -1281,6 +1282,7 @@
             _Py_UOpsSymbolicExpression *__attr_;
             __attr_ = sym_init_unknown(ctx);
             stack_pointer[-1] = __attr_;
+            stack_pointer += ((0) ? 1 : 0);
             break;
         }
 
@@ -1306,8 +1308,8 @@
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
             _Py_UOpsSymbolicExpression *__null_;
             _Py_UOpsSymbolicExpression *__callable_;
-            __null_ = stack_pointer[-1];
-            __callable_ = stack_pointer[-2];
+            __null_ = stack_pointer[-1 - oparg];
+            __callable_ = stack_pointer[-2 - oparg];
             // Constant evaluation 
             if (is_const(__callable_) && is_const(__null_)) {
                 PyObject *null;
@@ -1339,9 +1341,8 @@
             _Py_UOpsSymbolicExpression *__self_;
             __func_ = sym_init_unknown(ctx);
             __self_ = sym_init_unknown(ctx);
-            stack_pointer[-1] = __func_;
-            stack_pointer[0] = __self_;
-            stack_pointer += 1;
+            stack_pointer[-2 - oparg] = __func_;
+            stack_pointer[-1 - oparg] = __self_;
             break;
         }
 
@@ -1353,8 +1354,8 @@
         case _CHECK_FUNCTION_EXACT_ARGS: {
             _Py_UOpsSymbolicExpression *__self_or_null_;
             _Py_UOpsSymbolicExpression *__callable_;
-            __self_or_null_ = stack_pointer[-1];
-            __callable_ = stack_pointer[-2];
+            __self_or_null_ = stack_pointer[-1 - oparg];
+            __callable_ = stack_pointer[-2 - oparg];
             uint32_t func_version = (uint32_t)CURRENT_OPERAND();
             // Constant evaluation 
             if (is_const(__callable_) && is_const(__self_or_null_)) {
@@ -1386,7 +1387,7 @@
 
         case _CHECK_STACK_SPACE: {
             _Py_UOpsSymbolicExpression *__callable_;
-            __callable_ = stack_pointer[-1];
+            __callable_ = stack_pointer[-2 - oparg];
             goto guard_required;
             break;
         }
@@ -1641,7 +1642,7 @@
         case _INSERT: {
             _Py_UOpsSymbolicExpression *__top_;
             __top_ = sym_init_unknown(ctx);
-            stack_pointer[-1] = __top_;
+            stack_pointer[-1 - oparg] = __top_;
             break;
         }
 

@@ -134,8 +134,8 @@ def _write_body_abstract_interp_impure_uop(
 def mangle_uop_names(uop: Uop) -> Uop:
     uop = dataclasses.replace(uop)
     new_stack = dataclasses.replace(uop.stack)
-    new_stack.inputs = [dataclasses.replace(var, name=f"__{var.name}_") for var in uop.stack.inputs if var.name not in UNUSED]
-    new_stack.outputs = [dataclasses.replace(var, name=f"__{var.name}_") for var in uop.stack.outputs if var.name not in UNUSED]
+    new_stack.inputs = [dataclasses.replace(var, name=f"__{var.name}_") for var in uop.stack.inputs]
+    new_stack.outputs = [dataclasses.replace(var, name=f"__{var.name}_") for var in uop.stack.outputs]
     uop.stack = new_stack
     return uop
 
@@ -187,7 +187,7 @@ def _write_body_abstract_interp_pure_uop(
     if all(input.size == '1' for input in uop.stack.inputs):
         # We can try a constant evaluation
         out.emit("// Constant evaluation\n")
-        predicates = " && ".join([f"is_const({var.name})" for var in mangled_uop.stack.inputs])
+        predicates = " && ".join([f"is_const({var.name})" for var in mangled_uop.stack.inputs if var.name not in UNUSED])
 
         out.emit(f"if ({predicates or 0}){{\n")
         declare_variables(uop, out, default_type="PyObject *")
@@ -242,11 +242,13 @@ def _write_body_abstract_interp_guard_uop(
     out.emit("// Constant evaluation \n")
     # TODO if we encode all type information of constants, then we shouldn't even need
     # this part, and we can just do a type check.
-    predicates_str = " && ".join([f"is_const({var.name})" for var in mangled_uop.stack.inputs])
+    predicates_str = " && ".join([f"is_const({var.name})" for var in mangled_uop.stack.inputs if var.name not in UNUSED])
     if predicates_str:
         out.emit(f"if ({predicates_str}) {{\n")
         declare_variables(uop, out, default_type="PyObject *")
         for var, mangled_var in zip(uop.stack.inputs, mangled_uop.stack.inputs):
+            if var.name in UNUSED:
+                continue
             out.emit(f"{var.name} = get_const({mangled_var.name});\n")
         emit_tokens(out, uop, stack, None, TIER2_REPLACEMENT_FUNCTIONS)
         out.emit("\n")
@@ -264,6 +266,8 @@ def _write_body_abstract_interp_guard_uop(
     propagates = []
 
     for input_var in mangled_uop.stack.inputs:
+        if input_var.name in UNUSED:
+            continue
         if (typ := input_var.typeprop) is not None:
             typname, aux = typ
             aux = "0" if aux is None else aux
