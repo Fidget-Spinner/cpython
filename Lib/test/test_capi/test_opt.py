@@ -709,5 +709,21 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIn("_PUSH_FRAME", uops)
         self.assertIn("_BINARY_OP_ADD_INT", uops)
 
+    # def test_repro1(self):
+    #     def testfunc(n):
+    #         num = []
+    #         while len(num) < n:
+    #             # CALL_PY_EXACT_ARGS
+    #             num += [1]
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(20)
+    #
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+
 if __name__ == "__main__":
     unittest.main()

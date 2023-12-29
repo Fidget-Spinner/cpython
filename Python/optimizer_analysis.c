@@ -111,14 +111,11 @@ typedef struct {
 typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     Py_ssize_t idx;
+
     // Note: separated from refcnt so we don't have to deal with counting
     // How many times this is nested as a subexpression of another
     // expression. Used for CSE.
     int usage_count;
-    // How many of this expression we have emitted so far. Only used for CSE.
-    int emitted_count;
-    _PyUOpInstruction inst;
-
 
     // Type of the symbolic expression
     _Py_UOpsSymType sym_type;
@@ -127,6 +124,13 @@ typedef struct _Py_UOpsSymbolicExpression {
     // The region where this expression was first created.
     // This matters for anything that isn't immutable
     int originating_region;
+
+    // The following fields are for codegen.
+    // How many of this expression we have emitted so far. Only used for CSE.
+    int emitted_count;
+    _PyUOpInstruction inst;
+    // The latest IR entry this symbolic expression is found in.
+    struct _Py_UOpsOptIREntry *ir_entry;
 
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
@@ -285,7 +289,7 @@ typedef enum _Py_UOps_IRStore_EntryKind {
     IR_FRAME_INFO = 2,
 } _Py_UOps_IRStore_EntryKind;
 
-typedef struct _Py_UOpsSSAEntry {
+typedef struct _Py_UOpsOptIREntry {
     _Py_UOps_IRStore_EntryKind typ;
     union {
         // IR_PLAIN_INST
@@ -295,31 +299,40 @@ typedef struct _Py_UOpsSSAEntry {
             _Py_UOps_IRStore_IdKind assignment_target;
             _Py_UOpsSymbolicExpression *expr;
         };
-        // IR_FRAME_INFO
+        // IR_FRAME_INFO, always precedes a _PUSH_FRAME IR_PLAIN_INST
         struct {
-            struct _Py_UOpsSSAEntry *frame_inst_end;
+            // Strong reference. Needed for later when we reconstruct the frame.
+            // From the code object as a constructor.
+            PyCodeObject *frame_co_code;
+            // Start and end of the frame creation
+            struct _Py_UOpsOptIREntry *frame_creation;
+            struct _Py_UOpsOptIREntry *frame_pop;
+            // A frame is only inlineable if during its entire lifetime,
+            // all its child frames (if any) are inlineable.
+            // And the locals count of each frame must be < 10.
+            bool is_inlineable;
         };
     };
-} _Py_UOpsSSAEntry;
+} _Py_UOpsOptIREntry;
 
-typedef struct _Py_UOps_SSA_IR {
+typedef struct _Py_UOps_Opt_IR {
     PyObject_VAR_HEAD
     int curr_write;
-    _Py_UOpsSSAEntry entries[1];
-} _Py_UOps_SSA_IR;
+    _Py_UOpsOptIREntry entries[1];
+} _Py_UOps_Opt_IR;
 
-static PyTypeObject _Py_UOps_SSA_IR_Type = {
+static PyTypeObject _Py_UOps_Opt_IR_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops SSA IR",
-    .tp_basicsize = sizeof(_Py_UOps_SSA_IR) - sizeof(_Py_UOpsSSAEntry),
-    .tp_itemsize = sizeof(_Py_UOpsSSAEntry),
+    .tp_basicsize = sizeof(_Py_UOps_Opt_IR) - sizeof(_Py_UOpsOptIREntry),
+    .tp_itemsize = sizeof(_Py_UOpsOptIREntry),
     .tp_dealloc = PyObject_Del,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
 static void
-ir_store(_Py_UOps_SSA_IR *ir, _Py_UOpsSymbolicExpression *expr, _Py_UOps_IRStore_IdKind store_fast_idx)
+ir_store(_Py_UOps_Opt_IR *ir, _Py_UOpsSymbolicExpression *expr, _Py_UOps_IRStore_IdKind store_fast_idx)
 {
     // Don't store stuff we know will never get compiled.
     if(_PyOpcode_isunknown(expr->inst.opcode) && store_fast_idx == TARGET_NONE) {
@@ -336,15 +349,16 @@ ir_store(_Py_UOps_SSA_IR *ir, _Py_UOpsSymbolicExpression *expr, _Py_UOps_IRStore
                         expr->inst.oparg,
                         (void *)expr->inst.operand);
 #endif
-    _Py_UOpsSSAEntry *entry = &ir->entries[ir->curr_write];
+    _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_SYMBOLIC;
     entry->assignment_target = store_fast_idx;
     entry->expr = expr;
+    expr->ir_entry = entry;
     ir->curr_write++;
 }
 
 static void
-ir_plain_inst(_Py_UOps_SSA_IR *ir, _PyUOpInstruction inst)
+ir_plain_inst(_Py_UOps_Opt_IR *ir, _PyUOpInstruction inst)
 {
 #ifdef Py_DEBUG
     char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
@@ -357,14 +371,14 @@ ir_plain_inst(_Py_UOps_SSA_IR *ir, _PyUOpInstruction inst)
                         inst.oparg,
                         (void *)inst.operand);
 #endif
-    _Py_UOpsSSAEntry *entry = &ir->entries[ir->curr_write];
+    _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_PLAIN_INST;
     entry->inst = inst;
     ir->curr_write++;
 }
 
-static void
-ir_frame_info(_Py_UOps_SSA_IR *ir)
+static _Py_UOpsOptIREntry *
+ir_frame_info(_Py_UOps_Opt_IR *ir)
 {
 #ifdef Py_DEBUG
     char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
@@ -374,9 +388,11 @@ ir_frame_info(_Py_UOps_SSA_IR *ir)
     }
     DPRINTF(3, "ir_frame_info\n");
 #endif
-    _Py_UOpsSSAEntry *entry = &ir->entries[ir->curr_write];
+    _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_FRAME_INFO;
+    entry->is_inlineable = false;
     ir->curr_write++;
+    return entry;
 }
 
 typedef struct _Py_UOpsAbstractFrame {
@@ -387,6 +403,8 @@ typedef struct _Py_UOpsAbstractFrame {
     // Max stacklen
     int stack_len;
     int locals_len;
+
+    _Py_UOpsOptIREntry *frame_ir_entry;
 
     _Py_UOpsSymbolicExpression **stack_pointer;
     _Py_UOpsSymbolicExpression **stack;
@@ -412,7 +430,28 @@ static PyTypeObject _Py_UOpsAbstractFrame_Type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
+static void
+frame_propagate_not_inlineable(_Py_UOpsAbstractFrame *frame)
+{
+    _Py_UOpsAbstractFrame *curr = frame;
+    while (curr != NULL) {
+        curr->frame_ir_entry->is_inlineable = false;
+        curr = curr->prev;
+    }
+}
 
+static void
+frame_decide_inlineable(_Py_UOpsAbstractFrame *frame)
+{
+    PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
+    // Too many locals, or too big stack
+    if (co->co_nlocals + co->co_stacksize > 20) {
+        frame->frame_ir_entry->is_inlineable = false;
+        frame_propagate_not_inlineable(frame);
+        return;
+    }
+    frame->frame_ir_entry = true;
+}
 
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
@@ -426,7 +465,7 @@ typedef struct _Py_UOpsAbstractInterpContext {
     _Py_UOpsAbstractFrame *frame;
 
     int curr_region_id;
-    _Py_UOps_SSA_IR *ir;
+    _Py_UOps_Opt_IR *ir;
 } _Py_UOpsAbstractInterpContext;
 
 static void
@@ -451,13 +490,14 @@ static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
 
 static inline _Py_UOpsAbstractFrame *
 _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
-                          PyObject *co_consts, int stack_len, int locals_len, int curr_stacklen);
+PyObject *co_consts, int stack_len, int locals_len,
+int curr_stacklen, _Py_UOpsOptIREntry *frame_ir_entry);
 
-static inline _Py_UOps_SSA_IR *
+static inline _Py_UOps_Opt_IR *
 _Py_UOpsSSA_IR_New(int entries)
 {
-    _Py_UOps_SSA_IR *ir = PyObject_NewVar(_Py_UOps_SSA_IR,
-                                          &_Py_UOps_SSA_IR_Type,
+    _Py_UOps_Opt_IR *ir = PyObject_NewVar(_Py_UOps_Opt_IR,
+                                          &_Py_UOps_Opt_IR_Type,
                                           entries);
     ir->curr_write = 0;
     return ir;
@@ -472,7 +512,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
 {
     _Py_UOpsAbstractFrame *frame = NULL;
     PyDictObject *sym_exprs_to_sym_exprs = NULL;
-    _Py_UOps_SSA_IR *ir = _Py_UOpsSSA_IR_New(ir_entries);
+    _Py_UOps_Opt_IR *ir = _Py_UOpsSSA_IR_New(ir_entries);
     if (ir == NULL) {
         goto error;
     }
@@ -492,7 +532,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
     self->sym_exprs_to_sym_exprs = sym_exprs_to_sym_exprs;
     self->ir = ir;
     self->new_frame_sym = NULL;
-    frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen);
+    frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen, NULL);
     self->frame = frame;
 
     if (frame == NULL) {
@@ -541,7 +581,8 @@ sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx);
 
 static inline _Py_UOpsAbstractFrame *
 _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
-                          PyObject *co_consts, int stack_len, int locals_len, int curr_stacklen)
+                          PyObject *co_consts, int stack_len, int locals_len,
+                          int curr_stacklen, _Py_UOpsOptIREntry *frame_ir_entry)
 {
     PyObject *sym_consts = create_sym_consts(ctx, co_consts);
     if (sym_consts == NULL) {
@@ -561,6 +602,8 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
     frame->stack_len = stack_len;
     frame->locals_len = locals_len;
     frame->prev = NULL;
+
+    frame->frame_ir_entry = frame_ir_entry;
 
     frame->locals = frame->locals_with_stack;
     frame->stack = frame->locals + locals_len;
@@ -648,7 +691,8 @@ extract_args_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
 static int
 _Py_UOpsAbstractInterpContext_FramePush(
     _Py_UOpsAbstractInterpContext *ctx,
-    _Py_UOpsSymbolicExpression *frame_sym
+    _Py_UOpsSymbolicExpression *frame_sym,
+    _Py_UOpsOptIREntry *frame_ir_entry,
 )
 {
     assert(frame_sym != NULL);
@@ -659,12 +703,14 @@ _Py_UOpsAbstractInterpContext_FramePush(
     }
     PyCodeObject *co = (PyCodeObject *)func->func_code;
     _Py_UOpsAbstractFrame *frame = _Py_UOpsAbstractFrame_New(ctx,
-        co->co_consts, co->co_stacksize, co->co_nlocals, 0);
+        co->co_consts, co->co_stacksize, co->co_nlocals,
+        0, frame_ir_entry);
     if (frame == NULL) {
         return -1;
     }
     frame->prev = ctx->frame;
     ctx->frame = frame;
+    frame_ir_entry->frame_co_code = (PyCodeObject*)Py_NewRef(co);
 
     return 0;
 }
@@ -1197,16 +1243,20 @@ uop_abstract_interpret_single_inst(
         case _PUSH_FRAME: {
             // TOS is the new frame.
             write_stack_to_ir(ctx, inst, true);
-            ir_plain_inst(ctx->ir, *inst);
             _Py_UOpsSymbolicExpression *frame_sym = PEEK(1);
             STACK_SHRINK(1);
             ctx->frame->stack_pointer = stack_pointer;
-            if (_Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym) != 0){
+            _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_info(ctx->ir);
+            ir_plain_inst(ctx->ir, *inst);
+            frame_ir_entry->frame_creation = ctx->new_frame_sym->ir_entry;
+            PycodeObject *co = _Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry);
+            if (co == NULL){
                 goto error;
             }
             stack_pointer = ctx->frame->stack_pointer;
             _Py_UOpsSymbolicExpression *self_or_null = extract_self_or_null_from_sym(ctx->new_frame_sym);
             assert(self_or_null != NULL);
+            assert(ctx->new_frame_sym != NULL);
             _Py_UOpsSymbolicExpression **args = extract_args_from_sym(ctx->new_frame_sym);
             assert(args != NULL);
             ctx->new_frame_sym = NULL;
@@ -1224,10 +1274,15 @@ uop_abstract_interpret_single_inst(
 
         case _POP_FRAME: {
             write_stack_to_ir(ctx, inst, true);
+            _Py_UOpsOptIREntry *frame_ir_entry = ctx->frame->frame_ir_entry;
+            frame_ir_entry->frame_pop = ctx->ir->curr_write;
             ir_plain_inst(ctx->ir, *inst);
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
             STACK_SHRINK(1);
             ctx->frame->stack_pointer = stack_pointer;
+
+            frame_decide_inlineable(ctx->frame);
+
             // Pop old frame.
             if (_Py_UOpsAbstractInterpContext_FramePop(ctx) != 0){
                 goto error;
@@ -1247,7 +1302,6 @@ uop_abstract_interpret_single_inst(
     // Store the frame symbolic to extract information later
     if (opcode == _INIT_CALL_PY_EXACT_ARGS) {
         ctx->new_frame_sym = PEEK(1);
-        ir_frame_info(ctx->ir);
     }
     DPRINTF(2, "stack_pointer %p\n", stack_pointer);
     ctx->frame->stack_pointer = stack_pointer;
@@ -1345,6 +1399,10 @@ uop_abstract_interpret(
         curr++;
 
     }
+
+    write_stack_to_ir(ctx, curr, false);
+    // Frames that are dangling at the end should never be inlined.
+    frame_propagate_not_inlineable(ctx->frame);
 
     return ctx;
 
@@ -1498,9 +1556,10 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
 
 
     // Common subexpression elimination.
-    if (do_cse && !_PyOpcode_isterminal(sym->inst.opcode) && sym->usage_count > 1) {
-        return compile_common_sym(emitter, sym, ctx);
-    }
+    // Disabled, fix later.
+//    if (do_cse && !_PyOpcode_isterminal(sym->inst.opcode) && sym->usage_count > 1) {
+//        return compile_common_sym(emitter, sym, ctx);
+//    }
 
 
     if (_PyOpcode_isterminal(sym->inst.opcode)) {
@@ -1564,10 +1623,10 @@ emit_uops_from_ctx(
         (PyObject **)(writebuffer_end - 1)
     };
 
-    _Py_UOps_SSA_IR *ir = ctx->ir;
+    _Py_UOps_Opt_IR *ir = ctx->ir;
     int entries = ir->curr_write;
     for (int i = 0; i < entries; i++) {
-        _Py_UOpsSSAEntry curr = ir->entries[i];
+        _Py_UOpsOptIREntry curr = ir->entries[i];
         if (curr.typ == IR_SYMBOLIC) {
             if (compile_sym_to_uops(&emitter, curr.expr, ctx, true) < 0) {
                 goto error;

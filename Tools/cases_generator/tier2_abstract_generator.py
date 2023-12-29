@@ -46,6 +46,8 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
     "PUSH_NULL",
     "END_SEND",
     "SWAP",
+
+    # Frame stuff
     "_PUSH_FRAME",
     "_POP_FRAME",
     "_SHRINK_STACK",
