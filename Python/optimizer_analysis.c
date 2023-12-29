@@ -66,7 +66,7 @@ is_bookkeeping_opcode(int opcode) {
 // These opcodes just adjust the stack.
 static inline bool
 is_dataonly_opcode(int opcode) {
-    return (opcode == POP_TOP);
+    return (opcode == POP_TOP || opcode == SWAP);
 }
 
 
@@ -434,7 +434,8 @@ static void
 frame_propagate_not_inlineable(_Py_UOpsAbstractFrame *frame)
 {
     _Py_UOpsAbstractFrame *curr = frame;
-    while (curr != NULL) {
+    // Topmost frame has frame_ir_entry as NULL.
+    while (curr != NULL && curr->frame_ir_entry != NULL) {
         curr->frame_ir_entry->is_inlineable = false;
         curr = curr->prev;
     }
@@ -692,7 +693,7 @@ static int
 _Py_UOpsAbstractInterpContext_FramePush(
     _Py_UOpsAbstractInterpContext *ctx,
     _Py_UOpsSymbolicExpression *frame_sym,
-    _Py_UOpsOptIREntry *frame_ir_entry,
+    _Py_UOpsOptIREntry *frame_ir_entry
 )
 {
     assert(frame_sym != NULL);
@@ -1249,7 +1250,7 @@ uop_abstract_interpret_single_inst(
             _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
             frame_ir_entry->frame_creation = ctx->new_frame_sym->ir_entry;
-            PycodeObject *co = _Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry);
+            PyCodeObject *co = _Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry);
             if (co == NULL){
                 goto error;
             }
@@ -1293,7 +1294,33 @@ uop_abstract_interpret_single_inst(
             sym_copy_type(retval, PEEK(1));
             break;
         }
-        // TODO SWAP
+
+        case SWAP: {
+            write_stack_to_ir(ctx, inst, true);
+            ir_plain_inst(ctx->ir, *inst);
+
+            _Py_UOpsSymbolicExpression *top;
+            _Py_UOpsSymbolicExpression *bottom;
+            top = stack_pointer[-1];
+            bottom = stack_pointer[-2 - (oparg-2)];
+            assert(oparg >= 2);
+
+            _Py_UOpsSymbolicExpression *new_top = sym_init_unknown(ctx);
+            if (new_top == NULL) {
+                goto error;
+            }
+            sym_copy_type(top, new_top);
+
+            _Py_UOpsSymbolicExpression *new_bottom = sym_init_unknown(ctx);
+            if (new_bottom == NULL) {
+                goto error;
+            }
+            sym_copy_type(bottom, new_bottom);
+
+            stack_pointer[-2 - (oparg-2)] = new_top;
+            stack_pointer[-1] = new_bottom;
+            break;
+        }
         default:
             DPRINTF(1, "Unknown opcode in abstract interpreter\n");
             Py_UNREACHABLE();

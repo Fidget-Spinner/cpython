@@ -709,6 +709,26 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIn("_PUSH_FRAME", uops)
         self.assertIn("_BINARY_OP_ADD_INT", uops)
 
+    # Broken on uop converter side, not our side.
+    # def test_swap(self):
+    #     def testfunc(n):
+    #         num = 0
+    #         while num < n:
+    #             a = 1
+    #             b = 2
+    #             a, b = b, a
+    #             num += 1
+    #         return a
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         res = testfunc(20)
+    #     self.assertEqual(res, 2)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("SWAP", uops)
+
     # def test_repro1(self):
     #     def testfunc(n):
     #         num = []
