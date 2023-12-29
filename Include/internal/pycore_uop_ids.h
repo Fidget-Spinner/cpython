@@ -232,12 +232,13 @@ extern "C" {
 #define _SAVE_RETURN_OFFSET 379
 #define _LOAD_CONST_IMMEDIATE 380
 #define _SHRINK_STACK 381
-#define _STORE_COMMON 382
-#define _LOAD_COMMON 383
-#define _SETUP_TIER2_FRAME 384
-#define _INSERT 385
-#define _CHECK_VALIDITY 386
-#define MAX_UOP_ID 386
+#define _SET_SP 382
+#define _STORE_COMMON 383
+#define _LOAD_COMMON 384
+#define _SETUP_TIER2_FRAME 385
+#define _INSERT 386
+#define _CHECK_VALIDITY 387
+#define MAX_UOP_ID 387
 
 #ifdef __cplusplus
 }

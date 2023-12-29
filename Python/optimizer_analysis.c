@@ -288,7 +288,8 @@ typedef enum _Py_UOps_IRStore_IdKind {
 typedef enum _Py_UOps_IRStore_EntryKind {
     IR_PLAIN_INST = 0,
     IR_SYMBOLIC = 1,
-    IR_FRAME_INFO = 2,
+    IR_FRAME_PUSH_INFO = 2,
+    IR_FRAME_POP_INFO = 3,
     IR_NOP = 4,
 } _Py_UOps_IRStore_EntryKind;
 
@@ -302,19 +303,21 @@ typedef struct _Py_UOpsOptIREntry {
             _Py_UOps_IRStore_IdKind assignment_target;
             _Py_UOpsSymbolicExpression *expr;
         };
-        // IR_FRAME_INFO, always precedes a _PUSH_FRAME IR_PLAIN_INST
+        // IR_FRAME_PUSH_INFO, always precedes a _PUSH_FRAME IR_PLAIN_INST
         struct {
             // Strong reference. Needed for later when we reconstruct the frame.
             // From the code object as a constructor.
             PyCodeObject *frame_co_code;
-            // Start and end of the frame creation
+            // Points to where the interpreter frame materialised.
             struct _Py_UOpsOptIREntry *frame_creation;
-            struct _Py_UOpsOptIREntry *frame_pop;
-            // A frame is only inlineable if during its entire lifetime,
-            // all its child frames (if any) are inlineable.
-            // And the locals count of each frame must be < 10.
+            // Only used in codegen for bookkeeping.
+            struct _Py_UOpsOptIREntry *prev_frame_ir;
+            // Only if inlined, then which scratch slot to start from in codegen.
+            int scratch_offset;
             bool is_inlineable;
         };
+        // IR_FRAME_POP_INFO, always prior to a _POP_FRAME IR_PLAIN_INST
+        // no fields, just a sentinel
     };
 } _Py_UOpsOptIREntry;
 
@@ -381,7 +384,7 @@ ir_plain_inst(_Py_UOps_Opt_IR *ir, _PyUOpInstruction inst)
 }
 
 static _Py_UOpsOptIREntry *
-ir_frame_info(_Py_UOps_Opt_IR *ir)
+ir_frame_push_info(_Py_UOps_Opt_IR *ir)
 {
 #ifdef Py_DEBUG
     char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
@@ -389,13 +392,30 @@ ir_frame_info(_Py_UOps_Opt_IR *ir)
     if (uop_debug != NULL && *uop_debug >= '0') {
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
-    DPRINTF(3, "ir_frame_info\n");
+    DPRINTF(3, "ir_frame_push_info\n");
 #endif
     _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
-    entry->typ = IR_FRAME_INFO;
+    entry->typ = IR_FRAME_PUSH_INFO;
     entry->is_inlineable = true;
+    // Code object is set by frame push.
     ir->curr_write++;
     return entry;
+}
+
+static void
+ir_frame_pop_info(_Py_UOps_Opt_IR *ir)
+{
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+    DPRINTF(3, "ir_frame_pop_info\n");
+#endif
+    _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
+    entry->typ = IR_FRAME_POP_INFO;
+    ir->curr_write++;
 }
 
 typedef struct _Py_UOpsAbstractFrame {
@@ -530,6 +550,18 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     assert(frame->frame_ir_entry != NULL);
     PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
     int extra_needed = co->co_nlocals + co->co_stacksize;
+    // Ban closures
+    if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
+        return;
+    }
+    // Ban generators, async, etc.
+    int flags = co->co_flags;
+    if ((flags & CO_COROUTINE) ||
+        (flags & CO_GENERATOR) ||
+        (flags & CO_ITERABLE_COROUTINE) ||
+        (flags & CO_ASYNC_GENERATOR)) {
+        return;
+    }
     // Too many locals, or too big stack. This is somewhat arbitrary, but
     // we don't want to inline anything that has too many locals because
     // we would have to copy over a lot more on deopt. Thus
@@ -1220,19 +1252,19 @@ uop_abstract_interpret_single_inst(
 #define BASIC_STACKADJ(n) (stack_pointer += n)
 
 #ifdef Py_DEBUG
-#define STACK_GROW(n)   do { \
-                            assert(n >= 0); \
-                            BASIC_STACKADJ(n); \
-                            assert(STACK_LEVEL() <= STACK_SIZE()); \
-                        } while (0)
-#define STACK_SHRINK(n) do { \
-                            assert(n >= 0); \
-                            assert(STACK_LEVEL() >= n); \
-                            BASIC_STACKADJ(-(n)); \
-                        } while (0)
+    #define STACK_GROW(n)   do { \
+                                assert(n >= 0); \
+                                BASIC_STACKADJ(n); \
+                                assert(STACK_LEVEL() <= STACK_SIZE()); \
+                            } while (0)
+    #define STACK_SHRINK(n) do { \
+                                assert(n >= 0); \
+                                assert(STACK_LEVEL() >= n); \
+                                BASIC_STACKADJ(-(n)); \
+                            } while (0)
 #else
     #define STACK_GROW(n)          BASIC_STACKADJ(n)
-#define STACK_SHRINK(n)        BASIC_STACKADJ(-(n))
+    #define STACK_SHRINK(n)        BASIC_STACKADJ(-(n))
 #endif
 #define PEEK(idx)              (((stack_pointer)[-(idx)]))
 #define GETLOCAL(idx)          ((ctx->frame->locals[idx]))
@@ -1326,7 +1358,7 @@ uop_abstract_interpret_single_inst(
             _Py_UOpsSymbolicExpression *frame_sym = PEEK(1);
             STACK_SHRINK(1);
             ctx->frame->stack_pointer = stack_pointer;
-            _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_info(ctx->ir);
+            _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_push_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
             frame_ir_entry->frame_creation = ctx->new_frame_sym->ir_entry;
             if (_Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry) != 0){
@@ -1355,7 +1387,7 @@ uop_abstract_interpret_single_inst(
         case _POP_FRAME: {
             write_stack_to_ir(ctx, inst, true);
             _Py_UOpsOptIREntry *frame_ir_entry = ctx->frame->frame_ir_entry;
-            frame_ir_entry->frame_pop = &ctx->ir->entries[ctx->ir->curr_write];
+            ir_frame_pop_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
             STACK_SHRINK(1);
@@ -1506,7 +1538,7 @@ uop_abstract_interpret(
 
     write_stack_to_ir(ctx, curr, false);
     // Frames that are dangling at the end should never be inlined.
-    frame_propagate_not_inlineable(ctx->frame);
+    frame_propagate_not_inlineable(ctx);
 
     return ctx;
 
@@ -1525,8 +1557,10 @@ typedef struct _Py_UOpsEmitter {
     // A dict mapping the common expressions to the slots indexes.
     PyObject *common_syms;
 
-    // Layed out in reverse order.
-    int curr_scratch_id;
+    bool is_inlining;
+
+    int consumed_scratch_slots;
+    int scratch_locals_offset;
     int max_scratch_slots;
     _Py_UOpsOptIREntry *curr_frame_ir_entry;
 } _Py_UOpsEmitter;
@@ -1719,7 +1753,9 @@ emit_uops_from_ctx(
         writebuffer_end,
         0,
         sym_store,
+        false,
         0,
+
         MAX_FRAME_GROWTH,
         ctx->frame->frame_ir_entry
     };
@@ -1728,31 +1764,61 @@ emit_uops_from_ctx(
     int entries = ir->curr_write;
     for (int i = 0; i < entries; i++) {
         _Py_UOpsOptIREntry curr = ir->entries[i];
-        if (curr.typ == IR_SYMBOLIC) {
-            if (compile_sym_to_uops(&emitter, curr.expr, ctx, true) < 0) {
-                goto error;
-            }
-            // Anything less means no assignment target at all.
-            if (curr.assignment_target >= TARGET_UNUSED) {
-                _PyUOpInstruction inst = {
-                    curr.assignment_target == TARGET_UNUSED
-                    ? POP_TOP : STORE_FAST,
-                    curr.assignment_target, 0, 0};
-                if (emit_i(&emitter, inst) < 0) {
+        switch (curr.typ) {
+            case IR_SYMBOLIC: {
+                if (compile_sym_to_uops(&emitter, curr.expr, ctx, true) < 0) {
                     goto error;
                 }
+                // Anything less means no assignment target at all.
+                if (curr.assignment_target >= TARGET_UNUSED) {
+                    _PyUOpInstruction inst = {
+                        curr.assignment_target == TARGET_UNUSED
+                        ? POP_TOP : STORE_FAST,
+                        curr.assignment_target, 0, 0};
+                    if (emit_i(&emitter, inst) < 0) {
+                        goto error;
+                    }
+                }
+                break;
             }
-        }
-        else if (curr.typ == IR_PLAIN_INST){
-            if (emit_i(&emitter, curr.inst) < 0) {
-                goto error;
+            case IR_PLAIN_INST: {
+                if (emit_i(&emitter, curr.inst) < 0) {
+                    goto error;
+                }
+                break;
             }
-        }
-        else if (curr.typ == IR_FRAME_INFO) {
-            emitter.curr_frame_ir_entry = &ir->entries[i];
-            if (curr.is_inlineable) {
-                DPRINTF(3, "inlining frame at IR location %d\n", i);
+            case IR_FRAME_PUSH_INFO: {
+                _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry;
+                emitter.curr_frame_ir_entry = &ir->entries[i];
+                emitter.curr_frame_ir_entry->prev_frame_ir = prev;
+                if (curr.is_inlineable) {
+                    DPRINTF(3, "inlining frame at IR location %d\n", i);
+                    emitter.is_inlining = curr.is_inlineable;
+                    assert(emitter.writebuffer[emitter.curr_i - 1].opcode == _SAVE_RETURN_OFFSET);
+                    assert(emitter.writebuffer[emitter.curr_i - 2].opcode == _INIT_CALL_PY_EXACT_ARGS);
+                    assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
+                    int num_shrink = emitter.writebuffer[emitter.curr_i - 2].oparg + 2;
+                    emitter.curr_i -= 3;
+                    _PyUOpInstruction shrink_stack = {_SHRINK_STACK, num_shrink, 0, 0};
+                    assert(emit_i(&emitter, shrink_stack) >= 0);
+                    assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _PUSH_FRAME));
+                    // Skip frame pushing.
+                    i++;
+                }
+                break;
             }
+            case IR_FRAME_POP_INFO: {
+                if (emitter.is_inlining) {
+                    assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _POP_FRAME));
+                    // Skip _POP_FRAME
+                    i++;
+                }
+                _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry->prev_frame_ir;
+                emitter.curr_frame_ir_entry->prev_frame_ir = NULL;
+                emitter.curr_frame_ir_entry = prev;
+                break;
+            }
+            case IR_NOP: break;
         }
     }
 

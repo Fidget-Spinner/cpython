@@ -687,7 +687,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     # TODO fix me, immutable instructions
     #     # self.assertEqual(len(binop_count), 1)
 
-    def test_frame(self):
+    def test_frame_inlining_simple(self):
 
         def dummy(x):
             return x + 1
@@ -700,14 +700,17 @@ class TestUopsOptimization(unittest.TestCase):
                 num += 1
 
         opt = _testinternalcapi.get_uop_optimizer()
+        import time
+        start = time.perf_counter()
         with temporary_optimizer(opt):
-            testfunc(20)
-
-        ex = get_first_executor(testfunc)
-        self.assertIsNotNone(ex)
-        uops = {opname for opname, _, _ in ex}
-        self.assertIn("_PUSH_FRAME", uops)
-        self.assertIn("_BINARY_OP_ADD_INT", uops)
+            testfunc(20000000)
+        end = time.perf_counter()
+        raise RuntimeError(f"Time taken {end - start}")
+        # ex = get_first_executor(testfunc)
+        # self.assertIsNotNone(ex)
+        # uops = {opname for opname, _, _ in ex}
+        # self.assertIn("_PUSH_FRAME", uops)
+        # self.assertIn("_BINARY_OP_ADD_INT", uops)
 
     # Broken on uop converter side, not our side.
     # def test_swap(self):

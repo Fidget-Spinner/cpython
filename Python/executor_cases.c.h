@@ -3404,6 +3404,12 @@
             break;
         }
 
+        case _SET_SP: {
+            oparg = CURRENT_OPARG();
+            stack_pointer = frame->localsplus + oparg;
+            break;
+        }
+
         case _STORE_COMMON: {
             PyObject *value;
             value = stack_pointer[-1];

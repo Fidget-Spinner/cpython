@@ -4065,6 +4065,10 @@ dummy_func(
         pure op(_SHRINK_STACK, (unused[oparg] --)) {
         }
 
+        op(_SET_SP, (--)) {
+            stack_pointer = frame->localsplus + oparg;
+        }
+
         pure op(_STORE_COMMON, (addr/4, value -- value)) {
             TIER_TWO_ONLY
             PyObject *tmp = *((PyObject **)addr);

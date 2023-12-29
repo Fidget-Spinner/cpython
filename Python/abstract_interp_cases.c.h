@@ -1635,6 +1635,10 @@
             break;
         }
 
+        case _SET_SP: {
+            break;
+        }
+
         case _SETUP_TIER2_FRAME: {
             break;
         }
