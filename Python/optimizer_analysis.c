@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define MAX_FRAME_GROWTH 128
+
 #define OVERALLOCATE_FACTOR 2
 
 #ifdef Py_DEBUG
@@ -287,6 +289,7 @@ typedef enum _Py_UOps_IRStore_EntryKind {
     IR_PLAIN_INST = 0,
     IR_SYMBOLIC = 1,
     IR_FRAME_INFO = 2,
+    IR_NOP = 4,
 } _Py_UOps_IRStore_EntryKind;
 
 typedef struct _Py_UOpsOptIREntry {
@@ -390,14 +393,17 @@ ir_frame_info(_Py_UOps_Opt_IR *ir)
 #endif
     _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_FRAME_INFO;
-    entry->is_inlineable = false;
+    entry->is_inlineable = true;
     ir->curr_write++;
     return entry;
 }
 
 typedef struct _Py_UOpsAbstractFrame {
     PyObject_VAR_HEAD
+    // Strong reference.
     struct _Py_UOpsAbstractFrame *prev;
+    // Borrowed reference.
+    struct _Py_UOpsAbstractFrame *next;
     // Symbolic version of co_consts
     PyObject *sym_consts;
     // Max stacklen
@@ -430,29 +436,6 @@ static PyTypeObject _Py_UOpsAbstractFrame_Type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
-static void
-frame_propagate_not_inlineable(_Py_UOpsAbstractFrame *frame)
-{
-    _Py_UOpsAbstractFrame *curr = frame;
-    // Topmost frame has frame_ir_entry as NULL.
-    while (curr != NULL && curr->frame_ir_entry != NULL) {
-        curr->frame_ir_entry->is_inlineable = false;
-        curr = curr->prev;
-    }
-}
-
-static void
-frame_decide_inlineable(_Py_UOpsAbstractFrame *frame)
-{
-    PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
-    // Too many locals, or too big stack
-    if (co->co_nlocals + co->co_stacksize > 20) {
-        frame->frame_ir_entry->is_inlineable = false;
-        frame_propagate_not_inlineable(frame);
-        return;
-    }
-    frame->frame_ir_entry = true;
-}
 
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
@@ -464,6 +447,8 @@ typedef struct _Py_UOpsAbstractInterpContext {
     // Stores the symbolic for the upcoming new frame that is about to be created.
     _Py_UOpsSymbolicExpression *new_frame_sym;
     _Py_UOpsAbstractFrame *frame;
+    // Number of extra PyObject * we need in the frame, heuristic for inlining.
+    int frame_entries_needed;
 
     int curr_region_id;
     _Py_UOps_Opt_IR *ir;
@@ -488,6 +473,88 @@ static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
+
+// Mark current frame and all previous frames not inlineable
+static void
+frame_propagate_not_inlineable(_Py_UOpsAbstractInterpContext *ctx)
+{
+    _Py_UOpsAbstractFrame *curr = ctx->frame;
+    // Topmost frame has frame_ir_entry as NULL.
+    while (curr != NULL && curr->frame_ir_entry != NULL) {
+        curr->frame_ir_entry->is_inlineable = false;
+        PyCodeObject *co = curr->frame_ir_entry->frame_co_code;
+        ctx->frame_entries_needed -= (co->co_stacksize + co->co_nlocals);
+        curr = curr->prev;
+    }
+}
+
+// Progressive uninlines frames starting from the earliest, until we have
+// enough space.
+static bool
+frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
+{
+    _Py_UOpsAbstractFrame *prev = ctx->frame;
+    // First, go to the earliest inlined frame.
+    while (prev != NULL && prev->frame_ir_entry != NULL && prev->frame_ir_entry->is_inlineable) {
+        prev = prev->prev;
+    }
+
+    _Py_UOpsAbstractFrame *curr = prev;
+    if (curr == NULL) {
+        return false;
+    }
+    if (curr->frame_ir_entry == NULL) {
+        curr = curr->next;
+    }
+    while (curr != NULL && curr->frame_ir_entry != NULL) {
+        curr->frame_ir_entry->is_inlineable = false;
+        PyCodeObject *co = curr->frame_ir_entry->frame_co_code;
+        ctx->frame_entries_needed -= (co->co_stacksize + co->co_nlocals);
+        if (MAX_FRAME_GROWTH - ctx->frame_entries_needed > required_space) {
+            return true;
+        }
+        curr = curr->next;
+    }
+    return false;
+}
+
+// The inlining heuristic is as follows:
+// 1. Inline small frames, AND
+// 2. Make sure we do not interleave inlined and non-inlined frames.
+// They make frame reconstruction for sys._getframe and tracebacks too
+// complicated.
+static void
+frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
+{
+    _Py_UOpsAbstractFrame *frame = ctx->frame;
+    assert(frame->frame_ir_entry != NULL);
+    PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
+    int extra_needed = co->co_nlocals + co->co_stacksize;
+    // Too many locals, or too big stack. This is somewhat arbitrary, but
+    // we don't want to inline anything that has too many locals because
+    // we would have to copy over a lot more on deopt. Thus
+    // making inlining not really worth it.
+    if (extra_needed > 32) {
+        frame->frame_ir_entry->is_inlineable = false;
+        frame_propagate_not_inlineable(ctx);
+        return;
+    }
+    // Not enough space left, try un-inlining previous frames.
+    if (ctx->frame_entries_needed + extra_needed > MAX_FRAME_GROWTH) {
+        if (frame_uninline(ctx, extra_needed)) {
+            ctx->frame_entries_needed += extra_needed;
+            assert(ctx->frame_entries_needed <= MAX_FRAME_GROWTH);
+            frame->frame_ir_entry->is_inlineable = true;
+        }
+        else {
+            frame_propagate_not_inlineable(ctx);
+        }
+        return;
+    }
+    ctx->frame_entries_needed += extra_needed;
+    frame->frame_ir_entry->is_inlineable = true;
+    return;
+}
 
 static inline _Py_UOpsAbstractFrame *
 _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
@@ -533,6 +600,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
     self->sym_exprs_to_sym_exprs = sym_exprs_to_sym_exprs;
     self->ir = ir;
     self->new_frame_sym = NULL;
+    self->frame_entries_needed = 0;
     frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen, NULL);
     self->frame = frame;
 
@@ -603,6 +671,7 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
     frame->stack_len = stack_len;
     frame->locals_len = locals_len;
     frame->prev = NULL;
+    frame->next = NULL;
 
     frame->frame_ir_entry = frame_ir_entry;
 
@@ -710,8 +779,12 @@ _Py_UOpsAbstractInterpContext_FramePush(
         return -1;
     }
     frame->prev = ctx->frame;
+    ctx->frame->next = frame;
     ctx->frame = frame;
     frame_ir_entry->frame_co_code = (PyCodeObject*)Py_NewRef(co);
+
+    ctx->frame_entries_needed += co->co_stacksize + co->co_nlocals;
+    assert(ctx->frame_entries_needed >= 0);
 
     return 0;
 }
@@ -725,7 +798,13 @@ _Py_UOpsAbstractInterpContext_FramePop(
     ctx->frame = frame->prev;
     assert(ctx->frame != NULL);
     frame->prev = NULL;
+    if (frame->frame_ir_entry != NULL) {
+        PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
+        ctx->frame_entries_needed -= co->co_stacksize + co->co_nlocals;
+        assert(ctx->frame_entries_needed >= 0);
+    }
     Py_DECREF(frame);
+    ctx->frame->next = NULL;
     return 0;
 }
 
@@ -1250,8 +1329,7 @@ uop_abstract_interpret_single_inst(
             _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
             frame_ir_entry->frame_creation = ctx->new_frame_sym->ir_entry;
-            PyCodeObject *co = _Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry);
-            if (co == NULL){
+            if (_Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry) != 0){
                 goto error;
             }
             stack_pointer = ctx->frame->stack_pointer;
@@ -1270,19 +1348,18 @@ uop_abstract_interpret_single_inst(
             for (int i = 0; i < argcount; i++) {
                 sym_copy_type(args[i], ctx->frame->locals[i]);
             }
+            frame_decide_inlineable(ctx);
             break;
         }
 
         case _POP_FRAME: {
             write_stack_to_ir(ctx, inst, true);
             _Py_UOpsOptIREntry *frame_ir_entry = ctx->frame->frame_ir_entry;
-            frame_ir_entry->frame_pop = ctx->ir->curr_write;
+            frame_ir_entry->frame_pop = &ctx->ir->entries[ctx->ir->curr_write];
             ir_plain_inst(ctx->ir, *inst);
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
             STACK_SHRINK(1);
             ctx->frame->stack_pointer = stack_pointer;
-
-            frame_decide_inlineable(ctx->frame);
 
             // Pop old frame.
             if (_Py_UOpsAbstractInterpContext_FramePop(ctx) != 0){
@@ -1444,21 +1521,14 @@ typedef struct _Py_UOpsEmitter {
     _PyUOpInstruction *writebuffer;
     _PyUOpInstruction *writebuffer_end;
     int curr_i;
-    // Calculated from writebuffer_end + n_scratch_slots
-    // Note: each slot is 128 bit instruction, so it can hold 2 64 bit
-    // PyObjects
-    int n_scratch_slots;
-    int max_scratch_slots;
+
     // A dict mapping the common expressions to the slots indexes.
     PyObject *common_syms;
 
     // Layed out in reverse order.
-    // The first scratch slot is the last entry of the buffer, counting
-    // backwards. Ie scratch_start > scratch_end
-    PyObject **scratch_start;
-    PyObject **scratch_end;
-    PyObject **scratch_available;
-
+    int curr_scratch_id;
+    int max_scratch_slots;
+    _Py_UOpsOptIREntry *curr_frame_ir_entry;
 } _Py_UOpsEmitter;
 
 static inline int
@@ -1495,72 +1565,72 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
                     bool do_cse);
 
 // Find a slot to store the result of a common subexpression.
-static int
-compile_common_sym(_Py_UOpsEmitter *emitter,
-            _Py_UOpsSymbolicExpression *sym,
-           _Py_UOpsAbstractInterpContext *ctx)
-{
-    sym->emitted_count++;
-
-    PyObject *idx = PyDict_GetItem(emitter->common_syms, (PyObject *)sym);
-    // Present - just use that
-    if (idx != NULL) {
-        long index = PyLong_AsLong(idx);
-        assert(!PyErr_Occurred());
-        PyObject **addr = emitter->scratch_start - index;
-        _PyUOpInstruction load_common = {_LOAD_COMMON, 0, 0, (uint64_t)addr};
-        if(emit_i(emitter, load_common) < 0) {
-            return -1;
-        }
-        return 0;
-    }
-
-    // Not present, emit the whole thing, then store that
-    if (compile_sym_to_uops(emitter, sym, ctx, false) < 0) {
-        return -1;
-    }
-
-    // Not really used - not worth to store it.
-    if (!(sym->usage_count > 1 && sym->emitted_count < (sym->usage_count))){
-        return 0;
-    }
-    // No space left, TODO evict something based on usage count.
-    // And store there.
-    if (emitter->n_scratch_slots >= emitter->max_scratch_slots) {
-        return 0;
-    }
-
-    // If there's space, expand the scratch slot.
-    emitter->scratch_end--;
-    // Grow backwards.
-    while ((char *)emitter->writebuffer_end > (char *)emitter->scratch_end) {
-        emitter->writebuffer_end--;
-    }
-    emitter->n_scratch_slots++;
-    PyObject **available = emitter->scratch_available;
-    assert(available >= emitter->scratch_end);
-    emitter->scratch_available--;
-
-    *available = NULL;
-    // TODO memory leak
-    _PyUOpInstruction store_common = {_STORE_COMMON, 0, 0, (uint64_t)available};
-    if(emit_i(emitter, store_common) < 0) {
-        return -1;
-    }
-    long index = (long)(emitter->scratch_start - available);
-    assert(index >= 0);
-    idx = PyLong_FromLong(index);
-    if (idx == NULL) {
-        return -1;
-    }
-    if (PyDict_SetItem(emitter->common_syms, (PyObject *)sym, idx) < 0) {
-        PyErr_Clear();
-        Py_DECREF(idx);
-        return -1;
-    }
-    Py_DECREF(idx);
-    return 0;
-}
+//static int
+//compile_common_sym(_Py_UOpsEmitter *emitter,
+//            _Py_UOpsSymbolicExpression *sym,
+//           _Py_UOpsAbstractInterpContext *ctx)
+//{
+//    sym->emitted_count++;
+//
+//    PyObject *idx = PyDict_GetItem(emitter->common_syms, (PyObject *)sym);
+//    // Present - just use that
+//    if (idx != NULL) {
+//        long index = PyLong_AsLong(idx);
+//        assert(!PyErr_Occurred());
+//        PyObject **addr = emitter->scratch_start - index;
+//        _PyUOpInstruction load_common = {_LOAD_COMMON, 0, 0, (uint64_t)addr};
+//        if(emit_i(emitter, load_common) < 0) {
+//            return -1;
+//        }
+//        return 0;
+//    }
+//
+//    // Not present, emit the whole thing, then store that
+//    if (compile_sym_to_uops(emitter, sym, ctx, false) < 0) {
+//        return -1;
+//    }
+//
+//    // Not really used - not worth to store it.
+//    if (!(sym->usage_count > 1 && sym->emitted_count < (sym->usage_count))){
+//        return 0;
+//    }
+//    // No space left, TODO evict something based on usage count.
+//    // And store there.
+//    if (emitter->curr_scratch_id >= emitter->max_scratch_slots) {
+//        return 0;
+//    }
+//
+//    // If there's space, expand the scratch slot.
+//    emitter->scratch_end--;
+//    // Grow backwards.
+//    while ((char *)emitter->writebuffer_end > (char *)emitter->scratch_end) {
+//        emitter->writebuffer_end--;
+//    }
+//    emitter->n_scratch_slots++;
+//    PyObject **available = emitter->scratch_available;
+//    assert(available >= emitter->scratch_end);
+//    emitter->scratch_available--;
+//
+//    *available = NULL;
+//    // TODO memory leak
+//    _PyUOpInstruction store_common = {_STORE_COMMON, 0, 0, (uint64_t)available};
+//    if(emit_i(emitter, store_common) < 0) {
+//        return -1;
+//    }
+//    long index = (long)(emitter->scratch_start - available);
+//    assert(index >= 0);
+//    idx = PyLong_FromLong(index);
+//    if (idx == NULL) {
+//        return -1;
+//    }
+//    if (PyDict_SetItem(emitter->common_syms, (PyObject *)sym, idx) < 0) {
+//        PyErr_Clear();
+//        Py_DECREF(idx);
+//        return -1;
+//    }
+//    Py_DECREF(idx);
+//    return 0;
+//}
 
 static int
 compile_sym_to_uops(_Py_UOpsEmitter *emitter,
@@ -1630,6 +1700,14 @@ emit_uops_from_ctx(
 )
 {
 
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+#endif
+
     PyObject *sym_store = PyDict_New();
     if (sym_store == NULL) {
         return -1;
@@ -1640,14 +1718,10 @@ emit_uops_from_ctx(
         trace_writebuffer,
         writebuffer_end,
         0,
-        0,
-        // Should not use more than 20% of the space for common expressions.
-        (int)((writebuffer_end - trace_writebuffer) / 5),
         sym_store,
-        // One wasted object, but it's fine I'd rather not use that to prevent logic bugs.
-        (PyObject **)(writebuffer_end - 1),
-        (PyObject **)(writebuffer_end - 1),
-        (PyObject **)(writebuffer_end - 1)
+        0,
+        MAX_FRAME_GROWTH,
+        ctx->frame->frame_ir_entry
     };
 
     _Py_UOps_Opt_IR *ir = ctx->ir;
@@ -1672,6 +1746,12 @@ emit_uops_from_ctx(
         else if (curr.typ == IR_PLAIN_INST){
             if (emit_i(&emitter, curr.inst) < 0) {
                 goto error;
+            }
+        }
+        else if (curr.typ == IR_FRAME_INFO) {
+            emitter.curr_frame_ir_entry = &ir->entries[i];
+            if (curr.is_inlineable) {
+                DPRINTF(3, "inlining frame at IR location %d\n", i);
             }
         }
     }
