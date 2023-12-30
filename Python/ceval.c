@@ -1743,6 +1743,66 @@ error:
     return NULL;
 }
 
+// Tells the current frame how to reconstruct inlined function frames.
+// Copy locals and stack from current frame->localsplus[oparg]
+// Operand contains the code object to construct the frame with
+// Then link the current frame up.
+int
+_PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame)
+{
+    assert(frame->tier == 2);
+    assert(frame->frame_reconstruction_inst != NULL);
+    _PyUOpInstruction *curr = frame->frame_reconstruction_inst;
+    int opcode = curr->opcode;
+    int oparg = curr->oparg;
+    PyCodeObject* code = (PyCodeObject *)(uintptr_t)curr->operand;
+
+    assert(opcode == _RECONSTRUCT_FRAME);
+    assert(PyCode_Check((PyObject*)code));
+    assert((curr+1)->opcode == _LOAD_CONST_IMMEDIATE);
+    assert(PyFunction_Check((PyObject*)(uintptr_t)(curr+1)->operand));
+    while (opcode == _RECONSTRUCT_FRAME) {
+        // We must retrieve a cached function and code object because the user might have
+        // modified them since execution. Thus, to remain consistent and give the apperance
+        // that the frame has existed since before modification, we use a manual code object
+        // rather than obtaining the function's.
+        PyFunctionObject *callable = (PyFunctionObject *)(uintptr_t)(curr+1)->operand);
+        int code_flags = ((PyCodeObject*)code)->co_flags;
+        PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable));
+
+        _PyInterpreterFrame *new_frame = _PyThreadState_PushFrame(tstate, code->co_framesize);
+        if (new_frame == NULL) {
+            goto fail;
+        }
+        _PyFrame_Initialize(new_frame, callable, locals, (PyCodeObject *)code,
+                            ((PyCodeObject *)code)->co_nlocalsplus);
+        // Copy over stack and friends.
+        int total_len = (code->co_nlocalsplus + code->co_stacksize);
+        memcpy(new_frame->localsplus, frame->localsplus + oparg,
+               sizeof(PyObject *) * total_len);
+
+        // Null out old frame - the old frame no longer owns the objects.
+        PyObject **start = frame->localsplus + oparg;
+        for (int i = 0; i < total_len; i++) {
+            *start = NULL;
+            start++;
+        }
+
+        curr+=2;
+        opcode = curr->opcode;
+        oparg = curr->oparg;
+        code = (PyCodeObject *)(uintptr_t)curr->operand;
+        assert(opcode == _RECONSTRUCT_FRAME);
+        assert(PyCode_Check(operand));
+        assert((curr+1)->opcode == _LOAD_CONST_IMMEDIATE);
+        assert(PyFunction_Check((PyObject*)(uintptr_t)(curr+1)->operand));
+    }
+    return 0;
+fail:
+    PyErr_NoMemory();
+    return -1;
+}
+
 PyObject *
 _PyEval_Vector(PyThreadState *tstate, PyFunctionObject *func,
                PyObject *locals,

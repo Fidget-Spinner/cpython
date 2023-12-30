@@ -3435,18 +3435,12 @@
 
         case _SETUP_TIER2_FRAME: {
             oparg = CURRENT_OPARG();
-            PyObject *scratch_size = (PyObject *)CURRENT_OPERAND();
-            if (!_PyFrame_ConvertToTier2(tstate, frame, oparg, (int)(Py_ssize_t)scratch_size) != 0) goto deoptimize;
+            if (!_PyFrame_ConvertToTier2(tstate, frame, oparg)) goto deoptimize;
             break;
         }
 
-        case _INSERT: {
-            PyObject *top;
-            oparg = CURRENT_OPARG();
-            top = stack_pointer[-1];
-            // Inserts TOS at position specified by oparg;
-            memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));
-            stack_pointer[-1 - oparg] = top;
+        case _RECONSTRUCT_FRAME: {
+            // Nothing here! All behavior is in the optimizer.
             break;
         }
 

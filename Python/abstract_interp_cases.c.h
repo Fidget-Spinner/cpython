@@ -1643,10 +1643,7 @@
             break;
         }
 
-        case _INSERT: {
-            _Py_UOpsSymbolicExpression *__top_;
-            __top_ = sym_init_unknown(ctx);
-            stack_pointer[-1 - oparg] = __top_;
+        case _RECONSTRUCT_FRAME: {
             break;
         }
 

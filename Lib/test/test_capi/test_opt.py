@@ -701,11 +701,8 @@ class TestUopsOptimization(unittest.TestCase):
 
         opt = _testinternalcapi.get_uop_optimizer()
         import time
-        start = time.perf_counter()
         with temporary_optimizer(opt):
-            testfunc(20000000)
-        end = time.perf_counter()
-        raise RuntimeError(f"Time taken {end - start}")
+            testfunc(64)
         # ex = get_first_executor(testfunc)
         # self.assertIsNotNone(ex)
         # uops = {opname for opname, _, _ in ex}

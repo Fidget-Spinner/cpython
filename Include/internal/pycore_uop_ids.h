@@ -236,7 +236,7 @@ extern "C" {
 #define _STORE_COMMON 383
 #define _LOAD_COMMON 384
 #define _SETUP_TIER2_FRAME 385
-#define _INSERT 386
+#define _RECONSTRUCT_FRAME 386
 #define _CHECK_VALIDITY 387
 #define MAX_UOP_ID 387
 

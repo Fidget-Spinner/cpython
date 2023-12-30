@@ -4083,13 +4083,12 @@ dummy_func(
             Py_INCREF(value);
         }
 
-        op(_SETUP_TIER2_FRAME, (scratch_size/4 --)) {
-            DEOPT_IF(!_PyFrame_ConvertToTier2(tstate, frame, oparg, (int)(Py_ssize_t)scratch_size) != 0);
+        op(_SETUP_TIER2_FRAME, (--)) {
+            DEOPT_IF(!_PyFrame_ConvertToTier2(tstate, frame, oparg));
         }
 
-        op(_INSERT, (unused[oparg], top -- top, unused[oparg])) {
-            // Inserts TOS at position specified by oparg;
-            memmove(&stack_pointer[-1 - oparg], &stack_pointer[-oparg], oparg * sizeof(stack_pointer[0]));
+        op(_RECONSTRUCT_FRAME, (--)) {
+            // Nothing here! All behavior is in the optimizer.
         }
 
         op(_CHECK_VALIDITY, (--)) {

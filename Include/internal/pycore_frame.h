@@ -64,10 +64,10 @@ typedef struct _PyInterpreterFrame {
     PyFrameObject *frame_obj; /* Strong reference, may be NULL. Only valid if not on C stack */
     _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
     int stacktop;  /* Offset of TOS from localsplus  */
-    int scrach_start; /* Offset of scratch space for Tier 2 optimizer from localsplus. Only if frame is used for tier 2 execution. */
     uint16_t return_offset;  /* Only relevant during a function call */
     char owner;
     char tier; /* Execution tier, default 1. */
+    void *frame_reconstruction_inst; /* _PyUopInstruction - Instructions to execute for frame reconstruction. Only if frame is tier 2. */
     /* Locals and stack */
     PyObject *localsplus[1];
 } _PyInterpreterFrame;
@@ -128,13 +128,13 @@ _PyFrame_Initialize(
     frame->f_builtins = func->func_builtins;
     frame->f_globals = func->func_globals;
     frame->f_locals = locals;
-    frame->scrach_start = 0;
     frame->stacktop = code->co_nlocalsplus;
     frame->frame_obj = NULL;
     frame->instr_ptr = _PyCode_CODE(code);
     frame->return_offset = 0;
     frame->owner = FRAME_OWNED_BY_THREAD;
     frame->tier = 1;
+    frame->frame_reconstruction_inst = NULL;
 
     for (int i = null_locals_from; i < code->co_nlocalsplus; i++) {
         frame->localsplus[i] = NULL;
@@ -269,35 +269,20 @@ void _PyThreadState_PopFrame(PyThreadState *tstate, _PyInterpreterFrame *frame);
  * it must be at the top of the datastack.
  * */
 static inline void
-_PyFrame_GrowStack(PyThreadState *tstate, _PyInterpreterFrame *frame, int size)
+_PyFrame_GrowLocalsPlus(PyThreadState *tstate, _PyInterpreterFrame *frame, int size)
 {
-    assert(frame->scrach_start == 0);
     assert(_PyThreadState_HasStackSpace(tstate, size));
     assert(tstate->current_frame == frame);
     tstate->datastack_top += size;
     assert(tstate->datastack_top < tstate->datastack_limit);
 }
 
-/* Adds some scratch space at the end of the current frame for Tier 2 execution.
- * The frame that is being expanded MUST be the current executing frame, and
- * it must be at the top of the datastack.
- * */
-static inline void
-_PyFrame_AddScratch(PyThreadState *tstate, _PyInterpreterFrame *frame, int size)
-{
-    assert(frame->scrach_start == 0);
-    assert(_PyThreadState_HasStackSpace(tstate, size));
-    assert(tstate->current_frame == frame);
-    frame->scrach_start = (int)(tstate->datastack_top - frame->localsplus);
-    tstate->datastack_top += size;
-    assert(tstate->datastack_top < tstate->datastack_limit);
-}
 
 /* Converts a frame from tier 1 to tier 2.
  * */
 static inline int
 _PyFrame_ConvertToTier2(PyThreadState *tstate, _PyInterpreterFrame *frame,
-                        int stack_grow, int scratch_grow)
+                        int localsplus_grow)
 {
     if (frame->tier == 2) {
         return 0;
@@ -305,12 +290,11 @@ _PyFrame_ConvertToTier2(PyThreadState *tstate, _PyInterpreterFrame *frame,
     if (frame->owner != FRAME_OWNED_BY_THREAD) {
         return 1;
     }
-    if (!_PyThreadState_HasStackSpace(tstate, stack_grow + scratch_grow)) {
+    if (!_PyThreadState_HasStackSpace(tstate, localsplus_grow)) {
         return 1;
     }
     assert(frame->tier == 1);
-    _PyFrame_GrowStack(tstate, frame, stack_grow);
-    _PyFrame_AddScratch(tstate, frame, scratch_grow);
+    _PyFrame_GrowLocalsPlus(tstate, frame, localsplus_grow);
     frame->tier = 2;
     return 0;
 }

@@ -559,7 +559,10 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     if ((flags & CO_COROUTINE) ||
         (flags & CO_GENERATOR) ||
         (flags & CO_ITERABLE_COROUTINE) ||
-        (flags & CO_ASYNC_GENERATOR)) {
+        (flags & CO_ASYNC_GENERATOR) ||
+        // TODO we can support these in the future.
+        (flags & CO_VARKEYWORDS) ||
+        (flags & CO_VARARGS)) {
         return;
     }
     // Too many locals, or too big stack. This is somewhat arbitrary, but
