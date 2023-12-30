@@ -1800,7 +1800,7 @@ emit_uops_from_ctx(
                     int num_shrink = emitter.writebuffer[emitter.curr_i - 2].oparg + 2;
                     emitter.curr_i -= 3;
                     _PyUOpInstruction shrink_stack = {_SHRINK_STACK, num_shrink, 0, 0};
-                    assert(emit_i(&emitter, shrink_stack) >= 0);
+                    emit_i(&emitter, shrink_stack);
                     assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _PUSH_FRAME));
                     // Skip frame pushing.
                     i++;
