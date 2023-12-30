@@ -3435,12 +3435,12 @@
 
         case _SETUP_TIER2_FRAME: {
             oparg = CURRENT_OPARG();
-            if (!_PyFrame_ConvertToTier2(tstate, frame, oparg)) goto deoptimize;
+            if (_PyFrame_ConvertToTier2(tstate, frame, oparg)) goto deoptimize;
             break;
         }
 
         case _RECONSTRUCT_FRAME: {
-            // Nothing here! All behavior is in the optimizer.
+            // Nothing here! All behavior is in ceval.c.
             break;
         }
 

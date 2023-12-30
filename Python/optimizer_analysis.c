@@ -61,8 +61,7 @@ _PyOpcode_isunknown(uint32_t opcode)
 static inline bool
 is_bookkeeping_opcode(int opcode) {
     return (opcode == _SET_IP ||
-        opcode == _CHECK_VALIDITY ||
-        opcode == RESUME_CHECK);
+        opcode == _CHECK_VALIDITY);
 }
 
 // These opcodes just adjust the stack.
@@ -396,7 +395,7 @@ ir_frame_push_info(_Py_UOps_Opt_IR *ir)
 #endif
     _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_FRAME_PUSH_INFO;
-    entry->is_inlineable = true;
+    entry->is_inlineable = false;
     // Code object is set by frame push.
     ir->curr_write++;
     return entry;
@@ -472,6 +471,10 @@ typedef struct _Py_UOpsAbstractInterpContext {
 
     int curr_region_id;
     _Py_UOps_Opt_IR *ir;
+
+    // The terminating instruction for the trace. Could be _JUMP_TO_TOP or
+    // _EXIT_TRACE.
+    _PyUOpInstruction *terminating;
 } _Py_UOpsAbstractInterpContext;
 
 static void
@@ -503,7 +506,7 @@ frame_propagate_not_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     while (curr != NULL && curr->frame_ir_entry != NULL) {
         curr->frame_ir_entry->is_inlineable = false;
         PyCodeObject *co = curr->frame_ir_entry->frame_co_code;
-        ctx->frame_entries_needed -= (co->co_stacksize + co->co_nlocals);
+        ctx->frame_entries_needed -= co->co_framesize;
         curr = curr->prev;
     }
 }
@@ -529,7 +532,7 @@ frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
     while (curr != NULL && curr->frame_ir_entry != NULL) {
         curr->frame_ir_entry->is_inlineable = false;
         PyCodeObject *co = curr->frame_ir_entry->frame_co_code;
-        ctx->frame_entries_needed -= (co->co_stacksize + co->co_nlocals);
+        ctx->frame_entries_needed -= (co->co_framesize);
         if (MAX_FRAME_GROWTH - ctx->frame_entries_needed > required_space) {
             return true;
         }
@@ -549,7 +552,7 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     _Py_UOpsAbstractFrame *frame = ctx->frame;
     assert(frame->frame_ir_entry != NULL);
     PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
-    int extra_needed = co->co_nlocals + co->co_stacksize;
+    int extra_needed = co->co_framesize;
     // Ban closures
     if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
         return;
@@ -810,7 +813,8 @@ _Py_UOpsAbstractInterpContext_FramePush(
     }
     PyCodeObject *co = (PyCodeObject *)func->func_code;
     _Py_UOpsAbstractFrame *frame = _Py_UOpsAbstractFrame_New(ctx,
-        co->co_consts, co->co_stacksize, co->co_nlocals,
+        co->co_consts, co->co_stacksize + MAX_FRAME_GROWTH,
+        co->co_nlocals,
         0, frame_ir_entry);
     if (frame == NULL) {
         return -1;
@@ -820,7 +824,7 @@ _Py_UOpsAbstractInterpContext_FramePush(
     ctx->frame = frame;
     frame_ir_entry->frame_co_code = (PyCodeObject*)Py_NewRef(co);
 
-    ctx->frame_entries_needed += co->co_stacksize + co->co_nlocals;
+    ctx->frame_entries_needed += co->co_framesize;
     assert(ctx->frame_entries_needed >= 0);
 
     return 0;
@@ -837,7 +841,7 @@ _Py_UOpsAbstractInterpContext_FramePop(
     frame->prev = NULL;
     if (frame->frame_ir_entry != NULL) {
         PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
-        ctx->frame_entries_needed -= co->co_stacksize + co->co_nlocals;
+        ctx->frame_entries_needed -= co->co_framesize;
         assert(ctx->frame_entries_needed >= 0);
     }
     Py_DECREF(frame);
@@ -1167,6 +1171,12 @@ copy_over_exit_stubs(_PyUOpInstruction *old_trace, int old_trace_len,
 }
 
 
+static bool
+inst_is_equal(_PyUOpInstruction lhs, _PyUOpInstruction rhs)
+{
+    return (lhs.opcode == rhs.opcode) && (lhs.oparg) == (rhs.oparg) && (lhs.operand == rhs.operand);
+}
+
 static int
 write_stack_to_ir(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *curr, bool copy_types) {
     // Emit the state of the stack first.
@@ -1183,13 +1193,14 @@ write_stack_to_ir(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *curr, b
         }
         ctx->frame->stack[i] = new_stack;
     }
+    // Write bookkeeping ops, but don't write duplicates.
     if((curr-1)->opcode == _CHECK_VALIDITY && (curr-2)->opcode == _SET_IP) {
         ir_plain_inst(ctx->ir, *(curr-2));
         ir_plain_inst(ctx->ir, *(curr-1));
     }
     return 0;
 
-    error:
+error:
     return -1;
 }
 
@@ -1253,7 +1264,7 @@ uop_abstract_interpret_single_inst(
 #endif
 
 #define STACK_LEVEL()     ((int)(stack_pointer - ctx->frame->stack))
-#define STACK_SIZE()      (co->co_stacksize)
+#define STACK_SIZE()      (co->co_stacksize + MAX_FRAME_GROWTH)
 #define BASIC_STACKADJ(n) (stack_pointer += n)
 
 #ifdef Py_DEBUG
@@ -1489,7 +1500,8 @@ uop_abstract_interpret(
     _Py_UOpsAbstractInterpContext *ctx = NULL;
 
     ctx = _Py_UOpsAbstractInterpContext_New(
-        co->co_consts, co->co_stacksize, co->co_nlocals, curr_stacklen,
+        co->co_consts, co->co_stacksize + MAX_FRAME_GROWTH,
+        co->co_nlocals, curr_stacklen,
         trace_len);
     if (ctx == NULL) {
         goto error;
@@ -1541,6 +1553,7 @@ uop_abstract_interpret(
 
     }
 
+    ctx->terminating = curr;
     write_stack_to_ir(ctx, curr, false);
     // Frames that are dangling at the end should never be inlined.
     frame_propagate_not_inlineable(ctx);
@@ -1752,11 +1765,13 @@ emit_uops_from_ctx(
         return -1;
     }
 
+    int max_additional_nlocals_needed = 0;
+    int curr_additional_nlocals_needed = 0;
 
     _Py_UOpsEmitter emitter = {
         trace_writebuffer,
         writebuffer_end,
-        0,
+        1, // Reserve 1 slot for _SETUP_TIER2_FRAME if needed.
         sym_store,
         false,
         0,
@@ -1767,6 +1782,7 @@ emit_uops_from_ctx(
 
     _Py_UOps_Opt_IR *ir = ctx->ir;
     int entries = ir->curr_write;
+    bool did_inline = false;
     for (int i = 0; i < entries; i++) {
         _Py_UOpsOptIREntry curr = ir->entries[i];
         switch (curr.typ) {
@@ -1796,25 +1812,39 @@ emit_uops_from_ctx(
                 _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry;
                 emitter.curr_frame_ir_entry = &ir->entries[i];
                 emitter.curr_frame_ir_entry->prev_frame_ir = prev;
-                if (curr.is_inlineable) {
-                    DPRINTF(3, "inlining frame at IR location %d\n", i);
-                    emitter.is_inlining = curr.is_inlineable;
-                    assert(emitter.writebuffer[emitter.curr_i - 1].opcode == _SAVE_RETURN_OFFSET);
-                    assert(emitter.writebuffer[emitter.curr_i - 2].opcode == _INIT_CALL_PY_EXACT_ARGS);
-                    assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
-                    int num_shrink = emitter.writebuffer[emitter.curr_i - 2].oparg + 2;
-                    emitter.curr_i -= 3;
-                    _PyUOpInstruction shrink_stack = {_SHRINK_STACK, num_shrink, 0, 0};
-                    emit_i(&emitter, shrink_stack);
-                    assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _PUSH_FRAME));
-                    // Skip frame pushing.
-                    i++;
+                if (!curr.is_inlineable) {
+                    break;
+                }
+                DPRINTF(3, "inlining frame at IR location %d\n", i);
+                did_inline = true;
+                curr_additional_nlocals_needed += (curr.frame_co_code->co_framesize);
+                max_additional_nlocals_needed = curr_additional_nlocals_needed > max_additional_nlocals_needed
+                    ? curr_additional_nlocals_needed : max_additional_nlocals_needed;
+                emitter.is_inlining = curr.is_inlineable;
+                assert(emitter.writebuffer[emitter.curr_i - 1].opcode == _SAVE_RETURN_OFFSET);
+                assert(emitter.writebuffer[emitter.curr_i - 2].opcode == _INIT_CALL_PY_EXACT_ARGS);
+                assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
+                int num_shrink = emitter.writebuffer[emitter.curr_i - 2].oparg + 2;
+                emitter.curr_i -= 3;
+                _PyUOpInstruction shrink_stack = {_SHRINK_STACK, num_shrink, 0, 0};
+                emit_i(&emitter, shrink_stack);
+                assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _PUSH_FRAME));
+                // Skip _PUSH_FRAME.
+                i++;
+                // Skip _RESUME_CHECK
+                for (int x = 0; x < 8; x++) {
+                    if (ir->entries[i+x].typ == IR_PLAIN_INST && ir->entries[i+x].inst.opcode == _RESUME_CHECK) {
+                        ir->entries[i+x].typ = IR_NOP;
+                        break;
+                    }
                 }
                 break;
             }
             case IR_FRAME_POP_INFO: {
                 if (emitter.is_inlining) {
                     assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _POP_FRAME));
+                    PyCodeObject *co = emitter.curr_frame_ir_entry->frame_co_code;
+                    curr_additional_nlocals_needed -= (co->co_framesize);
                     // Skip _POP_FRAME
                     i++;
                 }
@@ -1829,9 +1859,24 @@ emit_uops_from_ctx(
 
     Py_DECREF(sym_store);
 
-    // Add the _JUMP_TO_TOP at the end of the trace.
-    _PyUOpInstruction jump_to_top = {_JUMP_TO_TOP, 0, 0};
-    if (emit_i(&emitter, jump_to_top) < 0) {
+    if (did_inline) {
+        DPRINTF(3, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
+                0,
+                "_SETUP_TIER2_FRAME",
+                max_additional_nlocals_needed,
+                0L);
+        _PyUOpInstruction setup_frame = {_SETUP_TIER2_FRAME, max_additional_nlocals_needed, 0, 0};
+        emitter.writebuffer[0] = setup_frame;
+    }
+    else {
+        _PyUOpInstruction nop = {_NOP, 0, 0, 0};
+        emitter.writebuffer[0] = nop;
+    }
+    // Add the _JUMP_TO_TOP/_EXIT_TRACE at the end of the trace.
+    _PyUOpInstruction terminal = {ctx->terminating->opcode == _EXIT_TRACE
+                                  ? _EXIT_TRACE : _JUMP_ABSOLUTE,
+                                  did_inline, 0};
+    if (emit_i(&emitter, terminal) < 0) {
         return -1;
     }
     return emitter.curr_i;

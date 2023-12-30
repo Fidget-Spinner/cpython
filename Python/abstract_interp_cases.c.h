@@ -13,6 +13,7 @@
         }
 
         case _RESUME_CHECK: {
+            goto guard_required;
             break;
         }
 

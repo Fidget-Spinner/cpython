@@ -1918,6 +1918,7 @@ const uint8_t _PyOpcode_ispure[470] = {
 extern const uint8_t _PyOpcode_isguard[470];
 #ifdef NEED_OPCODE_METADATA
 const uint8_t _PyOpcode_isguard[470] = {
+    [RESUME_CHECK] = 1,
     [_GUARD_BOTH_INT] = 1,
     [_GUARD_BOTH_FLOAT] = 1,
     [_GUARD_BOTH_UNICODE] = 1,

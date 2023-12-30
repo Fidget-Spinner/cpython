@@ -161,7 +161,7 @@ dummy_func(
             }
         }
 
-        inst(RESUME_CHECK, (--)) {
+        mandatory guard inst(RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -4084,11 +4084,11 @@ dummy_func(
         }
 
         op(_SETUP_TIER2_FRAME, (--)) {
-            DEOPT_IF(!_PyFrame_ConvertToTier2(tstate, frame, oparg));
+            DEOPT_IF(_PyFrame_ConvertToTier2(tstate, frame, oparg));
         }
 
         op(_RECONSTRUCT_FRAME, (--)) {
-            // Nothing here! All behavior is in the optimizer.
+            // Nothing here! All behavior is in ceval.c.
         }
 
         op(_CHECK_VALIDITY, (--)) {

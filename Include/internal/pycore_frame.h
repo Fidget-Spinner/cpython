@@ -273,6 +273,9 @@ _PyFrame_GrowLocalsPlus(PyThreadState *tstate, _PyInterpreterFrame *frame, int s
 {
     assert(_PyThreadState_HasStackSpace(tstate, size));
     assert(tstate->current_frame == frame);
+    // Make sure we are the top frame.
+    assert((PyObject **)frame + _PyFrame_GetCode(frame)->co_framesize ==
+           tstate->datastack_top);
     tstate->datastack_top += size;
     assert(tstate->datastack_top < tstate->datastack_limit);
 }

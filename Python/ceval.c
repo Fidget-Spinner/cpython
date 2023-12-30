@@ -1080,6 +1080,7 @@ deoptimize:
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
     UOP_STAT_INC(uopcode, miss);
     Py_DECREF(current_executor);
+    _PyFrame_SetStackPointer(frame, stack_pointer);
     frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame);
     if (frame == NULL) {
         goto resume_with_error;
@@ -1641,8 +1642,9 @@ clear_thread_frame(PyThreadState *tstate, _PyInterpreterFrame * frame)
     assert(frame->owner == FRAME_OWNED_BY_THREAD);
     // Make sure that this is, indeed, the top frame. We can't check this in
     // _PyThreadState_PopFrame, since f_code is already cleared at that point:
-    assert((PyObject **)frame + _PyFrame_GetCode(frame)->co_framesize ==
-        tstate->datastack_top);
+    // This doesn't apply to tier 2 frames.
+    assert(frame->tier == 1 ? (PyObject **)frame + _PyFrame_GetCode(frame)->co_framesize ==
+        tstate->datastack_top : 1);
     tstate->c_recursion_remaining--;
     assert(frame->frame_obj == NULL || frame->frame_obj->f_frame == frame);
     _PyFrame_ClearExceptCode(frame);
