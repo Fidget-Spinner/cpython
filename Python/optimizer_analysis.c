@@ -569,6 +569,8 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     // we don't want to inline anything that has too many locals because
     // we would have to copy over a lot more on deopt. Thus
     // making inlining not really worth it.
+    // Also too many locals might make our requests for stack space
+    // more likely to fail.
     if (extra_needed > 32) {
         frame->frame_ir_entry->is_inlineable = false;
         frame_propagate_not_inlineable(ctx);

@@ -3358,7 +3358,7 @@
 
         case _JUMP_ABSOLUTE: {
             PyObject *pc = (PyObject *)CURRENT_OPERAND();
-            next_uop = (_PyUOpInstruction *)pc;
+            next_uop = current_executor->trace + (uint64_t)pc;
             CHECK_EVAL_BREAKER();
             break;
         }

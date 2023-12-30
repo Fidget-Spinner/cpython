@@ -4032,7 +4032,7 @@ dummy_func(
         }
 
         op(_JUMP_ABSOLUTE, (pc/4 --)) {
-            next_uop = (_PyUOpInstruction *)pc;
+            next_uop = current_executor->trace + (uint64_t)pc;
             CHECK_EVAL_BREAKER();
         }
 
