@@ -541,6 +541,7 @@ frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
     return false;
 }
 
+
 // The inlining heuristic is as follows:
 // 1. Inline small frames, AND
 // 2. Make sure we do not interleave inlined and non-inlined frames.
@@ -549,12 +550,20 @@ frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
 static void
 frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
 {
+#ifdef Py_DEBUG
+    char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
+    int lltrace = 0;
+    if (uop_debug != NULL && *uop_debug >= '0') {
+        lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
+    }
+#endif
     _Py_UOpsAbstractFrame *frame = ctx->frame;
     assert(frame->frame_ir_entry != NULL);
     PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
     int extra_needed = co->co_framesize;
     // Ban closures
     if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
+        DPRINTF(3, "inline_fail: closure\n");
         return;
     }
     // Ban generators, async, etc.
@@ -566,6 +575,7 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
         // TODO we can support these in the future.
         (flags & CO_VARKEYWORDS) ||
         (flags & CO_VARARGS)) {
+        DPRINTF(3, "inline_fail: generator/coroutine\n");
         return;
     }
     // Too many locals, or too big stack. This is somewhat arbitrary, but
@@ -577,6 +587,7 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     if (extra_needed > 32) {
         frame->frame_ir_entry->is_inlineable = false;
         frame_propagate_not_inlineable(ctx);
+        DPRINTF(3, "inline_fail: too many locals/stack\n");
         return;
     }
     // Not enough space left, try un-inlining previous frames.
@@ -588,9 +599,11 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
         }
         else {
             frame_propagate_not_inlineable(ctx);
+            DPRINTF(3, "inline_fail: out of space\n");
         }
         return;
     }
+    DPRINTF(3, "inline_success\n");
     ctx->frame_entries_needed += extra_needed;
     frame->frame_ir_entry->is_inlineable = true;
     return;
@@ -1575,8 +1588,6 @@ typedef struct _Py_UOpsEmitter {
     // A dict mapping the common expressions to the slots indexes.
     PyObject *common_syms;
 
-    bool is_inlining;
-
     int consumed_scratch_slots;
     int scratch_locals_offset;
     int max_scratch_slots;
@@ -1820,7 +1831,6 @@ emit_uops_from_ctx(
                 curr_additional_nlocals_needed += (curr.frame_co_code->co_framesize);
                 max_additional_nlocals_needed = curr_additional_nlocals_needed > max_additional_nlocals_needed
                     ? curr_additional_nlocals_needed : max_additional_nlocals_needed;
-                emitter.is_inlining = curr.is_inlineable;
                 assert(emitter.writebuffer[emitter.curr_i - 1].opcode == _SAVE_RETURN_OFFSET);
                 assert(emitter.writebuffer[emitter.curr_i - 2].opcode == _INIT_CALL_PY_EXACT_ARGS);
                 assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
@@ -1841,7 +1851,7 @@ emit_uops_from_ctx(
                 break;
             }
             case IR_FRAME_POP_INFO: {
-                if (emitter.is_inlining) {
+                if (emitter.curr_frame_ir_entry->is_inlineable) {
                     assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _POP_FRAME));
                     PyCodeObject *co = emitter.curr_frame_ir_entry->frame_co_code;
                     curr_additional_nlocals_needed -= (co->co_framesize);

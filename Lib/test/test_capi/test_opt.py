@@ -730,51 +730,53 @@ class TestUopsOptimization(unittest.TestCase):
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertIn("_PUSH_FRAME", uops)
 
-    def test_frame_inlining_chained(self):
-
-        def other():
-            return 1
-        def dummy():
-            return other()
-
-        def testfunc(n):
-            num = 0
-            while num < n:
-                # CALL_PY_EXACT_ARGS
-                dummy()
-                num += 1
-
-        opt = _testinternalcapi.get_uop_optimizer()
-        with temporary_optimizer(opt):
-            testfunc(64)
-        ex = get_first_executor(testfunc)
-        self.assertIsNotNone(ex)
-        uops = {opname for opname, _, _ in ex}
-        self.assertNotIn("_PUSH_FRAME", uops)
-        self.assertIn("_BINARY_OP_ADD_INT", uops)
-
-    # def test_frame_inlining_traceback(self):
+    # def test_frame_inlining_reject_closure(self):
     #
-    #     def dummy(x, y):
-    #         return x / y
+    #     # This is a normal function. So it should be inlined.
+    #     def other():
+    #         return 1
     #
-    #     def testfunc(n, y):
+    #     # This is a closure so it cannot be inlined.
+    #     def dummy():
+    #         return other()
+    #
+    #     def testfunc(n):
     #         num = 0
     #         while num < n:
     #             # CALL_PY_EXACT_ARGS
-    #             dummy(n, y)
+    #             dummy()
     #             num += 1
     #
     #     opt = _testinternalcapi.get_uop_optimizer()
     #     with temporary_optimizer(opt):
-    #         testfunc(32, 32)
-    #         # Force a traceback
-    #         testfunc(32, 0)
+    #         testfunc(64)
     #     ex = get_first_executor(testfunc)
     #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+    #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+    #     self.assertEqual(1, len(frame_count))
+
+    def test_frame_inlining_traceback(self):
+
+        def dummy(x, y):
+            return x / y
+
+        def testfunc(n, y):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                dummy(n, y)
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32, 32)
+            # Force a traceback
+            testfunc(32, 0)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
 
     # Broken on uop converter side, not our side.
     # def test_swap(self):
