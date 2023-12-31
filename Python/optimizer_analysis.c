@@ -32,17 +32,6 @@
 #endif
 
 static inline bool
-_PyOpcode_isimmutable(uint32_t opcode)
-{
-    // TODO subscr tuple is immutable
-    switch (opcode) {
-        case PUSH_NULL:
-            return true;
-    }
-    return false;
-}
-
-static inline bool
 _PyOpcode_isterminal(uint32_t opcode)
 {
     return (opcode == LOAD_FAST ||
@@ -97,7 +86,7 @@ typedef enum {
     // CHECK_PEP_523_TYPE, // Environment check
     // CHECK_FUNCTION_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
     // CHECK_STACK_SPACE_TYPE // Environment check
-    INVALID_TYPE = -1
+    INVALID_TYPE = 32,
 } _Py_UOpsSymExprTypeEnum;
 
 #define MAX_TYPE_WITH_AUX 2
@@ -583,6 +572,9 @@ sym_init_var(_Py_UOpsAbstractInterpContext *ctx, int locals_idx);
 static inline _Py_UOpsSymbolicExpression*
 sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx);
 
+static void
+sym_copy_immutable_type_info(_Py_UOpsSymbolicExpression *from_sym, _Py_UOpsSymbolicExpression *to_sym);
+
 static inline _Py_UOpsAbstractFrame *
 _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
                           PyObject *co_consts, int stack_len, int locals_len,
@@ -630,7 +622,6 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
 
     // Initialize the stack as well
     for (int i = 0; i < curr_stacklen; i++) {
-        // TODO copy over the immutables
         _Py_UOpsSymbolicExpression *stackvar = sym_init_unknown(ctx);
         if (stackvar == NULL) {
             goto error;
@@ -768,7 +759,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
 
     self->idx = -1;
-    self->sym_type.types = 0;
+    self->sym_type.types = INVALID_TYPE;
     self->inst = inst;
     self->const_val = const_val;
     self->originating_region = ctx->curr_region_id;
@@ -816,7 +807,7 @@ _Py_UOpsSymbolicExpression_NewSingleton(
 
 
     self->idx = -1;
-    self->sym_type.types = 0;
+    self->sym_type.types = INVALID_TYPE;
     self->inst = inst;
     self->const_val = NULL;
     self->originating_region = -1;
@@ -838,8 +829,17 @@ static void
 sym_copy_type(_Py_UOpsSymbolicExpression *from_sym, _Py_UOpsSymbolicExpression *to_sym)
 {
     to_sym->sym_type = from_sym->sym_type;
-    if (from_sym->const_val != NULL) {
-        to_sym->const_val = Py_NewRef(from_sym->const_val);
+    to_sym->const_val = Py_XNewRef(from_sym->const_val);
+}
+
+static void
+sym_copy_immutable_type_info(_Py_UOpsSymbolicExpression *from_sym, _Py_UOpsSymbolicExpression *to_sym)
+{
+    uint32_t immutables = (1 << NULL_TYPE | 1 << PYINT_TYPE | 1 << PYFLOAT_TYPE | 1 << PYUNICODE_TYPE);
+    to_sym->sym_type.types = (from_sym->sym_type.types & immutables);
+    // Entire type is immutable, then we can copy the const.
+    if ((from_sym->sym_type.types & immutables) == from_sym->sym_type.types) {
+        to_sym->const_val = Py_XNewRef(from_sym->const_val);
     }
 }
 
@@ -1041,6 +1041,8 @@ write_stack_to_ir(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *curr, b
         }
         if (copy_types) {
             sym_copy_type(ctx->frame->stack[i], new_stack);
+        } else {
+            sym_copy_immutable_type_info(ctx->frame->stack[i], new_stack);
         }
         ctx->frame->stack[i] = new_stack;
     }
@@ -1053,6 +1055,15 @@ write_stack_to_ir(_Py_UOpsAbstractInterpContext *ctx, _PyUOpInstruction *curr, b
 
 error:
     return -1;
+}
+
+static void
+clear_locals_type_info(_Py_UOpsAbstractInterpContext *ctx) {
+    int locals_entries = ctx->frame->locals_len;
+    for (int i = 0; i < locals_entries; i++) {
+        // clears out all types except immutables.
+        sym_copy_immutable_type_info(ctx->frame->locals[i], ctx->frame->locals[i]);
+    }
 }
 
 typedef enum {
@@ -1384,6 +1395,7 @@ uop_abstract_interpret(
             DPRINTF(2, "Impure\n");
             if (first_impure) {
                 write_stack_to_ir(ctx, curr, false);
+                clear_locals_type_info(ctx);
             }
             first_impure = false;
             ctx->curr_region_id++;
