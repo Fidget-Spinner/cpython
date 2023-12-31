@@ -547,11 +547,10 @@ class TestUopsOptimization(unittest.TestCase):
     # def test_int_constant_propagation(self):
     #     def testfunc(loops):
     #         num = 0
-    #         while num < loops:
+    #         for _ in range(loops):
     #             x = 0
     #             y = 1
     #             a = x + y
-    #             num += 1
     #         return 1
     #
     #     opt = _testinternalcapi.get_uop_optimizer()
@@ -563,7 +562,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     self.assertEqual(res, 1)
     #     binop_count = [opname for opname, _, _ in ex if opname == "_BINARY_OP_ADD_INT"]
-    #     self.assertEqual(len(binop_count), 1)
+    #     self.assertEqual(len(binop_count), 0)
     #
     # def test_int_type_propagation(self):
     #     def testfunc(loops):
@@ -834,18 +833,38 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertNotIn("_PUSH_FRAME", uops)
     #     self.assertIn("_BINARY_OP_ADD_INT", uops)
 
-    def test_frame_inlining_complex(self):
+    # def test_frame_inlining_complex(self):
+    #     def dummy(func, y):
+    #         if y == 0:
+    #             return 1
+    #         return func(func, 0)
+    #
+    #     def testfunc(n, y):
+    #         for i in range(n):
+    #             # CALL_PY_EXACT_ARGS
+    #             dummy(dummy, 2)
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(32, 32)
+    #         # Force a traceback
+    #         testfunc(32, 0)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_PUSH_FRAME", uops)
+    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    def test_frame_inlining_higher_order(self):
         def dummy(func, y):
             if y == 0:
                 return 1
             return func(func, y-1)
 
         def testfunc(n, y):
-            num = 0
-            while num < n:
+            for i in range(n):
                 # CALL_PY_EXACT_ARGS
-                dummy(dummy, 3)
-                num += 1
+                dummy(dummy, 2)
 
         opt = _testinternalcapi.get_uop_optimizer()
         with temporary_optimizer(opt):
