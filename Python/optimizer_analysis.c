@@ -130,8 +130,6 @@ typedef struct _Py_UOpsSymbolicExpression {
     // How many of this expression we have emitted so far. Only used for CSE.
     int emitted_count;
     _PyUOpInstruction inst;
-    // The latest IR entry this symbolic expression is found in.
-    struct _Py_UOpsOptIREntry *ir_entry;
 
     struct _Py_UOpsSymbolicExpression *operands[1];
 } _Py_UOpsSymbolicExpression;
@@ -307,12 +305,10 @@ typedef struct _Py_UOpsOptIREntry {
             // Strong reference. Needed for later when we reconstruct the frame.
             // From the code object as a constructor.
             PyCodeObject *frame_co_code;
-            // Points to where the interpreter frame materialised.
-            struct _Py_UOpsOptIREntry *frame_creation;
             // Only used in codegen for bookkeeping.
             struct _Py_UOpsOptIREntry *prev_frame_ir;
             // Only if inlined, then which scratch slot to start from in codegen.
-            int scratch_offset;
+            int localsplus_offset;
             bool is_inlineable;
         };
         // IR_FRAME_POP_INFO, always prior to a _POP_FRAME IR_PLAIN_INST
@@ -358,7 +354,6 @@ ir_store(_Py_UOps_Opt_IR *ir, _Py_UOpsSymbolicExpression *expr, _Py_UOps_IRStore
     entry->typ = IR_SYMBOLIC;
     entry->assignment_target = store_fast_idx;
     entry->expr = expr;
-    expr->ir_entry = entry;
     ir->curr_write++;
 }
 
@@ -396,6 +391,8 @@ ir_frame_push_info(_Py_UOps_Opt_IR *ir)
     _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_FRAME_PUSH_INFO;
     entry->is_inlineable = false;
+    // Unassigned, only assigned at codegen.
+    entry->localsplus_offset = -1;
     // Code object is set by frame push.
     ir->curr_write++;
     return entry;
@@ -506,7 +503,7 @@ frame_propagate_not_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     while (curr != NULL && curr->frame_ir_entry != NULL) {
         curr->frame_ir_entry->is_inlineable = false;
         PyCodeObject *co = curr->frame_ir_entry->frame_co_code;
-        ctx->frame_entries_needed -= co->co_framesize;
+        ctx->frame_entries_needed -= (co->co_nlocalsplus + co->co_stacksize);
         curr = curr->prev;
     }
 }
@@ -532,7 +529,7 @@ frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
     while (curr != NULL && curr->frame_ir_entry != NULL) {
         curr->frame_ir_entry->is_inlineable = false;
         PyCodeObject *co = curr->frame_ir_entry->frame_co_code;
-        ctx->frame_entries_needed -= (co->co_framesize);
+        ctx->frame_entries_needed -= (co->co_nlocalsplus + co->co_stacksize);
         if (MAX_FRAME_GROWTH - ctx->frame_entries_needed > required_space) {
             return true;
         }
@@ -560,7 +557,7 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     _Py_UOpsAbstractFrame *frame = ctx->frame;
     assert(frame->frame_ir_entry != NULL);
     PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
-    int extra_needed = co->co_framesize;
+    int extra_needed = (co->co_nlocalsplus + co->co_stacksize);
     // Ban closures
     if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
         DPRINTF(3, "inline_fail: closure\n");
@@ -837,7 +834,7 @@ _Py_UOpsAbstractInterpContext_FramePush(
     ctx->frame = frame;
     frame_ir_entry->frame_co_code = (PyCodeObject*)Py_NewRef(co);
 
-    ctx->frame_entries_needed += co->co_framesize;
+    ctx->frame_entries_needed += (co->co_nlocalsplus + co->co_stacksize);
     assert(ctx->frame_entries_needed >= 0);
 
     return 0;
@@ -854,7 +851,7 @@ _Py_UOpsAbstractInterpContext_FramePop(
     frame->prev = NULL;
     if (frame->frame_ir_entry != NULL) {
         PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
-        ctx->frame_entries_needed -= co->co_framesize;
+        ctx->frame_entries_needed -= (co->co_nlocalsplus + co->co_stacksize);
         assert(ctx->frame_entries_needed >= 0);
     }
     Py_DECREF(frame);
@@ -1389,7 +1386,6 @@ uop_abstract_interpret_single_inst(
             ctx->frame->stack_pointer = stack_pointer;
             _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_push_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
-            frame_ir_entry->frame_creation = ctx->new_frame_sym->ir_entry;
             if (_Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry) != 0){
                 goto error;
             }
@@ -1588,9 +1584,7 @@ typedef struct _Py_UOpsEmitter {
     // A dict mapping the common expressions to the slots indexes.
     PyObject *common_syms;
 
-    int consumed_scratch_slots;
-    int scratch_locals_offset;
-    int max_scratch_slots;
+    int consumed_localsplus_slots;
     _Py_UOpsOptIREntry *curr_frame_ir_entry;
 } _Py_UOpsEmitter;
 
@@ -1784,10 +1778,7 @@ emit_uops_from_ctx(
         writebuffer_end,
         1, // Reserve 1 slot for _SETUP_TIER2_FRAME if needed.
         sym_store,
-        false,
         0,
-
-        MAX_FRAME_GROWTH,
         ctx->frame->frame_ir_entry
     };
 
@@ -1828,7 +1819,7 @@ emit_uops_from_ctx(
                 }
                 DPRINTF(3, "inlining frame at IR location %d\n", i);
                 did_inline = true;
-                curr_additional_nlocals_needed += (curr.frame_co_code->co_framesize);
+                curr_additional_nlocals_needed += (curr.frame_co_code->co_nlocalsplus + curr.frame_co_code->co_stacksize);
                 max_additional_nlocals_needed = curr_additional_nlocals_needed > max_additional_nlocals_needed
                     ? curr_additional_nlocals_needed : max_additional_nlocals_needed;
                 assert(emitter.writebuffer[emitter.curr_i - 1].opcode == _SAVE_RETURN_OFFSET);
@@ -1854,7 +1845,7 @@ emit_uops_from_ctx(
                 if (emitter.curr_frame_ir_entry->is_inlineable) {
                     assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _POP_FRAME));
                     PyCodeObject *co = emitter.curr_frame_ir_entry->frame_co_code;
-                    curr_additional_nlocals_needed -= (co->co_framesize);
+                    curr_additional_nlocals_needed -= (co->co_nlocalsplus + co->co_stacksize);
                     // Skip _POP_FRAME
                     i++;
                 }
