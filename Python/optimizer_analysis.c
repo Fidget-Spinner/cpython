@@ -170,6 +170,8 @@ typedef struct _Py_UOpsOptIREntry {
             struct _Py_UOpsOptIREntry *prev_frame_ir;
             // Only if inlined, then which stack slot to start from in codegen.
             int localsplus_offset;
+            // Localsplus of the new frame that is about to be created. Used during inlining.
+            _Py_UOpsSymbolicExpression **new_frame_localsplus;
             bool is_inlineable;
             // Self is consumed if it's not NULL during inlining.
             bool consumed_self;
@@ -254,8 +256,7 @@ ir_frame_push_info(_Py_UOps_Opt_IR *ir)
     _Py_UOpsOptIREntry *entry = &ir->entries[ir->curr_write];
     entry->typ = IR_FRAME_PUSH_INFO;
     entry->is_inlineable = false;
-    // Unassigned, only assigned at codegen.
-    entry->localsplus_offset = -1;
+    entry->localsplus_offset = 0;
     entry->consumed_self = false;
     // Code object is set by frame push.
     ir->curr_write++;
@@ -265,10 +266,11 @@ ir_frame_push_info(_Py_UOps_Opt_IR *ir)
 static int
 ir_entry_calculate_localsplus_offset(_Py_UOpsOptIREntry *ir, int original_localsplus_offset)
 {
-    // Root frame.
+    // Root frame
     if (ir == NULL) {
         return original_localsplus_offset;
     }
+    assert(!ir->is_inlineable ? ir->localsplus_offset == 0 : false);
     assert(ir->typ == IR_FRAME_PUSH_INFO);
     return ir->localsplus_offset + original_localsplus_offset;
 }
@@ -344,7 +346,7 @@ typedef struct _Py_UOpsAbstractInterpContext {
     Py_ssize_t sym_curr_id;
     // Stores the symbolic for the upcoming new frame that is about to be created.
     _Py_UOpsSymbolicExpression *new_frame_sym;
-    // Localsplus of the new frame that is about to be created. Used during inlining.
+    // Localsplus of the new frame that is about to be created. Passed to frame->frame_ir_entry.
     _Py_UOpsSymbolicExpression **new_frame_localsplus;
     _Py_UOpsAbstractFrame *frame;
     // Number of extra PyObject * we need in the frame, heuristic for inlining.
@@ -1249,29 +1251,31 @@ uop_abstract_interpret_single_inst(
             assert(args != NULL);
             ctx->new_frame_sym = NULL;
             int argcount = oparg;
+            frame_ir_entry->new_frame_localsplus = ctx->new_frame_localsplus;
             // Bound method fiddling, same as _INIT_CALL_PY_EXACT_ARGS
             if (!sym_is_type(self_or_null, NULL_TYPE)) {
                 args--;
                 argcount++;
-                ctx->new_frame_localsplus--;
+                frame_ir_entry->new_frame_localsplus--;
                 frame_ir_entry->consumed_self = true;
             }
             for (int i = 0; i < argcount; i++) {
                 sym_copy_type(args[i], ctx->frame->locals[i]);
             }
-            frame_decide_inlineable(ctx);
-            // If the frame is inlined, we
-            // don't need to copy over locals, instead interleave the frames.
-            // The old stack entries become the locals of the new frame.
-            // The new frame steals references to the stack entries.
-            frame_ir_entry->localsplus_offset = abstractframe_get_localsplus_index(old_frame, ctx->new_frame_localsplus);
-            ctx->new_frame_localsplus = NULL;
             break;
         }
 
         case _POP_FRAME: {
             write_stack_to_ir(ctx, inst, true);
             _Py_UOpsOptIREntry *frame_ir_entry = ctx->frame->frame_ir_entry;
+            frame_decide_inlineable(ctx);
+            // If the frame is inlined, we
+            // don't need to copy over locals, instead interleave the frames.
+            // The old stack entries become the locals of the new frame.
+            // The new frame steals references to the stack entries.
+            if (frame_ir_entry->is_inlineable) {
+                frame_ir_entry->localsplus_offset = abstractframe_get_localsplus_index(ctx->frame->prev, frame_ir_entry->new_frame_localsplus);
+            }
             ir_frame_pop_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
@@ -1428,8 +1432,6 @@ uop_abstract_interpret(
 
     ctx->terminating = curr;
     write_stack_to_ir(ctx, curr, false);
-    // Frames that are dangling at the end should never be inlined.
-    frame_propagate_not_inlineable(ctx);
 
     return ctx;
 

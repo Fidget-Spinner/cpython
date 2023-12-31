@@ -833,15 +833,14 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertNotIn("_PUSH_FRAME", uops)
     #     self.assertIn("_BINARY_OP_ADD_INT", uops)
 
-    # def test_frame_inlining_complex(self):
+    # def test_frame_inlining_higher_order(self):
     #     def dummy(func, y):
     #         if y == 0:
     #             return 1
-    #         return func(func, 0)
+    #         return func(func, y-1)
     #
     #     def testfunc(n, y):
     #         for i in range(n):
-    #             # CALL_PY_EXACT_ARGS
     #             dummy(dummy, 2)
     #
     #     opt = _testinternalcapi.get_uop_optimizer()
@@ -851,15 +850,15 @@ class TestUopsOptimization(unittest.TestCase):
     #         testfunc(32, 0)
     #     ex = get_first_executor(testfunc)
     #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+    #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+    #     # Both frames fail to inlne.
+    #     self.assertEqual(len(frame_count), 2)
 
-    def test_frame_inlining_higher_order(self):
+    def test_frame_inlining_complex(self):
         def dummy(func, y):
             if y == 0:
                 return 1
-            return func(func, y-1)
+            return func(func, 0)
 
         def testfunc(n, y):
             for i in range(n):
