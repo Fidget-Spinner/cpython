@@ -1774,8 +1774,6 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     int oparg = curr->oparg;
     PyCodeObject* code = (PyCodeObject *)(uintptr_t)curr->operand;
 
-    _PyInterpreterFrame *prev_frame = frame->previous;
-    _PyInterpreterFrame *new_start_frame = NULL;
     _PyInterpreterFrame *recentmost_frame = frame;
 
     while (opcode == _RECONSTRUCT_FRAME) {
@@ -1795,7 +1793,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         if (new_frame == NULL) {
             goto fail;
         }
-        new_start_frame = new_start_frame == NULL ? new_frame : new_start_frame;
+
         _PyFrame_Initialize(new_frame, callable, locals, (PyCodeObject *)code,
                             ((PyCodeObject *)code)->co_nlocalsplus);
         // Copy over locals, stack and friends.
@@ -1820,10 +1818,6 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         code = (PyCodeObject *)(uintptr_t)curr->operand;
     }
 
-    // Link the new stack of frames, and thus unlink the old tier 2 one.
-    // Note: because of how _PyThreadState_PopFrame works, this cannot be the
-    // base frame in the chunk!
-    new_start_frame->previous = prev_frame;
     return recentmost_frame;
 fail:
     PyErr_NoMemory();
