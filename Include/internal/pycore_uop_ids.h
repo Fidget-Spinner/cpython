@@ -231,14 +231,15 @@ extern "C" {
 #define _JUMP_ABSOLUTE 378
 #define _SAVE_RETURN_OFFSET 379
 #define _LOAD_CONST_IMMEDIATE 380
-#define _SHRINK_STACK 381
-#define _SET_SP 382
+#define _PRE_INLINE 381
+#define _POST_INLINE 382
 #define _STORE_COMMON 383
 #define _LOAD_COMMON 384
 #define _SETUP_TIER2_FRAME 385
 #define _RECONSTRUCT_FRAME 386
-#define _CHECK_VALIDITY 387
-#define MAX_UOP_ID 387
+#define _SET_SP 387
+#define _CHECK_VALIDITY 388
+#define MAX_UOP_ID 388
 
 #ifdef __cplusplus
 }

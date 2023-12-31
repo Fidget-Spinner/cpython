@@ -4031,8 +4031,8 @@ dummy_func(
             CHECK_EVAL_BREAKER();
         }
 
-        op(_JUMP_ABSOLUTE, (pc/4 --)) {
-            next_uop = current_executor->trace + (uint64_t)pc;
+        op(_JUMP_ABSOLUTE, (--)) {
+            next_uop = current_executor->trace + oparg;
             CHECK_EVAL_BREAKER();
         }
 
@@ -4062,11 +4062,21 @@ dummy_func(
             Py_INCREF(value);
         }
 
-        pure op(_SHRINK_STACK, (unused[oparg] --)) {
+        // Inlining prelude
+        op(_PRE_INLINE, (-- args[oparg])) {
+            PyObject **curr = args;
+            PyObject **end = args + oparg;
+            while (curr < end) {
+                *curr = NULL;
+                curr++;
+            }
         }
 
-        op(_SET_SP, (--)) {
-            stack_pointer = frame->localsplus + oparg;
+        // Inlining postlude
+        op(_POST_INLINE, (args[oparg], retval -- retval)) {
+            for (int i = 0; i < oparg; i++) {
+                Py_XDECREF(args[i]);
+            }
         }
 
         pure op(_STORE_COMMON, (addr/4, value -- value)) {
@@ -4088,6 +4098,10 @@ dummy_func(
         }
 
         op(_RECONSTRUCT_FRAME, (--)) {
+            // Nothing here! All behavior is in ceval.c.
+        }
+
+        op(_SET_SP, (--)) {
             // Nothing here! All behavior is in ceval.c.
         }
 

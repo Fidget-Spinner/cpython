@@ -1784,7 +1784,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         assert(PyFunction_Check((PyObject*)(uintptr_t)(curr+1)->operand));
         assert((curr+2)->opcode == _SET_SP);
         // We must retrieve a cached function and code object because the user might have
-        // modified them since execution. Thus, to remain consistent and give the apperance
+        // modified them since execution. Thus, to remain consistent and give the appearance
         // that the frame has existed since before modification, we use a manual code object
         // rather than obtaining the function's.
         PyFunctionObject *callable = (PyFunctionObject *)(uintptr_t)((curr+1)->operand);

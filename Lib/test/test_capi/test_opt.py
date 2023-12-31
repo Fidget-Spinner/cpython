@@ -708,6 +708,35 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertNotIn("_PUSH_FRAME", uops)
     #     self.assertIn("_BINARY_OP_ADD_INT", uops)
 
+    # def test_frame_inlining_interleaving_locals_and_stack(self):
+    #     """One optimization during inlining is instead of copying over stack
+    #     to the new locals, simply interleave them and use the current stack
+    #     entries as the new locals of the inlined frame. Thus allowing zero copy
+    #     during inlining. This tests that.
+    #     """
+    #
+    #     def dummy(x, y):
+    #         unused_local = 1
+    #         return y / x
+    #
+    #     def testfunc(n):
+    #         num = 0
+    #         foo = 1
+    #         bar = 0
+    #         while num < n:
+    #             # If the interleaving is wrong, it will divide the wrong things and fail.
+    #             y = dummy(foo, bar)
+    #             num += 1
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(64)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertNotIn("_PUSH_FRAME", uops)
+    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+
     # def test_frame_no_inlining(self):
     #
     #     def dummy():
@@ -755,6 +784,8 @@ class TestUopsOptimization(unittest.TestCase):
     #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
     #     self.assertEqual(1, len(frame_count))
 
+
+    # TODO Fix this traceback!!!
     def test_frame_inlining_traceback(self):
 
         def dummy(x, y):

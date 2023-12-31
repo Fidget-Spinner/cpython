@@ -3357,8 +3357,8 @@
         }
 
         case _JUMP_ABSOLUTE: {
-            PyObject *pc = (PyObject *)CURRENT_OPERAND();
-            next_uop = current_executor->trace + (uint64_t)pc;
+            oparg = CURRENT_OPARG();
+            next_uop = current_executor->trace + oparg;
             CHECK_EVAL_BREAKER();
             break;
         }
@@ -3398,15 +3398,31 @@
             break;
         }
 
-        case _SHRINK_STACK: {
+        case _PRE_INLINE: {
+            PyObject **args;
             oparg = CURRENT_OPARG();
-            stack_pointer += -oparg;
+            args = &stack_pointer[0];
+            PyObject **curr = args;
+            PyObject **end = args + oparg;
+            while (curr < end) {
+                *curr = NULL;
+                curr++;
+            }
+            stack_pointer += oparg;
             break;
         }
 
-        case _SET_SP: {
+        case _POST_INLINE: {
+            PyObject *retval;
+            PyObject **args;
             oparg = CURRENT_OPARG();
-            stack_pointer = frame->localsplus + oparg;
+            retval = stack_pointer[-1];
+            args = &stack_pointer[-1 - oparg];
+            for (int i = 0; i < oparg; i++) {
+                Py_XDECREF(args[i]);
+            }
+            stack_pointer[-1 - oparg] = retval;
+            stack_pointer += -oparg;
             break;
         }
 
@@ -3440,6 +3456,11 @@
         }
 
         case _RECONSTRUCT_FRAME: {
+            // Nothing here! All behavior is in ceval.c.
+            break;
+        }
+
+        case _SET_SP: {
             // Nothing here! All behavior is in ceval.c.
             break;
         }
