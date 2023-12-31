@@ -113,22 +113,14 @@ typedef struct _Py_UOpsSymbolicExpression {
     PyObject_VAR_HEAD
     Py_ssize_t idx;
 
-    // Note: separated from refcnt so we don't have to deal with counting
-    // How many times this is nested as a subexpression of another
-    // expression. Used for CSE.
-    int usage_count;
-
     // Type of the symbolic expression
     _Py_UOpsSymType sym_type;
     PyObject *const_val;
-    Py_hash_t cached_hash;
     // The region where this expression was first created.
     // This matters for anything that isn't immutable
     int originating_region;
 
     // The following fields are for codegen.
-    // How many of this expression we have emitted so far. Only used for CSE.
-    int emitted_count;
     _PyUOpInstruction inst;
 
     struct _Py_UOpsSymbolicExpression *operands[1];
@@ -145,131 +137,11 @@ sym_dealloc(PyObject *o)
     Py_TYPE(o)->tp_free(o);
 }
 
-static Py_hash_t
-sym_hash(PyObject *o)
-{
-    _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o;
-    if (self->cached_hash != -1) {
-        return self->cached_hash;
-    }
-    // TODO a faster hash function that doesn't allocate?
-    PyObject *temp = PyTuple_New(Py_SIZE(o) + 2);
-    if (temp == NULL) {
-        return -1;
-    }
-    Py_ssize_t len = Py_SIZE(o);
-    for (Py_ssize_t i = 0; i < len; i++) {
-        PyTuple_SET_ITEM(temp, i, Py_NewRef(self->operands[i]));
-    }
-    PyObject *opcode = PyLong_FromLong(self->inst.opcode);
-    if (opcode == NULL) {
-        Py_DECREF(temp);
-        return -1;
-    }
-    PyObject *oparg = PyLong_FromLong(self->inst.oparg);
-    if (oparg == NULL) {
-        Py_DECREF(temp);
-        Py_DECREF(opcode);
-        return -1;
-    }
-    // Note: DO NOT add target here, because we rearrange exits anyways.
-    PyTuple_SET_ITEM(temp, Py_SIZE(o), opcode);
-    PyTuple_SET_ITEM(temp, Py_SIZE(o) + 1, oparg);
-    Py_hash_t hash = PyObject_Hash(temp);
-    Py_DECREF(temp);
-    self->cached_hash = hash;
-    return hash;
-}
-
-static PyObject *
-sym_richcompare(PyObject *o1, PyObject *o2, int op)
-{
-    assert(op == Py_EQ);
-    if (Py_TYPE(o1) != Py_TYPE(o2)) {
-        Py_RETURN_FALSE;
-    }
-
-    _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)o1;
-    _Py_UOpsSymbolicExpression *other = (_Py_UOpsSymbolicExpression *)o2;
-
-    int self_opcode = self->inst.opcode;
-    int other_opcode = other->inst.opcode;
-
-    if (self->const_val && other->const_val) {
-        return PyObject_RichCompare(self->const_val, other->const_val, Py_EQ);
-    }
-
-    if (_PyOpcode_isterminal(self_opcode) != _PyOpcode_isterminal(other_opcode)) {
-        Py_RETURN_FALSE;
-    }
-
-    if (_PyOpcode_isimmutable(self_opcode) != _PyOpcode_isimmutable(other_opcode)) {
-        Py_RETURN_FALSE;
-    }
-
-    if (!_PyOpcode_isimmutable(self_opcode)) {
-        if (self->originating_region != other->originating_region) {
-            Py_RETURN_FALSE;
-        }
-    }
-
-    // Terminal ops are kinda like special sentinels.
-    // They are always considered unique, except for constant values
-    // which can be repeated
-    if (_PyOpcode_isterminal(self_opcode) && _PyOpcode_isterminal(other_opcode)) {
-        // Note: even if two LOAD_FAST have the same opcode and oparg,
-        // They are not the same because we are constructing a new terminal.
-        // All terminals except constants are unique.
-        return self->idx == other->idx ? Py_True : Py_False;
-    }
-    // Two symbolic expressions are the same iff
-    // 1. Their opcodes are equal.
-    // 2. If they are mutable, they must be from the same store.
-    // 3. Their constituent subexpressions are equal.
-    // For 2. we use a quick hack, and compare by their global ID. Note
-    // that this ID is only populated later on, after we have determined the
-    // expression is not a duplicate. The invariant that must hold is that
-    // the subexpressions have already been checked for duplicates and their
-    // id populated. This should always hold.
-    // The symexpr's own id does not have to be populated yet.
-    // Note: WE DO NOT COMPARE THEIR CONST_VAL, BECAUSE THAT CAN BE POPULATED
-    // LATER.
-    if ((self_opcode != other_opcode)
-        || (self->inst.oparg != other->inst.oparg)
-        // NOTE: TARGET NOT HERE BECAUSE WE RERRANGE CODE ANYWAYS
-        || (self->inst.operand != other->inst.operand)) {
-        Py_RETURN_FALSE;
-    }
-
-    Py_ssize_t self_len = Py_SIZE(self);
-    Py_ssize_t other_len = Py_SIZE(other);
-    if (self_len != other_len) {
-        Py_RETURN_FALSE;
-    }
-    for (Py_ssize_t i = 0; i < self_len; i++) {
-        _Py_UOpsSymbolicExpression *a = self->operands[i];
-        _Py_UOpsSymbolicExpression *b = other->operands[i];
-        assert(a != NULL);
-        assert(b != NULL);
-        assert(a->idx != -1);
-        assert(b->idx != -1);
-        if (a->idx != b->idx) {
-            Py_RETURN_FALSE;
-        }
-    }
-
-    // DONT CHECK THE GUARDS ARE THE SAME. GUARDS CAN DIFFER
-    // BECAUSER OF INFO GAINED IN TYPE PROP.
-    Py_RETURN_TRUE;
-}
-
 static PyTypeObject _Py_UOpsSymbolicExpression_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops symbolic expression",
     .tp_basicsize = sizeof(_Py_UOpsSymbolicExpression) - sizeof(_Py_UOpsSymbolicExpression *),
     .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_hash = sym_hash,
-    .tp_richcompare = sym_richcompare,
     .tp_dealloc = sym_dealloc,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
@@ -479,8 +351,6 @@ abstractframe_get_localsplus_index(_Py_UOpsAbstractFrame *self, _Py_UOpsSymbolic
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
     PyObject_HEAD
-    // Maps a sym_expr to itself, so we can do O(1) lookups of it later
-    PyDictObject *sym_exprs_to_sym_exprs;
     // Current ID to assign a new (non-duplicate) sym_expr
     Py_ssize_t sym_curr_id;
     // Stores the symbolic for the upcoming new frame that is about to be created.
@@ -503,7 +373,6 @@ static void
 abstractinterp_dealloc(PyObject *o)
 {
     _Py_UOpsAbstractInterpContext *self = (_Py_UOpsAbstractInterpContext *)o;
-    Py_DECREF(self->sym_exprs_to_sym_exprs);
     Py_XDECREF(self->frame);
     Py_DECREF(self->ir);
     Py_TYPE(self)->tp_free((PyObject *)self);
@@ -654,15 +523,8 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
                                   int ir_entries)
 {
     _Py_UOpsAbstractFrame *frame = NULL;
-    PyDictObject *sym_exprs_to_sym_exprs = NULL;
     _Py_UOps_Opt_IR *ir = _Py_UOpsSSA_IR_New(ir_entries);
     if (ir == NULL) {
-        goto error;
-    }
-
-
-    sym_exprs_to_sym_exprs = (PyDictObject *)PyDict_New();
-    if (sym_exprs_to_sym_exprs == NULL) {
         goto error;
     }
 
@@ -672,7 +534,6 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
         goto error;
     }
 
-    self->sym_exprs_to_sym_exprs = sym_exprs_to_sym_exprs;
     self->ir = ir;
     self->new_frame_sym = NULL;
     self->frame_entries_needed = 0;
@@ -688,7 +549,6 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
 error:
     Py_XDECREF(ir);
     Py_XDECREF(frame);
-    Py_XDECREF(sym_exprs_to_sym_exprs);
     return NULL;
 }
 
@@ -884,40 +744,6 @@ _Py_UOpsAbstractInterpContext_FramePop(
     return 0;
 }
 
-static _Py_UOpsSymbolicExpression *
-check_sym_already_exists(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsSymbolicExpression *self)
-{
-    // Unknown opcodes are treated as always unique
-    // Guards are always unique.
-    if (self->inst.opcode == CACHE || _PyOpcode_isguard[self->inst.opcode]) {
-        return self;
-    }
-
-    assert(ctx->sym_exprs_to_sym_exprs);
-
-    // Check if this sym expr already exists
-    PyObject *res = PyDict_GetItem(
-        (PyObject *)ctx->sym_exprs_to_sym_exprs, (PyObject *)self);
-    // No entry, return ourselves.
-    if (res == NULL) {
-        // Add it to our sym expression global book
-        int res = PyDict_SetItem((PyObject *)ctx->sym_exprs_to_sym_exprs,
-                                 (PyObject *)self, (PyObject *)self);
-        if (res < 0) {
-            Py_DECREF(self);
-            return NULL;
-        }
-        // Assign an ID
-        self->idx = ctx->sym_curr_id;
-        ctx->sym_curr_id++;
-        return self;
-    }
-    // There's an entry. Reuse that instead
-    Py_DECREF(self);
-    ((_Py_UOpsSymbolicExpression *)res)->usage_count++;
-    return (_Py_UOpsSymbolicExpression *)res;
-}
-
 // Steals a reference to const_val
 // Creates a symbolic expression consisting of subexpressoins
 // from arr_start and va_list.
@@ -942,9 +768,6 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
 
     self->idx = -1;
-    self->cached_hash = -1;
-    self->usage_count = 1;
-    self->emitted_count = 0;
     self->sym_type.types = 0;
     self->inst = inst;
     self->const_val = const_val;
@@ -975,13 +798,8 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         assert(operands[i+x]);
     }
 
-    for (int i = 0; i < total_subexprs; i++) {
-        if (!_PyOpcode_isguard[inst.opcode]) {
-            operands[i]->usage_count++;
-        }
-    }
 
-    return check_sym_already_exists(ctx, self);
+    return self;
 }
 
 static _Py_UOpsSymbolicExpression*
@@ -998,14 +816,12 @@ _Py_UOpsSymbolicExpression_NewSingleton(
 
 
     self->idx = -1;
-    self->cached_hash = -1;
-    self->usage_count = 0;
     self->sym_type.types = 0;
     self->inst = inst;
     self->const_val = NULL;
     self->originating_region = -1;
 
-    return check_sym_already_exists(ctx, self);
+    return self;
 }
 
 
@@ -1658,73 +1474,6 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
                     _Py_UOpsAbstractInterpContext *ctx,
                     bool do_cse);
 
-// Find a slot to store the result of a common subexpression.
-//static int
-//compile_common_sym(_Py_UOpsEmitter *emitter,
-//            _Py_UOpsSymbolicExpression *sym,
-//           _Py_UOpsAbstractInterpContext *ctx)
-//{
-//    sym->emitted_count++;
-//
-//    PyObject *idx = PyDict_GetItem(emitter->common_syms, (PyObject *)sym);
-//    // Present - just use that
-//    if (idx != NULL) {
-//        long index = PyLong_AsLong(idx);
-//        assert(!PyErr_Occurred());
-//        PyObject **addr = emitter->scratch_start - index;
-//        _PyUOpInstruction load_common = {_LOAD_COMMON, 0, 0, (uint64_t)addr};
-//        if(emit_i(emitter, load_common) < 0) {
-//            return -1;
-//        }
-//        return 0;
-//    }
-//
-//    // Not present, emit the whole thing, then store that
-//    if (compile_sym_to_uops(emitter, sym, ctx, false) < 0) {
-//        return -1;
-//    }
-//
-//    // Not really used - not worth to store it.
-//    if (!(sym->usage_count > 1 && sym->emitted_count < (sym->usage_count))){
-//        return 0;
-//    }
-//    // No space left, TODO evict something based on usage count.
-//    // And store there.
-//    if (emitter->curr_scratch_id >= emitter->max_scratch_slots) {
-//        return 0;
-//    }
-//
-//    // If there's space, expand the scratch slot.
-//    emitter->scratch_end--;
-//    // Grow backwards.
-//    while ((char *)emitter->writebuffer_end > (char *)emitter->scratch_end) {
-//        emitter->writebuffer_end--;
-//    }
-//    emitter->n_scratch_slots++;
-//    PyObject **available = emitter->scratch_available;
-//    assert(available >= emitter->scratch_end);
-//    emitter->scratch_available--;
-//
-//    *available = NULL;
-//    // TODO memory leak
-//    _PyUOpInstruction store_common = {_STORE_COMMON, 0, 0, (uint64_t)available};
-//    if(emit_i(emitter, store_common) < 0) {
-//        return -1;
-//    }
-//    long index = (long)(emitter->scratch_start - available);
-//    assert(index >= 0);
-//    idx = PyLong_FromLong(index);
-//    if (idx == NULL) {
-//        return -1;
-//    }
-//    if (PyDict_SetItem(emitter->common_syms, (PyObject *)sym, idx) < 0) {
-//        PyErr_Clear();
-//        Py_DECREF(idx);
-//        return -1;
-//    }
-//    Py_DECREF(idx);
-//    return 0;
-//}
 
 static int
 compile_sym_to_uops(_Py_UOpsEmitter *emitter,
@@ -1744,14 +1493,6 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
         inst.operand = (uint64_t)Py_NewRef(sym->const_val);
         return emit_i(emitter, inst);
     }
-
-
-    // Common subexpression elimination.
-    // Disabled, fix later.
-//    if (do_cse && !_PyOpcode_isterminal(sym->inst.opcode) && sym->usage_count > 1) {
-//        return compile_common_sym(emitter, sym, ctx);
-//    }
-
 
     if (_PyOpcode_isterminal(sym->inst.opcode)) {
         // These are for unknown stack entries.
