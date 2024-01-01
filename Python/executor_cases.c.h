@@ -3402,12 +3402,14 @@
             PyObject **args;
             oparg = CURRENT_OPARG();
             args = &stack_pointer[0];
+            PyObject *reconstructer = (PyObject *)CURRENT_OPERAND();
             PyObject **curr = args;
             PyObject **end = args + oparg;
             while (curr < end) {
                 *curr = NULL;
                 curr++;
             }
+            frame->frame_reconstruction_inst = current_executor->trace + (int64_t)reconstructer;
             stack_pointer += oparg;
             break;
         }

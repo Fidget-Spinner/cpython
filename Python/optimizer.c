@@ -844,6 +844,12 @@ make_executor_from_uops(_PyUOpInstruction *buffer, _PyBloomFilter *dependencies)
             int oparg = executor->trace[dest].oparg;
             executor->trace[dest].oparg = buffer[oparg].oparg;
         }
+        if (opcode == _PRE_INLINE)
+        {
+            /* The oparg of the target will already have been set to its new offset */
+            int oparg = executor->trace[dest].operand;
+            executor->trace[dest].operand = buffer[oparg].oparg;
+        }
         /* Set the oparg to be the destination offset,
          * so that we can set the oparg of earlier jumps correctly. */
         buffer[i].oparg = dest;

@@ -251,7 +251,7 @@ static  _PyInterpreterFrame *
 _PyEvalFramePushAndInit_Ex(PyThreadState *tstate, PyFunctionObject *func,
     PyObject *locals, Py_ssize_t nargs, PyObject *callargs, PyObject *kwargs);
 static _PyInterpreterFrame *
-_PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame);
+_PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame, PyObject ***stackptr_ptr);
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -893,6 +893,7 @@ exception_unwind:
                     PyObject *o = POP();
                     Py_XDECREF(o);
                 }
+//                fprintf(stderr, "SL: %d\n", STACK_LEVEL());
                 assert(STACK_LEVEL() == 0);
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 monitor_unwind(tstate, frame, next_instr-1);
@@ -1061,7 +1062,7 @@ error_tier_two:
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
     _PyFrame_SetStackPointer(frame, stack_pointer);
     frame->return_offset = 0;  // Don't leave this random
-    frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame);
+    frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame, &stack_pointer);
     if (frame == NULL) {
         goto resume_with_error;
     }
@@ -1072,6 +1073,11 @@ error_tier_two:
 
 // Jump here from DEOPT_IF()
 deoptimize:
+    frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame, &stack_pointer);
+    // Unrecoverable memory error.
+    if (frame == NULL) {
+        goto resume_with_error;
+    }
     next_instr = next_uop[-1].target + _PyCode_CODE(_PyFrame_GetCode(frame));
     DPRINTF(2, "DEOPT: [UOp %d (%s), oparg %d, operand %" PRIu64 ", target %d @ %d -> %s]\n",
             uopcode, _PyUOpName(uopcode), next_uop[-1].oparg, next_uop[-1].operand, next_uop[-1].target,
@@ -1080,12 +1086,6 @@ deoptimize:
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
     UOP_STAT_INC(uopcode, miss);
     Py_DECREF(current_executor);
-    _PyFrame_SetStackPointer(frame, stack_pointer);
-    frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame);
-    if (frame == NULL) {
-        goto resume_with_error;
-    }
-    stack_pointer = _PyFrame_GetStackPointer(frame);
     DISPATCH();
 
 }
@@ -1759,18 +1759,28 @@ error:
 }
 
 // Tells the current frame how to reconstruct truly inlined function frames.
-// Copy locals and stack from current frame->localsplus[oparg]
-// Operand contains the code object to construct the frame with
-// Then link the current frame up.
+// See optimizer_analysis.c for what each field represents.
 static _PyInterpreterFrame *
-_PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame)
+_PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame, PyObject ***stackptr_ptr)
 {
     // Does not need reconstruction.
     if (frame->tier != 2 || frame->frame_reconstruction_inst == NULL) {
         return frame;
     }
+    _PyInterpreterFrame *prev_frame = frame;
+    int curr_stacklevel = ((int)(*stackptr_ptr - frame->localsplus));
     _PyUOpInstruction *curr = frame->frame_reconstruction_inst;
+    assert(curr->opcode == _SET_SP);
+    _PyUOpInstruction *root_frame_set_sp = curr;
+    curr++;
+    assert(curr->opcode == _SAVE_RETURN_OFFSET);
+    _PyUOpInstruction *root_frame_return_offset = curr;
+    curr++;
+    assert(curr->opcode == _SET_SP);
+    _PyUOpInstruction *recentmost_frame_set_sp = curr;
+    curr++;
     int opcode = curr->opcode;
+    assert(opcode == _RECONSTRUCT_FRAME);
     int oparg = curr->oparg;
     PyCodeObject* code = (PyCodeObject *)(uintptr_t)curr->operand;
 
@@ -1781,6 +1791,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         assert((curr+1)->opcode == _LOAD_CONST_IMMEDIATE);
         assert(PyFunction_Check((PyObject*)(uintptr_t)(curr+1)->operand));
         assert((curr+2)->opcode == _SET_SP);
+        assert((curr+3)->opcode == _SAVE_RETURN_OFFSET);
         // We must retrieve a cached function and code object because the user might have
         // modified them since execution. Thus, to remain consistent and give the appearance
         // that the frame has existed since before modification, we use a manual code object
@@ -1793,31 +1804,48 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         if (new_frame == NULL) {
             goto fail;
         }
+        new_frame->previous = prev_frame;
+        new_frame->return_offset = (curr+3)->oparg;
+        prev_frame = new_frame;
 
+        // TODO CONSUME callable and self_or_null from the stack to deal with refleak.
         _PyFrame_Initialize(new_frame, callable, locals, (PyCodeObject *)code,
                             ((PyCodeObject *)code)->co_nlocalsplus);
+        new_frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(new_frame)) + (int)(curr+3)->operand;
         // Copy over locals, stack and friends.
         int total_len = (code->co_nlocalsplus + code->co_stacksize);
         memcpy(new_frame->localsplus, frame->localsplus + oparg,
                sizeof(PyObject *) * total_len);
 
         // Null out old frame - the old frame no longer owns the objects.
-        PyObject **start = frame->localsplus + oparg;
-        for (int i = 0; i < total_len; i++) {
-            *start = NULL;
-            start++;
-        }
+//        PyObject **start = frame->localsplus + oparg;
+//        for (int i = 0; i < total_len; i++) {
+//            *start = NULL;
+//            start++;
+//        }
 
         // Finally, set the stack pointer
-        frame->stacktop = (curr+2)->oparg;
+        fprintf(stderr, "BOO %d\n", (curr+2)->oparg);
+        recentmost_frame->stacktop = _PyFrame_GetCode(recentmost_frame)->co_nlocalsplus + (curr+2)->oparg;
+        assert(frame->stacktop >= 0);
 
         recentmost_frame = new_frame;
-        curr+=2;
+        curr+=3;
         opcode = curr->opcode;
         oparg = curr->oparg;
         code = (PyCodeObject *)(uintptr_t)curr->operand;
     }
 
+    // Recentmost frame stack pointer is set by the current level.
+    fprintf(stderr, "BLAH %d\n", (curr_stacklevel - curr->target));
+    *stackptr_ptr = recentmost_frame->localsplus + _PyFrame_GetCode(recentmost_frame)->co_nlocalsplus + (curr_stacklevel - recentmost_frame_set_sp->target);
+    // Set root frame stack pointer.
+    assert(root_frame_set_sp->oparg > 0);
+    fprintf(stderr, "BOO %d\n", root_frame_set_sp->oparg);
+    frame->stacktop = _PyFrame_GetCode(frame)->co_nlocalsplus + root_frame_set_sp->oparg;
+    frame->return_offset = root_frame_return_offset->oparg;
+    frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(frame)) + (int)root_frame_return_offset->operand;
+    tstate->current_frame = recentmost_frame;
     return recentmost_frame;
 fail:
     PyErr_NoMemory();

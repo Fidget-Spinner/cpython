@@ -855,21 +855,22 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertEqual(len(frame_count), 2)
 
     def test_frame_inlining_complex(self):
-        def dummy(func, y):
+        def dummy(y, func):
             if y == 0:
                 return 1
-            return func(func, 0)
+            return func(0, func)
 
-        def testfunc(n, y):
+        def testfunc(n):
+            x = 2
             for i in range(n):
                 # CALL_PY_EXACT_ARGS
-                dummy(dummy, 2)
+                dummy(x, dummy)
 
         opt = _testinternalcapi.get_uop_optimizer()
         with temporary_optimizer(opt):
-            testfunc(32, 32)
+            testfunc(32)
             # Force a traceback
-            testfunc(32, 0)
+            testfunc(32)
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
         uops = {opname for opname, _, _ in ex}

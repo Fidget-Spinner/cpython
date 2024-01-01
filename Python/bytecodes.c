@@ -4063,13 +4063,14 @@ dummy_func(
         }
 
         // Inlining prelude
-        op(_PRE_INLINE, (-- args[oparg])) {
+        op(_PRE_INLINE, (reconstructer/4 -- args[oparg])) {
             PyObject **curr = args;
             PyObject **end = args + oparg;
             while (curr < end) {
                 *curr = NULL;
                 curr++;
             }
+            frame->frame_reconstruction_inst = current_executor->trace + (int64_t)reconstructer;
         }
 
         // Inlining postlude
