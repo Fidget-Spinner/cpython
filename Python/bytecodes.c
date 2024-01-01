@@ -4071,13 +4071,18 @@ dummy_func(
                 curr++;
             }
             frame->frame_reconstruction_inst = current_executor->trace + (int64_t)reconstructer;
+            CHECK_EVAL_BREAKER();
         }
 
         // Inlining postlude
-        op(_POST_INLINE, (args[oparg], retval -- retval)) {
+        op(_POST_INLINE, (reconstructer/4, args[oparg], retval -- retval)) {
             for (int i = 0; i < oparg; i++) {
                 Py_XDECREF(args[i]);
             }
+            frame->frame_reconstruction_inst = ((int64_t)reconstructer == -1
+                ? NULL
+                : current_executor->trace + (int64_t)reconstructer);
+            CHECK_EVAL_BREAKER();
         }
 
         pure op(_STORE_COMMON, (addr/4, value -- value)) {

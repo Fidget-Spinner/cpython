@@ -3411,6 +3411,7 @@
             }
             frame->frame_reconstruction_inst = current_executor->trace + (int64_t)reconstructer;
             stack_pointer += oparg;
+            CHECK_EVAL_BREAKER();
             break;
         }
 
@@ -3420,11 +3421,16 @@
             oparg = CURRENT_OPARG();
             retval = stack_pointer[-1];
             args = &stack_pointer[-1 - oparg];
+            PyObject *reconstructer = (PyObject *)CURRENT_OPERAND();
             for (int i = 0; i < oparg; i++) {
                 Py_XDECREF(args[i]);
             }
+            frame->frame_reconstruction_inst = ((int64_t)reconstructer == -1
+                ? NULL
+            : current_executor->trace + (int64_t)reconstructer);
             stack_pointer[-1 - oparg] = retval;
             stack_pointer += -oparg;
+            CHECK_EVAL_BREAKER();
             break;
         }
 

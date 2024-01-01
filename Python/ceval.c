@@ -1061,7 +1061,6 @@ error_tier_two:
             _PyOpcode_OpName[frame->instr_ptr->op.code]);
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
     _PyFrame_SetStackPointer(frame, stack_pointer);
-    frame->return_offset = 0;  // Don't leave this random
     frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame, &stack_pointer);
     if (frame == NULL) {
         goto resume_with_error;
@@ -1809,7 +1808,8 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         prev_frame = new_frame;
 
         // TODO CONSUME callable and self_or_null from the stack to deal with refleak.
-        _PyFrame_Initialize(new_frame, callable, locals, (PyCodeObject *)code,
+        _PyFrame_Initialize(new_frame, (PyFunctionObject*)Py_NewRef(callable),
+                            locals, (PyCodeObject *)code,
                             ((PyCodeObject *)code)->co_nlocalsplus);
         new_frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(new_frame)) + (int)(curr+3)->operand;
         // Copy over locals, stack and friends.
@@ -1837,10 +1837,11 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     }
 
     // Recentmost frame stack pointer is set by the current level.
-    fprintf(stderr, "BLAH %d\n", (curr_stacklevel - curr->target));
+    fprintf(stderr, "BLAH %d\n", (curr_stacklevel - recentmost_frame_set_sp->target));
     *stackptr_ptr = recentmost_frame->localsplus + _PyFrame_GetCode(recentmost_frame)->co_nlocalsplus + (curr_stacklevel - recentmost_frame_set_sp->target);
+    recentmost_frame->instr_ptr = frame->instr_ptr;
     // Set root frame stack pointer.
-    assert(root_frame_set_sp->oparg > 0);
+    assert(root_frame_set_sp->oparg >= 0);
     fprintf(stderr, "BOO %d\n", root_frame_set_sp->oparg);
     frame->stacktop = _PyFrame_GetCode(frame)->co_nlocalsplus + root_frame_set_sp->oparg;
     frame->return_offset = root_frame_return_offset->oparg;

@@ -180,6 +180,8 @@ typedef struct _Py_UOpsOptIREntry {
             int set_ip;
             // from SAVE_RETURN_OFFSET, for reconstruction
             int save_return_offset;
+            // The compiled frame reconstructor's offset in the trace.
+            int reconstruction_offset;
             bool is_inlineable;
             // Self is consumed if it's not NULL during inlining.
             bool consumed_self;
@@ -269,6 +271,7 @@ ir_frame_push_info(_Py_UOps_Opt_IR *ir)
     entry->n_stackentries_used = -1;
     entry->set_ip = -1;
     entry->save_return_offset = -1;
+    entry->reconstruction_offset = -1;
     // Code object is set by frame push.
     ir->curr_write++;
     return entry;
@@ -1243,8 +1246,8 @@ uop_abstract_interpret_single_inst(
         }
 
         case _PUSH_FRAME: {
-            // + 2 because callable and self_or_null then -1 because there's a frame on the current stack.
-            ctx->frame->frame_ir_entry->n_stackentries_used = (STACK_LEVEL()) + 2 - 1;
+            // No callable and self_or_null because that should be consumed. -1 because there's a frame on the current stack.
+            ctx->frame->frame_ir_entry->n_stackentries_used = (STACK_LEVEL()) - 1;
             int argcount = oparg;
             _Py_UOpsAbstractFrame *old_frame = ctx->frame;
             // TOS is the new frame.
@@ -1609,14 +1612,20 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
     // _LOAD_CONST_IMMEDIATE <function object operand>
     // _SET_SP <oparg current stack level> <operand consumed_self? >
     //     <target offset into root's nlocalsplus of where our current inlined stack starts>
+    // _SAVE_RETURN_OFFSET <sets frame return offest and IP>
+    //
     // Note: only the most recent frame's stack will have variable stack adjusts. If you think about it
     // all other frames in the chain have stack adjusts we can statically determine.
     // Thus we can calculate how much to set the most recent frame's stack using the runtime stack pointer.
 
     // Finally product is
-    // root frame does not need to be re-materialised
+    // <root frame metadata>
     // _SET_SP <oparg stack level of root frame> <operand consumed_self? >
-    // <the stub you saw above, as many times as needed>
+    // _RETURN_OFFSET (of root frame) + _SET_IP
+    //
+    // <recentmost frame stack adjust metadata>
+    //
+    // ... <re-materializaton metadata of previous frames>
     // _EXIT_TRACE.
 
     // Note: emit from back to front.
@@ -1672,6 +1681,7 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
     _PyUOpInstruction recentmost_set_sp = {
         _SET_SP,
         0, // Requires runtime calculation.
+        // Where to start the stack from.
         recentmost_frame_ir_entry->localsplus_offset +
         recentmost_frame_ir_entry->frame_co_code->co_nlocalsplus,
         frame_ir_entry->consumed_self
@@ -1806,13 +1816,15 @@ emit_uops_from_ctx(
                     goto error;
                 }
 
+                curr.reconstruction_offset = reconstruction_offset;
+
                 // Get rid of those 3 above.
                 emitter.curr_i -= 3;
                 int nargs = emitter.writebuffer[emitter.curr_i - 2].oparg;
                 // Expand the stack to AFTER our new interleaved locals.
                 _PyUOpInstruction pre_inline = {
                     _PRE_INLINE,
-                    emitter.curr_frame_ir_entry->frame_co_code->co_nlocalsplus - nargs,
+                    curr.frame_co_code->co_nlocalsplus - nargs,
                     0,
                     reconstruction_offset
                 };
@@ -1831,6 +1843,9 @@ emit_uops_from_ctx(
             }
             case IR_FRAME_POP_INFO: {
 //                DPRINTF(3, "frame_pop\n");
+                _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry->prev_frame_ir;
+                // There will always be the root frame.
+                assert(prev != NULL);
                 if (emitter.curr_frame_ir_entry->is_inlineable) {
                     assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _POP_FRAME));
                     PyCodeObject *co = emitter.curr_frame_ir_entry->frame_co_code;
@@ -1842,10 +1857,11 @@ emit_uops_from_ctx(
                         emitter.curr_frame_ir_entry->frame_co_code->co_nlocalsplus +
                         // 1 for self, 1 for callable, this aligns with _CALL_PY_EXACT_ARGS
                         2,
-                        0, 0};
+                        0,
+                        prev->reconstruction_offset,
+                    };
                     emit_i(&emitter, new_sp);
                 }
-                _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry->prev_frame_ir;
                 emitter.curr_frame_ir_entry->prev_frame_ir = NULL;
                 emitter.curr_frame_ir_entry = prev;
                 break;
