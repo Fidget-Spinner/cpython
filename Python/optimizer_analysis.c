@@ -21,6 +21,7 @@
 #include <stddef.h>
 
 #define MAX_FRAME_GROWTH 128
+#define MAX_ABSTRACT_INTERP_SIZE 1024
 
 #define OVERALLOCATE_FACTOR 2
 
@@ -319,7 +320,6 @@ typedef struct _Py_UOpsAbstractFrame {
     _Py_UOpsSymbolicExpression **stack_pointer;
     _Py_UOpsSymbolicExpression **stack;
     _Py_UOpsSymbolicExpression **locals;
-    _Py_UOpsSymbolicExpression *locals_with_stack[1];
 } _Py_UOpsAbstractFrame;
 
 static void
@@ -333,8 +333,8 @@ abstractframe_dealloc(_Py_UOpsAbstractFrame *self)
 static PyTypeObject _Py_UOpsAbstractFrame_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops abstract frame",
-    .tp_basicsize = sizeof(_Py_UOpsAbstractFrame) - sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
+    .tp_basicsize = sizeof(_Py_UOpsAbstractFrame) ,
+    .tp_itemsize = 0,
     .tp_dealloc = (destructor)abstractframe_dealloc,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
@@ -344,7 +344,6 @@ static int
 abstractframe_get_localsplus_index(_Py_UOpsAbstractFrame *self, _Py_UOpsSymbolicExpression **ptr)
 {
     assert(ptr != NULL);
-    int result = (ptr - self->locals_with_stack);
     assert(result >= 0);
     return result;
 }
@@ -370,6 +369,10 @@ typedef struct _Py_UOpsAbstractInterpContext {
     // The terminating instruction for the trace. Could be _JUMP_TO_TOP or
     // _EXIT_TRACE.
     _PyUOpInstruction *terminating;
+
+    _Py_UOpsSymbolicExpression **water_level;
+    _Py_UOpsSymbolicExpression **limit;
+    _Py_UOpsSymbolicExpression *localsplus[1];
 } _Py_UOpsAbstractInterpContext;
 
 static void
@@ -384,8 +387,8 @@ abstractinterp_dealloc(PyObject *o)
 static PyTypeObject _Py_UOpsAbstractInterpContext_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uops abstract interpreter's context",
-    .tp_basicsize = sizeof(_Py_UOpsAbstractInterpContext),
-    .tp_itemsize = 0,
+    .tp_basicsize = sizeof(_Py_UOpsAbstractInterpContext) - sizeof(_Py_UOpsSymbolicExpression *),
+    .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
     .tp_dealloc = (destructor)abstractinterp_dealloc,
     .tp_free = PyObject_Free,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
@@ -532,10 +535,17 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
     }
     _Py_UOpsOptIREntry *root_frame = ir_frame_push_info(ir);
 
-    _Py_UOpsAbstractInterpContext *self = PyObject_New(_Py_UOpsAbstractInterpContext,
-                                                       &_Py_UOpsAbstractInterpContext_Type);
+    _Py_UOpsAbstractInterpContext *self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
+                                                       &_Py_UOpsAbstractInterpContext_Type,
+                                                       MAX_ABSTRACT_INTERP_SIZE);
     if (self == NULL) {
         goto error;
+    }
+
+    self->limit = self->localsplus + MAX_ABSTRACT_INTERP_SIZE;
+    self->water_level = self->localsplus;
+    for (int i = 0 ; i < MAX_ABSTRACT_INTERP_SIZE; i++) {
+        self->localsplus[i] = NULL;
     }
 
     self->ir = ir;
@@ -602,9 +612,8 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
         return NULL;
     }
     int total_len = stack_len + locals_len;
-    _Py_UOpsAbstractFrame *frame = PyObject_NewVar(_Py_UOpsAbstractFrame,
-                                                      &_Py_UOpsAbstractFrame_Type,
-                                                      total_len);
+    _Py_UOpsAbstractFrame *frame = PyObject_New(_Py_UOpsAbstractFrame,
+                                                      &_Py_UOpsAbstractFrame_Type);
     if (frame == NULL) {
         Py_DECREF(sym_consts);
         return NULL;
@@ -619,14 +628,14 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
 
     frame->frame_ir_entry = frame_ir_entry;
 
-    frame->locals = frame->locals_with_stack;
+    frame->locals = ctx->water_level;
     frame->stack = frame->locals + locals_len;
     frame->stack_pointer = frame->stack + curr_stacklen;
-
-    // Null out everything first
-    for (int i = 0; i < total_len; i++) {
-        frame->locals_with_stack[i] = NULL;
+    ctx->water_level = ctx->water_level + total_len;
+    if (ctx->water_level > ctx->limit) {
+        return NULL;
     }
+
     // Initialize with the initial state of all local variables
     for (int i = 0; i < locals_len; i++) {
         _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
@@ -645,6 +654,7 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
         }
         frame->stack[i] = stackvar;
     }
+
     return frame;
 
 error:
@@ -748,6 +758,8 @@ _Py_UOpsAbstractInterpContext_FramePop(
         ctx->frame_entries_needed -= (co->co_nlocalsplus + co->co_stacksize);
         assert(ctx->frame_entries_needed >= 0);
     }
+
+    ctx->water_level = frame->locals;
     Py_DECREF(frame);
     ctx->frame->next = NULL;
     return 0;

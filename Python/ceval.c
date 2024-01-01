@@ -1839,7 +1839,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     // Recentmost frame stack pointer is set by the current level.
     fprintf(stderr, "BLAH %d\n", (curr_stacklevel - recentmost_frame_set_sp->target));
     *stackptr_ptr = recentmost_frame->localsplus + _PyFrame_GetCode(recentmost_frame)->co_nlocalsplus + (curr_stacklevel - recentmost_frame_set_sp->target);
-    recentmost_frame->instr_ptr = frame->instr_ptr;
+    recentmost_frame->instr_ptr =  (_PyCode_CODE(_PyFrame_GetCode(recentmost_frame))) + (frame->instr_ptr - (_PyCode_CODE(_PyFrame_GetCode(frame))));
     // Set root frame stack pointer.
     assert(root_frame_set_sp->oparg >= 0);
     fprintf(stderr, "BOO %d\n", root_frame_set_sp->oparg);
