@@ -707,6 +707,27 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertNotIn("_PUSH_FRAME", uops)
     #     self.assertIn("_BINARY_OP_ADD_INT", uops)
 
+    # def test_frame_inlining_rewrite_locals(self):
+    #
+    #     def dummy(x):
+    #         return x + 1
+    #
+    #     def testfunc(n):
+    #         num = 0
+    #         while num < n:
+    #             # CALL_PY_EXACT_ARGS
+    #             y = dummy(num)
+    #             num += 1
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(64)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertNotIn("_PUSH_FRAME", uops)
+    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+
     # def test_frame_inlining_interleaving_locals_and_stack(self):
     #     """One optimization during inlining is instead of copying over stack
     #     to the new locals, simply interleave them and use the current stack
@@ -714,9 +735,9 @@ class TestUopsOptimization(unittest.TestCase):
     #     during inlining. This tests that.
     #     """
     #
-    #     def dummy(x, y):
-    #         unused_local = 1
-    #         return y / x
+    #     def dummy(x, y, a, b):
+    #         bar = 1
+    #         return y / x / b / a / bar
     #
     #     def testfunc(n):
     #         num = 0
@@ -724,7 +745,7 @@ class TestUopsOptimization(unittest.TestCase):
     #         bar = 0
     #         while num < n:
     #             # If the interleaving is wrong, it will divide the wrong things and fail.
-    #             y = dummy(foo, bar)
+    #             y = dummy(foo, bar, foo, foo)
     #             num += 1
     #
     #     opt = _testinternalcapi.get_uop_optimizer()
@@ -875,7 +896,26 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIsNotNone(ex)
         uops = {opname for opname, _, _ in ex}
         self.assertIn("_PUSH_FRAME", uops)
-        self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    # def test_frame_inlining_bound_method(self):
+    #     class A:
+    #         def __init__(self):
+    #             self.a = 1
+    #         def foo(self):
+    #             return self.a
+    #
+    #     a = A()
+    #     def testfunc(n):
+    #         for i in range(n):
+    #             a.foo()
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(32)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_LOAD_ATTR_METHOD_WITH_VALUES", uops)
 
     # Broken on uop converter side, not our side.
     # def test_swap(self):

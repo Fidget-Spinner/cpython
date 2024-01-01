@@ -26,6 +26,7 @@
 #include "pycore_typeobject.h"    // _PySuper_Lookup()
 #include "pycore_uop_ids.h"       // Uops
 #include "pycore_uops.h"          // _PyUOpExecutorObject
+#include "pycore_uop_metadata.h"
 #include "pycore_pyerrors.h"
 
 #include "pycore_dict.h"
@@ -1012,6 +1013,13 @@ enter_tier_two:
                 next_uop->target,
                 (int)(stack_pointer - _PyFrame_Stackbase(frame)));
         next_uop++;
+
+#ifdef LLTRACE
+    if (lltrace >= 4) {
+        dump_stack(frame, stack_pointer);
+        printf("stack offset from real localsplus: %d\n", (int)(stack_pointer - frame->localsplus));
+    }
+#endif
         OPT_STAT_INC(uops_executed);
         UOP_STAT_INC(uopcode, execution_count);
 #ifdef Py_STATS
