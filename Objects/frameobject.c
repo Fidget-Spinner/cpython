@@ -890,6 +890,7 @@ frame_dealloc(PyFrameObject *f)
         frame->f_executable = NULL;
         Py_CLEAR(frame->f_funcobj);
         Py_CLEAR(frame->f_locals);
+        Py_CLEAR(frame->f_names);
         PyObject **locals = _PyFrame_GetLocalsArray(frame);
         for (int i = 0; i < frame->stacktop; i++) {
             Py_CLEAR(locals[i]);

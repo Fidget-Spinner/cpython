@@ -10,7 +10,9 @@ extern "C" {
 
 #include "pycore_uops.h"          // _PyUOpInstruction
 
-int _Py_uop_analyze_and_optimize(PyCodeObject *code,
+int _Py_uop_analyze_and_optimize(
+    PyObject *f_funcobj,
+    PyCodeObject *code,
     _PyUOpInstruction *trace, int trace_len, int curr_stackentries);
 
 extern PyTypeObject _PyCounterExecutor_Type;

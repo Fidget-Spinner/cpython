@@ -4058,40 +4058,36 @@ dummy_func(
         }
 
         // Inlining prelude
-        op(_PRE_INLINE, (reconstructer/4 -- args[oparg])) {
-            PyObject **curr = args;
-            PyObject **end = args + oparg;
-            while (curr < end) {
-                *curr = NULL;
-                curr++;
+        // not too easy to express the stack effect.
+        op(_PRE_INLINE, (reconstructer/4 --)) {
+            PyObject **end = frame->localsplus + oparg;
+            while (stack_pointer < end) {
+                *stack_pointer = NULL;
+                stack_pointer++;
             }
+            assert((int64_t)reconstructer > 0);
             frame->frame_reconstruction_inst = current_executor->trace + (int64_t)reconstructer;
             CHECK_EVAL_BREAKER();
         }
 
+        op(_SET_FRAME_NAMES, (names/4 --)) {
+            FRAME_CO_NAMES = Py_NewRef(names);
+        }
+
         // Inlining postlude
-        op(_POST_INLINE, (reconstructer/4, args[oparg], retval -- retval)) {
-            for (int i = 0; i < oparg; i++) {
-                Py_XDECREF(args[i]);
+        op(_POST_INLINE, (reconstructer/4 -- retval)) {
+            PyObject **end = frame->localsplus + oparg;
+            PyObject *ret = PEEK(1);
+            stack_pointer--;
+            while (stack_pointer > end) {
+                Py_CLEAR(stack_pointer[-1]);
+                stack_pointer--;
             }
+            retval = ret;
             frame->frame_reconstruction_inst = ((int64_t)reconstructer == -1
                 ? NULL
                 : current_executor->trace + (int64_t)reconstructer);
             CHECK_EVAL_BREAKER();
-        }
-
-        pure op(_STORE_COMMON, (addr/4, value -- value)) {
-            TIER_TWO_ONLY
-            PyObject *tmp = *((PyObject **)addr);
-            *((PyObject **)addr) = value;
-            // TODO find out why this segfaults
-            // Py_XDECREF(tmp);
-        }
-
-        pure op(_LOAD_COMMON, (addr/4 -- value)) {
-            TIER_TWO_ONLY
-            value = *((PyObject **)addr);
-            Py_INCREF(value);
         }
 
         // Represents a possibly uninitialized value

@@ -232,15 +232,14 @@ extern "C" {
 #define _SAVE_RETURN_OFFSET 379
 #define _LOAD_CONST_IMMEDIATE 380
 #define _PRE_INLINE 381
-#define _POST_INLINE 382
-#define _STORE_COMMON 383
-#define _LOAD_COMMON 384
-#define INIT_FAST 385
-#define _SETUP_TIER2_FRAME 386
-#define _RECONSTRUCT_FRAME 387
-#define _SET_SP 388
-#define _CHECK_VALIDITY 389
-#define MAX_UOP_ID 389
+#define _SET_FRAME_NAMES 382
+#define _POST_INLINE 383
+#define INIT_FAST 384
+#define _SETUP_TIER2_FRAME 385
+#define _RECONSTRUCT_FRAME 386
+#define _SET_SP 387
+#define _CHECK_VALIDITY 388
+#define MAX_UOP_ID 388
 
 #ifdef __cplusplus
 }

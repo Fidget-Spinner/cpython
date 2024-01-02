@@ -1083,7 +1083,7 @@ deoptimize:
     frame = _PyEvalFrame_ReconstructTier2Frame(tstate, frame, &stack_pointer);
     // Unrecoverable memory error.
     if (frame == NULL) {
-        goto resume_with_error;
+        goto error_tier_two;
     }
     next_instr = next_uop[-1].target + _PyCode_CODE(_PyFrame_GetCode(frame));
     DPRINTF(2, "DEOPT: [UOp %d (%s), oparg %d, operand %" PRIu64 ", target %d @ %d -> %s]\n",
@@ -1770,6 +1770,7 @@ error:
 static _PyInterpreterFrame *
 _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame, PyObject ***stackptr_ptr)
 {
+    assert(frame->frame_reconstruction_inst != NULL ? (frame->tier == 2) : 1);
     // Does not need reconstruction.
     if (frame->tier != 2 || frame->frame_reconstruction_inst == NULL) {
         return frame;
@@ -1779,7 +1780,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     dump_stack(frame, *stackptr_ptr);
 #endif
     _PyInterpreterFrame *prev_frame = frame;
-    int curr_stacklevel = ((int)(*stackptr_ptr - frame->localsplus));
+    PyObject **curr_stacklevel = *stackptr_ptr;
     _PyUOpInstruction *curr = frame->frame_reconstruction_inst;
     assert(curr->opcode == _SET_SP);
     _PyUOpInstruction *root_frame_set_sp = curr;
@@ -1798,6 +1799,9 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     _PyInterpreterFrame *recentmost_frame = frame;
 
     while (opcode == _RECONSTRUCT_FRAME) {
+#ifdef LLTRACE
+        printf("reconstructing frame... \n");
+#endif
         assert(PyCode_Check(code));
         assert((curr+1)->opcode == _LOAD_CONST_IMMEDIATE);
         assert(PyFunction_Check((PyObject*)(uintptr_t)(curr+1)->operand));
@@ -1826,7 +1830,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         new_frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(new_frame)) + (int)(curr+3)->operand;
         // Copy over locals, stack and friends.
 #ifdef LLTRACE
-        printf("copying over stack from with offset %d: \n", oparg);
+        printf("copying over stack with offset %d: , locals count: %d, stacksize: %d\n", oparg, code->co_nlocalsplus, code->co_stacksize);
         dump_stack(frame, frame->localsplus + oparg);
 #endif
         int total_len = (code->co_nlocalsplus + code->co_stacksize);
@@ -1835,13 +1839,12 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
 
         // Null out old frame - the old frame no longer owns the objects.
         PyObject **start = frame->localsplus + oparg;
-        for (int i = 0; i < total_len; i++) {
+        for (int i = 0; i < total_len - 1; i++) {
             *start = NULL;
             start++;
         }
 
         // Finally, set the stack pointer
-        fprintf(stderr, "BOO %d\n", (curr+2)->oparg);
         recentmost_frame->stacktop = _PyFrame_GetCode(recentmost_frame)->co_nlocalsplus + (curr+2)->oparg;
         assert(frame->stacktop >= 0);
 
@@ -1853,18 +1856,24 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     }
 
     // Recentmost frame stack pointer is set by the current level.
-    *stackptr_ptr = recentmost_frame->localsplus + (curr_stacklevel - recentmost_frame_set_sp->oparg);
+    int recentmost_stackentries = (int)(curr_stacklevel - (frame->localsplus + recentmost_frame_set_sp->oparg + (_PyFrame_GetCode(recentmost_frame)->co_nlocalsplus)));
+    *stackptr_ptr = recentmost_frame->localsplus + (_PyFrame_GetCode(recentmost_frame)->co_nlocalsplus) + recentmost_stackentries;
+#ifdef LLTRACE
+    printf("restoring offset %d\n", (int)(frame->instr_ptr - (_PyCode_CODE(_PyFrame_GetCode(frame)))));
+#endif
     recentmost_frame->instr_ptr =  (_PyCode_CODE(_PyFrame_GetCode(recentmost_frame))) + (frame->instr_ptr - (_PyCode_CODE(_PyFrame_GetCode(frame))));
+    recentmost_frame->return_offset = -1;
     // Set root frame stack pointer.
     assert(root_frame_set_sp->oparg >= 0);
     frame->stacktop = _PyFrame_GetCode(frame)->co_nlocalsplus + root_frame_set_sp->oparg;
     frame->return_offset = root_frame_return_offset->oparg;
     frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(frame)) + (int)root_frame_return_offset->operand;
+    frame->f_names = Py_NewRef(_PyFrame_GetCode(frame)->co_names);
     tstate->current_frame = recentmost_frame;
     frame->frame_reconstruction_inst = NULL;
 
 #ifdef LLTRACE
-        printf("after reconstruction root stack: \n");
+        printf("after reconstruction root stack, with n_stackentries %d: \n", root_frame_set_sp->oparg);
         dump_stack(frame, &(frame->localsplus[frame->stacktop]));
         printf("after reconstruction topmost stack: \n");
         dump_stack(recentmost_frame, *stackptr_ptr);

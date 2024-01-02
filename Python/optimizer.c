@@ -108,6 +108,7 @@ PyUnstable_Replace_Executor(PyCodeObject *code, _Py_CODEUNIT *instr, _PyExecutor
 static int
 error_optimize(
     _PyOptimizerObject* self,
+    PyObject *f_func,
     PyCodeObject *code,
     _Py_CODEUNIT *instr,
     _PyExecutorObject **exec,
@@ -174,7 +175,7 @@ _PyOptimizer_BackEdge(_PyInterpreterFrame *frame, _Py_CODEUNIT *src, _Py_CODEUNI
     _PyOptimizerObject *opt = interp->optimizer;
     _PyExecutorObject *executor = NULL;
     /* Start optimizing at the destination to guarantee forward progress */
-    int err = opt->optimize(opt, code, dest, &executor, (int)(stack_pointer - _PyFrame_Stackbase(frame)));
+    int err = opt->optimize(opt, frame->f_funcobj, code, dest, &executor, (int)(stack_pointer - _PyFrame_Stackbase(frame)));
     if (err <= 0) {
         assert(executor == NULL);
         return err;
@@ -266,6 +267,7 @@ counter_execute(_PyExecutorObject *self, _PyInterpreterFrame *frame, PyObject **
 static int
 counter_optimize(
     _PyOptimizerObject* self,
+    PyObject *f_func,
     PyCodeObject *code,
     _Py_CODEUNIT *instr,
     _PyExecutorObject **exec_ptr,
@@ -800,6 +802,14 @@ compute_used(_PyUOpInstruction *buffer, uint32_t *used)
             /* Mark target as reachable */
             SET_BIT(used, buffer[i].oparg);
         }
+        if (opcode == _PRE_INLINE) {
+            /* Mark target as reachable */
+            SET_BIT(used, buffer[i].operand);
+        }
+        if (opcode == _POST_INLINE && (int64_t)buffer[i].operand > 0) {
+            /* Mark target as reachable */
+            SET_BIT(used, buffer[i].operand);
+        }
         if (opcode == NOP) {
             count--;
             UNSET_BIT(used, i);
@@ -840,8 +850,18 @@ make_executor_from_uops(_PyUOpInstruction *buffer, _PyBloomFilter *dependencies)
         if (opcode == _PRE_INLINE)
         {
             /* The oparg of the target will already have been set to its new offset */
-            int oparg = executor->trace[dest].operand;
+            int64_t oparg = executor->trace[dest].operand;
             executor->trace[dest].operand = buffer[oparg].oparg;
+            assert(oparg > 0);
+        }
+        if (opcode == _POST_INLINE)
+        {
+            /* The oparg of the target will already have been set to its new offset */
+            int64_t oparg = executor->trace[dest].operand;
+            if (oparg > 0) {
+                executor->trace[dest].operand = buffer[oparg].oparg;
+                assert(oparg > 0);
+            }
         }
         /* Set the oparg to be the destination offset,
          * so that we can set the oparg of earlier jumps correctly. */
@@ -875,6 +895,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, _PyBloomFilter *dependencies)
 static int
 uop_optimize(
     _PyOptimizerObject *self,
+    PyObject *f_funcobj,
     PyCodeObject *code,
     _Py_CODEUNIT *instr,
     _PyExecutorObject **exec_ptr,
@@ -891,7 +912,7 @@ uop_optimize(
     OPT_STAT_INC(traces_created);
     char *uop_optimize = Py_GETENV("PYTHONUOPSOPTIMIZE");
     if (uop_optimize == NULL || *uop_optimize > '0') {
-        err = _Py_uop_analyze_and_optimize(code, buffer, _Py_UOP_MAX_TRACE_LENGTH, curr_stackentries);
+        err = _Py_uop_analyze_and_optimize(f_funcobj, code, buffer, _Py_UOP_MAX_TRACE_LENGTH, curr_stackentries);
         if (err < 0) {
             return -1;
         }

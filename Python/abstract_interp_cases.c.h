@@ -1759,11 +1759,10 @@
         }
 
         case _PRE_INLINE: {
-            PyObject **__args_;
-            __args_ = &stack_pointer[0];
-            __args_ = sym_init_unknown(ctx);
-            if(__args_ == NULL) goto error;
-            stack_pointer += oparg;
+            break;
+        }
+
+        case _SET_FRAME_NAMES: {
             break;
         }
 
@@ -1771,8 +1770,8 @@
             _Py_UOpsSymbolicExpression *__retval_;
             __retval_ = sym_init_unknown(ctx);
             if(__retval_ == NULL) goto error;
-            stack_pointer[-1 - oparg] = __retval_;
-            stack_pointer += -oparg;
+            stack_pointer[0] = __retval_;
+            stack_pointer += 1;
             break;
         }
 

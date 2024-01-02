@@ -3399,61 +3399,43 @@
         }
 
         case _PRE_INLINE: {
-            PyObject **args;
             oparg = CURRENT_OPARG();
-            args = &stack_pointer[0];
             PyObject *reconstructer = (PyObject *)CURRENT_OPERAND();
-            PyObject **curr = args;
-            PyObject **end = args + oparg;
-            while (curr < end) {
-                *curr = NULL;
-                curr++;
+            PyObject **end = frame->localsplus + oparg;
+            while (stack_pointer < end) {
+                *stack_pointer = NULL;
+                stack_pointer++;
             }
+            assert((int64_t)reconstructer > 0);
             frame->frame_reconstruction_inst = current_executor->trace + (int64_t)reconstructer;
-            stack_pointer += oparg;
             CHECK_EVAL_BREAKER();
+            break;
+        }
+
+        case _SET_FRAME_NAMES: {
+            PyObject *names = (PyObject *)CURRENT_OPERAND();
+            FRAME_CO_NAMES = Py_NewRef(names);
             break;
         }
 
         case _POST_INLINE: {
             PyObject *retval;
-            PyObject **args;
             oparg = CURRENT_OPARG();
-            retval = stack_pointer[-1];
-            args = &stack_pointer[-1 - oparg];
             PyObject *reconstructer = (PyObject *)CURRENT_OPERAND();
-            for (int i = 0; i < oparg; i++) {
-                Py_XDECREF(args[i]);
+            PyObject **end = frame->localsplus + oparg;
+            PyObject *ret = PEEK(1);
+            stack_pointer--;
+            while (stack_pointer > end) {
+                Py_CLEAR(stack_pointer[-1]);
+                stack_pointer--;
             }
+            retval = ret;
             frame->frame_reconstruction_inst = ((int64_t)reconstructer == -1
                 ? NULL
             : current_executor->trace + (int64_t)reconstructer);
-            stack_pointer[-1 - oparg] = retval;
-            stack_pointer += -oparg;
-            CHECK_EVAL_BREAKER();
-            break;
-        }
-
-        case _STORE_COMMON: {
-            PyObject *value;
-            value = stack_pointer[-1];
-            PyObject *addr = (PyObject *)CURRENT_OPERAND();
-            TIER_TWO_ONLY
-            PyObject *tmp = *((PyObject **)addr);
-            *((PyObject **)addr) = value;
-            // TODO find out why this segfaults
-            // Py_XDECREF(tmp);
-            break;
-        }
-
-        case _LOAD_COMMON: {
-            PyObject *value;
-            PyObject *addr = (PyObject *)CURRENT_OPERAND();
-            TIER_TWO_ONLY
-            value = *((PyObject **)addr);
-            Py_INCREF(value);
-            stack_pointer[0] = value;
+            stack_pointer[0] = retval;
             stack_pointer += 1;
+            CHECK_EVAL_BREAKER();
             break;
         }
 

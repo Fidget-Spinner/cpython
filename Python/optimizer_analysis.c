@@ -468,6 +468,19 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx,
     // Also too many locals might make our requests for stack space
     // more likely to fail.
     if (extra_needed > 32) {
+        DPRINTF(3, "inline_fail: too big\n");
+        goto inline_fail;
+    }
+    // The new frame and previous frame must share the same globals()
+    // ie. they must be in the same module.
+    // Technically, this could be worked around by setting globals, but
+    // it adds extra overhead to store them in the eval function.
+    // TODO: research how beneficial inlining across modules is.
+    if (frame_ir_entry->frame_function->func_globals !=
+        ctx->frame->frame_ir_entry->frame_function->func_globals ||
+        frame_ir_entry->frame_function->func_builtins !=
+        ctx->frame->frame_ir_entry->frame_function->func_builtins) {
+        DPRINTF(3, "inline_fail: not same globals/builtins\n");
         goto inline_fail;
     }
     curr = curr + 1;
@@ -542,12 +555,13 @@ frame_initalize(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsAbstractFrame *frame
                 int locals_len, int curr_stacklen);
 
 static _Py_UOpsAbstractInterpContext *
-_Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
-                                  int stack_len,
-                                  int locals_len,
+_Py_UOpsAbstractInterpContext_New(PyObject *f_funcobj,
+                                  PyCodeObject *co,
                                   int curr_stacklen,
                                   int ir_entries)
 {
+    int locals_len = co->co_nlocalsplus;
+    int stack_len = co->co_stacksize;
     _Py_UOpsAbstractFrame *frame = NULL;
     _Py_UOps_Opt_IR *ir = _Py_UOpsSSA_IR_New(ir_entries);
     if (ir == NULL) {
@@ -571,7 +585,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
     self->ir = ir;
     self->new_frame_sym = NULL;
     self->frame_entries_needed = 0;
-    frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen, root_frame);
+    frame = _Py_UOpsAbstractFrame_New(self, co->co_consts, stack_len, locals_len, curr_stacklen, root_frame);
     if (frame == NULL) {
         goto error;
     }
@@ -586,6 +600,10 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
 
     root_frame->my_real_localsplus = self->localsplus;
     root_frame->my_virtual_localsplus = self->localsplus;
+    root_frame->frame_co_code = (PyCodeObject *)Py_NewRef(co);
+    assert(PyFunction_Check(f_funcobj));
+    root_frame->frame_function = (PyFunctionObject *)Py_NewRef(f_funcobj);
+
     assert(root_frame->my_real_localsplus != NULL);
 
     return self;
@@ -1344,7 +1362,7 @@ uop_abstract_interpret_single_inst(
                 args--;
                 argcount++;
                 frame_ir_entry->consumed_self = true;
-                virtual_localsplus -= 1;
+                virtual_localsplus--;
             }
             ir_plain_inst(ctx->ir, *inst);
             DPRINTF(3, "virtual_localsplus - base is: %ld\n", virtual_localsplus - ctx->localsplus);
@@ -1455,6 +1473,7 @@ required:
 
 static _Py_UOpsAbstractInterpContext *
 uop_abstract_interpret(
+    PyObject *f_funcobj,
     PyCodeObject *co,
     _PyUOpInstruction *trace,
     int trace_len,
@@ -1474,8 +1493,7 @@ uop_abstract_interpret(
     _Py_UOpsAbstractInterpContext *ctx = NULL;
 
     ctx = _Py_UOpsAbstractInterpContext_New(
-        co->co_consts, co->co_stacksize,
-        co->co_nlocalsplus, curr_stacklen,
+        f_funcobj, co, curr_stacklen,
         trace_len);
     if (ctx == NULL) {
         goto error;
@@ -1517,10 +1535,6 @@ uop_abstract_interpret(
             // Emit the state of the stack first.
             // Since this is a guard, copy over the type info
             write_stack_to_ir(ctx, curr, true);
-            if((curr-1)->opcode == _CHECK_VALIDITY && (curr-2)->opcode == _SET_IP) {
-                ir_plain_inst(ctx->ir, *(curr-2));
-                ir_plain_inst(ctx->ir, *(curr-1));
-            }
             ir_plain_inst(ctx->ir, *curr);
         }
 
@@ -1566,9 +1580,11 @@ emit_i(_Py_UOpsEmitter *emitter,
     }
 #endif
     if (emitter->curr_i < 0) {
+        DPRINTF(2, "out of emission space\n");
         return -1;
     }
     if (emitter->writebuffer + emitter->curr_i >= emitter->writebuffer_end) {
+        DPRINTF(2, "out of emission space\n");
         return -1;
     }
     DPRINTF(3, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
@@ -1825,6 +1841,7 @@ emit_uops_from_ctx(
     // TODO more accurate calculation of interleaved locals and stack.
     int max_additional_nlocals_needed = 0;
     int curr_additional_nlocals_needed = 0;
+    int entry_reserved_for_inlining_setup = 0;
 
     _Py_UOpsAbstractFrame *root_frame = ctx->frame;
     while (root_frame->prev != NULL) {
@@ -1834,8 +1851,8 @@ emit_uops_from_ctx(
         trace_writebuffer,
         writebuffer_end,
         writebuffer_end,
-        1, // Reserve 1 slot for _SETUP_TIER2_FRAME if needed.
-        writebuffer_end,
+        0,
+        (int)(writebuffer_end - trace_writebuffer),
         sym_store,
         0,
         root_frame->frame_ir_entry
@@ -1882,15 +1899,15 @@ emit_uops_from_ctx(
                 _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry;
                 emitter.curr_frame_ir_entry = curr;
                 curr->prev_frame_ir = prev;
-                curr->my_real_localsplus = curr->my_virtual_localsplus;
-                assert(curr->my_real_localsplus != NULL);
                 if (!curr->is_inlineable) {
+                    curr->my_real_localsplus = curr->my_virtual_localsplus;
                     break;
                 }
                 // For an inline frame, we share the same localsplus, so inherit it.
                 curr->my_real_localsplus = prev->my_real_localsplus;
                 DPRINTF(3, "inlining frame at IR location %d, and interleaving locals\n", i);
-                did_inline = true;
+
+
                 curr_additional_nlocals_needed += (curr->frame_co_code->co_nlocalsplus + curr->frame_co_code->co_stacksize);
                 max_additional_nlocals_needed = curr_additional_nlocals_needed > max_additional_nlocals_needed
                     ? curr_additional_nlocals_needed : max_additional_nlocals_needed;
@@ -1899,7 +1916,6 @@ emit_uops_from_ctx(
                 assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
 
                 assert(curr->my_real_localsplus != NULL);
-
                 // Compile the reconstruction
                 prev->save_return_offset = emitter.writebuffer[emitter.curr_i - 1].oparg;
                 // Find the closest _SET_IP
@@ -1916,20 +1932,35 @@ emit_uops_from_ctx(
                 if (reconstruction_offset < 0) {
                     goto error;
                 }
+                assert(reconstruction_offset != 0);
 
                 curr->reconstruction_offset = reconstruction_offset;
 
                 // Get rid of those 3 above.
                 emitter.curr_i -= 3;
-                int nargs = emitter.writebuffer[emitter.curr_i - 2].oparg + (curr->consumed_self);
-                // Expand the stack to AFTER our new interleaved locals.
+                int nargs = emitter.writebuffer[emitter.curr_i - 2].oparg;
+                // Expand the root stack to AFTER our new interleaved locals.
                 _PyUOpInstruction pre_inline = {
                     _PRE_INLINE,
-                    curr->frame_co_code->co_nlocalsplus - nargs,
+                    (int)(curr->my_virtual_localsplus - curr->my_real_localsplus) + curr->frame_co_code->co_nlocalsplus,
                     0,
                     reconstruction_offset
                 };
+                // TODO mem leak
+                _PyUOpInstruction set_frame_names = {
+                    _SET_FRAME_NAMES,
+                    0,
+                    0,
+                    Py_NewRef(curr->frame_co_code->co_names)
+                };
+                // Our very first inlinee - setup the root frame.
+                if (did_inline == false) {
+                    entry_reserved_for_inlining_setup = emitter.curr_i;
+                    emitter.curr_i++;
+                }
+                did_inline = true;
                 emit_i(&emitter, pre_inline);
+                emit_i(&emitter, set_frame_names);
                 assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _PUSH_FRAME));
                 // Skip _PUSH_FRAME.
                 i++;
@@ -1954,14 +1985,22 @@ emit_uops_from_ctx(
                     // Skip _POP_FRAME
                     i++;
                     // Cleanup the stack.
+                    assert((int)(emitter.curr_frame_ir_entry->my_virtual_localsplus - emitter.curr_frame_ir_entry->my_real_localsplus) > 0);
                     _PyUOpInstruction new_sp = {_POST_INLINE,
-                        co->co_nlocalsplus +
-                        // 1 for self, 1 for callable, this aligns with _CALL_PY_EXACT_ARGS
-                        2 - emitter.curr_frame_ir_entry->consumed_self,
+                                                // -2 for callable, self_or_null
+                        (int)(emitter.curr_frame_ir_entry->my_virtual_localsplus - emitter.curr_frame_ir_entry->my_real_localsplus) - (emitter.curr_frame_ir_entry->consumed_self ? 1 : 2),
                         0,
                         prev->reconstruction_offset,
                     };
+                    // Another mem leak
+                    _PyUOpInstruction set_frame_names = {
+                        _SET_FRAME_NAMES,
+                        0,
+                        0,
+                        Py_NewRef(prev->frame_co_code->co_names)
+                    };
                     emit_i(&emitter, new_sp);
+                    emit_i(&emitter, set_frame_names);
                 }
                 emitter.curr_frame_ir_entry->prev_frame_ir = NULL;
                 emitter.curr_frame_ir_entry = prev;
@@ -1980,11 +2019,8 @@ emit_uops_from_ctx(
                 max_additional_nlocals_needed,
                 0L);
         _PyUOpInstruction setup_frame = {_SETUP_TIER2_FRAME, max_additional_nlocals_needed, 0, 0};
-        emitter.writebuffer[0] = setup_frame;
-    }
-    else {
         _PyUOpInstruction nop = {_NOP, 0, 0, 0};
-        emitter.writebuffer[0] = nop;
+        emitter.writebuffer[entry_reserved_for_inlining_setup] = did_inline ? setup_frame : nop;
     }
     // Add the _JUMP_TO_TOP/_EXIT_TRACE at the end of the trace.
     _PyUOpInstruction jump_absolute = {
@@ -2045,6 +2081,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
 
 int
 _Py_uop_analyze_and_optimize(
+    PyObject *f_funcobj,
     PyCodeObject *co,
     _PyUOpInstruction *buffer,
     int buffer_size,
@@ -2061,7 +2098,7 @@ _Py_uop_analyze_and_optimize(
 
     // Pass: Abstract interpretation and symbolic analysis
     _Py_UOpsAbstractInterpContext *ctx = uop_abstract_interpret(
-        co, buffer,
+        f_funcobj, co, buffer,
         buffer_size, curr_stacklen);
 
     if (ctx == NULL) {
@@ -2093,7 +2130,7 @@ _Py_uop_analyze_and_optimize(
 
     PyMem_Free(temp_writebuffer);
 
-    remove_unneeded_uops(buffer, buffer_size);
+    // remove_unneeded_uops(buffer, buffer_size);
 
     return 0;
 error:

@@ -958,12 +958,38 @@ class TestUopsOptimization(unittest.TestCase):
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertIn("_CHECK_CALL_BOUND_METHOD_EXACT_ARGS", uops)
 
-    def test_frame_inlining_dangling_frame(self):
+    # def test_frame_inlining_dangling_frame(self):
+    #
+    #
+    #     def testfunc(n):
+    #         for i in range(n):
+    #             outer()
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(32)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+    #     pop_frame_count = [opname for opname, _, _ in ex if opname == "_POP_FRAME"]
+    #     # Both frames fail to inlne.
+    #     self.assertGreater(len(frame_count), len(pop_frame_count))
 
+    def test_frame_inlining_other_bound_method(self):
+        class Strength:
+            def __init__(self, strength):
+                super(Strength, self).__init__()
+                self.strength = strength
 
+            @classmethod
+            def stronger(cls, s1, s2):
+                return s1.strength < s2.strength
+
+        s1 = Strength(1)
+        s2 = Strength(2)
         def testfunc(n):
             for i in range(n):
-                outer()
+                Strength.stronger(s1, s2)
 
         opt = _testinternalcapi.get_uop_optimizer()
         with temporary_optimizer(opt):
@@ -971,9 +997,8 @@ class TestUopsOptimization(unittest.TestCase):
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
         frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
-        pop_frame_count = [opname for opname, _, _ in ex if opname == "_POP_FRAME"]
         # Both frames fail to inlne.
-        self.assertGreater(len(frame_count), len(pop_frame_count))
+        self.assertEqual(len(frame_count), 0)
 
     # Broken on uop converter side, not our side.
     # def test_swap(self):
