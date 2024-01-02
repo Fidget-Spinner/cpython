@@ -274,6 +274,7 @@ ir_frame_push_info(_Py_UOps_Opt_IR *ir)
     entry->reconstruction_offset = -1;
     entry->my_virtual_localsplus = NULL;
     entry->my_real_localsplus = NULL;
+    entry->prev_frame_ir = NULL;
     // Code object is set by frame push.
     ir->curr_write++;
     return entry;
@@ -585,6 +586,7 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
 
     root_frame->my_real_localsplus = self->localsplus;
     root_frame->my_virtual_localsplus = self->localsplus;
+    assert(root_frame->my_real_localsplus != NULL);
 
     return self;
 
@@ -1330,7 +1332,7 @@ uop_abstract_interpret_single_inst(
             // The old stack entries become the locals of the new frame.
             // The new frame steals references to the stack entries.
             // + 2 because callable and null
-            _Py_UOpsSymbolicExpression **virtual_localsplus = stack_pointer + 3;
+            _Py_UOpsSymbolicExpression **virtual_localsplus = stack_pointer + 2;
             _Py_UOpsSymbolicExpression *self_or_null = extract_self_or_null_from_sym(ctx->new_frame_sym);
             assert(self_or_null != NULL);
             assert(ctx->new_frame_sym != NULL);
@@ -1342,7 +1344,7 @@ uop_abstract_interpret_single_inst(
                 args--;
                 argcount++;
                 frame_ir_entry->consumed_self = true;
-                virtual_localsplus--;
+                virtual_localsplus -= 1;
             }
             ir_plain_inst(ctx->ir, *inst);
             DPRINTF(3, "virtual_localsplus - base is: %ld\n", virtual_localsplus - ctx->localsplus);
@@ -1421,6 +1423,11 @@ uop_abstract_interpret_single_inst(
     // Store the frame symbolic to extract information later
     if (opcode == _INIT_CALL_PY_EXACT_ARGS) {
         ctx->new_frame_sym = PEEK(1);
+        DPRINTF(3, "call_py_exact_args: {");
+        for (Py_ssize_t i = 0; i < Py_SIZE(ctx->new_frame_sym); i++) {
+            DPRINTF(3, "#%ld (%s)", i, ((ctx->new_frame_sym->operands[i]->inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[ctx->new_frame_sym->operands[i]->inst.opcode]))
+        }
+        DPRINTF(3, "} \n");
     }
     DPRINTF(2, " stack_level %d\n", STACK_LEVEL());
     ctx->frame->stack_pointer = stack_pointer;
@@ -1468,7 +1475,7 @@ uop_abstract_interpret(
 
     ctx = _Py_UOpsAbstractInterpContext_New(
         co->co_consts, co->co_stacksize,
-        co->co_nlocals, curr_stacklen,
+        co->co_nlocalsplus, curr_stacklen,
         trace_len);
     if (ctx == NULL) {
         goto error;
@@ -1648,12 +1655,16 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
             return 0;
         }
         inst = sym->inst;
-        inst.opcode = sym->inst.opcode == INIT_FAST ? LOAD_FAST : sym->inst.opcode;
-        inst.oparg = sym->inst.opcode == INIT_FAST ?
-         (emitter->curr_frame_ir_entry->my_virtual_localsplus -
-            emitter->curr_frame_ir_entry->my_real_localsplus) +
-            sym->inst.oparg
-            : sym->inst.oparg;
+        if (sym->inst.opcode == INIT_FAST) {
+            inst.opcode = LOAD_FAST;
+            assert(emitter->curr_frame_ir_entry->my_real_localsplus != NULL);
+            assert(emitter->curr_frame_ir_entry->my_virtual_localsplus >= emitter->curr_frame_ir_entry->my_real_localsplus);
+            int recalculated_localsplus = (emitter->curr_frame_ir_entry->my_virtual_localsplus -
+                                           emitter->curr_frame_ir_entry->my_real_localsplus) + inst.oparg;
+            assert(recalculated_localsplus < MAX_ABSTRACT_INTERP_SIZE);
+            assert(recalculated_localsplus >= 0);
+            inst.oparg = recalculated_localsplus;
+        }
         return emit_i(emitter, inst);
     }
 
@@ -1815,6 +1826,10 @@ emit_uops_from_ctx(
     int max_additional_nlocals_needed = 0;
     int curr_additional_nlocals_needed = 0;
 
+    _Py_UOpsAbstractFrame *root_frame = ctx->frame;
+    while (root_frame->prev != NULL) {
+        root_frame = root_frame->prev;
+    }
     _Py_UOpsEmitter emitter = {
         trace_writebuffer,
         writebuffer_end,
@@ -1823,7 +1838,8 @@ emit_uops_from_ctx(
         writebuffer_end,
         sym_store,
         0,
-        ctx->frame->frame_ir_entry
+        root_frame->frame_ir_entry
+
     };
 
     _Py_UOps_Opt_IR *ir = ctx->ir;
@@ -1864,12 +1880,15 @@ emit_uops_from_ctx(
             case IR_FRAME_PUSH_INFO: {
 //                DPRINTF(3, "frame_push\n");
                 _Py_UOpsOptIREntry *prev = emitter.curr_frame_ir_entry;
-                emitter.curr_frame_ir_entry = &ir->entries[i];
-                emitter.curr_frame_ir_entry->prev_frame_ir = prev;
+                emitter.curr_frame_ir_entry = curr;
+                curr->prev_frame_ir = prev;
                 curr->my_real_localsplus = curr->my_virtual_localsplus;
+                assert(curr->my_real_localsplus != NULL);
                 if (!curr->is_inlineable) {
                     break;
                 }
+                // For an inline frame, we share the same localsplus, so inherit it.
+                curr->my_real_localsplus = prev->my_real_localsplus;
                 DPRINTF(3, "inlining frame at IR location %d, and interleaving locals\n", i);
                 did_inline = true;
                 curr_additional_nlocals_needed += (curr->frame_co_code->co_nlocalsplus + curr->frame_co_code->co_stacksize);
@@ -1879,7 +1898,7 @@ emit_uops_from_ctx(
                 assert(emitter.writebuffer[emitter.curr_i - 2].opcode == _INIT_CALL_PY_EXACT_ARGS);
                 assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
 
-                curr->my_real_localsplus = prev->my_real_localsplus;
+                assert(curr->my_real_localsplus != NULL);
 
                 // Compile the reconstruction
                 prev->save_return_offset = emitter.writebuffer[emitter.curr_i - 1].oparg;

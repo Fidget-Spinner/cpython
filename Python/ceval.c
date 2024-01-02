@@ -1770,14 +1770,14 @@ error:
 static _PyInterpreterFrame *
 _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *frame, PyObject ***stackptr_ptr)
 {
-#ifdef LLTRACE
-    printf("pre-reconstruction stack: \n");
-    dump_stack(frame, *stackptr_ptr);
-#endif
     // Does not need reconstruction.
     if (frame->tier != 2 || frame->frame_reconstruction_inst == NULL) {
         return frame;
     }
+#ifdef LLTRACE
+    printf("pre-reconstruction stack: \n");
+    dump_stack(frame, *stackptr_ptr);
+#endif
     _PyInterpreterFrame *prev_frame = frame;
     int curr_stacklevel = ((int)(*stackptr_ptr - frame->localsplus));
     _PyUOpInstruction *curr = frame->frame_reconstruction_inst;

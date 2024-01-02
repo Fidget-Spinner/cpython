@@ -706,7 +706,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertNotIn("_PUSH_FRAME", uops)
     #     self.assertIn("_BINARY_OP_ADD_INT", uops)
-
+    #
     # def test_frame_inlining_rewrite_locals(self):
     #
     #     def dummy(x):
@@ -896,7 +896,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertNotIn("_PUSH_FRAME", uops)
-    #
+    # #
     # def test_frame_inlining_instance_method(self):
     #     class A:
     #         def __init__(self):
@@ -916,7 +916,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertIn("_LOAD_ATTR_METHOD_WITH_VALUES", uops)
-
+    #
     # def test_frame_inlining_class_method(self):
     #     class A:
     #         def __init__(self):
@@ -936,7 +936,7 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertIn("_LOAD_ATTR_CLASS", uops)
-
+    #
     # def test_frame_inlining_bound_method(self):
     #     class A:
     #         def __init__(self):
@@ -957,6 +957,23 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertIn("_CHECK_CALL_BOUND_METHOD_EXACT_ARGS", uops)
+
+    def test_frame_inlining_dangling_frame(self):
+
+
+        def testfunc(n):
+            for i in range(n):
+                outer()
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+        pop_frame_count = [opname for opname, _, _ in ex if opname == "_POP_FRAME"]
+        # Both frames fail to inlne.
+        self.assertGreater(len(frame_count), len(pop_frame_count))
 
     # Broken on uop converter side, not our side.
     # def test_swap(self):
@@ -993,6 +1010,15 @@ class TestUopsOptimization(unittest.TestCase):
     #     self.assertIsNotNone(ex)
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+def inner():
+    for _ in range(32):
+        1 + 1
+
+def outer():
+    for _ in range(32):
+        inner()
+
 
 if __name__ == "__main__":
     unittest.main()
