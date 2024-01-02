@@ -131,6 +131,9 @@ def _write_body_abstract_interp_impure_uop(
     for var in mangled_uop.stack.outputs:
         if var.name not in UNUSED and not var.peek:
             out.emit(f"{var.name} = sym_init_unknown(ctx);\n")
+            out.emit(f"if({var.name} == NULL) goto error;\n")
+            if var.name in ("null", "__null_"):
+                out.emit(f"sym_set_type({var.name}, NULL_TYPE, 0);\n")
 
 
 def mangle_uop_names(uop: Uop) -> Uop:

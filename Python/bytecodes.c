@@ -202,11 +202,6 @@ dummy_func(
             LOAD_FAST,
         };
 
-        // Represents a possibly uninitialized value
-        pseudo(INIT_FAST) = {
-            LOAD_FAST_CHECK,
-        };
-
         inst(LOAD_FAST_CHECK, (-- value)) {
             value = GETLOCAL(oparg);
             ERROR_IF(value == NULL, unbound_local_error);
@@ -1911,7 +1906,7 @@ dummy_func(
             DEOPT_IF(tp->tp_version_tag != type_version);
         }
 
-        op(_CHECK_MANAGED_OBJECT_HAS_VALUES, (owner -- owner)) {
+        mandatory guard op(_CHECK_MANAGED_OBJECT_HAS_VALUES, (owner -- owner)) {
             assert(Py_TYPE(owner)->tp_dictoffset < 0);
             assert(Py_TYPE(owner)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
             PyDictOrValues *dorv = _PyObject_DictOrValuesPointer(owner);
@@ -4097,6 +4092,11 @@ dummy_func(
             TIER_TWO_ONLY
             value = *((PyObject **)addr);
             Py_INCREF(value);
+        }
+
+        // Represents a possibly uninitialized value
+        op(INIT_FAST, (--)) {
+            // Nothing, just a sentinel.
         }
 
         op(_SETUP_TIER2_FRAME, (--)) {

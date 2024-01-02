@@ -1,5 +1,4 @@
 #include "Python.h"
-#include "opcode.h"
 #include "pycore_interp.h"
 #include "pycore_opcode_metadata.h"
 #include "pycore_opcode_utils.h"
@@ -35,9 +34,9 @@
 static inline bool
 _PyOpcode_isterminal(uint32_t opcode)
 {
-    return (opcode == LOAD_FAST ||
-            opcode == LOAD_FAST_CHECK ||
-            opcode == LOAD_FAST_AND_CLEAR ||
+    return (opcode == _LOAD_FAST ||
+            opcode == _LOAD_FAST_CHECK ||
+            opcode == _LOAD_FAST_AND_CLEAR ||
             opcode == INIT_FAST ||
             opcode == LOAD_CONST || opcode == CACHE);
 }
@@ -87,7 +86,7 @@ typedef enum {
     // CHECK_PEP_523_TYPE, // Environment check
     // CHECK_FUNCTION_EXACT_ARGS_TYPE, // idk how to deal with this, requires stack check
     // CHECK_STACK_SPACE_TYPE // Environment check
-    INVALID_TYPE = 32,
+    INVALID_TYPE = 31,
 } _Py_UOpsSymExprTypeEnum;
 
 #define MAX_TYPE_WITH_AUX 2
@@ -575,10 +574,12 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
     if (frame == NULL) {
         goto error;
     }
-    frame_push(self, frame, self->water_level, locals_len, curr_stacklen,
-               stack_len + locals_len);
+    if (frame_push(self, frame, self->water_level, locals_len, curr_stacklen,
+               stack_len + locals_len) < 0) {
+        goto error;
+    }
     if (frame_initalize(self, frame, locals_len, curr_stacklen) < 0) {
-        return -1;
+        goto error;
     }
     self->frame = frame;
 
@@ -652,8 +653,6 @@ frame_initalize(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsAbstractFrame *frame
                 int locals_len, int curr_stacklen)
 {
     // Initialize with the initial state of all local variables
-    // Don't null from the start, as we might be interleaving locals, instead
-    // null from when waterlevel ends.
     for (int i = 0; i < locals_len; i++) {
         _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
         if (local == NULL) {
@@ -771,8 +770,10 @@ _Py_UOpsAbstractInterpContext_FramePush(
     if (frame == NULL) {
         return -1;
     }
-    frame_push(ctx, frame, localsplus_start, co->co_nlocalsplus, 0,
-               co->co_nlocalsplus + co->co_stacksize);
+    if (frame_push(ctx, frame, localsplus_start, co->co_nlocalsplus, 0,
+               co->co_nlocalsplus + co->co_stacksize) < 0) {
+        return -1;
+    }
     if (frame_initalize(ctx, frame, co->co_nlocalsplus, 0) < 0) {
         return -1;
     }
@@ -834,7 +835,7 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 
 
     self->idx = -1;
-    self->sym_type.types = INVALID_TYPE;
+    self->sym_type.types = 1 << INVALID_TYPE;
     self->inst = inst;
     self->const_val = const_val;
     self->originating_region = ctx->curr_region_id;
@@ -882,7 +883,7 @@ _Py_UOpsSymbolicExpression_NewSingleton(
 
 
     self->idx = -1;
-    self->sym_type.types = INVALID_TYPE;
+    self->sym_type.types = 1 << INVALID_TYPE;
     self->inst = inst;
     self->const_val = NULL;
     self->originating_region = -1;
@@ -1021,7 +1022,7 @@ sym_matches_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ, u
     return true;
 }
 
-static inline uint32_t
+static uint32_t
 sym_type_get_aux(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ)
 {
     assert(sym_is_type(sym, typ));
@@ -1377,7 +1378,12 @@ uop_abstract_interpret_single_inst(
             stack_pointer = ctx->frame->stack_pointer;
             // Push retval into new frame.
             STACK_GROW(1);
-            sym_copy_type(retval, PEEK(1));
+            _Py_UOpsSymbolicExpression *new_retval = sym_init_unknown(ctx);
+            if (new_retval == NULL) {
+                goto error;
+            }
+            PEEK(1) = new_retval;
+            sym_copy_type(retval, new_retval);
             break;
         }
 
@@ -1432,7 +1438,7 @@ error:
 guard_required:
     assert(_PyOpcode_isguard[opcode]);
 required:
-    DPRINTF(2, "stack_pointer %p\n", stack_pointer);
+    DPRINTF(2, " stack_level %d\n", STACK_LEVEL());
     ctx->frame->stack_pointer = stack_pointer;
     assert(STACK_LEVEL() >= 0);
 
@@ -1480,7 +1486,7 @@ uop_abstract_interpret(
         if (!_PyOpcode_ispure[curr->opcode] &&
             !is_bookkeeping_opcode(curr->opcode) &&
             !_PyOpcode_isguard[(curr)->opcode]) {
-            DPRINTF(2, "Impure\n");
+            DPRINTF(2, "Impure %s\n", (curr->opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[curr->opcode]);
             if (first_impure) {
                 write_stack_to_ir(ctx, curr, false);
                 clear_locals_type_info(ctx);
@@ -1879,7 +1885,7 @@ emit_uops_from_ctx(
                 prev->save_return_offset = emitter.writebuffer[emitter.curr_i - 1].oparg;
                 // Find the closest _SET_IP
                 bool found = false;
-                for (int x = 0; x < 8; x++) {
+                for (int x = 0; x < 10; x++) {
                     if (emitter.writebuffer[emitter.curr_i - x].opcode == _SET_IP) {
                         prev->set_ip = emitter.writebuffer[emitter.curr_i - x].oparg;
                         found = true;

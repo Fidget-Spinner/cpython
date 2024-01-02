@@ -19,7 +19,6 @@ extern "C" {
 
 #define IS_PSEUDO_INSTR(OP)  ( \
     ((OP) == LOAD_CLOSURE) || \
-    ((OP) == INIT_FAST) || \
     ((OP) == STORE_FAST_MAYBE_NULL) || \
     ((OP) == LOAD_SUPER_METHOD) || \
     ((OP) == LOAD_ZERO_SUPER_METHOD) || \
@@ -897,7 +896,7 @@ enum InstructionFormat {
 };
 
 #define IS_VALID_OPCODE(OP) \
-    (((OP) >= 0) && ((OP) < 269) && \
+    (((OP) >= 0) && ((OP) < 268) && \
      (_PyOpcode_opcode_metadata[(OP)].valid_entry))
 
 #define HAS_ARG_FLAG (1)
@@ -936,9 +935,9 @@ struct opcode_metadata {
     int16_t flags;
 };
 
-extern const struct opcode_metadata _PyOpcode_opcode_metadata[269];
+extern const struct opcode_metadata _PyOpcode_opcode_metadata[268];
 #ifdef NEED_OPCODE_METADATA
-const struct opcode_metadata _PyOpcode_opcode_metadata[269] = {
+const struct opcode_metadata _PyOpcode_opcode_metadata[268] = {
     [BEFORE_ASYNC_WITH] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [BEFORE_WITH] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_OP] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
@@ -1146,7 +1145,6 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[269] = {
     [UNPACK_SEQUENCE_TWO_TUPLE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_DEOPT_FLAG },
     [WITH_EXCEPT_START] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [YIELD_VALUE] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_ESCAPES_FLAG },
-    [INIT_FAST] = { true, -1, HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_ERROR_FLAG },
     [JUMP] = { true, -1, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [JUMP_NO_INTERRUPT] = { true, -1, HAS_ARG_FLAG | HAS_JUMP_FLAG },
     [LOAD_CLOSURE] = { true, -1, HAS_ARG_FLAG | HAS_LOCAL_FLAG },
@@ -1332,9 +1330,9 @@ _PyOpcode_macro_expansion[256] = {
 };
 #endif // NEED_OPCODE_METADATA
 
-extern const char *_PyOpcode_OpName[269];
+extern const char *_PyOpcode_OpName[268];
 #ifdef NEED_OPCODE_METADATA
-const char *_PyOpcode_OpName[269] = {
+const char *_PyOpcode_OpName[268] = {
     [BEFORE_ASYNC_WITH] = "BEFORE_ASYNC_WITH",
     [BEFORE_WITH] = "BEFORE_WITH",
     [BINARY_OP] = "BINARY_OP",
@@ -1424,7 +1422,6 @@ const char *_PyOpcode_OpName[269] = {
     [GET_YIELD_FROM_ITER] = "GET_YIELD_FROM_ITER",
     [IMPORT_FROM] = "IMPORT_FROM",
     [IMPORT_NAME] = "IMPORT_NAME",
-    [INIT_FAST] = "INIT_FAST",
     [INSTRUMENTED_CALL] = "INSTRUMENTED_CALL",
     [INSTRUMENTED_CALL_FUNCTION_EX] = "INSTRUMENTED_CALL_FUNCTION_EX",
     [INSTRUMENTED_CALL_KW] = "INSTRUMENTED_CALL_KW",
@@ -1851,11 +1848,10 @@ const uint8_t _PyOpcode_Deopt[256] = {
 struct pseudo_targets {
     uint8_t targets[3];
 };
-extern const struct pseudo_targets _PyOpcode_PseudoTargets[13];
+extern const struct pseudo_targets _PyOpcode_PseudoTargets[12];
 #ifdef NEED_OPCODE_METADATA
-const struct pseudo_targets _PyOpcode_PseudoTargets[13] = {
+const struct pseudo_targets _PyOpcode_PseudoTargets[12] = {
     [LOAD_CLOSURE-256] = { { LOAD_FAST, 0, 0 } },
-    [INIT_FAST-256] = { { LOAD_FAST_CHECK, 0, 0 } },
     [STORE_FAST_MAYBE_NULL-256] = { { STORE_FAST, 0, 0 } },
     [LOAD_SUPER_METHOD-256] = { { LOAD_SUPER_ATTR, 0, 0 } },
     [LOAD_ZERO_SUPER_METHOD-256] = { { LOAD_SUPER_ATTR, 0, 0 } },
@@ -1872,7 +1868,7 @@ const struct pseudo_targets _PyOpcode_PseudoTargets[13] = {
 #endif // NEED_OPCODE_METADATA
 static inline bool
 is_pseudo_target(int pseudo, int target) {
-    if (pseudo < 256 || pseudo >= 269) {
+    if (pseudo < 256 || pseudo >= 268) {
         return false;
     }
     for (int i = 0; _PyOpcode_PseudoTargets[pseudo-256].targets[i]; i++) {
@@ -1881,9 +1877,9 @@ is_pseudo_target(int pseudo, int target) {
     return false;
 }
 
-extern const uint8_t _PyOpcode_ispure[471];
+extern const uint8_t _PyOpcode_ispure[472];
 #ifdef NEED_OPCODE_METADATA
-const uint8_t _PyOpcode_ispure[471] = {
+const uint8_t _PyOpcode_ispure[472] = {
     [LOAD_FAST] = 1,
     [LOAD_FAST_AND_CLEAR] = 1,
     [LOAD_CONST] = 1,
@@ -1914,9 +1910,9 @@ const uint8_t _PyOpcode_ispure[471] = {
 
 #endif // NEED_OPCODE_METADATA
 
-extern const uint8_t _PyOpcode_isguard[471];
+extern const uint8_t _PyOpcode_isguard[472];
 #ifdef NEED_OPCODE_METADATA
-const uint8_t _PyOpcode_isguard[471] = {
+const uint8_t _PyOpcode_isguard[472] = {
     [RESUME_CHECK] = 1,
     [_GUARD_BOTH_INT] = 1,
     [_GUARD_BOTH_FLOAT] = 1,
@@ -1924,6 +1920,7 @@ const uint8_t _PyOpcode_isguard[471] = {
     [_GUARD_GLOBALS_VERSION] = 1,
     [_GUARD_BUILTINS_VERSION] = 1,
     [_GUARD_TYPE_VERSION] = 1,
+    [_CHECK_MANAGED_OBJECT_HAS_VALUES] = 1,
     [_GUARD_DORV_VALUES] = 1,
     [_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT] = 1,
     [_GUARD_KEYS_VERSION] = 1,

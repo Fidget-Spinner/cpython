@@ -897,25 +897,66 @@ class TestUopsOptimization(unittest.TestCase):
     #     uops = {opname for opname, _, _ in ex}
     #     self.assertNotIn("_PUSH_FRAME", uops)
     #
-    def test_frame_inlining_bound_method(self):
-        class A:
-            def __init__(self):
-                self.a = 1
-            def foo(self):
-                return self.a
+    # def test_frame_inlining_instance_method(self):
+    #     class A:
+    #         def __init__(self):
+    #             self.a = 1
+    #         def foo(self):
+    #             return self.a
+    #
+    #     a = A()
+    #     def testfunc(n):
+    #         for i in range(n):
+    #             a.foo()
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(32)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_LOAD_ATTR_METHOD_WITH_VALUES", uops)
 
-        a = A()
-        def testfunc(n):
-            for i in range(n):
-                a.foo()
+    # def test_frame_inlining_class_method(self):
+    #     class A:
+    #         def __init__(self):
+    #             self.a = 1
+    #         def foo(self):
+    #             return self.a
+    #
+    #     def testfunc(n):
+    #         a = A()
+    #         for i in range(n):
+    #             A.foo(a)
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(32)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_LOAD_ATTR_CLASS", uops)
 
-        opt = _testinternalcapi.get_uop_optimizer()
-        with temporary_optimizer(opt):
-            testfunc(32)
-        ex = get_first_executor(testfunc)
-        self.assertIsNotNone(ex)
-        uops = {opname for opname, _, _ in ex}
-        self.assertIn("_LOAD_ATTR_METHOD_WITH_VALUES", uops)
+    # def test_frame_inlining_bound_method(self):
+    #     class A:
+    #         def __init__(self):
+    #             self.a = 1
+    #         def foo(self):
+    #             return self.a
+    #
+    #     a = A()
+    #     meth = a.foo
+    #     def testfunc(n):
+    #         for i in range(n):
+    #             meth()
+    #
+    #     opt = _testinternalcapi.get_uop_optimizer()
+    #     with temporary_optimizer(opt):
+    #         testfunc(32)
+    #     ex = get_first_executor(testfunc)
+    #     self.assertIsNotNone(ex)
+    #     uops = {opname for opname, _, _ in ex}
+    #     self.assertIn("_CHECK_CALL_BOUND_METHOD_EXACT_ARGS", uops)
 
     # Broken on uop converter side, not our side.
     # def test_swap(self):

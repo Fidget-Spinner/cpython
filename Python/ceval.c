@@ -1834,11 +1834,11 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
                sizeof(PyObject *) * total_len);
 
         // Null out old frame - the old frame no longer owns the objects.
-//        PyObject **start = frame->localsplus + oparg;
-//        for (int i = 0; i < total_len; i++) {
-//            *start = NULL;
-//            start++;
-//        }
+        PyObject **start = frame->localsplus + oparg;
+        for (int i = 0; i < total_len; i++) {
+            *start = NULL;
+            start++;
+        }
 
         // Finally, set the stack pointer
         fprintf(stderr, "BOO %d\n", (curr+2)->oparg);

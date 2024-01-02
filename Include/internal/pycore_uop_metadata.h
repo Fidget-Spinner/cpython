@@ -207,6 +207,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_POST_INLINE] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ESCAPES_FLAG,
     [_STORE_COMMON] = 0,
     [_LOAD_COMMON] = 0,
+    [INIT_FAST] = 0,
     [_SETUP_TIER2_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
     [_RECONSTRUCT_FRAME] = 0,
     [_SET_SP] = 0,
@@ -214,6 +215,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
 };
 
 const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
+    [INIT_FAST] = "INIT_FAST",
     [_BEFORE_ASYNC_WITH] = "_BEFORE_ASYNC_WITH",
     [_BEFORE_WITH] = "_BEFORE_WITH",
     [_BINARY_OP] = "_BINARY_OP",

@@ -3457,6 +3457,11 @@
             break;
         }
 
+        case INIT_FAST: {
+            // Nothing, just a sentinel.
+            break;
+        }
+
         case _SETUP_TIER2_FRAME: {
             oparg = CURRENT_OPARG();
             if (_PyFrame_ConvertToTier2(tstate, frame, oparg)) goto deoptimize;
