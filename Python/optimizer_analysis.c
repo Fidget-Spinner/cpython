@@ -421,6 +421,8 @@ frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
     return false;
 }
 
+static inline bool
+op_is_end(uint32_t opcode);
 
 // The inlining heuristic is as follows:
 // 1. Inline small frames, AND
@@ -428,7 +430,10 @@ frame_uninline(_Py_UOpsAbstractInterpContext *ctx, int required_space)
 // They make frame reconstruction for sys._getframe and tracebacks too
 // complicated.
 static void
-frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
+frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx,
+                        _Py_UOpsOptIREntry *frame_ir_entry,
+                        PyCodeObject *co,
+                        _PyUOpInstruction *curr, _PyUOpInstruction *end)
 {
 #ifdef Py_DEBUG
     char *uop_debug = Py_GETENV("PYTHONUOPSDEBUG");
@@ -437,14 +442,12 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
         lltrace = *uop_debug - '0';  // TODO: Parse an int and all that
     }
 #endif
-    _Py_UOpsAbstractFrame *frame = ctx->frame;
-    assert(frame->frame_ir_entry != NULL);
-    PyCodeObject *co = frame->frame_ir_entry->frame_co_code;
+    assert(frame_ir_entry != NULL);
     int extra_needed = (co->co_nlocalsplus + co->co_stacksize);
     // Ban closures
     if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
         DPRINTF(3, "inline_fail: closure\n");
-        return;
+        goto inline_fail;
     }
     // Ban generators, async, etc.
     int flags = co->co_flags;
@@ -456,7 +459,7 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
         (flags & CO_VARKEYWORDS) ||
         (flags & CO_VARARGS)) {
         DPRINTF(3, "inline_fail: generator/coroutine\n");
-        return;
+        goto inline_fail;
     }
     // Too many locals, or too big stack. This is somewhat arbitrary, but
     // we don't want to inline anything that has too many locals because
@@ -465,27 +468,49 @@ frame_decide_inlineable(_Py_UOpsAbstractInterpContext *ctx)
     // Also too many locals might make our requests for stack space
     // more likely to fail.
     if (extra_needed > 32) {
-        frame->frame_ir_entry->is_inlineable = false;
-        frame_propagate_not_inlineable(ctx);
-        DPRINTF(3, "inline_fail: too many locals/stack\n");
-        return;
+        goto inline_fail;
+    }
+    curr = curr + 1;
+    int frame_count = 1;
+    bool closed = false;
+    while (curr < end && !op_is_end(curr->opcode)) {
+        if (curr->opcode == _PUSH_FRAME) {
+            frame_count++;
+        }
+        else if (curr->opcode == _POP_FRAME) {
+            frame_count--;
+            if (frame_count == 0) {
+                closed = true;
+                break;
+            }
+        }
+        curr++;
+    }
+    if (!closed) {
+        DPRINTF(3, "inline_fail not closed by _POP_FRAME\n");
+        goto inline_fail;
     }
     // Not enough space left, try un-inlining previous frames.
     if (ctx->frame_entries_needed + extra_needed > MAX_FRAME_GROWTH) {
         if (frame_uninline(ctx, extra_needed)) {
             ctx->frame_entries_needed += extra_needed;
             assert(ctx->frame_entries_needed <= MAX_FRAME_GROWTH);
-            frame->frame_ir_entry->is_inlineable = true;
+            frame_ir_entry->is_inlineable = true;
         }
         else {
-            frame_propagate_not_inlineable(ctx);
             DPRINTF(3, "inline_fail: out of space\n");
+            goto inline_fail;
         }
         return;
     }
     DPRINTF(3, "inline_success\n");
     ctx->frame_entries_needed += extra_needed;
-    frame->frame_ir_entry->is_inlineable = true;
+    frame_ir_entry->is_inlineable = true;
+    return;
+
+inline_fail:
+    frame_propagate_not_inlineable(ctx);
+    frame_ir_entry->is_inlineable = false;
     return;
 }
 
@@ -503,6 +528,18 @@ _Py_UOpsSSA_IR_New(int entries)
     ir->curr_write = 0;
     return ir;
 }
+
+static inline int
+frame_push(_Py_UOpsAbstractInterpContext *ctx,
+           _Py_UOpsAbstractFrame *frame,
+           _Py_UOpsSymbolicExpression **localsplus_start,
+           int locals_len,
+           int curr_stacklen,
+           int total_len);
+
+static inline int
+frame_initalize(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsAbstractFrame *frame,
+                int locals_len, int curr_stacklen);
 
 static _Py_UOpsAbstractInterpContext *
 _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
@@ -535,11 +572,16 @@ _Py_UOpsAbstractInterpContext_New(PyObject *co_consts,
     self->new_frame_sym = NULL;
     self->frame_entries_needed = 0;
     frame = _Py_UOpsAbstractFrame_New(self, co_consts, stack_len, locals_len, curr_stacklen, root_frame);
-    self->frame = frame;
-
     if (frame == NULL) {
         goto error;
     }
+    frame_push(self, frame, self->water_level, locals_len, 0,
+               stack_len + locals_len);
+    if (frame_initalize(self, frame, locals_len, 0) < 0) {
+        return -1;
+    }
+    self->frame = frame;
+
     root_frame->my_real_localsplus = frame->locals;
     root_frame->my_virtual_localsplus = root_frame->my_real_localsplus;
 
@@ -587,6 +629,53 @@ sym_init_unknown(_Py_UOpsAbstractInterpContext *ctx);
 static void
 sym_copy_immutable_type_info(_Py_UOpsSymbolicExpression *from_sym, _Py_UOpsSymbolicExpression *to_sym);
 
+static inline int
+frame_push(_Py_UOpsAbstractInterpContext *ctx,
+           _Py_UOpsAbstractFrame *frame,
+           _Py_UOpsSymbolicExpression **localsplus_start,
+           int locals_len,
+           int curr_stacklen,
+           int total_len)
+{
+    frame->locals = localsplus_start;
+    frame->stack = frame->locals + locals_len;
+    frame->stack_pointer = frame->stack + curr_stacklen;
+    ctx->water_level = localsplus_start + total_len;
+    if (ctx->water_level > ctx->limit) {
+        return -1;
+    }
+    return 0;
+}
+
+static inline int
+frame_initalize(_Py_UOpsAbstractInterpContext *ctx, _Py_UOpsAbstractFrame *frame,
+                int locals_len, int curr_stacklen)
+{
+    // Initialize with the initial state of all local variables
+    for (int i = 0; i < locals_len; i++) {
+        _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
+        if (local == NULL) {
+            goto error;
+        }
+        frame->locals[i] = local;
+    }
+
+
+    // Initialize the stack as well
+    for (int i = 0; i < curr_stacklen; i++) {
+        _Py_UOpsSymbolicExpression *stackvar = sym_init_unknown(ctx);
+        if (stackvar == NULL) {
+            goto error;
+        }
+        frame->stack[i] = stackvar;
+    }
+
+    return 0;
+
+error:
+    return -1;
+}
+
 static inline _Py_UOpsAbstractFrame *
 _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
                           PyObject *co_consts, int stack_len, int locals_len,
@@ -612,39 +701,7 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
     frame->next = NULL;
 
     frame->frame_ir_entry = frame_ir_entry;
-
-    frame->locals = ctx->water_level;
-    frame->stack = frame->locals + locals_len;
-    frame->stack_pointer = frame->stack + curr_stacklen;
-    ctx->water_level = ctx->water_level + total_len;
-    if (ctx->water_level > ctx->limit) {
-        return NULL;
-    }
-
-    // Initialize with the initial state of all local variables
-    for (int i = 0; i < locals_len; i++) {
-        _Py_UOpsSymbolicExpression *local = sym_init_var(ctx, i);
-        if (local == NULL) {
-            goto error;
-        }
-        frame->locals[i] = local;
-    }
-
-
-    // Initialize the stack as well
-    for (int i = 0; i < curr_stacklen; i++) {
-        _Py_UOpsSymbolicExpression *stackvar = sym_init_unknown(ctx);
-        if (stackvar == NULL) {
-            goto error;
-        }
-        frame->stack[i] = stackvar;
-    }
-
     return frame;
-
-error:
-    Py_DECREF(frame);
-    return NULL;
 }
 
 static inline bool
@@ -699,17 +756,12 @@ extract_args_from_sym(_Py_UOpsSymbolicExpression *frame_sym)
 static int
 _Py_UOpsAbstractInterpContext_FramePush(
     _Py_UOpsAbstractInterpContext *ctx,
-    _Py_UOpsSymbolicExpression *frame_sym,
-    _Py_UOpsOptIREntry *frame_ir_entry
+    _Py_UOpsOptIREntry *frame_ir_entry,
+    PyCodeObject *co,
+    _Py_UOpsSymbolicExpression **localsplus_start
 )
 {
-    assert(frame_sym != NULL);
-    // Extract func version from the frame symbolic
-    PyFunctionObject *func = extract_func_from_sym(frame_sym);
-    if (func == NULL) {
-        return -1;
-    }
-    PyCodeObject *co = (PyCodeObject *)func->func_code;
+    assert(frame_ir_entry != NULL);
     _Py_UOpsAbstractFrame *frame = _Py_UOpsAbstractFrame_New(ctx,
         co->co_consts, co->co_stacksize,
         co->co_nlocalsplus,
@@ -717,14 +769,20 @@ _Py_UOpsAbstractInterpContext_FramePush(
     if (frame == NULL) {
         return -1;
     }
+    frame_push(ctx, frame, localsplus_start, co->co_nlocalsplus, 0,
+               co->co_nlocalsplus + co->co_stacksize);
+    if (frame_initalize(ctx, frame, co->co_nlocalsplus, 0) < 0) {
+        return -1;
+    }
+
     frame->prev = ctx->frame;
     ctx->frame->next = frame;
     ctx->frame = frame;
-    frame_ir_entry->frame_co_code = (PyCodeObject*)Py_NewRef(co);
-    frame_ir_entry->frame_function = (PyFunctionObject *)Py_NewRef(func);
 
     ctx->frame_entries_needed += (co->co_nlocalsplus + co->co_stacksize);
     assert(ctx->frame_entries_needed >= 0);
+
+    frame_ir_entry->my_virtual_localsplus = localsplus_start;
 
     return 0;
 }
@@ -1127,6 +1185,7 @@ static int
 uop_abstract_interpret_single_inst(
     PyCodeObject *co,
     _PyUOpInstruction *inst,
+    _PyUOpInstruction *end,
     _Py_UOpsAbstractInterpContext *ctx
 )
 {
@@ -1249,18 +1308,26 @@ uop_abstract_interpret_single_inst(
             _Py_UOpsAbstractFrame *old_frame = ctx->frame;
             // TOS is the new frame.
             write_stack_to_ir(ctx, inst, true);
-            _Py_UOpsSymbolicExpression *frame_sym = PEEK(1);
             STACK_SHRINK(1);
             ctx->frame->stack_pointer = stack_pointer;
             _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_push_info(ctx->ir);
 
-            // + 3 because callable, self_or_null, and stack_pointer is 1 too high.
-            frame_ir_entry->my_virtual_localsplus = stack_pointer + 3;
-            ir_plain_inst(ctx->ir, *inst);
-            if (_Py_UOpsAbstractInterpContext_FramePush(ctx, ctx->new_frame_sym, frame_ir_entry) != 0){
+            PyFunctionObject *func = extract_func_from_sym(ctx->new_frame_sym);
+            if (func == NULL) {
                 goto error;
             }
-            stack_pointer = ctx->frame->stack_pointer;
+            PyCodeObject *co = (PyCodeObject *)func->func_code;
+
+            frame_ir_entry->frame_co_code = (PyCodeObject*)Py_NewRef(co);
+            frame_ir_entry->frame_function = (PyFunctionObject *)Py_NewRef(func);
+
+            frame_decide_inlineable(ctx, frame_ir_entry, co, inst, end);
+            // If the frame is inlined, we
+            // don't need to copy over locals, instead interleave the frames.
+            // The old stack entries become the locals of the new frame.
+            // The new frame steals references to the stack entries.
+            // + 3 because callable, self_or_null, and stack_pointer is 1 too high.
+            _Py_UOpsSymbolicExpression **virtual_localsplus = stack_pointer + 3;
             _Py_UOpsSymbolicExpression *self_or_null = extract_self_or_null_from_sym(ctx->new_frame_sym);
             assert(self_or_null != NULL);
             assert(ctx->new_frame_sym != NULL);
@@ -1272,8 +1339,18 @@ uop_abstract_interpret_single_inst(
                 args--;
                 argcount++;
                 frame_ir_entry->consumed_self = true;
-                frame_ir_entry->my_virtual_localsplus--;
+                virtual_localsplus--;
             }
+            ir_plain_inst(ctx->ir, *inst);
+            if (_Py_UOpsAbstractInterpContext_FramePush(
+                ctx,
+                frame_ir_entry,
+                co,
+                frame_ir_entry->is_inlineable ? virtual_localsplus : ctx->water_level
+                ) != 0){
+                goto error;
+            }
+            stack_pointer = ctx->frame->stack_pointer;
             for (int i = 0; i < argcount; i++) {
                 sym_copy_type(args[i], ctx->frame->locals[i]);
             }
@@ -1283,7 +1360,6 @@ uop_abstract_interpret_single_inst(
         case _POP_FRAME: {
             write_stack_to_ir(ctx, inst, true);
             _Py_UOpsOptIREntry *frame_ir_entry = ctx->frame->frame_ir_entry;
-            frame_decide_inlineable(ctx);
             ir_frame_pop_info(ctx->ir);
             ir_plain_inst(ctx->ir, *inst);
             _Py_UOpsSymbolicExpression *retval = PEEK(1);
@@ -1414,7 +1490,7 @@ uop_abstract_interpret(
         }
 
         status = uop_abstract_interpret_single_inst(
-            co, curr, ctx
+            co, curr, end, ctx
         );
         if (status == ABSTRACT_INTERP_ERROR) {
             goto error;
@@ -1565,7 +1641,8 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
         inst.opcode = sym->inst.opcode == INIT_FAST ? LOAD_FAST : sym->inst.opcode;
         inst.oparg = sym->inst.opcode == INIT_FAST ?
          (emitter->curr_frame_ir_entry->my_virtual_localsplus -
-            emitter->curr_frame_ir_entry->my_real_localsplus) + sym->inst.oparg
+            emitter->curr_frame_ir_entry->my_real_localsplus) +
+            sym->inst.oparg
             : sym->inst.oparg;
         return emit_i(emitter, inst);
     }
@@ -1649,7 +1726,7 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
         _PyUOpInstruction set_sp = {
             _SET_SP,
             frame_ir_entry->n_stackentries_used,
-            (frame_ir_entry->my_virtual_localsplus - frame_ir_entry->my_real_localsplus) + frame_ir_entry->frame_co_code->co_nlocalsplus,
+            0,
             frame_ir_entry->consumed_self
         };
         _PyUOpInstruction return_offset = {
@@ -1672,8 +1749,8 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
         _SET_SP,
         0, // Requires runtime calculation.
         // Where to start the stack from.
-        (frame_ir_entry->my_virtual_localsplus - frame_ir_entry->my_real_localsplus) +
-        recentmost_frame_ir_entry->frame_co_code->co_nlocalsplus,
+        (recentmost_frame_ir_entry->my_virtual_localsplus - recentmost_frame_ir_entry->my_real_localsplus) +
+            recentmost_frame_ir_entry->frame_co_code->co_nlocalsplus,
         0
     };
 
@@ -1793,10 +1870,6 @@ emit_uops_from_ctx(
                 assert(emitter.writebuffer[emitter.curr_i - 2].opcode == _INIT_CALL_PY_EXACT_ARGS);
                 assert(emitter.writebuffer[emitter.curr_i - 3].opcode == _CHECK_STACK_SPACE);
 
-                // If the frame is inlined, we
-                // don't need to copy over locals, instead interleave the frames.
-                // The old stack entries become the locals of the new frame.
-                // The new frame steals references to the stack entries.
                 curr->my_real_localsplus = prev->my_real_localsplus;
 
                 // Compile the reconstruction

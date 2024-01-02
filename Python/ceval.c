@@ -1845,16 +1845,21 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
     }
 
     // Recentmost frame stack pointer is set by the current level.
-    fprintf(stderr, "BLAH %d\n", (curr_stacklevel - recentmost_frame_set_sp->target));
     *stackptr_ptr = recentmost_frame->localsplus + _PyFrame_GetCode(recentmost_frame)->co_nlocalsplus + (curr_stacklevel - recentmost_frame_set_sp->target);
     recentmost_frame->instr_ptr =  (_PyCode_CODE(_PyFrame_GetCode(recentmost_frame))) + (frame->instr_ptr - (_PyCode_CODE(_PyFrame_GetCode(frame))));
     // Set root frame stack pointer.
     assert(root_frame_set_sp->oparg >= 0);
-    fprintf(stderr, "BOO %d\n", root_frame_set_sp->oparg);
     frame->stacktop = _PyFrame_GetCode(frame)->co_nlocalsplus + root_frame_set_sp->oparg;
     frame->return_offset = root_frame_return_offset->oparg;
     frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(frame)) + (int)root_frame_return_offset->operand;
     tstate->current_frame = recentmost_frame;
+
+#ifdef LLTRACE
+        printf("after reconstruction root stack: \n");
+        dump_stack(frame, &(frame->localsplus[frame->stacktop]));
+        printf("after reconstruction topmost stack: \n");
+        dump_stack(recentmost_frame, *stackptr_ptr);
+#endif
     return recentmost_frame;
 fail:
     PyErr_NoMemory();
