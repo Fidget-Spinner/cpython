@@ -597,6 +597,44 @@
             break;
         }
 
+        case _UNPACK_SEQUENCE: {
+            stack_pointer += -1 + oparg;
+            break;
+        }
+
+        case _UNPACK_SEQUENCE_TWO_TUPLE: {
+            PyObject **__values_;
+            __values_ = &stack_pointer[-1];
+            for (int case_gen_i = 0; case_gen_i < oparg; case_gen_i++) {
+                __values_[case_gen_i] = sym_init_unknown(ctx);
+                if(__values_[case_gen_i] == NULL) goto error;
+            }
+            stack_pointer += -1 + oparg;
+            break;
+        }
+
+        case _UNPACK_SEQUENCE_TUPLE: {
+            PyObject **__values_;
+            __values_ = &stack_pointer[-1];
+            for (int case_gen_i = 0; case_gen_i < oparg; case_gen_i++) {
+                __values_[case_gen_i] = sym_init_unknown(ctx);
+                if(__values_[case_gen_i] == NULL) goto error;
+            }
+            stack_pointer += -1 + oparg;
+            break;
+        }
+
+        case _UNPACK_SEQUENCE_LIST: {
+            PyObject **__values_;
+            __values_ = &stack_pointer[-1];
+            for (int case_gen_i = 0; case_gen_i < oparg; case_gen_i++) {
+                __values_[case_gen_i] = sym_init_unknown(ctx);
+                if(__values_[case_gen_i] == NULL) goto error;
+            }
+            stack_pointer += -1 + oparg;
+            break;
+        }
+
         case _UNPACK_EX: {
             stack_pointer += (oparg >> 8) + (oparg & 0xFF);
             break;

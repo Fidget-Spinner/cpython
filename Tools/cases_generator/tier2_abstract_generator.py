@@ -52,14 +52,6 @@ SPECIALLY_HANDLED_ABSTRACT_INSTR = {
     "_POP_FRAME",
     "_SHRINK_STACK",
 
-    # Touches the stack directly.
-    "UNPACK_SEQUENCE",
-    "UNPACK_SEQUENCE_TUPLE",
-    "UNPACK_SEQUENCE_TWO_TUPLE",
-    "UNPACK_SEQUENCE_LIST",
-    "_UNPACK_SEQUENCE",
-    "_UNPACK_EX"
-
 
     # Shouldn't appear in abstract interpreter
     "_LOAD_FAST_NO_INCREF",
@@ -129,11 +121,19 @@ def _write_body_abstract_interp_impure_uop(
     # Simply make all outputs effects unknown
 
     for var in mangled_uop.stack.outputs:
-        if var.name not in UNUSED and not var.peek:
+        if var.name in UNUSED or var.peek:
+            continue
+
+        if var.size == '1':
             out.emit(f"{var.name} = sym_init_unknown(ctx);\n")
             out.emit(f"if({var.name} == NULL) goto error;\n")
             if var.name in ("null", "__null_"):
                 out.emit(f"sym_set_type({var.name}, NULL_TYPE, 0);\n")
+        else:
+            out.emit(f"for (int case_gen_i = 0; case_gen_i < {var.size}; case_gen_i++) {{\n")
+            out.emit(f"{var.name}[case_gen_i] = sym_init_unknown(ctx);\n")
+            out.emit(f"if({var.name}[case_gen_i] == NULL) goto error;\n")
+            out.emit("}\n")
 
 
 def mangle_uop_names(uop: Uop) -> Uop:
