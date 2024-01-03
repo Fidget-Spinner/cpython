@@ -1844,12 +1844,12 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         new_frame->stacktop = _PyFrame_GetCode(new_frame)->co_nlocalsplus + (curr+2)->oparg;
         assert(new_frame->stacktop >= 0 || (int)(curr+2)->oparg < 0);
 
-#ifdef LLTRACE
-        if (!(((int16_t)(curr+2)->oparg) < 0)) {
-            printf("the new frame %p has stack entries %d: \n", new_frame, (curr+2)->oparg);
-            dump_stack(new_frame, &(new_frame->localsplus[new_frame->stacktop]));
-        }
-#endif
+//#ifdef LLTRACE
+//        if (!(((int16_t)(curr+2)->oparg) < 0)) {
+//            printf("the new frame %p has stack entries %d: \n", new_frame, (curr+2)->oparg);
+//            dump_stack(new_frame, &(new_frame->localsplus[new_frame->stacktop]));
+//        }
+//#endif
         recentmost_frame = new_frame;
         curr+=4;
         opcode = curr->opcode;

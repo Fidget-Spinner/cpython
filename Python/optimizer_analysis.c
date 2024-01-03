@@ -1280,7 +1280,13 @@ uop_abstract_interpret_single_inst(
         case LOAD_FAST_AND_CLEAR: {
             STACK_GROW(1);
             PEEK(1) = GETLOCAL(oparg);
-            GETLOCAL(oparg) = NULL;
+            _PyUOpInstruction inst = {PUSH_NULL, 0, 0, 0};
+            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, inst);
+            if (null_sym == NULL) {
+                goto error;
+            }
+            sym_set_type(null_sym, NULL_TYPE, 0);
+            GETLOCAL(oparg) = null_sym;
             break;
         }
         case LOAD_CONST: {
@@ -1319,6 +1325,9 @@ uop_abstract_interpret_single_inst(
             STACK_GROW(1);
             _PyUOpInstruction inst = {PUSH_NULL, 0, 0, 0};
             _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, inst);
+            if (null_sym == NULL) {
+                goto error;
+            }
             sym_set_type(null_sym, NULL_TYPE, 0);
             PEEK(1) = null_sym;
             break;
