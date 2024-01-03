@@ -1856,7 +1856,6 @@ emit_uops_from_ctx(
     // TODO more accurate calculation of interleaved locals and stack.
     int max_additional_nlocals_needed = 0;
     int curr_additional_nlocals_needed = 0;
-    int entry_reserved_for_inlining_setup = 0;
 
     _Py_UOpsAbstractFrame *root_frame = ctx->frame;
     while (root_frame->prev != NULL) {
@@ -1977,11 +1976,11 @@ emit_uops_from_ctx(
                     Py_NewRef(curr->frame_co_code->co_names)
                 };
                 // Our very first inlinee - setup the root frame.
-                if (did_inline == false) {
-                    entry_reserved_for_inlining_setup = emitter.curr_i;
+                if (prev->is_inlineable == false) {
                     emitter.curr_i++;
+                    _PyUOpInstruction setup_frame = {_SETUP_TIER2_FRAME, MAX_FRAME_GROWTH, 0, 0};
+                    emit_i(&emitter, setup_frame);
                 }
-                did_inline = true;
                 emit_i(&emitter, pre_inline);
                 emit_i(&emitter, set_frame_names);
                 assert((ir->entries[i+1].typ == IR_PLAIN_INST && ir->entries[i+1].inst.opcode == _PUSH_FRAME));
@@ -2035,20 +2034,10 @@ emit_uops_from_ctx(
 
     Py_DECREF(sym_store);
 
-    if (did_inline) {
-        DPRINTF(3, "Emitting instruction at [%d] op: %s, oparg: %d, operand: %" PRIu64 " \n",
-                0,
-                "_SETUP_TIER2_FRAME",
-                max_additional_nlocals_needed,
-                0L);
-        _PyUOpInstruction setup_frame = {_SETUP_TIER2_FRAME, max_additional_nlocals_needed, 0, 0};
-        _PyUOpInstruction nop = {_NOP, 0, 0, 0};
-        emitter.writebuffer[entry_reserved_for_inlining_setup] = did_inline ? setup_frame : nop;
-    }
     // Add the _JUMP_TO_TOP/_EXIT_TRACE at the end of the trace.
     _PyUOpInstruction jump_absolute = {
         _JUMP_ABSOLUTE,
-        did_inline,
+        0,
         0
     };
     _PyUOpInstruction terminal = ctx->terminating->opcode == _EXIT_TRACE ?
