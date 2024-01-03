@@ -1819,15 +1819,15 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
         if (new_frame == NULL) {
             goto fail;
         }
-        new_frame->previous = prev_frame;
-        new_frame->return_offset = (curr+3)->oparg;
-        prev_frame = new_frame;
 
         // TODO CONSUME callable from the stack to deal with refleak.
         _PyFrame_Initialize(new_frame, (PyFunctionObject*)Py_NewRef(callable),
                             locals, (PyCodeObject *)code,
                             ((PyCodeObject *)code)->co_nlocalsplus);
-        new_frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(new_frame)) + (int)(curr+3)->operand;
+        new_frame->previous = prev_frame;
+        new_frame->return_offset = (curr+3)->oparg;
+        new_frame->instr_ptr = _PyCode_CODE(code) + (int)(curr+3)->operand;
+        prev_frame = new_frame;
         // Copy over locals, stack and friends.
 #ifdef LLTRACE
         printf("copying over stack with offset %d: , locals count: %d, stacksize: %d\n", oparg, code->co_nlocalsplus, code->co_stacksize);
@@ -1846,7 +1846,7 @@ _PyEvalFrame_ReconstructTier2Frame(PyThreadState *tstate, _PyInterpreterFrame *f
 
 #ifdef LLTRACE
         if (!(((int16_t)(curr+2)->oparg) < 0)) {
-            printf("the new frame has stack entries %d: \n", (curr+2)->oparg);
+            printf("the new frame %p has stack entries %d: \n", new_frame, (curr+2)->oparg);
             dump_stack(new_frame, &(new_frame->localsplus[new_frame->stacktop]));
         }
 #endif

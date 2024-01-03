@@ -786,7 +786,7 @@ compute_used(_PyUOpInstruction *buffer, uint32_t *used)
 {
     int count = 0;
     SET_BIT(used, 0);
-    for (int i = 0; i < _Py_UOP_MAX_TRACE_LENGTH; i++) {
+    for (int i = 0; i < _Py_UOP_MAX_TRACE_SCRATCH_LENGTH; i++) {
         if (!BIT_IS_SET(used, i)) {
             continue;
         }
@@ -826,7 +826,7 @@ compute_used(_PyUOpInstruction *buffer, uint32_t *used)
 static _PyExecutorObject *
 make_executor_from_uops(_PyUOpInstruction *buffer, _PyBloomFilter *dependencies)
 {
-    uint32_t used[(_Py_UOP_MAX_TRACE_LENGTH + 31)/32] = { 0 };
+    uint32_t used[(_Py_UOP_MAX_TRACE_SCRATCH_LENGTH + 31)/32] = { 0 };
     int length = compute_used(buffer, used);
     _PyUOpExecutorObject *executor = PyObject_NewVar(_PyUOpExecutorObject, &_PyUOpExecutor_Type, length);
     if (executor == NULL) {
@@ -834,7 +834,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, _PyBloomFilter *dependencies)
     }
     int dest = length - 1;
     /* Scan backwards, so that we see the destinations of jumps before the jumps themselves. */
-    for (int i = _Py_UOP_MAX_TRACE_LENGTH-1; i >= 0; i--) {
+    for (int i = _Py_UOP_MAX_TRACE_SCRATCH_LENGTH-1; i >= 0; i--) {
         if (!BIT_IS_SET(used, i)) {
             continue;
         }
@@ -903,7 +903,7 @@ uop_optimize(
 {
     _PyBloomFilter dependencies;
     _Py_BloomFilter_Init(&dependencies);
-    _PyUOpInstruction buffer[_Py_UOP_MAX_TRACE_LENGTH];
+    _PyUOpInstruction buffer[_Py_UOP_MAX_TRACE_SCRATCH_LENGTH];
     int err = translate_bytecode_to_trace(code, instr, buffer, _Py_UOP_MAX_TRACE_LENGTH, &dependencies);
     if (err <= 0) {
         // Error or nothing translated
@@ -912,9 +912,9 @@ uop_optimize(
     OPT_STAT_INC(traces_created);
     char *uop_optimize = Py_GETENV("PYTHONUOPSOPTIMIZE");
     if (uop_optimize == NULL || *uop_optimize > '0') {
-        err = _Py_uop_analyze_and_optimize(f_funcobj, code, buffer, _Py_UOP_MAX_TRACE_LENGTH, curr_stackentries);
+        err = _Py_uop_analyze_and_optimize(f_funcobj, code, buffer, _Py_UOP_MAX_TRACE_SCRATCH_LENGTH, curr_stackentries);
         if (err < 0) {
-            return -1;
+            // No error is set just proceed with unoptimized uops.
         }
     }
     _PyExecutorObject *executor = make_executor_from_uops(buffer, &dependencies);

@@ -686,294 +686,294 @@ class TestUopsOptimization(unittest.TestCase):
     #     # TODO fix me, immutable instructions
     #     # self.assertEqual(len(binop_count), 1)
 
-    # def test_frame_inlining_simple(self):
-    #
-    #     def dummy(x):
-    #         return x + 1
-    #
-    #     def testfunc(n):
-    #         num = 0
-    #         while num < n:
-    #             # CALL_PY_EXACT_ARGS
-    #             y = dummy(1)
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(64)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertNotIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
-    #
-    # def test_frame_inlining_rewrite_locals(self):
-    #
-    #     def dummy(x):
-    #         return x + 1
-    #
-    #     def testfunc(n):
-    #         num = 0
-    #         while num < n:
-    #             # CALL_PY_EXACT_ARGS
-    #             y = dummy(num)
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(64)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertNotIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
-    #
-    # def test_frame_no_inlining(self):
-    #
-    #     def dummy():
-    #         n = 0
-    #         while n < 2:
-    #             n += 1
-    #
-    #     def testfunc(n):
-    #         num = 0
-    #         while num < n:
-    #             # CALL_PY_EXACT_ARGS
-    #             dummy()
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(64)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertIn("_PUSH_FRAME", uops)
-    #
-    # def test_frame_inlining_reject_closure(self):
-    #
-    #     # This is a normal function. So it should be inlined.
-    #     def other():
-    #         return 1
-    #
-    #     # This is a closure so it cannot be inlined.
-    #     def dummy():
-    #         return other()
-    #
-    #     def testfunc(n):
-    #         num = 0
-    #         while num < n:
-    #             # CALL_PY_EXACT_ARGS
-    #             dummy()
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(64)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
-    #     self.assertEqual(1, len(frame_count))
-    #
-    #
-    # def test_frame_inlining_traceback_reconstruction(self):
-    #
-    #     def dummy(x, y):
-    #         return x / y
-    #
-    #     def testfunc(n, y):
-    #         num = 0
-    #         while num < n:
-    #             # CALL_PY_EXACT_ARGS
-    #             dummy(n, y)
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32, 32)
-    #         # Force a traceback
-    #         with self.assertRaises(ZeroDivisionError):
-    #             testfunc(32, 0)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertNotIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
-    #
-    # def test_frame_inlining_multiargs(self):
-    #     def dummy(a, b, c, d):
-    #         # Currently the type propagation is not smart enough to see
-    #         # that these are the same values because it crosses function
-    #         # boundaries. TODO value numbeering.
-    #         return a + b + c + d
-    #
-    #     def testfunc(n, y):
-    #         num = 0
-    #         while num < n:
-    #             # CALL_PY_EXACT_ARGS
-    #             dummy(n, n, n, n)
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32, 32)
-    #         # Force a traceback
-    #         testfunc(32, 0)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertNotIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
-    #
-    # def test_frame_inlining_higher_order(self):
-    #     def dummy(func, y):
-    #         if y == 0:
-    #             return 1
-    #         return func(func, y-1)
-    #
-    #     def testfunc(n, y):
-    #         for i in range(n):
-    #             dummy(dummy, 2)
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32, 32)
-    #         # Force a traceback
-    #         testfunc(32, 0)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
-    #     # Both frames fail to inlne.
-    #     self.assertEqual(len(frame_count), 2)
-    #
-    # def test_frame_inlining_interleaving_locals_and_stack(self):
-    #     """One optimization during inlining is instead of copying over stack
-    #     to the new locals, simply interleave them and use the current stack
-    #     entries as the new locals of the inlined frame. Thus allowing zero copy
-    #     during inlining. This tests that.
-    #     """
-    #
-    #     def dummy(x, y, a, b):
-    #         bar = 1
-    #         return y / x / b / a / bar
-    #
-    #     def testfunc(n):
-    #         num = 0
-    #         foo = 1
-    #         bar = 0
-    #         while num < n:
-    #             # If the interleaving is wrong, it will divide the wrong things and fail.
-    #             y = dummy(foo, bar, foo, foo)
-    #             num += 1
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(64)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertNotIn("_PUSH_FRAME", uops)
-    #     self.assertIn("_BINARY_OP_ADD_INT", uops)
-    #
-    # def test_frame_inlining_complex(self):
-    #     def dummy(y, func):
-    #         if y == 0:
-    #             return 1
-    #         return func(0, func)
-    #
-    #     def testfunc(n):
-    #         x = 2
-    #         for i in range(n):
-    #             # CALL_PY_EXACT_ARGS
-    #             dummy(x, dummy)
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32)
-    #         # Force a traceback
-    #         testfunc(32)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertNotIn("_PUSH_FRAME", uops)
-    # #
-    # def test_frame_inlining_instance_method(self):
-    #     class A:
-    #         def __init__(self):
-    #             self.a = 1
-    #         def foo(self):
-    #             return self.a
-    #
-    #     a = A()
-    #     def testfunc(n):
-    #         for i in range(n):
-    #             a.foo()
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertIn("_LOAD_ATTR_METHOD_WITH_VALUES", uops)
-    #
-    # def test_frame_inlining_class_method(self):
-    #     class A:
-    #         def __init__(self):
-    #             self.a = 1
-    #         def foo(self):
-    #             return self.a
-    #
-    #     def testfunc(n):
-    #         a = A()
-    #         for i in range(n):
-    #             A.foo(a)
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertIn("_LOAD_ATTR_CLASS", uops)
-    #
-    # def test_frame_inlining_bound_method(self):
-    #     class A:
-    #         def __init__(self):
-    #             self.a = 1
-    #         def foo(self):
-    #             return self.a
-    #
-    #     a = A()
-    #     meth = a.foo
-    #     def testfunc(n):
-    #         for i in range(n):
-    #             meth()
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     uops = {opname for opname, _, _ in ex}
-    #     self.assertIn("_CHECK_CALL_BOUND_METHOD_EXACT_ARGS", uops)
+    def test_frame_inlining_simple(self):
 
-    # def test_frame_inlining_dangling_frame(self):
+        def dummy(x):
+            return x + 1
+
+        def testfunc(n):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                y = dummy(1)
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(64)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertNotIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    def test_frame_inlining_rewrite_locals(self):
+
+        def dummy(x):
+            return x + 1
+
+        def testfunc(n):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                y = dummy(num)
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(64)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertNotIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    def test_frame_no_inlining(self):
+
+        def dummy():
+            n = 0
+            while n < 2:
+                n += 1
+
+        def testfunc(n):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                dummy()
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(64)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertIn("_PUSH_FRAME", uops)
+
+    def test_frame_inlining_reject_closure(self):
+
+        # This is a normal function. So it should be inlined.
+        def other():
+            return 1
+
+        # This is a closure so it cannot be inlined.
+        def dummy():
+            return other()
+
+        def testfunc(n):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                dummy()
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(64)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+        self.assertEqual(1, len(frame_count))
+
+
+    def test_frame_inlining_traceback_reconstruction(self):
+
+        def dummy(x, y):
+            return x / y
+
+        def testfunc(n, y):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                dummy(n, y)
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32, 32)
+            # Force a traceback
+            with self.assertRaises(ZeroDivisionError):
+                testfunc(32, 0)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertNotIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    def test_frame_inlining_multiargs(self):
+        def dummy(a, b, c, d):
+            # Currently the type propagation is not smart enough to see
+            # that these are the same values because it crosses function
+            # boundaries. TODO value numbeering.
+            return a + b + c + d
+
+        def testfunc(n, y):
+            num = 0
+            while num < n:
+                # CALL_PY_EXACT_ARGS
+                dummy(n, n, n, n)
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32, 32)
+            # Force a traceback
+            testfunc(32, 0)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertNotIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    def test_frame_inlining_higher_order(self):
+        def dummy(func, y):
+            if y == 0:
+                return 1
+            return func(func, y-1)
+
+        def testfunc(n, y):
+            for i in range(n):
+                dummy(dummy, 2)
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32, 32)
+            # Force a traceback
+            testfunc(32, 0)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+        # Both frames fail to inlne.
+        self.assertEqual(len(frame_count), 2)
+
+    def test_frame_inlining_interleaving_locals_and_stack(self):
+        """One optimization during inlining is instead of copying over stack
+        to the new locals, simply interleave them and use the current stack
+        entries as the new locals of the inlined frame. Thus allowing zero copy
+        during inlining. This tests that.
+        """
+
+        def dummy(x, y, a, b):
+            bar = 1
+            return y / x / b / a / bar
+
+        def testfunc(n):
+            num = 0
+            foo = 1
+            bar = 0
+            while num < n:
+                # If the interleaving is wrong, it will divide the wrong things and fail.
+                y = dummy(foo, bar, foo, foo)
+                num += 1
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(64)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertNotIn("_PUSH_FRAME", uops)
+        self.assertIn("_BINARY_OP_ADD_INT", uops)
+
+    def test_frame_inlining_complex(self):
+        def dummy(y, func):
+            if y == 0:
+                return 1
+            return func(0, func)
+
+        def testfunc(n):
+            x = 2
+            for i in range(n):
+                # CALL_PY_EXACT_ARGS
+                dummy(x, dummy)
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32)
+            # Force a traceback
+            testfunc(32)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertNotIn("_PUSH_FRAME", uops)
     #
-    #
-    #     def testfunc(n):
-    #         for i in range(n):
-    #             outer()
-    #
-    #     opt = _testinternalcapi.get_uop_optimizer()
-    #     with temporary_optimizer(opt):
-    #         testfunc(32)
-    #     ex = get_first_executor(testfunc)
-    #     self.assertIsNotNone(ex)
-    #     frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
-    #     pop_frame_count = [opname for opname, _, _ in ex if opname == "_POP_FRAME"]
-    #     # Both frames fail to inlne.
-    #     self.assertGreater(len(frame_count), len(pop_frame_count))
+    def test_frame_inlining_instance_method(self):
+        class A:
+            def __init__(self):
+                self.a = 1
+            def foo(self):
+                return self.a
+
+        a = A()
+        def testfunc(n):
+            for i in range(n):
+                a.foo()
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertIn("_LOAD_ATTR_METHOD_WITH_VALUES", uops)
+
+    def test_frame_inlining_class_method(self):
+        class A:
+            def __init__(self):
+                self.a = 1
+            def foo(self):
+                return self.a
+
+        def testfunc(n):
+            a = A()
+            for i in range(n):
+                A.foo(a)
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertIn("_LOAD_ATTR_CLASS", uops)
+
+    def test_frame_inlining_bound_method(self):
+        class A:
+            def __init__(self):
+                self.a = 1
+            def foo(self):
+                return self.a
+
+        a = A()
+        meth = a.foo
+        def testfunc(n):
+            for i in range(n):
+                meth()
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = {opname for opname, _, _ in ex}
+        self.assertIn("_CHECK_CALL_BOUND_METHOD_EXACT_ARGS", uops)
+
+    def test_frame_inlining_dangling_frame(self):
+
+
+        def testfunc(n):
+            for i in range(n):
+                outer()
+
+        opt = _testinternalcapi.get_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(32)
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        frame_count = [opname for opname, _, _ in ex if opname == "_PUSH_FRAME"]
+        pop_frame_count = [opname for opname, _, _ in ex if opname == "_POP_FRAME"]
+        # Both frames fail to inlne.
+        self.assertGreater(len(frame_count), len(pop_frame_count))
 
     def test_frame_inlining_other_bound_method(self):
         class Strength:

@@ -175,7 +175,7 @@ typedef struct _Py_UOpsOptIREntry {
             // My real localsplus. This is the parent's localsplus for an inlined call,
             // otherwise it's my own.
             _Py_UOpsSymbolicExpression **my_real_localsplus;
-            // How much stack is in use at the moment. Used during inlining reconstruction.
+            // How much stack is in use after returning from this frame_ir. Used during inlining reconstruction.
             int n_stackentries_used;
             // from the most recent _SET_IP, for reconstruction
             int set_ip;
@@ -1330,11 +1330,14 @@ uop_abstract_interpret_single_inst(
             // TOS is the new frame.
             write_stack_to_ir(ctx, inst, true);
             STACK_SHRINK(1);
-            // No callable and self_or_null because that should be consumed.
-            ctx->frame->frame_ir_entry->n_stackentries_used = (STACK_LEVEL());
-            assert(ctx->frame->frame_ir_entry->n_stackentries_used >= 0);
             ctx->frame->stack_pointer = stack_pointer;
             _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_push_info(ctx->ir);
+
+            // No callable and self_or_null because that should be consumed.
+            // NOTE THE BUG IS THAT WE NEED TO RESTORE THE STACK OF OURSELF,
+            // BUT WE HAVE THE STACK OF THE NEXT FRAME.
+            frame_ir_entry->n_stackentries_used = (STACK_LEVEL());
+            assert(frame_ir_entry->n_stackentries_used >= 0);
 
             PyFunctionObject *func = extract_func_from_sym(ctx->new_frame_sym);
             if (func == NULL) {
@@ -1743,6 +1746,7 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
     int curr_stack_offset = 0;
     _Py_UOpsOptIREntry *recentmost_frame_ir_entry = emitter->curr_frame_ir_entry;
     _Py_UOpsOptIREntry *frame_ir_entry = emitter->curr_frame_ir_entry;
+    _Py_UOpsOptIREntry *prev_entry = emitter->curr_frame_ir_entry;
     while (frame_ir_entry->is_inlineable) {
         // We are the root entry. No need to re-materialize.
         if (frame_ir_entry->prev_frame_ir == NULL) {
@@ -1763,7 +1767,7 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
         assert(frame_ir_entry == recentmost_frame_ir_entry ? 1 : frame_ir_entry->n_stackentries_used >= 0);
         _PyUOpInstruction set_sp = {
             _SET_SP,
-            frame_ir_entry->n_stackentries_used,
+            prev_entry->n_stackentries_used,
             0,
             frame_ir_entry->consumed_self
         };
@@ -1780,6 +1784,7 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
         emit_reserve_i(emitter, load_const);
         emit_reserve_i(emitter, set_sp);
         emit_reserve_i(emitter, return_offset);
+        prev_entry = frame_ir_entry;
         frame_ir_entry = frame_ir_entry->prev_frame_ir;
     }
     // Set the stack pointer of the recentmost frame, which requires runtime calculation.
@@ -1792,10 +1797,10 @@ compile_frame_reconstruction(_Py_UOpsEmitter *emitter)
     };
 
     // Finally, set stack pointer of root frame, statically
-    assert(frame_ir_entry->n_stackentries_used >= 0);
+    assert(prev_entry->n_stackentries_used >= 0);
     _PyUOpInstruction root_frame_set_sp = {
         _SET_SP,
-        frame_ir_entry->n_stackentries_used,
+        prev_entry->n_stackentries_used,
         0,
         0
     };
@@ -1948,7 +1953,6 @@ emit_uops_from_ctx(
 
                 // Get rid of those 3 above.
                 emitter.curr_i -= 3;
-                int nargs = emitter.writebuffer[emitter.curr_i - 2].oparg;
                 // Expand the root stack to AFTER our new interleaved locals.
                 _PyUOpInstruction pre_inline = {
                     _PRE_INLINE,
@@ -2007,7 +2011,7 @@ emit_uops_from_ctx(
                         _SET_FRAME_NAMES,
                         0,
                         0,
-                        Py_NewRef(prev->frame_co_code->co_names)
+                        (uint64_t)Py_NewRef(prev->frame_co_code->co_names)
                     };
                     emit_i(&emitter, new_sp);
                     emit_i(&emitter, set_frame_names);

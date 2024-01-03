@@ -11,6 +11,8 @@ extern "C" {
 #include "pycore_frame.h"         // _PyInterpreterFrame
 
 #define _Py_UOP_MAX_TRACE_LENGTH 512
+// Optimizer might need more info for frame reconstructions.
+#define _Py_UOP_MAX_TRACE_SCRATCH_LENGTH 1024
 
 typedef struct {
     uint16_t opcode;
