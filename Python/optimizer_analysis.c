@@ -1325,13 +1325,14 @@ uop_abstract_interpret_single_inst(
         }
 
         case _PUSH_FRAME: {
-            // No callable and self_or_null because that should be consumed. -1 because there's a frame on the current stack.
-            ctx->frame->frame_ir_entry->n_stackentries_used = (STACK_LEVEL()) - 1;
             int argcount = oparg;
             _Py_UOpsAbstractFrame *old_frame = ctx->frame;
             // TOS is the new frame.
             write_stack_to_ir(ctx, inst, true);
             STACK_SHRINK(1);
+            // No callable and self_or_null because that should be consumed.
+            ctx->frame->frame_ir_entry->n_stackentries_used = (STACK_LEVEL());
+            assert(ctx->frame->frame_ir_entry->n_stackentries_used >= 0);
             ctx->frame->stack_pointer = stack_pointer;
             _Py_UOpsOptIREntry *frame_ir_entry = ir_frame_push_info(ctx->ir);
 
@@ -1880,6 +1881,15 @@ emit_uops_from_ctx(
                         curr->assignment_target == TARGET_UNUSED
                         ? POP_TOP : STORE_FAST,
                         curr->assignment_target, 0, 0};
+                    if (inst.opcode == STORE_FAST) {
+                        assert(emitter.curr_frame_ir_entry->my_real_localsplus != NULL);
+                        assert(emitter.curr_frame_ir_entry->my_virtual_localsplus >= emitter.curr_frame_ir_entry->my_real_localsplus);
+                        int recalculated_localsplus = (emitter.curr_frame_ir_entry->my_virtual_localsplus -
+                                                       emitter.curr_frame_ir_entry->my_real_localsplus) + inst.oparg;
+                        assert(recalculated_localsplus < MAX_ABSTRACT_INTERP_SIZE);
+                        assert(recalculated_localsplus >= 0);
+                        inst.oparg = recalculated_localsplus;
+                    }
                     if (emit_i(&emitter, inst) < 0) {
                         goto error;
                     }
