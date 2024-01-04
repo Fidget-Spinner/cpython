@@ -1636,7 +1636,8 @@ Python/optimizer.o: \
 Python/optimizer_analysis.o: \
 		$(srcdir)/Include/internal/pycore_opcode_metadata.h \
 		$(srcdir)/Include/internal/pycore_uop_metadata.h \
-		$(srcdir)/Include/internal/pycore_optimizer.h
+		$(srcdir)/Include/internal/pycore_optimizer.h \
+		$(srcdir)/Python/abstract_interp_cases.c.h
 
 Python/frozen.o: $(FROZEN_FILES_OUT)
 
