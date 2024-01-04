@@ -263,26 +263,29 @@ def _write_body_abstract_interp_guard_uop(
         out.emit("}\n")
 
     # Does the input specify typed inputs?
-    if not any(input_var.typeprop for input_var in mangled_uop.stack.inputs):
+    if not any(output_var.typeprop for output_var in mangled_uop.stack.outputs):
         return
     # If the input types already match, eliminate the guard
     # Read the cache information to check the auxiliary type information
     predicates = []
     propagates = []
 
-    for input_var in mangled_uop.stack.inputs:
-        if input_var.name in UNUSED:
+    assert len(mangled_uop.stack.outputs) == len(mangled_uop.stack.inputs), "guards must have same number of args"
+    assert [output == input_ for output, input_ in zip(mangled_uop.stack.outputs, mangled_uop.stack.inputs)], \
+        "guards must forward their stack values"
+    for output_var in mangled_uop.stack.outputs:
+        if output_var.name in UNUSED:
             continue
-        if (typ := input_var.typeprop) is not None:
+        if (typ := output_var.typeprop) is not None:
             typname, aux = typ
             aux = "0" if aux is None else aux
             # Check that the input type information match (including auxiliary info)
             predicates.append(
-                f"sym_matches_type((_Py_UOpsSymbolicExpression *){input_var.name}, {typname}, (uint32_t){aux})"
+                f"sym_matches_type((_Py_UOpsSymbolicExpression *){output_var.name}, {typname}, (uint32_t){aux})"
             )
             # Propagate mode - set the types
             propagates.append(
-                f"sym_set_type((_Py_UOpsSymbolicExpression *){input_var.name}, {typname}, (uint32_t){aux})"
+                f"sym_set_type((_Py_UOpsSymbolicExpression *){output_var.name}, {typname}, (uint32_t){aux})"
             )
 
     out.emit("// Type guard elimination \n")
