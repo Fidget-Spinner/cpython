@@ -1312,6 +1312,7 @@ uop_abstract_interpret_single_inst(
         case COPY: {
             _Py_UOpsSymbolicExpression *bottom = PEEK(1 + (oparg - 1));
             STACK_GROW(1);
+            // TODO should I just copy types or actually assign?
             PEEK(1) = bottom;
             break;
         }
