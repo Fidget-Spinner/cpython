@@ -100,7 +100,7 @@ typedef struct {
 
 
 typedef struct _Py_UOpsSymbolicExpression {
-    PyObject_VAR_HEAD
+    Py_ssize_t operand_count;
     Py_ssize_t idx;
 
     // Type of the symbolic expression
@@ -124,18 +124,8 @@ sym_dealloc(PyObject *o)
     // Note: we are not decerfing the symbolic expressions because we only hold
     // a borrowed ref to them. The symexprs are kept alive by the global table.
     Py_CLEAR(self->const_val);
-    Py_TYPE(o)->tp_free(o);
 }
 
-static PyTypeObject _Py_UOpsSymbolicExpression_Type = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    .tp_name = "uops symbolic expression",
-    .tp_basicsize = sizeof(_Py_UOpsSymbolicExpression) - sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_itemsize = sizeof(_Py_UOpsSymbolicExpression *),
-    .tp_dealloc = sym_dealloc,
-    .tp_free = PyObject_Free,
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
-};
 
 
 typedef enum _Py_UOps_IRStore_IdKind {
@@ -305,7 +295,8 @@ typedef struct _Py_UOpsAbstractFrame {
     // Borrowed reference.
     struct _Py_UOpsAbstractFrame *next;
     // Symbolic version of co_consts
-    PyObject *sym_consts;
+    int sym_consts_len;
+    _Py_UOpsSymbolicExpression **sym_consts;
     // Max stacklen
     int stack_len;
     int locals_len;
@@ -320,7 +311,7 @@ typedef struct _Py_UOpsAbstractFrame {
 static void
 abstractframe_dealloc(_Py_UOpsAbstractFrame *self)
 {
-    Py_DECREF(self->sym_consts);
+    PyMem_Free(self->sym_consts);
     Py_XDECREF(self->prev);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
@@ -335,11 +326,21 @@ static PyTypeObject _Py_UOpsAbstractFrame_Type = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION
 };
 
+typedef struct sym_arena {
+    // Current ID to assign a new (non-duplicate) sym_expr
+    Py_ssize_t sym_curr_id;
+    char *curr_available;
+    char *end;
+    char *arena;
+} sym_arena;
+
+typedef struct frequent_syms {
+    _Py_UOpsSymbolicExpression *nulL_sym;
+} frequent_syms;
+
 // Tier 2 types meta interpreter
 typedef struct _Py_UOpsAbstractInterpContext {
     PyObject_HEAD
-    // Current ID to assign a new (non-duplicate) sym_expr
-    Py_ssize_t sym_curr_id;
     // Stores the symbolic for the upcoming new frame that is about to be created.
     _Py_UOpsSymbolicExpression *new_frame_sym;
     _Py_UOpsAbstractFrame *frame;
@@ -350,9 +351,13 @@ typedef struct _Py_UOpsAbstractInterpContext {
     int curr_region_id;
     _Py_UOps_Opt_IR *ir;
 
+    sym_arena s_arena;
+
     // The terminating instruction for the trace. Could be _JUMP_TO_TOP or
     // _EXIT_TRACE.
     _PyUOpInstruction *terminating;
+
+    frequent_syms frequent_syms;
 
     _Py_UOpsSymbolicExpression **water_level;
     _Py_UOpsSymbolicExpression **limit;
@@ -564,15 +569,24 @@ _Py_UOpsAbstractInterpContext_New(PyObject *f_funcobj,
     int locals_len = co->co_nlocalsplus;
     int stack_len = co->co_stacksize;
     _Py_UOpsAbstractFrame *frame = NULL;
-    _Py_UOps_Opt_IR *ir = _Py_UOpsSSA_IR_New(ir_entries);
+    _Py_UOpsAbstractInterpContext *self = NULL;
+    _Py_UOps_Opt_IR *ir = NULL;
+    char *arena = NULL;
+    Py_ssize_t arena_size = sizeof(_Py_UOpsSymbolicExpression) * ir_entries * OVERALLOCATE_FACTOR;
+    arena = (char *)PyMem_Malloc(arena_size);
+    if (arena == NULL) {
+        goto error;
+    }
+
+    ir = _Py_UOpsSSA_IR_New(ir_entries);
     if (ir == NULL) {
         goto error;
     }
     _Py_UOpsOptIREntry *root_frame = ir_frame_push_info(ir);
 
-    _Py_UOpsAbstractInterpContext *self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
-                                                       &_Py_UOpsAbstractInterpContext_Type,
-                                                       MAX_ABSTRACT_INTERP_SIZE);
+    self = PyObject_NewVar(_Py_UOpsAbstractInterpContext,
+                               &_Py_UOpsAbstractInterpContext_Type,
+                               MAX_ABSTRACT_INTERP_SIZE);
     if (self == NULL) {
         goto error;
     }
@@ -583,7 +597,12 @@ _Py_UOpsAbstractInterpContext_New(PyObject *f_funcobj,
         self->localsplus[i] = NULL;
     }
 
-    self->ir = ir;
+    // Setup the arena for sym expressions.
+    self->s_arena.sym_curr_id = 0;
+    self->s_arena.arena = arena;
+    self->s_arena.curr_available = arena;
+    self->s_arena.end = arena + arena_size;
+
     self->new_frame_sym = NULL;
     self->frame_entries_needed = 0;
     frame = _Py_UOpsAbstractFrame_New(self, co->co_consts, stack_len, locals_len, curr_stacklen, root_frame);
@@ -597,7 +616,15 @@ _Py_UOpsAbstractInterpContext_New(PyObject *f_funcobj,
     if (frame_initalize(self, frame, locals_len, curr_stacklen) < 0) {
         goto error;
     }
+
+
+
     self->frame = frame;
+    self->ir = ir;
+
+    self->curr_region_id = 0;
+    self->frequent_syms.nulL_sym = NULL;
+
 
     root_frame->my_real_localsplus = self->localsplus;
     root_frame->my_virtual_localsplus = self->localsplus;
@@ -610,6 +637,11 @@ _Py_UOpsAbstractInterpContext_New(PyObject *f_funcobj,
     return self;
 
 error:
+    PyMem_Free(arena);
+    if (self != NULL) {
+        self->s_arena.arena = NULL;
+    }
+    Py_XDECREF(self);
     Py_XDECREF(ir);
     Py_XDECREF(frame);
     return NULL;
@@ -618,11 +650,11 @@ error:
 static inline _Py_UOpsSymbolicExpression*
 sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int const_idx);
 
-static inline PyObject *
+static inline _Py_UOpsSymbolicExpression **
 create_sym_consts(_Py_UOpsAbstractInterpContext *ctx, PyObject *co_consts)
 {
     Py_ssize_t co_const_len = PyTuple_GET_SIZE(co_consts);
-    PyObject *sym_consts = PyTuple_New(co_const_len);
+    _Py_UOpsSymbolicExpression **sym_consts = PyMem_New(_Py_UOpsSymbolicExpression *, co_const_len);
     if (sym_consts == NULL) {
         return NULL;
     }
@@ -631,9 +663,7 @@ create_sym_consts(_Py_UOpsAbstractInterpContext *ctx, PyObject *co_consts)
         if (res == NULL) {
             goto error;
         }
-        // PyTuple_SET_ITEM steals a reference to res.
-        Py_INCREF(res);
-        PyTuple_SET_ITEM(sym_consts, i, res);
+        sym_consts[i] = res;
     }
 
     return sym_consts;
@@ -703,7 +733,7 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
                           PyObject *co_consts, int stack_len, int locals_len,
                           int curr_stacklen, _Py_UOpsOptIREntry *frame_ir_entry)
 {
-    PyObject *sym_consts = create_sym_consts(ctx, co_consts);
+    _Py_UOpsSymbolicExpression **sym_consts = create_sym_consts(ctx, co_consts);
     if (sym_consts == NULL) {
         return NULL;
     }
@@ -717,6 +747,7 @@ _Py_UOpsAbstractFrame_New(_Py_UOpsAbstractInterpContext *ctx,
 
 
     frame->sym_consts = sym_consts;
+    frame->sym_consts_len = (int)Py_SIZE(co_consts);
     frame->stack_len = stack_len;
     frame->locals_len = locals_len;
     frame->prev = NULL;
@@ -847,13 +878,11 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
 {
     int total_subexprs = num_arr + num_subexprs;
 
-    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
-                                                          &_Py_UOpsSymbolicExpression_Type,
-                                                          total_subexprs);
-    if (self == NULL) {
+    _Py_UOpsSymbolicExpression *self = (_Py_UOpsSymbolicExpression *)ctx->s_arena.curr_available;
+    ctx->s_arena.curr_available += sizeof(_Py_UOpsSymbolicExpression) + sizeof(_Py_UOpsSymbolicExpression *) * (num_subexprs);
+    if (ctx->s_arena.curr_available >= ctx->s_arena.end) {
         return NULL;
     }
-
 
     self->idx = -1;
     self->sym_type.types = 1 << INVALID_TYPE;
@@ -861,7 +890,6 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
     self->const_val = const_val;
     self->originating_region = ctx->curr_region_id;
 
-    assert(Py_SIZE(self) >= num_subexprs);
 
     // Setup
     int i = 0;
@@ -886,28 +914,6 @@ _Py_UOpsSymbolicExpression_New(_Py_UOpsAbstractInterpContext *ctx,
         assert(operands[i+x]);
     }
 
-
-    return self;
-}
-
-static _Py_UOpsSymbolicExpression*
-_Py_UOpsSymbolicExpression_NewSingleton(
-    _Py_UOpsAbstractInterpContext *ctx,
-    _PyUOpInstruction inst)
-{
-    _Py_UOpsSymbolicExpression *self = PyObject_NewVar(_Py_UOpsSymbolicExpression,
-                                                          &_Py_UOpsSymbolicExpression_Type,
-                                                          0);
-    if (self == NULL) {
-        return NULL;
-    }
-
-
-    self->idx = -1;
-    self->sym_type.types = 1 << INVALID_TYPE;
-    self->inst = inst;
-    self->const_val = NULL;
-    self->originating_region = -1;
 
     return self;
 }
@@ -1021,6 +1027,21 @@ sym_init_const(_Py_UOpsAbstractInterpContext *ctx, PyObject *const_val, int cons
     return temp;
 }
 
+static _Py_UOpsSymbolicExpression*
+sym_init_null(_Py_UOpsAbstractInterpContext *ctx)
+{
+    if (ctx->frequent_syms.nulL_sym != NULL) {
+        return ctx->frequent_syms.nulL_sym;
+    }
+    _Py_UOpsSymbolicExpression *null_sym = sym_init_unknown(ctx);
+    if (null_sym == NULL) {
+        return NULL;
+    }
+    sym_set_type(null_sym, NULL_TYPE, 0);
+    ctx->frequent_syms.nulL_sym = null_sym;
+
+    return null_sym;
+}
 
 static inline bool
 sym_is_type(_Py_UOpsSymbolicExpression *sym, _Py_UOpsSymExprTypeEnum typ)
@@ -1194,14 +1215,12 @@ do { \
     }
 
 #ifndef Py_DEBUG
-#define GETITEM(v, i) PyTuple_GET_ITEM((v), (i))
+#define GETITEM(ctx, i) (ctx->frame->sym_consts[(i)])
 #else
-static inline PyObject *
-GETITEM(PyObject *v, Py_ssize_t i) {
-    assert(PyTuple_CheckExact(v));
-    assert(i >= 0);
-    assert(i < PyTuple_GET_SIZE(v));
-    return PyTuple_GET_ITEM(v, i);
+static inline _Py_UOpsSymbolicExpression *
+GETITEM(_Py_UOpsAbstractInterpContext *ctx, Py_ssize_t i) {
+    assert(i < ctx->frame->sym_consts_len);
+    return ctx->frame->sym_consts[i];
 }
 #endif
 
@@ -1282,18 +1301,17 @@ uop_abstract_interpret_single_inst(
             STACK_GROW(1);
             PEEK(1) = GETLOCAL(oparg);
             _PyUOpInstruction inst = {PUSH_NULL, 0, 0, 0};
-            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, inst);
+            _Py_UOpsSymbolicExpression *null_sym =  sym_init_null(ctx);
             if (null_sym == NULL) {
                 goto error;
             }
-            sym_set_type(null_sym, NULL_TYPE, 0);
             GETLOCAL(oparg) = null_sym;
             break;
         }
         case LOAD_CONST: {
             STACK_GROW(1);
             PEEK(1) = (_Py_UOpsSymbolicExpression *)GETITEM(
-                ctx->frame->sym_consts, oparg);
+                ctx, oparg);
             break;
         }
         case STORE_FAST_MAYBE_NULL:
@@ -1326,11 +1344,10 @@ uop_abstract_interpret_single_inst(
         case PUSH_NULL: {
             STACK_GROW(1);
             _PyUOpInstruction inst = {PUSH_NULL, 0, 0, 0};
-            _Py_UOpsSymbolicExpression *null_sym =  _Py_UOpsSymbolicExpression_NewSingleton(ctx, inst);
+            _Py_UOpsSymbolicExpression *null_sym =  sym_init_null(ctx);
             if (null_sym == NULL) {
                 goto error;
             }
-            sym_set_type(null_sym, NULL_TYPE, 0);
             PEEK(1) = null_sym;
             break;
         }
@@ -1457,7 +1474,7 @@ uop_abstract_interpret_single_inst(
     if (opcode == _INIT_CALL_PY_EXACT_ARGS) {
         ctx->new_frame_sym = PEEK(1);
         DPRINTF(3, "call_py_exact_args: {");
-        for (Py_ssize_t i = 0; i < Py_SIZE(ctx->new_frame_sym); i++) {
+        for (Py_ssize_t i = 0; i < (ctx->new_frame_sym->operand_count); i++) {
             DPRINTF(3, "#%ld (%s)", i, ((ctx->new_frame_sym->operands[i]->inst.opcode >= 300 ? _PyOpcode_uop_name : _PyOpcode_OpName)[ctx->new_frame_sym->operands[i]->inst.opcode]))
         }
         DPRINTF(3, "} \n");
@@ -1513,8 +1530,6 @@ uop_abstract_interpret(
     if (ctx == NULL) {
         goto error;
     }
-    ctx->sym_curr_id = 0;
-    ctx->curr_region_id = 0;
 
     _PyUOpInstruction *curr = trace;
     _PyUOpInstruction *end = trace + trace_len;
@@ -1700,7 +1715,7 @@ compile_sym_to_uops(_Py_UOpsEmitter *emitter,
     }
 
     // Compile each operand
-    Py_ssize_t operands_count = Py_SIZE(sym);
+    Py_ssize_t operands_count = sym->operand_count;
     for (Py_ssize_t i = 0; i < operands_count; i++) {
         if (sym->operands[i] == NULL) {
             continue;
