@@ -133,7 +133,7 @@ dummy_func(
     switch (opcode) {
 
 // BEGIN BYTECODES //
-        inst(NOP, (--)) {
+        pure inst(NOP, (--)) {
         }
 
         family(RESUME, 0) = {
@@ -1859,7 +1859,7 @@ dummy_func(
             #endif  /* ENABLE_SPECIALIZATION */
         }
 
-        op(_LOAD_ATTR, (owner -- attr, self_or_null if (oparg & 1))) {
+        op(_LOAD_ATTR, (owner -- attr, self_or_null: &SELF_OR_NULL if (oparg & 1))) {
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 1);
             if (oparg & 1) {
                 /* Designed to work in tandem with CALL, pushes two values. */
@@ -1877,7 +1877,7 @@ dummy_func(
                        something was returned by a descriptor protocol).  Set
                        the second element of the stack to NULL, to signal
                        CALL that it's not a method call.
-                       NULL | meth | arg1 | ... | argN
+                       meth | NULL | arg1 | ... | argN
                     */
                     DECREF_INPUTS();
                     ERROR_IF(attr == NULL, error);
@@ -4065,6 +4065,14 @@ dummy_func(
             DEOPT_IF(1);
         }
 
+        op(_JUMP_ABSOLUTE, (--)) {
+            next_uop = current_executor->trace + oparg;
+            CHECK_EVAL_BREAKER();
+        }
+
+        op(_JUMP_ABSOLUTE_HEADER, (--)) {
+        }
+
         op(_CHECK_VALIDITY, (--)) {
             TIER_TWO_ONLY
             DEOPT_IF(!current_executor->vm_data.valid);
@@ -4082,6 +4090,10 @@ dummy_func(
         op(_INTERNAL_INCREMENT_OPT_COUNTER, (opt --)) {
             _PyCounterOptimizerObject *exe = (_PyCounterOptimizerObject *)opt;
             exe->count++;
+        }
+
+        op(_SHRINK_STACK, (args[oparg] --)) {
+            DECREF_INPUTS();
         }
 
 
