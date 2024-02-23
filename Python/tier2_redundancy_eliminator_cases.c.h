@@ -184,8 +184,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             if (sym_is_const(left) && sym_is_const(right)) {
-                assert(PyLong_CheckExact(sym_get_const(left)));
-                assert(PyLong_CheckExact(sym_get_const(right)));
+                ERROR_IF(!PyLong_CheckExact(sym_get_const(left)), will_deopt);
+                ERROR_IF(!PyLong_CheckExact(sym_get_const(right)), will_deopt);
                 PyObject *temp = _PyLong_Multiply((PyLongObject *)sym_get_const(left),
                     (PyLongObject *)sym_get_const(right));
                 if (temp == NULL) {
@@ -210,8 +210,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             if (sym_is_const(left) && sym_is_const(right)) {
-                assert(PyLong_CheckExact(sym_get_const(left)));
-                assert(PyLong_CheckExact(sym_get_const(right)));
+                ERROR_IF(!PyLong_CheckExact(sym_get_const(left)), will_deopt);
+                ERROR_IF(!PyLong_CheckExact(sym_get_const(right)), will_deopt);
                 PyObject *temp = _PyLong_Add((PyLongObject *)sym_get_const(left),
                     (PyLongObject *)sym_get_const(right));
                 if (temp == NULL) {
@@ -236,8 +236,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             if (sym_is_const(left) && sym_is_const(right)) {
-                assert(PyLong_CheckExact(sym_get_const(left)));
-                assert(PyLong_CheckExact(sym_get_const(right)));
+                ERROR_IF(!PyLong_CheckExact(sym_get_const(left)), will_deopt);
+                ERROR_IF(!PyLong_CheckExact(sym_get_const(right)), will_deopt);
                 PyObject *temp = _PyLong_Subtract((PyLongObject *)sym_get_const(left),
                     (PyLongObject *)sym_get_const(right));
                 if (temp == NULL) {
@@ -276,8 +276,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             if (sym_is_const(left) && sym_is_const(right)) {
-                assert(PyFloat_CheckExact(sym_get_const(left)));
-                assert(PyFloat_CheckExact(sym_get_const(right)));
+                ERROR_IF(!PyFloat_CheckExact(sym_get_const(left)), will_deopt);
+                ERROR_IF(!PyFloat_CheckExact(sym_get_const(right)), will_deopt);
                 PyObject *temp = PyFloat_FromDouble(
                     PyFloat_AS_DOUBLE(sym_get_const(left)) *
                     PyFloat_AS_DOUBLE(sym_get_const(right)));
@@ -303,8 +303,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             if (sym_is_const(left) && sym_is_const(right)) {
-                assert(PyFloat_CheckExact(sym_get_const(left)));
-                assert(PyFloat_CheckExact(sym_get_const(right)));
+                ERROR_IF(!PyFloat_CheckExact(sym_get_const(left)), will_deopt);
+                ERROR_IF(!PyFloat_CheckExact(sym_get_const(right)), will_deopt);
                 PyObject *temp = PyFloat_FromDouble(
                     PyFloat_AS_DOUBLE(sym_get_const(left)) +
                     PyFloat_AS_DOUBLE(sym_get_const(right)));
@@ -330,8 +330,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             if (sym_is_const(left) && sym_is_const(right)) {
-                assert(PyFloat_CheckExact(sym_get_const(left)));
-                assert(PyFloat_CheckExact(sym_get_const(right)));
+                ERROR_IF(!PyFloat_CheckExact(sym_get_const(left)), will_deopt);
+                ERROR_IF(!PyFloat_CheckExact(sym_get_const(right)), will_deopt);
                 PyObject *temp = PyFloat_FromDouble(
                     PyFloat_AS_DOUBLE(sym_get_const(left)) -
                     PyFloat_AS_DOUBLE(sym_get_const(right)));

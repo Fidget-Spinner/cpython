@@ -597,6 +597,13 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
         }                              \
     } while (0);
 
+#define ERROR_IF(COND, LABEL) \
+    do { \
+        if (COND) { \
+            goto LABEL; \
+        } \
+    } while (0);
+
 #define _LOAD_ATTR_NOT_NULL \
     do {                    \
     OUT_OF_SPACE_IF_NULL(attr = sym_new_known_notnull(ctx)); \
@@ -660,6 +667,11 @@ out_of_space:
 
 error:
     DPRINTF(1, "Encountered error in abstract interpreter\n");
+    abstractcontext_fini(ctx);
+    return 0;
+
+will_deopt:
+    DPRINTF(1, "Code will always deopt in abstract interpreter\n");
     abstractcontext_fini(ctx);
     return 0;
 }
