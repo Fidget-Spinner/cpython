@@ -4160,6 +4160,16 @@ dummy_func(
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 
+        op(_JUMP_ABSOLUTE, (--)) {
+#ifndef _Py_JIT
+            next_uop = current_executor->trace + oparg;
+#endif
+            CHECK_EVAL_BREAKER();
+        }
+
+        op(_JUMP_ABSOLUTE_HEADER, (--)) {
+        }
+
 // END BYTECODES //
 
     }

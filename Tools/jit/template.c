@@ -80,7 +80,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, PyObject **stack_pointer, PyThreadState *
     PATCH_VALUE(uint64_t, _operand, _JIT_OPERAND)
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
     // The actual instruction definitions (only one will be used):
-    if (opcode == _JUMP_TO_TOP) {
+    if (opcode == _JUMP_TO_TOP || opcode == _JUMP_ABSOLUTE) {
         CHECK_EVAL_BREAKER();
         PATCH_JUMP(_JIT_TOP);
     }

@@ -853,7 +853,7 @@ compute_used(_PyUOpInstruction *buffer, uint32_t *used, int *exit_count_ptr)
         if (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) {
             exit_count++;
         }
-        if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE) {
+        if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE || opcode == _JUMP_ABSOLUTE) {
             continue;
         }
         /* All other micro-ops fall through, so i+1 is reachable */
@@ -919,7 +919,8 @@ make_executor_from_uops(_PyUOpInstruction *buffer, const _PyBloomFilter *depende
         *dest = buffer[i];
         int opcode = buffer[i].opcode;
         if (opcode == _POP_JUMP_IF_FALSE ||
-            opcode == _POP_JUMP_IF_TRUE)
+            opcode == _POP_JUMP_IF_TRUE ||
+            opcode == _JUMP_ABSOLUTE)
         {
             /* The oparg of the target will already have been set to its new offset */
             int oparg = dest->oparg;
@@ -934,6 +935,19 @@ make_executor_from_uops(_PyUOpInstruction *buffer, const _PyBloomFilter *depende
          * so that we can set the oparg of earlier jumps correctly. */
         buffer[i].oparg = (uint16_t)(dest - executor->trace);
         dest--;
+    }
+    // Rewrite backward jumps
+    if (executor->trace[length-1].opcode == _JUMP_ABSOLUTE) {
+        bool found = false;
+        for (int end = length - 1; end >= 0; end--) {
+            if (executor->trace[end].opcode == _JUMP_ABSOLUTE_HEADER) {
+                ((_PyUOpInstruction *)&executor->trace[length-1])->oparg = end + 1;
+                found = true;
+                break;
+            }
+        }
+        assert(found);
+        (void)found;
     }
     assert(next_exit == -1);
     assert(dest == executor->trace);
@@ -1003,7 +1017,7 @@ uop_optimize(
     _PyBloomFilter dependencies;
     _Py_BloomFilter_Init(&dependencies);
     _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
-    int err = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies);
+    int err = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH/2, &dependencies);
     if (err <= 0) {
         // Error or nothing translated
         return err;
@@ -1012,7 +1026,7 @@ uop_optimize(
     char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
     if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
         err = _Py_uop_analyze_and_optimize(frame, buffer,
-                                           UOP_MAX_TRACE_LENGTH,
+                                           UOP_MAX_TRACE_LENGTH/2,
                                            curr_stackentries, &dependencies);
         if (err <= 0) {
             return err;
@@ -1029,7 +1043,7 @@ uop_optimize(
         else if (oparg < _PyUop_Replication[opcode]) {
             buffer[pc].opcode = opcode + oparg + 1;
         }
-        else if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE) {
+        else if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE || opcode == _JUMP_ABSOLUTE) {
             break;
         }
         assert(_PyOpcode_uop_name[buffer[pc].opcode]);

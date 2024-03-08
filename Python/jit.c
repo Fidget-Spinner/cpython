@@ -396,6 +396,17 @@ emit(const StencilGroup *group, uint64_t patches[])
     copy_and_patch((unsigned char *)patches[HoleValue_CODE], &group->code, patches);
 }
 
+static size_t
+calculate_jump_abs_offset(const _PyUOpInstruction *trace, _PyUOpInstruction *jump_absolute)
+{
+    assert(jump_absolute->opcode == _JUMP_ABSOLUTE);
+    size_t total = 0;
+    for (int i = 0; i < jump_absolute->oparg; i++) {
+        total += stencil_groups[trace[i].opcode].code.body_size;
+    }
+    return total;
+}
+
 // Compiles executor in-place. Don't forget to call _PyJIT_Free later!
 int
 _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction *trace, size_t length)
@@ -432,7 +443,13 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction *trace, size
         // Think of patches as a dictionary mapping HoleValue to uint64_t:
         uint64_t patches[] = GET_PATCHES();
         patches[HoleValue_CODE] = (uint64_t)code;
-        patches[HoleValue_CONTINUE] = (uint64_t)code + group->code.body_size;
+        if (instruction->opcode == _JUMP_ABSOLUTE) {
+            assert(i + 1 == length);
+            patches[HoleValue_TOP] = (uint64_t)memory + calculate_jump_abs_offset(trace, instruction);
+        }
+        else {
+            patches[HoleValue_CONTINUE] = (uint64_t)code + group->code.body_size;
+        }
         patches[HoleValue_DATA] = (uint64_t)data;
         patches[HoleValue_EXECUTOR] = (uint64_t)executor;
         patches[HoleValue_OPARG] = instruction->oparg;

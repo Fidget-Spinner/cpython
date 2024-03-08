@@ -3901,4 +3901,17 @@
             break;
         }
 
+        case _JUMP_ABSOLUTE: {
+            oparg = CURRENT_OPARG();
+            #ifndef _Py_JIT
+            next_uop = current_executor->trace + oparg;
+            #endif
+            CHECK_EVAL_BREAKER();
+            break;
+        }
+
+        case _JUMP_ABSOLUTE_HEADER: {
+            break;
+        }
+
 #undef TIER_TWO

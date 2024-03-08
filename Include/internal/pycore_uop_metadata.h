@@ -243,6 +243,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_START_EXECUTOR] = 0,
     [_FATAL_ERROR] = HAS_ESCAPES_FLAG,
     [_CHECK_VALIDITY_AND_SET_IP] = HAS_DEOPT_FLAG,
+    [_JUMP_ABSOLUTE] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG,
+    [_JUMP_ABSOLUTE_HEADER] = 0,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -368,6 +370,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_ITER_NEXT_LIST] = "_ITER_NEXT_LIST",
     [_ITER_NEXT_RANGE] = "_ITER_NEXT_RANGE",
     [_ITER_NEXT_TUPLE] = "_ITER_NEXT_TUPLE",
+    [_JUMP_ABSOLUTE] = "_JUMP_ABSOLUTE",
+    [_JUMP_ABSOLUTE_HEADER] = "_JUMP_ABSOLUTE_HEADER",
     [_JUMP_TO_TOP] = "_JUMP_TO_TOP",
     [_LIST_APPEND] = "_LIST_APPEND",
     [_LIST_EXTEND] = "_LIST_EXTEND",

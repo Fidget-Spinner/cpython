@@ -55,7 +55,7 @@
 static inline bool
 op_is_end(uint32_t opcode)
 {
-    return opcode == _EXIT_TRACE || opcode == _JUMP_TO_TOP;
+    return opcode == _EXIT_TRACE || opcode == _JUMP_TO_TOP || opcode == _JUMP_ABSOLUTE;
 }
 
 static int
@@ -537,6 +537,34 @@ peephole_opt(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, int buffer_s
     }
 }
 
+static void
+do_loop_splitting(_PyUOpInstruction *buffer, int buffer_size)
+{
+    assert(buffer_size <= UOP_MAX_TRACE_LENGTH/2);
+    _PyUOpInstruction *this_instr = buffer;
+    for (; this_instr < buffer + buffer_size; this_instr++) {
+        if (op_is_end(this_instr->opcode)) {
+            break;
+        }
+    }
+    if (this_instr->opcode != _JUMP_TO_TOP) {
+        return;
+    }
+
+    assert((this_instr + 1)->opcode == _EXIT_TRACE);
+    _PyUOpInstruction exit_trace = *(this_instr+1);
+    this_instr->opcode = _JUMP_ABSOLUTE_HEADER;
+    int length = (int)(this_instr - buffer);
+    int target = length + 1;
+    this_instr++;
+    memcpy(this_instr, buffer, length * sizeof(_PyUOpInstruction));
+    _PyUOpInstruction *end = (this_instr + length);
+    end->opcode = _JUMP_ABSOLUTE;
+    end->oparg = target;
+    end++;
+    *end = exit_trace;
+}
+
 //  0 - failure, no error raised, just fall back to Tier 1
 // -1 - failure, and raise error
 //  1 - optimizer success
@@ -560,6 +588,8 @@ _Py_uop_analyze_and_optimize(
     }
 
     peephole_opt(frame, buffer, buffer_size);
+
+    do_loop_splitting(buffer, buffer_size);
 
     err = optimize_uops(
         (PyCodeObject *)frame->f_executable, buffer,

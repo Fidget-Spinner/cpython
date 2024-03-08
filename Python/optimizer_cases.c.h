@@ -2006,3 +2006,11 @@
             break;
         }
 
+        case _JUMP_ABSOLUTE: {
+            break;
+        }
+
+        case _JUMP_ABSOLUTE_HEADER: {
+            break;
+        }
+
