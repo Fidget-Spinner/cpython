@@ -443,19 +443,19 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction *trace, size
         // Think of patches as a dictionary mapping HoleValue to uint64_t:
         uint64_t patches[] = GET_PATCHES();
         patches[HoleValue_CODE] = (uint64_t)code;
-        if (instruction->opcode == _JUMP_ABSOLUTE) {
-            assert(i + 1 == length);
-            patches[HoleValue_TOP] = (uint64_t)memory + calculate_jump_abs_offset(trace, instruction);
-        }
-        else {
-            patches[HoleValue_CONTINUE] = (uint64_t)code + group->code.body_size;
-        }
+        patches[HoleValue_CONTINUE] = (uint64_t)code + group->code.body_size;
         patches[HoleValue_DATA] = (uint64_t)data;
         patches[HoleValue_EXECUTOR] = (uint64_t)executor;
         patches[HoleValue_OPARG] = instruction->oparg;
         patches[HoleValue_OPERAND] = instruction->operand;
         patches[HoleValue_TARGET] = instruction->target;
-        patches[HoleValue_TOP] = (uint64_t)top;
+        if (instruction->opcode == _JUMP_ABSOLUTE) {
+            assert(i + 1 == length);
+            patches[HoleValue_TOP] = (uint64_t)memory + calculate_jump_abs_offset(trace, instruction);
+        }
+        else {
+            patches[HoleValue_TOP] = (uint64_t)top;
+        }
         patches[HoleValue_ZERO] = 0;
         emit(group, patches);
         code += group->code.body_size;
