@@ -14,7 +14,7 @@
 #include "pycore_setobject.h"
 #include "pycore_sliceobject.h"
 #include "pycore_descrobject.h"
-
+#include "pycore_uop_metadata.h"
 #include "ceval_macros.h"
 
 #undef CURRENT_OPARG
@@ -44,7 +44,7 @@
 #define GOTO_TIER_TWO(EXECUTOR) \
 do {  \
     __attribute__((musttail))                     \
-    return ((jit_func)((EXECUTOR)->jit_code))(frame, stack_pointer, tstate); \
+    return ((jit_func)((EXECUTOR)->jit_code))(frame, stack_pointer, tstate, NULL, NULL); \
 } while (0)
 
 #undef GOTO_TIER_ONE
@@ -66,7 +66,7 @@ do {  \
 #define PATCH_JUMP(ALIAS)                                    \
     PyAPI_DATA(void) ALIAS;                                  \
     __attribute__((musttail))                                \
-    return ((jit_func)&ALIAS)(frame, stack_pointer, tstate);
+    return ((jit_func)&ALIAS)(frame, stack_pointer, tstate, REG_0, REG_1);
 
 _Py_CODEUNIT *
 _JIT_ENTRY(_PyInterpreterFrame *frame, PyObject **stack_pointer, PyThreadState *tstate, PyObject *REG_0, PyObject *REG_1)
@@ -108,9 +108,8 @@ error_tier_two:
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(NULL);
 deoptimize:
-    if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
-        int this_opcode = next_uop[-1].opcode;
-        int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
+    if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
+        int popped = _PyUop_num_popped(opcode, oparg);
         if (popped >= 2) {
             stack_pointer[-1] = REG_1;
             stack_pointer[-2] = REG_0;
@@ -123,9 +122,8 @@ deoptimize:
     GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target);
 side_exit:
     {
-        if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
-            int this_opcode = next_uop[-1].opcode;
-            int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
+        if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
+            int popped = _PyUop_num_popped(opcode, oparg);
             if (popped >= 2) {
                 stack_pointer[-1] = REG_1;
                 stack_pointer[-2] = REG_0;

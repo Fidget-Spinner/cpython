@@ -393,7 +393,7 @@ stack_pointer = _PyFrame_GetStackPointer(frame);
 #define GOTO_TIER_TWO(EXECUTOR)                        \
 do {                                                   \
     jit_func jitted = (EXECUTOR)->jit_code;            \
-    next_instr = jitted(frame, stack_pointer, tstate); \
+    next_instr = jitted(frame, stack_pointer, tstate, NULL, NULL); \
     Py_DECREF(tstate->previous_executor);              \
     tstate->previous_executor = NULL;                  \
     frame = tstate->current_frame;                     \

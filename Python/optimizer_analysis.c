@@ -551,6 +551,9 @@ replace_and_duplicate(_PyUOpInstruction *buffer)
         if (_PyUop_Flags[opcode] & HAS_OPARG_AND_1_FLAG) {
             buffer[pc].opcode = opcode + 1 + (oparg & 1);
         }
+        else if (oparg < _PyUop_Replication[opcode]) {
+            buffer[pc].opcode = opcode + oparg + 1;
+        }
         else if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE) {
             break;
         }
@@ -588,6 +591,9 @@ op_is_safe(int opcode)
         case _LOAD_CONST_INLINE:
         case _LOAD_CONST_INLINE_BORROW_WITH_NULL:
         case _LOAD_CONST_INLINE_BORROW:
+        case _GUARD_BOTH_INT:
+        case _GUARD_BOTH_FLOAT:
+        case _GUARD_BOTH_UNICODE:
             return true;
         default:
             return _PyUop_Flags[opcode] & HAS_SPILLS_FLAG;
@@ -620,16 +626,23 @@ peephole_regalloc(_PyUOpInstruction *buffer)
                     net_stack_effect += net_effect;
                     registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
                     DPRINTF(3, "CONSIDERING: %s\n", _PyUOpName(inst.opcode));
-                    if (!op_is_safe(inst.opcode) && !(_PyUop_Flags[inst.opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG))) {
+                    if (!op_is_safe(inst.opcode)) {
                         net_stack_effect = -1;
                         break;
                     }
-                    int prev_pushed = _PyUop_num_pushed(buffer[end-1].opcode, buffer[end-1].oparg);
-                    if (prev_pushed + net_stack_effect == 0) {
+                    // int prev_pushed = _PyUop_num_pushed(buffer[end-1].opcode, buffer[end-1].oparg);
+                    if (net_stack_effect == 0) {
                         net_stack_effect = 0;
-                        registers_used += registers_touched(buffer[end-1].opcode, prev_pushed);
-                        end -= 2;
+                        end--;
                         break;
+                        // registers_used += registers_touched(buffer[end-1].opcode, prev_pushed);
+//                        if (op_is_safe(buffer[(end-1)].opcode) && op_is_safe(buffer[(end-2)].opcode)) {
+//                            end -= 2;
+//                            break;
+//                        } else {
+//                            net_stack_effect = -1;
+//                            break;
+//                        }
                     }
                     end--;
                 }
@@ -702,8 +715,8 @@ _Py_uop_analyze_and_optimize(
 
     remove_unneeded_uops(buffer, buffer_size);
 
-    replace_and_duplicate(buffer);
     peephole_regalloc(buffer);
+    replace_and_duplicate(buffer);
 
     OPT_STAT_INC(optimizer_successes);
     return 1;

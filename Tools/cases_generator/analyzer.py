@@ -812,6 +812,9 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
     if not uop.stack.inputs and not uop.stack.outputs:
         return
 
+    if uop.replicated or uop.replicates or "split" in uop.annotations:
+        return
+
     # Assume the top few stack items are in registers
     if not uop.properties.has_complex_input:
         new_input_effect = []
