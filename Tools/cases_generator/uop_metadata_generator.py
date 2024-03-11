@@ -82,15 +82,21 @@ def generate_stack_effect_functions(analysis: Analysis, out: CWriter) -> None:
 def generate_uop_to_reg_mapping(
     analysis: Analysis, out: CWriter
 ) -> None:
-    out.emit("extern const uint16_t _PyUop_ToRegisterVer[MAX_UOP_ID+1];\n")
+    out.emit(f"extern int _PyUop_match_reg(uint32_t opcode, int should_spill);\n")
     out.emit("#ifdef NEED_OPCODE_METADATA\n")
-    out.emit("const uint16_t _PyUop_ToRegisterVer[MAX_UOP_ID+1] = {\n")
-    for uop in analysis.uops.values():
-        if uop.is_viable() and uop.properties.tier != 1 and uop.properties.has_register_version:
-            out.emit(f"[{uop.name}] = {uop.register_version.name},\n")
-
-    out.emit("};\n\n")
-    out.emit("#endif // NEED_OPCODE_METADATA\n\n")
+    out.emit(f"int _PyUop_match_reg(uint32_t opcode, int should_spill)  {{\n")
+    out.emit("switch(opcode) {\n")
+    for name, uop in analysis.uops.items():
+        if not(uop.is_viable() and uop.properties.tier != 1):
+            continue
+        if uop.properties.has_register_version:
+            out.emit(f"case {uop.name}:\n")
+            out.emit(f"    return should_spill ? {uop.name}__REG_SPILL : {uop.name}__REG;\n")
+    out.emit("default:\n")
+    out.emit("    return -1;\n")
+    out.emit("}\n")
+    out.emit("}\n\n")
+    out.emit("#endif\n\n")
 
 def generate_uop_metadata(
     filenames: list[str], analysis: Analysis, outfile: TextIO

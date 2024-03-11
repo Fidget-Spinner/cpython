@@ -174,7 +174,7 @@ class Uop:
     implicitly_created: bool = False
     replicated = 0
     replicates : "Uop | None" = None
-    register_version: "Uop | None" = None
+    register_version: "list[Uop] | None" = None
 
     def dump(self, indent: str) -> None:
         print(
@@ -842,6 +842,7 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
 
     uop.properties.has_register_version = True
 
+    register_versions = []
     # First variant: use regs for inputs, use reg for outputs.
     stack = StackEffect(new_input_effect, new_output_effect)
     name = f"{uop.name}__REG"
@@ -858,7 +859,26 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
         properties=properties,
     )
     uops[name] = result
-    uop.register_version = result
+    register_versions.append(result)
+
+    # Second variant: use regs for inputs, no reg for output (spill).
+    stack = StackEffect(new_input_effect, uop.stack.outputs)
+    name = f"{uop.name}__REG_SPILL"
+    properties = replace(uop.properties)
+    properties.uses_register = True
+    properties.has_register_version = False
+    result = Uop(
+        name=name,
+        context=uop.context,
+        annotations=uop.annotations,
+        stack=stack,
+        caches=uop.caches,
+        body=uop.body,
+        properties=properties,
+    )
+    uops[name] = result
+    register_versions.append(result)
+    uop.register_version = register_versions
 
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}
