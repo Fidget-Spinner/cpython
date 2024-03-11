@@ -1,9 +1,13 @@
-from dataclasses import dataclass, field
+import itertools
+
+from dataclasses import dataclass, field, replace
 import lexer
 import parser
 import re
 from typing import Optional
 
+
+REGISTERS = list(map(str, range(3)))
 
 @dataclass
 class Properties:
@@ -24,9 +28,12 @@ class Properties:
     side_exit: bool
     pure: bool
     passthrough: bool
+    has_complex_input: bool
+    has_complex_output: bool
     tier: int | None = None
     oparg_and_1: bool = False
     const_oparg: int = -1
+    register: bool = False
 
     def dump(self, indent: str) -> None:
         print(indent, end="")
@@ -53,6 +60,8 @@ class Properties:
             side_exit=any(p.side_exit for p in properties),
             pure=all(p.pure for p in properties),
             passthrough=all(p.passthrough for p in properties),
+            has_complex_input=any(p.has_complex_input for p in properties),
+            has_complex_output=any(p.has_complex_output for p in properties),
         )
 
 
@@ -74,6 +83,8 @@ SKIP_PROPERTIES = Properties(
     side_exit=False,
     pure=False,
     passthrough=False,
+    has_complex_input=False,
+    has_complex_output=False,
 )
 
 
@@ -98,9 +109,6 @@ class StackItem:
     condition: str | None
     size: str
     peek: bool = False
-    type_prop: None | tuple[str, None | str] = field(
-        default_factory=lambda: None, init=True, compare=False, hash=False
-    )
 
     def __str__(self) -> str:
         cond = f" if ({self.condition})" if self.condition else ""
@@ -111,11 +119,33 @@ class StackItem:
     def is_array(self) -> bool:
         return self.type == "PyObject **"
 
+@dataclass
+class RegisterItem:
+    name: str
+    type: str | None
+    register: str
+    peek: bool = False
+    condition: bool = None
+    size: str = "1"
+
+    def __str__(self) -> str:
+        type = "" if self.type is None else f"{self.type} "
+        return f"{type}{self.name}_%{self.register} {self.peek}"
+
+    def is_array(self) -> bool:
+        return False
+
+    @staticmethod
+    def from_stackitem(register: str, stack: StackItem) -> "RegisterItem":
+        return RegisterItem(stack.name, stack.type, register, stack.peek)
+
+
+EffectItem = StackItem | RegisterItem
 
 @dataclass
 class StackEffect:
-    inputs: list[StackItem]
-    outputs: list[StackItem]
+    inputs: list[EffectItem]
+    outputs: list[EffectItem]
 
     def __str__(self) -> str:
         return f"({', '.join([str(i) for i in self.inputs])} -- {', '.join([str(i) for i in self.outputs])})"
@@ -474,6 +504,15 @@ def effect_depends_on_oparg_1(op: parser.InstDef) -> bool:
             return True
     return False
 
+def stack_effect_is_complex(effects: list[EffectItem]):
+    for eff in effects:
+        assert isinstance(eff, StackItem)
+        if eff.condition and eff.condition != "1":
+            return True
+        if eff.size != "1":
+            return True
+    return False
+
 def compute_properties(op: parser.InstDef) -> Properties:
     has_free = (
         variable_used(op, "PyCell_New")
@@ -513,19 +552,25 @@ def compute_properties(op: parser.InstDef) -> Properties:
         pure="pure" in op.annotations,
         passthrough=passthrough,
         tier=tier_variable(op),
+        has_complex_input=False,
+        has_complex_output=False,
     )
 
 
 def make_uop(name: str, op: parser.InstDef, inputs: list[parser.InputEffect], uops: dict[str, Uop]) -> Uop:
+    stack = analyze_stack(op)
+    properties = compute_properties(op)
     result = Uop(
         name=name,
         context=op.context,
         annotations=op.annotations,
-        stack=analyze_stack(op),
+        stack=stack,
         caches=analyze_caches(inputs),
         body=op.block.tokens,
-        properties=compute_properties(op),
+        properties=properties,
     )
+    properties.has_complex_input = stack_effect_is_complex(stack.inputs)
+    properties.has_complex_output = stack_effect_is_complex(stack.outputs)
     if effect_depends_on_oparg_1(op) and "split" in op.annotations:
         result.properties.oparg_and_1 = True
         for bit in ("0", "1"):
@@ -534,11 +579,14 @@ def make_uop(name: str, op: parser.InstDef, inputs: list[parser.InputEffect], uo
             if properties.oparg:
                 # May not need oparg anymore
                 properties.oparg = any(token.text == "oparg" for token in op.block.tokens)
+            stack = analyze_stack(op, bit)
+            properties.has_complex_input = stack_effect_is_complex(stack.inputs)
+            properties.has_complex_output = stack_effect_is_complex(stack.outputs)
             rep = Uop(
                 name=name_x,
                 context=op.context,
                 annotations=op.annotations,
-                stack=analyze_stack(op, bit),
+                stack=stack,
                 caches=analyze_caches(inputs),
                 body=op.block.tokens,
                 properties=properties,
@@ -556,11 +604,14 @@ def make_uop(name: str, op: parser.InstDef, inputs: list[parser.InputEffect], uo
         properties = compute_properties(op)
         properties.oparg = False
         properties.const_oparg = oparg
+        stack = analyze_stack(op)
+        properties.has_complex_input = stack_effect_is_complex(stack.inputs)
+        properties.has_complex_output = stack_effect_is_complex(stack.outputs)
         rep = Uop(
             name=name_x,
             context=op.context,
             annotations=op.annotations,
-            stack=analyze_stack(op),
+            stack=stack,
             caches=analyze_caches(inputs),
             body=op.block.tokens,
             properties=properties,
@@ -751,6 +802,50 @@ def assign_opcodes(
     return instmap, len(no_arg), min_instrumented
 
 
+def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
+    new_input_effect: list[EffectItem]
+    new_output_effect: list[EffectItem]
+
+    if not uop.stack.inputs and not uop.stack.outputs:
+        return
+
+    # Assume the top few stack items are in registers
+    if not uop.properties.has_complex_input:
+        new_input_effect = []
+        for inp in uop.stack.inputs[:-len(REGISTERS)]:
+            new_input_effect.append(inp)
+        for reg, inp in zip(REGISTERS, uop.stack.inputs[-len(REGISTERS):]):
+            new_input_effect.append(RegisterItem.from_stackitem(reg, inp))
+    else:
+        new_input_effect = list(uop.stack.inputs)
+
+    # Simply put the top few stack items in registers
+    if not uop.properties.has_complex_output:
+        new_output_effect = []
+        for inp in uop.stack.outputs[:-len(REGISTERS)]:
+            new_output_effect.append(inp)
+        for reg, inp in zip(REGISTERS, uop.stack.outputs[-len(REGISTERS):]):
+            new_output_effect.append(RegisterItem.from_stackitem(reg, inp))
+    else:
+        new_output_effect = list(uop.stack.outputs)
+
+    assert len(new_input_effect) == len(uop.stack.inputs)
+    assert len(new_output_effect) == len(uop.stack.outputs)
+    stack = StackEffect(new_input_effect, new_output_effect)
+    name = f"{uop.name}__REG"
+    properties = replace(uop.properties)
+    properties.register = True
+    result = Uop(
+        name=name,
+        context=uop.context,
+        annotations=uop.annotations,
+        stack=stack,
+        caches=uop.caches,
+        body=uop.body,
+        properties=properties,
+    )
+    uops[name] = result
+
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}
     uops: dict[str, Uop] = {}
@@ -794,6 +889,8 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
                     continue
                 if target.text in instructions:
                     instructions[target.text].is_target = True
+    for uop in list(uops.values()):
+        generate_uop_register_variants(uop, uops)
     # Special case BINARY_OP_INPLACE_ADD_UNICODE
     # BINARY_OP_INPLACE_ADD_UNICODE is not a normal family member,
     # as it is the wrong size, but we need it to maintain an

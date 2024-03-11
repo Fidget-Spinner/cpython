@@ -1,5 +1,5 @@
 import re
-from analyzer import StackItem, Instruction, Uop
+from analyzer import StackItem, RegisterItem, EffectItem, Instruction, Uop
 from dataclasses import dataclass
 from cwriter import CWriter
 
@@ -21,7 +21,10 @@ def maybe_parenthesize(sym: str) -> str:
         return f"({sym})"
 
 
-def var_size(var: StackItem) -> str:
+def var_size(var: EffectItem) -> str:
+    if isinstance(var, RegisterItem):
+        return "1"
+    assert isinstance(var, StackItem)
     if var.condition:
         # Special case simplifications
         if var.condition == "0":
@@ -47,10 +50,10 @@ class StackOffset:
     def empty() -> "StackOffset":
         return StackOffset([], [])
 
-    def pop(self, item: StackItem) -> None:
+    def pop(self, item: EffectItem) -> None:
         self.popped.append(var_size(item))
 
-    def push(self, item: StackItem) -> None:
+    def push(self, item: EffectItem) -> None:
         self.pushed.append(var_size(item))
 
     def __sub__(self, other: "StackOffset") -> "StackOffset":
@@ -124,11 +127,16 @@ class Stack:
         self.variables: list[StackItem] = []
         self.defined: set[str] = set()
 
-    def pop(self, var: StackItem) -> str:
+    @staticmethod
+    def to_reg(register: RegisterItem):
+        return f"REG_{register.register}"
+
+    def pop(self, var: EffectItem) -> str:
         self.top_offset.pop(var)
         if not var.peek:
             self.peek_offset.pop(var)
         indirect = "&" if var.is_array() else ""
+        reg = Stack.to_reg(var) if isinstance(var, RegisterItem) else None
         if self.variables:
             popped = self.variables.pop()
             if popped.size != var.size:
@@ -139,6 +147,7 @@ class Stack:
             if popped.name == var.name:
                 return ""
             elif popped.name in UNUSED:
+                assert isinstance(var, StackItem)
                 self.defined.add(var.name)
                 return (
                     f"{var.name} = {indirect}stack_pointer[{self.top_offset.to_c()}];\n"
@@ -147,15 +156,18 @@ class Stack:
                 return ""
             else:
                 self.defined.add(var.name)
-                return f"{var.name} = {popped.name};\n"
+                return f"{var.name} = {reg or popped.name};\n"
         self.base_offset.pop(var)
         if var.name in UNUSED:
             return ""
         else:
             self.defined.add(var.name)
         cast = f"({var.type})" if (not indirect and var.type) else ""
+        if reg:
+            assert not indirect
+        rhs = reg or f"stack_pointer[{self.base_offset.to_c()}]"
         assign = (
-            f"{var.name} = {cast}{indirect}stack_pointer[{self.base_offset.to_c()}];"
+            f"{var.name} = {cast}{indirect}{rhs};"
         )
         if var.condition:
             if var.condition == "1":
@@ -166,9 +178,10 @@ class Stack:
                 return f"if ({var.condition}) {{ {assign} }}\n"
         return f"{assign}\n"
 
-    def push(self, var: StackItem) -> str:
+    def push(self, var: EffectItem) -> str:
         self.variables.append(var)
         if var.is_array() and var.name not in self.defined and var.name not in UNUSED:
+            assert isinstance(var, StackItem)
             c_offset = self.top_offset.to_c()
             self.top_offset.push(var)
             self.defined.add(var.name)
@@ -188,9 +201,12 @@ class Stack:
                             continue
                         elif var.condition != "1":
                             out.emit(f"if ({var.condition}) ")
-                    out.emit(
-                        f"stack_pointer[{self.base_offset.to_c()}] = {cast}{var.name};\n"
-                    )
+                    if isinstance(var, RegisterItem):
+                        out.emit(f"{Stack.to_reg(var)} = {cast}{var.name};\n")
+                    else:
+                        out.emit(
+                            f"stack_pointer[{self.base_offset.to_c()}] = {cast}{var.name};\n"
+                        )
             self.base_offset.push(var)
         if self.base_offset.to_c() != self.top_offset.to_c():
             print("base", self.base_offset.to_c(), "top", self.top_offset.to_c())

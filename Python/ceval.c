@@ -1008,6 +1008,7 @@ enter_tier_two:
 
     OPT_STAT_INC(traces_executed);
     uint16_t uopcode;
+    PyObject *REG_0 = NULL, *REG_1 = NULL, *REG_2 = NULL;
 #ifdef Py_STATS
     uint64_t trace_uop_execution_counter = 0;
 #endif

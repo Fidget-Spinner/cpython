@@ -8,6 +8,7 @@ from parsing import (
     CacheEffect,
     StackEffect,
     InputEffect,
+    OutputEffect,
     OpName,
     AstNode,
 )
