@@ -117,6 +117,9 @@ PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 
 PyAPI_FUNC(int) _PyOptimizer_Optimize(_PyInterpreterFrame *frame, _Py_CODEUNIT *start, PyObject **stack_pointer, _PyExecutorObject **exec_ptr);
 
+PyAPI_FUNC(void)
+reconstruct_stack(int opcode, int oparg, PyObject **stack_pointer, PyObject *REG_0, PyObject *REG_1);
+
 #ifdef __cplusplus
 }
 #endif

@@ -20,6 +20,20 @@
 
 #define MAX_EXECUTORS_SIZE 256
 
+void
+reconstruct_stack(int opcode, int oparg, PyObject **stack_pointer, PyObject *REG_0, PyObject *REG_1)
+{
+    if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
+        int popped = _PyUop_num_popped(opcode, oparg);
+        if (popped >= 2) {
+            stack_pointer[-1] = REG_1;
+            stack_pointer[-2] = REG_0;
+        }
+        else if (popped == 1) {
+            stack_pointer[-1] = REG_0;
+        }
+    }
+}
 
 static bool
 has_space_for_executor(PyCodeObject *code, _Py_CODEUNIT *instr)

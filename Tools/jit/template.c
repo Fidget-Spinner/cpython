@@ -68,20 +68,6 @@ do {  \
     __attribute__((musttail))                                \
     return ((jit_func)&ALIAS)(frame, stack_pointer, tstate, REG_0, REG_1);
 
-static void __attribute__((noinline, optnone))
-reconstruct_stack(int opcode, int oparg, PyObject **stack_pointer, PyObject *REG_0, PyObject *REG_1)
-{
-    if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
-        int popped = _PyUop_num_popped(opcode, oparg);
-        if (popped >= 2) {
-            stack_pointer[-1] = REG_1;
-            stack_pointer[-2] = REG_0;
-        }
-        else if (popped == 1) {
-            stack_pointer[-1] = REG_0;
-        }
-    }
-}
 _Py_CODEUNIT *
 _JIT_ENTRY(_PyInterpreterFrame *frame, PyObject **stack_pointer, PyThreadState *tstate, PyObject *REG_0, PyObject *REG_1)
 {

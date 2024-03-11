@@ -664,6 +664,7 @@ peephole_regalloc(_PyUOpInstruction *buffer)
                         registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
                         start--;
                     }
+                    DPRINTF(2, "REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(buffer[pc].opcode), _PyUOpName(_PyUop_match_reg(buffer[pc].opcode, true, 0)));
                     buffer[pc].opcode = _PyUop_match_reg(buffer[pc].opcode, true, 0);
                 }
                 break;
