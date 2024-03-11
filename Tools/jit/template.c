@@ -69,7 +69,7 @@ do {  \
     return ((jit_func)&ALIAS)(frame, stack_pointer, tstate);
 
 _Py_CODEUNIT *
-_JIT_ENTRY(_PyInterpreterFrame *frame, PyObject **stack_pointer, PyThreadState *tstate)
+_JIT_ENTRY(_PyInterpreterFrame *frame, PyObject **stack_pointer, PyThreadState *tstate, PyObject *REG_0, PyObject *REG_1)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
@@ -108,10 +108,32 @@ error_tier_two:
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(NULL);
 deoptimize:
+    if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
+        int this_opcode = next_uop[-1].opcode;
+        int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
+        if (popped >= 2) {
+            stack_pointer[-1] = REG_1;
+            stack_pointer[-2] = REG_0;
+        }
+        else if (popped == 1) {
+            stack_pointer[-1] = REG_0;
+        }
+    }
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target);
 side_exit:
     {
+        if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
+            int this_opcode = next_uop[-1].opcode;
+            int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
+            if (popped >= 2) {
+                stack_pointer[-1] = REG_1;
+                stack_pointer[-2] = REG_0;
+            }
+            else if (popped == 1) {
+                stack_pointer[-1] = REG_0;
+            }
+        }
         _PyExitData *exit = &current_executor->exits[_target];
         Py_INCREF(exit->executor);
         tstate->previous_executor = (PyObject *)current_executor;

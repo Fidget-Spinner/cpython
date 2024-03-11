@@ -551,9 +551,6 @@ replace_and_duplicate(_PyUOpInstruction *buffer)
         if (_PyUop_Flags[opcode] & HAS_OPARG_AND_1_FLAG) {
             buffer[pc].opcode = opcode + 1 + (oparg & 1);
         }
-        else if (oparg < _PyUop_Replication[opcode]) {
-            buffer[pc].opcode = opcode + oparg + 1;
-        }
         else if (opcode == _JUMP_TO_TOP || opcode == _EXIT_TRACE) {
             break;
         }
@@ -571,16 +568,29 @@ registers_touched(int opcode, int reg)
 }
 
 static bool
-op_is_zappable(int opcode)
+op_is_safe(int opcode)
 {
     switch(opcode) {
         case _SET_IP:
         case _CHECK_VALIDITY_AND_SET_IP:
         case _CHECK_VALIDITY:
         case _NOP:
+        case _BINARY_OP_ADD_INT:
+        case _BINARY_OP_ADD_FLOAT:
+        case _BINARY_OP_ADD_UNICODE:
+        case _BINARY_OP_MULTIPLY_INT:
+        case _BINARY_OP_MULTIPLY_FLOAT:
+        case _BINARY_OP_SUBTRACT_INT:
+        case _BINARY_OP_SUBTRACT_FLOAT:
+        case _LOAD_FAST:
+        case _LOAD_FAST_CHECK:
+        case _LOAD_CONST_INLINE_WITH_NULL:
+        case _LOAD_CONST_INLINE:
+        case _LOAD_CONST_INLINE_BORROW_WITH_NULL:
+        case _LOAD_CONST_INLINE_BORROW:
             return true;
         default:
-            return false;
+            return _PyUop_Flags[opcode] & HAS_SPILLS_FLAG;
     }
 }
 
@@ -610,7 +620,7 @@ peephole_regalloc(_PyUOpInstruction *buffer)
                     net_stack_effect += net_effect;
                     registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
                     DPRINTF(3, "CONSIDERING: %s\n", _PyUOpName(inst.opcode));
-                    if (!op_is_zappable(inst.opcode) && !(_PyUop_Flags[inst.opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG))) {
+                    if (!op_is_safe(inst.opcode) && !(_PyUop_Flags[inst.opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG))) {
                         net_stack_effect = -1;
                         break;
                     }
@@ -692,8 +702,8 @@ _Py_uop_analyze_and_optimize(
 
     remove_unneeded_uops(buffer, buffer_size);
 
+    replace_and_duplicate(buffer);
     peephole_regalloc(buffer);
-    // replace_and_duplicate(buffer);
 
     OPT_STAT_INC(optimizer_successes);
     return 1;

@@ -868,6 +868,7 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
         properties = replace(uop.properties)
         properties.uses_register = True
         properties.has_register_version = False
+        properties.oparg_and_1 = False
         result = Uop(
             name=name,
             context=uop.context,
@@ -887,6 +888,7 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
     properties.uses_register = True
     properties.has_register_version = False
     properties.spills = True
+    properties.oparg_and_1 = False
     result = Uop(
         name=name,
         context=uop.context,

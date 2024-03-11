@@ -7495,7 +7495,25 @@
             break;
         }
 
-        /* _LOAD_ATTR_INSTANCE_VALUE__REG_SPILL is split on (oparg & 1) */
+        case _LOAD_ATTR_INSTANCE_VALUE__REG_SPILL: {
+            PyObject *owner;
+            PyObject *attr;
+            PyObject *null = NULL;
+            oparg = CURRENT_OPARG();
+            owner = REG_0;
+            uint16_t index = (uint16_t)CURRENT_OPERAND();
+            PyDictOrValues dorv = *_PyObject_DictOrValuesPointer(owner);
+            attr = _PyDictOrValues_GetValues(dorv)->values[index];
+            if (attr == NULL) goto deoptimize;
+            STAT_INC(LOAD_ATTR, hit);
+            Py_INCREF(attr);
+            null = NULL;
+            Py_DECREF(owner);
+            stack_pointer[-1] = attr;
+            if (oparg & 1) stack_pointer[0] = null;
+            stack_pointer += (oparg & 1);
+            break;
+        }
 
         case _CHECK_ATTR_MODULE__REG_OUT_0_REG: {
             PyObject *owner;
@@ -7676,7 +7694,25 @@
             break;
         }
 
-        /* _LOAD_ATTR_SLOT__REG_SPILL is split on (oparg & 1) */
+        case _LOAD_ATTR_SLOT__REG_SPILL: {
+            PyObject *owner;
+            PyObject *attr;
+            PyObject *null = NULL;
+            oparg = CURRENT_OPARG();
+            owner = REG_0;
+            uint16_t index = (uint16_t)CURRENT_OPERAND();
+            char *addr = (char *)owner + index;
+            attr = *(PyObject **)addr;
+            if (attr == NULL) goto deoptimize;
+            STAT_INC(LOAD_ATTR, hit);
+            Py_INCREF(attr);
+            null = NULL;
+            Py_DECREF(owner);
+            stack_pointer[-1] = attr;
+            if (oparg & 1) stack_pointer[0] = null;
+            stack_pointer += (oparg & 1);
+            break;
+        }
 
         case _CHECK_ATTR_CLASS__REG_OUT_0_REG: {
             PyObject *owner;
@@ -7757,7 +7793,23 @@
             break;
         }
 
-        /* _LOAD_ATTR_CLASS__REG_SPILL is split on (oparg & 1) */
+        case _LOAD_ATTR_CLASS__REG_SPILL: {
+            PyObject *owner;
+            PyObject *attr;
+            PyObject *null = NULL;
+            oparg = CURRENT_OPARG();
+            owner = REG_0;
+            PyObject *descr = (PyObject *)CURRENT_OPERAND();
+            STAT_INC(LOAD_ATTR, hit);
+            assert(descr != NULL);
+            attr = Py_NewRef(descr);
+            null = NULL;
+            Py_DECREF(owner);
+            stack_pointer[-1] = attr;
+            if (oparg & 1) stack_pointer[0] = null;
+            stack_pointer += (oparg & 1);
+            break;
+        }
 
         /* _LOAD_ATTR_PROPERTY__REG_SPILL is not a viable micro-op for tier 2 */
 
