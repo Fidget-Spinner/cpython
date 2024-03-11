@@ -344,33 +344,6 @@ eliminate_pop_guard(_PyUOpInstruction *this_instr, bool exit)
     }
 }
 
-static int
-count_register_inputs(_Py_UOpsContext *ctx)
-{
-    int num_inputs = 0;
-    for (int i = 0; i < UOP_REGISTERS_COUNT; i++) {
-        _Py_UopsSymbol **target =ctx->frame->stack_pointer - i - 1;
-        if (target <= ctx->frame->stack) {
-            break;
-        }
-        if ((*target)->in_register >= 0) {
-            num_inputs++;
-        }
-    }
-    return num_inputs;
-}
-
-static void
-mark_register_outputs(_PyUOpInstruction *this_instr, _Py_UopsSymbol **stack_pointer)
-{
-    int pushed = _PyUop_num_pushed(this_instr->opcode, this_instr->oparg);
-    assert(pushed >= 0);
-    int end = pushed > UOP_REGISTERS_COUNT ? UOP_REGISTERS_COUNT : pushed;
-    for (int i = 0; i < end; i++) {
-        stack_pointer[-i-1]->in_register = true;
-    }
-}
-
 /* 1 for success, 0 for not ready, cannot error at the moment. */
 static int
 optimize_uops(
@@ -378,9 +351,7 @@ optimize_uops(
     _PyUOpInstruction *trace,
     int trace_len,
     int curr_stacklen,
-    _PyBloomFilter *dependencies,
-    _PyUOpInstruction *temp_buffer,
-    int *new_buffer_length
+    _PyBloomFilter *dependencies
 )
 {
 
@@ -396,17 +367,15 @@ optimize_uops(
     }
     ctx->curr_frame_depth++;
     ctx->frame = frame;
-    _PyUOpInstruction *this_instr = trace;
-    _PyUOpInstruction *this_write = temp_buffer;
 
-    for (;
+    for (_PyUOpInstruction *this_instr = trace;
          this_instr < trace + trace_len && !op_is_end(this_instr->opcode);
          this_instr++) {
 
         int oparg = this_instr->oparg;
         uint32_t opcode = this_instr->opcode;
+
         _Py_UopsSymbol **stack_pointer = ctx->frame->stack_pointer;
-        int register_input_count = count_register_inputs(ctx);
 
         DPRINTF(3, "Abstract interpreting %s:%d ",
                 _PyUOpName(opcode),
@@ -419,55 +388,11 @@ optimize_uops(
                 Py_UNREACHABLE();
         }
         assert(ctx->frame != NULL);
-        if (register_input_count > 0 || _PyUop_num_popped(opcode, oparg) == 0) {
-            if (_PyUop_Flags[opcode] & HAS_REGISTER_VERSION_FLAG) {
-                DPRINTF(2, "\nOG_OP: %s, REG_OP: %s\n", _PyUOpName(opcode), _PyUOpName(_PyUop_ToRegisterVer[opcode]));
-                this_instr->opcode = _PyUop_ToRegisterVer[opcode];
-                // Set all the stack outputs to registers
-                mark_register_outputs(this_instr, stack_pointer);
-            }
-            // Has register input but no register variant --
-            // spill all previous instructions.
-            else if (register_input_count > 0) {
-                int reg_spill_op = _REG_SPILL_0 + (register_input_count - 1);
-                _PyUOpInstruction spill = {reg_spill_op, 0, 0, 0};
-                *this_write = spill;
-                this_write++;
-                if (this_write > temp_buffer + UOP_MAX_TRACE_LENGTH) {
-                    goto out_of_space;
-                }
-                for (int i = 0; i < register_input_count; i++) {
-                    stack_pointer[-1-i]->in_register = false;
-                }
-            }
-        }
-        *this_write = *this_instr;
-        this_write++;
-        if (this_write > temp_buffer + UOP_MAX_TRACE_LENGTH) {
-            goto out_of_space;
-        }
         DPRINTF(3, " stack_level %d\n", STACK_LEVEL());
         ctx->frame->stack_pointer = stack_pointer;
         assert(STACK_LEVEL() >= 0);
     }
 
-    assert(op_is_end(this_instr->opcode));
-    int to_spill = count_register_inputs(ctx);
-    if (to_spill > 0) {
-        int reg_spill_op = _REG_SPILL_0 + (to_spill - 1);
-        _PyUOpInstruction spill = {reg_spill_op, 0, 0, 0};
-        *this_write = spill;
-        this_write++;
-        if (this_write > temp_buffer + UOP_MAX_TRACE_LENGTH) {
-            goto out_of_space;
-        }
-    }
-    *this_write = *this_instr;
-    this_write++;
-    if (this_write > temp_buffer + UOP_MAX_TRACE_LENGTH) {
-        goto out_of_space;
-    }
-    *new_buffer_length = (int)(this_write - temp_buffer);
     _Py_uop_abstractcontext_fini(ctx);
     return 1;
 
@@ -665,8 +590,7 @@ _Py_uop_analyze_and_optimize(
     int new_buffer_len;
     err = optimize_uops(
         (PyCodeObject *)frame->f_executable, buffer,
-        buffer_size, curr_stacklen, dependencies, temp_buffer,
-        &new_buffer_len);
+        buffer_size, curr_stacklen, dependencies);
 
     if (err == 0) {
         goto not_ready;
