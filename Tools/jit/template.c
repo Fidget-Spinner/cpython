@@ -68,6 +68,20 @@ do {  \
     __attribute__((musttail))                                \
     return ((jit_func)&ALIAS)(frame, stack_pointer, tstate, REG_0, REG_1);
 
+static void __attribute__((noinline, optnone))
+reconstruct_stack(int opcode, int oparg, PyObject **stack_pointer, PyObject *REG_0, PyObject *REG_1)
+{
+    if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
+        int popped = _PyUop_num_popped(opcode, oparg);
+        if (popped >= 2) {
+            stack_pointer[-1] = REG_1;
+            stack_pointer[-2] = REG_0;
+        }
+        else if (popped == 1) {
+            stack_pointer[-1] = REG_0;
+        }
+    }
+}
 _Py_CODEUNIT *
 _JIT_ENTRY(_PyInterpreterFrame *frame, PyObject **stack_pointer, PyThreadState *tstate, PyObject *REG_0, PyObject *REG_1)
 {
@@ -108,30 +122,12 @@ error_tier_two:
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(NULL);
 deoptimize:
-    if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
-        int popped = _PyUop_num_popped(opcode, oparg);
-        if (popped >= 2) {
-            stack_pointer[-1] = REG_1;
-            stack_pointer[-2] = REG_0;
-        }
-        else if (popped == 1) {
-            stack_pointer[-1] = REG_0;
-        }
-    }
+    reconstruct_stack(opcode, oparg, stack_pointer, REG_0, REG_1);
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target);
 side_exit:
     {
-        if (_PyUop_Flags[opcode] & HAS_USES_REGISTER_FLAG) {
-            int popped = _PyUop_num_popped(opcode, oparg);
-            if (popped >= 2) {
-                stack_pointer[-1] = REG_1;
-                stack_pointer[-2] = REG_0;
-            }
-            else if (popped == 1) {
-                stack_pointer[-1] = REG_0;
-            }
-        }
+        reconstruct_stack(opcode, oparg, stack_pointer, REG_0, REG_1);
         _PyExitData *exit = &current_executor->exits[_target];
         Py_INCREF(exit->executor);
         tstate->previous_executor = (PyObject *)current_executor;
