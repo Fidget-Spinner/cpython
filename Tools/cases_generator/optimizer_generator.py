@@ -178,7 +178,7 @@ def generate_abstract_interpreter(
             continue
         if uop.is_super():
             continue
-        if uop.properties.register:
+        if uop.properties.uses_register:
             continue
         if not uop.is_viable():
             out.emit(f"/* {uop.name} is not a viable micro-op for tier 2 */\n\n")

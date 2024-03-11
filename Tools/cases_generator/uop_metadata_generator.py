@@ -8,6 +8,7 @@ import argparse
 from analyzer import (
     Analysis,
     analyze_files,
+    REGISTERS,
 )
 from generators_common import (
     DEFAULT_INPUT,
@@ -17,6 +18,7 @@ from generators_common import (
 )
 from cwriter import CWriter
 from typing import TextIO
+from stack import get_uop_stack_effect
 
 
 DEFAULT_OUTPUT = ROOT / "Include/internal/pycore_uop_metadata.h"
@@ -46,6 +48,36 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     out.emit("};\n")
     out.emit("#endif // NEED_OPCODE_METADATA\n\n")
 
+def emit_stack_effect_function(
+        out: CWriter, direction: str, data: list[tuple[str, str]]
+) -> None:
+    out.emit(f"extern int _PyUop_num_{direction}(int opcode, int oparg);\n")
+    out.emit("#ifdef NEED_OPCODE_METADATA\n")
+    out.emit(f"int _PyUop_num_{direction}(int opcode, int oparg)  {{\n")
+    out.emit("switch(opcode) {\n")
+    for name, effect in data:
+        out.emit(f"case {name}:\n")
+        out.emit(f"    return {effect};\n")
+    out.emit("default:\n")
+    out.emit("    return -1;\n")
+    out.emit("}\n")
+    out.emit("}\n\n")
+    out.emit("#endif\n\n")
+
+
+def generate_stack_effect_functions(analysis: Analysis, out: CWriter) -> None:
+    popped_data: list[tuple[str, str]] = []
+    pushed_data: list[tuple[str, str]] = []
+    for uop in analysis.uops.values():
+        if not(uop.is_viable() and uop.properties.tier != 1):
+            continue
+        stack = get_uop_stack_effect(uop)
+        popped = (-stack.base_offset).to_c()
+        pushed = (stack.top_offset - stack.base_offset).to_c()
+        popped_data.append((uop.name, popped))
+        pushed_data.append((uop.name, pushed))
+    emit_stack_effect_function(out, "popped", sorted(popped_data))
+    emit_stack_effect_function(out, "pushed", sorted(pushed_data))
 
 def generate_uop_metadata(
     filenames: list[str], analysis: Analysis, outfile: TextIO
@@ -55,7 +87,9 @@ def generate_uop_metadata(
     with out.header_guard("Py_CORE_UOP_METADATA_H"):
         out.emit("#include <stdint.h>\n")
         out.emit('#include "pycore_uop_ids.h"\n')
+        out.emit(f"#define UOP_REGISTERS_COUNT {len(REGISTERS)}\n\n")
         generate_names_and_flags(analysis, out)
+        generate_stack_effect_functions(analysis, out)
 
 
 arg_parser = argparse.ArgumentParser(

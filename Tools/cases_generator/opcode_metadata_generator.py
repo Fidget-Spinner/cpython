@@ -52,8 +52,9 @@ FLAGS = [
     "ESCAPES",
     "EXIT",
     "PURE",
-    "PASSTHROUGH",
     "OPARG_AND_1",
+    "USES_REGISTER",
+    "REGISTER_VERSION",
 ]
 
 

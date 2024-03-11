@@ -234,3 +234,11 @@ def get_stack_effect(inst: Instruction) -> Stack:
         for i, var in enumerate(uop.stack.outputs):
             stack.push(var)
     return stack
+
+def get_uop_stack_effect(uop: Uop) -> Stack:
+    stack = Stack()
+    for var in reversed(uop.stack.inputs):
+        stack.pop(var)
+    for i, var in enumerate(uop.stack.outputs):
+        stack.push(var)
+    return stack

@@ -33,7 +33,8 @@ class Properties:
     tier: int | None = None
     oparg_and_1: bool = False
     const_oparg: int = -1
-    register: bool = False
+    uses_register: bool = False
+    has_register_version: bool = False
 
     def dump(self, indent: str) -> None:
         print(indent, end="")
@@ -834,7 +835,8 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
     stack = StackEffect(new_input_effect, new_output_effect)
     name = f"{uop.name}__REG"
     properties = replace(uop.properties)
-    properties.register = True
+    properties.uses_register = True
+    uop.properties.has_register_version = True
     result = Uop(
         name=name,
         context=uop.context,
