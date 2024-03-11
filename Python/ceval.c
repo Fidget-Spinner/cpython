@@ -1009,7 +1009,7 @@ enter_tier_two:
 
     OPT_STAT_INC(traces_executed);
     uint16_t uopcode;
-    PyObject *REG_0 = NULL, *REG_1 = NULL, *REG_2 = NULL;
+    PyObject *REG_0 = NULL, *REG_1 = NULL;
 #ifdef Py_STATS
     uint64_t trace_uop_execution_counter = 0;
 #endif
@@ -1090,12 +1090,7 @@ deoptimize:
     if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
         int this_opcode = next_uop[-1].opcode;
         int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
-        if (popped >= 3) {
-            stack_pointer[-1] = REG_2;
-            stack_pointer[-2] = REG_1;
-            stack_pointer[-3] = REG_0;
-        }
-        else if (popped == 2) {
+        if (popped >= 2) {
             stack_pointer[-1] = REG_1;
             stack_pointer[-2] = REG_0;
         }
@@ -1125,12 +1120,7 @@ side_exit:
     if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
         int this_opcode = next_uop[-1].opcode;
         int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
-        if (popped >= 3) {
-            stack_pointer[-1] = REG_2;
-            stack_pointer[-2] = REG_1;
-            stack_pointer[-3] = REG_0;
-        }
-        else if (popped == 2) {
+        if (popped >= 2) {
             stack_pointer[-1] = REG_1;
             stack_pointer[-2] = REG_0;
         }

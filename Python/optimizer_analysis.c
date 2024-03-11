@@ -561,6 +561,100 @@ replace_and_duplicate(_PyUOpInstruction *buffer)
     }
 }
 
+static int
+registers_touched(int opcode, int reg)
+{
+    if (_PyUop_Flags[opcode] & (HAS_USES_REGISTER_FLAG | HAS_REGISTER_VERSION_FLAG)) {
+        return reg > UOP_REGISTERS_COUNT ? UOP_REGISTERS_COUNT : reg;
+    }
+    return 0;
+}
+
+static bool
+op_is_zappable(int opcode)
+{
+    switch(opcode) {
+        case _SET_IP:
+        case _CHECK_VALIDITY_AND_SET_IP:
+        case _CHECK_VALIDITY:
+        case _NOP:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static void
+peephole_regalloc(_PyUOpInstruction *buffer)
+{
+
+    for (int pc = 0; pc < UOP_MAX_TRACE_LENGTH; pc++) {
+        int opcode = buffer[pc].opcode;
+        switch(opcode) {
+            case _BINARY_OP_ADD_INT:
+            case _BINARY_OP_ADD_FLOAT:
+            case _BINARY_OP_ADD_UNICODE:
+            case _BINARY_OP_MULTIPLY_INT:
+            case _BINARY_OP_MULTIPLY_FLOAT:
+            case _BINARY_OP_SUBTRACT_INT:
+            case _BINARY_OP_SUBTRACT_FLOAT:
+            {
+                int end = pc - 1;
+                int net_stack_effect = -_PyUop_num_popped(opcode, buffer[pc].oparg);
+                int registers_used = net_stack_effect;
+                while (net_stack_effect < 0 && end >= 1) {
+                    _PyUOpInstruction inst = buffer[end];
+                    int pushed = _PyUop_num_pushed(inst.opcode, inst.oparg);
+                    int popped =  _PyUop_num_popped(inst.opcode, inst.oparg);
+                    int net_effect = pushed - popped;
+                    net_stack_effect += net_effect;
+                    registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
+                    DPRINTF(3, "CONSIDERING: %s\n", _PyUOpName(inst.opcode));
+                    if (!op_is_zappable(inst.opcode) && !(_PyUop_Flags[inst.opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG))) {
+                        net_stack_effect = -1;
+                        break;
+                    }
+                    int prev_pushed = _PyUop_num_pushed(buffer[end-1].opcode, buffer[end-1].oparg);
+                    if (prev_pushed + net_stack_effect == 0) {
+                        net_stack_effect = 0;
+                        registers_used += registers_touched(buffer[end-1].opcode, prev_pushed);
+                        end -= 2;
+                        break;
+                    }
+                    end--;
+                }
+                // Found a good path. Time to regalloc the whole run!
+                if (net_stack_effect == 0 && registers_used == 0) {
+                    int start = pc - 1;
+                    registers_used = -_PyUop_num_popped(opcode, buffer[pc].oparg);
+                    while (start > end) {
+                        _PyUOpInstruction inst = buffer[start];
+                        // Replace spills with non-spilled version too!
+                        if (_PyUop_Flags[inst.opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG)) {
+                            int reg_to_start_with = (_PyUop_Flags[inst.opcode] & HAS_PASSTHROUGH_FLAG) ? 0 : (-registers_used) - 1;
+                            int match = _PyUop_match_reg((_PyUop_Flags[inst.opcode] & HAS_SPILLS_FLAG) ? _PyUop_match_reg_to_uop(inst.opcode) : inst.opcode, false, reg_to_start_with);
+                            DPRINTF(2, "REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(buffer[start].opcode), _PyUOpName(match));
+                            buffer[start].opcode = match;
+                        }
+                        int pushed = _PyUop_num_pushed(inst.opcode, inst.oparg);
+                        int popped =  _PyUop_num_popped(inst.opcode, inst.oparg);
+                        registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
+                        start--;
+                    }
+                    buffer[pc].opcode = _PyUop_match_reg(buffer[pc].opcode, true, 0);
+                }
+                break;
+            }
+            case _JUMP_TO_TOP:
+            case _EXIT_TRACE:
+                return;
+            default:
+                break;
+        }
+    }
+    Py_UNREACHABLE();
+}
+
 
 //  0 - failure, no error raised, just fall back to Tier 1
 // -1 - failure, and raise error
@@ -586,8 +680,6 @@ _Py_uop_analyze_and_optimize(
 
     peephole_opt(frame, buffer, buffer_size);
 
-    _PyUOpInstruction temp_buffer[UOP_MAX_TRACE_LENGTH];
-    int new_buffer_len;
     err = optimize_uops(
         (PyCodeObject *)frame->f_executable, buffer,
         buffer_size, curr_stacklen, dependencies);
@@ -597,10 +689,10 @@ _Py_uop_analyze_and_optimize(
     }
     assert(err == 1);
 
-    memcpy(buffer, temp_buffer, new_buffer_len * sizeof(_PyUOpInstruction));
 
-    remove_unneeded_uops(buffer, new_buffer_len);
+    remove_unneeded_uops(buffer, buffer_size);
 
+    peephole_regalloc(buffer);
     // replace_and_duplicate(buffer);
 
     OPT_STAT_INC(optimizer_successes);

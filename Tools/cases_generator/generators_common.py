@@ -217,12 +217,16 @@ def cflags(p: Properties) -> str:
         flags.append("HAS_ESCAPES_FLAG")
     if p.pure:
         flags.append("HAS_PURE_FLAG")
+    if p.passthrough:
+        flags.append("HAS_PASSTHROUGH_FLAG")
     if p.oparg_and_1:
         flags.append("HAS_OPARG_AND_1_FLAG")
     if p.uses_register:
         flags.append("HAS_USES_REGISTER_FLAG")
     if p.has_register_version:
         flags.append("HAS_REGISTER_VERSION_FLAG")
+    if p.spills:
+        flags.append("HAS_SPILLS_FLAG")
     if flags:
         return " | ".join(flags)
     else:

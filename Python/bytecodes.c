@@ -4161,20 +4161,6 @@ dummy_func(
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 
-        tier2 op(_REG_SPILL_0, (unused -- reg0)) {
-            reg0 = REG_0;
-        }
-
-        tier2 op(_REG_SPILL_0_1, (unused, unused -- reg0, reg1)) {
-            reg0 = REG_0;
-            reg1 = REG_1;
-        }
-
-        tier2 op(_REG_SPILL_0_1_2, (unused, unused, unused -- reg0, reg1, reg2)) {
-            reg0 = REG_0;
-            reg1 = REG_1;
-            reg2 = REG_2;
-        }
 
 // END BYTECODES //
 

@@ -7,7 +7,7 @@ import re
 from typing import Optional
 
 
-REGISTERS = list(map(str, range(3)))
+REGISTERS = list(map(str, range(2)))
 
 @dataclass
 class Properties:
@@ -35,6 +35,7 @@ class Properties:
     const_oparg: int = -1
     uses_register: bool = False
     has_register_version: bool = False
+    spills: bool = False
 
     def dump(self, indent: str) -> None:
         print(indent, end="")
@@ -804,15 +805,9 @@ def assign_opcodes(
     return instmap, len(no_arg), min_instrumented
 
 
-def generate_all_register_effect_permutations(effects: list[EffectItem]) -> list[EffectItem]:
-    res = []
-    # Either choose to put the effect in a register
-    # Or don't choose to put the effect in a register
-
-
 def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
     new_input_effect: list[EffectItem]
-    new_output_effect: list[EffectItem]
+    new_output_effects: list[list[EffectItem]] = []
 
     if not uop.stack.inputs and not uop.stack.outputs:
         return
@@ -829,37 +824,61 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
 
     # Simply put the top few stack items in registers
     if not uop.properties.has_complex_output:
-        new_output_effect = []
-        for inp in uop.stack.outputs[:-len(REGISTERS)]:
-            new_output_effect.append(inp)
-        for reg, inp in zip(REGISTERS, uop.stack.outputs[-len(REGISTERS):]):
-            new_output_effect.append(RegisterItem.from_stackitem(reg, inp))
+        # Note: if we push fewer than the number of registers in existence, generate
+        # all stack effect permutations that can fit in that number!
+        if len(REGISTERS) <= len(uop.stack.outputs):
+            new_output_effect = []
+            for inp in uop.stack.outputs[:-len(REGISTERS)]:
+                new_output_effect.append(inp)
+            for reg, inp in zip(REGISTERS, uop.stack.outputs[-len(REGISTERS):]):
+                new_output_effect.append(RegisterItem.from_stackitem(reg, inp))
+            new_output_effects.append(new_output_effect)
+        elif uop.stack.outputs:
+            # Registers consumed must always be contiguous, eg. reg0, reg1 / reg2, reg3 /...
+            for i in range(len(REGISTERS)):
+                if len(REGISTERS[i:]) < len(uop.stack.outputs):
+                    break
+                for reg in REGISTERS[i:]:
+                    new_output_effect = []
+                    for out in uop.stack.outputs:
+                        new_output_effect.append(RegisterItem.from_stackitem(reg, out))
+                    new_output_effects.append(new_output_effect)
+        else:
+            new_output_effects.append([])
     else:
-        new_output_effect = list(uop.stack.outputs)
+        new_output_effects.append(list(uop.stack.outputs))
 
     assert len(new_input_effect) == len(uop.stack.inputs)
-    assert len(new_output_effect) == len(uop.stack.outputs)
+    assert all(len(out) == len(uop.stack.outputs) for out in new_output_effects)
 
     uop.properties.has_register_version = True
 
     register_versions = []
-    # First variant: use regs for inputs, use reg for outputs.
-    stack = StackEffect(new_input_effect, new_output_effect)
-    name = f"{uop.name}__REG"
-    properties = replace(uop.properties)
-    properties.uses_register = True
-    properties.has_register_version = False
-    result = Uop(
-        name=name,
-        context=uop.context,
-        annotations=uop.annotations,
-        stack=stack,
-        caches=uop.caches,
-        body=uop.body,
-        properties=properties,
-    )
-    uops[name] = result
-    register_versions.append(result)
+    seen = set()
+    for new_input_eff, new_out_eff in itertools.product([new_input_effect], new_output_effects):
+        # First variant: use regs for inputs, use reg for outputs.
+        stack = StackEffect(new_input_eff, new_out_eff)
+        out_name = '_'.join([out.register for out in new_out_eff if isinstance(out, RegisterItem)])
+        if not out_name:
+            continue
+        name = f"{uop.name}__REG_OUT_{out_name}_REG"
+        if name in seen:
+            continue
+        seen.add(name)
+        properties = replace(uop.properties)
+        properties.uses_register = True
+        properties.has_register_version = False
+        result = Uop(
+            name=name,
+            context=uop.context,
+            annotations=uop.annotations,
+            stack=stack,
+            caches=uop.caches,
+            body=uop.body,
+            properties=properties,
+        )
+        uops[name] = result
+        register_versions.append(result)
 
     # Second variant: use regs for inputs, no reg for output (spill).
     stack = StackEffect(new_input_effect, uop.stack.outputs)
@@ -867,6 +886,7 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
     properties = replace(uop.properties)
     properties.uses_register = True
     properties.has_register_version = False
+    properties.spills = True
     result = Uop(
         name=name,
         context=uop.context,

@@ -2010,39 +2010,3 @@
             break;
         }
 
-        case _REG_SPILL_0: {
-            _Py_UopsSymbol *reg0;
-            reg0 = sym_new_unknown(ctx);
-            if (reg0 == NULL) goto out_of_space;
-            stack_pointer[-1] = reg0;
-            break;
-        }
-
-        case _REG_SPILL_0_1: {
-            _Py_UopsSymbol *reg0;
-            _Py_UopsSymbol *reg1;
-            reg0 = sym_new_unknown(ctx);
-            if (reg0 == NULL) goto out_of_space;
-            reg1 = sym_new_unknown(ctx);
-            if (reg1 == NULL) goto out_of_space;
-            stack_pointer[-2] = reg0;
-            stack_pointer[-1] = reg1;
-            break;
-        }
-
-        case _REG_SPILL_0_1_2: {
-            _Py_UopsSymbol *reg0;
-            _Py_UopsSymbol *reg1;
-            _Py_UopsSymbol *reg2;
-            reg0 = sym_new_unknown(ctx);
-            if (reg0 == NULL) goto out_of_space;
-            reg1 = sym_new_unknown(ctx);
-            if (reg1 == NULL) goto out_of_space;
-            reg2 = sym_new_unknown(ctx);
-            if (reg2 == NULL) goto out_of_space;
-            stack_pointer[-3] = reg0;
-            stack_pointer[-2] = reg1;
-            stack_pointer[-1] = reg2;
-            break;
-        }
-
