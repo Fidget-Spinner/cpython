@@ -79,6 +79,19 @@ def generate_stack_effect_functions(analysis: Analysis, out: CWriter) -> None:
     emit_stack_effect_function(out, "popped", sorted(popped_data))
     emit_stack_effect_function(out, "pushed", sorted(pushed_data))
 
+def generate_uop_to_reg_mapping(
+    analysis: Analysis, out: CWriter
+) -> None:
+    out.emit("extern const uint16_t _PyUop_ToRegisterVer[MAX_UOP_ID+1];\n")
+    out.emit("#ifdef NEED_OPCODE_METADATA\n")
+    out.emit("const uint16_t _PyUop_ToRegisterVer[MAX_UOP_ID+1] = {\n")
+    for uop in analysis.uops.values():
+        if uop.is_viable() and uop.properties.tier != 1 and uop.properties.has_register_version:
+            out.emit(f"[{uop.name}] = {uop.register_version.name},\n")
+
+    out.emit("};\n\n")
+    out.emit("#endif // NEED_OPCODE_METADATA\n\n")
+
 def generate_uop_metadata(
     filenames: list[str], analysis: Analysis, outfile: TextIO
 ) -> None:
@@ -90,6 +103,7 @@ def generate_uop_metadata(
         out.emit(f"#define UOP_REGISTERS_COUNT {len(REGISTERS)}\n\n")
         generate_names_and_flags(analysis, out)
         generate_stack_effect_functions(analysis, out)
+        generate_uop_to_reg_mapping(analysis, out)
 
 
 arg_parser = argparse.ArgumentParser(

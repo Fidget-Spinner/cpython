@@ -27,6 +27,7 @@
 #include "pycore_tuple.h"         // _PyTuple_ITEMS()
 #include "pycore_typeobject.h"    // _PySuper_Lookup()
 #include "pycore_uop_ids.h"       // Uops
+#include "pycore_uop_metadata.h"
 #include "pycore_pyerrors.h"
 
 #include "pycore_dict.h"
@@ -1086,6 +1087,22 @@ error_tier_two:
 
 // Jump here from DEOPT_IF()
 deoptimize:
+    if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
+        int this_opcode = next_uop[-1].opcode;
+        int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
+        if (popped >= 3) {
+            stack_pointer[-1] = REG_2;
+            stack_pointer[-2] = REG_1;
+            stack_pointer[-3] = REG_0;
+        }
+        else if (popped == 2) {
+            stack_pointer[-1] = REG_1;
+            stack_pointer[-2] = REG_0;
+        }
+        else if (popped == 1) {
+            stack_pointer[-1] = REG_0;
+        }
+    }
     next_instr = next_uop[-1].target + _PyCode_CODE(_PyFrame_GetCode(frame));
 #ifdef Py_DEBUG
     if (lltrace >= 2) {
@@ -1105,6 +1122,22 @@ deoptimize:
 side_exit:
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
     UOP_STAT_INC(uopcode, miss);
+    if (_PyUop_Flags[next_uop[-1].opcode] & HAS_USES_REGISTER_FLAG) {
+        int this_opcode = next_uop[-1].opcode;
+        int popped = _PyUop_num_popped(this_opcode, next_uop[-1].oparg);
+        if (popped >= 3) {
+            stack_pointer[-1] = REG_2;
+            stack_pointer[-2] = REG_1;
+            stack_pointer[-3] = REG_0;
+        }
+        else if (popped == 2) {
+            stack_pointer[-1] = REG_1;
+            stack_pointer[-2] = REG_0;
+        }
+        else if (popped == 1) {
+            stack_pointer[-1] = REG_0;
+        }
+    }
     uint32_t exit_index = next_uop[-1].exit_index;
     assert(exit_index < current_executor->exit_count);
     _PyExitData *exit = &current_executor->exits[exit_index];

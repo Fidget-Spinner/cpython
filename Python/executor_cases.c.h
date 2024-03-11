@@ -3902,6 +3902,36 @@
             break;
         }
 
+        case _REG_SPILL_0: {
+            PyObject *reg0;
+            reg0 = REG_0;
+            stack_pointer[-1] = reg0;
+            break;
+        }
+
+        case _REG_SPILL_0_1: {
+            PyObject *reg0;
+            PyObject *reg1;
+            reg0 = REG_0;
+            reg1 = REG_1;
+            stack_pointer[-2] = reg0;
+            stack_pointer[-1] = reg1;
+            break;
+        }
+
+        case _REG_SPILL_0_1_2: {
+            PyObject *reg0;
+            PyObject *reg1;
+            PyObject *reg2;
+            reg0 = REG_0;
+            reg1 = REG_1;
+            reg2 = REG_2;
+            stack_pointer[-3] = reg0;
+            stack_pointer[-2] = reg1;
+            stack_pointer[-1] = reg2;
+            break;
+        }
+
         case _LOAD_FAST_CHECK__REG: {
             PyObject *value;
             oparg = CURRENT_OPARG();
@@ -7510,6 +7540,36 @@
             _PyCounterOptimizerObject *exe = (_PyCounterOptimizerObject *)opt;
             exe->count++;
             stack_pointer += -1;
+            break;
+        }
+
+        case _REG_SPILL_0__REG: {
+            PyObject *reg0;
+            reg0 = REG_0;
+            REG_0 = reg0;
+            break;
+        }
+
+        case _REG_SPILL_0_1__REG: {
+            PyObject *reg0;
+            PyObject *reg1;
+            reg0 = REG_0;
+            reg1 = REG_1;
+            REG_0 = reg0;
+            REG_1 = reg1;
+            break;
+        }
+
+        case _REG_SPILL_0_1_2__REG: {
+            PyObject *reg0;
+            PyObject *reg1;
+            PyObject *reg2;
+            reg0 = REG_0;
+            reg1 = REG_1;
+            reg2 = REG_2;
+            REG_0 = reg0;
+            REG_1 = reg1;
+            REG_2 = reg2;
             break;
         }
 

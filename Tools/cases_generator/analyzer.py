@@ -174,6 +174,7 @@ class Uop:
     implicitly_created: bool = False
     replicated = 0
     replicates : "Uop | None" = None
+    register_version: "Uop | None" = None
 
     def dump(self, indent: str) -> None:
         print(
@@ -803,6 +804,12 @@ def assign_opcodes(
     return instmap, len(no_arg), min_instrumented
 
 
+def generate_all_register_effect_permutations(effects: list[EffectItem]) -> list[EffectItem]:
+    res = []
+    # Either choose to put the effect in a register
+    # Or don't choose to put the effect in a register
+
+
 def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
     new_input_effect: list[EffectItem]
     new_output_effect: list[EffectItem]
@@ -832,11 +839,15 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
 
     assert len(new_input_effect) == len(uop.stack.inputs)
     assert len(new_output_effect) == len(uop.stack.outputs)
+
+    uop.properties.has_register_version = True
+
+    # First variant: use regs for inputs, use reg for outputs.
     stack = StackEffect(new_input_effect, new_output_effect)
     name = f"{uop.name}__REG"
     properties = replace(uop.properties)
     properties.uses_register = True
-    uop.properties.has_register_version = True
+    properties.has_register_version = False
     result = Uop(
         name=name,
         context=uop.context,
@@ -847,6 +858,7 @@ def generate_uop_register_variants(uop: Uop, uops: dict[str, Uop]) -> None:
         properties=properties,
     )
     uops[name] = result
+    uop.register_version = result
 
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}

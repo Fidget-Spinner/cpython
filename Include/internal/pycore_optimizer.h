@@ -31,6 +31,7 @@ extern PyTypeObject _PyUOpOptimizer_Type;
 
 struct _Py_UopsSymbol {
     int flags;  // 0 bits: Top; 2 or more bits: Bottom
+    int in_register; // Which register they are in.
     PyTypeObject *typ;  // Borrowed reference
     PyObject *const_val;  // Owned reference (!)
 };
@@ -46,6 +47,7 @@ struct _Py_UopsSymbol {
 typedef struct _Py_UopsSymbol _Py_UopsSymbol;
 
 struct _Py_UOpsAbstractFrame {
+    PyObject_HEAD;
     // Max stacklen
     int stack_len;
     int locals_len;

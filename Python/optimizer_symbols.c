@@ -31,6 +31,7 @@
 // Flags for below.
 #define IS_NULL    1 << 0
 #define NOT_NULL   1 << 1
+#define DONT_CLEAR 1 << 2
 
 #ifdef Py_DEBUG
 static inline int get_lltrace(void) {
@@ -60,6 +61,7 @@ sym_new(_Py_UOpsContext *ctx)
     self->flags = 0;
     self->typ = NULL;
     self->const_val = NULL;
+    self->in_register = false;
 
     return self;
 }
@@ -339,6 +341,9 @@ _Py_uop_abstractcontext_fini(_Py_UOpsContext *ctx)
     ctx->curr_frame_depth = 0;
     int tys = ctx->t_arena.ty_curr_number;
     for (int i = 0; i < tys; i++) {
+        if (ctx->t_arena.arena[i].flags & DONT_CLEAR) {
+            continue;
+        }
         Py_CLEAR(ctx->t_arena.arena[i].const_val);
     }
 }

@@ -1581,7 +1581,7 @@
             _Py_UopsSymbol **args;
             _Py_UopsSymbol *self_or_null;
             _Py_UopsSymbol *callable;
-            _Py_UOpsAbstractFrame *new_frame;
+            _Py_UopsSymbol *new_frame;
             args = &stack_pointer[-oparg];
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
@@ -1608,21 +1608,25 @@
                 localsplus_start = args;
                 n_locals_already_filled = argcount;
             }
-            OUT_OF_SPACE_IF_NULL(new_frame =
+            _Py_UOpsAbstractFrame *temp;
+            OUT_OF_SPACE_IF_NULL(temp =
                              frame_new(ctx, co, localsplus_start, n_locals_already_filled, 0));
-            stack_pointer[-2 - oparg] = (_Py_UopsSymbol *)new_frame;
+            OUT_OF_SPACE_IF_NULL(new_frame = sym_new_const(ctx, temp));
+            new_frame->flags |= (1 << 2);
+            stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;
             break;
         }
 
         case _PUSH_FRAME: {
-            _Py_UOpsAbstractFrame *new_frame;
-            new_frame = (_Py_UOpsAbstractFrame *)stack_pointer[-1];
+            _Py_UopsSymbol *new_frame;
+            new_frame = stack_pointer[-1];
             stack_pointer += -1;
             ctx->frame->stack_pointer = stack_pointer;
-            ctx->frame = new_frame;
+            assert(sym_is_const(new_frame));
+            ctx->frame = sym_get_const(new_frame);
             ctx->curr_frame_depth++;
-            stack_pointer = new_frame->stack_pointer;
+            stack_pointer = ctx->frame->stack_pointer;
             break;
         }
 
@@ -2003,6 +2007,42 @@
         }
 
         case _CHECK_VALIDITY_AND_SET_IP: {
+            break;
+        }
+
+        case _REG_SPILL_0: {
+            _Py_UopsSymbol *reg0;
+            reg0 = sym_new_unknown(ctx);
+            if (reg0 == NULL) goto out_of_space;
+            stack_pointer[-1] = reg0;
+            break;
+        }
+
+        case _REG_SPILL_0_1: {
+            _Py_UopsSymbol *reg0;
+            _Py_UopsSymbol *reg1;
+            reg0 = sym_new_unknown(ctx);
+            if (reg0 == NULL) goto out_of_space;
+            reg1 = sym_new_unknown(ctx);
+            if (reg1 == NULL) goto out_of_space;
+            stack_pointer[-2] = reg0;
+            stack_pointer[-1] = reg1;
+            break;
+        }
+
+        case _REG_SPILL_0_1_2: {
+            _Py_UopsSymbol *reg0;
+            _Py_UopsSymbol *reg1;
+            _Py_UopsSymbol *reg2;
+            reg0 = sym_new_unknown(ctx);
+            if (reg0 == NULL) goto out_of_space;
+            reg1 = sym_new_unknown(ctx);
+            if (reg1 == NULL) goto out_of_space;
+            reg2 = sym_new_unknown(ctx);
+            if (reg2 == NULL) goto out_of_space;
+            stack_pointer[-3] = reg0;
+            stack_pointer[-2] = reg1;
+            stack_pointer[-1] = reg2;
             break;
         }
 

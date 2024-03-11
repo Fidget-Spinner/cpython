@@ -531,7 +531,7 @@ dummy_func(void) {
         }
     }
 
-    op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null, args[oparg] -- new_frame: _Py_UOpsAbstractFrame *)) {
+    op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null, args[oparg] -- new_frame)) {
         int argcount = oparg;
 
         (void)callable;
@@ -559,8 +559,11 @@ dummy_func(void) {
             localsplus_start = args;
             n_locals_already_filled = argcount;
         }
-        OUT_OF_SPACE_IF_NULL(new_frame =
+        _Py_UOpsAbstractFrame *temp;
+        OUT_OF_SPACE_IF_NULL(temp =
                              frame_new(ctx, co, localsplus_start, n_locals_already_filled, 0));
+        OUT_OF_SPACE_IF_NULL(new_frame = sym_new_const(ctx, temp));
+        new_frame->flags |= (1 << 2);
     }
 
     op(_POP_FRAME, (retval -- res)) {
@@ -571,12 +574,13 @@ dummy_func(void) {
         res = retval;
     }
 
-    op(_PUSH_FRAME, (new_frame: _Py_UOpsAbstractFrame * -- unused if (0))) {
+    op(_PUSH_FRAME, (new_frame -- unused if (0))) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
-        ctx->frame = new_frame;
+        assert(sym_is_const(new_frame));
+        ctx->frame = sym_get_const(new_frame);
         ctx->curr_frame_depth++;
-        stack_pointer = new_frame->stack_pointer;
+        stack_pointer = ctx->frame->stack_pointer;
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg])) {
