@@ -571,39 +571,44 @@ registers_touched(int opcode, int reg)
 }
 
 static bool
-op_is_safe(int opcode)
+op_is_load(int opcode)
 {
     switch(opcode) {
-        case _SET_IP:
-        case _CHECK_VALIDITY_AND_SET_IP:
-        case _CHECK_VALIDITY:
-        case _NOP:
-        case _BINARY_OP_ADD_INT:
-        case _BINARY_OP_ADD_FLOAT:
-        case _BINARY_OP_ADD_UNICODE:
-        case _BINARY_OP_MULTIPLY_INT:
-        case _BINARY_OP_MULTIPLY_FLOAT:
-        case _BINARY_OP_SUBTRACT_INT:
-        case _BINARY_OP_SUBTRACT_FLOAT:
         case _LOAD_FAST:
         case _LOAD_FAST_CHECK:
-        case _LOAD_CONST_INLINE_WITH_NULL:
         case _LOAD_CONST_INLINE:
-        case _LOAD_CONST_INLINE_BORROW_WITH_NULL:
         case _LOAD_CONST_INLINE_BORROW:
-        case _GUARD_BOTH_INT:
-        case _GUARD_BOTH_FLOAT:
-        case _GUARD_BOTH_UNICODE:
             return true;
         default:
             return _PyUop_Flags[opcode] & HAS_SPILLS_FLAG;
     }
 }
 
+static bool
+op_is_transparent(int opcode)
+{
+    switch (opcode) {
+        case _SET_IP:
+        case _CHECK_VALIDITY:
+        case _CHECK_VALIDITY_AND_SET_IP:
+        case _NOP:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static _PyUOpInstruction *
+first_non_transparent(_PyUOpInstruction *search) {
+    while (op_is_transparent(search->opcode)) {
+        search--;
+    }
+    return search;
+}
+
 static void
 peephole_regalloc(_PyUOpInstruction *buffer)
 {
-
     for (int pc = 0; pc < UOP_MAX_TRACE_LENGTH; pc++) {
         int opcode = buffer[pc].opcode;
         switch(opcode) {
@@ -617,55 +622,30 @@ peephole_regalloc(_PyUOpInstruction *buffer)
             {
                 int end = pc - 1;
                 int net_stack_effect = -_PyUop_num_popped(opcode, buffer[pc].oparg);
-                int registers_used = net_stack_effect;
-                while (net_stack_effect < 0 && end >= 1) {
-                    _PyUOpInstruction inst = buffer[end];
-                    int pushed = _PyUop_num_pushed(inst.opcode, inst.oparg);
-                    int popped =  _PyUop_num_popped(inst.opcode, inst.oparg);
-                    int net_effect = pushed - popped;
-                    net_stack_effect += net_effect;
-                    registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
-                    DPRINTF(3, "CONSIDERING: %s\n", _PyUOpName(inst.opcode));
-                    if (!op_is_safe(inst.opcode)) {
-                        net_stack_effect = -1;
-                        break;
+                _PyUOpInstruction *maybe_guard = &buffer[pc-1];
+                _PyUOpInstruction *rhs = first_non_transparent(&buffer[pc-2]);
+                _PyUOpInstruction *lhs = first_non_transparent(rhs - 1);
+                if (op_is_load(lhs->opcode) && op_is_load(rhs->opcode)) {
+                    int reg_to_start_with = 1;
+                    assert(_PyUop_Flags[lhs->opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG));
+                    assert(_PyUop_Flags[rhs->opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG));
+                    // Replace spills with non-spilled version too!
+                    int lhs_match = _PyUop_match_reg((_PyUop_Flags[lhs->opcode] & HAS_SPILLS_FLAG) ? _PyUop_match_reg_to_uop(lhs->opcode) : lhs->opcode, false, reg_to_start_with);
+                    reg_to_start_with--;
+                    int rhs_match = _PyUop_match_reg((_PyUop_Flags[rhs->opcode] & HAS_SPILLS_FLAG) ? _PyUop_match_reg_to_uop(rhs->opcode) : rhs->opcode, false, reg_to_start_with);
+                    reg_to_start_with--;
+                    if (maybe_guard->opcode != _NOP) {
+                        assert(_PyUop_Flags[maybe_guard->opcode] & HAS_REGISTER_VERSION_FLAG);
+                        int guard_match = _PyUop_match_reg(maybe_guard->opcode, false, 0);
+                        DPRINTF(2, "GUARD REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(maybe_guard->opcode), _PyUOpName(guard_match));
+                        maybe_guard->opcode = guard_match;
                     }
-                    // int prev_pushed = _PyUop_num_pushed(buffer[end-1].opcode, buffer[end-1].oparg);
-                    if (net_stack_effect == 0) {
-                        net_stack_effect = 0;
-                        end--;
-                        break;
-                        // registers_used += registers_touched(buffer[end-1].opcode, prev_pushed);
-//                        if (op_is_safe(buffer[(end-1)].opcode) && op_is_safe(buffer[(end-2)].opcode)) {
-//                            end -= 2;
-//                            break;
-//                        } else {
-//                            net_stack_effect = -1;
-//                            break;
-//                        }
-                    }
-                    end--;
-                }
-                // Found a good path. Time to regalloc the whole run!
-                if (net_stack_effect == 0 && registers_used == 0) {
-                    int start = pc - 1;
-                    registers_used = -_PyUop_num_popped(opcode, buffer[pc].oparg);
-                    while (start > end) {
-                        _PyUOpInstruction inst = buffer[start];
-                        // Replace spills with non-spilled version too!
-                        if (_PyUop_Flags[inst.opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG)) {
-                            int reg_to_start_with = (_PyUop_Flags[inst.opcode] & HAS_PASSTHROUGH_FLAG) ? 0 : (-registers_used) - 1;
-                            int match = _PyUop_match_reg((_PyUop_Flags[inst.opcode] & HAS_SPILLS_FLAG) ? _PyUop_match_reg_to_uop(inst.opcode) : inst.opcode, false, reg_to_start_with);
-                            DPRINTF(2, "REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(buffer[start].opcode), _PyUOpName(match));
-                            buffer[start].opcode = match;
-                        }
-                        int pushed = _PyUop_num_pushed(inst.opcode, inst.oparg);
-                        int popped =  _PyUop_num_popped(inst.opcode, inst.oparg);
-                        registers_used += (registers_touched(inst.opcode, pushed) - registers_touched(inst.opcode, popped));
-                        start--;
-                    }
+                    DPRINTF(2, "REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(lhs->opcode), _PyUOpName(lhs_match));
+                    DPRINTF(2, "REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(rhs->opcode), _PyUOpName(rhs_match));
                     DPRINTF(2, "REGALLOC -- PREV: %s, AFTER %s:\n", _PyUOpName(buffer[pc].opcode), _PyUOpName(_PyUop_match_reg(buffer[pc].opcode, true, 0)));
                     buffer[pc].opcode = _PyUop_match_reg(buffer[pc].opcode, true, 0);
+                    lhs->opcode = lhs_match;
+                    rhs->opcode = rhs_match;
                 }
                 break;
             }
