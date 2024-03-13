@@ -623,8 +623,8 @@ peephole_regalloc(_PyUOpInstruction *buffer)
                 int end = pc - 1;
                 int net_stack_effect = -_PyUop_num_popped(opcode, buffer[pc].oparg);
                 _PyUOpInstruction *maybe_guard = &buffer[pc-1];
-                _PyUOpInstruction *rhs = first_non_transparent(&buffer[pc-2]);
-                _PyUOpInstruction *lhs = first_non_transparent(rhs - 1);
+                _PyUOpInstruction *lhs = first_non_transparent(&buffer[pc-2]);
+                _PyUOpInstruction *rhs = first_non_transparent(lhs - 1);
                 if (op_is_load(lhs->opcode) && op_is_load(rhs->opcode)) {
                     int reg_to_start_with = 1;
                     assert(_PyUop_Flags[lhs->opcode] & (HAS_REGISTER_VERSION_FLAG | HAS_SPILLS_FLAG));
