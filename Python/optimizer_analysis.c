@@ -595,6 +595,9 @@ do_loop_splitting(_PyUOpInstruction *buffer, int buffer_size)
             break;
         }
     }
+    if (!can_peel) {
+        return;
+    }
     if (this_instr->opcode != _JUMP_TO_TOP) {
         return;
     }
