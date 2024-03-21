@@ -925,6 +925,22 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertLessEqual(len(guard_both_float_count), 1)
         self.assertIn("_COMPARE_OP_STR", uops)
 
+    def test_loop_peeling(self):
+        def testfunc(n):
+            a = ""
+            for _ in range(n):
+                x = a == a
+            return x
+
+        res, ex = self._run_with_optimizer(testfunc, 32)
+        self.assertTrue(res)
+        self.assertIsNotNone(ex)
+        uops = get_opnames(ex)
+        guard_both_float_count = [opname for opname in iter_opnames(ex)]
+        raise Exception(f"{guard_both_float_count}")
+        self.assertLessEqual(len(guard_both_float_count), 1)
+        self.assertIn("_COMPARE_OP_STR", uops)
+
     def test_type_inconsistency(self):
         ns = {}
         src = textwrap.dedent("""

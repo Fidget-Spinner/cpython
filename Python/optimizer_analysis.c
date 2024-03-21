@@ -585,8 +585,13 @@ do_loop_splitting(_PyUOpInstruction *buffer, int buffer_size)
 {
     assert(buffer_size <= UOP_MAX_TRACE_LENGTH/2);
     _PyUOpInstruction *this_instr = buffer;
+    bool can_peel = false;
     for (; this_instr < buffer + buffer_size; this_instr++) {
-        if (op_is_end(this_instr->opcode)) {
+        int opcode = this_instr->opcode;
+        if (!can_peel && (opcode == _GUARD_BOTH_INT || opcode == _GUARD_BOTH_FLOAT || opcode == _GUARD_BOTH_UNICODE)) {
+            can_peel = true;
+        }
+        if (op_is_end(opcode)) {
             break;
         }
     }
