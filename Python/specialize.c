@@ -424,7 +424,7 @@ _PyCode_Quicken(PyCodeObject *code)
             int initial_value;
             switch (opcode) {
                 case JUMP_BACKWARD:
-                    initial_value = 0;
+                    initial_value = initial_backoff_counter();
                     break;
                 case POP_JUMP_IF_FALSE:
                 case POP_JUMP_IF_TRUE:
