@@ -307,14 +307,17 @@ gc_visit_thread_stacks(struct _stoptheworld_state *stw)
     for (PyThreadState *p = interp->threads.head; p != NULL; p = p->next) {
         _PyInterpreterFrame *curr_frame = p->current_frame;
         while (curr_frame != NULL) {
-            PyCodeObject *co = (PyCodeObject *)curr_frame->f_executable;
-            for (int i = 0; i < co->co_nlocalsplus + co->co_stacksize; i++) {
-                _PyStackRef curr_o = curr_frame->localsplus[i];
-                // Note: we MUST check that it has deferred bit set before checking the rest.
-                // Otherwise we might read into invalid memory due to non-deferred references
-                // being dead already.
-                if ((curr_o.bits & Py_TAG_DEFERRED) == Py_TAG_DEFERRED) {
-                    gc_add_refs(Py_STACKREF_UNTAG_BORROWED(curr_o), 1);
+            // f_executable could be Py_None for the entry frame.
+            if (PyCode_Check(curr_frame->f_executable)) {
+                PyCodeObject *co = (PyCodeObject *)curr_frame->f_executable;
+                for (int i = 0; i < co->co_nlocalsplus + co->co_stacksize; i++) {
+                    _PyStackRef curr_o = curr_frame->localsplus[i];
+                    // Note: we MUST check that it has deferred bit set before checking the rest.
+                    // Otherwise we might read into invalid memory due to non-deferred references
+                    // being dead already.
+                    if ((curr_o.bits & Py_TAG_DEFERRED) == Py_TAG_DEFERRED) {
+                        gc_add_refs(Py_STACKREF_UNTAG_BORROWED(curr_o), 1);
+                    }
                 }
             }
             curr_frame = curr_frame->previous;
