@@ -3183,7 +3183,7 @@ _PyList_FromStackSteal(_PyStackRef const *src, Py_ssize_t n)
     PyListObject *list = (PyListObject *)PyList_New(n);
     if (list == NULL) {
         for (Py_ssize_t i = 0; i < n; i++) {
-            Py_DECREF_STACKREF(src[i]);
+            Py_STACKREF_DECREF(src[i]);
         }
         return NULL;
     }

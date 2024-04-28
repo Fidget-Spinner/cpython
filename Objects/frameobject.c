@@ -809,7 +809,7 @@ frame_setlineno(PyFrameObject *f, PyObject* p_new_lineno, void *Py_UNUSED(ignore
             Py_XSETREF(tstate->exc_info->exc_value, exc == Py_None ? NULL : exc);
         }
         else {
-            Py_XDECREF_STACKREF(_PyFrame_StackPop(f->f_frame));
+            Py_STACKREF_XDECREF(_PyFrame_StackPop(f->f_frame));
         }
         start_stack = pop_value(start_stack);
     }
@@ -886,7 +886,7 @@ frame_dealloc(PyFrameObject *f)
         Py_CLEAR(frame->f_locals);
         _PyStackRef *locals = _PyFrame_GetLocalsArray(frame);
         for (int i = 0; i < frame->stacktop; i++) {
-            Py_CLEAR_STACKREF(locals[i]);
+            Py_STACKREF_CLEAR(locals[i]);
         }
     }
     Py_CLEAR(f->f_back);
@@ -917,7 +917,7 @@ frame_tp_clear(PyFrameObject *f)
     _PyStackRef *locals = _PyFrame_GetLocalsArray(f->f_frame);
     assert(f->f_frame->stacktop >= 0);
     for (int i = 0; i < f->f_frame->stacktop; i++) {
-        Py_CLEAR_STACKREF(locals[i]);
+        Py_STACKREF_CLEAR(locals[i]);
     }
     f->f_frame->stacktop = 0;
     Py_CLEAR(f->f_frame->f_locals);
@@ -1137,7 +1137,7 @@ frame_init_get_vars(_PyInterpreterFrame *frame)
     int offset = PyUnstable_Code_GetFirstFree(co);
     for (int i = 0; i < co->co_nfreevars; ++i) {
         PyObject *o = PyTuple_GET_ITEM(closure, i);
-        frame->localsplus[offset + i] = Py_NewRef_StackRef(Py_STACKREF_TAG(o));
+        frame->localsplus[offset + i] = Py_StackRef_NewRef(Py_STACKREF_TAG(o));
     }
     // COPY_FREE_VARS doesn't have inline CACHEs, either:
     frame->instr_ptr = _PyCode_CODE(_PyFrame_GetCode(frame));
@@ -1436,7 +1436,7 @@ _PyFrame_LocalsToFast(_PyInterpreterFrame *frame, int clear)
                 }
                 value = Py_NewRef(Py_None);
             }
-            Py_XSETREF_STACKREF(fast[i], Py_NewRef_StackRef(Py_STACKREF_TAG(value)));
+            Py_STACKREF_XSETREF(fast[i], Py_StackRef_NewRef(Py_STACKREF_TAG(value)));
         }
         Py_XDECREF(value);
     }

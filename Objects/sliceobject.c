@@ -181,8 +181,8 @@ _PyBuildSlice_ConsumeStackRefs(_PyStackRef start, _PyStackRef stop)
                                                      Py_STACKREF_UNTAG_OWNED(stop),
                                                      Py_None);
     if (res == NULL) {
-        Py_DECREF_STACKREF_OWNED(start);
-        Py_DECREF_STACKREF_OWNED(stop);
+        Py_STACKREF_DECREF_OWNED(start);
+        Py_STACKREF_DECREF_OWNED(stop);
         return NULL;
     }
     return res;

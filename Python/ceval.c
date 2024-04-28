@@ -898,7 +898,7 @@ exception_unwind:
                 /* Pop remaining stack entries. */
                 _PyStackRef *stackbase = _PyFrame_Stackbase(frame);
                 while (stack_pointer > stackbase) {
-                    Py_XDECREF_STACKREF(POP());
+                    Py_STACKREF_XDECREF(POP());
                 }
                 assert(STACK_LEVEL() == 0);
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -909,7 +909,7 @@ exception_unwind:
             assert(STACK_LEVEL() >= level);
             _PyStackRef *new_top = _PyFrame_Stackbase(frame) + level;
             while (stack_pointer > new_top) {
-                Py_XDECREF_STACKREF(POP());
+                Py_STACKREF_XDECREF(POP());
             }
             if (lasti) {
                 int frame_lasti = _PyInterpreterFrame_LASTI(frame);
@@ -1473,7 +1473,7 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
     else if (argcount > n) {
         /* Too many postional args. Error is reported later */
         for (j = n; j < argcount; j++) {
-            Py_DECREF_STACKREF(args[j]);
+            Py_STACKREF_DECREF(args[j]);
         }
     }
 
@@ -1559,12 +1559,12 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
             if (PyDict_SetItem(kwdict, keyword, Py_STACKREF_UNTAG_OWNED(value_tagged)) == -1) {
                 goto kw_fail;
             }
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             continue;
 
         kw_fail:
             for (;i < kwcount; i++) {
-                Py_DECREF_STACKREF(args[i+argcount]);
+                Py_STACKREF_DECREF(args[i+argcount]);
             }
             goto fail_post_args;
 
@@ -1610,7 +1610,7 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
             for (; i < defcount; i++) {
                 if (Py_STACKREF_UNTAG_BORROWED(localsplus[m+i]) == NULL) {
                     PyObject *def = defs[i];
-                    localsplus[m+i] = Py_NewRef_StackRef(Py_STACKREF_TAG(def));
+                    localsplus[m+i] = Py_StackRef_NewRef(Py_STACKREF_TAG(def));
                 }
             }
         }
@@ -1645,14 +1645,14 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
 
 fail_pre_positional:
     for (j = 0; j < argcount; j++) {
-        Py_DECREF_STACKREF(args[j]);
+        Py_STACKREF_DECREF(args[j]);
     }
     /* fall through */
 fail_post_positional:
     if (kwnames) {
         Py_ssize_t kwcount = PyTuple_GET_SIZE(kwnames);
         for (j = argcount; j < argcount+kwcount; j++) {
-            Py_DECREF_STACKREF(args[j]);
+            Py_STACKREF_DECREF(args[j]);
         }
     }
     /* fall through */
@@ -1727,12 +1727,12 @@ fail:
     /* Consume the references */
     Py_DECREF(func);
     for (size_t i = 0; i < argcount; i++) {
-        Py_DECREF_STACKREF(args[i]);
+        Py_STACKREF_DECREF(args[i]);
     }
     if (kwnames) {
         Py_ssize_t kwcount = PyTuple_GET_SIZE(kwnames);
         for (Py_ssize_t i = 0; i < kwcount; i++) {
-            Py_DECREF_STACKREF(args[i+argcount]);
+            Py_STACKREF_DECREF(args[i+argcount]);
         }
     }
     PyErr_NoMemory();
@@ -2168,7 +2168,7 @@ _PyEval_UnpackTaggedIterable(PyThreadState *tstate, PyObject *v,
 
 Error:
     for (; i > 0; i--, sp++) {
-        Py_DECREF_STACKREF(*sp);
+        Py_STACKREF_DECREF(*sp);
     }
     Py_XDECREF(it);
     return 0;

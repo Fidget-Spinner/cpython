@@ -132,17 +132,17 @@ def replace_decrefs(
             continue
         if var.size != "1":
             out.emit(f"for (int _i = {var.size}; --_i >= 0;) {{\n")
-            out.emit(f"Py_DECREF_STACKREF({var.name}[_i]);\n")
+            out.emit(f"Py_STACKREF_DECREF({var.name}[_i]);\n")
             out.emit("}\n")
         elif var.condition:
             out.emit(f"(void){var.name};\n")
             if var.condition == "1":
-                out.emit(f"Py_DECREF_STACKREF({var.name}{tagged});\n")
+                out.emit(f"Py_STACKREF_DECREF({var.name}{tagged});\n")
             elif var.condition != "0":
-                out.emit(f"Py_XDECREF_STACKREF({var.name}{tagged});\n")
+                out.emit(f"Py_STACKREF_XDECREF({var.name}{tagged});\n")
         else:
             out.emit(f"(void){var.name};\n")
-            out.emit(f"Py_DECREF_STACKREF({var.name}{tagged});\n")
+            out.emit(f"Py_STACKREF_DECREF({var.name}{tagged});\n")
 
 
 def replace_sync_sp(

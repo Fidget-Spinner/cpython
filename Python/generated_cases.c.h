@@ -40,15 +40,15 @@
                                   "(missed __aexit__ method)",
                                   Py_TYPE(mgr)->tp_name);
                 }
-                Py_DECREF_STACKREF(enter_tagged);
+                Py_STACKREF_DECREF(enter_tagged);
                 goto error;
             }
             (void)mgr;
-            Py_DECREF_STACKREF(mgr_tagged);
+            Py_STACKREF_DECREF(mgr_tagged);
             res = PyObject_CallNoArgs(enter);
-            Py_DECREF_STACKREF(enter_tagged);
+            Py_STACKREF_DECREF(enter_tagged);
             if (res == NULL) {
-                Py_DECREF_STACKREF(Py_STACKREF_TAG(exit));
+                Py_STACKREF_DECREF(Py_STACKREF_TAG(exit));
                 if (true) goto pop_1_error;
             }
             stack_pointer[-1] = Py_STACKREF_TAG(exit);
@@ -91,15 +91,15 @@
                                   "(missed __exit__ method)",
                                   Py_TYPE(mgr)->tp_name);
                 }
-                Py_DECREF_STACKREF(enter_tagged);
+                Py_STACKREF_DECREF(enter_tagged);
                 goto error;
             }
             (void)mgr;
-            Py_DECREF_STACKREF(mgr_tagged);
+            Py_STACKREF_DECREF(mgr_tagged);
             res = PyObject_CallNoArgs(enter);
-            Py_DECREF_STACKREF(enter_tagged);
+            Py_STACKREF_DECREF(enter_tagged);
             if (res == NULL) {
-                Py_DECREF_STACKREF(Py_STACKREF_TAG(exit));
+                Py_STACKREF_DECREF(Py_STACKREF_TAG(exit));
                 if (true) goto pop_1_error;
             }
             stack_pointer[-1] = Py_STACKREF_TAG(exit);
@@ -147,9 +147,9 @@
                 assert(_PyEval_BinaryOps[oparg]);
                 res = _PyEval_BinaryOps[oparg](lhs, rhs);
                 (void)lhs;
-                Py_DECREF_STACKREF(lhs_tagged);
+                Py_STACKREF_DECREF(lhs_tagged);
                 (void)rhs;
-                Py_DECREF_STACKREF(rhs_tagged);
+                Py_STACKREF_DECREF(rhs_tagged);
                 if (res == NULL) goto pop_2_error;
             }
             stack_pointer[-2] = Py_STACKREF_TAG(res);
@@ -479,7 +479,7 @@
                 res = PyObject_GetItem(Py_STACKREF_UNTAG_BORROWED(container), slice);
                 Py_DECREF(slice);
             }
-            Py_DECREF_STACKREF(container);
+            Py_STACKREF_DECREF(container);
             if (res == NULL) goto pop_3_error;
             stack_pointer[-3] = Py_STACKREF_TAG(res);
             stack_pointer += -2;
@@ -522,9 +522,9 @@
             {
                 res = PyObject_GetItem(container, sub);
                 (void)container;
-                Py_DECREF_STACKREF(container_tagged);
+                Py_STACKREF_DECREF(container_tagged);
                 (void)sub;
-                Py_DECREF_STACKREF(sub_tagged);
+                Py_STACKREF_DECREF(sub_tagged);
                 if (res == NULL) goto pop_2_error;
             }
             stack_pointer[-2] = Py_STACKREF_TAG(res);
@@ -556,9 +556,9 @@
                 _PyErr_SetKeyError(sub);
             }
             (void)dict;
-            Py_DECREF_STACKREF(dict_tagged);
+            Py_STACKREF_DECREF(dict_tagged);
             (void)sub;
-            Py_DECREF_STACKREF(sub_tagged);
+            Py_STACKREF_DECREF(sub_tagged);
             if (rc <= 0) goto pop_2_error;
             // not found or error
             stack_pointer[-2] = Py_STACKREF_TAG(res);
@@ -631,7 +631,7 @@
             assert(res != NULL);
             Py_INCREF(res);
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            Py_DECREF_STACKREF(list_tagged);
+            Py_STACKREF_DECREF(list_tagged);
             stack_pointer[-2] = Py_STACKREF_TAG(res);
             stack_pointer += -1;
             DISPATCH();
@@ -665,7 +665,7 @@
             STAT_INC(BINARY_SUBSCR, hit);
             res = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            Py_DECREF_STACKREF(str_tagged);
+            Py_STACKREF_DECREF(str_tagged);
             stack_pointer[-2] = Py_STACKREF_TAG(res);
             stack_pointer += -1;
             DISPATCH();
@@ -699,7 +699,7 @@
             assert(res != NULL);
             Py_INCREF(res);
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            Py_DECREF_STACKREF(tuple_tagged);
+            Py_STACKREF_DECREF(tuple_tagged);
             stack_pointer[-2] = Py_STACKREF_TAG(res);
             stack_pointer += -1;
             DISPATCH();
@@ -723,10 +723,10 @@
                 &PyTuple_GET_ITEM(keys, 0), 1,
                 values, 1, oparg);
             for (int _i = oparg; --_i >= 0;) {
-                Py_DECREF_STACKREF(values[_i]);
+                Py_STACKREF_DECREF(values[_i]);
             }
             (void)keys;
-            Py_DECREF_STACKREF(keys_tagged);
+            Py_STACKREF_DECREF(keys_tagged);
             if (map == NULL) { stack_pointer += -1 - oparg; goto error; }
             stack_pointer[-1 - oparg] = Py_STACKREF_TAG(map);
             stack_pointer += -oparg;
@@ -759,7 +759,7 @@
                 values+1, 2,
                 oparg);
             for (int _i = oparg*2; --_i >= 0;) {
-                Py_DECREF_STACKREF(values[_i]);
+                Py_STACKREF_DECREF(values[_i]);
             }
             if (map == NULL) { stack_pointer += -oparg*2; goto error; }
             stack_pointer[-oparg*2] = Py_STACKREF_TAG(map);
@@ -783,7 +783,7 @@
                 if (err == 0) {
                     err = PySet_Add(set, Py_STACKREF_UNTAG_OWNED(item));
                 }
-                Py_DECREF_STACKREF(item);
+                Py_STACKREF_DECREF(item);
             }
             if (err != 0) {
                 Py_DECREF(set);
@@ -817,11 +817,11 @@
 
             slice = PySlice_New(start, stop, step);
             (void)start;
-            Py_DECREF_STACKREF(start_tagged);
+            Py_STACKREF_DECREF(start_tagged);
             (void)stop;
-            Py_DECREF_STACKREF(stop_tagged);
+            Py_STACKREF_DECREF(stop_tagged);
             (void)step;
-            Py_XDECREF_STACKREF(step_tagged);
+            Py_STACKREF_XDECREF(step_tagged);
             if (slice == NULL) { stack_pointer += -2 - ((oparg == 3) ? 1 : 0); goto error; }
             stack_pointer[-2 - ((oparg == 3) ? 1 : 0)] = Py_STACKREF_TAG(slice);
             stack_pointer += -1 - ((oparg == 3) ? 1 : 0);
@@ -837,7 +837,7 @@
             pieces = &stack_pointer[-oparg];
             str = _PyUnicode_JoinStack(&_Py_STR(empty), pieces, oparg);
             for (int _i = oparg; --_i >= 0;) {
-                Py_DECREF_STACKREF(pieces[_i]);
+                Py_STACKREF_DECREF(pieces[_i]);
             }
             if (str == NULL) { stack_pointer += -oparg; goto error; }
             stack_pointer[-oparg] = Py_STACKREF_TAG(str);
@@ -915,10 +915,10 @@
                     args--;
                     total_args++;
                     PyObject *self = ((PyMethodObject *)callable)->im_self;
-                    args[0] = Py_NewRef_StackRef(Py_STACKREF_TAG(self));
+                    args[0] = Py_StackRef_NewRef(Py_STACKREF_TAG(self));
                     PyObject *method = ((PyMethodObject *)callable)->im_func;
-                    args[-1] = Py_NewRef_StackRef(Py_STACKREF_TAG_DEFERRED(method));
-                    Py_DECREF_STACKREF(callable_tagged);
+                    args[-1] = Py_StackRef_NewRef(Py_STACKREF_TAG_DEFERRED(method));
+                    Py_STACKREF_DECREF(callable_tagged);
                     callable = method;
                     callable_tagged = args[-1];
                 }
@@ -966,9 +966,9 @@
                     }
                 }
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 for (int i = 0; i < total_args; i++) {
-                    Py_DECREF_STACKREF(args[i]);
+                    Py_STACKREF_DECREF(args[i]);
                 }
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
@@ -1021,7 +1021,7 @@
             if (self == NULL) {
                 goto error;
             }
-            Py_DECREF_STACKREF(callable_tagged);
+            Py_STACKREF_DECREF(callable_tagged);
             _PyInterpreterFrame *shim = _PyFrame_PushTrampolineUnchecked(
                 tstate, (PyCodeObject *)&_Py_InitCleanup, 1);
             assert(_PyCode_CODE((PyCodeObject *)shim->f_executable)[0].op.code == EXIT_INIT_CHECK);
@@ -1086,11 +1086,11 @@
                 STAT_INC(CALL, hit);
                 // Ugly tag and untag because the uop header needs to have consistent type with
                 // the rest of the inst. So we can't change it to _PyStackRef.
-                self = Py_STACKREF_UNTAG_BORROWED(Py_NewRef_StackRef(Py_STACKREF_TAG(((PyMethodObject *)callable)->im_self)));
+                self = Py_STACKREF_UNTAG_BORROWED(Py_StackRef_NewRef(Py_STACKREF_TAG(((PyMethodObject *)callable)->im_self)));
                 stack_pointer[-1 - oparg] = Py_STACKREF_TAG(self);  // Patch stack as it is used by _INIT_CALL_PY_EXACT_ARGS
-                func = Py_STACKREF_UNTAG_BORROWED(Py_NewRef_StackRef(Py_STACKREF_TAG(((PyMethodObject *)callable)->im_func)));
+                func = Py_STACKREF_UNTAG_BORROWED(Py_StackRef_NewRef(Py_STACKREF_TAG(((PyMethodObject *)callable)->im_func)));
                 stack_pointer[-2 - oparg] = Py_STACKREF_TAG(func);  // This is used by CALL, upon deoptimization
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
             }
             // _CHECK_FUNCTION_EXACT_ARGS
             self_or_null = self;
@@ -1188,9 +1188,9 @@
                 res = PyObject_TypeVectorcall_Tagged(tp, args, total_args, NULL);
                 /* Free the arguments. */
                 for (int i = 0; i < total_args; i++) {
-                    Py_DECREF_STACKREF(args[i]);
+                    Py_STACKREF_DECREF(args[i]);
                 }
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1243,9 +1243,9 @@
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
                 /* Free the arguments. */
                 for (int i = 0; i < total_args; i++) {
-                    Py_DECREF_STACKREF(args[i]);
+                    Py_STACKREF_DECREF(args[i]);
                 }
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1298,9 +1298,9 @@
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
                 /* Free the arguments. */
                 for (int i = 0; i < total_args; i++) {
-                    Py_DECREF_STACKREF(args[i]);
+                    Py_STACKREF_DECREF(args[i]);
                 }
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1352,8 +1352,8 @@
                 res = _PyCFunction_TrampolineCall(cfunc, PyCFunction_GET_SELF(callable), Py_STACKREF_UNTAG_BORROWED(arg));
                 _Py_LeaveRecursiveCallTstate(tstate);
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-                Py_DECREF_STACKREF(arg);
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(arg);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1400,7 +1400,7 @@
                 if (tuple == NULL) {
                     goto error;
                 }
-                Py_SETREF_STACKREF(callargs_tagged, Py_STACKREF_TAG(tuple));
+                Py_STACKREF_SETREF(callargs_tagged, Py_STACKREF_TAG(tuple));
                 callargs = tuple;
             }
             assert(PyTuple_CheckExact(callargs));
@@ -1452,11 +1452,11 @@
                 result = PyObject_Call(func, callargs, kwargs);
             }
             (void)func;
-            Py_DECREF_STACKREF(func_tagged);
+            Py_STACKREF_DECREF(func_tagged);
             (void)callargs;
-            Py_DECREF_STACKREF(callargs_tagged);
+            Py_STACKREF_DECREF(callargs_tagged);
             (void)kwargs;
-            Py_XDECREF_STACKREF(kwargs_tagged);
+            Py_STACKREF_XDECREF(kwargs_tagged);
             assert(Py_STACKREF_UNTAG_BORROWED(PEEK(2 + (oparg & 1))) == NULL);
             if (result == NULL) { stack_pointer += -3 - (oparg & 1); goto error; }
             stack_pointer[-3 - (oparg & 1)] = Py_STACKREF_TAG(result);
@@ -1478,7 +1478,7 @@
             assert(oparg <= MAX_INTRINSIC_1);
             res = _PyIntrinsics_UnaryFunctions[oparg].func(tstate, value);
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             if (res == NULL) goto pop_1_error;
             stack_pointer[-1] = Py_STACKREF_TAG(res);
             DISPATCH();
@@ -1502,9 +1502,9 @@
             assert(oparg <= MAX_INTRINSIC_2);
             res = _PyIntrinsics_BinaryFunctions[oparg].func(tstate, value2, value1);
             (void)value2;
-            Py_DECREF_STACKREF(value2_tagged);
+            Py_STACKREF_DECREF(value2_tagged);
             (void)value1;
-            Py_DECREF_STACKREF(value1_tagged);
+            Py_STACKREF_DECREF(value1_tagged);
             if (res == NULL) goto pop_2_error;
             stack_pointer[-2] = Py_STACKREF_TAG(res);
             stack_pointer += -1;
@@ -1552,9 +1552,9 @@
             if (res == NULL) {
                 GOTO_ERROR(error);
             }
-            Py_DECREF_STACKREF(inst_tagged);
-            Py_DECREF_STACKREF(cls_tagged);
-            Py_DECREF_STACKREF(callable_tagged);
+            Py_STACKREF_DECREF(inst_tagged);
+            Py_STACKREF_DECREF(cls_tagged);
+            Py_STACKREF_DECREF(callable_tagged);
             stack_pointer[-2 - oparg] = Py_STACKREF_TAG(res);
             stack_pointer += -1 - oparg;
             DISPATCH();
@@ -1595,10 +1595,10 @@
                 args--;
                 total_args++;
                 PyObject *self = ((PyMethodObject *)callable)->im_self;
-                args[0] = Py_NewRef_StackRef(Py_STACKREF_TAG(self));
+                args[0] = Py_StackRef_NewRef(Py_STACKREF_TAG(self));
                 PyObject *method = ((PyMethodObject *)callable)->im_func;
-                args[-1] = Py_NewRef_StackRef(Py_STACKREF_TAG_DEFERRED(method));
-                Py_DECREF_STACKREF(callable_tagged);
+                args[-1] = Py_StackRef_NewRef(Py_STACKREF_TAG_DEFERRED(method));
+                Py_STACKREF_DECREF(callable_tagged);
                 callable = method;
                 callable_tagged = args[-1];
             }
@@ -1614,7 +1614,7 @@
                     tstate, (PyFunctionObject *)Py_STACKREF_UNTAG_OWNED(callable_tagged), locals,
                     args, positional_args, kwnames
                 );
-                Py_DECREF_STACKREF(kwnames_tagged);
+                Py_STACKREF_DECREF(kwnames_tagged);
                 // Manipulate stack directly since we leave using DISPATCH_INLINED().
                 STACK_SHRINK(oparg + 3);
                 // The frame has stolen all the arguments from the stack,
@@ -1648,11 +1648,11 @@
                     }
                 }
             }
-            Py_DECREF_STACKREF(kwnames_tagged);
+            Py_STACKREF_DECREF(kwnames_tagged);
             assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-            Py_DECREF_STACKREF(callable_tagged);
+            Py_STACKREF_DECREF(callable_tagged);
             for (int i = 0; i < total_args; i++) {
-                Py_DECREF_STACKREF(args[i]);
+                Py_STACKREF_DECREF(args[i]);
             }
             if (res == NULL) { stack_pointer += -3 - oparg; goto error; }
             stack_pointer[-3 - oparg] = Py_STACKREF_TAG(res);
@@ -1702,8 +1702,8 @@
             if (res == NULL) {
                 GOTO_ERROR(error);
             }
-            Py_DECREF_STACKREF(callable_tagged);
-            Py_DECREF_STACKREF(arg_tagged);
+            Py_STACKREF_DECREF(callable_tagged);
+            Py_STACKREF_DECREF(arg_tagged);
             stack_pointer[-2 - oparg] = Py_STACKREF_TAG(res);
             stack_pointer += -1 - oparg;
             DISPATCH();
@@ -1738,8 +1738,8 @@
             if (_PyList_AppendTakeRef((PyListObject *)self, Py_STACKREF_UNTAG_OWNED(arg)) < 0) {
                 goto pop_1_error;  // Since arg is DECREF'ed already
             }
-            Py_DECREF_STACKREF(self_tagged);
-            Py_DECREF_STACKREF(callable_tagged);
+            Py_STACKREF_DECREF(self_tagged);
+            Py_STACKREF_DECREF(callable_tagged);
             STACK_SHRINK(3);
             // Skip POP_TOP
             assert(next_instr->op.code == POP_TOP);
@@ -1791,9 +1791,9 @@
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
                 /* Clear the stack of the arguments. */
                 for (int i = 0; i < total_args; i++) {
-                    Py_DECREF_STACKREF(args[i]);
+                    Py_STACKREF_DECREF(args[i]);
                 }
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1849,9 +1849,9 @@
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
                 /* Free the arguments. */
                 for (int i = 0; i < total_args; i++) {
-                    Py_DECREF_STACKREF(args[i]);
+                    Py_STACKREF_DECREF(args[i]);
                 }
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1907,8 +1907,8 @@
                 res = _PyCFunction_TrampolineCall(cfunc, self, NULL);
                 _Py_LeaveRecursiveCallTstate(tstate);
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-                Py_DECREF_STACKREF(self_tagged);
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(self_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -1965,9 +1965,9 @@
                 res = _PyCFunction_TrampolineCall(cfunc, self, arg);
                 _Py_LeaveRecursiveCallTstate(tstate);
                 assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-                Py_DECREF_STACKREF(self_tagged);
-                Py_DECREF_STACKREF(arg_tagged);
-                Py_DECREF_STACKREF(callable_tagged);
+                Py_STACKREF_DECREF(self_tagged);
+                Py_STACKREF_DECREF(arg_tagged);
+                Py_STACKREF_DECREF(callable_tagged);
                 if (res == NULL) { stack_pointer += -2 - oparg; goto error; }
             }
             // _CHECK_PERIODIC
@@ -2103,7 +2103,7 @@
             }
             for (int i = argcount; i < code->co_argcount; i++) {
                 PyObject *def = PyTuple_GET_ITEM(func->func_defaults, i - min_args);
-                new_frame->localsplus[i] = Py_NewRef_StackRef(Py_STACKREF_TAG(def));
+                new_frame->localsplus[i] = Py_StackRef_NewRef(Py_STACKREF_TAG(def));
             }
             // Manipulate stack and cache directly since we leave using DISPATCH_INLINED().
             STACK_SHRINK(oparg + 2);
@@ -2141,7 +2141,7 @@
                 DEOPT_IF(callable != (PyObject *)&PyUnicode_Type, CALL);
                 STAT_INC(CALL, hit);
                 res = PyObject_Str(arg);
-                Py_DECREF_STACKREF(arg_tagged);
+                Py_STACKREF_DECREF(arg_tagged);
                 if (res == NULL) goto pop_3_error;
             }
             // _CHECK_PERIODIC
@@ -2183,7 +2183,7 @@
                 DEOPT_IF(callable != (PyObject *)&PyTuple_Type, CALL);
                 STAT_INC(CALL, hit);
                 res = PySequence_Tuple(arg);
-                Py_DECREF_STACKREF(arg_tagged);
+                Py_STACKREF_DECREF(arg_tagged);
                 if (res == NULL) goto pop_3_error;
             }
             // _CHECK_PERIODIC
@@ -2222,8 +2222,8 @@
             DEOPT_IF(null != NULL, CALL);
             DEOPT_IF(callable != (PyObject *)&PyType_Type, CALL);
             STAT_INC(CALL, hit);
-            res = Py_NewRef_StackRef(Py_STACKREF_TAG(Py_TYPE(arg)));
-            Py_DECREF_STACKREF(arg_tagged);
+            res = Py_StackRef_NewRef(Py_STACKREF_TAG(Py_TYPE(arg)));
+            Py_STACKREF_DECREF(arg_tagged);
             stack_pointer[-3] = (res);
             stack_pointer += -2;
             DISPATCH();
@@ -2247,9 +2247,9 @@
 
             if (_PyEval_CheckExceptStarTypeValid(tstate, match_type) < 0) {
                 (void)exc_value;
-                Py_DECREF_STACKREF(exc_value_tagged);
+                Py_STACKREF_DECREF(exc_value_tagged);
                 (void)match_type;
-                Py_DECREF_STACKREF(match_type_tagged);
+                Py_STACKREF_DECREF(match_type_tagged);
                 if (true) goto pop_2_error;
             }
             match = NULL;
@@ -2257,9 +2257,9 @@
             int res = _PyEval_ExceptionGroupMatch(exc_value, match_type,
                 &match, &rest);
             (void)exc_value;
-            Py_DECREF_STACKREF(exc_value_tagged);
+            Py_STACKREF_DECREF(exc_value_tagged);
             (void)match_type;
-            Py_DECREF_STACKREF(match_type_tagged);
+            Py_STACKREF_DECREF(match_type_tagged);
             if (res < 0) goto pop_2_error;
             assert((match == NULL) == (rest == NULL));
             if (match == NULL) goto pop_2_error;
@@ -2289,12 +2289,12 @@
             assert(PyExceptionInstance_Check(left));
             if (_PyEval_CheckExceptTypeValid(tstate, right) < 0) {
                 (void)right;
-                Py_DECREF_STACKREF(right_tagged);
+                Py_STACKREF_DECREF(right_tagged);
                 if (true) goto pop_1_error;
             }
             int res = PyErr_GivenExceptionMatches(left, right);
             (void)right;
-            Py_DECREF_STACKREF(right_tagged);
+            Py_STACKREF_DECREF(right_tagged);
             b = res ? Py_True : Py_False;
             stack_pointer[-1] = Py_STACKREF_TAG(b);
             DISPATCH();
@@ -2327,11 +2327,11 @@
             if (PyErr_GivenExceptionMatches(exc_value, PyExc_StopIteration)) {
                 value = Py_NewRef(((PyStopIterationObject *)exc_value)->value);
                 (void)sub_iter;
-                Py_DECREF_STACKREF(sub_iter_tagged);
+                Py_STACKREF_DECREF(sub_iter_tagged);
                 (void)last_sent_val;
-                Py_DECREF_STACKREF(last_sent_val_tagged);
+                Py_STACKREF_DECREF(last_sent_val_tagged);
                 (void)exc_value;
-                Py_DECREF_STACKREF(exc_value_tagged);
+                Py_STACKREF_DECREF(exc_value_tagged);
                 none = Py_None;
             }
             else {
@@ -2382,13 +2382,13 @@
                 assert((oparg >> 5) <= Py_GE);
                 res = PyObject_RichCompare(left, right, oparg >> 5);
                 (void)left;
-                Py_DECREF_STACKREF(left_tagged);
+                Py_STACKREF_DECREF(left_tagged);
                 (void)right;
-                Py_DECREF_STACKREF(right_tagged);
+                Py_STACKREF_DECREF(right_tagged);
                 if (res == NULL) goto pop_2_error;
                 if (oparg & 16) {
                     int res_bool = PyObject_IsTrue(res);
-                    Py_DECREF_STACKREF(Py_STACKREF_TAG(res));
+                    Py_STACKREF_DECREF(Py_STACKREF_TAG(res));
                     if (res_bool < 0) goto pop_2_error;
                     res = res_bool ? Py_True : Py_False;
                 }
@@ -2556,9 +2556,9 @@
             {
                 int res = PySequence_Contains(right, left);
                 (void)left;
-                Py_DECREF_STACKREF(left_tagged);
+                Py_STACKREF_DECREF(left_tagged);
                 (void)right;
-                Py_DECREF_STACKREF(right_tagged);
+                Py_STACKREF_DECREF(right_tagged);
                 if (res < 0) goto pop_2_error;
                 b = (res ^ oparg) ? Py_True : Py_False;
             }
@@ -2588,9 +2588,9 @@
             STAT_INC(CONTAINS_OP, hit);
             int res = PyDict_Contains(right, left);
             (void)left;
-            Py_DECREF_STACKREF(left_tagged);
+            Py_STACKREF_DECREF(left_tagged);
             (void)right;
-            Py_DECREF_STACKREF(right_tagged);
+            Py_STACKREF_DECREF(right_tagged);
             if (res < 0) goto pop_2_error;
             b = (res ^ oparg) ? Py_True : Py_False;
             stack_pointer[-2] = Py_STACKREF_TAG(b);
@@ -2620,9 +2620,9 @@
             // Note: both set and frozenset use the same seq_contains method!
             int res = _PySet_Contains((PySetObject *)right, left);
             (void)left;
-            Py_DECREF_STACKREF(left_tagged);
+            Py_STACKREF_DECREF(left_tagged);
             (void)right;
-            Py_DECREF_STACKREF(right_tagged);
+            Py_STACKREF_DECREF(right_tagged);
             if (res < 0) goto pop_2_error;
             b = (res ^ oparg) ? Py_True : Py_False;
             stack_pointer[-2] = Py_STACKREF_TAG(b);
@@ -2644,7 +2644,7 @@
             assert(oparg >= FVC_STR && oparg <= FVC_ASCII);
             conv_fn = _PyEval_ConversionFuncs[oparg];
             result = conv_fn(value);
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             if (result == NULL) goto pop_1_error;
             stack_pointer[-1] = Py_STACKREF_TAG(result);
             DISPATCH();
@@ -2679,7 +2679,7 @@
             int offset = co->co_nlocalsplus - oparg;
             for (int i = 0; i < oparg; ++i) {
                 PyObject *o = PyTuple_GET_ITEM(closure, i);
-                frame->localsplus[offset + i] = Py_NewRef_StackRef(Py_STACKREF_TAG(o));
+                frame->localsplus[offset + i] = Py_StackRef_NewRef(Py_STACKREF_TAG(o));
             }
             DISPATCH();
         }
@@ -2696,7 +2696,7 @@
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             int err = PyObject_DelAttr(owner, name);
             (void)owner;
-            Py_DECREF_STACKREF(owner_tagged);
+            Py_STACKREF_DECREF(owner_tagged);
             if (err) goto pop_1_error;
             stack_pointer += -1;
             DISPATCH();
@@ -2714,7 +2714,7 @@
                 _PyEval_FormatExcUnbound(tstate, _PyFrame_GetCode(frame), oparg);
                 goto error;
             }
-            Py_DECREF_STACKREF(Py_STACKREF_TAG(oldobj));
+            Py_STACKREF_DECREF(Py_STACKREF_TAG(oldobj));
             DISPATCH();
         }
 
@@ -2792,9 +2792,9 @@
             /* del container[sub] */
             int err = PyObject_DelItem(container, sub);
             (void)container;
-            Py_DECREF_STACKREF(container_tagged);
+            Py_STACKREF_DECREF(container_tagged);
             (void)sub;
-            Py_DECREF_STACKREF(sub_tagged);
+            Py_STACKREF_DECREF(sub_tagged);
             if (err) goto pop_2_error;
             stack_pointer += -2;
             DISPATCH();
@@ -2822,11 +2822,11 @@
             if (_PyDict_MergeEx(dict, update, 2) < 0) {
                 _PyEval_FormatKwargsError(tstate, callable, update);
                 (void)update;
-                Py_DECREF_STACKREF(update_tagged);
+                Py_STACKREF_DECREF(update_tagged);
                 if (true) goto pop_1_error;
             }
             (void)update;
-            Py_DECREF_STACKREF(update_tagged);
+            Py_STACKREF_DECREF(update_tagged);
             stack_pointer += -1;
             DISPATCH();
         }
@@ -2852,11 +2852,11 @@
                                   Py_TYPE(update)->tp_name);
                 }
                 (void)update;
-                Py_DECREF_STACKREF(update_tagged);
+                Py_STACKREF_DECREF(update_tagged);
                 if (true) goto pop_1_error;
             }
             (void)update;
-            Py_DECREF_STACKREF(update_tagged);
+            Py_STACKREF_DECREF(update_tagged);
             stack_pointer += -1;
             DISPATCH();
         }
@@ -2879,9 +2879,9 @@
             assert(exc && PyExceptionInstance_Check(exc));
             if (PyErr_GivenExceptionMatches(exc, PyExc_StopAsyncIteration)) {
                 (void)awaitable;
-                Py_DECREF_STACKREF(awaitable_tagged);
+                Py_STACKREF_DECREF(awaitable_tagged);
                 (void)exc;
-                Py_DECREF_STACKREF(exc_tagged);
+                Py_STACKREF_DECREF(exc_tagged);
             }
             else {
                 Py_INCREF(exc);
@@ -2903,7 +2903,7 @@
             value = Py_STACKREF_UNTAG_BORROWED(value_tagged);
 
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             stack_pointer += -1;
             DISPATCH();
         }
@@ -2923,7 +2923,7 @@
             receiver = Py_STACKREF_UNTAG_BORROWED(receiver_tagged);
 
             (void)receiver;
-            Py_DECREF_STACKREF(receiver_tagged);
+            Py_STACKREF_DECREF(receiver_tagged);
             stack_pointer[-2] = Py_STACKREF_TAG(value);
             stack_pointer += -1;
             DISPATCH();
@@ -2998,7 +2998,7 @@
              * of format(value) is value itself. */
             if (!PyUnicode_CheckExact(value)) {
                 res = PyObject_Format(value, NULL);
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 if (res == NULL) goto pop_1_error;
             }
             else {
@@ -3024,8 +3024,8 @@
             value = Py_STACKREF_UNTAG_BORROWED(value_tagged);
 
             res = PyObject_Format(value, fmt_spec);
-            Py_DECREF_STACKREF(value_tagged);
-            Py_DECREF_STACKREF(fmt_spec_tagged);
+            Py_STACKREF_DECREF(value_tagged);
+            Py_STACKREF_DECREF(fmt_spec_tagged);
             if (res == NULL) goto pop_2_error;
             stack_pointer[-2] = Py_STACKREF_TAG(res);
             stack_pointer += -1;
@@ -3074,7 +3074,7 @@
                     /* iterator ended normally */
                     assert(next_instr[oparg].op.code == END_FOR ||
                        next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
-                    Py_DECREF_STACKREF(iter_tagged);
+                    Py_STACKREF_DECREF(iter_tagged);
                     STACK_SHRINK(1);
                     /* Jump forward oparg, then skip following END_FOR and POP_TOP instruction */
                     JUMPBY(oparg + 2);
@@ -3145,7 +3145,7 @@
                         Py_DECREF(seq);
                     }
                     #endif
-                    Py_DECREF_STACKREF(iter_tagged);
+                    Py_STACKREF_DECREF(iter_tagged);
                     STACK_SHRINK(1);
                     /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
                     JUMPBY(oparg + 2);
@@ -3190,7 +3190,7 @@
                 STAT_INC(FOR_ITER, hit);
                 if (r->len <= 0) {
                     STACK_SHRINK(1);
-                    Py_DECREF_STACKREF(iter_tagged);
+                    Py_STACKREF_DECREF(iter_tagged);
                     // Jump over END_FOR and POP_TOP instructions.
                     JUMPBY(oparg + 2);
                     DISPATCH();
@@ -3239,7 +3239,7 @@
                         it->it_seq = NULL;
                         Py_DECREF(seq);
                     }
-                    Py_DECREF_STACKREF(iter_tagged);
+                    Py_STACKREF_DECREF(iter_tagged);
                     STACK_SHRINK(1);
                     /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
                     JUMPBY(oparg + 2);
@@ -3281,12 +3281,12 @@
                               "__aiter__ method, got %.100s",
                               type->tp_name);
                 (void)obj;
-                Py_DECREF_STACKREF(obj_tagged);
+                Py_STACKREF_DECREF(obj_tagged);
                 if (true) goto pop_1_error;
             }
             iter = (*getter)(obj);
             (void)obj;
-            Py_DECREF_STACKREF(obj_tagged);
+            Py_STACKREF_DECREF(obj_tagged);
             if (iter == NULL) goto pop_1_error;
             if (Py_TYPE(iter)->tp_as_async == NULL ||
                 Py_TYPE(iter)->tp_as_async->am_anext == NULL) {
@@ -3369,7 +3369,7 @@
                 _PyEval_FormatAwaitableError(tstate, Py_TYPE(iterable), oparg);
             }
             (void)iterable;
-            Py_DECREF_STACKREF(iterable_tagged);
+            Py_STACKREF_DECREF(iterable_tagged);
             if (iter != NULL && PyCoro_CheckExact(iter)) {
                 PyObject *yf = _PyGen_yf((PyGenObject*)iter);
                 if (yf != NULL) {
@@ -3401,7 +3401,7 @@
             /* before: [obj]; after [getiter(obj)] */
             iter = PyObject_GetIter(iterable);
             (void)iterable;
-            Py_DECREF_STACKREF(iterable_tagged);
+            Py_STACKREF_DECREF(iterable_tagged);
             if (iter == NULL) goto pop_1_error;
             stack_pointer[-1] = Py_STACKREF_TAG(iter);
             DISPATCH();
@@ -3460,7 +3460,7 @@
                     goto error;
                 }
                 (void)iterable;
-                Py_DECREF_STACKREF(iterable_tagged);
+                Py_STACKREF_DECREF(iterable_tagged);
             }
             stack_pointer[-1] = Py_STACKREF_TAG(iter);
             DISPATCH();
@@ -3502,9 +3502,9 @@
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             res = import_name(tstate, frame, name, fromlist, level);
             (void)level;
-            Py_DECREF_STACKREF(level_tagged);
+            Py_STACKREF_DECREF(level_tagged);
             (void)fromlist;
-            Py_DECREF_STACKREF(fromlist_tagged);
+            Py_STACKREF_DECREF(fromlist_tagged);
             if (res == NULL) goto pop_2_error;
             stack_pointer[-2] = Py_STACKREF_TAG(res);
             stack_pointer += -1;
@@ -3579,7 +3579,7 @@
                 PyErr_SetRaisedException(NULL);
             }
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             stack_pointer += -1;
             DISPATCH();
         }
@@ -3606,7 +3606,7 @@
                 }
                 PyErr_SetRaisedException(NULL);
             }
-            Py_DECREF_STACKREF(receiver_tagged);
+            Py_STACKREF_DECREF(receiver_tagged);
             stack_pointer[-2] = Py_STACKREF_TAG(value);
             stack_pointer += -1;
             DISPATCH();
@@ -3638,7 +3638,7 @@
                 assert(next_instr[oparg].op.code == END_FOR ||
                        next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
                 STACK_SHRINK(1);
-                Py_DECREF_STACKREF(iter_tagged);
+                Py_STACKREF_DECREF(iter_tagged);
                 /* Skip END_FOR and POP_TOP */
                 target = next_instr + oparg + 2;
             }
@@ -3726,7 +3726,7 @@
                 offset = oparg;
             }
             else {
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 offset = 0;
             }
             #if ENABLE_SPECIALIZATION
@@ -3750,7 +3750,7 @@
                 offset = 0;
             }
             else {
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 offset = oparg;
             }
             #if ENABLE_SPECIALIZATION
@@ -3927,9 +3927,9 @@
 
             int res = Py_Is(left, right) ^ oparg;
             (void)left;
-            Py_DECREF_STACKREF(left_tagged);
+            Py_STACKREF_DECREF(left_tagged);
             (void)right;
-            Py_DECREF_STACKREF(right_tagged);
+            Py_STACKREF_DECREF(right_tagged);
             b = res ? Py_True : Py_False;
             stack_pointer[-2] = Py_STACKREF_TAG(b);
             stack_pointer += -1;
@@ -4036,12 +4036,12 @@
                                   Py_TYPE(iterable)->tp_name);
                 }
                 (void)iterable;
-                Py_DECREF_STACKREF(iterable_tagged);
+                Py_STACKREF_DECREF(iterable_tagged);
                 if (true) goto pop_1_error;
             }
             assert(Py_IsNone(none_val));
             (void)iterable;
-            Py_DECREF_STACKREF(iterable_tagged);
+            Py_STACKREF_DECREF(iterable_tagged);
             stack_pointer += -1;
             DISPATCH();
         }
@@ -4110,7 +4110,7 @@
                            meth | NULL | arg1 | ... | argN
                          */
                         (void)owner;
-                        Py_DECREF_STACKREF(owner_tagged);
+                        Py_STACKREF_DECREF(owner_tagged);
                         if (Py_STACKREF_UNTAG_BORROWED(*attr) == NULL) goto pop_1_error;
                         self_or_null = NULL;
                     }
@@ -4119,7 +4119,7 @@
                     /* Classic, pushes one value. */
                     *attr = Py_STACKREF_TAG(PyObject_GetAttr(owner, name));
                     (void)owner;
-                    Py_DECREF_STACKREF(owner_tagged);
+                    Py_STACKREF_DECREF(owner_tagged);
                     if (Py_STACKREF_UNTAG_BORROWED(*attr) == NULL) goto pop_1_error;
                 }
             }
@@ -4157,7 +4157,7 @@
                 attr = Py_NewRef(descr);
                 null = NULL;
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
             if (oparg & 1) stack_pointer[0] = Py_STACKREF_TAG(null);
@@ -4198,7 +4198,7 @@
             // Manipulate stack directly because we exit with DISPATCH_INLINED().
             STACK_SHRINK(1);
             new_frame->localsplus[0] = owner_tagged;
-            new_frame->localsplus[1] = Py_NewRef_StackRef(Py_STACKREF_TAG(name));
+            new_frame->localsplus[1] = Py_StackRef_NewRef(Py_STACKREF_TAG(name));
             frame->return_offset = (uint16_t)(next_instr - this_instr);
             DISPATCH_INLINED(new_frame);
         }
@@ -4238,7 +4238,7 @@
                 Py_INCREF(attr);
                 null = NULL;
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             /* Skip 5 cache entries */
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
@@ -4413,7 +4413,7 @@
                 Py_INCREF(attr);
                 null = NULL;
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             /* Skip 5 cache entries */
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
@@ -4450,7 +4450,7 @@
                 STAT_INC(LOAD_ATTR, hit);
                 assert(descr != NULL);
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
                 attr = Py_NewRef(descr);
             }
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
@@ -4495,7 +4495,7 @@
                 STAT_INC(LOAD_ATTR, hit);
                 assert(descr != NULL);
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
                 attr = Py_NewRef(descr);
             }
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
@@ -4568,7 +4568,7 @@
                 Py_INCREF(attr);
                 null = NULL;
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             /* Skip 5 cache entries */
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
@@ -4625,7 +4625,7 @@
                 Py_INCREF(attr);
                 null = NULL;
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             /* Skip 5 cache entries */
             stack_pointer[-1] = Py_STACKREF_TAG(attr);
@@ -4657,7 +4657,7 @@
             _PyStackRef value;
             value = Py_STACKREF_TAG(GETITEM(FRAME_CO_CONSTS, oparg));
             // Perhaps consider making co_consts tagged too?
-            Py_INCREF_STACKREF(value);
+            Py_STACKREF_INCREF(value);
             stack_pointer[0] = (value);
             stack_pointer += 1;
             DISPATCH();
@@ -4686,7 +4686,7 @@
             _PyStackRef value;
             value = GETLOCAL(oparg);
             assert(Py_STACKREF_UNTAG_BORROWED(value) != NULL);
-            Py_INCREF_STACKREF(value);
+            Py_STACKREF_INCREF(value);
             stack_pointer[0] = (value);
             stack_pointer += 1;
             DISPATCH();
@@ -4718,7 +4718,7 @@
                 );
                 if (1) goto error;
             }
-            Py_INCREF_STACKREF(value);
+            Py_STACKREF_INCREF(value);
             stack_pointer[0] = (value);
             stack_pointer += 1;
             DISPATCH();
@@ -4734,8 +4734,8 @@
             uint32_t oparg2 = oparg & 15;
             value1 = GETLOCAL(oparg1);
             value2 = GETLOCAL(oparg2);
-            Py_INCREF_STACKREF(value1);
-            Py_INCREF_STACKREF(value2);
+            Py_STACKREF_INCREF(value1);
+            Py_STACKREF_INCREF(value2);
             stack_pointer[0] = (value1);
             stack_pointer[1] = (value2);
             stack_pointer += 2;
@@ -4767,7 +4767,7 @@
                     goto error;
                 }
             }
-            Py_DECREF_STACKREF(class_dict_tagged);
+            Py_STACKREF_DECREF(class_dict_tagged);
             stack_pointer[-1] = Py_STACKREF_TAG(value);
             DISPATCH();
         }
@@ -4803,7 +4803,7 @@
                 }
             }
             (void)mod_or_class_dict;
-            Py_DECREF_STACKREF(mod_or_class_dict_tagged);
+            Py_STACKREF_DECREF(mod_or_class_dict_tagged);
             stack_pointer[-1] = Py_STACKREF_TAG(v);
             DISPATCH();
         }
@@ -5073,11 +5073,11 @@
                     }
                 }
                 (void)global_super;
-                Py_DECREF_STACKREF(global_super_tagged);
+                Py_STACKREF_DECREF(global_super_tagged);
                 (void)class;
-                Py_DECREF_STACKREF(class_tagged);
+                Py_STACKREF_DECREF(class_tagged);
                 (void)self;
-                Py_DECREF_STACKREF(self_tagged);
+                Py_STACKREF_DECREF(self_tagged);
                 if (super == NULL) goto pop_3_error;
                 PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
                 attr = PyObject_GetAttr(super, name);
@@ -5120,11 +5120,11 @@
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
             attr = _PySuper_Lookup((PyTypeObject *)class, self, name, NULL);
             (void)global_super;
-            Py_DECREF_STACKREF(global_super_tagged);
+            Py_STACKREF_DECREF(global_super_tagged);
             (void)class;
-            Py_DECREF_STACKREF(class_tagged);
+            Py_STACKREF_DECREF(class_tagged);
             (void)self;
-            Py_DECREF_STACKREF(self_tagged);
+            Py_STACKREF_DECREF(self_tagged);
             if (attr == NULL) goto pop_3_error;
             stack_pointer[-3] = Py_STACKREF_TAG(attr);
             stack_pointer += -2;
@@ -5163,16 +5163,16 @@
             int method_found = 0;
             attr = _PySuper_Lookup(cls, self, name,
                                    Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr ? &method_found : NULL);
-            Py_DECREF_STACKREF(global_super_tagged);
-            Py_DECREF_STACKREF(class_tagged);
+            Py_STACKREF_DECREF(global_super_tagged);
+            Py_STACKREF_DECREF(class_tagged);
             if (attr == NULL) {
-                Py_DECREF_STACKREF(self_tagged);
+                Py_STACKREF_DECREF(self_tagged);
                 if (true) goto pop_3_error;
             }
             if (method_found) {
                 self_or_null = self; // transfer ownership
             } else {
-                Py_DECREF_STACKREF(self_tagged);
+                Py_STACKREF_DECREF(self_tagged);
                 self_or_null = NULL;
             }
             stack_pointer[-3] = Py_STACKREF_TAG(attr);
@@ -5208,7 +5208,7 @@
 
             PyFunctionObject *func_obj = (PyFunctionObject *)
             PyFunction_New(codeobj, GLOBALS());
-            Py_DECREF_STACKREF(codeobj_tagged);
+            Py_STACKREF_DECREF(codeobj_tagged);
             if (func_obj == NULL) {
                 goto error;
             }
@@ -5267,11 +5267,11 @@
             assert(PyTuple_CheckExact(names));
             attrs = _PyEval_MatchClass(tstate, subject, type, oparg, names);
             (void)subject;
-            Py_DECREF_STACKREF(subject_tagged);
+            Py_STACKREF_DECREF(subject_tagged);
             (void)type;
-            Py_DECREF_STACKREF(type_tagged);
+            Py_STACKREF_DECREF(type_tagged);
             (void)names;
-            Py_DECREF_STACKREF(names_tagged);
+            Py_STACKREF_DECREF(names_tagged);
             if (attrs) {
                 assert(PyTuple_CheckExact(attrs));  // Success!
             }
@@ -5408,7 +5408,7 @@
                 else {
                     b = Py_False;
                     (void)value;
-                    Py_DECREF_STACKREF(value_tagged);
+                    Py_STACKREF_DECREF(value_tagged);
                 }
             }
             // _POP_JUMP_IF_TRUE
@@ -5449,7 +5449,7 @@
                 else {
                     b = Py_False;
                     (void)value;
-                    Py_DECREF_STACKREF(value_tagged);
+                    Py_STACKREF_DECREF(value_tagged);
                 }
             }
             // _POP_JUMP_IF_FALSE
@@ -5500,7 +5500,7 @@
             value = Py_STACKREF_UNTAG_BORROWED(value_tagged);
 
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             stack_pointer += -1;
             DISPATCH();
         }
@@ -5666,7 +5666,7 @@
             {
                 value = Py_STACKREF_TAG(GETITEM(FRAME_CO_CONSTS, oparg));
                 // Perhaps consider making co_consts tagged too?
-                Py_INCREF_STACKREF(value);
+                Py_STACKREF_INCREF(value);
             }
             // _POP_FRAME
             retval = value;
@@ -5814,7 +5814,7 @@
                         goto error;
                     }
                 }
-                Py_DECREF_STACKREF(v_tagged);
+                Py_STACKREF_DECREF(v_tagged);
             }
             stack_pointer[-1] = Py_STACKREF_TAG(retval);
             DISPATCH();
@@ -5891,7 +5891,7 @@
 
             int err = PySet_Add(set, Py_STACKREF_UNTAG_OWNED(v));
             (void)v;
-            Py_DECREF_STACKREF(v);
+            Py_STACKREF_DECREF(v);
             if (err) goto pop_1_error;
             stack_pointer += -1;
             DISPATCH();
@@ -5956,7 +5956,7 @@
 
             int err = _PySet_Update(set, iterable);
             (void)iterable;
-            Py_DECREF_STACKREF(iterable_tagged);
+            Py_STACKREF_DECREF(iterable_tagged);
             if (err < 0) goto pop_1_error;
             stack_pointer += -1;
             DISPATCH();
@@ -5998,9 +5998,9 @@
                 PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
                 int err = PyObject_SetAttr(owner, name, Py_STACKREF_UNTAG_OWNED(v));
                 (void)v;
-                Py_DECREF_STACKREF(v);
+                Py_STACKREF_DECREF(v);
                 (void)owner;
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
                 if (err) goto pop_2_error;
             }
             stack_pointer += -2;
@@ -6049,7 +6049,7 @@
                 else {
                     Py_DECREF(old_value);
                 }
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             stack_pointer += -2;
             DISPATCH();
@@ -6084,7 +6084,7 @@
                 PyObject *old_value = *(PyObject **)addr;
                 *(PyObject **)addr = Py_STACKREF_UNTAG_OWNED(value);
                 Py_XDECREF(old_value);
-                Py_DECREF_STACKREF(owner_tagged);
+                Py_STACKREF_DECREF(owner_tagged);
             }
             stack_pointer += -2;
             DISPATCH();
@@ -6141,7 +6141,7 @@
             }
             /* PEP 509 */
             dict->ma_version_tag = new_version;
-            Py_DECREF_STACKREF(owner_tagged);
+            Py_STACKREF_DECREF(owner_tagged);
             stack_pointer += -2;
             DISPATCH();
         }
@@ -6183,7 +6183,7 @@
             uint32_t oparg2 = oparg & 15;
             SETLOCAL(oparg1, value1);
             value2 = GETLOCAL(oparg2);
-            Py_INCREF_STACKREF(value2);
+            Py_STACKREF_INCREF(value2);
             stack_pointer[-1] = (value2);
             DISPATCH();
         }
@@ -6216,7 +6216,7 @@
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             int err = PyDict_SetItem(GLOBALS(), name, Py_STACKREF_UNTAG_OWNED(v));
             (void)v;
-            Py_DECREF_STACKREF(v);
+            Py_STACKREF_DECREF(v);
             if (err) goto pop_1_error;
             stack_pointer += -1;
             DISPATCH();
@@ -6236,7 +6236,7 @@
                 _PyErr_Format(tstate, PyExc_SystemError,
                               "no locals found when storing %R", name);
                 (void)v;
-                Py_DECREF_STACKREF(v);
+                Py_STACKREF_DECREF(v);
                 if (true) goto pop_1_error;
             }
             if (PyDict_CheckExact(ns))
@@ -6244,7 +6244,7 @@
             else
             err = PyObject_SetItem(ns, name, Py_STACKREF_UNTAG_OWNED(v));
             (void)v;
-            Py_DECREF_STACKREF(v);
+            Py_STACKREF_DECREF(v);
             if (err) goto pop_1_error;
             stack_pointer += -1;
             DISPATCH();
@@ -6275,8 +6275,8 @@
                 err = PyObject_SetItem(Py_STACKREF_UNTAG_BORROWED(container), slice, Py_STACKREF_UNTAG_OWNED(v));
                 Py_DECREF(slice);
             }
-            Py_DECREF_STACKREF(v);
-            Py_DECREF_STACKREF(container);
+            Py_STACKREF_DECREF(v);
+            Py_STACKREF_DECREF(container);
             if (err) goto pop_4_error;
             stack_pointer += -4;
             DISPATCH();
@@ -6318,11 +6318,11 @@
                 /* container[sub] = v */
                 int err = PyObject_SetItem(Py_STACKREF_UNTAG_BORROWED(container), Py_STACKREF_UNTAG_OWNED(sub), Py_STACKREF_UNTAG_OWNED(v));
                 (void)v;
-                Py_DECREF_STACKREF(v);
+                Py_STACKREF_DECREF(v);
                 (void)container;
-                Py_DECREF_STACKREF(container);
+                Py_STACKREF_DECREF(container);
                 (void)sub;
-                Py_DECREF_STACKREF(sub);
+                Py_STACKREF_DECREF(sub);
                 if (err) goto pop_3_error;
             }
             stack_pointer += -3;
@@ -6350,7 +6350,7 @@
             STAT_INC(STORE_SUBSCR, hit);
             int err = _PyDict_SetItem_Take2((PyDictObject *)dict,
                 Py_STACKREF_UNTAG_OWNED(sub), Py_STACKREF_UNTAG_OWNED(value));
-            Py_DECREF_STACKREF(dict_tagged);
+            Py_STACKREF_DECREF(dict_tagged);
             if (err) goto pop_3_error;
             stack_pointer += -3;
             DISPATCH();
@@ -6388,7 +6388,7 @@
             assert(old_value != NULL);
             Py_DECREF(old_value);
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            Py_DECREF_STACKREF(list_tagged);
+            Py_STACKREF_DECREF(list_tagged);
             stack_pointer += -3;
             DISPATCH();
         }
@@ -6445,7 +6445,7 @@
             {
                 int err = PyObject_IsTrue(value);
                 (void)value;
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 if (err < 0) goto pop_1_error;
                 res = err ? Py_True : Py_False;
             }
@@ -6479,7 +6479,7 @@
             value_tagged = Py_STACKREF_TAG(owner);
             {
                 (void)value;
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 res = Py_True;
             }
             stack_pointer[-1] = Py_STACKREF_TAG(res);
@@ -6524,7 +6524,7 @@
             }
             else {
                 (void)value;
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 res = Py_True;
             }
             stack_pointer[-1] = Py_STACKREF_TAG(res);
@@ -6548,7 +6548,7 @@
             STAT_INC(TO_BOOL, hit);
             res = Py_SIZE(value) ? Py_True : Py_False;
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             stack_pointer[-1] = Py_STACKREF_TAG(res);
             DISPATCH();
         }
@@ -6596,7 +6596,7 @@
             else {
                 assert(Py_SIZE(value));
                 (void)value;
-                Py_DECREF_STACKREF(value_tagged);
+                Py_STACKREF_DECREF(value_tagged);
                 res = Py_True;
             }
             stack_pointer[-1] = Py_STACKREF_TAG(res);
@@ -6615,7 +6615,7 @@
 
             res = PyNumber_Invert(value);
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             if (res == NULL) goto pop_1_error;
             stack_pointer[-1] = Py_STACKREF_TAG(res);
             DISPATCH();
@@ -6633,7 +6633,7 @@
 
             res = PyNumber_Negative(value);
             (void)value;
-            Py_DECREF_STACKREF(value_tagged);
+            Py_STACKREF_DECREF(value_tagged);
             if (res == NULL) goto pop_1_error;
             stack_pointer[-1] = Py_STACKREF_TAG(res);
             DISPATCH();
@@ -6668,7 +6668,7 @@
             _PyStackRef *top = stack_pointer + totalargs - 1;
             int res = _PyEval_UnpackTaggedIterable(tstate, seq, oparg & 0xFF, oparg >> 8, top);
             (void)seq;
-            Py_DECREF_STACKREF(seq_tagged);
+            Py_STACKREF_DECREF(seq_tagged);
             if (res == 0) goto pop_1_error;
             stack_pointer += (oparg >> 8) + (oparg & 0xFF);
             DISPATCH();
@@ -6707,7 +6707,7 @@
                 _PyStackRef *top = stack_pointer + oparg - 1;
                 int res = _PyEval_UnpackTaggedIterable(tstate, seq, oparg, -1, top);
                 (void)seq;
-                Py_DECREF_STACKREF(seq_tagged);
+                Py_STACKREF_DECREF(seq_tagged);
                 if (res == 0) goto pop_1_error;
             }
             stack_pointer += -1 + oparg;
@@ -6732,10 +6732,10 @@
             STAT_INC(UNPACK_SEQUENCE, hit);
             PyObject **items = _PyList_ITEMS(seq);
             for (int i = oparg; --i >= 0; ) {
-                *values++ = Py_NewRef_StackRef(Py_STACKREF_TAG(items[i]));
+                *values++ = Py_StackRef_NewRef(Py_STACKREF_TAG(items[i]));
             }
             (void)seq;
-            Py_DECREF_STACKREF(seq_tagged);
+            Py_STACKREF_DECREF(seq_tagged);
             stack_pointer += -1 + oparg;
             DISPATCH();
         }
@@ -6758,10 +6758,10 @@
             STAT_INC(UNPACK_SEQUENCE, hit);
             PyObject **items = _PyTuple_ITEMS(seq);
             for (int i = oparg; --i >= 0; ) {
-                *values++ = Py_NewRef_StackRef(Py_STACKREF_TAG(items[i]));
+                *values++ = Py_StackRef_NewRef(Py_STACKREF_TAG(items[i]));
             }
             (void)seq;
-            Py_DECREF_STACKREF(seq_tagged);
+            Py_STACKREF_DECREF(seq_tagged);
             stack_pointer += -1 + oparg;
             DISPATCH();
         }
@@ -6786,7 +6786,7 @@
             val0 = Py_NewRef(PyTuple_GET_ITEM(seq, 0));
             val1 = Py_NewRef(PyTuple_GET_ITEM(seq, 1));
             (void)seq;
-            Py_DECREF_STACKREF(seq_tagged);
+            Py_STACKREF_DECREF(seq_tagged);
             stack_pointer[-1] = Py_STACKREF_TAG(val1);
             stack_pointer[0] = Py_STACKREF_TAG(val0);
             stack_pointer += 1;

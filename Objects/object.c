@@ -1570,14 +1570,14 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     *method = descr_tagged;
     descrgetfunc f = NULL;
     if (descr != NULL) {
-        Py_INCREF_STACKREF(descr_tagged);
+        Py_STACKREF_INCREF(descr_tagged);
         if (_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR)) {
             meth_found = 1;
         } else {
             f = Py_TYPE(descr)->tp_descr_get;
             if (f != NULL && PyDescr_IsData(descr)) {
                 *method = Py_STACKREF_TAG(f(descr, obj, (PyObject *)Py_TYPE(obj)));
-                Py_DECREF_STACKREF(descr_tagged);
+                Py_STACKREF_DECREF(descr_tagged);
                 return 0;
             }
         }
@@ -1587,7 +1587,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
         _PyObject_TryGetInstanceAttribute(obj, name, &attr)) {
         if (attr != NULL) {
             *method = Py_STACKREF_TAG(attr);
-            Py_XDECREF_STACKREF(descr_tagged);
+            Py_STACKREF_XDECREF(descr_tagged);
             return 0;
         }
         dict = NULL;
@@ -1611,7 +1611,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
             *method = Py_STACKREF_TAG(item);
             // found or error
             Py_DECREF(dict);
-            Py_XDECREF_STACKREF(descr_tagged);
+            Py_STACKREF_XDECREF(descr_tagged);
             return 0;
         }
         // not found
@@ -1625,7 +1625,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
 
     if (f != NULL) {
         *method = Py_STACKREF_TAG(f(descr, obj, (PyObject *)Py_TYPE(obj)));
-        Py_DECREF_STACKREF(descr_tagged);
+        Py_STACKREF_DECREF(descr_tagged);
         return 0;
     }
 
