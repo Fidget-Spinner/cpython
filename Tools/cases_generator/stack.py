@@ -190,7 +190,7 @@ class Stack:
             elif var.condition == "0":
                 return ("", )
             else:
-                return (f"if ({var.condition}) {{ {''.join(assign)} }}\n", )
+                return (f"if ({var.condition}) {{\n", *assign,  "}\n", )
         return (*assign, "\n")
 
     def push(self, var: StackItem) -> str:

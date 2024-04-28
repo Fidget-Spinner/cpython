@@ -4618,9 +4618,10 @@
             PyObject *start;
             PyObject *slice;
             oparg = CURRENT_OPARG();
-            if (oparg == 3) { step_tagged = stack_pointer[-((oparg == 3) ? 1 : 0)];
-step = Py_STACKREF_UNTAG_BORROWED(step_tagged);
- }
+            if (oparg == 3) {
+                step_tagged = stack_pointer[-((oparg == 3) ? 1 : 0)];
+                step = Py_STACKREF_UNTAG_BORROWED(step_tagged);
+            }
             stop_tagged = stack_pointer[-1 - ((oparg == 3) ? 1 : 0)];
             stop = Py_STACKREF_UNTAG_BORROWED(stop_tagged);
 

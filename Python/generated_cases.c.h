@@ -805,9 +805,10 @@
             _PyStackRef start_tagged;
             PyObject *start;
             PyObject *slice;
-            if (oparg == 3) { step_tagged = stack_pointer[-((oparg == 3) ? 1 : 0)];
-step = Py_STACKREF_UNTAG_BORROWED(step_tagged);
- }
+            if (oparg == 3) {
+                step_tagged = stack_pointer[-((oparg == 3) ? 1 : 0)];
+                step = Py_STACKREF_UNTAG_BORROWED(step_tagged);
+            }
             stop_tagged = stack_pointer[-1 - ((oparg == 3) ? 1 : 0)];
             stop = Py_STACKREF_UNTAG_BORROWED(stop_tagged);
 
@@ -1378,9 +1379,10 @@ step = Py_STACKREF_UNTAG_BORROWED(step_tagged);
             _PyStackRef func_tagged;
             PyObject *func;
             PyObject *result;
-            if (oparg & 1) { kwargs_tagged = stack_pointer[-(oparg & 1)];
-kwargs = Py_STACKREF_UNTAG_BORROWED(kwargs_tagged);
- }
+            if (oparg & 1) {
+                kwargs_tagged = stack_pointer[-(oparg & 1)];
+                kwargs = Py_STACKREF_UNTAG_BORROWED(kwargs_tagged);
+            }
             callargs_tagged = stack_pointer[-1 - (oparg & 1)];
             callargs = Py_STACKREF_UNTAG_BORROWED(callargs_tagged);
 
