@@ -108,7 +108,7 @@ _PyFrame_ClearLocals(_PyInterpreterFrame *frame)
         PyStackRef_XDECREF(frame->localsplus[i]);
     }
     frame->stacktop = 0;
-    PyStackRef_CLEAR(frame->f_locals);
+    Py_CLEAR(frame->f_locals);
 }
 
 void

@@ -3095,7 +3095,6 @@
             _PyStackRef iter_tagged;
             PyObject *iter;
             _PyInterpreterFrame *gen_frame;
-            _PyStackRef new_frame_tagged;
             _PyInterpreterFrame *new_frame;
             /* Skip 1 cache entry */
             // _CHECK_PEP_523
