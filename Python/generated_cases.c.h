@@ -1140,7 +1140,6 @@
             {
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.
-                (void)new_frame_tagged;
                 assert(tstate->interp->eval_frame == NULL);
                 stack_pointer += -2 - oparg;
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -2046,7 +2045,6 @@
             {
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.
-                (void)new_frame_tagged;
                 assert(tstate->interp->eval_frame == NULL);
                 stack_pointer += -2 - oparg;
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -3123,11 +3121,9 @@
             }
             // _PUSH_FRAME
             new_frame = gen_frame;
-            new_frame_tagged = PyStackRef_StealRef(gen_frame);
             {
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.
-                (void)new_frame_tagged;
                 assert(tstate->interp->eval_frame == NULL);
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 new_frame->previous = frame;

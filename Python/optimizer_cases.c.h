@@ -771,7 +771,7 @@
         case _YIELD_VALUE: {
             _Py_UopsSymbol *res;
             OUT_OF_SPACE_IF_NULL(res = sym_new_unknown(ctx));
-            stack_pointer[-1] = res;
+            stack_pointer[-1] = (res);
             break;
         }
 

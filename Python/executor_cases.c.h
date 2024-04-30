@@ -1343,10 +1343,11 @@
         /* _INSTRUMENTED_YIELD_VALUE is not a viable micro-op for tier 2 because it is instrumented */
 
         case _YIELD_VALUE: {
-            PyObject *retval;
-            PyObject *value;
+            _PyStackRef retval;
+            _PyStackRef value;
             oparg = CURRENT_OPARG();
             retval = stack_pointer[-1];
+
             // NOTE: It's important that YIELD_VALUE never raises an exception!
             // The compiler treats any exception raised here as a failed close()
             // or throw() call.
@@ -1378,7 +1379,7 @@
             LOAD_SP();
             value = retval;
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
+            stack_pointer[0] = (value);
             stack_pointer += 1;
             break;
         }
@@ -3361,10 +3362,13 @@
         }
 
         case _FOR_ITER_GEN_FRAME: {
+            _PyStackRef iter_tagged;
             PyObject *iter;
             _PyInterpreterFrame *gen_frame;
             oparg = CURRENT_OPARG();
-            iter = stack_pointer[-1];
+            iter_tagged = stack_pointer[-1];
+            iter = PyStackRef_Get(iter_tagged);
+
             PyGenObject *gen = (PyGenObject *)iter;
             if (Py_TYPE(gen) != &PyGen_Type) {
                 UOP_STAT_INC(uopcode, miss);
@@ -3376,13 +3380,13 @@
             }
             STAT_INC(FOR_ITER, hit);
             gen_frame = (_PyInterpreterFrame *)gen->gi_iframe;
-            _PyFrame_StackPush(gen_frame, Py_None);
+            _PyFrame_StackPush(gen_frame, PyStackRef_StealRef(Py_None));
             gen->gi_frame_state = FRAME_EXECUTING;
             gen->gi_exc_state.previous_item = tstate->exc_info;
             tstate->exc_info = &gen->gi_exc_state;
             // oparg is the return offset from the next instruction.
             frame->return_offset = (uint16_t)(1 + INLINE_CACHE_ENTRIES_FOR_ITER + oparg);
-            stack_pointer[0] = (PyObject *)gen_frame;
+            stack_pointer[0] = PyStackRef_StealRef((PyObject *)gen_frame);
             stack_pointer += 1;
             break;
         }

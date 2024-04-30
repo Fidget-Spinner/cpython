@@ -161,7 +161,7 @@ class Stack:
             else:
                 self.defined.add(var.name)
                 res = [f"{var.name} = {popped.name};\n"]
-                if not var.type or var.type.strip() != "_PyStackRef":
+                if not var.type:
                     res.append(f"{var.name}_tagged = PyStackRef_StealRef({popped.name});\n")
                 return tuple(res)
         self.base_offset.pop(var)
