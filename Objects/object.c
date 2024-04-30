@@ -1560,7 +1560,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     }
 
     PyObject *descr = _PyType_Lookup(tp, name);
-    _PyStackRef descr_tagged = PyStackRef_NewRefDeferred(descr);
+    _PyStackRef descr_tagged = PyStackRef_XNewRefDeferred(descr);
     // Directly set it to that if a GC cycle happens, the descriptor doesn't get
     // evaporated.
     // This is why we no longer need a strong reference for this if it's

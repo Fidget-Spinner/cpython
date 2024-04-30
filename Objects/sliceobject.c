@@ -154,6 +154,9 @@ _PyBuildSlice_Steal3(PyObject *start, PyObject *stop, PyObject *step)
     _PyObject_GC_TRACK(obj);
     return obj;
 error:
+    Py_DECREF(start);
+    Py_DECREF(stop);
+    Py_DECREF(step);
     return NULL;
 }
 
@@ -180,11 +183,6 @@ _PyBuildSlice_ConsumeStackRefs(_PyStackRef start, _PyStackRef stop)
     PyObject *res = (PyObject *)_PyBuildSlice_Steal3(PyStackRef_StealObject(start),
                                                      PyStackRef_StealObject(stop),
                                                      Py_None);
-    if (res == NULL) {
-        PyStackRef_DECREF_OWNED(start);
-        PyStackRef_DECREF_OWNED(stop);
-        return NULL;
-    }
     return res;
 }
 
