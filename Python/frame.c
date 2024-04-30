@@ -26,7 +26,7 @@ _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg)
             continue;
         }
 #endif
-        Py_VISIT(Py_STACKREF_UNTAG_BORROWED(locals[i]));
+        Py_VISIT(PyStackRef_Get(locals[i]));
     }
     return 0;
 }
@@ -122,7 +122,7 @@ _PyFrame_ClearExceptCode(_PyInterpreterFrame *frame)
     }
     assert(frame->stacktop >= 0);
     for (int i = 0; i < frame->stacktop; i++) {
-        Py_STACKREF_XDECREF(frame->localsplus[i]);
+        PyStackRef_XDECREF(frame->localsplus[i]);
     }
     Py_XDECREF(frame->f_locals);
     Py_DECREF(frame->f_funcobj);

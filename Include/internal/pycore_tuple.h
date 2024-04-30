@@ -8,7 +8,7 @@ extern "C" {
 #  error "this header requires Py_BUILD_CORE define"
 #endif
 
-#include "pycore_tagged.h" // _PyStackRef
+#include "pycore_stackref.h" // _PyStackRef
 
 extern void _PyTuple_MaybeUntrack(PyObject *);
 extern void _PyTuple_DebugMallocStats(FILE *out);

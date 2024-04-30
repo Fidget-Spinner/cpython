@@ -15,7 +15,7 @@
 #include "pycore_tstate.h"        // _PyThreadStateImpl
 #include "pycore_weakref.h"       // _PyWeakref_ClearRef()
 #include "pydtrace.h"
-#include "pycore_tagged.h"
+#include "pycore_stackref.h"
 
 #ifdef Py_GIL_DISABLED
 
@@ -316,7 +316,7 @@ gc_visit_thread_stacks(struct _stoptheworld_state *stw)
                     // Otherwise we might read into invalid memory due to non-deferred references
                     // being dead already.
                     if ((curr_o.bits & Py_TAG_DEFERRED) == Py_TAG_DEFERRED) {
-                        gc_add_refs(Py_STACKREF_UNTAG_BORROWED(curr_o), 1);
+                        gc_add_refs(PyStackRef_Get(curr_o), 1);
                     }
                 }
             }
@@ -653,7 +653,7 @@ clear_weakrefs(struct collection_state *state)
                 // Otherwise we might read into invalid memory due to non-deferred references
                 // being dead already.
                 if ((curr_o.bits & Py_TAG_DEFERRED) == Py_TAG_DEFERRED) {
-                    gc_add_refs(Py_STACKREF_UNTAG_BORROWED(curr_o), 1);
+                    gc_add_refs(PyStackRef_Get(curr_o), 1);
                 }
             }
         }

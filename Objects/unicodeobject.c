@@ -9751,6 +9751,8 @@ _PyUnicode_JoinStack_Slow(PyObject *separator, _PyStackRef const *tagged, Py_ssi
     return res;
 }
 
+#define MAX_UNTAG_SCRATCH 10
+
 PyObject *
 _PyUnicode_JoinStack(PyObject *separator, _PyStackRef const *items_tagged, Py_ssize_t seqlen)
 {

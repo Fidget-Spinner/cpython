@@ -1545,7 +1545,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
 
     int meth_found = 0;
 
-    assert(Py_STACKREF_UNTAG_BORROWED(*method) == NULL);
+    assert(PyStackRef_Get(*method) == NULL);
 
     PyTypeObject *tp = Py_TYPE(obj);
     if (!_PyType_IsReady(tp)) {
@@ -1555,12 +1555,12 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     }
 
     if (tp->tp_getattro != PyObject_GenericGetAttr || !PyUnicode_CheckExact(name)) {
-        *method = Py_STACKREF_TAG(PyObject_GetAttr(obj, name));
+        *method = PyStackRef_StealRef(PyObject_GetAttr(obj, name));
         return 0;
     }
 
     PyObject *descr = _PyType_Lookup(tp, name);
-    _PyStackRef descr_tagged = Py_STACKREF_TAG_DEFERRED(descr);
+    _PyStackRef descr_tagged = PyStackRef_NewRefDeferred(descr);
     // Directly set it to that if a GC cycle happens, the descriptor doesn't get
     // evaporated.
     // This is why we no longer need a strong reference for this if it's
@@ -1570,14 +1570,13 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     *method = descr_tagged;
     descrgetfunc f = NULL;
     if (descr != NULL) {
-        Py_STACKREF_INCREF(descr_tagged);
         if (_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR)) {
             meth_found = 1;
         } else {
             f = Py_TYPE(descr)->tp_descr_get;
             if (f != NULL && PyDescr_IsData(descr)) {
-                *method = Py_STACKREF_TAG(f(descr, obj, (PyObject *)Py_TYPE(obj)));
-                Py_STACKREF_DECREF(descr_tagged);
+                *method = PyStackRef_StealRef(f(descr, obj, (PyObject *)Py_TYPE(obj)));
+                PyStackRef_DECREF(descr_tagged);
                 return 0;
             }
         }
@@ -1586,8 +1585,8 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     if ((tp->tp_flags & Py_TPFLAGS_INLINE_VALUES) &&
         _PyObject_TryGetInstanceAttribute(obj, name, &attr)) {
         if (attr != NULL) {
-            *method = Py_STACKREF_TAG(attr);
-            Py_STACKREF_XDECREF(descr_tagged);
+            *method = PyStackRef_StealRef(attr);
+            PyStackRef_XDECREF(descr_tagged);
             return 0;
         }
         dict = NULL;
@@ -1608,10 +1607,10 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
         Py_INCREF(dict);
         PyObject *item;
         if (PyDict_GetItemRef(dict, name, &item) != 0) {
-            *method = Py_STACKREF_TAG(item);
+            *method = PyStackRef_StealRef(item);
             // found or error
             Py_DECREF(dict);
-            Py_STACKREF_XDECREF(descr_tagged);
+            PyStackRef_XDECREF(descr_tagged);
             return 0;
         }
         // not found
@@ -1624,8 +1623,8 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     }
 
     if (f != NULL) {
-        *method = Py_STACKREF_TAG(f(descr, obj, (PyObject *)Py_TYPE(obj)));
-        Py_STACKREF_DECREF(descr_tagged);
+        *method = PyStackRef_StealRef(f(descr, obj, (PyObject *)Py_TYPE(obj)));
+        PyStackRef_DECREF(descr_tagged);
         return 0;
     }
 
@@ -1634,7 +1633,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
         return 0;
     }
 
-    *method = Py_STACKREF_TAG(NULL);
+    *method = PyStackRef_StealRef(NULL);
     PyErr_Format(PyExc_AttributeError,
                  "'%.100s' object has no attribute '%U'",
                  tp->tp_name, name);

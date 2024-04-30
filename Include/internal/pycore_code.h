@@ -8,7 +8,7 @@ extern "C" {
 #  error "this header requires Py_BUILD_CORE define"
 #endif
 
-#include "pycore_tagged.h" // _PyStackRef
+#include "pycore_stackref.h" // _PyStackRef
 
 // We hide some of the newer PyCodeObject fields behind macros.
 // This helps with backporting certain changes to 3.12.

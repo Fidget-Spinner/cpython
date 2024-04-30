@@ -11,7 +11,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>               // offsetof()
 #include "pycore_code.h"          // STATS
-#include "pycore_tagged.h"        // _PyStackRef
+#include "pycore_stackref.h"        // _PyStackRef
 
 /* See Objects/frame_layout.md for an explanation of the frame stack
  * including explanation of the PyFrameObject and _PyInterpreterFrame
@@ -85,7 +85,7 @@ static inline _PyStackRef *_PyFrame_Stackbase(_PyInterpreterFrame *f) {
 
 static inline _PyStackRef _PyFrame_StackPeek(_PyInterpreterFrame *f) {
     assert(f->stacktop > _PyFrame_GetCode(f)->co_nlocalsplus);
-    assert(Py_STACKREF_UNTAG_BORROWED(f->localsplus[f->stacktop-1]) != NULL);
+    assert(PyStackRef_Get(f->localsplus[f->stacktop-1]) != NULL);
     return f->localsplus[f->stacktop-1];
 }
 
@@ -124,7 +124,7 @@ static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *
 #ifdef Py_GIL_DISABLED
     PyCodeObject *co = (PyCodeObject *)dest->f_executable;
     for (int i = src->stacktop; i < co->co_nlocalsplus + co->co_stacksize; i++) {
-        dest->localsplus[i] = Py_STACKREF_TAG(NULL);
+        dest->localsplus[i] = PyStackRef_StealRef(NULL);
     }
 #endif
 }
@@ -150,7 +150,7 @@ _PyFrame_Initialize(
     frame->owner = FRAME_OWNED_BY_THREAD;
 
     for (int i = null_locals_from; i < code->co_nlocalsplus; i++) {
-        frame->localsplus[i] = Py_STACKREF_TAG(NULL);
+        frame->localsplus[i] = PyStackRef_StealRef(NULL);
     }
 
 #ifdef Py_GIL_DISABLED
@@ -159,7 +159,7 @@ _PyFrame_Initialize(
     // no choice but to traverse the entire stack.
     // This just makes sure we don't pass the GC invalid stack values.
     for (int i = code->co_nlocalsplus; i < code->co_nlocalsplus + code->co_stacksize; i++) {
-        frame->localsplus[i] = Py_STACKREF_TAG(NULL);
+        frame->localsplus[i] = PyStackRef_StealRef(NULL);
     }
 #endif
 }
@@ -324,7 +324,7 @@ _PyFrame_PushTrampolineUnchecked(PyThreadState *tstate, PyCodeObject *code, int 
 #ifdef Py_GIL_DISABLED
     assert(code->co_nlocalsplus == 0);
     for (int i = 0; i < code->co_stacksize; i++) {
-        frame->localsplus[i] = Py_STACKREF_TAG(NULL);
+        frame->localsplus[i] = PyStackRef_StealRef(NULL);
     }
 #endif
     return frame;

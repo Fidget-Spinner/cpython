@@ -2123,7 +2123,7 @@ _PyDict_FromStackItems(_PyStackRef const *keys, Py_ssize_t keys_offset,
     PyInterpreterState *interp = _PyInterpreterState_GET();
 
     for (Py_ssize_t i = 0; i < length; i++) {
-        if (!PyUnicode_CheckExact(Py_STACKREF_UNTAG_BORROWED(*ks))) {
+        if (!PyUnicode_CheckExact(PyStackRef_Get(*ks))) {
             unicode = false;
             break;
         }
@@ -2139,8 +2139,8 @@ _PyDict_FromStackItems(_PyStackRef const *keys, Py_ssize_t keys_offset,
     _PyStackRef const *vs = values;
 
     for (Py_ssize_t i = 0; i < length; i++) {
-        PyObject *key = Py_STACKREF_UNTAG_BORROWED(*ks);
-        PyObject *value = Py_STACKREF_UNTAG_BORROWED(*vs);
+        PyObject *key = PyStackRef_Get(*ks);
+        PyObject *value = PyStackRef_Get(*vs);
         if (setitem_lock_held((PyDictObject *)dict, key, value) < 0) {
             Py_DECREF(dict);
             return NULL;
@@ -2180,7 +2180,7 @@ _PyDict_FromStackItemsUntaggedKeys(
 
     for (Py_ssize_t i = 0; i < length; i++) {
         PyObject *key = *ks;
-        PyObject *value = Py_STACKREF_UNTAG_BORROWED(*vs);
+        PyObject *value = PyStackRef_Get(*vs);
         if (setitem_lock_held((PyDictObject *)dict, key, value) < 0) {
             Py_DECREF(dict);
             return NULL;
