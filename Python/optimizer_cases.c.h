@@ -56,10 +56,10 @@
         }
 
         case _STORE_FAST: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             GETLOCAL(oparg) = value;
             stack_pointer += -1;
@@ -108,11 +108,11 @@
         }
 
         case _TO_BOOL: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
             _Py_UopsSymbol *res;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             if (optimize_to_bool(this_instr, ctx, value, &res)) {
                 OUT_OF_SPACE_IF_NULL(res);
@@ -126,11 +126,11 @@
         }
 
         case _TO_BOOL_BOOL: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
             _Py_UopsSymbol *res;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             if (optimize_to_bool(this_instr, ctx, value, &res)) {
                 OUT_OF_SPACE_IF_NULL(res);
@@ -146,11 +146,11 @@
         }
 
         case _TO_BOOL_INT: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
             _Py_UopsSymbol *res;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             if (optimize_to_bool(this_instr, ctx, value, &res)) {
                 OUT_OF_SPACE_IF_NULL(res);
@@ -166,11 +166,11 @@
         }
 
         case _TO_BOOL_LIST: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
             _Py_UopsSymbol *res;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             if (optimize_to_bool(this_instr, ctx, value, &res)) {
                 OUT_OF_SPACE_IF_NULL(res);
@@ -186,11 +186,11 @@
         }
 
         case _TO_BOOL_NONE: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
             _Py_UopsSymbol *res;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             if (optimize_to_bool(this_instr, ctx, value, &res)) {
                 OUT_OF_SPACE_IF_NULL(res);
@@ -206,11 +206,11 @@
         }
 
         case _TO_BOOL_STR: {
-            _Py_UopsSymbol *value_tagged;
+            _Py_UopsSymbol *value_stackref;
             _Py_UopsSymbol *value;
             _Py_UopsSymbol *res;
-            value_tagged = stack_pointer[-1];
-            value = (value_tagged);
+            value_stackref = stack_pointer[-1];
+            value = (value_stackref);
 
             if (optimize_to_bool(this_instr, ctx, value, &res)) {
                 OUT_OF_SPACE_IF_NULL(res);
@@ -242,15 +242,15 @@
         }
 
         case _GUARD_BOTH_INT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_matches_type(left, &PyLong_Type)) {
                 if (sym_matches_type(right, &PyLong_Type)) {
@@ -283,16 +283,16 @@
         }
 
         case _BINARY_OP_MULTIPLY_INT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
@@ -319,16 +319,16 @@
         }
 
         case _BINARY_OP_ADD_INT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
@@ -355,16 +355,16 @@
         }
 
         case _BINARY_OP_SUBTRACT_INT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
@@ -391,15 +391,15 @@
         }
 
         case _GUARD_BOTH_FLOAT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_matches_type(left, &PyFloat_Type)) {
                 if (sym_matches_type(right, &PyFloat_Type)) {
@@ -432,16 +432,16 @@
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyFloat_Type) && sym_matches_type(right, &PyFloat_Type))
@@ -469,16 +469,16 @@
         }
 
         case _BINARY_OP_ADD_FLOAT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyFloat_Type) && sym_matches_type(right, &PyFloat_Type))
@@ -506,16 +506,16 @@
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyFloat_Type) && sym_matches_type(right, &PyFloat_Type))
@@ -543,15 +543,15 @@
         }
 
         case _GUARD_BOTH_UNICODE: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_matches_type(left, &PyUnicode_Type) &&
                 sym_matches_type(right, &PyUnicode_Type)) {
@@ -567,16 +567,16 @@
         }
 
         case _BINARY_OP_ADD_UNICODE: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             if (sym_is_const(left) && sym_is_const(right) &&
                 sym_matches_type(left, &PyUnicode_Type) && sym_matches_type(right, &PyUnicode_Type)) {
@@ -705,11 +705,11 @@
         }
 
         case _POP_FRAME: {
-            _Py_UopsSymbol *retval_tagged;
+            _Py_UopsSymbol *retval_stackref;
             _Py_UopsSymbol *retval;
             _Py_UopsSymbol *res;
-            retval_tagged = stack_pointer[-1];
-            retval = (retval_tagged);
+            retval_stackref = stack_pointer[-1];
+            retval = (retval_stackref);
 
             stack_pointer += -1;
             ctx->frame->stack_pointer = stack_pointer;
@@ -808,11 +808,11 @@
         }
 
         case _UNPACK_SEQUENCE: {
-            _Py_UopsSymbol *seq_tagged;
+            _Py_UopsSymbol *seq_stackref;
             _Py_UopsSymbol *seq;
             _Py_UopsSymbol **values;
-            seq_tagged = stack_pointer[-1];
-            seq = (seq_tagged);
+            seq_stackref = stack_pointer[-1];
+            seq = (seq_stackref);
 
             values = &stack_pointer[-1];
             /* This has to be done manually */
@@ -860,11 +860,11 @@
         }
 
         case _UNPACK_EX: {
-            _Py_UopsSymbol *seq_tagged;
+            _Py_UopsSymbol *seq_stackref;
             _Py_UopsSymbol *seq;
             _Py_UopsSymbol **values;
-            seq_tagged = stack_pointer[-1];
-            seq = (seq_tagged);
+            seq_stackref = stack_pointer[-1];
+            seq = (seq_stackref);
 
             values = &stack_pointer[-1];
             /* This has to be done manually */
@@ -1101,12 +1101,12 @@
         }
 
         case _LOAD_ATTR: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *self_or_null = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             (void)owner;
             OUT_OF_SPACE_IF_NULL(attr = sym_new_not_null(ctx));
@@ -1128,12 +1128,12 @@
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *null = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             uint16_t index = (uint16_t)this_instr->operand;
             _LOAD_ATTR_NOT_NULL
@@ -1146,10 +1146,10 @@
         }
 
         case _CHECK_ATTR_MODULE: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             uint32_t dict_version = (uint32_t)this_instr->operand;
             (void)dict_version;
@@ -1170,12 +1170,12 @@
         }
 
         case _LOAD_ATTR_MODULE: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *null = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             uint16_t index = (uint16_t)this_instr->operand;
             (void)index;
@@ -1208,12 +1208,12 @@
         }
 
         case _LOAD_ATTR_WITH_HINT: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *null = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             uint16_t hint = (uint16_t)this_instr->operand;
             _LOAD_ATTR_NOT_NULL
@@ -1226,12 +1226,12 @@
         }
 
         case _LOAD_ATTR_SLOT: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *null = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             uint16_t index = (uint16_t)this_instr->operand;
             _LOAD_ATTR_NOT_NULL
@@ -1248,12 +1248,12 @@
         }
 
         case _LOAD_ATTR_CLASS: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *null = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             PyObject *descr = (PyObject *)this_instr->operand;
             _LOAD_ATTR_NOT_NULL
@@ -1286,16 +1286,16 @@
         }
 
         case _COMPARE_OP: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             (void)left;
             (void)right;
@@ -1311,16 +1311,16 @@
         }
 
         case _COMPARE_OP_FLOAT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             (void)left;
             (void)right;
@@ -1331,16 +1331,16 @@
         }
 
         case _COMPARE_OP_INT: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             (void)left;
             (void)right;
@@ -1351,16 +1351,16 @@
         }
 
         case _COMPARE_OP_STR: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             (void)left;
             (void)right;
@@ -1371,16 +1371,16 @@
         }
 
         case _IS_OP: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             (void)left;
             (void)right;
@@ -1391,16 +1391,16 @@
         }
 
         case _CONTAINS_OP: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             (void)left;
             (void)right;
@@ -1583,11 +1583,11 @@
         }
 
         case _ITER_NEXT_RANGE: {
-            _Py_UopsSymbol *iter_tagged;
+            _Py_UopsSymbol *iter_stackref;
             _Py_UopsSymbol *iter;
             _Py_UopsSymbol *next;
-            iter_tagged = stack_pointer[-1];
-            iter = (iter_tagged);
+            iter_stackref = stack_pointer[-1];
+            iter = (iter_stackref);
 
             OUT_OF_SPACE_IF_NULL(next = sym_new_type(ctx, &PyLong_Type));
             (void)iter;
@@ -1637,12 +1637,12 @@
         }
 
         case _LOAD_ATTR_METHOD_WITH_VALUES: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *self = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             PyObject *descr = (PyObject *)this_instr->operand;
             (void)descr;
@@ -1655,12 +1655,12 @@
         }
 
         case _LOAD_ATTR_METHOD_NO_DICT: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *self = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             PyObject *descr = (PyObject *)this_instr->operand;
             (void)descr;
@@ -1693,12 +1693,12 @@
         }
 
         case _LOAD_ATTR_METHOD_LAZY_DICT: {
-            _Py_UopsSymbol *owner_tagged;
+            _Py_UopsSymbol *owner_stackref;
             _Py_UopsSymbol *owner;
             _Py_UopsSymbol *attr;
             _Py_UopsSymbol *self = NULL;
-            owner_tagged = stack_pointer[-1];
-            owner = (owner_tagged);
+            owner_stackref = stack_pointer[-1];
+            owner = (owner_stackref);
 
             PyObject *descr = (PyObject *)this_instr->operand;
             (void)descr;
@@ -1719,15 +1719,15 @@
         }
 
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
-            _Py_UopsSymbol *null_tagged;
+            _Py_UopsSymbol *null_stackref;
             _Py_UopsSymbol *null;
-            _Py_UopsSymbol *callable_tagged;
+            _Py_UopsSymbol *callable_stackref;
             _Py_UopsSymbol *callable;
-            null_tagged = stack_pointer[-1 - oparg];
-            null = (null_tagged);
+            null_stackref = stack_pointer[-1 - oparg];
+            null = (null_stackref);
 
-            callable_tagged = stack_pointer[-2 - oparg];
-            callable = (callable_tagged);
+            callable_stackref = stack_pointer[-2 - oparg];
+            callable = (callable_stackref);
 
             if (!sym_set_null(null)) {
                 goto hit_bottom;
@@ -1739,12 +1739,12 @@
         }
 
         case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
-            _Py_UopsSymbol *callable_tagged;
+            _Py_UopsSymbol *callable_stackref;
             _Py_UopsSymbol *callable;
             _Py_UopsSymbol *func;
             _Py_UopsSymbol *self;
-            callable_tagged = stack_pointer[-2 - oparg];
-            callable = (callable_tagged);
+            callable_stackref = stack_pointer[-2 - oparg];
+            callable = (callable_stackref);
 
             (void)callable;
             OUT_OF_SPACE_IF_NULL(func = sym_new_not_null(ctx));
@@ -1764,15 +1764,15 @@
         }
 
         case _CHECK_FUNCTION_EXACT_ARGS: {
-            _Py_UopsSymbol *self_or_null_tagged;
+            _Py_UopsSymbol *self_or_null_stackref;
             _Py_UopsSymbol *self_or_null;
-            _Py_UopsSymbol *callable_tagged;
+            _Py_UopsSymbol *callable_stackref;
             _Py_UopsSymbol *callable;
-            self_or_null_tagged = stack_pointer[-1 - oparg];
-            self_or_null = (self_or_null_tagged);
+            self_or_null_stackref = stack_pointer[-1 - oparg];
+            self_or_null = (self_or_null_stackref);
 
-            callable_tagged = stack_pointer[-2 - oparg];
-            callable = (callable_tagged);
+            callable_stackref = stack_pointer[-2 - oparg];
+            callable = (callable_stackref);
 
             uint32_t func_version = (uint32_t)this_instr->operand;
             if (!sym_set_type(callable, &PyFunction_Type)) {
@@ -1791,17 +1791,17 @@
 
         case _INIT_CALL_PY_EXACT_ARGS: {
             _Py_UopsSymbol **args;
-            _Py_UopsSymbol *self_or_null_tagged;
+            _Py_UopsSymbol *self_or_null_stackref;
             _Py_UopsSymbol *self_or_null;
-            _Py_UopsSymbol *callable_tagged;
+            _Py_UopsSymbol *callable_stackref;
             _Py_UopsSymbol *callable;
             _Py_UOpsAbstractFrame *new_frame;
             args = &stack_pointer[-oparg];
-            self_or_null_tagged = stack_pointer[-1 - oparg];
-            self_or_null = (self_or_null_tagged);
+            self_or_null_stackref = stack_pointer[-1 - oparg];
+            self_or_null = (self_or_null_stackref);
 
-            callable_tagged = stack_pointer[-2 - oparg];
-            callable = (callable_tagged);
+            callable_stackref = stack_pointer[-2 - oparg];
+            callable = (callable_stackref);
 
             int argcount = oparg;
             (void)callable;
@@ -1848,10 +1848,10 @@
         }
 
         case _PUSH_FRAME: {
-            _Py_UopsSymbol *new_frame_tagged;
+            _Py_UopsSymbol *new_frame_stackref;
             _Py_UOpsAbstractFrame *new_frame;
-            new_frame_tagged = stack_pointer[-1];
-            new_frame = (_Py_UOpsAbstractFrame *)(new_frame_tagged);
+            new_frame_stackref = stack_pointer[-1];
+            new_frame = (_Py_UOpsAbstractFrame *)(new_frame_stackref);
 
             stack_pointer += -1;
             ctx->frame->stack_pointer = stack_pointer;
@@ -2092,11 +2092,11 @@
         }
 
         case _COPY: {
-            _Py_UopsSymbol *bottom_tagged;
+            _Py_UopsSymbol *bottom_stackref;
             _Py_UopsSymbol *bottom;
             _Py_UopsSymbol *top;
-            bottom_tagged = stack_pointer[-1 - (oparg-1)];
-            bottom = (bottom_tagged);
+            bottom_stackref = stack_pointer[-1 - (oparg-1)];
+            bottom = (bottom_stackref);
 
             assert(oparg > 0);
             top = bottom;
@@ -2106,16 +2106,16 @@
         }
 
         case _BINARY_OP: {
-            _Py_UopsSymbol *right_tagged;
+            _Py_UopsSymbol *right_stackref;
             _Py_UopsSymbol *right;
-            _Py_UopsSymbol *left_tagged;
+            _Py_UopsSymbol *left_stackref;
             _Py_UopsSymbol *left;
             _Py_UopsSymbol *res;
-            right_tagged = stack_pointer[-1];
-            right = (right_tagged);
+            right_stackref = stack_pointer[-1];
+            right = (right_stackref);
 
-            left_tagged = stack_pointer[-2];
-            left = (left_tagged);
+            left_stackref = stack_pointer[-2];
+            left = (left_stackref);
 
             PyTypeObject *ltype = sym_get_type(left);
             PyTypeObject *rtype = sym_get_type(right);
@@ -2139,15 +2139,15 @@
         }
 
         case _SWAP: {
-            _Py_UopsSymbol *top_tagged;
+            _Py_UopsSymbol *top_stackref;
             _Py_UopsSymbol *top;
-            _Py_UopsSymbol *bottom_tagged;
+            _Py_UopsSymbol *bottom_stackref;
             _Py_UopsSymbol *bottom;
-            top_tagged = stack_pointer[-1];
-            top = (top_tagged);
+            top_stackref = stack_pointer[-1];
+            top = (top_stackref);
 
-            bottom_tagged = stack_pointer[-2 - (oparg-2)];
-            bottom = (bottom_tagged);
+            bottom_stackref = stack_pointer[-2 - (oparg-2)];
+            bottom = (bottom_stackref);
 
             stack_pointer[-2 - (oparg-2)] = (top);
             stack_pointer[-1] = (bottom);
@@ -2169,10 +2169,10 @@
         /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE is not a viable micro-op for tier 2 */
 
         case _GUARD_IS_TRUE_POP: {
-            _Py_UopsSymbol *flag_tagged;
+            _Py_UopsSymbol *flag_stackref;
             _Py_UopsSymbol *flag;
-            flag_tagged = stack_pointer[-1];
-            flag = (flag_tagged);
+            flag_stackref = stack_pointer[-1];
+            flag = (flag_stackref);
 
             if (sym_is_const(flag)) {
                 PyObject *value = sym_get_const(flag);
@@ -2184,10 +2184,10 @@
         }
 
         case _GUARD_IS_FALSE_POP: {
-            _Py_UopsSymbol *flag_tagged;
+            _Py_UopsSymbol *flag_stackref;
             _Py_UopsSymbol *flag;
-            flag_tagged = stack_pointer[-1];
-            flag = (flag_tagged);
+            flag_stackref = stack_pointer[-1];
+            flag = (flag_stackref);
 
             if (sym_is_const(flag)) {
                 PyObject *value = sym_get_const(flag);
@@ -2199,10 +2199,10 @@
         }
 
         case _GUARD_IS_NONE_POP: {
-            _Py_UopsSymbol *flag_tagged;
+            _Py_UopsSymbol *flag_stackref;
             _Py_UopsSymbol *flag;
-            flag_tagged = stack_pointer[-1];
-            flag = (flag_tagged);
+            flag_stackref = stack_pointer[-1];
+            flag = (flag_stackref);
 
             if (sym_is_const(flag)) {
                 PyObject *value = sym_get_const(flag);
@@ -2218,10 +2218,10 @@
         }
 
         case _GUARD_IS_NOT_NONE_POP: {
-            _Py_UopsSymbol *flag_tagged;
+            _Py_UopsSymbol *flag_stackref;
             _Py_UopsSymbol *flag;
-            flag_tagged = stack_pointer[-1];
-            flag = (flag_tagged);
+            flag_stackref = stack_pointer[-1];
+            flag = (flag_stackref);
 
             if (sym_is_const(flag)) {
                 PyObject *value = sym_get_const(flag);

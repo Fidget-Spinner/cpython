@@ -310,7 +310,7 @@ gc_visit_thread_stacks(struct _stoptheworld_state *stw)
             // f_executable could be Py_None for the entry frame.
             if (PyCode_Check(curr_frame->f_executable)) {
                 PyCodeObject *co = (PyCodeObject *)curr_frame->f_executable;
-                for (int i = 0; i < curr_frame->stacktop; i++) {
+                for (int i = 0; i < co->co_nlocalsplus + co->co_stacksize; i++) {
                     _PyStackRef curr_o = curr_frame->localsplus[i];
                     // Note: we MUST check that it has deferred bit set before checking the rest.
                     // Otherwise we might read into invalid memory due to non-deferred references

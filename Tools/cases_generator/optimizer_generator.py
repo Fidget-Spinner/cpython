@@ -51,11 +51,11 @@ def declare_variables(uop: Uop, out: CWriter, skip_inputs: bool) -> None:
                 variables.add(var.name)
                 if var.condition:
                     if not var.is_array():
-                        out.emit(f"{type_name(var, tagged=True)}{var.name}_tagged = NULL;\n")
+                        out.emit(f"{type_name(var, tagged=True)}{var.name}_stackref = NULL;\n")
                     out.emit(f"{type_name(var)}{var.name} = NULL;\n")
                 else:
                     if not var.is_array():
-                        out.emit(f"{type_name(var, tagged=True)}{var.name}_tagged;\n")
+                        out.emit(f"{type_name(var, tagged=True)}{var.name}_stackref;\n")
                     out.emit(f"{type_name(var)}{var.name};\n")
     for var in uop.stack.outputs:
         if var.peek:

@@ -1560,14 +1560,14 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     }
 
     PyObject *descr = _PyType_Lookup(tp, name);
-    _PyStackRef descr_tagged = PyStackRef_XNewRefDeferred(descr);
+    _PyStackRef descr_stackref = PyStackRef_XNewRefDeferred(descr);
     // Directly set it to that if a GC cycle happens, the descriptor doesn't get
     // evaporated.
     // This is why we no longer need a strong reference for this if it's
     // deferred.
     // Note: all refcounting operations after this MUST be on descr_tagged
     // instead of descr.
-    *method = descr_tagged;
+    *method = descr_stackref;
     descrgetfunc f = NULL;
     if (descr != NULL) {
         if (_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR)) {
@@ -1576,7 +1576,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
             f = Py_TYPE(descr)->tp_descr_get;
             if (f != NULL && PyDescr_IsData(descr)) {
                 *method = PyStackRef_StealRef(f(descr, obj, (PyObject *)Py_TYPE(obj)));
-                PyStackRef_DECREF(descr_tagged);
+                PyStackRef_DECREF(descr_stackref);
                 return 0;
             }
         }
@@ -1586,7 +1586,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
         _PyObject_TryGetInstanceAttribute(obj, name, &attr)) {
         if (attr != NULL) {
             *method = PyStackRef_StealRef(attr);
-            PyStackRef_XDECREF(descr_tagged);
+            PyStackRef_XDECREF(descr_stackref);
             return 0;
         }
         dict = NULL;
@@ -1610,7 +1610,7 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
             *method = PyStackRef_StealRef(item);
             // found or error
             Py_DECREF(dict);
-            PyStackRef_XDECREF(descr_tagged);
+            PyStackRef_XDECREF(descr_stackref);
             return 0;
         }
         // not found
@@ -1618,18 +1618,18 @@ _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method)
     }
 
     if (meth_found) {
-        *method = descr_tagged;
+        *method = descr_stackref;
         return 1;
     }
 
     if (f != NULL) {
         *method = PyStackRef_StealRef(f(descr, obj, (PyObject *)Py_TYPE(obj)));
-        PyStackRef_DECREF(descr_tagged);
+        PyStackRef_DECREF(descr_stackref);
         return 0;
     }
 
     if (descr != NULL) {
-        *method = descr_tagged;
+        *method = descr_stackref;
         return 0;
     }
 

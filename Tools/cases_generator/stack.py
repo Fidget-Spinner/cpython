@@ -149,8 +149,8 @@ class Stack:
                     type = var.type or ""
                     if type.strip() != "_PyStackRef":
                         return (
-                            f"{var.name}_tagged = stack_pointer[{self.top_offset.to_c()}];\n",
-                            f"{var.name} = {untag}({var.name}_tagged);\n",
+                            f"{var.name}_stackref = stack_pointer[{self.top_offset.to_c()}];\n",
+                            f"{var.name} = {untag}({var.name}_stackref);\n",
                         )
                     else:
                         return (
@@ -162,7 +162,7 @@ class Stack:
                 self.defined.add(var.name)
                 res = [f"{var.name} = {popped.name};\n"]
                 if not var.type:
-                    res.append(f"{var.name}_tagged = PyStackRef_StealRef({popped.name});\n")
+                    res.append(f"{var.name}_stackref = PyStackRef_StealRef({popped.name});\n")
                 return tuple(res)
         self.base_offset.pop(var)
         if var.name in UNUSED:
@@ -177,8 +177,8 @@ class Stack:
         else:
             if (var.type or "").strip() != "_PyStackRef":
                 assign = (
-                    f"{var.name}_tagged = stack_pointer[{self.base_offset.to_c()}];\n",
-                    f"{var.name} = {cast}{untag}({var.name}_tagged);\n",
+                    f"{var.name}_stackref = stack_pointer[{self.base_offset.to_c()}];\n",
+                    f"{var.name} = {cast}{untag}({var.name}_stackref);\n",
                 )
             else:
                 assign = (

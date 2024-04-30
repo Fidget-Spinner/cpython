@@ -295,7 +295,7 @@ dummy_func(
 
         pure inst(END_SEND, (receiver, value -- value)) {
             (void)receiver;
-            PyStackRef_DECREF(receiver_tagged);
+            PyStackRef_DECREF(receiver_stackref);
         }
 
         tier1 inst(INSTRUMENTED_END_SEND, (receiver, value -- value)) {
@@ -306,7 +306,7 @@ dummy_func(
                 }
                 PyErr_SetRaisedException(NULL);
             }
-            PyStackRef_DECREF(receiver_tagged);
+            PyStackRef_DECREF(receiver_stackref);
         }
 
         inst(UNARY_NEGATIVE, (value -- res)) {
@@ -635,7 +635,7 @@ dummy_func(
             assert(res != NULL);
             Py_INCREF(res);
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            PyStackRef_DECREF(list_tagged);
+            PyStackRef_DECREF(list_stackref);
         }
 
         inst(BINARY_SUBSCR_STR_INT, (unused/1, str, sub -- res)) {
@@ -650,7 +650,7 @@ dummy_func(
             STAT_INC(BINARY_SUBSCR, hit);
             res = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            PyStackRef_DECREF(str_tagged);
+            PyStackRef_DECREF(str_stackref);
         }
 
         inst(BINARY_SUBSCR_TUPLE_INT, (unused/1, tuple, sub -- res)) {
@@ -666,7 +666,7 @@ dummy_func(
             assert(res != NULL);
             Py_INCREF(res);
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            PyStackRef_DECREF(tuple_tagged);
+            PyStackRef_DECREF(tuple_stackref);
         }
 
         inst(BINARY_SUBSCR_DICT, (unused/1, dict, sub -- res)) {
@@ -698,7 +698,7 @@ dummy_func(
             Py_INCREF(getitem);
             _PyInterpreterFrame *new_frame = _PyFrame_PushUnchecked(tstate, getitem, 2);
             STACK_SHRINK(2);
-            new_frame->localsplus[0] = container_tagged;
+            new_frame->localsplus[0] = container_stackref;
             new_frame->localsplus[1] = sub;
             frame->return_offset = (uint16_t)(next_instr - this_instr);
             DISPATCH_INLINED(new_frame);
@@ -757,7 +757,7 @@ dummy_func(
             assert(old_value != NULL);
             Py_DECREF(old_value);
             _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
-            PyStackRef_DECREF(list_tagged);
+            PyStackRef_DECREF(list_stackref);
         }
 
         inst(STORE_SUBSCR_DICT, (unused/1, value: _PyStackRef, dict, sub: _PyStackRef -- )) {
@@ -765,7 +765,7 @@ dummy_func(
             STAT_INC(STORE_SUBSCR, hit);
             int err = _PyDict_SetItem_Take2((PyDictObject *)dict,
                                             PyStackRef_StealObject(sub), PyStackRef_StealObject(value));
-            PyStackRef_DECREF(dict_tagged);
+            PyStackRef_DECREF(dict_stackref);
             ERROR_IF(err, error);
         }
 
@@ -863,7 +863,7 @@ dummy_func(
             _PyInterpreterFrame *dying = frame;
             frame = tstate->current_frame = dying->previous;
             _PyEval_FrameClearAndPop(tstate, dying);
-            _PyFrame_StackPush(frame, retval_tagged);
+            _PyFrame_StackPush(frame, retval_stackref);
             LOAD_IP(frame->return_offset);
             goto resume_frame;
         }
@@ -1021,7 +1021,7 @@ dummy_func(
                 PyGenObject *gen = (PyGenObject *)receiver;
                 _PyInterpreterFrame *gen_frame = (_PyInterpreterFrame *)gen->gi_iframe;
                 STACK_SHRINK(1);
-                _PyFrame_StackPush(gen_frame, v_tagged);
+                _PyFrame_StackPush(gen_frame, v_stackref);
                 gen->gi_frame_state = FRAME_EXECUTING;
                 gen->gi_exc_state.previous_item = tstate->exc_info;
                 tstate->exc_info = &gen->gi_exc_state;
@@ -1048,7 +1048,7 @@ dummy_func(
                     ERROR_NO_POP();
                 }
             }
-            PyStackRef_DECREF(v_tagged);
+            PyStackRef_DECREF(v_stackref);
         }
 
         macro(SEND) = _SPECIALIZE_SEND + _SEND;
@@ -1088,7 +1088,7 @@ dummy_func(
             _PyInterpreterFrame *gen_frame = frame;
             frame = tstate->current_frame = frame->previous;
             gen_frame->previous = NULL;
-            _PyFrame_StackPush(frame, retval_tagged);
+            _PyFrame_StackPush(frame, retval_stackref);
             /* We don't know which of these is relevant here, so keep them equal */
             assert(INLINE_CACHE_ENTRIES_SEND == INLINE_CACHE_ENTRIES_FOR_ITER);
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
@@ -1579,7 +1579,7 @@ dummy_func(
                     ERROR_NO_POP();
                 }
             }
-            PyStackRef_DECREF(class_dict_tagged);
+            PyStackRef_DECREF(class_dict_stackref);
         }
 
         inst(LOAD_DEREF, ( -- value)) {
@@ -1835,16 +1835,16 @@ dummy_func(
             int method_found = 0;
             attr = _PySuper_Lookup(cls, self, name,
                                    Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr ? &method_found : NULL);
-            PyStackRef_DECREF(global_super_tagged);
-            PyStackRef_DECREF(class_tagged);
+            PyStackRef_DECREF(global_super_stackref);
+            PyStackRef_DECREF(class_stackref);
             if (attr == NULL) {
-                PyStackRef_DECREF(self_tagged);
+                PyStackRef_DECREF(self_stackref);
                 ERROR_IF(true, error);
             }
             if (method_found) {
                 self_or_null = self; // transfer ownership
             } else {
-                PyStackRef_DECREF(self_tagged);
+                PyStackRef_DECREF(self_stackref);
                 self_or_null = NULL;
             }
         }
@@ -2064,7 +2064,7 @@ dummy_func(
             _PyInterpreterFrame *new_frame = _PyFrame_PushUnchecked(tstate, f, 1);
             // Manipulate stack directly because we exit with DISPATCH_INLINED().
             STACK_SHRINK(1);
-            new_frame->localsplus[0] = owner_tagged;
+            new_frame->localsplus[0] = owner_stackref;
             frame->return_offset = (uint16_t)(next_instr - this_instr);
             DISPATCH_INLINED(new_frame);
         }
@@ -2089,7 +2089,7 @@ dummy_func(
             _PyInterpreterFrame *new_frame = _PyFrame_PushUnchecked(tstate, f, 2);
             // Manipulate stack directly because we exit with DISPATCH_INLINED().
             STACK_SHRINK(1);
-            new_frame->localsplus[0] = owner_tagged;
+            new_frame->localsplus[0] = owner_stackref;
             new_frame->localsplus[1] = PyStackRef_NewRef(PyStackRef_StealRef(name));
             frame->return_offset = (uint16_t)(next_instr - this_instr);
             DISPATCH_INLINED(new_frame);
@@ -2115,7 +2115,7 @@ dummy_func(
             else {
                 Py_DECREF(old_value);
             }
-            PyStackRef_DECREF(owner_tagged);
+            PyStackRef_DECREF(owner_stackref);
         }
 
         macro(STORE_ATTR_INSTANCE_VALUE) =
@@ -2160,7 +2160,7 @@ dummy_func(
             }
             /* PEP 509 */
             dict->ma_version_tag = new_version;
-            PyStackRef_DECREF(owner_tagged);
+            PyStackRef_DECREF(owner_stackref);
         }
 
         op(_STORE_ATTR_SLOT, (index/1, value: _PyStackRef, owner --)) {
@@ -2169,7 +2169,7 @@ dummy_func(
             PyObject *old_value = *(PyObject **)addr;
             *(PyObject **)addr = PyStackRef_StealObject(value);
             Py_XDECREF(old_value);
-            PyStackRef_DECREF(owner_tagged);
+            PyStackRef_DECREF(owner_stackref);
         }
 
         macro(STORE_ATTR_SLOT) =
@@ -2425,7 +2425,7 @@ dummy_func(
         }
 
         replaced op(_POP_JUMP_IF_FALSE, (cond -- )) {
-            (void)cond_tagged;
+            (void)cond_stackref;
             assert(PyBool_Check(cond));
             int flag = Py_IsFalse(cond);
             #if ENABLE_SPECIALIZATION
@@ -2435,7 +2435,7 @@ dummy_func(
         }
 
         replaced op(_POP_JUMP_IF_TRUE, (cond -- )) {
-            (void)cond_tagged;
+            (void)cond_stackref;
             assert(PyBool_Check(cond));
             int flag = Py_IsTrue(cond);
             #if ENABLE_SPECIALIZATION
@@ -2583,7 +2583,7 @@ dummy_func(
                 /* iterator ended normally */
                 assert(next_instr[oparg].op.code == END_FOR ||
                        next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
-                PyStackRef_DECREF(iter_tagged);
+                PyStackRef_DECREF(iter_stackref);
                 STACK_SHRINK(1);
                 /* Jump forward oparg, then skip following END_FOR and POP_TOP instruction */
                 JUMPBY(oparg + 2);
@@ -2603,7 +2603,7 @@ dummy_func(
                     _PyErr_Clear(tstate);
                 }
                 /* iterator ended normally */
-                PyStackRef_DECREF(iter_tagged);
+                PyStackRef_DECREF(iter_stackref);
                 STACK_SHRINK(1);
                 /* The translator sets the deopt target just past END_FOR */
                 DEOPT_IF(true);
@@ -2615,8 +2615,8 @@ dummy_func(
 
         inst(INSTRUMENTED_FOR_ITER, (unused/1 -- )) {
             _Py_CODEUNIT *target;
-            _PyStackRef iter_tagged = TOP();
-            PyObject *iter = PyStackRef_Get(iter_tagged);
+            _PyStackRef iter_stackref = TOP();
+            PyObject *iter = PyStackRef_Get(iter_stackref);
             PyObject *next = (*Py_TYPE(iter)->tp_iternext)(iter);
             if (next != NULL) {
                 PUSH(PyStackRef_StealRef(next));
@@ -2634,7 +2634,7 @@ dummy_func(
                 assert(next_instr[oparg].op.code == END_FOR ||
                        next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
                 STACK_SHRINK(1);
-                PyStackRef_DECREF(iter_tagged);
+                PyStackRef_DECREF(iter_stackref);
                 /* Skip END_FOR and POP_TOP */
                 target = next_instr + oparg + 2;
             }
@@ -2658,7 +2658,7 @@ dummy_func(
                     Py_DECREF(seq);
                 }
                 #endif
-                PyStackRef_DECREF(iter_tagged);
+                PyStackRef_DECREF(iter_stackref);
                 STACK_SHRINK(1);
                 /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
                 JUMPBY(oparg + 2);
@@ -2704,7 +2704,7 @@ dummy_func(
                     it->it_seq = NULL;
                     Py_DECREF(seq);
                 }
-                PyStackRef_DECREF(iter_tagged);
+                PyStackRef_DECREF(iter_stackref);
                 STACK_SHRINK(1);
                 /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
                 JUMPBY(oparg + 2);
@@ -2747,7 +2747,7 @@ dummy_func(
             STAT_INC(FOR_ITER, hit);
             if (r->len <= 0) {
                 STACK_SHRINK(1);
-                PyStackRef_DECREF(iter_tagged);
+                PyStackRef_DECREF(iter_stackref);
                 // Jump over END_FOR and POP_TOP instructions.
                 JUMPBY(oparg + 2);
                 DISPATCH();
@@ -2809,7 +2809,7 @@ dummy_func(
                 }
                 ERROR_NO_POP();
             }
-            _PyStackRef enter_tagged = PyStackRef_StealRef(enter);
+            _PyStackRef enter_stackref = PyStackRef_StealRef(enter);
             exit = _PyObject_LookupSpecial(mgr, &_Py_ID(__aexit__));
             if (exit == NULL) {
                 if (!_PyErr_Occurred(tstate)) {
@@ -2819,12 +2819,12 @@ dummy_func(
                                   "(missed __aexit__ method)",
                                   Py_TYPE(mgr)->tp_name);
                 }
-                PyStackRef_DECREF(enter_tagged);
+                PyStackRef_DECREF(enter_stackref);
                 ERROR_NO_POP();
             }
             DECREF_INPUTS();
             res = PyObject_CallNoArgs(enter);
-            PyStackRef_DECREF(enter_tagged);
+            PyStackRef_DECREF(enter_stackref);
             if (res == NULL) {
                 PyStackRef_DECREF(PyStackRef_StealRef(exit));
                 ERROR_IF(true, error);
@@ -2836,7 +2836,7 @@ dummy_func(
              * value returned from calling its __enter__
              */
             PyObject *enter = _PyObject_LookupSpecial(mgr, &_Py_ID(__enter__));
-            _PyStackRef enter_tagged = PyStackRef_StealRef(enter);
+            _PyStackRef enter_stackref = PyStackRef_StealRef(enter);
             if (enter == NULL) {
                 if (!_PyErr_Occurred(tstate)) {
                     _PyErr_Format(tstate, PyExc_TypeError,
@@ -2855,12 +2855,12 @@ dummy_func(
                                   "(missed __exit__ method)",
                                   Py_TYPE(mgr)->tp_name);
                 }
-                PyStackRef_DECREF(enter_tagged);
+                PyStackRef_DECREF(enter_stackref);
                 ERROR_NO_POP();
             }
             DECREF_INPUTS();
             res = PyObject_CallNoArgs(enter);
-            PyStackRef_DECREF(enter_tagged);
+            PyStackRef_DECREF(enter_stackref);
             if (res == NULL) {
                 PyStackRef_DECREF(PyStackRef_StealRef(exit));
                 ERROR_IF(true, error);
@@ -3084,9 +3084,9 @@ dummy_func(
                 args[0] = PyStackRef_NewRef(PyStackRef_StealRef(self));
                 PyObject *method = ((PyMethodObject *)callable)->im_func;
                 args[-1] = PyStackRef_NewRefDeferred(method);
-                PyStackRef_DECREF(callable_tagged);
+                PyStackRef_DECREF(callable_stackref);
                 callable = method;
-                callable_tagged = args[-1];
+                callable_stackref = args[-1];
             }
             // Check if the call can be inlined or not
             if (Py_TYPE(callable) == &PyFunction_Type &&
@@ -3096,7 +3096,7 @@ dummy_func(
                 int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable))->co_flags;
                 PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable));
                 _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit(
-                    tstate, (PyFunctionObject *)PyStackRef_StealObject(callable_tagged), locals,
+                    tstate, (PyFunctionObject *)PyStackRef_StealObject(callable_stackref), locals,
                     args, total_args, NULL
                 );
                 // Manipulate stack directly since we leave using DISPATCH_INLINED().
@@ -3132,7 +3132,7 @@ dummy_func(
                 }
             }
             assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
@@ -3158,7 +3158,7 @@ dummy_func(
             stack_pointer[-1 - oparg] = PyStackRef_StealRef(self);  // Patch stack as it is used by _INIT_CALL_PY_EXACT_ARGS
             func = PyStackRef_Get(PyStackRef_NewRef(PyStackRef_StealRef(((PyMethodObject *)callable)->im_func)));
             stack_pointer[-2 - oparg] = PyStackRef_StealRef(func);  // This is used by CALL, upon deoptimization
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
         }
 
         op(_CHECK_PEP_523, (--)) {
@@ -3186,7 +3186,7 @@ dummy_func(
             PyFunctionObject *func = (PyFunctionObject *)callable;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null_tagged;
+            new_frame->localsplus[0] = self_or_null_stackref;
             for (int i = 0; i < oparg; i++) {
                 first_non_self_local[i] = args[i];
             }
@@ -3267,7 +3267,7 @@ dummy_func(
             DEOPT_IF(callable != (PyObject *)&PyType_Type);
             STAT_INC(CALL, hit);
             res = PyStackRef_NewRef(PyStackRef_StealRef(Py_TYPE(arg)));
-            PyStackRef_DECREF(arg_tagged);
+            PyStackRef_DECREF(arg_stackref);
         }
 
         op(_CALL_STR_1, (callable, null, arg -- res)) {
@@ -3276,7 +3276,7 @@ dummy_func(
             DEOPT_IF(callable != (PyObject *)&PyUnicode_Type);
             STAT_INC(CALL, hit);
             res = PyObject_Str(arg);
-            PyStackRef_DECREF(arg_tagged);
+            PyStackRef_DECREF(arg_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3292,7 +3292,7 @@ dummy_func(
             DEOPT_IF(callable != (PyObject *)&PyTuple_Type);
             STAT_INC(CALL, hit);
             res = PySequence_Tuple(arg);
-            PyStackRef_DECREF(arg_tagged);
+            PyStackRef_DECREF(arg_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3324,7 +3324,7 @@ dummy_func(
             if (self == NULL) {
                 ERROR_NO_POP();
             }
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             _PyInterpreterFrame *shim = _PyFrame_PushTrampolineUnchecked(
                 tstate, (PyCodeObject *)&_Py_InitCleanup, 1);
             assert(_PyCode_CODE((PyCodeObject *)shim->f_executable)[0].op.code == EXIT_INIT_CHECK);
@@ -3378,7 +3378,7 @@ dummy_func(
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3409,7 +3409,7 @@ dummy_func(
             assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
 
             PyStackRef_DECREF(arg);
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3442,7 +3442,7 @@ dummy_func(
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3475,7 +3475,7 @@ dummy_func(
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3496,8 +3496,8 @@ dummy_func(
             PyInterpreterState *interp = tstate->interp;
             DEOPT_IF(callable != interp->callable_cache.len);
             STAT_INC(CALL, hit);
-            _PyStackRef arg_tagged = args[0];
-            PyObject *arg = PyStackRef_Get(arg_tagged);
+            _PyStackRef arg_stackref = args[0];
+            PyObject *arg = PyStackRef_Get(arg_stackref);
             Py_ssize_t len_i = PyObject_Length(arg);
             if (len_i < 0) {
                 ERROR_NO_POP();
@@ -3507,8 +3507,8 @@ dummy_func(
             if (res == NULL) {
                 GOTO_ERROR(error);
             }
-            PyStackRef_DECREF(callable_tagged);
-            PyStackRef_DECREF(arg_tagged);
+            PyStackRef_DECREF(callable_stackref);
+            PyStackRef_DECREF(arg_stackref);
         }
 
         inst(CALL_ISINSTANCE, (unused/1, unused/2, callable, self_or_null, args[oparg] -- res)) {
@@ -3522,9 +3522,9 @@ dummy_func(
             PyInterpreterState *interp = tstate->interp;
             DEOPT_IF(callable != interp->callable_cache.isinstance);
             STAT_INC(CALL, hit);
-            _PyStackRef cls_tagged = args[1];
-            _PyStackRef inst_tagged = args[0];
-            int retval = PyObject_IsInstance(PyStackRef_Get(inst_tagged), PyStackRef_Get(cls_tagged));
+            _PyStackRef cls_stackref = args[1];
+            _PyStackRef inst_stackref = args[0];
+            int retval = PyObject_IsInstance(PyStackRef_Get(inst_stackref), PyStackRef_Get(cls_stackref));
             if (retval < 0) {
                 ERROR_NO_POP();
             }
@@ -3533,9 +3533,9 @@ dummy_func(
             if (res == NULL) {
                 GOTO_ERROR(error);
             }
-            PyStackRef_DECREF(inst_tagged);
-            PyStackRef_DECREF(cls_tagged);
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(inst_stackref);
+            PyStackRef_DECREF(cls_stackref);
+            PyStackRef_DECREF(callable_stackref);
         }
 
         // This is secretly a super-instruction
@@ -3549,8 +3549,8 @@ dummy_func(
             if (_PyList_AppendTakeRef((PyListObject *)self, PyStackRef_StealObject(arg)) < 0) {
                 goto pop_1_error;  // Since arg is DECREF'ed already
             }
-            PyStackRef_DECREF(self_tagged);
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(self_stackref);
+            PyStackRef_DECREF(callable_stackref);
             STACK_SHRINK(3);
             // Skip POP_TOP
             assert(next_instr->op.code == POP_TOP);
@@ -3571,10 +3571,10 @@ dummy_func(
             DEOPT_IF(meth->ml_flags != METH_O);
             // CPython promises to check all non-vectorcall function calls.
             DEOPT_IF(tstate->c_recursion_remaining <= 0);
-            _PyStackRef arg_tagged = args[1];
-            _PyStackRef self_tagged = args[0];
-            PyObject *self = PyStackRef_Get(self_tagged);
-            PyObject *arg = PyStackRef_Get(arg_tagged);
+            _PyStackRef arg_stackref = args[1];
+            _PyStackRef self_stackref = args[0];
+            PyObject *self = PyStackRef_Get(self_stackref);
+            PyObject *arg = PyStackRef_Get(arg_stackref);
             DEOPT_IF(!Py_IS_TYPE(self, method->d_common.d_type));
             STAT_INC(CALL, hit);
             PyCFunction cfunc = meth->ml_meth;
@@ -3582,9 +3582,9 @@ dummy_func(
             res = _PyCFunction_TrampolineCall(cfunc, self, arg);
             _Py_LeaveRecursiveCallTstate(tstate);
             assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-            PyStackRef_DECREF(self_tagged);
-            PyStackRef_DECREF(arg_tagged);
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(self_stackref);
+            PyStackRef_DECREF(arg_stackref);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3620,7 +3620,7 @@ dummy_func(
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3641,8 +3641,8 @@ dummy_func(
             PyMethodDescrObject *method = (PyMethodDescrObject *)callable;
             DEOPT_IF(!Py_IS_TYPE(method, &PyMethodDescr_Type));
             PyMethodDef *meth = method->d_method;
-            _PyStackRef self_tagged = args[0];
-            PyObject *self = PyStackRef_Get(self_tagged);
+            _PyStackRef self_stackref = args[0];
+            PyObject *self = PyStackRef_Get(self_stackref);
             DEOPT_IF(!Py_IS_TYPE(self, method->d_common.d_type));
             DEOPT_IF(meth->ml_flags != METH_NOARGS);
             // CPython promises to check all non-vectorcall function calls.
@@ -3653,8 +3653,8 @@ dummy_func(
             res = _PyCFunction_TrampolineCall(cfunc, self, NULL);
             _Py_LeaveRecursiveCallTstate(tstate);
             assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-            PyStackRef_DECREF(self_tagged);
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(self_stackref);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3690,7 +3690,7 @@ dummy_func(
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -3727,9 +3727,9 @@ dummy_func(
                 args[0] = PyStackRef_NewRef(PyStackRef_StealRef(self));
                 PyObject *method = ((PyMethodObject *)callable)->im_func;
                 args[-1] = PyStackRef_NewRefDeferred(method);
-                PyStackRef_DECREF(callable_tagged);
+                PyStackRef_DECREF(callable_stackref);
                 callable = method;
-                callable_tagged = args[-1];
+                callable_stackref = args[-1];
             }
             int positional_args = total_args - (int)PyTuple_GET_SIZE(kwnames);
             // Check if the call can be inlined or not
@@ -3740,10 +3740,10 @@ dummy_func(
                 int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable))->co_flags;
                 PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable));
                 _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit(
-                    tstate, (PyFunctionObject *)PyStackRef_StealObject(callable_tagged), locals,
+                    tstate, (PyFunctionObject *)PyStackRef_StealObject(callable_stackref), locals,
                     args, positional_args, kwnames
                 );
-                PyStackRef_DECREF(kwnames_tagged);
+                PyStackRef_DECREF(kwnames_stackref);
                 // Manipulate stack directly since we leave using DISPATCH_INLINED().
                 STACK_SHRINK(oparg + 3);
                 // The frame has stolen all the arguments from the stack,
@@ -3777,9 +3777,9 @@ dummy_func(
                     }
                 }
             }
-            PyStackRef_DECREF(kwnames_tagged);
+            PyStackRef_DECREF(kwnames_stackref);
             assert((res != NULL) ^ (_PyErr_Occurred(tstate) != NULL));
-            PyStackRef_DECREF(callable_tagged);
+            PyStackRef_DECREF(callable_stackref);
             for (int i = 0; i < total_args; i++) {
                 PyStackRef_DECREF(args[i]);
             }
@@ -3803,7 +3803,7 @@ dummy_func(
                 if (tuple == NULL) {
                     ERROR_NO_POP();
                 }
-                PyStackRef_SETREF(callargs_tagged, PyStackRef_StealRef(tuple));
+                PyStackRef_SETREF(callargs_stackref, PyStackRef_StealRef(tuple));
                 callargs = tuple;
             }
             assert(PyTuple_CheckExact(callargs));
@@ -3843,7 +3843,7 @@ dummy_func(
                     PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(func));
 
                     _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit_Ex(tstate,
-                                                                                (PyFunctionObject *)PyStackRef_StealObject(func_tagged), locals,
+                                                                                (PyFunctionObject *)PyStackRef_StealObject(func_stackref), locals,
                                                                                 nargs, callargs, kwargs);
                     // Need to manually shrink the stack since we exit with DISPATCH_INLINED.
                     STACK_SHRINK(oparg + 3);
@@ -3867,7 +3867,7 @@ dummy_func(
             PyFunctionObject *func_obj = (PyFunctionObject *)
                 PyFunction_New(codeobj, GLOBALS());
 
-            PyStackRef_DECREF(codeobj_tagged);
+            PyStackRef_DECREF(codeobj_stackref);
             if (func_obj == NULL) {
                 ERROR_NO_POP();
             }
@@ -3940,7 +3940,7 @@ dummy_func(
             assert(oparg >= FVC_STR && oparg <= FVC_ASCII);
             conv_fn = _PyEval_ConversionFuncs[oparg];
             result = conv_fn(value);
-            PyStackRef_DECREF(value_tagged);
+            PyStackRef_DECREF(value_stackref);
             ERROR_IF(result == NULL, error);
         }
 
@@ -3949,7 +3949,7 @@ dummy_func(
              * of format(value) is value itself. */
             if (!PyUnicode_CheckExact(value)) {
                 res = PyObject_Format(value, NULL);
-                PyStackRef_DECREF(value_tagged);
+                PyStackRef_DECREF(value_stackref);
                 ERROR_IF(res == NULL, error);
             }
             else {
@@ -3959,8 +3959,8 @@ dummy_func(
 
         inst(FORMAT_WITH_SPEC, (value, fmt_spec -- res)) {
             res = PyObject_Format(value, fmt_spec);
-            PyStackRef_DECREF(value_tagged);
-            PyStackRef_DECREF(fmt_spec_tagged);
+            PyStackRef_DECREF(value_stackref);
+            PyStackRef_DECREF(fmt_spec_stackref);
             ERROR_IF(res == NULL, error);
         }
 
@@ -4042,15 +4042,15 @@ dummy_func(
         }
 
         inst(INSTRUMENTED_POP_JUMP_IF_NONE, (unused/1 -- )) {
-            _PyStackRef value_tagged = POP();
-            PyObject *value = PyStackRef_Get(value_tagged);
+            _PyStackRef value_stackref = POP();
+            PyObject *value = PyStackRef_Get(value_stackref);
             int flag = Py_IsNone(value);
             int offset;
             if (flag) {
                 offset = oparg;
             }
             else {
-                PyStackRef_DECREF(value_tagged);
+                PyStackRef_DECREF(value_stackref);
                 offset = 0;
             }
             #if ENABLE_SPECIALIZATION
@@ -4060,15 +4060,15 @@ dummy_func(
         }
 
         inst(INSTRUMENTED_POP_JUMP_IF_NOT_NONE, (unused/1 -- )) {
-            _PyStackRef value_tagged = POP();
-            PyObject *value = PyStackRef_Get(value_tagged);
+            _PyStackRef value_stackref = POP();
+            PyObject *value = PyStackRef_Get(value_stackref);
             int offset;
             int nflag = Py_IsNone(value);
             if (nflag) {
                 offset = 0;
             }
             else {
-                PyStackRef_DECREF(value_tagged);
+                PyStackRef_DECREF(value_stackref);
                 offset = oparg;
             }
             #if ENABLE_SPECIALIZATION
@@ -4112,7 +4112,7 @@ dummy_func(
         op (_GUARD_IS_NONE_POP, (val -- )) {
             SYNC_SP();
             if (!Py_IsNone(val)) {
-                PyStackRef_DECREF(val_tagged);
+                PyStackRef_DECREF(val_stackref);
                 EXIT_IF(1);
             }
         }
@@ -4120,7 +4120,7 @@ dummy_func(
         op (_GUARD_IS_NOT_NONE_POP, (val -- )) {
             SYNC_SP();
             EXIT_IF(Py_IsNone(val));
-            PyStackRef_DECREF(val_tagged);
+            PyStackRef_DECREF(val_stackref);
         }
 
         op(_JUMP_TO_TOP, (--)) {

@@ -1487,7 +1487,7 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
         for (i = 0; i < kwcount; i++) {
             PyObject **co_varnames;
             PyObject *keyword = PyTuple_GET_ITEM(kwnames, i);
-            _PyStackRef value_tagged = args[i+argcount];
+            _PyStackRef value_stackref = args[i+argcount];
             Py_ssize_t j;
 
             if (keyword == NULL || !PyUnicode_Check(keyword)) {
@@ -1560,10 +1560,10 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
                 goto kw_fail;
             }
 
-            if (PyDict_SetItem(kwdict, keyword, PyStackRef_StealObject(value_tagged)) == -1) {
+            if (PyDict_SetItem(kwdict, keyword, PyStackRef_StealObject(value_stackref)) == -1) {
                 goto kw_fail;
             }
-            PyStackRef_DECREF(value_tagged);
+            PyStackRef_DECREF(value_stackref);
             continue;
 
         kw_fail:
@@ -1579,7 +1579,7 @@ initialize_locals(PyThreadState *tstate, PyFunctionObject *func,
                           func->func_qualname, keyword);
                 goto kw_fail;
             }
-            localsplus[j] = value_tagged;
+            localsplus[j] = value_stackref;
         }
     }
 
