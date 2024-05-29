@@ -4021,10 +4021,12 @@ dummy_func(
         }
 
         specializing op(_SPECIALIZE_BINARY_OP, (counter/1, lhs, rhs -- lhs, rhs)) {
-            #if ENABLE_SPECIALIZATION
+            #if ENABLE_SPECIALIZATION || defined(ENABLE_SPECIALIZATION_LIMITED)
             if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                 next_instr = this_instr;
-                _Py_Specialize_BinaryOp(lhs, rhs, next_instr, oparg, LOCALS_ARRAY);
+                if (_Py_Specialize_BinaryOp(frame, &next_instr, lhs, rhs, next_instr, oparg, LOCALS_ARRAY) != 0) {
+                    goto error;
+                }
                 DISPATCH_SAME_OPARG();
             }
             STAT_INC(BINARY_OP, deferred);

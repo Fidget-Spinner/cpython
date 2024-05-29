@@ -129,10 +129,11 @@ static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *
 static inline void
 _PyFrame_Initialize(
     _PyInterpreterFrame *frame, PyFunctionObject *func,
-    PyObject *locals, PyCodeObject *code, int null_locals_from)
+    PyObject *locals, PyObject *co, int null_locals_from)
 {
+    PyCodeObject *code = (PyCodeObject *)co;
     frame->f_funcobj = (PyObject *)func;
-    frame->f_executable = Py_NewRef(code);
+    frame->f_executable = co;
     frame->f_builtins = func->func_builtins;
     frame->f_globals = func->func_globals;
     frame->f_locals = locals;
@@ -279,7 +280,7 @@ _PyFrame_PushUnchecked(PyThreadState *tstate, PyFunctionObject *func, int null_l
     _PyInterpreterFrame *new_frame = (_PyInterpreterFrame *)tstate->datastack_top;
     tstate->datastack_top += code->co_framesize;
     assert(tstate->datastack_top < tstate->datastack_limit);
-    _PyFrame_Initialize(new_frame, func, NULL, code, null_locals_from);
+    _PyFrame_Initialize(new_frame, func, NULL, Py_NewRef(code), null_locals_from);
     return new_frame;
 }
 

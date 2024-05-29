@@ -502,6 +502,7 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
     PyMutex_Unlock(&interp->func_state.mutex);
     co->_co_next = NULL;
     co->_co_parent = NULL;
+    co->_co_frame_count = 0;
 #endif
     co->_co_monitoring = NULL;
     co->_co_instrumentation_version = 0;
@@ -2688,45 +2689,56 @@ _PyCode_Fini(PyInterpreterState *interp)
 PyCodeObject *
 _PyCode_FromCode(PyCodeObject *self)
 {
-    struct _PyCodeConstructor con = {
-        .filename = self->co_filename,
-        .name = self->co_name,
-        .qualname = self->co_qualname,
-        .flags = self->co_flags,
+    PyCodeObject *co = PyObject_GC_NewVar(PyCodeObject, &PyCode_Type,
+                                          _PyCode_NBYTES(self) / sizeof(_Py_CODEUNIT));
+    co->co_consts = Py_NewRef(self->co_consts);
+    co->co_names = Py_NewRef(self->co_names);
+    co->co_exceptiontable = Py_NewRef(self->co_exceptiontable);
 
-        .code = (PyObject *)self,
-        .firstlineno = self->co_firstlineno,
-        .linetable = self->co_linetable,
+    co->co_flags = self->co_flags;
 
-        .consts = self->co_consts,
-        .names = self->co_names,
+    co->co_argcount = self->co_argcount;
+    co->co_posonlyargcount = self->co_posonlyargcount;
+    co->co_kwonlyargcount = self->co_kwonlyargcount;
+    co->co_stacksize = self->co_stacksize;
+    co->co_firstlineno = self->co_firstlineno;
 
-        .localsplusnames = self->co_localsplusnames,
-        .localspluskinds = self->co_localspluskinds,
+    co->co_nlocalsplus = self->co_nlocalsplus;
+    co->co_framesize = self->co_framesize;
+    co->co_nlocals = self->co_nlocals;
+    co->co_ncellvars = self->co_ncellvars;
+    co->co_nfreevars = self->co_nfreevars;
+    co->co_version = self->co_version;
 
-        .argcount = self->co_argcount,
-        .posonlyargcount = self->co_posonlyargcount,
-        .kwonlyargcount = self->co_kwonlyargcount,
+    co->co_localsplusnames = Py_XNewRef(self->co_localsplusnames);
+    co->co_localspluskinds = Py_XNewRef(self->co_localspluskinds);
+    co->co_filename = Py_XNewRef(self->co_filename);
+    co->co_name = Py_XNewRef(self->co_name);
+    co->co_qualname = Py_XNewRef(self->co_qualname);
+    co->co_linetable = Py_XNewRef(self->co_linetable);
+    co->co_weakreflist = Py_XNewRef(self->co_weakreflist);
 
-        .stacksize = self->co_stacksize,
+#ifdef Py_GIL_DISABLED
+    co->_co_next = NULL;
+    co->_co_parent = NULL;
+    co->_co_frame_count = 0;
+#endif
 
-        .exceptiontable = self->co_exceptiontable,
-    };
-    return _PyCode_New(&con);
+    co->_co_monitoring = self->_co_monitoring;
+    co->_co_instrumentation_version = self->_co_instrumentation_version;
+    co->co_executors = NULL;
+    co->_co_firsttraceable = self->_co_firsttraceable;
+    memcpy(_PyCode_CODE(co), _PyCode_CODE(self), _PyCode_NBYTES(self));
+
+    return co;
 }
 
 // Returns a new reference to an available code object.
 PyCodeObject *
 _PyCode_StealAvailableCode(PyCodeObject *self)
 {
+#ifdef Py_GIL_DISABLED
     assert(PyCode_Check(self));
-    // If we have the same thread ID, there's nothing that needs to be stolen.
-    // Else if another thread is using `self`, we try to find another code
-    // object for it to reduce contention.
-    PyThreadState *ts = PyThreadState_GET();
-    if (ts->thread_id == ((PyObject *)(self))->ob_tid) {
-        return (PyCodeObject *)Py_NewRef(self);
-    }
     PyCodeObject *res;
     Py_BEGIN_CRITICAL_SECTION(self);
     if (self->_co_next != NULL) {
@@ -2746,43 +2758,83 @@ _PyCode_StealAvailableCode(PyCodeObject *self)
     if (res == NULL) {
         return NULL;
     }
-    res->_co_parent = (PyObject *)self;
+    res->_co_frame_count++;
+    res->_co_parent = Py_NewRef(self);
     res->_co_next = NULL;
     return res;
+#else
+    return Py_NewRef(self);
+#endif
 }
 
 // Steals a reference to to_return
 void
-_PyCode_ReturnAvailableCode(PyCodeObject *self, PyCodeObject *to_return)
+_PyCode_ReturnAvailableCode(PyCodeObject *to_return)
 {
-    if (to_return == self) {
+    if (to_return == NULL) {
+        return;
+    }
+    // Root code object.
+    if (to_return->_co_parent == to_return) {
+        return;
+    }
+#ifdef Py_GIL_DISABLED
+    PyCodeObject *owner = (PyCodeObject *)to_return->_co_parent;
+    if (owner == NULL) {
         Py_DECREF(to_return);
         return;
     }
-    PyCodeObject *res;
-    PyObject *temp = self->_co_next;
-    self->_co_next = (PyObject *)to_return;
     assert(to_return->_co_next == NULL);
+    PyCodeObject *res;
+    Py_BEGIN_CRITICAL_SECTION(owner);
+    PyObject *temp = owner->_co_next;
+    owner->_co_next = (PyObject *)to_return;
     to_return->_co_next = temp;
+    Py_END_CRITICAL_SECTION();
+#else
+    Py_DECREF(to_return);
+#endif
 }
 
-// Spawns a new code object to add to `self`.
-// -1 on error, 0 on success
-int
-_PyCode_SpawnAvailableCodeIfNotSameThread(PyCodeObject *self)
+// Spawns a new code object if shared, else just use the same one.
+static PyCodeObject *
+_PyCode_SpawnAvailableCodeIfShared(PyCodeObject *self)
 {
     assert(PyCode_Check(self));
-    // If we have the same thread ID, there's nothing that needs to be spawned.
-    // This thread is the main one executing this code object.
-    PyThreadState *ts = PyThreadState_GET();
-    if (ts->thread_id == ((PyObject *)(self))->ob_tid) {
-        return 0;
+    if (self->_co_frame_count > 1) {
+        PyCodeObject *res = _PyCode_FromCode(self);
+        if (res == NULL) {
+            return NULL;
+        }
+        res->_co_parent = Py_NewRef(self);
+        return res;
     }
-    PyCodeObject *res = _PyCode_FromCode(self);
-    if (res == NULL) {
-        return -1;
+    return (PyCodeObject *)Py_NewRef(self);
+}
+
+// Duplicate a code object if a frame is sharing it and set it on the frame
+// Read, copy, update.
+// Returns the true next instruction to execute.
+_Py_CODEUNIT *
+_PyCode_FrameRCU(_PyInterpreterFrame *frame, _Py_CODEUNIT *next_instr)
+{
+    if (frame->f_executable == NULL) {
+        return next_instr;
     }
-    res->_co_parent = (PyObject *)self;
-    res->_co_next = NULL;
-    return 0;
+    PyCodeObject *self = (PyCodeObject *)frame->f_executable;
+    PyCodeObject *dup_co = _PyCode_SpawnAvailableCodeIfShared(self);
+    if (dup_co == self) {
+        return next_instr;
+    }
+    if (dup_co == NULL) {
+        return NULL;
+    }
+    Py_BEGIN_CRITICAL_SECTION(self);
+    self->_co_frame_count--;
+    assert(self->_co_frame_count >= 0);
+    frame->f_executable = (PyObject *)dup_co;
+    dup_co->_co_frame_count++;
+    Py_END_CRITICAL_SECTION();
+    size_t offset = next_instr - _PyCode_CODE(self);
+    return _PyCode_CODE(dup_co) + offset;
 }

@@ -450,6 +450,21 @@ _PyCode_Quicken(PyCodeObject *code)
     #endif /* ENABLE_SPECIALIZATION */
 }
 
+int
+write_single_inst_rcu(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst, _Py_CODEUNIT *inst, int opcode, int oparg)
+{
+    _Py_CODEUNIT *updated_next_inst = _PyCode_FrameRCU(frame, *next_inst);
+    if (updated_next_inst == NULL) {
+        return 1;
+    }
+    size_t offset = inst - *next_inst;
+    *next_inst = updated_next_inst;
+    _Py_CODEUNIT *write_to = updated_next_inst + offset;
+    write_to->op.code = opcode;
+    write_to->op.arg = oparg;
+    return 0;
+}
+
 #define SIMPLE_FUNCTION 0
 
 /* Common */
@@ -2055,11 +2070,12 @@ binary_op_fail_kind(int oparg, PyObject *lhs, PyObject *rhs)
 }
 #endif   // Py_STATS
 
-void
-_Py_Specialize_BinaryOp(PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
+int
+_Py_Specialize_BinaryOp(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst,
+                        PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
                         int oparg, PyObject **locals)
 {
-    assert(ENABLE_SPECIALIZATION);
+    // assert(ENABLE_SPECIALIZATION);
     assert(_PyOpcode_Caches[BINARY_OP] == INLINE_CACHE_ENTRIES_BINARY_OP);
     _PyBinaryOpCache *cache = (_PyBinaryOpCache *)(instr + 1);
     switch (oparg) {
@@ -2072,18 +2088,26 @@ _Py_Specialize_BinaryOp(PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
                 _Py_CODEUNIT next = instr[INLINE_CACHE_ENTRIES_BINARY_OP + 1];
                 bool to_store = (next.op.code == STORE_FAST);
                 if (to_store && locals[next.op.arg] == lhs) {
-                    instr->op.code = BINARY_OP_INPLACE_ADD_UNICODE;
+                    if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_INPLACE_ADD_UNICODE, 0) != 0) {
+                        return 1;
+                    }
                     goto success;
                 }
-                instr->op.code = BINARY_OP_ADD_UNICODE;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_UNICODE, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             if (PyLong_CheckExact(lhs)) {
-                instr->op.code = BINARY_OP_ADD_INT;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_INT, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             if (PyFloat_CheckExact(lhs)) {
-                instr->op.code = BINARY_OP_ADD_FLOAT;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_FLOAT, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             break;
@@ -2093,11 +2117,15 @@ _Py_Specialize_BinaryOp(PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
                 break;
             }
             if (PyLong_CheckExact(lhs)) {
-                instr->op.code = BINARY_OP_MULTIPLY_INT;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_MULTIPLY_INT, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             if (PyFloat_CheckExact(lhs)) {
-                instr->op.code = BINARY_OP_MULTIPLY_FLOAT;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_MULTIPLY_FLOAT, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             break;
@@ -2107,11 +2135,15 @@ _Py_Specialize_BinaryOp(PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
                 break;
             }
             if (PyLong_CheckExact(lhs)) {
-                instr->op.code = BINARY_OP_SUBTRACT_INT;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_SUBTRACT_INT, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             if (PyFloat_CheckExact(lhs)) {
-                instr->op.code = BINARY_OP_SUBTRACT_FLOAT;
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_SUBTRACT_FLOAT, 0) != 0) {
+                    return 1;
+                }
                 goto success;
             }
             break;
@@ -2120,10 +2152,11 @@ _Py_Specialize_BinaryOp(PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
     STAT_INC(BINARY_OP, failure);
     instr->op.code = BINARY_OP;
     cache->counter = adaptive_counter_backoff(cache->counter);
-    return;
+    return 0;
 success:
     STAT_INC(BINARY_OP, success);
     cache->counter = adaptive_counter_cooldown();
+    return 0;
 }
 
 

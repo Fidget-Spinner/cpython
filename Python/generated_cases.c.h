@@ -114,10 +114,12 @@
             {
                 uint16_t counter = read_u16(&this_instr[1].cache);
                 (void)counter;
-                #if ENABLE_SPECIALIZATION
+                #if ENABLE_SPECIALIZATION || defined(ENABLE_SPECIALIZATION_LIMITED)
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
-                    _Py_Specialize_BinaryOp(lhs, rhs, next_instr, oparg, LOCALS_ARRAY);
+                    if (_Py_Specialize_BinaryOp(frame, &next_instr, lhs, rhs, next_instr, oparg, LOCALS_ARRAY) != 0) {
+                        goto error;
+                    }
                     DISPATCH_SAME_OPARG();
                 }
                 STAT_INC(BINARY_OP, deferred);

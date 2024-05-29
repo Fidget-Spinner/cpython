@@ -267,6 +267,7 @@ extern void _PyCode_Clear_Executors(PyCodeObject *code);
 #ifdef Py_GIL_DISABLED
 // gh-115999 tracks progress on addressing this.
 #define ENABLE_SPECIALIZATION 0
+#define ENABLE_SPECIALIZATION_LIMITED
 #else
 #define ENABLE_SPECIALIZATION 1
 #endif
@@ -287,8 +288,9 @@ extern void _Py_Specialize_StoreSubscr(PyObject *container, PyObject *sub,
                                        _Py_CODEUNIT *instr);
 extern void _Py_Specialize_Call(PyObject *callable, _Py_CODEUNIT *instr,
                                 int nargs);
-extern void _Py_Specialize_BinaryOp(PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
-                                    int oparg, PyObject **locals);
+extern int _Py_Specialize_BinaryOp(struct _PyInterpreterFrame *frame, _Py_CODEUNIT **next_instr,
+                        PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
+                        int oparg, PyObject **locals);
 extern void _Py_Specialize_CompareOp(PyObject *lhs, PyObject *rhs,
                                      _Py_CODEUNIT *instr, int oparg);
 extern void _Py_Specialize_UnpackSequence(PyObject *seq, _Py_CODEUNIT *instr,
@@ -543,8 +545,8 @@ extern int _Py_GetBaseOpcode(PyCodeObject *code, int offset);
 extern int _PyInstruction_GetLength(PyCodeObject *code, int offset);
 
 extern PyCodeObject *_PyCode_StealAvailableCode(PyCodeObject *self);
-extern void _PyCode_ReturnAvailableCode(PyCodeObject *self, PyCodeObject *to_return);
-extern int _PyCode_SpawnAvailableCodeIfNotSameThread(PyCodeObject *self);
+extern void _PyCode_ReturnAvailableCode(PyCodeObject *to_return);
+extern _Py_CODEUNIT *_PyCode_FrameRCU(struct _PyInterpreterFrame *frame, _Py_CODEUNIT *next_instr);
 
 #ifdef __cplusplus
 }

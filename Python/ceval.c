@@ -1679,7 +1679,7 @@ clear_thread_frame(PyThreadState *tstate, _PyInterpreterFrame * frame)
     tstate->c_recursion_remaining--;
     assert(frame->frame_obj == NULL || frame->frame_obj->f_frame == frame);
     _PyFrame_ClearExceptCode(frame);
-    Py_DECREF(frame->f_executable);
+    _PyCode_ReturnAvailableCode((PyCodeObject *)frame->f_executable);
     tstate->c_recursion_remaining++;
     _PyThreadState_PopFrame(tstate, frame);
 }
@@ -1718,13 +1718,14 @@ _PyEvalFramePushAndInit(PyThreadState *tstate, PyFunctionObject *func,
                         PyObject *locals, PyObject* const* args,
                         size_t argcount, PyObject *kwnames)
 {
-    PyCodeObject * code = (PyCodeObject *)func->func_code;
+    PyCodeObject *code = _PyCode_StealAvailableCode((PyCodeObject *)func->func_code);
     CALL_STAT_INC(frames_pushed);
     _PyInterpreterFrame *frame = _PyThreadState_PushFrame(tstate, code->co_framesize);
     if (frame == NULL) {
+        _PyCode_ReturnAvailableCode(code);
         goto fail;
     }
-    _PyFrame_Initialize(frame, func, locals, code, 0);
+    _PyFrame_Initialize(frame, func, locals, (PyObject *)code, 0);
     if (initialize_locals(tstate, func, frame->localsplus, args, argcount, kwnames)) {
         assert(frame->owner == FRAME_OWNED_BY_THREAD);
         clear_thread_frame(tstate, frame);

@@ -128,6 +128,8 @@ typedef struct {
     PyObject *_co_next;                                                        \
     /* points to the first code object in the linked list. strong reference */ \
     PyObject *_co_parent;                                                      \
+    /* Frames using this code object */                                        \
+    int _co_frame_count;                                                       \
 
 #else
 #define _PyCode_FreeThreadedFields_DEF /**/
