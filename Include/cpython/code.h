@@ -120,6 +120,19 @@ typedef struct {
     uint8_t *per_instruction_tools;
 } _PyCoMonitoringData;
 
+#ifdef Py_GIL_DISABLED
+#define _PyCode_FreeThreadedFields_DEF                                         \
+    /* linked list of available code objects for use by other threads to       \
+     * avoid contention during specialization                                  \
+     * lazily initialized strong reference */                                  \
+    PyObject *_co_next;                                                        \
+    /* points to the first code object in the linked list. strong reference */ \
+    PyObject *_co_parent;                                                      \
+
+#else
+#define _PyCode_FreeThreadedFields_DEF /**/
+#endif
+
 // To avoid repeating ourselves in deepfreeze.py, all PyCodeObject members are
 // defined in this macro:
 #define _PyCode_DEF(SIZE) {                                                    \
@@ -178,6 +191,7 @@ typedef struct {
     PyObject *co_weakreflist;     /* to support weakrefs to code objects */    \
     _PyExecutorArray *co_executors;      /* executors from optimizer */        \
     _PyCoCached *_co_cached;      /* cached co_* attributes */                 \
+    _PyCode_FreeThreadedFields_DEF                                             \
     uintptr_t _co_instrumentation_version; /* current instrumentation version */ \
     _PyCoMonitoringData *_co_monitoring; /* Monitoring data */                 \
     int _co_firsttraceable;       /* index of first traceable instruction */   \

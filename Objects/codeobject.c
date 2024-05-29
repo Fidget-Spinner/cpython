@@ -14,6 +14,7 @@
 #include "pycore_pystate.h"       // _PyInterpreterState_GET()
 #include "pycore_setobject.h"     // _PySet_NextEntry()
 #include "pycore_tuple.h"         // _PyTuple_ITEMS()
+#include "pycore_critical_section.h" // Py_BEGIN_CRITICAL_SECTION
 #include "clinic/codeobject.c.h"
 
 static const char *
@@ -499,6 +500,8 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
     }
 #ifdef Py_GIL_DISABLED
     PyMutex_Unlock(&interp->func_state.mutex);
+    co->_co_next = NULL;
+    co->_co_parent = NULL;
 #endif
     co->_co_monitoring = NULL;
     co->_co_instrumentation_version = 0;
@@ -1862,6 +1865,10 @@ code_dealloc(PyCodeObject *co)
     Py_XDECREF(co->co_qualname);
     Py_XDECREF(co->co_linetable);
     Py_XDECREF(co->co_exceptiontable);
+#ifdef Py_GIL_DISABLED
+    Py_XDECREF(co->_co_next);
+    Py_XDECREF(co->_co_parent);
+#endif
     if (co->_co_cached != NULL) {
         Py_XDECREF(co->_co_cached->_co_code);
         Py_XDECREF(co->_co_cached->_co_cellvars);
@@ -1881,6 +1888,8 @@ static int
 code_traverse(PyCodeObject *co, visitproc visit, void *arg)
 {
     Py_VISIT(co->co_consts);
+    Py_VISIT(co->_co_next);
+    Py_VISIT(co->_co_parent);
     return 0;
 }
 #endif
@@ -2670,4 +2679,110 @@ _PyCode_Fini(PyInterpreterState *interp)
         state->constants = NULL;
     }
 #endif
+}
+
+/******************
+ * free-threaded API
+ ******************/
+
+PyCodeObject *
+_PyCode_FromCode(PyCodeObject *self)
+{
+    struct _PyCodeConstructor con = {
+        .filename = self->co_filename,
+        .name = self->co_name,
+        .qualname = self->co_qualname,
+        .flags = self->co_flags,
+
+        .code = (PyObject *)self,
+        .firstlineno = self->co_firstlineno,
+        .linetable = self->co_linetable,
+
+        .consts = self->co_consts,
+        .names = self->co_names,
+
+        .localsplusnames = self->co_localsplusnames,
+        .localspluskinds = self->co_localspluskinds,
+
+        .argcount = self->co_argcount,
+        .posonlyargcount = self->co_posonlyargcount,
+        .kwonlyargcount = self->co_kwonlyargcount,
+
+        .stacksize = self->co_stacksize,
+
+        .exceptiontable = self->co_exceptiontable,
+    };
+    return _PyCode_New(&con);
+}
+
+// Returns a new reference to an available code object.
+PyCodeObject *
+_PyCode_StealAvailableCode(PyCodeObject *self)
+{
+    assert(PyCode_Check(self));
+    // If we have the same thread ID, there's nothing that needs to be stolen.
+    // Else if another thread is using `self`, we try to find another code
+    // object for it to reduce contention.
+    PyThreadState *ts = PyThreadState_GET();
+    if (ts->thread_id == ((PyObject *)(self))->ob_tid) {
+        return (PyCodeObject *)Py_NewRef(self);
+    }
+    PyCodeObject *res;
+    Py_BEGIN_CRITICAL_SECTION(self);
+    if (self->_co_next != NULL) {
+        // Transfer ownership to the callee
+        PyObject *next = self->_co_next;
+        assert(PyCode_Check(next));
+        self->_co_next = ((PyCodeObject *)next)->_co_next;
+        res = (PyCodeObject *)next;
+    }
+    else {
+        // None available. Bummer. Just use self.
+        // If it eventually does need this, specialization will trigger a
+        // new code object to be created.
+        res = (PyCodeObject *)Py_NewRef(self);
+    }
+    Py_END_CRITICAL_SECTION();
+    if (res == NULL) {
+        return NULL;
+    }
+    res->_co_parent = (PyObject *)self;
+    res->_co_next = NULL;
+    return res;
+}
+
+// Steals a reference to to_return
+void
+_PyCode_ReturnAvailableCode(PyCodeObject *self, PyCodeObject *to_return)
+{
+    if (to_return == self) {
+        Py_DECREF(to_return);
+        return;
+    }
+    PyCodeObject *res;
+    PyObject *temp = self->_co_next;
+    self->_co_next = (PyObject *)to_return;
+    assert(to_return->_co_next == NULL);
+    to_return->_co_next = temp;
+}
+
+// Spawns a new code object to add to `self`.
+// -1 on error, 0 on success
+int
+_PyCode_SpawnAvailableCodeIfNotSameThread(PyCodeObject *self)
+{
+    assert(PyCode_Check(self));
+    // If we have the same thread ID, there's nothing that needs to be spawned.
+    // This thread is the main one executing this code object.
+    PyThreadState *ts = PyThreadState_GET();
+    if (ts->thread_id == ((PyObject *)(self))->ob_tid) {
+        return 0;
+    }
+    PyCodeObject *res = _PyCode_FromCode(self);
+    if (res == NULL) {
+        return -1;
+    }
+    res->_co_parent = (PyObject *)self;
+    res->_co_next = NULL;
+    return 0;
 }

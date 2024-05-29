@@ -542,6 +542,10 @@ extern int _Py_GetBaseOpcode(PyCodeObject *code, int offset);
 
 extern int _PyInstruction_GetLength(PyCodeObject *code, int offset);
 
+extern PyCodeObject *_PyCode_StealAvailableCode(PyCodeObject *self);
+extern void _PyCode_ReturnAvailableCode(PyCodeObject *self, PyCodeObject *to_return);
+extern int _PyCode_SpawnAvailableCodeIfNotSameThread(PyCodeObject *self);
+
 #ifdef __cplusplus
 }
 #endif
