@@ -2728,6 +2728,8 @@ _PyCode_FromCode(PyCodeObject *self)
     co->_co_instrumentation_version = self->_co_instrumentation_version;
     co->co_executors = NULL;
     co->_co_firsttraceable = self->_co_firsttraceable;
+    co->co_extra = NULL;
+    co->_co_cached = NULL;
     memcpy(_PyCode_CODE(co), _PyCode_CODE(self), _PyCode_NBYTES(self));
 
     return co;
@@ -2775,7 +2777,8 @@ _PyCode_ReturnAvailableCode(PyCodeObject *to_return)
         return;
     }
     // Root code object.
-    if (to_return->_co_parent == to_return) {
+    if (to_return->_co_parent == (PyObject *)to_return) {
+        Py_DECREF(to_return);
         return;
     }
 #ifdef Py_GIL_DISABLED
@@ -2785,12 +2788,13 @@ _PyCode_ReturnAvailableCode(PyCodeObject *to_return)
         return;
     }
     assert(to_return->_co_next == NULL);
-    PyCodeObject *res;
     Py_BEGIN_CRITICAL_SECTION(owner);
     PyObject *temp = owner->_co_next;
     owner->_co_next = (PyObject *)to_return;
     to_return->_co_next = temp;
+    to_return->_co_parent = NULL;
     Py_END_CRITICAL_SECTION();
+    Py_DECREF(owner);
 #else
     Py_DECREF(to_return);
 #endif
@@ -2823,16 +2827,18 @@ _PyCode_FrameRCU(_PyInterpreterFrame *frame, _Py_CODEUNIT *next_instr)
     }
     PyCodeObject *self = (PyCodeObject *)frame->f_executable;
     PyCodeObject *dup_co = _PyCode_SpawnAvailableCodeIfShared(self);
-    if (dup_co == self) {
-        return next_instr;
-    }
     if (dup_co == NULL) {
         return NULL;
+    }
+    if (dup_co == self) {
+        Py_DECREF(dup_co);
+        return next_instr;
     }
     Py_BEGIN_CRITICAL_SECTION(self);
     self->_co_frame_count--;
     assert(self->_co_frame_count >= 0);
-    frame->f_executable = (PyObject *)dup_co;
+    // Patch out the frame's code object with our duplicated one.
+    Py_SETREF(frame->f_executable, (PyObject *)dup_co);
     dup_co->_co_frame_count++;
     Py_END_CRITICAL_SECTION();
     size_t offset = next_instr - _PyCode_CODE(self);
