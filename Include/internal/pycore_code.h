@@ -267,7 +267,7 @@ extern void _PyCode_Clear_Executors(PyCodeObject *code);
 #ifdef Py_GIL_DISABLED
 // gh-115999 tracks progress on addressing this.
 #define ENABLE_SPECIALIZATION 0
-#define ENABLE_SPECIALIZATION_LIMITED
+#define ENABLE_SPECIALIZATION_LIMITED 1
 #else
 #define ENABLE_SPECIALIZATION 1
 #endif

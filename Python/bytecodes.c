@@ -4021,7 +4021,7 @@ dummy_func(
         }
 
         specializing op(_SPECIALIZE_BINARY_OP, (counter/1, lhs, rhs -- lhs, rhs)) {
-            #if ENABLE_SPECIALIZATION || defined(ENABLE_SPECIALIZATION_LIMITED)
+            #if ENABLE_SPECIALIZATION || ENABLE_SPECIALIZATION_LIMITED
             if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                 next_instr = this_instr;
                 if (_Py_Specialize_BinaryOp(frame, &next_instr, lhs, rhs, next_instr, oparg, LOCALS_ARRAY) != 0) {

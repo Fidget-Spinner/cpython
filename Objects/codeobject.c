@@ -2749,6 +2749,8 @@ _PyCode_StealAvailableCode(PyCodeObject *self)
         assert(PyCode_Check(next));
         self->_co_next = ((PyCodeObject *)next)->_co_next;
         res = (PyCodeObject *)next;
+        assert (res->_co_parent == NULL);
+        res->_co_parent = Py_NewRef(self);
     }
     else {
         // None available. Bummer. Just use self.
@@ -2761,7 +2763,6 @@ _PyCode_StealAvailableCode(PyCodeObject *self)
         return NULL;
     }
     res->_co_frame_count++;
-    res->_co_parent = Py_NewRef(self);
     res->_co_next = NULL;
     return res;
 #else
@@ -2792,8 +2793,8 @@ _PyCode_ReturnAvailableCode(PyCodeObject *to_return)
     PyObject *temp = owner->_co_next;
     owner->_co_next = (PyObject *)to_return;
     to_return->_co_next = temp;
-    to_return->_co_parent = NULL;
     Py_END_CRITICAL_SECTION();
+    to_return->_co_parent = NULL;
     Py_DECREF(owner);
 #else
     Py_DECREF(to_return);
@@ -2810,6 +2811,7 @@ _PyCode_SpawnAvailableCodeIfShared(PyCodeObject *self)
         if (res == NULL) {
             return NULL;
         }
+        assert(res->_co_parent == NULL);
         res->_co_parent = Py_NewRef(self);
         return res;
     }
