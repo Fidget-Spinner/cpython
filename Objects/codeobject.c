@@ -2716,7 +2716,7 @@ _PyCode_FromCode(PyCodeObject *self)
     co->co_name = Py_XNewRef(self->co_name);
     co->co_qualname = Py_XNewRef(self->co_qualname);
     co->co_linetable = Py_XNewRef(self->co_linetable);
-    co->co_weakreflist = Py_XNewRef(self->co_weakreflist);
+    co->co_weakreflist = NULL;
 
 #ifdef Py_GIL_DISABLED
     co->_co_next = NULL;
