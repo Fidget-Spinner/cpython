@@ -163,7 +163,10 @@
                 double dres =
                 ((PyFloatObject *)left)->ob_fval +
                 ((PyFloatObject *)right)->ob_fval;
-                DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
+                Py_DECREF(left);
+                Py_DECREF(right);
+                res = PyFloat_FromDouble(dres);
+                if (res == NULL) goto pop_2_error;
             }
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -295,7 +298,10 @@
                 double dres =
                 ((PyFloatObject *)left)->ob_fval *
                 ((PyFloatObject *)right)->ob_fval;
-                DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
+                Py_DECREF(left);
+                Py_DECREF(right);
+                res = PyFloat_FromDouble(dres);
+                if (res == NULL) goto pop_2_error;
             }
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -353,7 +359,10 @@
                 double dres =
                 ((PyFloatObject *)left)->ob_fval -
                 ((PyFloatObject *)right)->ob_fval;
-                DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
+                Py_DECREF(left);
+                Py_DECREF(right);
+                res = PyFloat_FromDouble(dres);
+                if (res == NULL) goto pop_2_error;
             }
             stack_pointer[-2] = res;
             stack_pointer += -1;

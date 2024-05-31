@@ -372,6 +372,7 @@ NON_ESCAPING_FUNCTIONS = (
     "PyList_GET_SIZE",
     "PyTuple_GET_SIZE",
     "Py_ARRAY_LENGTH",
+    "PyFloat_FromDouble",
     "Py_Unicode_GET_LENGTH",
     "PyUnicode_READ_CHAR",
     "_Py_SINGLETON",

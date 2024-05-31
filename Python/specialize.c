@@ -457,11 +457,9 @@ write_single_inst_rcu(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst, _Py_
     if (updated_next_inst == NULL) {
         return 1;
     }
-    size_t offset = inst - *next_inst;
+    updated_next_inst->op.code = opcode;
+    updated_next_inst->op.arg = oparg;
     *next_inst = updated_next_inst;
-    _Py_CODEUNIT *write_to = updated_next_inst + offset;
-    write_to->op.code = opcode;
-    write_to->op.arg = oparg;
     return 0;
 }
 

@@ -488,7 +488,9 @@ dummy_func(
             double dres =
                 ((PyFloatObject *)left)->ob_fval *
                 ((PyFloatObject *)right)->ob_fval;
-            DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
+            DECREF_INPUTS();
+            res = PyFloat_FromDouble(dres);
+            ERROR_IF(res == NULL, error);
         }
 
         pure op(_BINARY_OP_ADD_FLOAT, (left, right -- res)) {
@@ -496,7 +498,9 @@ dummy_func(
             double dres =
                 ((PyFloatObject *)left)->ob_fval +
                 ((PyFloatObject *)right)->ob_fval;
-            DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
+            DECREF_INPUTS();
+            res = PyFloat_FromDouble(dres);
+            ERROR_IF(res == NULL, error);
         }
 
         pure op(_BINARY_OP_SUBTRACT_FLOAT, (left, right -- res)) {
@@ -504,7 +508,9 @@ dummy_func(
             double dres =
                 ((PyFloatObject *)left)->ob_fval -
                 ((PyFloatObject *)right)->ob_fval;
-            DECREF_INPUTS_AND_REUSE_FLOAT(left, right, dres, res);
+            DECREF_INPUTS();
+            res = PyFloat_FromDouble(dres);
+            ERROR_IF(res == NULL, error);
         }
 
         macro(BINARY_OP_MULTIPLY_FLOAT) =
