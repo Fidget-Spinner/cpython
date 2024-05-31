@@ -2793,8 +2793,9 @@ _PyCode_ReturnAvailableCode(PyCodeObject *to_return)
     PyObject *temp = owner->_co_next;
     owner->_co_next = (PyObject *)to_return;
     to_return->_co_next = temp;
-    Py_END_CRITICAL_SECTION();
+    to_return->_co_frame_count--;
     to_return->_co_parent = NULL;
+    Py_END_CRITICAL_SECTION();
     Py_DECREF(owner);
 #else
     Py_DECREF(to_return);
