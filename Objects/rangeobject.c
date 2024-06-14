@@ -823,7 +823,7 @@ rangeiter_next(_PyRangeIterObject *r)
             long result = _Py_atomic_load_int64_relaxed(&r->start);
             if (_PySeqLock_EndRead(&r->sequence, sequence)) {
                 _PySeqLock_LockWrite(&r->sequence);
-                _Py_atomic_store_int64(&r->start, result + r->step);
+                _Py_atomic_store_int64(&r->start, result + _Py_atomic_load_int64_relaxed(&r->step));
                 _Py_atomic_add_int64(&r->len, -1);
                 _PySeqLock_UnlockWrite(&r->sequence);
                 return PyLong_FromLong(result);
