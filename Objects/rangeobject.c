@@ -7,7 +7,7 @@
 #include "pycore_modsupport.h"    // _PyArg_NoKwnames()
 #include "pycore_range.h"
 #include "pycore_tuple.h"         // _PyTuple_ITEMS()
-
+#include "pycore_pyatomic_ft_wrappers.h"
 
 /* Support objects whose length is > PY_SSIZE_T_MAX.
 
@@ -816,6 +816,24 @@ PyTypeObject PyRange_Type = {
 static PyObject *
 rangeiter_next(_PyRangeIterObject *r)
 {
+#ifdef Py_GIL_DISABLED
+    while (1) {
+        uint32_t sequence = _PySeqLock_BeginRead(&r->sequence);
+        if (_Py_atomic_load_int64_relaxed(&r->len) > 0) {
+            long result = _Py_atomic_load_int64_relaxed(&r->start);
+            if (_PySeqLock_EndRead(&r->sequence, sequence)) {
+                _PySeqLock_LockWrite(&r->sequence);
+                _Py_atomic_store_int64(&r->start, result + r->step);
+                _Py_atomic_add_int64(&r->len, -1);
+                _PySeqLock_UnlockWrite(&r->sequence);
+                return PyLong_FromLong(result);
+            }
+        }
+        else {
+            return NULL;
+        }
+    }
+#else
     if (r->len > 0) {
         long result = r->start;
         r->start = result + r->step;
@@ -823,6 +841,7 @@ rangeiter_next(_PyRangeIterObject *r)
         return PyLong_FromLong(result);
     }
     return NULL;
+#endif
 }
 
 static PyObject *
@@ -966,6 +985,7 @@ fast_range_iter(long start, long stop, long step, long len)
     it->start = start;
     it->step = step;
     it->len = len;
+    _PySeqLock_AfterFork(&it->sequence);
     return (PyObject *)it;
 }
 

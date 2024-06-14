@@ -13,6 +13,9 @@ typedef struct {
     long start;
     long step;
     long len;
+#ifdef Py_GIL_DISABLED
+    _PySeqLock sequence;
+#endif
 } _PyRangeIterObject;
 
 #ifdef __cplusplus
