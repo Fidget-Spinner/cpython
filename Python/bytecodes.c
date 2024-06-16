@@ -213,7 +213,7 @@ dummy_func(
             }
         }
 
-        pseudo(LOAD_CLOSURE) = {
+        pseudo(LOAD_CLOSURE, (-- unused)) = {
             LOAD_FAST,
         };
 
@@ -259,7 +259,7 @@ dummy_func(
             SETLOCAL(oparg, value);
         }
 
-        pseudo(STORE_FAST_MAYBE_NULL) = {
+        pseudo(STORE_FAST_MAYBE_NULL, (unused --)) = {
             STORE_FAST,
         };
 
@@ -1391,18 +1391,35 @@ dummy_func(
                 ERROR_NO_POP();
             }
             if (v == NULL) {
-                if (PyDict_GetItemRef(GLOBALS(), name, &v) < 0) {
-                    ERROR_NO_POP();
-                }
-                if (v == NULL) {
-                    if (PyMapping_GetOptionalItem(BUILTINS(), name, &v) < 0) {
+                if (PyDict_CheckExact(GLOBALS())
+                    && PyDict_CheckExact(BUILTINS()))
+                {
+                    v = _PyDict_LoadGlobal((PyDictObject *)GLOBALS(),
+                                            (PyDictObject *)BUILTINS(),
+                                            name);
+                    if (v == NULL) {
+                        if (!_PyErr_Occurred(tstate)) {
+                            /* _PyDict_LoadGlobal() returns NULL without raising
+                            * an exception if the key doesn't exist */
+                            _PyEval_FormatExcCheckArg(tstate, PyExc_NameError,
+                                                    NAME_ERROR_MSG, name);
+                        }
                         ERROR_NO_POP();
                     }
+                }
+                else {
+                    /* Slow-path if globals or builtins is not a dict */
+                    /* namespace 1: globals */
+                    ERROR_IF(PyMapping_GetOptionalItem(GLOBALS(), name, &v) < 0, error);
                     if (v == NULL) {
-                        _PyEval_FormatExcCheckArg(
-                                    tstate, PyExc_NameError,
-                                    NAME_ERROR_MSG, name);
-                        ERROR_NO_POP();
+                        /* namespace 2: builtins */
+                        ERROR_IF(PyMapping_GetOptionalItem(BUILTINS(), name, &v) < 0, error);
+                        if (v == NULL) {
+                            _PyEval_FormatExcCheckArg(
+                                        tstate, PyExc_NameError,
+                                        NAME_ERROR_MSG, name);
+                            ERROR_IF(true, error);
+                        }
                     }
                 }
             }
@@ -1559,7 +1576,7 @@ dummy_func(
 
         inst(MAKE_CELL, (--)) {
             // "initial" is probably NULL but not if it's an arg (or set
-            // via PyFrame_LocalsToFast() before MAKE_CELL has run).
+            // via the f_locals proxy before MAKE_CELL has run).
             PyObject *initial = GETLOCAL(oparg);
             PyObject *cell = PyCell_New(initial);
             if (cell == NULL) {
@@ -2399,12 +2416,12 @@ dummy_func(
             #endif /* _Py_TIER2 */
         }
 
-        pseudo(JUMP) = {
+        pseudo(JUMP, (--)) = {
             JUMP_FORWARD,
             JUMP_BACKWARD,
         };
 
-        pseudo(JUMP_NO_INTERRUPT) = {
+        pseudo(JUMP_NO_INTERRUPT, (--)) = {
             JUMP_FORWARD,
             JUMP_BACKWARD_NO_INTERRUPT,
         };
@@ -2901,19 +2918,27 @@ dummy_func(
             ERROR_IF(res == NULL, error);
         }
 
-        pseudo(SETUP_FINALLY, (HAS_ARG)) = {
+        pseudo(SETUP_FINALLY, (-- unused), (HAS_ARG)) = {
+            /* If an exception is raised, restore the stack position
+             * and push one value before jumping to the handler.
+             */
             NOP,
         };
 
-        pseudo(SETUP_CLEANUP, (HAS_ARG)) = {
+        pseudo(SETUP_CLEANUP, (-- unused, unused), (HAS_ARG)) = {
+            /* As SETUP_FINALLY, but push lasti as well */
             NOP,
         };
 
-        pseudo(SETUP_WITH, (HAS_ARG)) = {
+        pseudo(SETUP_WITH, (-- unused), (HAS_ARG)) = {
+            /* If an exception is raised, restore the stack position to the
+             * position before the result of __(a)enter__ and push 2 values
+             * before jumping to the handler.
+             */
             NOP,
         };
 
-        pseudo(POP_BLOCK) = {
+        pseudo(POP_BLOCK, (--)) = {
             NOP,
         };
 
@@ -3955,6 +3980,11 @@ dummy_func(
                     assert(PyTuple_CheckExact(attr));
                     assert(func_obj->func_defaults == NULL);
                     func_obj->func_defaults = attr;
+                    break;
+                case MAKE_FUNCTION_ANNOTATE:
+                    assert(PyCallable_Check(attr));
+                    assert(func_obj->func_annotate == NULL);
+                    func_obj->func_annotate = attr;
                     break;
                 default:
                     Py_UNREACHABLE();
