@@ -2730,6 +2730,7 @@ _PyCode_FromCode(PyCodeObject *self)
     co->_co_firsttraceable = self->_co_firsttraceable;
     co->co_extra = NULL;
     co->_co_cached = NULL;
+
     memcpy(_PyCode_CODE(co), _PyCode_CODE(self), _PyCode_NBYTES(self));
 
     return co;
@@ -2758,12 +2759,11 @@ _PyCode_StealAvailableCode(PyCodeObject *self)
         // new code object to be created.
         res = (PyCodeObject *)Py_NewRef(self);
     }
-    Py_END_CRITICAL_SECTION();
-    if (res == NULL) {
-        return NULL;
+    if (res != NULL) {
+        res->_co_frame_count++;
+        res->_co_next = NULL;
     }
-    res->_co_frame_count++;
-    res->_co_next = NULL;
+    Py_END_CRITICAL_SECTION();
     return res;
 #else
     return Py_NewRef(self);
@@ -2804,7 +2804,7 @@ _PyCode_ReturnAvailableCode(PyCodeObject *to_return)
 
 // Spawns a new code object if shared, else just use the same one.
 static PyCodeObject *
-_PyCode_SpawnAvailableCodeIfShared(PyCodeObject *self)
+_PyCode_SpawnAvailableCodeIfShared_Unlocked(PyCodeObject *self)
 {
     assert(PyCode_Check(self));
     if (self->_co_frame_count > 1) {
@@ -2817,6 +2817,16 @@ _PyCode_SpawnAvailableCodeIfShared(PyCodeObject *self)
         return res;
     }
     return (PyCodeObject *)Py_NewRef(self);
+}
+
+static PyCodeObject *
+_PyCode_SpawnAvailableCodeIfShared(PyCodeObject *self)
+{
+    PyCodeObject *res;
+    Py_BEGIN_CRITICAL_SECTION(self);
+    res = _PyCode_SpawnAvailableCodeIfShared_Unlocked(self);
+    Py_END_CRITICAL_SECTION();
+    return res;
 }
 
 // Duplicate a code object if a frame is sharing it and set it on the frame

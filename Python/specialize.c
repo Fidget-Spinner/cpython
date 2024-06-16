@@ -15,6 +15,7 @@
 #include "pycore_opcode_utils.h"  // RESUME_AT_FUNC_START
 #include "pycore_pylifecycle.h"   // _PyOS_URandomNonblock()
 #include "pycore_runtime.h"       // _Py_ID()
+#include "pycore_critical_section.h"
 
 #include <stdlib.h> // rand()
 
@@ -2073,6 +2074,8 @@ _Py_Specialize_BinaryOp(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst,
                         PyObject *lhs, PyObject *rhs, _Py_CODEUNIT *instr,
                         int oparg, PyObject **locals)
 {
+    assert(frame->f_executable);
+    PyCodeObject *original_co = (PyCodeObject *)frame->f_executable;
     assert(ENABLE_SPECIALIZATION || ENABLE_SPECIALIZATION_LIMITED);
     assert(_PyOpcode_Caches[BINARY_OP] == INLINE_CACHE_ENTRIES_BINARY_OP);
     _PyBinaryOpCache *cache = (_PyBinaryOpCache *)(instr + 1);
@@ -2086,24 +2089,24 @@ _Py_Specialize_BinaryOp(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst,
                 _Py_CODEUNIT next = instr[INLINE_CACHE_ENTRIES_BINARY_OP + 1];
                 bool to_store = (next.op.code == STORE_FAST);
                 if (to_store && locals[next.op.arg] == lhs) {
-                    if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_INPLACE_ADD_UNICODE, 0) != 0) {
+                    if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_INPLACE_ADD_UNICODE, instr->op.arg) != 0) {
                         return 1;
                     }
                     goto success;
                 }
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_UNICODE, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_UNICODE, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
             }
             if (PyLong_CheckExact(lhs)) {
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_INT, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_INT, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
             }
             if (PyFloat_CheckExact(lhs)) {
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_FLOAT, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_ADD_FLOAT, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
@@ -2115,13 +2118,13 @@ _Py_Specialize_BinaryOp(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst,
                 break;
             }
             if (PyLong_CheckExact(lhs)) {
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_MULTIPLY_INT, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_MULTIPLY_INT, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
             }
             if (PyFloat_CheckExact(lhs)) {
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_MULTIPLY_FLOAT, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_MULTIPLY_FLOAT, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
@@ -2133,13 +2136,13 @@ _Py_Specialize_BinaryOp(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst,
                 break;
             }
             if (PyLong_CheckExact(lhs)) {
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_SUBTRACT_INT, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_SUBTRACT_INT, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
             }
             if (PyFloat_CheckExact(lhs)) {
-                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_SUBTRACT_FLOAT, 0) != 0) {
+                if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP_SUBTRACT_FLOAT, instr->op.arg) != 0) {
                     return 1;
                 }
                 goto success;
@@ -2148,12 +2151,24 @@ _Py_Specialize_BinaryOp(_PyInterpreterFrame *frame, _Py_CODEUNIT **next_inst,
     }
     SPECIALIZATION_FAIL(BINARY_OP, binary_op_fail_kind(oparg, lhs, rhs));
     STAT_INC(BINARY_OP, failure);
-    instr->op.code = BINARY_OP;
-    cache->counter = adaptive_counter_backoff(cache->counter);
+
+    if (write_single_inst_rcu(frame, next_inst, instr, BINARY_OP, instr->op.arg) != 0) {
+        return 1;
+    }
+    // Writes to the new bytecode don't need to be atomic.
+    _PyBinaryOpCache *new_cache = ((_PyBinaryOpCache *)(next_inst+1));
+    new_cache->counter = adaptive_counter_backoff(new_cache->counter);
+    // Write to the original bytecode needs to be atomic, as other threads might not have
+    // COW-ed it yet.
+    Py_BEGIN_CRITICAL_SECTION(original_co);
+    FT_ATOMIC_STORE_UINT16(cache->counter.as_counter, adaptive_counter_backoff(new_cache->counter).as_counter);
+    Py_END_CRITICAL_SECTION();
     return 0;
 success:
     STAT_INC(BINARY_OP, success);
-    cache->counter = adaptive_counter_cooldown();
+    assert(frame->f_executable);
+    new_cache = ((_PyBinaryOpCache *)(next_inst+1));
+    new_cache->counter = adaptive_counter_backoff(new_cache->counter);
     return 0;
 }
 
