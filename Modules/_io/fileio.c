@@ -243,8 +243,8 @@ _io_FileIO___init___impl(fileio *self, PyObject *nameobj, const char *mode,
     int fd = -1;
     int fd_is_own = 0;
 #ifdef O_CLOEXEC
-    PyThreadState *tstate = PyThreadState_Get();
-    int *atomic_flag_works = &tstate->fileutils__Py_open_cloexec_works;
+    PyInterpreterState *is = PyInterpreterState_Get();
+    int *atomic_flag_works = &is->fileutils_state._Py_open_cloexec_works;
 #elif !defined(MS_WINDOWS)
     int *atomic_flag_works = NULL;
 #endif

@@ -37,6 +37,7 @@ extern "C" {
 #include "pycore_typeobject.h"    // struct types_state
 #include "pycore_unicodeobject.h" // struct _Py_unicode_state
 #include "pycore_warnings.h"      // struct _warnings_runtime_state
+#include "pycore_fileutils.h"     // struct _Py_fileutils_state
 
 
 struct _Py_long_state {
@@ -253,6 +254,7 @@ struct _is {
 
     struct ast_state ast;
     struct types_state types;
+    struct _Py_fileutils_state fileutils_state;
     struct callable_cache callable_cache;
     _PyOptimizerObject *optimizer;
     _PyExecutorObject *executor_list_head;

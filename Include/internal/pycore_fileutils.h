@@ -329,6 +329,22 @@ extern int _Py_GetTicksPerSecond(long *ticks_per_second);
 // Export for '_testcapi' shared extension
 PyAPI_FUNC(int) _Py_IsValidFD(int fd);
 
+struct _Py_fileutils_state {
+    // For Python/fileutils.c
+    int ioctl_works;
+    int skiproot_initialized;
+    int combineex_initialized;
+    int _Py_open_cloexec_works;
+};
+
+#define _Py_fileutils_state_INIT \
+    {\
+        .ioctl_works = -1, \
+        .skiproot_initialized = 0, \
+        .combineex_initialized = 0, \
+        ._Py_open_cloexec_works = -1, \
+    }
+
 #ifdef __cplusplus
 }
 #endif
