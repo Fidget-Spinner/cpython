@@ -597,9 +597,9 @@ _Py_uop_analyze_and_optimize(
         return err;
     }
 
-    length = optimize_uops(
-        _PyFrame_GetCode(frame), buffer,
-        length, curr_stacklen, dependencies);
+//    length = optimize_uops(
+//        _PyFrame_GetCode(frame), buffer,
+//        length, curr_stacklen, dependencies);
 
     if (length <= 0) {
         return length;
