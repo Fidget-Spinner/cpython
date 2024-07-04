@@ -1553,20 +1553,21 @@
         /* _LOAD_NAME is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
         case _LOAD_GLOBAL: {
-            _PyStackRef res;
+            _PyStackRef *res;
             _PyStackRef null = PyStackRef_NULL;
             oparg = CURRENT_OPARG();
+            res = &stack_pointer[0];
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg>>1);
-            PyObject *res_o;
             if (PyDict_CheckExact(GLOBALS())
                 && PyDict_CheckExact(BUILTINS()))
             {
-                res_o = _PyDict_LoadGlobal((PyDictObject *)GLOBALS(),
+                _PyDict_LoadGlobalStackRef((PyDictObject *)GLOBALS(),
                     (PyDictObject *)BUILTINS(),
-                    name);
-                if (res_o == NULL) {
+                    name,
+                    res);
+                if (PyStackRef_IsNull(*res)) {
                     if (!_PyErr_Occurred(tstate)) {
-                        /* _PyDict_LoadGlobal() returns NULL without raising
+                        /* _PyDict_LoadGlobalStackRef() sets NULL without raising
                          * an exception if the key doesn't exist */
                         _PyEval_FormatExcCheckArg(tstate, PyExc_NameError,
                             NAME_ERROR_MSG, name);
@@ -1575,6 +1576,7 @@
                 }
             }
             else {
+                PyObject *res_o;
                 /* Slow-path if globals or builtins is not a dict */
                 /* namespace 1: globals */
                 if (PyMapping_GetOptionalItem(GLOBALS(), name, &res_o) < 0) JUMP_TO_ERROR();
@@ -1588,10 +1590,9 @@
                         if (true) JUMP_TO_ERROR();
                     }
                 }
+                *res = PyStackRef_FromPyObjectSteal(res_o);
             }
             null = PyStackRef_NULL;
-            res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
             if (oparg & 1) stack_pointer[1] = null;
             stack_pointer += 1 + (oparg & 1);
             assert(WITHIN_STACK_BOUNDS());
