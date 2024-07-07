@@ -56,9 +56,9 @@ enum _frameowner {
 };
 
 typedef struct _PyInterpreterFrame {
-    PyObject *f_executable; /* Strong reference (code object or None) */
+    _PyStackRef f_executable; /* Strong reference (code object or None) */
     struct _PyInterpreterFrame *previous;
-    PyObject *f_funcobj; /* Strong reference. Only valid if not on C stack */
+    _PyStackRef f_funcobj; /* Strong reference. Only valid if not on C stack */
     PyObject *f_globals; /* Borrowed reference. Only valid if not on C stack */
     PyObject *f_builtins; /* Borrowed reference. Only valid if not on C stack */
     PyObject *f_locals; /* Strong reference, may be NULL. Only valid if not on C stack */
@@ -75,8 +75,9 @@ typedef struct _PyInterpreterFrame {
     ((int)((IF)->instr_ptr - _PyCode_CODE(_PyFrame_GetCode(IF))))
 
 static inline PyCodeObject *_PyFrame_GetCode(_PyInterpreterFrame *f) {
-    assert(PyCode_Check(f->f_executable));
-    return (PyCodeObject *)f->f_executable;
+    PyObject *code = PyStackRef_AsPyObjectBorrow(f->f_executable);
+    assert(PyCode_Check(code));
+    return (PyCodeObject *)code;
 }
 
 static inline _PyStackRef *_PyFrame_Stackbase(_PyInterpreterFrame *f) {
@@ -123,14 +124,14 @@ static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *
     dest->previous = NULL;
 
 #ifdef Py_GIL_DISABLED
-    PyCodeObject *co = (PyCodeObject *)dest->f_executable;
+    PyCodeObject *co = (PyCodeObject *) PyStackRef_AsPyObjectBorrow(dest->f_executable);
     for (int i = src->stacktop; i < co->co_nlocalsplus + co->co_stacksize; i++) {
         dest->localsplus[i] = PyStackRef_NULL;
     }
 #endif
 }
 
-/* Consumes reference to func and locals.
+/* Consumes reference to locals.
    Does not initialize frame->previous, which happens
    when frame is linked into the frame stack.
  */
@@ -139,8 +140,8 @@ _PyFrame_Initialize(
     _PyInterpreterFrame *frame, PyFunctionObject *func,
     PyObject *locals, PyCodeObject *code, int null_locals_from)
 {
-    frame->f_funcobj = (PyObject *)func;
-    frame->f_executable = Py_NewRef(code);
+    frame->f_funcobj = PyStackRef_FromPyObjectNew(func);
+    frame->f_executable = PyStackRef_FromPyObjectNew(code);
     frame->f_builtins = func->func_builtins;
     frame->f_globals = func->func_globals;
     frame->f_locals = locals;
@@ -310,8 +311,8 @@ _PyFrame_PushTrampolineUnchecked(PyThreadState *tstate, PyCodeObject *code, int 
     _PyInterpreterFrame *frame = (_PyInterpreterFrame *)tstate->datastack_top;
     tstate->datastack_top += code->co_framesize;
     assert(tstate->datastack_top < tstate->datastack_limit);
-    frame->f_funcobj = Py_None;
-    frame->f_executable = Py_NewRef(code);
+    frame->f_funcobj = PyStackRef_None;
+    frame->f_executable = PyStackRef_FromPyObjectNew(code);
 #ifdef Py_DEBUG
     frame->f_builtins = NULL;
     frame->f_globals = NULL;

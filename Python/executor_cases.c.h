@@ -1775,8 +1775,8 @@
             oparg = CURRENT_OPARG();
             /* Copy closure variables to free variables */
             PyCodeObject *co = _PyFrame_GetCode(frame);
-            assert(PyFunction_Check(frame->f_funcobj));
-            PyObject *closure = ((PyFunctionObject *)frame->f_funcobj)->func_closure;
+            assert(PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj)));
+            PyObject *closure = ((PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj))->func_closure;
             assert(oparg == co->co_nfreevars);
             int offset = co->co_nlocalsplus - oparg;
             for (int i = 0; i < oparg; ++i) {
@@ -3440,9 +3440,10 @@
             int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
             PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
             new_frame = _PyEvalFramePushAndInit(
-                tstate, (PyFunctionObject *)PyStackRef_AsPyObjectSteal(callable), locals,
+                tstate, (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(callable), locals,
                 args, total_args, NULL
             );
+            PyStackRef_CLOSE(callable);
             // The frame has stolen all the arguments from the stack,
             // so there is no need to clean them up.
             stack_pointer += -2 - oparg;
@@ -3682,6 +3683,7 @@
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -3708,6 +3710,7 @@
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -3734,6 +3737,7 @@
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -3760,6 +3764,7 @@
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -3786,6 +3791,7 @@
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -3811,6 +3817,7 @@
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -4552,8 +4559,8 @@
 
         case _RETURN_GENERATOR: {
             _PyStackRef res;
-            assert(PyFunction_Check(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)frame->f_funcobj;
+            assert(PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj)));
+            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
             PyGenObject *gen = (PyGenObject *)_Py_MakeCoro(func);
             if (gen == NULL) {
                 JUMP_TO_ERROR();
@@ -4922,7 +4929,7 @@
 
         case _CHECK_FUNCTION: {
             uint32_t func_version = (uint32_t)CURRENT_OPERAND();
-            assert(PyFunction_Check(frame->f_funcobj));
+            assert(PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj)));
             if (((PyFunctionObject *)frame->f_funcobj)->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();

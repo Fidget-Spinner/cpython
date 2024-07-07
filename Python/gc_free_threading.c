@@ -316,6 +316,13 @@ gc_visit_stackref(_PyStackRef stackref)
     }
 }
 
+static inline void
+gc_visit_frame_fields(_PyInterpreterFrame *frame)
+{
+    gc_visit_stackref(frame->f_executable);
+    gc_visit_stackref(frame->f_funcobj);
+}
+
 static void
 gc_visit_thread_stacks(PyInterpreterState *interp)
 {
@@ -323,7 +330,8 @@ gc_visit_thread_stacks(PyInterpreterState *interp)
     for (PyThreadState *p = interp->threads.head; p != NULL; p = p->next) {
         _PyInterpreterFrame *curr_frame = p->current_frame;
         while (curr_frame != NULL) {
-            PyCodeObject *co = (PyCodeObject *)curr_frame->f_executable;
+            gc_visit_frame_fields(curr_frame);
+            PyCodeObject *co = (PyCodeObject *) PyStackRef_AsPyObjectBorrow(curr_frame->f_executable);
             if (co != NULL && PyCode_Check(co)) {
                 for (int i = 0;
                      i < co->co_nlocalsplus + co->co_stacksize; i++) {
@@ -657,6 +665,7 @@ clear_weakrefs(struct collection_state *state)
             // freed after its function object.
             PyGenObject *gen = (PyGenObject *)op;
             struct _PyInterpreterFrame *frame = &(gen->gi_iframe);
+            gc_visit_frame_fields(frame);
             for (int i = 0; i < frame->stacktop; i++) {
                 gc_visit_stackref(frame->localsplus[i]);
             }
@@ -896,14 +905,22 @@ _PyGC_VisitFrameStack(_PyInterpreterFrame *frame, visitproc visit, void *arg)
     /* locals */
     _PyStackRef *locals = _PyFrame_GetLocalsArray(frame);
     int i = 0;
+    int is_visit_decref = visit == visit_decref || visit == visit_decref_unreachable;
     /* locals and stack */
     for (; i <frame->stacktop; i++) {
         if (PyStackRef_IsDeferred(locals[i]) &&
-            (visit == visit_decref || visit == visit_decref_unreachable)) {
+            (is_visit_decref)) {
             continue;
         }
         Py_VISIT(PyStackRef_AsPyObjectBorrow(locals[i]));
     }
+    if (!(PyStackRef_IsDeferred(frame->f_funcobj) && is_visit_decref)) {
+        Py_VISIT(PyStackRef_AsPyObjectBorrow(frame->f_funcobj));
+    }
+    if (!(PyStackRef_IsDeferred(frame->f_executable) && is_visit_decref)) {
+        Py_VISIT(PyStackRef_AsPyObjectBorrow(frame->f_executable));
+    }
+
     return 0;
 }
 

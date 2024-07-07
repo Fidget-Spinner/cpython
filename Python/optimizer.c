@@ -535,7 +535,7 @@ translate_bytecode_to_trace(
 {
     bool progress_needed = true;
     PyCodeObject *code = _PyFrame_GetCode(frame);
-    PyFunctionObject *func = (PyFunctionObject *)frame->f_funcobj;
+    PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
     assert(PyFunction_Check(func));
     PyCodeObject *initial_code = code;
     _Py_BloomFilter_Add(dependencies, initial_code);

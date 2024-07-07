@@ -1604,7 +1604,7 @@ frame_dealloc(PyFrameObject *f)
     }
 
     Py_TRASHCAN_BEGIN(f, frame_dealloc);
-    PyObject *co = NULL;
+    _PyStackRef co = PyStackRef_NULL;
 
     /* GH-106092: If f->f_frame was on the stack and we reached the maximum
      * nesting depth for deallocations, the trashcan may have delayed this
@@ -1616,8 +1616,8 @@ frame_dealloc(PyFrameObject *f)
     if (f->f_frame == frame && frame->owner == FRAME_OWNED_BY_FRAME_OBJECT) {
         /* Don't clear code object until the end */
         co = frame->f_executable;
-        frame->f_executable = NULL;
-        Py_CLEAR(frame->f_funcobj);
+        frame->f_executable = PyStackRef_NULL;
+        PyStackRef_CLEAR(frame->f_funcobj);
         Py_CLEAR(frame->f_locals);
         _PyStackRef *locals = _PyFrame_GetLocalsArray(frame);
         for (int i = 0; i < frame->stacktop; i++) {
@@ -1628,7 +1628,7 @@ frame_dealloc(PyFrameObject *f)
     Py_CLEAR(f->f_trace);
     Py_CLEAR(f->f_extra_locals);
     PyObject_GC_Del(f);
-    Py_XDECREF(co);
+    PyStackRef_CLOSE(co);
     Py_TRASHCAN_END;
 }
 
@@ -1767,7 +1767,7 @@ static void
 init_frame(_PyInterpreterFrame *frame, PyFunctionObject *func, PyObject *locals)
 {
     PyCodeObject *code = (PyCodeObject *)func->func_code;
-    _PyFrame_Initialize(frame, (PyFunctionObject*)Py_NewRef(func),
+    _PyFrame_Initialize(frame, (PyFunctionObject*)func,
                         Py_XNewRef(locals), code, 0);
     frame->previous = NULL;
 }
@@ -1838,14 +1838,14 @@ frame_init_get_vars(_PyInterpreterFrame *frame)
     PyCodeObject *co = _PyFrame_GetCode(frame);
     int lasti = _PyInterpreterFrame_LASTI(frame);
     if (!(lasti < 0 && _PyCode_CODE(co)->op.code == COPY_FREE_VARS
-          && PyFunction_Check(frame->f_funcobj)))
+          && PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj))))
     {
         /* Free vars are initialized */
         return;
     }
 
     /* Free vars have not been initialized -- Do that */
-    PyObject *closure = ((PyFunctionObject *)frame->f_funcobj)->func_closure;
+    PyObject *closure = ((PyFunctionObject *) PyStackRef_AsPyObjectBorrow(frame->f_funcobj))->func_closure;
     int offset = PyUnstable_Code_GetFirstFree(co);
     for (int i = 0; i < co->co_nfreevars; ++i) {
         PyObject *o = PyTuple_GET_ITEM(closure, i);

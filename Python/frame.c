@@ -13,8 +13,6 @@ _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg)
 {
     Py_VISIT(frame->frame_obj);
     Py_VISIT(frame->f_locals);
-    Py_VISIT(frame->f_funcobj);
-    Py_VISIT(_PyFrame_GetCode(frame));
     return _PyGC_VisitFrameStack(frame, visit, arg);
 }
 
@@ -120,7 +118,7 @@ _PyFrame_ClearExceptCode(_PyInterpreterFrame *frame)
         Py_DECREF(f);
     }
     _PyFrame_ClearLocals(frame);
-    Py_DECREF(frame->f_funcobj);
+    PyStackRef_CLOSE(frame->f_funcobj);
 }
 
 /* Unstable API functions */
@@ -128,7 +126,7 @@ _PyFrame_ClearExceptCode(_PyInterpreterFrame *frame)
 PyObject *
 PyUnstable_InterpreterFrame_GetCode(struct _PyInterpreterFrame *frame)
 {
-    PyObject *code = frame->f_executable;
+    PyObject *code = PyStackRef_AsPyObjectBorrow(frame->f_executable);
     Py_INCREF(code);
     return code;
 }

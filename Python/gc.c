@@ -537,6 +537,8 @@ visit_decref(PyObject *op, void *parent)
 int
 _PyGC_VisitFrameStack(_PyInterpreterFrame *frame, visitproc visit, void *arg)
 {
+    Py_VISIT(PyStackRef_AsPyObjectBorrow(frame->f_funcobj));
+    Py_VISIT(_PyFrame_GetCode(frame));
     /* locals */
     _PyStackRef *locals = _PyFrame_GetLocalsArray(frame);
     int i = 0;

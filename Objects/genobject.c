@@ -150,7 +150,7 @@ gen_dealloc(PyGenObject *gen)
     if (_PyGen_GetCode(gen)->co_flags & CO_COROUTINE) {
         Py_CLEAR(((PyCoroObject *)gen)->cr_origin_or_finalizer);
     }
-    Py_DECREF(_PyGen_GetCode(gen));
+    PyStackRef_CLOSE(gen->gi_iframe.f_executable);
     Py_CLEAR(gen->gi_name);
     Py_CLEAR(gen->gi_qualname);
 

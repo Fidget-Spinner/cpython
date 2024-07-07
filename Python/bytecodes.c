@@ -773,7 +773,6 @@ dummy_func(
             assert(code->co_argcount == 2);
             DEOPT_IF(!_PyThreadState_HasStackSpace(tstate, code->co_framesize));
             STAT_INC(BINARY_SUBSCR, hit);
-            Py_INCREF(getitem);
             _PyInterpreterFrame *new_frame = _PyFrame_PushUnchecked(tstate, getitem, 2);
             STACK_SHRINK(2);
             new_frame->localsplus[0] = container_st;
@@ -1759,8 +1758,8 @@ dummy_func(
         inst(COPY_FREE_VARS, (--)) {
             /* Copy closure variables to free variables */
             PyCodeObject *co = _PyFrame_GetCode(frame);
-            assert(PyFunction_Check(frame->f_funcobj));
-            PyObject *closure = ((PyFunctionObject *)frame->f_funcobj)->func_closure;
+            assert(PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj)));
+            PyObject *closure = ((PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj))->func_closure;
             assert(oparg == co->co_nfreevars);
             int offset = co->co_nlocalsplus - oparg;
             for (int i = 0; i < oparg; ++i) {
@@ -2276,7 +2275,6 @@ dummy_func(
             assert(code->co_argcount == 1);
             DEOPT_IF(!_PyThreadState_HasStackSpace(tstate, code->co_framesize));
             STAT_INC(LOAD_ATTR, hit);
-            Py_INCREF(fget);
             _PyInterpreterFrame *new_frame = _PyFrame_PushUnchecked(tstate, f, 1);
             // Manipulate stack directly because we exit with DISPATCH_INLINED().
             STACK_SHRINK(1);
@@ -2303,7 +2301,6 @@ dummy_func(
             STAT_INC(LOAD_ATTR, hit);
 
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 1);
-            Py_INCREF(f);
             _PyInterpreterFrame *new_frame = _PyFrame_PushUnchecked(tstate, f, 2);
             // Manipulate stack directly because we exit with DISPATCH_INLINED().
             STACK_SHRINK(1);
@@ -3359,9 +3356,10 @@ dummy_func(
                 int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
                 PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
                 _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit(
-                    tstate, (PyFunctionObject *)PyStackRef_AsPyObjectSteal(callable), locals,
+                    tstate, (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(callable), locals,
                     args, total_args, NULL
                 );
+                PyStackRef_CLOSE(callable);
                 // Manipulate stack directly since we leave using DISPATCH_INLINED().
                 STACK_SHRINK(oparg + 2);
                 // The frame has stolen all the arguments from the stack,
@@ -3432,9 +3430,10 @@ dummy_func(
             int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
             PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
             new_frame = _PyEvalFramePushAndInit(
-                tstate, (PyFunctionObject *)PyStackRef_AsPyObjectSteal(callable), locals,
+                tstate, (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(callable), locals,
                 args, total_args, NULL
             );
+            PyStackRef_CLOSE(callable);
             // The frame has stolen all the arguments from the stack,
             // so there is no need to clean them up.
             SYNC_SP();
@@ -3578,6 +3577,7 @@ dummy_func(
             STAT_INC(CALL, hit);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             new_frame = _PyFrame_PushUnchecked(tstate, func, oparg + has_self);
+            PyStackRef_CLOSE(callable);
             _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
             new_frame->localsplus[0] = self_or_null;
             for (int i = 0; i < oparg; i++) {
@@ -3698,11 +3698,10 @@ dummy_func(
             PyStackRef_CLOSE(callable);
             _PyInterpreterFrame *shim = _PyFrame_PushTrampolineUnchecked(
                 tstate, (PyCodeObject *)&_Py_InitCleanup, 1);
-            assert(_PyCode_CODE((PyCodeObject *)shim->f_executable)[0].op.code == EXIT_INIT_CHECK);
+            assert(_PyCode_CODE((PyCodeObject *)PyStackRef_AsPyObjectBorrow(shim->f_executable))[0].op.code == EXIT_INIT_CHECK);
             /* Push self onto stack of shim */
             Py_INCREF(self);
             shim->localsplus[0] = PyStackRef_FromPyObjectSteal(self);
-            Py_INCREF(init);
             _PyInterpreterFrame *init_frame = _PyFrame_PushUnchecked(tstate, init, oparg+1);
             /* Copy self followed by args to __init__ frame */
             init_frame->localsplus[0] = PyStackRef_FromPyObjectSteal(self);
@@ -4173,10 +4172,11 @@ dummy_func(
                 int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
                 PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
                 _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit(
-                    tstate, (PyFunctionObject *)PyStackRef_AsPyObjectSteal(callable), locals,
+                    tstate, (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(callable), locals,
                     args, positional_args, kwnames_o
                 );
                 PyStackRef_CLOSE(kwnames);
+                PyStackRef_CLOSE(callable);
                 // Manipulate stack directly since we leave using DISPATCH_INLINED().
                 STACK_SHRINK(oparg + 3);
                 // The frame has stolen all the arguments from the stack,
@@ -4288,8 +4288,9 @@ dummy_func(
                     PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(func));
 
                     _PyInterpreterFrame *new_frame = _PyEvalFramePushAndInit_Ex(tstate,
-                                                                                (PyFunctionObject *)PyStackRef_AsPyObjectSteal(func_st), locals,
+                                                                                (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(func_st), locals,
                                                                                 nargs, callargs, kwargs);
+                    PyStackRef_CLOSE(func_st);
                     // Need to manually shrink the stack since we exit with DISPATCH_INLINED.
                     STACK_SHRINK(oparg + 3);
                     if (new_frame == NULL) {
@@ -4359,8 +4360,8 @@ dummy_func(
         }
 
         inst(RETURN_GENERATOR, (-- res)) {
-            assert(PyFunction_Check(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)frame->f_funcobj;
+            assert(PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj)));
+            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
             PyGenObject *gen = (PyGenObject *)_Py_MakeCoro(func);
             if (gen == NULL) {
                 ERROR_NO_POP();
@@ -4685,7 +4686,7 @@ dummy_func(
         }
 
         tier2 op(_CHECK_FUNCTION, (func_version/2 -- )) {
-            assert(PyFunction_Check(frame->f_funcobj));
+            assert(PyFunction_Check(PyStackRef_AsPyObjectBorrow(frame->f_funcobj)));
             DEOPT_IF(((PyFunctionObject *)frame->f_funcobj)->func_version != func_version);
         }
 

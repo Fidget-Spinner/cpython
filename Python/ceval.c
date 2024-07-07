@@ -164,8 +164,8 @@ lltrace_instruction(_PyInterpreterFrame *frame,
 static void
 lltrace_resume_frame(_PyInterpreterFrame *frame)
 {
-    PyObject *fobj = frame->f_funcobj;
-    if (!PyCode_Check(frame->f_executable) ||
+    PyObject *fobj = PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
+    if (!PyCode_Check(PyStackRef_AsPyObjectBorrow(frame->f_executable)) ||
         fobj == NULL ||
         !PyFunction_Check(fobj)
     ) {
@@ -765,13 +765,13 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 
 #ifdef Py_DEBUG
     /* Set these to invalid but identifiable values for debugging. */
-    entry_frame.f_funcobj = (PyObject*)0xaaa0;
     entry_frame.f_locals = (PyObject*)0xaaa1;
     entry_frame.frame_obj = (PyFrameObject*)0xaaa2;
     entry_frame.f_globals = (PyObject*)0xaaa3;
     entry_frame.f_builtins = (PyObject*)0xaaa4;
 #endif
-    entry_frame.f_executable = Py_None;
+    entry_frame.f_funcobj = PyStackRef_None;
+    entry_frame.f_executable = PyStackRef_None;
     entry_frame.instr_ptr = (_Py_CODEUNIT *)_Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS + 1;
     entry_frame.stacktop = 0;
     entry_frame.owner = FRAME_OWNED_BY_CSTACK;
@@ -1709,7 +1709,7 @@ clear_thread_frame(PyThreadState *tstate, _PyInterpreterFrame * frame)
     tstate->c_recursion_remaining--;
     assert(frame->frame_obj == NULL || frame->frame_obj->f_frame == frame);
     _PyFrame_ClearExceptCode(frame);
-    Py_DECREF(frame->f_executable);
+    PyStackRef_CLOSE(frame->f_executable);
     tstate->c_recursion_remaining++;
     _PyThreadState_PopFrame(tstate, frame);
 }
@@ -1763,7 +1763,6 @@ _PyEvalFramePushAndInit(PyThreadState *tstate, PyFunctionObject *func,
     return frame;
 fail:
     /* Consume the references */
-    Py_DECREF(func);
     Py_XDECREF(locals);
     for (size_t i = 0; i < argcount; i++) {
         PyStackRef_CLOSE(args[i]);
@@ -1806,7 +1805,7 @@ _PyEvalFramePushAndInit_UnTagged(PyThreadState *tstate, PyFunctionObject *func,
 }
 
 /* Same as _PyEvalFramePushAndInit but takes an args tuple and kwargs dict.
-   Steals references to func, callargs and kwargs.
+   Steals references to callargs and kwargs.
 */
 static _PyInterpreterFrame *
 _PyEvalFramePushAndInit_Ex(PyThreadState *tstate, PyFunctionObject *func,
@@ -1836,9 +1835,6 @@ _PyEvalFramePushAndInit_Ex(PyThreadState *tstate, PyFunctionObject *func,
     if (has_dict) {
         _PyStack_UnpackDict_FreeNoDecRef(newargs, kwnames);
     }
-    /* No need to decref func here because the reference has been stolen by
-       _PyEvalFramePushAndInit.
-    */
     Py_DECREF(callargs);
     Py_XDECREF(kwargs);
     return new_frame;
@@ -1855,8 +1851,7 @@ _PyEval_Vector(PyThreadState *tstate, PyFunctionObject *func,
                PyObject *kwnames)
 {
     /* _PyEvalFramePushAndInit consumes the references
-     * to func, locals and all its arguments */
-    Py_INCREF(func);
+     * to locals and all its arguments */
     Py_XINCREF(locals);
     for (size_t i = 0; i < argcount; i++) {
         Py_INCREF(args[i]);
@@ -1941,6 +1936,7 @@ PyEval_EvalCodeEx(PyObject *_co, PyObject *globals, PyObject *locals,
     res = _PyEval_Vector(tstate, func, locals,
                          allargs, argcount,
                          kwnames);
+    Py_DECREF(func);
 fail:
     Py_XDECREF(func);
     Py_XDECREF(kwnames);

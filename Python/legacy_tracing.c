@@ -130,9 +130,9 @@ _PyEval_SetOpcodeTrace(
     bool enable
 ) {
     assert(frame != NULL);
-    assert(PyCode_Check(frame->f_frame->f_executable));
+    assert(PyCode_Check(PyStackRef_AsPyObjectBorrow((frame->f_frame->f_executable))));
 
-    PyCodeObject *code = (PyCodeObject *)frame->f_frame->f_executable;
+    PyCodeObject *code = (PyCodeObject *) PyStackRef_AsPyObjectBorrow(frame->f_frame->f_executable);
     _PyMonitoringEventSet events = 0;
 
     if (_PyMonitoring_GetLocalEvents(code, PY_MONITORING_SYS_TRACE_ID, &events) < 0) {
