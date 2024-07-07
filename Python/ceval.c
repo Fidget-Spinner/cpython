@@ -1936,7 +1936,6 @@ PyEval_EvalCodeEx(PyObject *_co, PyObject *globals, PyObject *locals,
     res = _PyEval_Vector(tstate, func, locals,
                          allargs, argcount,
                          kwnames);
-    Py_DECREF(func);
 fail:
     Py_XDECREF(func);
     Py_XDECREF(kwnames);
