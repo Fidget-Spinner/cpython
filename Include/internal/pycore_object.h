@@ -14,6 +14,7 @@ extern "C" {
 #include "pycore_interp.h"        // PyInterpreterState.gc
 #include "pycore_pyatomic_ft_wrappers.h"  // FT_ATOMIC_STORE_PTR_RELAXED
 #include "pycore_pystate.h"       // _PyInterpreterState_GET()
+#include "pycore_stackref.h"
 
 /* Check if an object is consistent. For example, ensure that the reference
    counter is greater than or equal to 1, and ensure that ob_type is not NULL.
@@ -713,6 +714,7 @@ PyAPI_FUNC(PyObject*) _PyObject_LookupSpecialMethod(PyObject *self, PyObject *at
 extern int _PyObject_IsAbstract(PyObject *);
 
 PyAPI_FUNC(int) _PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method);
+PyAPI_FUNC(int) _PyObject_GetMethodStackRef(PyObject *obj, PyObject *name, _PyStackRef *method);
 extern PyObject* _PyObject_NextNotImplemented(PyObject *);
 
 // Pickle support.
@@ -755,6 +757,8 @@ PyAPI_DATA(PyTypeObject) _PyNotImplemented_Type;
 PyAPI_DATA(int) _Py_SwappedOp[];
 
 extern void _Py_GetConstant_Init(void);
+
+extern void _PyType_LookupStackRef(PyTypeObject *type, PyObject *name, _PyStackRef *result);
 
 #ifdef __cplusplus
 }
