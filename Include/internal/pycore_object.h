@@ -14,6 +14,7 @@ extern "C" {
 #include "pycore_interp.h"        // PyInterpreterState.gc
 #include "pycore_pyatomic_ft_wrappers.h"  // FT_ATOMIC_STORE_PTR_RELAXED
 #include "pycore_pystate.h"       // _PyInterpreterState_GET()
+#include "pycore_typeid.h"        // _PyTypeId_IncrefSlow
 
 /* Check if an object is consistent. For example, ensure that the reference
    counter is greater than or equal to 1, and ensure that ob_type is not NULL.
@@ -256,6 +257,28 @@ extern PyStatus _PyObject_InitState(PyInterpreterState *interp);
 extern void _PyObject_FiniState(PyInterpreterState *interp);
 extern bool _PyRefchain_IsTraced(PyInterpreterState *interp, PyObject *obj);
 
+static void
+_Py_incref_type(PyTypeObject *type)
+{
+    if (_Py_IsImmortal((PyObject *)type)) {
+        return;
+    }
+
+    Py_ssize_t typeid = type->tp_typeid;
+    if (typeid == 0) {
+        Py_INCREF(type);
+        return;
+    }
+
+    PyThreadState *tstate = PyThreadState_GET();
+    if (typeid >= tstate->local_refcnts_size) {
+        _PyTypeId_IncrefSlow(&_PyRuntime.typeids, type);
+    }
+    else {
+        tstate->local_refcnts[typeid]++;
+    }
+}
+
 /* Inline functions trading binary compatibility for speed:
    _PyObject_Init() is the fast version of PyObject_Init(), and
    _PyObject_InitVar() is the fast version of PyObject_InitVar().
@@ -277,6 +300,25 @@ _PyObject_InitVar(PyVarObject *op, PyTypeObject *typeobj, Py_ssize_t size)
     assert(op != NULL);
     assert(typeobj != &PyLong_Type);
     _PyObject_Init((PyObject *)op, typeobj);
+    Py_SET_SIZE(op, size);
+}
+
+static inline void
+_PyObject_Init_Incref_TypeId(PyObject *op, PyTypeObject *typeobj)
+{
+    assert(op != NULL);
+    Py_SET_TYPE(op, typeobj);
+    assert(_PyType_HasFeature(typeobj, Py_TPFLAGS_HEAPTYPE) || _Py_IsImmortal(typeobj));
+    _Py_incref_type(typeobj);
+    _Py_NewReference(op);
+}
+
+static inline void
+_PyObject_InitVar_Incref_TypeId(PyVarObject *op, PyTypeObject *typeobj, Py_ssize_t size)
+{
+    assert(op != NULL);
+    assert(typeobj != &PyLong_Type);
+    _PyObject_Init_Incref_TypeId((PyObject *)op, typeobj);
     Py_SET_SIZE(op, size);
 }
 

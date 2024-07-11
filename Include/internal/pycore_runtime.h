@@ -24,6 +24,7 @@ extern "C" {
 #include "pycore_tracemalloc.h"     // struct _tracemalloc_runtime_state
 #include "pycore_typeobject.h"      // struct _types_runtime_state
 #include "pycore_unicodeobject.h"   // struct _Py_unicode_runtime_state
+#include "pycore_typeid.h"          // PyTypeIdPool
 
 struct _getargs_runtime_state {
     struct _PyArg_Parser *static_parsers;
@@ -305,6 +306,10 @@ typedef struct pyruntimestate {
     // Used in "Python/emscripten_trampoline.c" to choose between type
     // reflection trampoline and EM_JS trampoline.
     bool wasm_type_reflection_available;
+#endif
+
+#ifdef Py_GIL_DISABLED
+    PyTypeIdPool typeids;
 #endif
 
 } _PyRuntimeState;

@@ -20,6 +20,7 @@
 #include "pycore_runtime_init.h"  // _PyRuntimeState_INIT
 #include "pycore_sysmodule.h"     // _PySys_Audit()
 #include "pycore_obmalloc.h"      // _PyMem_obmalloc_state_on_heap()
+#include "pycore_typeid.h"        // _PyTypeId_Finalize, _PyTypeId_MergeRefcounts
 
 /* --------------------------------------------------------------------------
 CAUTION
@@ -488,6 +489,8 @@ _PyRuntimeState_Fini(_PyRuntimeState *runtime)
     if (PyThread_tss_is_created(&runtime->trashTSSkey)) {
         PyThread_tss_delete(&runtime->trashTSSkey);
     }
+
+    _PyTypeId_Finalize(&_PyRuntime.typeids);
 }
 
 #ifdef HAVE_FORK
@@ -1738,6 +1741,7 @@ PyThreadState_Clear(PyThreadState *tstate)
 
     tstate->_status.cleared = 1;
 
+    _PyTypeId_MergeRefcounts(&_PyRuntime.typeids, tstate);
     // XXX Call _PyThreadStateSwap(runtime, NULL) here if "current".
     // XXX Do it as early in the function as possible.
 }
@@ -1760,6 +1764,9 @@ tstate_delete_common(PyThreadState *tstate, int release_gil)
     _PyRuntimeState *runtime = interp->runtime;
 
     HEAD_LOCK(runtime);
+
+    _PyTypeId_MergeRefcounts(&_PyRuntime.typeids, tstate);
+
     if (tstate->prev) {
         tstate->prev->next = tstate->next;
     }
