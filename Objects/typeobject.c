@@ -2223,9 +2223,53 @@ _PyType_AllocNoTrack(PyTypeObject *type, Py_ssize_t nitems)
 }
 
 PyObject *
+_PyType_AllocNoTrack_TypeId(PyTypeObject *type, Py_ssize_t nitems)
+{
+    PyObject *obj;
+    /* The +1 on nitems is needed for most types but not all. We could save a
+     * bit of space by allocating one less item in certain cases, depending on
+     * the type. However, given the extra complexity (e.g. an additional type
+     * flag to indicate when that is safe) it does not seem worth the memory
+     * savings. An example type that doesn't need the +1 is a subclass of
+     * tuple. See GH-100659 and GH-81381. */
+    size_t size = _PyObject_VAR_SIZE(type, nitems+1);
+
+    const size_t presize = _PyType_PreHeaderSize(type);
+    if (type->tp_flags & Py_TPFLAGS_INLINE_VALUES) {
+        assert(type->tp_itemsize == 0);
+        size += _PyInlineValuesSize(type);
+    }
+    char *alloc = _PyObject_MallocWithType(type, size + presize);
+    if (alloc  == NULL) {
+        return PyErr_NoMemory();
+    }
+    obj = (PyObject *)(alloc + presize);
+    if (presize) {
+        ((PyObject **)alloc)[0] = NULL;
+        ((PyObject **)alloc)[1] = NULL;
+    }
+    if (PyType_IS_GC(type)) {
+        _PyObject_GC_Link(obj);
+    }
+    memset(obj, '\0', size);
+
+    if (type->tp_itemsize == 0) {
+        _PyObject_Init_Incref_TypeId(obj, type);
+    }
+    else {
+        _PyObject_InitVar_Incref_TypeId((PyVarObject *)obj, type, nitems);
+    }
+    if (type->tp_flags & Py_TPFLAGS_INLINE_VALUES) {
+        _PyObject_InitInlineValues(obj, type);
+    }
+    return obj;
+}
+
+
+PyObject *
 PyType_GenericAlloc(PyTypeObject *type, Py_ssize_t nitems)
 {
-    PyObject *obj = _PyType_AllocNoTrack(type, nitems);
+    PyObject *obj = _PyType_AllocNoTrack_TypeId(type, nitems);
     if (obj == NULL) {
         return NULL;
     }
@@ -2385,6 +2429,27 @@ subtype_clear(PyObject *self)
 }
 
 static void
+decref_type(PyTypeObject *type)
+{
+    assert(!_Py_IsImmortal((PyObject *)type));
+
+    Py_ssize_t typeid = type->tp_typeid;
+    if (typeid == 0) {
+        Py_DECREF(type);
+        return;
+    }
+
+    assert(_PyObject_HasDeferredRefcount((PyObject *)type));
+    PyThreadState *tstate = PyThreadState_GET();
+    if (typeid >= tstate->local_refcnts_size) {
+        Py_DECREF(type);
+    }
+    else {
+        tstate->local_refcnts[typeid]--;
+    }
+}
+
+static void
 subtype_dealloc(PyObject *self)
 {
     PyTypeObject *type, *base;
@@ -2427,7 +2492,8 @@ subtype_dealloc(PyObject *self)
         // Don't read type memory after calling basedealloc() since basedealloc()
         // can deallocate the type and free its memory.
         int type_needs_decref = (type->tp_flags & Py_TPFLAGS_HEAPTYPE
-                                 && !(base->tp_flags & Py_TPFLAGS_HEAPTYPE));
+                                 && !(base->tp_flags & Py_TPFLAGS_HEAPTYPE)
+                                 && !_Py_IsImmortal(type));
 
         assert((type->tp_flags & Py_TPFLAGS_MANAGED_DICT) == 0);
 
@@ -2440,7 +2506,7 @@ subtype_dealloc(PyObject *self)
            reference counting. Only decref if the base type is not already a heap
            allocated type. Otherwise, basedealloc should have decref'd it already */
         if (type_needs_decref) {
-            Py_DECREF(type);
+            decref_type(type);
         }
 
         /* Done */
@@ -2540,7 +2606,8 @@ subtype_dealloc(PyObject *self)
     // Don't read type memory after calling basedealloc() since basedealloc()
     // can deallocate the type and free its memory.
     int type_needs_decref = (type->tp_flags & Py_TPFLAGS_HEAPTYPE
-                             && !(base->tp_flags & Py_TPFLAGS_HEAPTYPE));
+                             && !(base->tp_flags & Py_TPFLAGS_HEAPTYPE)
+                             && !(_Py_IsImmortal(type)));
 
     assert(basedealloc);
     basedealloc(self);
@@ -2550,7 +2617,7 @@ subtype_dealloc(PyObject *self)
        reference counting. Only decref if the base type is not already a heap
        allocated type. Otherwise, basedealloc should have decref'd it already */
     if (type_needs_decref) {
-        Py_DECREF(type);
+        decref_type(type);
     }
 
   endlabel:
@@ -3901,6 +3968,10 @@ type_new_alloc(type_new_ctx *ctx)
     et->ht_module = NULL;
     et->_ht_tpname = NULL;
 
+    if (_PyTypeId_Allocate(&_PyRuntime.typeids, type) < 0) {
+        return NULL;
+    }
+
     _PyObject_SetDeferredRefcount((PyObject *)et);
 
     return type;
@@ -4860,6 +4931,9 @@ _PyType_FromMetaclass_impl(
     res_start = (char*)res;
 
     type = &res->ht_type;
+    if (_PyTypeId_Allocate(&_PyRuntime.typeids, type) < 0) {
+        goto finally;
+    }
     /* The flags must be initialized early, before the GC traverses us */
     type->tp_flags = spec->flags | Py_TPFLAGS_HEAPTYPE;
 
@@ -5903,6 +5977,9 @@ type_dealloc(PyObject *self)
     }
     Py_XDECREF(et->ht_module);
     PyMem_Free(et->_ht_tpname);
+    if (type->tp_typeid != 0) {
+        _PyTypeId_Release(&_PyRuntime.typeids, type);
+    }
     Py_TYPE(type)->tp_free((PyObject *)type);
 }
 

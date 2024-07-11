@@ -14,6 +14,7 @@
 #include "pycore_tstate.h"        // _PyThreadStateImpl
 #include "pycore_weakref.h"       // _PyWeakref_ClearRef()
 #include "pydtrace.h"
+#include "pycore_typeid.h"        // _PyTypeId_MergeRefcounts
 
 #ifdef Py_GIL_DISABLED
 
@@ -332,6 +333,8 @@ merge_all_queued_objects(PyInterpreterState *interp, struct collection_state *st
 {
     HEAD_LOCK(&_PyRuntime);
     for (PyThreadState *p = interp->threads.head; p != NULL; p = p->next) {
+        // Merge per-thread refcount for types into the type's actual refcount
+        _PyTypeId_MergeRefcounts(&_PyRuntime.typeids, p);
         merge_queued_objects((_PyThreadStateImpl *)p, state);
     }
     HEAD_UNLOCK(&_PyRuntime);
@@ -613,6 +616,13 @@ clear_weakrefs(struct collection_state *state)
 {
     PyObject *op;
     WORKSTACK_FOR_EACH(&state->unreachable, op) {
+        if (PyType_Check(op)) {
+            PyTypeObject *type = (PyTypeObject *)op;
+            if (type->tp_typeid != 0) {
+                _PyTypeId_Release(&_PyRuntime.typeids, type);
+            }
+        }
+
         if (PyWeakref_Check(op)) {
             // Clear weakrefs that are themselves unreachable to ensure their
             // callbacks will not be executed later from a `tp_clear()`

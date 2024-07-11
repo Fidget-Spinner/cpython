@@ -192,6 +192,12 @@ struct _ts {
     PyObject *previous_executor;
 
     uint64_t dict_global_version;
+
+#ifdef Py_GIL_DISABLED
+    /* Local refcount for heap type objects */
+    Py_ssize_t *local_refcnts;
+    Py_ssize_t local_refcnts_size;
+#endif
 };
 
 #ifdef Py_DEBUG
