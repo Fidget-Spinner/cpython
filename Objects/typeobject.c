@@ -3968,11 +3968,12 @@ type_new_alloc(type_new_ctx *ctx)
     et->ht_module = NULL;
     et->_ht_tpname = NULL;
 
+    _PyObject_SetDeferredRefcount((PyObject *)et);
+
     if (_PyTypeId_Allocate(&_PyRuntime.typeids, type) < 0) {
         return NULL;
     }
 
-    _PyObject_SetDeferredRefcount((PyObject *)et);
 
     return type;
 }
@@ -4931,9 +4932,12 @@ _PyType_FromMetaclass_impl(
     res_start = (char*)res;
 
     type = &res->ht_type;
+
+    _PyObject_SetDeferredRefcount((PyObject *)type);
     if (_PyTypeId_Allocate(&_PyRuntime.typeids, type) < 0) {
         goto finally;
     }
+
     /* The flags must be initialized early, before the GC traverses us */
     type->tp_flags = spec->flags | Py_TPFLAGS_HEAPTYPE;
 

@@ -391,7 +391,7 @@ update_refs(const mi_heap_t *heap, const mi_heap_area_t *area,
     }
 
     Py_ssize_t refcount = Py_REFCNT(op);
-    refcount -= _PyObject_HasDeferredRefcount(op);
+    refcount -= _PyObject_HasDeferredRefcount(op) ? (UINT32_MAX / 2) : 0;
     _PyObject_ASSERT(op, refcount >= 0);
 
     if (refcount > 0 && !_PyObject_HasDeferredRefcount(op)) {
@@ -716,10 +716,6 @@ PyStatus
 _PyGC_Init(PyInterpreterState *interp)
 {
     GCState *gcstate = &interp->gc;
-
-    // gh-117783: immortalize objects that would use deferred refcounting
-    // once the first non-main thread is created (but not in subinterpreters).
-    gcstate->immortalize = _Py_IsMainInterpreter(interp) ? 0 : -1;
 
     gcstate->garbage = PyList_New(0);
     if (gcstate->garbage == NULL) {
@@ -1799,32 +1795,6 @@ custom_visitor_wrapper(const mi_heap_t *heap, const mi_heap_area_t *area,
     }
 
     return true;
-}
-
-// gh-117783: Immortalize objects that use deferred reference counting to
-// temporarily work around scaling bottlenecks.
-static bool
-immortalize_visitor(const mi_heap_t *heap, const mi_heap_area_t *area,
-                    void *block, size_t block_size, void *args)
-{
-    PyObject *op = op_from_block(block, args, false);
-    if (op != NULL && _PyObject_HasDeferredRefcount(op)) {
-        _Py_SetImmortal(op);
-        op->ob_gc_bits &= ~_PyGC_BITS_DEFERRED;
-    }
-    return true;
-}
-
-void
-_PyGC_ImmortalizeDeferredObjects(PyInterpreterState *interp)
-{
-    struct visitor_args args;
-    _PyEval_StopTheWorld(interp);
-    if (interp->gc.immortalize == 0) {
-        gc_visit_heaps(interp, &immortalize_visitor, &args);
-        interp->gc.immortalize = 1;
-    }
-    _PyEval_StartTheWorld(interp);
 }
 
 void

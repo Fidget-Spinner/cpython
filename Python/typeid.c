@@ -51,6 +51,7 @@ resize_typeids(PyTypeIdPool *pool)
 int
 _PyTypeId_Allocate(PyTypeIdPool *pool, PyTypeObject *type)
 {
+    assert(_PyObject_HasDeferredRefcount((PyObject *)type));
     PyMutex_Lock(&pool->mutex);
     if (pool->next == NULL) {
         if (resize_typeids(pool) < 0) {
