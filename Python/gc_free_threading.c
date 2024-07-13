@@ -165,6 +165,7 @@ disable_deferred_refcounting(PyObject *op)
     if (_PyObject_HasDeferredRefcount(op)) {
         op->ob_gc_bits &= ~_PyGC_BITS_DEFERRED;
         op->ob_ref_shared -= (1 << _Py_REF_SHARED_SHIFT);
+        op->ob_ref_local -= (UINT32_MAX / 2);
     }
 }
 
