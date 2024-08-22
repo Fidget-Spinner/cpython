@@ -199,6 +199,9 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsSymbol **stack_pointer;
     _Py_UopsSymbol **stack;
     _Py_UopsSymbol **locals;
+
+    bool is_inlined;
+    int reconstruction_offset;
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;

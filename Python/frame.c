@@ -8,6 +8,60 @@
 #include "pycore_object.h"        // _PyObject_GC_UNTRACK()
 #include "opcode.h"
 
+// Reconstructs inlined frames.
+void
+_PyFrame_Reconstruct(_PyInterpreterFrame *frame)
+{
+    assert(frame->has_inlinee);
+    assert(frame->first_inlined_frame_offset > 0);
+    _PyStackRef *old_sp = frame->stackpointer;
+    _Py_CODEUNIT *old_ip = frame->instr_ptr;
+    // Layout:
+    // Frame:
+    // 0. Offset from current localsplus to start frame.
+    // 1. __globals__
+    // 2. __builtins__
+    // 3. __code__
+    // 4. __funcobj__
+    // 5. instr_ptr
+    // 6. n_stackentries
+    // 7. return_offset
+    // 8. Next frame's offset from host frame's localsplus.
+    // 9. _EXIT_TRACE Note: oparg = 0 if no more frames left.
+    _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)(frame->localsplus + frame->first_inlined_frame_offset);
+    _PyUOpInstruction *reconstruction = (_PyUOpInstruction *)first_inlined->previous;
+    assert(reconstruction->oparg == _RECONSTRUCTION_INFO);
+    _PyInterpreterFrame *prev = frame->previous;
+    _PyInterpreterFrame *next = frame;
+
+    next->instr_ptr = ((_Py_CODEUNIT *)reconstruction[5].operand);
+    next->stackpointer = next->localsplus + (reconstruction[6].operand);
+
+    assert(reconstruction[9].opcode == _EXIT_TRACE);
+    reconstruction += 9;
+    prev = next;
+    while (reconstruction[9].oparg) {
+        next = (_PyInterpreterFrame *)frame->localsplus + reconstruction->operand;
+        next->f_globals = ((PyObject *)reconstruction[1].operand);
+        next->f_builtins = ((PyObject *)reconstruction[2].operand);
+        next->f_executable = Py_NewRef((PyObject *)reconstruction[3].operand);
+        next->f_funcobj = Py_NewRef((PyObject *)reconstruction[4].operand);
+        next->instr_ptr = ((_Py_CODEUNIT *)reconstruction[5].operand);
+        next->stackpointer = next->localsplus + (reconstruction[6].operand);
+        next->return_offset = (reconstruction[7].operand);
+        next->first_inlined_frame_offset = 0;
+        next->owner = FRAME_OWNED_BY_THREAD;
+        next->previous = prev;
+        prev = next;
+        assert(reconstruction[9].opcode == _EXIT_TRACE);
+        reconstruction += 9;
+    }
+
+    // If the frame is the topmost frame, set the stack pointer and instr ptr to the current one.
+    next->stackpointer = old_sp;
+    next->instr_ptr = old_ip;
+}
+
 int
 _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg)
 {

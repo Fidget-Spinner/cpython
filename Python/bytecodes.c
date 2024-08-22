@@ -4830,6 +4830,71 @@ dummy_func(
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 
+        // Prelude to an inlined call.
+        // This creates a "skeleton" frame -- a frame that has all the memory
+        // space needed for a real frame, but with none of its fields filled in.
+        // Thus saving us a bunch of work having to initialize a new frame.
+        tier2 op(_PUSH_SKELETON_FRAME, (argcount/4 --)) {
+            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
+            // Copy over old frame args to new frame locals.
+            _PyStackRef *src = stack_pointer - (int64_t)argcount;
+            _PyStackRef *dst = stack_pointer + FRAME_SIZE;
+            // Future optimization: if we defer all these
+            // args' refcounts (which we can, because
+            // the callee has strong references to them anyways),
+            // This will just become a memcpy.
+            for (int i = 0; i < oparg; i++) {
+                dst[i] = PyStackRef_DUP(src[i]);
+            }
+            stack_pointer += FRAME_SIZE + (int64_t)argcount;
+            // NULL out the remaining locals of the inlined frame.
+            for (int i = 0; i < oparg; i++) {
+                stack_pointer[i] = PyStackRef_NULL;
+            }
+            stack_pointer += oparg;
+            // And we're done! That's all that we need to push a new frame :).
+        }
+
+        tier2 op(_SET_RECONSTRUCTION_OFFSET, (reconstruction/4 --)) {
+            int localscount = oparg;
+            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
+            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(stack_pointer - localscount - FRAME_SIZE);
+            inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
+        }
+
+        // Postlude to an inlined call.
+        // We simply free up the locals and args.
+        tier2 op(_POP_SKELETON_FRAME, (--)) {
+            // Check to make sure sys._getframe didn't request for a reconstruction.
+            DEOPT_IF(!frame->has_inlinee);
+            int localscount = oparg;
+            _PyStackRef *start = stack_pointer - localscount;
+            // Note: Implement deferred refcounting for the args in the future.
+            // Then this will just be a pointer bump.
+            for (int64_t i = 0; i < localscount; i++) {
+                PyStackRef_XCLOSE(start[i]);
+            }
+            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
+            stack_pointer -= FRAME_SIZE;
+            // Finally, pop off arguments and callable, self
+            for (int i = 0; i < oparg; i++) {
+                PyStackRef_CLOSE(stack_pointer);
+                stack_pointer--;
+            }
+            // Self
+            PyStackRef_XCLOSE(stack_pointer);
+            stack_pointer--;
+            // Callable
+            PyStackRef_CLOSE(stack_pointer);
+            stack_pointer--;
+            // And we're done! That's all that we need to pop a frame :).
+        }
+
+
+        // Fake op just for storing reconstruction data.
+        tier2 op(_RECONSTRUCTION_INFO, (--)) {
+        }
+
         tier2 op(_DEOPT, (--)) {
             EXIT_TO_TIER1();
         }

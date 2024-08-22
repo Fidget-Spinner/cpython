@@ -656,6 +656,7 @@ dummy_func(void) {
     op(_RETURN_VALUE, (retval -- res)) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
+        inline_frame_pop(ctx, this_instr, ctx->frame->is_inlined);
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
         res = retval;
@@ -728,6 +729,7 @@ dummy_func(void) {
         ctx->frame->stack_pointer = stack_pointer;
         ctx->frame = new_frame;
         ctx->curr_frame_depth++;
+        inline_frame_push(ctx, this_instr);
         stack_pointer = new_frame->stack_pointer;
         co = get_code(this_instr);
         if (co == NULL) {
@@ -754,6 +756,7 @@ dummy_func(void) {
             corresponding_check_stack->opcode = _NOP;
         }
         corresponding_check_stack = NULL;
+
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg])) {

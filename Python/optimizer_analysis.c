@@ -301,9 +301,139 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 #define GETLOCAL(idx)          ((ctx->frame->locals[idx]))
 
 #define REPLACE_OP(INST, OP, ARG, OPERAND)    \
-    INST->opcode = OP;            \
-    INST->oparg = ARG;            \
-    INST->operand = OPERAND;
+    (INST)->opcode = OP;            \
+    (INST)->oparg = ARG;            \
+    (INST)->operand = OPERAND;
+
+
+static PyFunctionObject *
+get_func(_PyUOpInstruction *op)
+{
+    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR);
+    PyCodeObject *co = NULL;
+    uint64_t operand = op->operand;
+    if (operand == 0) {
+        return NULL;
+    }
+    if (operand & 1) {
+        return NULL;
+    }
+    else {
+        PyFunctionObject *func = (PyFunctionObject *)operand;
+        return func;
+    }
+}
+
+static int
+function_decide_inlineable(PyFunctionObject *func)
+{
+    if (func == NULL) {
+        return 0;
+    }
+    PyCodeObject *co = (PyCodeObject *)func->func_code;
+    if (co == NULL) {
+        return 0;
+    }
+    // Ban closures
+    if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
+        DPRINTF(2, "inline_fail: closure\n");
+        return 0;
+    }
+    // Ban generators, async, etc.
+    int flags = co->co_flags;
+    if ((flags & CO_COROUTINE) ||
+        (flags & CO_GENERATOR) ||
+        (flags & CO_ITERABLE_COROUTINE) ||
+        (flags & CO_ASYNC_GENERATOR) ||
+        // TODO we can support these in the future.
+        (flags & CO_VARKEYWORDS) ||
+        (flags & CO_VARARGS)) {
+        DPRINTF(2, "inline_fail: generator/coroutine/varargs/varkeywords\n");
+        return 0;
+    }
+
+    if (co->co_nlocalsplus >= 128) {
+        DPRINTF(2, "inline_fail: too many local vars\n");
+        return 0;
+    }
+    return 1;
+}
+
+static inline int
+add_reconstruction_data(_Py_UOpsContext *ctx, PyFunctionObject *func, PyCodeObject *co)
+{
+
+}
+
+static inline void
+inline_frame_push(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
+{
+    assert(this_instr->opcode == _PUSH_FRAME);
+    // Inline calls
+    assert((this_instr - 3)->opcode == _CHECK_STACK_SPACE);
+    assert((this_instr - 2)->opcode == _INIT_CALL_PY_EXACT_ARGS);
+    assert((this_instr - 1)->opcode == _SAVE_RETURN_OFFSET);
+    assert((this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP ||
+        (this_instr + 1)->opcode == _CHECK_VALIDITY);
+    assert((this_instr + 2)->opcode == _RESUME_CHECK);
+    // Skip over the CHECK_VALIDITY when deciding,
+    // as those can be optimized away later.
+    PyFunctionObject *func = get_func(this_instr);
+    if (func == NULL) {
+        return;
+    }
+    PyCodeObject *co = func->func_code;
+
+    int argcount = (this_instr - 2)->oparg;
+
+    // Cannot be inlined. Make sure we don't inline previous frames for simpler reconstruction.
+    // In theory, this can be removed in a future version when we get better.
+    if (!function_decide_inlineable(func)) {
+        for (int i = 0; i < ctx->curr_frame_depth; i++) {
+            ctx->frames[i].is_inlined = false;
+        }
+        ctx->frame->is_inlined = false;
+        return;
+    }
+
+    int reconstruction_offset = add_reconstruction_data(ctx, func, co);
+    if (reconstruction_offset < 0) {
+        for (int i = 0; i < ctx->curr_frame_depth; i++) {
+            ctx->frames[i].is_inlined = false;
+        }
+        ctx->frame->is_inlined = false;
+        return;
+    }
+
+    REPLACE_OP((this_instr - 3), _NOP, 0, 0);
+    REPLACE_OP((this_instr - 2), _NOP, 0, 0);
+    REPLACE_OP((this_instr - 1), _NOP, 0, 0);
+    REPLACE_OP(this_instr, _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
+    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION_OFFSET, co->co_nlocalsplus, reconstruction_offset);
+    REPLACE_OP((this_instr + 2), _NOP, 0, 0);
+}
+
+static inline void
+inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, bool is_inlined)
+{
+    assert(this_instr->opcode == _RETURN_VALUE);
+    // Inline pop
+    assert((this_instr + 1)->opcode == _NOP);
+    // Skip over the CHECK_VALIDITY when deciding,
+    // as those can be optimized away later.
+    PyFunctionObject *func = get_func(this_instr);
+    if (func == NULL) {
+        return;
+    }
+    PyCodeObject *co = func->func_code;
+
+    if (!is_inlined) {
+        return;
+    }
+
+    REPLACE_OP(this_instr, _POP_SKELETON_FRAME, co->co_nlocalsplus, 0);
+    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION_OFFSET, 0, ctx->frame->reconstruction_offset);
+}
 
 /* Shortened forms for convenience, used in optimizer_bytecodes.c */
 #define sym_is_not_null _Py_uop_sym_is_not_null

@@ -772,6 +772,8 @@ translate_bytecode_to_trace(
                         }
 
                         if (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE) {
+                            // Temp buffer for frame inlining optimizations (if needed)
+                            ADD_TO_TRACE(_NOP, 0, 0, 0);
                             TRACE_STACK_POP();
                             /* Set the operand to the function or code object returned to,
                              * to assist optimization passes. (See _PUSH_FRAME below.)

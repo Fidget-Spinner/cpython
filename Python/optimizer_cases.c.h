@@ -2383,6 +2383,22 @@
             break;
         }
 
+        case _PUSH_SKELETON_FRAME: {
+            break;
+        }
+
+        case _SET_RECONSTRUCTION_OFFSET: {
+            break;
+        }
+
+        case _POP_SKELETON_FRAME: {
+            break;
+        }
+
+        case _RECONSTRUCTION_INFO: {
+            break;
+        }
+
         case _DEOPT: {
             break;
         }

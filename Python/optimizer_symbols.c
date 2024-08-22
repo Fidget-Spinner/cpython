@@ -374,6 +374,8 @@ _Py_uop_frame_new(
         frame->stack[i] = stackvar;
     }
 
+    frame->is_inlined = false;
+
     return frame;
 }
 

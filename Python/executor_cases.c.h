@@ -5478,36 +5478,102 @@
             break;
         }
 
-        case _DEOPT: {
-            EXIT_TO_TIER1();
-            break;
-        }
-
-        case _ERROR_POP_N: {
+        case _PUSH_SKELETON_FRAME: {
             oparg = CURRENT_OPARG();
-            uint32_t target = (uint32_t)CURRENT_OPERAND();
-            frame->instr_ptr = ((_Py_CODEUNIT *)_PyFrame_GetCode(frame)->co_code_adaptive) + target;
-            stack_pointer += -oparg;
-            assert(WITHIN_STACK_BOUNDS());
-            GOTO_UNWIND();
-            break;
-        }
+            PyObject *argcount = (PyObject *)CURRENT_OPERAND();
+            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
+            // Copy over old frame args to new frame locals.
+            _PyStackRef *src = stack_pointer - (int64_t)argcount;
+            _PyStackRef *dst = stack_pointer + FRAME_SIZE;
+            // Future optimization: if we defer all these
+            // args' refcounts (which we can, because
+            // the callee has strong references to them anyways),
+            // This will just become a memcpy.
+            for (int i = 0; i < oparg; i++) {
+                dst[i] = PyStackRef_DUP(src[i]);
+            }
+            stack_pointer += FRAME_SIZE + (int64_t)argcount;
+            // NULL out the remaining locals of the inlined frame.
+            for (int i = 0; i < oparg; i++) {
+                stack_pointer[i] = PyStackRef_NULL;
+            }
+            stack_pointer += oparg;
+        // And we're done! That's all that we need to push a new frame :).
+        break;
+    }
 
-        case _TIER2_RESUME_CHECK: {
-            #if defined(__EMSCRIPTEN__)
-            if (_Py_emscripten_signal_clock == 0) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
-            #endif
-            uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
-            if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
-            break;
+    case _SET_RECONSTRUCTION_OFFSET: {
+        PyObject *offset = (PyObject *)CURRENT_OPERAND();
+        _PyInterpreterFrame *inlined = (_PyInterpreterFrame *)(frame->localsplus + frame->first_inlined_frame_offset);
+        inlined->previous = (struct _PyInterpreterFrame *)offset;
+        break;
+    }
+
+    case _POP_SKELETON_FRAME: {
+        oparg = CURRENT_OPARG();
+        PyObject *localscount = (PyObject *)CURRENT_OPERAND();
+        // Check to make sure sys._getframe didn't request for a reconstruction.
+        if (!frame->has_inlinee) {
+            UOP_STAT_INC(uopcode, miss);
+            JUMP_TO_JUMP_TARGET();
         }
+        _PyStackRef *start = stack_pointer - localscount;
+        // Note: Implement deferred refcounting for the args in the future.
+        // Then this will just be a pointer bump.
+        for (int64_t i = 0; i < localscount; i++) {
+            PyStackRef_XCLOSE(start[i]);
+        }
+        size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
+        stack_pointer -= FRAME_SIZE;
+        // Finally, pop off arguments and callable, self
+        for (int i = 0; i < oparg; i++) {
+            PyStackRef_CLOSE(stack_pointer);
+            stack_pointer--;
+        }
+        // Self
+        PyStackRef_XCLOSE(stack_pointer);
+        stack_pointer--;
+        // Callable
+        PyStackRef_CLOSE(stack_pointer);
+        stack_pointer--;
+    // And we're done! That's all that we need to pop a frame :).
+    break;
+}
+
+case _RECONSTRUCTION_INFO: {
+    break;
+}
+
+case _DEOPT: {
+    EXIT_TO_TIER1();
+    break;
+}
+
+case _ERROR_POP_N: {
+    oparg = CURRENT_OPARG();
+    uint32_t target = (uint32_t)CURRENT_OPERAND();
+    frame->instr_ptr = ((_Py_CODEUNIT *)_PyFrame_GetCode(frame)->co_code_adaptive) + target;
+    stack_pointer += -oparg;
+    assert(WITHIN_STACK_BOUNDS());
+    GOTO_UNWIND();
+    break;
+}
+
+case _TIER2_RESUME_CHECK: {
+    #if defined(__EMSCRIPTEN__)
+    if (_Py_emscripten_signal_clock == 0) {
+        UOP_STAT_INC(uopcode, miss);
+        JUMP_TO_JUMP_TARGET();
+    }
+    _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
+    #endif
+    uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
+    if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
+        UOP_STAT_INC(uopcode, miss);
+        JUMP_TO_JUMP_TARGET();
+    }
+    assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
+    break;
+}
 
 #undef TIER_TWO

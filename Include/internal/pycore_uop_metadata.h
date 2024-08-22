@@ -276,6 +276,10 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_START_EXECUTOR] = 0,
     [_FATAL_ERROR] = 0,
     [_CHECK_VALIDITY_AND_SET_IP] = HAS_DEOPT_FLAG,
+    [_PUSH_SKELETON_FRAME] = HAS_ARG_FLAG,
+    [_SET_RECONSTRUCTION_OFFSET] = 0,
+    [_POP_SKELETON_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
+    [_RECONSTRUCTION_INFO] = 0,
     [_DEOPT] = 0,
     [_ERROR_POP_N] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
@@ -489,13 +493,16 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_MAYBE_EXPAND_METHOD] = "_MAYBE_EXPAND_METHOD",
     [_NOP] = "_NOP",
     [_POP_EXCEPT] = "_POP_EXCEPT",
+    [_POP_SKELETON_FRAME] = "_POP_SKELETON_FRAME",
     [_POP_TOP] = "_POP_TOP",
     [_POP_TOP_LOAD_CONST_INLINE_BORROW] = "_POP_TOP_LOAD_CONST_INLINE_BORROW",
     [_PUSH_EXC_INFO] = "_PUSH_EXC_INFO",
     [_PUSH_FRAME] = "_PUSH_FRAME",
     [_PUSH_NULL] = "_PUSH_NULL",
+    [_PUSH_SKELETON_FRAME] = "_PUSH_SKELETON_FRAME",
     [_PY_FRAME_GENERAL] = "_PY_FRAME_GENERAL",
     [_PY_FRAME_KW] = "_PY_FRAME_KW",
+    [_RECONSTRUCTION_INFO] = "_RECONSTRUCTION_INFO",
     [_REPLACE_WITH_TRUE] = "_REPLACE_WITH_TRUE",
     [_RESUME_CHECK] = "_RESUME_CHECK",
     [_RETURN_GENERATOR] = "_RETURN_GENERATOR",
@@ -506,6 +513,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SET_ADD] = "_SET_ADD",
     [_SET_FUNCTION_ATTRIBUTE] = "_SET_FUNCTION_ATTRIBUTE",
     [_SET_IP] = "_SET_IP",
+    [_SET_RECONSTRUCTION_OFFSET] = "_SET_RECONSTRUCTION_OFFSET",
     [_SET_UPDATE] = "_SET_UPDATE",
     [_START_EXECUTOR] = "_START_EXECUTOR",
     [_STORE_ATTR] = "_STORE_ATTR",
@@ -1065,6 +1073,14 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _FATAL_ERROR:
             return 0;
         case _CHECK_VALIDITY_AND_SET_IP:
+            return 0;
+        case _PUSH_SKELETON_FRAME:
+            return 0;
+        case _SET_RECONSTRUCTION_OFFSET:
+            return 0;
+        case _POP_SKELETON_FRAME:
+            return 0;
+        case _RECONSTRUCTION_INFO:
             return 0;
         case _DEOPT:
             return 0;

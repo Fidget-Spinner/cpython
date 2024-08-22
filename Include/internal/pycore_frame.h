@@ -61,7 +61,7 @@ enum _frameowner {
 
 typedef struct _PyInterpreterFrame {
     PyObject *f_executable; /* Strong reference (code object or None) */
-    struct _PyInterpreterFrame *previous;
+    struct _PyInterpreterFrame *previous; /* Doubles as a pointer to the reconstruction data for an inlined frame. */
     PyObject *f_funcobj; /* Strong reference. Only valid if not on C stack */
     PyObject *f_globals; /* Borrowed reference. Only valid if not on C stack */
     PyObject *f_builtins; /* Borrowed reference. Only valid if not on C stack */
@@ -70,6 +70,11 @@ typedef struct _PyInterpreterFrame {
     _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
     _PyStackRef *stackpointer;
     uint16_t return_offset;  /* Only relevant during a function call */
+    /* This points to the first inlined frame in localsplus */
+    uint16_t first_inlined_frame_offset;
+    /* Whether the frame contains an inlined frame. Purely to aid debuggers.
+     * Note that when sys._getframe reconstructs the frame, this bit is unset.*/
+    char has_inlinee;
     char owner;
     /* Locals and stack */
     _PyStackRef localsplus[1];
@@ -157,6 +162,7 @@ _PyFrame_Initialize(
     frame->instr_ptr = _PyCode_CODE(code);
     frame->return_offset = 0;
     frame->owner = FRAME_OWNED_BY_THREAD;
+    frame->first_inlined_frame_offset = 0;
 
     for (int i = null_locals_from; i < code->co_nlocalsplus; i++) {
         frame->localsplus[i] = PyStackRef_NULL;
