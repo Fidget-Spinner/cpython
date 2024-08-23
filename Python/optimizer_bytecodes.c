@@ -604,6 +604,7 @@ dummy_func(void) {
 
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
             new_frame = frame_new(ctx, co, 0, args, argcount);
+            new_frame->argcount = argcount;
         } else {
             new_frame = frame_new(ctx, co, 0, NULL, 0);
 
@@ -657,6 +658,7 @@ dummy_func(void) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
         bool old_frame_is_inlined = ctx->frame->is_inlined;
+        int old_frame_argcount = ctx->frame->argcount;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
         res = retval;
@@ -675,7 +677,7 @@ dummy_func(void) {
             ctx->done = true;
         }
         if (old_frame_is_inlined) {
-            inline_frame_pop(ctx, this_instr);
+            inline_frame_pop(ctx, this_instr, co, old_frame_argcount);
         }
     }
 

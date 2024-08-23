@@ -237,7 +237,7 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #endif
 
 #define WITHIN_STACK_BOUNDS() \
-   (frame == &entry_frame || (STACK_LEVEL() >= 0 && STACK_LEVEL() <= STACK_SIZE()))
+   (frame == &entry_frame || frame->has_inlinee || (STACK_LEVEL() >= 0 && STACK_LEVEL() <= STACK_SIZE()))
 
 /* Data access macros */
 #define FRAME_CO_CONSTS (_PyFrame_GetCode(frame)->co_consts)

@@ -206,7 +206,8 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsSymbol **locals;
     _Py_CODEUNIT *instr_ptr;
     int return_offset;
-    _PyUOpInstruction *push_frame; // Borrowed
+    _PyUOpInstruction *push_frame;
+    int argcount;
 
     bool is_inlined;
     // Offset of the first inlined frame from the localsplus of the current frame.

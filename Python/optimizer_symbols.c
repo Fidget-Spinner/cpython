@@ -378,6 +378,7 @@ _Py_uop_frame_new(
     frame->instr_ptr = NULL;
     frame->return_offset = 0;
     frame->push_frame = NULL;
+    frame->argcount = -1;
 
     return frame;
 }

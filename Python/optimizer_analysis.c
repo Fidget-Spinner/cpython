@@ -180,7 +180,7 @@ function_decide_inlineable(PyFunctionObject *func)
         return 0;
     }
 
-    if (co->co_nlocalsplus >= 128) {
+    if (co->co_nlocalsplus >= 512) {
         DPRINTF(2, "inline_fail: too many local vars\n");
         return 0;
     }
@@ -332,17 +332,25 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                 }
                 assert(PyFunction_Check(func));
                 function_version = func->func_version;
+                PyObject *old_globals = globals;
                 globals = func->func_globals;
                 builtins = func->func_builtins;
                 frame_depth--;
-                if (function_decide_inlineable(get_func(push_frames[frame_depth]))) {
+                // We need the globals to match, otherwise this will just result in a DEOPT
+                // due to the global to constant promotion.
+                if (old_globals == globals && function_decide_inlineable(get_func(push_frames[frame_depth]))) {
                     push_frames[frame_depth]->opcode = _PUSH_SKELETON_FRAME_CANDIDATE;
+                    // For now, ban non-leaf calls. We need a proper algorithm that works
+                    // from each nested call-outwards if we are to support non-leaf calls.
+                    for (int i = 0; i < frame_depth - 2; i++) {
+                        push_frames[i]->opcode = push_frames[i]->opcode == _PUSH_SKELETON_FRAME_CANDIDATE ? _PUSH_FRAME : push_frames[i]->opcode;
+                    }
                 }
                 else {
                     // Cannot be inlined. Make sure we don't inline previous frames for simpler reconstruction.
                     // In theory, this can be removed in a future version when we get better.
                     for (int i = 0; i < frame_depth; i++) {
-                        push_frames[i]->opcode = _PUSH_FRAME;
+                        push_frames[i]->opcode = push_frames[i]->opcode == _PUSH_SKELETON_FRAME_CANDIDATE ? _PUSH_FRAME : push_frames[i]->opcode;
                     }
                 }
 
@@ -387,14 +395,13 @@ prev_frame(_Py_UOpsContext *ctx)
 
 // Note: for this, current frame must be the frame that was just inlined.
 // <0 for error
-// >0 for offset into first inlined frame.
 static inline int
 add_reconstruction_data(_Py_UOpsContext *ctx, PyCodeObject *f_executable)
 {
     // Construct in order:
     // 1. Host frame
     // 2. ... inlined frames (from bottom of stack to top)
-
+    int res = ctx->reconstruction_count;
     if (ctx->reconstruction_count >= TRACE_MAX_FRAME_RECONSTRUCTIONS) {
         return -1;
     }
@@ -445,6 +452,8 @@ add_reconstruction_data(_Py_UOpsContext *ctx, PyCodeObject *f_executable)
 
     cons->next_frame_cons = NULL;
 
+    return res;
+
 }
 
 static inline int
@@ -465,7 +474,11 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     }
     PyCodeObject *co = (PyCodeObject *)func->func_code;
 
-    int argcount = (this_instr - 2)->oparg;
+    int argcount = ctx->frame->argcount;
+    if (argcount < 0) {
+        DPRINTF(2, "inline_fail: undeterministic argcount\n");
+        return -1;
+    }
 
     assert((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP);
     int first_inlined_frame_offset = add_reconstruction_data(ctx, f_executable);
@@ -478,7 +491,7 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
 
     REPLACE_OP((this_instr - 2), _NOP, 0, 0);
     REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
-    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, co->co_nlocalsplus, first_inlined_frame_offset);
+    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, co->co_nlocalsplus + co->co_stacksize, first_inlined_frame_offset);
     ctx->frame->first_inlined_frame_offset = first_inlined_frame_offset;
     // Note: Leave the _CHECK_VALIDITY and +1
     // Remove RESUME_CHECK
@@ -511,22 +524,15 @@ err:
 }
 
 static inline void
-inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
+inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, PyCodeObject *inlinee_co, int old_frame_argcount)
 {
     assert(this_instr->opcode == _RETURN_VALUE);
     // Inline pop
     assert((this_instr + 1)->opcode == _NOP || (this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP);
-    // Skip over the CHECK_VALIDITY when deciding,
-    // as those can be optimized away later.
-    PyFunctionObject *func = get_func(this_instr);
-    if (func == NULL) {
-        return;
-    }
-    PyCodeObject *co = (PyCodeObject *)func->func_code;
+    assert(old_frame_argcount >= 0);
 
-
-    REPLACE_OP(this_instr, _POP_SKELETON_FRAME, co->co_nlocalsplus, 0);
-    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION, 0, ctx->frame->first_inlined_frame_offset);
+    REPLACE_OP(this_instr, _POP_SKELETON_FRAME, old_frame_argcount, inlinee_co->co_nlocalsplus);
+    // REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION, 0, ctx->frame->first_inlined_frame_offset);
 }
 
 /* Shortened forms for convenience, used in optimizer_bytecodes.c */
