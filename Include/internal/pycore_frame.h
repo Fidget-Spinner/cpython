@@ -285,8 +285,8 @@ _PyFrame_ClearLocals(_PyInterpreterFrame *frame);
 void
 _PyFrame_ClearExceptCode(_PyInterpreterFrame * frame);
 
-void
-_PyFrame_Reconstruct(_PyInterpreterFrame *frame);
+_PyInterpreterFrame *
+_PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer);
 
 int
 _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg);

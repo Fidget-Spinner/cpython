@@ -210,8 +210,8 @@ struct _Py_UOpsAbstractFrame {
     int argcount;
 
     bool is_inlined;
-    // Offset of the first inlined frame from the localsplus of the current frame.
-    int first_inlined_frame_offset;
+    // Offset of the first reconstructor for any inlined frames.
+    int first_reconstructor;
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;

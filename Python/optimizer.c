@@ -1159,6 +1159,19 @@ make_executor_from_uops(
     /* Copy frame reconstruction info over */
     memcpy(executor->reconstructors, constructors, recon_count * sizeof(_PyInterpFrameReconstructor));
 
+    // Point all the frame reconstructors to their correct locations
+    for (int pc = 0; pc < length; pc++) {
+        int opcode = buffer[pc].opcode;
+        if (opcode == _SET_RECONSTRUCTION) {
+            buffer[pc].operand = (uintptr_t)&executor->reconstructors[buffer[pc].operand];
+        }
+        else if (is_terminator(&buffer[pc])) {
+            break;
+        }
+        assert(_PyOpcode_uop_name[buffer[pc].opcode]);
+        assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
+    }
+
     /* Initialize exits */
     for (int i = 0; i < exit_count; i++) {
         executor->exits[i].executor = NULL;

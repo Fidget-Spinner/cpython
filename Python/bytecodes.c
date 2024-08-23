@@ -3485,20 +3485,8 @@ dummy_func(
         }
 
         // Sentinel for something that could be inlined.
-        // Keep in sync with _PUSH_FRAME!
         tier2 op(_PUSH_SKELETON_FRAME_CANDIDATE, (new_frame: _PyInterpreterFrame* -- )) {
-            // Write it out explicitly because it's subtly different.
-            // Eventually this should be the only occurrence of this code.
-            assert(tstate->interp->eval_frame == NULL);
-            SYNC_SP();
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            assert(new_frame->previous == frame || new_frame->previous->previous == frame);
-            CALL_STAT_INC(inlined_py_calls);
-            frame = tstate->current_frame = new_frame;
-            tstate->py_recursion_remaining--;
-            LOAD_SP();
-            LOAD_IP(0);
-            LLTRACE_RESUME_FRAME();
+            Py_UNREACHABLE();
         }
 
         macro(CALL_BOUND_METHOD_EXACT_ARGS) =
@@ -4854,14 +4842,11 @@ dummy_func(
         tier2 op(_PUSH_SKELETON_FRAME, (inlinee_nlocalsplus/2 --)) {
             int argcount = oparg;
             frame->has_inlinee = 1;
-            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
             // Copy over old frame args to new frame locals.
             _PyStackRef *src = stack_pointer - argcount;
-            PyCodeObject *host_frame_code = (PyCodeObject *)(frame->f_executable);
-            _PyStackRef *inlinee_localsplus = frame->localsplus +
-                host_frame_code->co_nlocalsplus +
-                host_frame_code->co_stacksize +
-                FRAME_SIZE;
+            _PyStackRef *inlinee_localsplus = (_PyStackRef *)(((PyObject **)frame) +
+                _PyFrame_GetCode(frame)->co_framesize +
+                FRAME_SPECIALS_SIZE);
             // Future optimization: if we defer all these
             // args' refcounts (which we can, because
             // the callee has strong references to them anyways),
@@ -4879,10 +4864,9 @@ dummy_func(
         }
 
         tier2 op(_SET_RECONSTRUCTION, (reconstruction/4 --)) {
-            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
-            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->localsplus + oparg);
+            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(((PyObject **)frame) + oparg);
             inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
-            frame->first_inlined_frame_offset = (int)(reconstruction);
+            frame->first_inlined_frame_offset = (int)(oparg);
         }
 
         // Postlude to an inlined call.
@@ -4897,8 +4881,7 @@ dummy_func(
             for (int64_t i = 0; i < inlinee_nlocalsplus; i++) {
                 PyStackRef_XCLOSE(start[i]);
             }
-            size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
-            stack_pointer = start - FRAME_SIZE;
+            stack_pointer = start - FRAME_SPECIALS_SIZE;
             // Finally, pop off arguments and callable, self
             for (int i = 0; i < argcount; i++) {
                 PyStackRef_CLOSE(*stack_pointer);

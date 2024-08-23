@@ -9,15 +9,15 @@
 #include "opcode.h"
 
 // Reconstructs inlined frames.
-void
-_PyFrame_Reconstruct(_PyInterpreterFrame *frame)
+_PyInterpreterFrame *
+_PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 {
     assert(frame->has_inlinee);
     assert(frame->first_inlined_frame_offset > 0);
-    _PyStackRef *old_sp = frame->stackpointer;
+    _PyStackRef *old_sp = stack_pointer != NULL ? stack_pointer : frame->stackpointer;
     _Py_CODEUNIT *old_ip = frame->instr_ptr;
 
-    _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)(frame->localsplus + frame->first_inlined_frame_offset);
+    _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)(((PyObject **)frame) + frame->first_inlined_frame_offset);
     _PyInterpFrameReconstructor *reconstruction = (_PyInterpFrameReconstructor  *)first_inlined->previous;
     _PyInterpreterFrame *prev = frame->previous;
     _PyInterpreterFrame *next = frame;
@@ -34,9 +34,8 @@ _PyFrame_Reconstruct(_PyInterpreterFrame *frame)
     prev_reconstruction->f_executable = frame->f_executable;
     reconstruction = reconstruction->next_frame_cons;
     while (reconstruction != NULL) {
-        next = (_PyInterpreterFrame *)prev->localsplus +
-            ((PyCodeObject *)(prev_reconstruction->f_executable))->co_nlocalsplus +
-            ((PyCodeObject *)(prev_reconstruction->f_executable))->co_stacksize;
+        next = (_PyInterpreterFrame *)((PyObject *)prev +
+            ((PyCodeObject *)(prev_reconstruction->f_executable))->co_framesize);
         next->f_globals = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_globals;
         next->f_builtins = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_builtins;
         next->f_executable = reconstruction->f_executable;
@@ -55,6 +54,9 @@ _PyFrame_Reconstruct(_PyInterpreterFrame *frame)
     // If the frame is the topmost frame, set the stack pointer and instr ptr to the current one.
     next->stackpointer = old_sp;
     next->instr_ptr = old_ip;
+    fprintf(stderr, "HI: %d, %d\n", old_sp - _PyFrame_Stackbase(next), _PyFrame_GetCode(frame)->co_stacksize);
+    assert(old_sp - _PyFrame_Stackbase(next) <= _PyFrame_GetCode(frame)->co_stacksize);
+    return next;
 }
 
 int

@@ -481,8 +481,8 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     }
 
     assert((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP);
-    int first_inlined_frame_offset = add_reconstruction_data(ctx, f_executable);
-    if (first_inlined_frame_offset < 0) {
+    int first_reconstructor = add_reconstruction_data(ctx, f_executable);
+    if (first_reconstructor < 0) {
         DPRINTF(2, "inline_fail: no reconstruction data\n");
         return -1;
     }
@@ -490,9 +490,9 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     DPRINTF(2, "inline_success\n");
 
     REPLACE_OP((this_instr - 2), _NOP, 0, 0);
-    REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
-    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, co->co_nlocalsplus + co->co_stacksize, first_inlined_frame_offset);
-    ctx->frame->first_inlined_frame_offset = first_inlined_frame_offset;
+    REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus, argcount);
+    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, f_executable->co_framesize, first_reconstructor);
+    ctx->frame->first_reconstructor = first_reconstructor;
     // Note: Leave the _CHECK_VALIDITY and +1
     // Remove RESUME_CHECK
     REPLACE_OP((this_instr + 2), _NOP, 0, 0);
