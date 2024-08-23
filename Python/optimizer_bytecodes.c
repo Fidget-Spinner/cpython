@@ -852,6 +852,10 @@ dummy_func(void) {
         frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
     }
 
+    op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
+        frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+    }
+
     op(_SAVE_RETURN_OFFSET, (--)) {
         frame->return_offset = oparg;
     }

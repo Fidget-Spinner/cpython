@@ -6525,9 +6525,7 @@
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            NEXTOPARG(); \
-            PRE_DISPATCH_GOTO(); \
-            DISPATCH_GOTO(); \
+            DISPATCH();
         }
 
         TARGET(SEND) {

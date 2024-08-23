@@ -2396,6 +2396,8 @@
         }
 
         case _CHECK_VALIDITY_AND_SET_IP: {
+            PyObject *instr_ptr = (PyObject *)this_instr->operand;
+            frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
             break;
         }
 

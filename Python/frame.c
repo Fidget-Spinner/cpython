@@ -24,35 +24,28 @@ _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 
     // Restore the host frame's reconstruction info (instr ptr and stackpointer)
     frame->instr_ptr = (reconstruction->instr_ptr);
-    frame->stackpointer = next->localsplus + reconstruction->n_stackentries;
+    frame->stackpointer = frame->localsplus
+        + ((PyCodeObject *)frame->f_executable)->co_nlocalsplus
+        + reconstruction->n_stackentries;
     frame->return_offset = (reconstruction->return_offset);
 
     _PyInterpFrameReconstructor *prev_reconstruction = reconstruction;
     reconstruction = reconstruction->next_frame_cons;
 
-    while (1) {
-        next->f_globals = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_globals;
-        next->f_builtins = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_builtins;
-        next->f_executable = reconstruction->f_executable;
-        next->f_funcobj = reconstruction->f_funcobj;
-        next->instr_ptr = reconstruction->instr_ptr;
-        next->stackpointer = next->localsplus + reconstruction->n_stackentries;
-        next->return_offset = reconstruction->return_offset;
-        next->first_inlined_frame_offset = 0;
-        next->has_inlinee = false;
-        next->owner = FRAME_OWNED_BY_THREAD;
-        next->previous = prev;
-        prev = next;
-        prev_reconstruction = reconstruction;
-        reconstruction = reconstruction->next_frame_cons;
-        if (reconstruction == NULL) {
-            break;
-        }
-        else {
-            next = (_PyInterpreterFrame *)((PyObject *)prev +
-               ((PyCodeObject *)(prev_reconstruction->f_executable))->co_framesize);
-        }
-    }
+    next->f_globals = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_globals;
+    next->f_builtins = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_builtins;
+    next->f_executable = Py_NewRef(reconstruction->f_executable);
+    next->f_funcobj = Py_NewRef(reconstruction->f_funcobj);
+    next->instr_ptr = reconstruction->instr_ptr;
+    next->stackpointer = next->localsplus + reconstruction->n_stackentries;
+    next->return_offset = reconstruction->return_offset;
+    next->first_inlined_frame_offset = 0;
+    next->has_inlinee = false;
+    next->owner = FRAME_OWNED_BY_THREAD;
+    next->previous = prev;
+    prev = next;
+    prev_reconstruction = reconstruction;
+    reconstruction = reconstruction->next_frame_cons;
 
     // If the frame is the topmost frame, set the stack pointer and instr ptr to the current one.
     next->stackpointer = NULL;
