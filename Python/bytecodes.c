@@ -3484,6 +3484,23 @@ dummy_func(
             LLTRACE_RESUME_FRAME();
         }
 
+        // Sentinel for something that could be inlined.
+        // Keep in sync with _PUSH_FRAME!
+        tier2 op(_PUSH_SKELETON_FRAME_CANDIDATE, (new_frame: _PyInterpreterFrame* -- )) {
+            // Write it out explicitly because it's subtly different.
+            // Eventually this should be the only occurrence of this code.
+            assert(tstate->interp->eval_frame == NULL);
+            SYNC_SP();
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+            CALL_STAT_INC(inlined_py_calls);
+            frame = tstate->current_frame = new_frame;
+            tstate->py_recursion_remaining--;
+            LOAD_SP();
+            LOAD_IP(0);
+            LLTRACE_RESUME_FRAME();
+        }
+
         macro(CALL_BOUND_METHOD_EXACT_ARGS) =
             unused/1 + // Skip over the counter
             _CHECK_PEP_523 +
@@ -4878,14 +4895,14 @@ dummy_func(
             stack_pointer -= FRAME_SIZE;
             // Finally, pop off arguments and callable, self
             for (int i = 0; i < oparg; i++) {
-                PyStackRef_CLOSE(stack_pointer);
+                PyStackRef_CLOSE(*stack_pointer);
                 stack_pointer--;
             }
             // Self
-            PyStackRef_XCLOSE(stack_pointer);
+            PyStackRef_XCLOSE(*stack_pointer);
             stack_pointer--;
             // Callable
-            PyStackRef_CLOSE(stack_pointer);
+            PyStackRef_CLOSE(*stack_pointer);
             stack_pointer--;
             // And we're done! That's all that we need to pop a frame :).
         }

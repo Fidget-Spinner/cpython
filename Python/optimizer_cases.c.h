@@ -628,6 +628,7 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
+            _Py_UOpsAbstractFrame *old_frame = ctx->frame;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
             res = retval;
@@ -642,6 +643,9 @@
             if (co == NULL) {
                 // might be impossible, but bailing is still safe
                 ctx->done = true;
+            }
+            if (old_frame->is_inlined) {
+                inline_frame_pop(ctx, this_instr);
             }
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1766,7 +1770,7 @@
             int argcount = oparg;
             (void)callable;
             PyCodeObject *co = NULL;
-            assert((this_instr + 2)->opcode == _PUSH_FRAME);
+            assert((this_instr + 2)->opcode == _PUSH_FRAME || (this_instr + 2)->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
             uint64_t push_operand = (this_instr + 2)->operand;
             if (push_operand & 1) {
                 co = (PyCodeObject *)(push_operand & ~1);
@@ -1836,6 +1840,12 @@
                 corresponding_check_stack->opcode = _NOP;
             }
             corresponding_check_stack = NULL;
+            break;
+        }
+
+        case _PUSH_SKELETON_FRAME_CANDIDATE: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 

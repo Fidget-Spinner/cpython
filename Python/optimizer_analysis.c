@@ -131,6 +131,59 @@ incorrect_keys(_PyUOpInstruction *inst, PyObject *obj)
     return 0;
 }
 
+static PyFunctionObject *
+get_func(_PyUOpInstruction *op)
+{
+    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR
+           || op->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
+    uint64_t operand = op->operand;
+    if (operand == 0) {
+        return NULL;
+    }
+    if (operand & 1) {
+        return NULL;
+    }
+    else {
+        PyFunctionObject *func = (PyFunctionObject *)operand;
+        return func;
+    }
+}
+
+static int
+function_decide_inlineable(PyFunctionObject *func)
+{
+    if (func == NULL) {
+        return 0;
+    }
+    PyCodeObject *co = (PyCodeObject *)func->func_code;
+    if (co == NULL) {
+        return 0;
+    }
+    // Ban closures
+    if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
+        DPRINTF(2, "inline_fail: closure\n");
+        return 0;
+    }
+    // Ban generators, async, etc.
+    int flags = co->co_flags;
+    if ((flags & CO_COROUTINE) ||
+        (flags & CO_GENERATOR) ||
+        (flags & CO_ITERABLE_COROUTINE) ||
+        (flags & CO_ASYNC_GENERATOR) ||
+        // TODO we can support these in the future.
+        (flags & CO_VARKEYWORDS) ||
+        (flags & CO_VARARGS)) {
+        DPRINTF(2, "inline_fail: generator/coroutine/varargs/varkeywords\n");
+        return 0;
+    }
+
+    if (co->co_nlocalsplus >= 128) {
+        DPRINTF(2, "inline_fail: too many local vars\n");
+        return 0;
+    }
+    return 1;
+}
+
 /* Returns 1 if successfully optimized
  *         0 if the trace is not suitable for optimization (yet)
  *        -1 if there was an error. */
@@ -138,6 +191,8 @@ static int
 remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                int buffer_size, _PyBloomFilter *dependencies)
 {
+    _PyUOpInstruction *push_frames[MAX_ABSTRACT_FRAME_DEPTH];
+    int frame_depth = 1;
     PyInterpreterState *interp = _PyInterpreterState_GET();
     PyObject *builtins = frame->f_builtins;
     if (builtins != interp->builtins) {
@@ -254,6 +309,8 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                     OPT_STAT_INC(remove_globals_builtins_changed);
                     return 1;
                 }
+                push_frames[frame_depth] = &buffer[pc];
+                frame_depth++;
                 break;
             }
             case _RETURN_VALUE:
@@ -274,6 +331,18 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                 function_version = func->func_version;
                 globals = func->func_globals;
                 builtins = func->func_builtins;
+                frame_depth--;
+                if (function_decide_inlineable(get_func(push_frames[frame_depth]))) {
+                    push_frames[frame_depth]->opcode = _PUSH_SKELETON_FRAME_CANDIDATE;
+                }
+                else {
+                    // Cannot be inlined. Make sure we don't inline previous frames for simpler reconstruction.
+                    // In theory, this can be removed in a future version when we get better.
+                    for (int i = 0; i < frame_depth; i++) {
+                        push_frames[i]->opcode = _PUSH_FRAME;
+                    }
+                }
+
                 break;
             }
             case _CHECK_FUNCTION_EXACT_ARGS:
@@ -306,59 +375,6 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
     (INST)->operand = OPERAND;
 
 
-static PyFunctionObject *
-get_func(_PyUOpInstruction *op)
-{
-    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR);
-    PyCodeObject *co = NULL;
-    uint64_t operand = op->operand;
-    if (operand == 0) {
-        return NULL;
-    }
-    if (operand & 1) {
-        return NULL;
-    }
-    else {
-        PyFunctionObject *func = (PyFunctionObject *)operand;
-        return func;
-    }
-}
-
-static int
-function_decide_inlineable(PyFunctionObject *func)
-{
-    if (func == NULL) {
-        return 0;
-    }
-    PyCodeObject *co = (PyCodeObject *)func->func_code;
-    if (co == NULL) {
-        return 0;
-    }
-    // Ban closures
-    if (co->co_ncellvars > 0 || co->co_nfreevars > 0) {
-        DPRINTF(2, "inline_fail: closure\n");
-        return 0;
-    }
-    // Ban generators, async, etc.
-    int flags = co->co_flags;
-    if ((flags & CO_COROUTINE) ||
-        (flags & CO_GENERATOR) ||
-        (flags & CO_ITERABLE_COROUTINE) ||
-        (flags & CO_ASYNC_GENERATOR) ||
-        // TODO we can support these in the future.
-        (flags & CO_VARKEYWORDS) ||
-        (flags & CO_VARARGS)) {
-        DPRINTF(2, "inline_fail: generator/coroutine/varargs/varkeywords\n");
-        return 0;
-    }
-
-    if (co->co_nlocalsplus >= 128) {
-        DPRINTF(2, "inline_fail: too many local vars\n");
-        return 0;
-    }
-    return 1;
-}
-
 static inline int
 add_reconstruction_data(_Py_UOpsContext *ctx, PyFunctionObject *func, PyCodeObject *co)
 {
@@ -366,36 +382,24 @@ add_reconstruction_data(_Py_UOpsContext *ctx, PyFunctionObject *func, PyCodeObje
 }
 
 static inline void
-inline_frame_push(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
+inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
 {
-    assert(this_instr->opcode == _PUSH_FRAME);
     // Inline calls
-    assert((this_instr - 3)->opcode == _CHECK_STACK_SPACE);
     assert((this_instr - 2)->opcode == _INIT_CALL_PY_EXACT_ARGS);
     assert((this_instr - 1)->opcode == _SAVE_RETURN_OFFSET);
     assert((this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP ||
-        (this_instr + 1)->opcode == _CHECK_VALIDITY);
-    assert((this_instr + 2)->opcode == _RESUME_CHECK);
+           (this_instr + 1)->opcode == _CHECK_VALIDITY);
     // Skip over the CHECK_VALIDITY when deciding,
     // as those can be optimized away later.
     PyFunctionObject *func = get_func(this_instr);
     if (func == NULL) {
         return;
     }
-    PyCodeObject *co = func->func_code;
+    PyCodeObject *co = (PyCodeObject *)func->func_code;
 
     int argcount = (this_instr - 2)->oparg;
 
-    // Cannot be inlined. Make sure we don't inline previous frames for simpler reconstruction.
-    // In theory, this can be removed in a future version when we get better.
-    if (!function_decide_inlineable(func)) {
-        for (int i = 0; i < ctx->curr_frame_depth; i++) {
-            ctx->frames[i].is_inlined = false;
-        }
-        ctx->frame->is_inlined = false;
-        return;
-    }
-
+    assert((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP);
     int reconstruction_offset = add_reconstruction_data(ctx, func, co);
     if (reconstruction_offset < 0) {
         for (int i = 0; i < ctx->curr_frame_depth; i++) {
@@ -405,31 +409,42 @@ inline_frame_push(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
         return;
     }
 
-    REPLACE_OP((this_instr - 3), _NOP, 0, 0);
+    DPRINTF(2, "inline_success\n");
+
     REPLACE_OP((this_instr - 2), _NOP, 0, 0);
-    REPLACE_OP((this_instr - 1), _NOP, 0, 0);
-    REPLACE_OP(this_instr, _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
-    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION_OFFSET, co->co_nlocalsplus, reconstruction_offset);
+    REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
+    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION_OFFSET, co->co_nlocalsplus, reconstruction_offset);
+    // Note: Leave the _CHECK_VALIDITY and +1
     REPLACE_OP((this_instr + 2), _NOP, 0, 0);
 }
 
 static inline void
-inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, bool is_inlined)
+inline_frame_push(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
+{
+    assert(this_instr->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
+    // So far we only support CALL_PY_EXACT_ARGS form
+    // TODO: CALL_PY_GENERAL
+    if ((this_instr - 2)->opcode == _INIT_CALL_PY_EXACT_ARGS) {
+        inline_call_py_exact_args(ctx, this_instr);
+    }
+    DPRINTF(2, "inline_fail: Unknown call form\n");
+
+}
+
+static inline void
+inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
 {
     assert(this_instr->opcode == _RETURN_VALUE);
     // Inline pop
-    assert((this_instr + 1)->opcode == _NOP);
+    assert((this_instr + 1)->opcode == _NOP || (this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP);
     // Skip over the CHECK_VALIDITY when deciding,
     // as those can be optimized away later.
     PyFunctionObject *func = get_func(this_instr);
     if (func == NULL) {
         return;
     }
-    PyCodeObject *co = func->func_code;
+    PyCodeObject *co = (PyCodeObject *)func->func_code;
 
-    if (!is_inlined) {
-        return;
-    }
 
     REPLACE_OP(this_instr, _POP_SKELETON_FRAME, co->co_nlocalsplus, 0);
     REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION_OFFSET, 0, ctx->frame->reconstruction_offset);
@@ -497,7 +512,8 @@ eliminate_pop_guard(_PyUOpInstruction *this_instr, bool exit)
 static PyCodeObject *
 get_code(_PyUOpInstruction *op)
 {
-    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR);
+    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR
+        || op->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
     PyCodeObject *co = NULL;
     uint64_t operand = op->operand;
     if (operand == 0) {
@@ -552,6 +568,9 @@ optimize_uops(
 
         int oparg = this_instr->oparg;
         opcode = this_instr->opcode;
+        if (opcode == _PUSH_SKELETON_FRAME_CANDIDATE) {
+            opcode = _PUSH_FRAME;
+        }
         _Py_UopsSymbol **stack_pointer = ctx->frame->stack_pointer;
 
 #ifdef Py_DEBUG
@@ -574,6 +593,11 @@ optimize_uops(
         DPRINTF(3, " stack_level %d\n", STACK_LEVEL());
         ctx->frame->stack_pointer = stack_pointer;
         assert(STACK_LEVEL() >= 0);
+
+        if (this_instr->opcode == _PUSH_SKELETON_FRAME_CANDIDATE) {
+            inline_frame_push(ctx, this_instr);
+            ctx->frame->is_inlined = true;
+        }
     }
     if (ctx->out_of_space) {
         DPRINTF(3, "\n");

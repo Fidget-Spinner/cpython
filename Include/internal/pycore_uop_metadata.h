@@ -222,6 +222,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_INIT_CALL_PY_EXACT_ARGS_4] = HAS_PURE_FLAG,
     [_INIT_CALL_PY_EXACT_ARGS] = HAS_ARG_FLAG | HAS_PURE_FLAG,
     [_PUSH_FRAME] = 0,
+    [_PUSH_SKELETON_FRAME_CANDIDATE] = 0,
     [_CALL_TYPE_1] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
     [_CALL_STR_1] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CALL_TUPLE_1] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -277,7 +278,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_FATAL_ERROR] = 0,
     [_CHECK_VALIDITY_AND_SET_IP] = HAS_DEOPT_FLAG,
     [_PUSH_SKELETON_FRAME] = HAS_ARG_FLAG,
-    [_SET_RECONSTRUCTION_OFFSET] = 0,
+    [_SET_RECONSTRUCTION_OFFSET] = HAS_ARG_FLAG,
     [_POP_SKELETON_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
     [_RECONSTRUCTION_INFO] = 0,
     [_DEOPT] = 0,
@@ -500,6 +501,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_PUSH_FRAME] = "_PUSH_FRAME",
     [_PUSH_NULL] = "_PUSH_NULL",
     [_PUSH_SKELETON_FRAME] = "_PUSH_SKELETON_FRAME",
+    [_PUSH_SKELETON_FRAME_CANDIDATE] = "_PUSH_SKELETON_FRAME_CANDIDATE",
     [_PY_FRAME_GENERAL] = "_PY_FRAME_GENERAL",
     [_PY_FRAME_KW] = "_PY_FRAME_KW",
     [_RECONSTRUCTION_INFO] = "_RECONSTRUCTION_INFO",
@@ -965,6 +967,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _INIT_CALL_PY_EXACT_ARGS:
             return 2 + oparg;
         case _PUSH_FRAME:
+            return 1;
+        case _PUSH_SKELETON_FRAME_CANDIDATE:
             return 1;
         case _CALL_TYPE_1:
             return 3;

@@ -574,7 +574,7 @@ dummy_func(void) {
         (void)callable;
 
         PyCodeObject *co = NULL;
-        assert((this_instr + 2)->opcode == _PUSH_FRAME);
+        assert((this_instr + 2)->opcode == _PUSH_FRAME || (this_instr + 2)->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
         uint64_t push_operand = (this_instr + 2)->operand;
         if (push_operand & 1) {
             co = (PyCodeObject *)(push_operand & ~1);
@@ -656,7 +656,7 @@ dummy_func(void) {
     op(_RETURN_VALUE, (retval -- res)) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
-        inline_frame_pop(ctx, this_instr, ctx->frame->is_inlined);
+        _Py_UOpsAbstractFrame *old_frame = ctx->frame;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
         res = retval;
@@ -673,6 +673,9 @@ dummy_func(void) {
         if (co == NULL) {
             // might be impossible, but bailing is still safe
             ctx->done = true;
+        }
+        if (old_frame->is_inlined) {
+            inline_frame_pop(ctx, this_instr);
         }
     }
 
@@ -729,7 +732,6 @@ dummy_func(void) {
         ctx->frame->stack_pointer = stack_pointer;
         ctx->frame = new_frame;
         ctx->curr_frame_depth++;
-        inline_frame_push(ctx, this_instr);
         stack_pointer = new_frame->stack_pointer;
         co = get_code(this_instr);
         if (co == NULL) {
@@ -756,7 +758,6 @@ dummy_func(void) {
             corresponding_check_stack->opcode = _NOP;
         }
         corresponding_check_stack = NULL;
-
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg])) {

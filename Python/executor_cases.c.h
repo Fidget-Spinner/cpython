@@ -4005,6 +4005,25 @@
             break;
         }
 
+        case _PUSH_SKELETON_FRAME_CANDIDATE: {
+            _PyInterpreterFrame *new_frame;
+            new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
+            // Write it out explicitly because it's subtly different.
+            // Eventually this should be the only occurrence of this code.
+            assert(tstate->interp->eval_frame == NULL);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+            CALL_STAT_INC(inlined_py_calls);
+            frame = tstate->current_frame = new_frame;
+            tstate->py_recursion_remaining--;
+            LOAD_SP();
+            LOAD_IP(0);
+            LLTRACE_RESUME_FRAME();
+            break;
+        }
+
         case _CALL_TYPE_1: {
             _PyStackRef arg;
             _PyStackRef null;
@@ -5503,20 +5522,23 @@
     }
 
     case _SET_RECONSTRUCTION_OFFSET: {
-        PyObject *offset = (PyObject *)CURRENT_OPERAND();
-        _PyInterpreterFrame *inlined = (_PyInterpreterFrame *)(frame->localsplus + frame->first_inlined_frame_offset);
-        inlined->previous = (struct _PyInterpreterFrame *)offset;
+        oparg = CURRENT_OPARG();
+        PyObject *reconstruction = (PyObject *)CURRENT_OPERAND();
+        int localscount = oparg;
+        size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
+        _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(stack_pointer - localscount - FRAME_SIZE);
+        inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
         break;
     }
 
     case _POP_SKELETON_FRAME: {
         oparg = CURRENT_OPARG();
-        PyObject *localscount = (PyObject *)CURRENT_OPERAND();
         // Check to make sure sys._getframe didn't request for a reconstruction.
         if (!frame->has_inlinee) {
             UOP_STAT_INC(uopcode, miss);
             JUMP_TO_JUMP_TARGET();
         }
+        int localscount = oparg;
         _PyStackRef *start = stack_pointer - localscount;
         // Note: Implement deferred refcounting for the args in the future.
         // Then this will just be a pointer bump.
@@ -5527,14 +5549,14 @@
         stack_pointer -= FRAME_SIZE;
         // Finally, pop off arguments and callable, self
         for (int i = 0; i < oparg; i++) {
-            PyStackRef_CLOSE(stack_pointer);
+            PyStackRef_CLOSE(*stack_pointer);
             stack_pointer--;
         }
         // Self
-        PyStackRef_XCLOSE(stack_pointer);
+        PyStackRef_XCLOSE(*stack_pointer);
         stack_pointer--;
         // Callable
-        PyStackRef_CLOSE(stack_pointer);
+        PyStackRef_CLOSE(*stack_pointer);
         stack_pointer--;
     // And we're done! That's all that we need to pop a frame :).
     break;
