@@ -80,6 +80,17 @@ typedef struct _PyInterpreterFrame {
     _PyStackRef localsplus[1];
 } _PyInterpreterFrame;
 
+typedef struct _PyInterpFrameReconstructor {
+    PyObject *f_executable; /* Strong reference (code object or None) */
+    struct _PyInterpreterFrame *next_frame; /* Doubles as a pointer to the reconstruction data for an inlined frame. */
+    PyObject *f_funcobj; /* Strong reference. Only valid if not on C stack */
+    PyObject *f_globals; /* Strong reference. Only valid if not on C stack */
+    PyObject *f_builtins; /* Strong reference. Only valid if not on C stack */
+    _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
+    _PyStackRef *n_stackentries;
+    uint16_t return_offset;  /* Only relevant during a function call */
+} _PyInterpFrameReconstructor;
+
 #define _PyInterpreterFrame_LASTI(IF) \
     ((int)((IF)->instr_ptr - _PyCode_CODE(_PyFrame_GetCode(IF))))
 

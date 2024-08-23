@@ -129,7 +129,8 @@ _Py_GetOptimizer(void)
 }
 
 static _PyExecutorObject *
-make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies);
+make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies,
+                        _PyInterpFrameReconstructor *constructors, int constructor_count);
 
 static const _PyBloomFilter EMPTY_FILTER = { 0 };
 
@@ -1057,16 +1058,22 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
 /* Executor side exits */
 
 static _PyExecutorObject *
-allocate_executor(int exit_count, int length)
+allocate_executor(int exit_count, int length, int recon_count)
 {
+    _PyInterpFrameReconstructor *reconstructors = PyMem_Malloc(sizeof(_PyInterpFrameReconstructor) * recon_count);
+    if (reconstructors == NULL) {
+        return NULL;
+    }
     int size = exit_count*sizeof(_PyExitData) + length*sizeof(_PyUOpInstruction);
     _PyExecutorObject *res = PyObject_GC_NewVar(_PyExecutorObject, &_PyUOpExecutor_Type, size);
     if (res == NULL) {
+        PyMem_Free(reconstructors);
         return NULL;
     }
     res->trace = (_PyUOpInstruction *)(res->exits + exit_count);
     res->code_size = length;
     res->exit_count = exit_count;
+    res->reconstructors = reconstructors;
     return res;
 }
 
@@ -1137,13 +1144,20 @@ sanity_check(_PyExecutorObject *executor)
  * and not a NOP.
  */
 static _PyExecutorObject *
-make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies)
+make_executor_from_uops(
+    _PyUOpInstruction *buffer,
+    int length, const _PyBloomFilter *dependencies,
+    _PyInterpFrameReconstructor *constructors,
+    int recon_count)
 {
     int exit_count = count_exits(buffer, length);
-    _PyExecutorObject *executor = allocate_executor(exit_count, length);
+    _PyExecutorObject *executor = allocate_executor(exit_count, length, recon_count);
     if (executor == NULL) {
         return NULL;
     }
+
+    /* Copy frame reconstruction info over */
+    memcpy(executor->reconstructors, constructors, recon_count * sizeof(_PyInterpFrameReconstructor));
 
     /* Initialize exits */
     for (int i = 0; i < exit_count; i++) {
@@ -1237,6 +1251,7 @@ uop_optimize(
     _PyBloomFilter dependencies;
     _Py_BloomFilter_Init(&dependencies);
     _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
+    _PyInterpFrameReconstructor recon_buffer[TRACE_MAX_FRAME_RECONSTRUCTIONS];
     OPT_STAT_INC(attempts);
     int length = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
     if (length <= 0) {
@@ -1245,11 +1260,14 @@ uop_optimize(
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
+    int recon_count = 0;
     char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
     if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
         length = _Py_uop_analyze_and_optimize(frame, buffer,
                                            length,
-                                           curr_stackentries, &dependencies);
+                                           curr_stackentries, &dependencies,
+                                          recon_buffer,
+                                          &recon_count);
         if (length <= 0) {
             return length;
         }
@@ -1275,7 +1293,7 @@ uop_optimize(
     OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
     length = prepare_for_execution(buffer, length);
     assert(length <= UOP_MAX_TRACE_LENGTH);
-    _PyExecutorObject *executor = make_executor_from_uops(buffer, length,  &dependencies);
+    _PyExecutorObject *executor = make_executor_from_uops(buffer, length,  &dependencies, recon_buffer, recon_count);
     if (executor == NULL) {
         return -1;
     }
@@ -1356,7 +1374,8 @@ counter_optimize(
         { .opcode = _INTERNAL_INCREMENT_OPT_COUNTER },
         { .opcode = _EXIT_TRACE, .target = (uint32_t)(target - _PyCode_CODE(code)), .format=UOP_FORMAT_TARGET }
     };
-    _PyExecutorObject *executor = make_executor_from_uops(buffer, 4, &EMPTY_FILTER);
+    _PyInterpFrameReconstructor empty;
+    _PyExecutorObject *executor = make_executor_from_uops(buffer, 4, &EMPTY_FILTER, &empty, 0);
     if (executor == NULL) {
         return -1;
     }

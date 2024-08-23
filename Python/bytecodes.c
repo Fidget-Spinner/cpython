@@ -4872,7 +4872,7 @@ dummy_func(
             // And we're done! That's all that we need to push a new frame :).
         }
 
-        tier2 op(_SET_RECONSTRUCTION_OFFSET, (reconstruction/4 --)) {
+        tier2 op(_SET_RECONSTRUCTION, (reconstruction/4 --)) {
             int localscount = oparg;
             size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
             _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(stack_pointer - localscount - FRAME_SIZE);

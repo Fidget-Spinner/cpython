@@ -2397,7 +2397,7 @@
             break;
         }
 
-        case _SET_RECONSTRUCTION_OFFSET: {
+        case _SET_RECONSTRUCTION: {
             break;
         }
 

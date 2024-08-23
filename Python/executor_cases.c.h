@@ -5521,7 +5521,7 @@
         break;
     }
 
-    case _SET_RECONSTRUCTION_OFFSET: {
+    case _SET_RECONSTRUCTION: {
         oparg = CURRENT_OPARG();
         PyObject *reconstruction = (PyObject *)CURRENT_OPERAND();
         int localscount = oparg;

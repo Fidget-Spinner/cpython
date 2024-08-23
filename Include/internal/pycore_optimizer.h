@@ -75,6 +75,7 @@ typedef struct _PyExecutorObject {
     size_t jit_size;
     void *jit_code;
     void *jit_side_entry;
+    _PyInterpFrameReconstructor *reconstructors;
     _PyExitData exits[1];
 } _PyExecutorObject;
 
@@ -134,9 +135,13 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateAll(PyInterpreterState *interp, int is_
 
 #define TRACE_STACK_SIZE 5
 
+#define TRACE_MAX_FRAME_RECONSTRUCTIONS TRACE_STACK_SIZE * 5
+
 int _Py_uop_analyze_and_optimize(struct _PyInterpreterFrame *frame,
     _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
-    _PyBloomFilter *dependencies);
+    _PyBloomFilter *dependencies,
+    _PyInterpFrameReconstructor *reconstruction_buffer,
+    int *recon_count);
 
 extern PyTypeObject _PyCounterExecutor_Type;
 extern PyTypeObject _PyCounterOptimizer_Type;
@@ -201,7 +206,7 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsSymbol **locals;
 
     bool is_inlined;
-    int reconstruction_offset;
+    _PyUOpInstruction *reconstruction;
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;

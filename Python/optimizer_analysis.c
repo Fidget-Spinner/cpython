@@ -413,7 +413,7 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
 
     REPLACE_OP((this_instr - 2), _NOP, 0, 0);
     REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
-    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION_OFFSET, co->co_nlocalsplus, reconstruction_offset);
+    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, co->co_nlocalsplus, reconstruction_offset);
     // Note: Leave the _CHECK_VALIDITY and +1
     REPLACE_OP((this_instr + 2), _NOP, 0, 0);
 }
@@ -447,7 +447,7 @@ inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
 
 
     REPLACE_OP(this_instr, _POP_SKELETON_FRAME, co->co_nlocalsplus, 0);
-    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION_OFFSET, 0, ctx->frame->reconstruction_offset);
+    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION, 0, ctx->frame->reconstruction);
 }
 
 /* Shortened forms for convenience, used in optimizer_bytecodes.c */
@@ -734,7 +734,9 @@ _Py_uop_analyze_and_optimize(
     _PyUOpInstruction *buffer,
     int length,
     int curr_stacklen,
-    _PyBloomFilter *dependencies
+    _PyBloomFilter *dependencies,
+    _PyInterpFrameReconstructor *reconstruction_buffer,
+    int *recon_count
 )
 {
     OPT_STAT_INC(optimizer_attempts);
