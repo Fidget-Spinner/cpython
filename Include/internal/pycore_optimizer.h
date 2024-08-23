@@ -204,9 +204,13 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsSymbol **stack_pointer;
     _Py_UopsSymbol **stack;
     _Py_UopsSymbol **locals;
+    _Py_CODEUNIT *instr_ptr;
+    int return_offset;
+    _PyUOpInstruction *push_frame; // Borrowed
 
     bool is_inlined;
-    _PyUOpInstruction *reconstruction;
+    // Offset of the first inlined frame from the localsplus of the current frame.
+    int first_inlined_frame_offset;
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;
@@ -232,6 +236,9 @@ struct _Py_UOpsContext {
     _Py_UopsSymbol **n_consumed;
     _Py_UopsSymbol **limit;
     _Py_UopsSymbol *locals_and_stack[MAX_ABSTRACT_INTERP_SIZE];
+
+    _PyInterpFrameReconstructor *reconstruction_buffer;
+    int reconstruction_count;
 };
 
 typedef struct _Py_UOpsContext _Py_UOpsContext;

@@ -1481,6 +1481,25 @@ class TestUopsOptimization(unittest.TestCase):
 
         fn(A())
 
+    def test_inlining(self):
+        """
+        Tests that setting a type version doesn't cause a segfault when later looking at the stack.
+        """
+
+        def thing(a):
+            x = 0
+            for i in range(20):
+                typing_cast(i)
+            return x
+
+        res, ex = self._run_with_optimizer(thing, 1)
+        self.assertIsNotNone(ex)
+        print(list(iter_opnames(ex)))
+        self.assertEqual(list(iter_opnames(ex)).count("_GUARD_TYPE_VERSION"), 1)
+
+
+def typing_cast(x):
+    return x
 
 if __name__ == "__main__":
     unittest.main()

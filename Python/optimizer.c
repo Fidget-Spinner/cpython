@@ -1293,6 +1293,7 @@ uop_optimize(
     OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
     length = prepare_for_execution(buffer, length);
     assert(length <= UOP_MAX_TRACE_LENGTH);
+    assert(recon_count <= TRACE_MAX_FRAME_RECONSTRUCTIONS);
     _PyExecutorObject *executor = make_executor_from_uops(buffer, length,  &dependencies, recon_buffer, recon_count);
     if (executor == NULL) {
         return -1;

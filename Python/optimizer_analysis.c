@@ -134,6 +134,9 @@ incorrect_keys(_PyUOpInstruction *inst, PyObject *obj)
 static PyFunctionObject *
 get_func(_PyUOpInstruction *op)
 {
+    if (op == NULL) {
+        return NULL;
+    }
     assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR
            || op->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
     uint64_t operand = op->operand;
@@ -375,59 +378,135 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
     (INST)->operand = OPERAND;
 
 
-static inline int
-add_reconstruction_data(_Py_UOpsContext *ctx, PyFunctionObject *func, PyCodeObject *co)
+static inline _Py_UOpsAbstractFrame *
+prev_frame(_Py_UOpsContext *ctx)
 {
+    assert(ctx->curr_frame_depth >= 2);
+    return &ctx->frames[ctx->curr_frame_depth - 2];
+}
+
+// Note: for this, current frame must be the frame that was just inlined.
+// <0 for error
+// >0 for offset into first inlined frame.
+static inline int
+add_reconstruction_data(_Py_UOpsContext *ctx, PyCodeObject *f_executable)
+{
+    // Construct in order:
+    // 1. Host frame
+    // 2. ... inlined frames (from bottom of stack to top)
+
+    if (ctx->reconstruction_count >= TRACE_MAX_FRAME_RECONSTRUCTIONS) {
+        return -1;
+    }
+    // Find host frame
+    _Py_UOpsAbstractFrame *curr_frame = NULL;
+    int i = ctx->curr_frame_depth - 1;
+    bool found = false;
+    for (; i >= 0; i--) {
+        if (!ctx->frames[i].is_inlined) {;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        DPRINTF(2, "inline_fail: inconsistent frame state in optimizer\n");
+        ctx->done = true;
+        return -1;
+    }
+    // Do once for the host frame.
+    curr_frame = &ctx->frames[i];
+    _PyInterpFrameReconstructor *host_frame = &ctx->reconstruction_buffer[ctx->reconstruction_count];
+    _PyInterpFrameReconstructor *cons = host_frame;
+    cons->instr_ptr = curr_frame->instr_ptr;
+    cons->n_stackentries = (int)(curr_frame->stack_pointer - curr_frame->stack);
+    cons->f_executable = (PyObject *)f_executable;
+    ctx->reconstruction_count++;
+    i++;
+    _PyInterpFrameReconstructor *prev = cons;
+    // Do for remaining frames.
+    for (; i < ctx->curr_frame_depth; i++) {
+        curr_frame = &ctx->frames[i];
+        cons = &ctx->reconstruction_buffer[ctx->reconstruction_count];
+        cons->instr_ptr = curr_frame->instr_ptr;
+        cons->return_offset = curr_frame->return_offset;
+        cons->n_stackentries = (int)(curr_frame->stack_pointer - curr_frame->stack);
+        PyFunctionObject *func = (PyFunctionObject *)get_func(curr_frame->push_frame);
+        if (func == NULL) {
+            DPRINTF(2, "inline_fail: no func_obj %d, D:%d\n", i, ctx->curr_frame_depth);
+            return -1;
+        }
+        cons->f_funcobj = Py_NewRef(func);
+        cons->f_executable = Py_NewRef(func->func_code);
+
+        prev->next_frame_cons = cons;
+        prev = cons;
+        ctx->reconstruction_count++;
+    }
+
+    cons->next_frame_cons = NULL;
 
 }
 
-static inline void
-inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
+static inline int
+inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, PyCodeObject *f_executable)
 {
     // Inline calls
     assert((this_instr - 2)->opcode == _INIT_CALL_PY_EXACT_ARGS);
     assert((this_instr - 1)->opcode == _SAVE_RETURN_OFFSET);
     assert((this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP ||
            (this_instr + 1)->opcode == _CHECK_VALIDITY);
+    assert((this_instr + 2)->opcode == _RESUME_CHECK);
     // Skip over the CHECK_VALIDITY when deciding,
     // as those can be optimized away later.
     PyFunctionObject *func = get_func(this_instr);
     if (func == NULL) {
-        return;
+        DPRINTF(2, "inline_fail: no func\n");
+        return -1;
     }
     PyCodeObject *co = (PyCodeObject *)func->func_code;
 
     int argcount = (this_instr - 2)->oparg;
 
     assert((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP);
-    int reconstruction_offset = add_reconstruction_data(ctx, func, co);
-    if (reconstruction_offset < 0) {
-        for (int i = 0; i < ctx->curr_frame_depth; i++) {
-            ctx->frames[i].is_inlined = false;
-        }
-        ctx->frame->is_inlined = false;
-        return;
+    int first_inlined_frame_offset = add_reconstruction_data(ctx, f_executable);
+    if (first_inlined_frame_offset < 0) {
+        DPRINTF(2, "inline_fail: no reconstruction data\n");
+        return -1;
     }
 
     DPRINTF(2, "inline_success\n");
 
     REPLACE_OP((this_instr - 2), _NOP, 0, 0);
     REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus - argcount, argcount);
-    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, co->co_nlocalsplus, reconstruction_offset);
+    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, co->co_nlocalsplus, first_inlined_frame_offset);
+    ctx->frame->first_inlined_frame_offset = first_inlined_frame_offset;
     // Note: Leave the _CHECK_VALIDITY and +1
+    // Remove RESUME_CHECK
     REPLACE_OP((this_instr + 2), _NOP, 0, 0);
 }
 
 static inline void
-inline_frame_push(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
+inline_frame_push(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, PyCodeObject *f_executable)
 {
+    ctx->frame->is_inlined = true;
     assert(this_instr->opcode == _PUSH_SKELETON_FRAME_CANDIDATE);
     // So far we only support CALL_PY_EXACT_ARGS form
     // TODO: CALL_PY_GENERAL
     if ((this_instr - 2)->opcode == _INIT_CALL_PY_EXACT_ARGS) {
-        inline_call_py_exact_args(ctx, this_instr);
+        if (inline_call_py_exact_args(ctx, this_instr, f_executable) < 0) {
+            goto err;
+        }
+        return;
     }
     DPRINTF(2, "inline_fail: Unknown call form\n");
+
+err:
+    this_instr->opcode = _PUSH_FRAME;
+    for (int i = 0; i < ctx->curr_frame_depth; i++) {
+        ctx->frames[i].is_inlined = false;
+    }
+    ctx->frame->is_inlined = false;
+    return -1;
 
 }
 
@@ -447,7 +526,7 @@ inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr)
 
 
     REPLACE_OP(this_instr, _POP_SKELETON_FRAME, co->co_nlocalsplus, 0);
-    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION, 0, ctx->frame->reconstruction);
+    REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION, 0, ctx->frame->first_inlined_frame_offset);
 }
 
 /* Shortened forms for convenience, used in optimizer_bytecodes.c */
@@ -538,7 +617,9 @@ optimize_uops(
     _PyUOpInstruction *trace,
     int trace_len,
     int curr_stacklen,
-    _PyBloomFilter *dependencies
+    _PyBloomFilter *dependencies,
+    _PyInterpFrameReconstructor *reconstruction_buffer,
+    int *reconstruction_count_p
 )
 {
 
@@ -549,6 +630,7 @@ optimize_uops(
     int max_space = 0;
     _PyUOpInstruction *first_valid_check_stack = NULL;
     _PyUOpInstruction *corresponding_check_stack = NULL;
+    PyCodeObject *f_executable = co;
 
     _Py_uop_abstractcontext_init(ctx);
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0);
@@ -560,6 +642,7 @@ optimize_uops(
     ctx->done = false;
     ctx->out_of_space = false;
     ctx->contradiction = false;
+    ctx->reconstruction_buffer = reconstruction_buffer;
 
     _PyUOpInstruction *this_instr = NULL;
     for (int i = 0; !ctx->done; i++) {
@@ -568,6 +651,7 @@ optimize_uops(
 
         int oparg = this_instr->oparg;
         opcode = this_instr->opcode;
+        // TODO implement pseudo or something in optimizer_bytecodes.c
         if (opcode == _PUSH_SKELETON_FRAME_CANDIDATE) {
             opcode = _PUSH_FRAME;
         }
@@ -595,8 +679,7 @@ optimize_uops(
         assert(STACK_LEVEL() >= 0);
 
         if (this_instr->opcode == _PUSH_SKELETON_FRAME_CANDIDATE) {
-            inline_frame_push(ctx, this_instr);
-            ctx->frame->is_inlined = true;
+            inline_frame_push(ctx, this_instr, f_executable);
         }
     }
     if (ctx->out_of_space) {
@@ -626,6 +709,7 @@ optimize_uops(
         first_valid_check_stack->opcode = _CHECK_STACK_SPACE_OPERAND;
         first_valid_check_stack->operand = max_space;
     }
+    *reconstruction_count_p = ctx->reconstruction_count;
     return trace_len;
 
 error:
@@ -704,7 +788,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
             {
                 /* _PUSH_FRAME doesn't escape or error, but it
                  * does need the IP for the return address */
-                bool needs_ip = opcode == _PUSH_FRAME;
+                bool needs_ip = (opcode == _PUSH_FRAME) || (opcode == _PUSH_SKELETON_FRAME);
                 if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
                     needs_ip = true;
                     may_have_escaped = true;
@@ -723,6 +807,25 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
         }
     }
     Py_UNREACHABLE();
+}
+
+void
+cleanup(_PyUOpInstruction *buffer, int buffer_size)
+{
+    for (int pc = 0; pc < buffer_size; pc++) {
+        _PyUOpInstruction *inst = &buffer[pc];
+        int opcode = inst->opcode;
+        switch(opcode) {
+            case _PUSH_SKELETON_FRAME_CANDIDATE:
+                inst->opcode = _PUSH_FRAME;
+                break;
+            default:
+                if (is_terminator(inst)) {
+                    return;
+                }
+                break;
+        }
+    }
 }
 
 //  0 - failure, no error raised, just fall back to Tier 1
@@ -748,11 +851,13 @@ _Py_uop_analyze_and_optimize(
 
     length = optimize_uops(
         _PyFrame_GetCode(frame), buffer,
-        length, curr_stacklen, dependencies);
+        length, curr_stacklen, dependencies, reconstruction_buffer, recon_count);
 
     if (length <= 0) {
         return length;
     }
+
+    cleanup(buffer, length);
 
     length = remove_unneeded_uops(buffer, length);
     assert(length > 0);

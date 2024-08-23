@@ -628,7 +628,7 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
-            _Py_UOpsAbstractFrame *old_frame = ctx->frame;
+            bool old_frame_is_inlined = ctx->frame->is_inlined;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
             res = retval;
@@ -644,7 +644,7 @@
                 // might be impossible, but bailing is still safe
                 ctx->done = true;
             }
-            if (old_frame->is_inlined) {
+            if (old_frame_is_inlined) {
                 inline_frame_pop(ctx, this_instr);
             }
             stack_pointer[0] = res;
@@ -1840,6 +1840,7 @@
                 corresponding_check_stack->opcode = _NOP;
             }
             corresponding_check_stack = NULL;
+            ctx->frame->push_frame = this_instr;
             break;
         }
 
@@ -2287,6 +2288,8 @@
         }
 
         case _SET_IP: {
+            PyObject *instr_ptr = (PyObject *)this_instr->operand;
+            frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
             break;
         }
 
@@ -2300,6 +2303,7 @@
         }
 
         case _SAVE_RETURN_OFFSET: {
+            frame->return_offset = oparg;
             break;
         }
 

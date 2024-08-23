@@ -4852,6 +4852,7 @@ dummy_func(
         // space needed for a real frame, but with none of its fields filled in.
         // Thus saving us a bunch of work having to initialize a new frame.
         tier2 op(_PUSH_SKELETON_FRAME, (argcount/4 --)) {
+            frame->has_inlinee = 1;
             size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
             // Copy over old frame args to new frame locals.
             _PyStackRef *src = stack_pointer - (int64_t)argcount;
@@ -4877,6 +4878,7 @@ dummy_func(
             size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
             _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(stack_pointer - localscount - FRAME_SIZE);
             inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
+            frame->first_inlined_frame_offset = (int)(reconstruction);
         }
 
         // Postlude to an inlined call.

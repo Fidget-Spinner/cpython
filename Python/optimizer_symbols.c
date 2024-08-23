@@ -375,6 +375,9 @@ _Py_uop_frame_new(
     }
 
     frame->is_inlined = false;
+    frame->instr_ptr = NULL;
+    frame->return_offset = 0;
+    frame->push_frame = NULL;
 
     return frame;
 }
@@ -409,6 +412,8 @@ _Py_uop_abstractcontext_init(_Py_UOpsContext *ctx)
 
     // Frame setup
     ctx->curr_frame_depth = 0;
+
+    ctx->reconstruction_count = 0;
 }
 
 int

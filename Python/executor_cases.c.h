@@ -5500,6 +5500,7 @@
         case _PUSH_SKELETON_FRAME: {
             oparg = CURRENT_OPARG();
             PyObject *argcount = (PyObject *)CURRENT_OPERAND();
+            frame->has_inlinee = 1;
             size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
             // Copy over old frame args to new frame locals.
             _PyStackRef *src = stack_pointer - (int64_t)argcount;
@@ -5528,6 +5529,7 @@
         size_t FRAME_SIZE = (sizeof(_PyInterpreterFrame) - sizeof(_PyStackRef));
         _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(stack_pointer - localscount - FRAME_SIZE);
         inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
+        frame->first_inlined_frame_offset = (int)(reconstruction);
         break;
     }
 

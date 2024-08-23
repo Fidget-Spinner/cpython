@@ -656,7 +656,7 @@ dummy_func(void) {
     op(_RETURN_VALUE, (retval -- res)) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
-        _Py_UOpsAbstractFrame *old_frame = ctx->frame;
+        bool old_frame_is_inlined = ctx->frame->is_inlined;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
         res = retval;
@@ -674,7 +674,7 @@ dummy_func(void) {
             // might be impossible, but bailing is still safe
             ctx->done = true;
         }
-        if (old_frame->is_inlined) {
+        if (old_frame_is_inlined) {
             inline_frame_pop(ctx, this_instr);
         }
     }
@@ -758,6 +758,7 @@ dummy_func(void) {
             corresponding_check_stack->opcode = _NOP;
         }
         corresponding_check_stack = NULL;
+        ctx->frame->push_frame = this_instr;
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg])) {
@@ -843,6 +844,14 @@ dummy_func(void) {
     op(_EXIT_TRACE, (exit_p/4 --)) {
         (void)exit_p;
         ctx->done = true;
+    }
+
+    op(_SET_IP, (instr_ptr/4 --)) {
+        frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+    }
+
+    op(_SAVE_RETURN_OFFSET, (--)) {
+        frame->return_offset = oparg;
     }
 
 // END BYTECODES //

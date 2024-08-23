@@ -82,12 +82,10 @@ typedef struct _PyInterpreterFrame {
 
 typedef struct _PyInterpFrameReconstructor {
     PyObject *f_executable; /* Strong reference (code object or None) */
-    struct _PyInterpreterFrame *next_frame; /* Doubles as a pointer to the reconstruction data for an inlined frame. */
+    struct _PyInterpFrameReconstructor *next_frame_cons; /* The next inlined frame's constructor */
     PyObject *f_funcobj; /* Strong reference. Only valid if not on C stack */
-    PyObject *f_globals; /* Strong reference. Only valid if not on C stack */
-    PyObject *f_builtins; /* Strong reference. Only valid if not on C stack */
     _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
-    _PyStackRef *n_stackentries;
+    int n_stackentries;
     uint16_t return_offset;  /* Only relevant during a function call */
 } _PyInterpFrameReconstructor;
 
@@ -174,6 +172,7 @@ _PyFrame_Initialize(
     frame->return_offset = 0;
     frame->owner = FRAME_OWNED_BY_THREAD;
     frame->first_inlined_frame_offset = 0;
+    frame->has_inlinee = 0;
 
     for (int i = null_locals_from; i < code->co_nlocalsplus; i++) {
         frame->localsplus[i] = PyStackRef_NULL;
@@ -285,6 +284,9 @@ _PyFrame_ClearLocals(_PyInterpreterFrame *frame);
  */
 void
 _PyFrame_ClearExceptCode(_PyInterpreterFrame * frame);
+
+void
+_PyFrame_Reconstruct(_PyInterpreterFrame *frame);
 
 int
 _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg);
