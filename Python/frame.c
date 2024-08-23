@@ -19,23 +19,18 @@ _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 
     _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)(((PyObject **)frame) + frame->first_inlined_frame_offset);
     _PyInterpFrameReconstructor *reconstruction = (_PyInterpFrameReconstructor  *)first_inlined->previous;
-    _PyInterpreterFrame *prev = frame->previous;
-    _PyInterpreterFrame *next = frame;
+    _PyInterpreterFrame *prev = frame;
+    _PyInterpreterFrame *next = first_inlined;
 
-    // Restore the host frame's instr ptr and stackpointer
-    next->instr_ptr = (reconstruction->instr_ptr);
-    next->stackpointer = next->localsplus + reconstruction->n_stackentries;
-    // Don't need to restore return_offset, because there should be no interfering
-    // _SAVE_RETURN_OFFSET in all inlined frames.
-    // So the current return_offset is the right one.
+    // Restore the host frame's reconstruction info (instr ptr and stackpointer)
+    frame->instr_ptr = (reconstruction->instr_ptr);
+    frame->stackpointer = next->localsplus + reconstruction->n_stackentries;
+    frame->return_offset = (reconstruction->return_offset);
 
-    prev = next;
     _PyInterpFrameReconstructor *prev_reconstruction = reconstruction;
-    prev_reconstruction->f_executable = frame->f_executable;
     reconstruction = reconstruction->next_frame_cons;
-    while (reconstruction != NULL) {
-        next = (_PyInterpreterFrame *)((PyObject *)prev +
-            ((PyCodeObject *)(prev_reconstruction->f_executable))->co_framesize);
+
+    while (1) {
         next->f_globals = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_globals;
         next->f_builtins = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_builtins;
         next->f_executable = reconstruction->f_executable;
@@ -48,14 +43,24 @@ _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
         next->owner = FRAME_OWNED_BY_THREAD;
         next->previous = prev;
         prev = next;
+        prev_reconstruction = reconstruction;
         reconstruction = reconstruction->next_frame_cons;
+        if (reconstruction == NULL) {
+            break;
+        }
+        else {
+            next = (_PyInterpreterFrame *)((PyObject *)prev +
+               ((PyCodeObject *)(prev_reconstruction->f_executable))->co_framesize);
+        }
     }
 
     // If the frame is the topmost frame, set the stack pointer and instr ptr to the current one.
-    next->stackpointer = old_sp;
+    next->stackpointer = NULL;
     next->instr_ptr = old_ip;
     fprintf(stderr, "HI: %d, %d\n", old_sp - _PyFrame_Stackbase(next), _PyFrame_GetCode(frame)->co_stacksize);
     assert(old_sp - _PyFrame_Stackbase(next) <= _PyFrame_GetCode(frame)->co_stacksize);
+    PyThreadState *tstate = _PyThreadState_GET();
+    tstate->datastack_top = ((PyObject **)next) + ((PyCodeObject *)(next->f_executable))->co_framesize;
     return next;
 }
 

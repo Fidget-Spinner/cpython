@@ -4839,7 +4839,7 @@ dummy_func(
         // This creates a "skeleton" frame -- a frame that has all the memory
         // space needed for a real frame, but with none of its fields filled in.
         // Thus saving us a bunch of work having to initialize a new frame.
-        tier2 op(_PUSH_SKELETON_FRAME, (inlinee_nlocalsplus/2 --)) {
+        tier2 op(_PUSH_SKELETON_FRAME, (inlinee_nlocalsplus/4 --)) {
             int argcount = oparg;
             frame->has_inlinee = 1;
             // Copy over old frame args to new frame locals.
@@ -4855,11 +4855,12 @@ dummy_func(
                 inlinee_localsplus[i] = PyStackRef_DUP(src[i]);
             }
             stack_pointer = inlinee_localsplus + argcount;
+            fprintf(stderr, "NLOCALS: %d, ARG: %d\n", (int)inlinee_nlocalsplus, argcount);
             // NULL out the remaining locals of the inlined frame.
-            for (int i = 0; i < inlinee_nlocalsplus; i++) {
+            for (int i = 0; i < (int)inlinee_nlocalsplus - argcount; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
-            stack_pointer = inlinee_localsplus + inlinee_nlocalsplus;
+            stack_pointer = inlinee_localsplus + (int)inlinee_nlocalsplus;
             // And we're done! That's all that we need to push a new frame :).
         }
 
@@ -4871,14 +4872,14 @@ dummy_func(
 
         // Postlude to an inlined call.
         // We simply free up the locals and args.
-        tier2 op(_POP_SKELETON_FRAME, (inlinee_nlocalsplus/2 --)) {
+        tier2 op(_POP_SKELETON_FRAME, (inlinee_nlocalsplus/4 --)) {
             // Check to make sure sys._getframe didn't request for a reconstruction.
             DEOPT_IF(!frame->has_inlinee);
             int argcount = oparg;
-            _PyStackRef *start = stack_pointer - inlinee_nlocalsplus;
+            _PyStackRef *start = stack_pointer - (int)inlinee_nlocalsplus;
             // Note: Implement deferred refcounting for the args in the future.
             // Then this will just be a pointer bump.
-            for (int64_t i = 0; i < inlinee_nlocalsplus; i++) {
+            for (int64_t i = 0; i < (int)inlinee_nlocalsplus; i++) {
                 PyStackRef_XCLOSE(start[i]);
             }
             stack_pointer = start - FRAME_SPECIALS_SIZE;

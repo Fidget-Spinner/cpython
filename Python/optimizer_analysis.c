@@ -427,6 +427,7 @@ add_reconstruction_data(_Py_UOpsContext *ctx, PyCodeObject *f_executable)
     cons->instr_ptr = curr_frame->instr_ptr;
     cons->n_stackentries = (int)(curr_frame->stack_pointer - curr_frame->stack);
     cons->f_executable = (PyObject *)f_executable;
+    cons->return_offset = curr_frame->return_offset;
     ctx->reconstruction_count++;
     i++;
     _PyInterpFrameReconstructor *prev = cons;
@@ -480,6 +481,8 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
         return -1;
     }
 
+    assert(co->co_nlocalsplus >= argcount);
+
     assert((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP);
     int first_reconstructor = add_reconstruction_data(ctx, f_executable);
     if (first_reconstructor < 0) {
@@ -490,7 +493,7 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     DPRINTF(2, "inline_success\n");
 
     REPLACE_OP((this_instr - 2), _NOP, 0, 0);
-    REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, co->co_nlocalsplus, argcount);
+    REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, argcount, co->co_nlocalsplus);
     REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, f_executable->co_framesize, first_reconstructor);
     ctx->frame->first_reconstructor = first_reconstructor;
     // Note: Leave the _CHECK_VALIDITY and +1

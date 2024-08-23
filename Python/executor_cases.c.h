@@ -5484,7 +5484,7 @@
 
         case _PUSH_SKELETON_FRAME: {
             oparg = CURRENT_OPARG();
-            uint32_t inlinee_nlocalsplus = (uint32_t)CURRENT_OPERAND();
+            PyObject *inlinee_nlocalsplus = (PyObject *)CURRENT_OPERAND();
             int argcount = oparg;
             frame->has_inlinee = 1;
             // Copy over old frame args to new frame locals.
@@ -5500,11 +5500,12 @@
                 inlinee_localsplus[i] = PyStackRef_DUP(src[i]);
             }
             stack_pointer = inlinee_localsplus + argcount;
+            fprintf(stderr, "NLOCALS: %d, ARG: %d\n", (int)inlinee_nlocalsplus, argcount);
             // NULL out the remaining locals of the inlined frame.
-            for (int i = 0; i < inlinee_nlocalsplus; i++) {
+            for (int i = 0; i < (int)inlinee_nlocalsplus - argcount; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
-            stack_pointer = inlinee_localsplus + inlinee_nlocalsplus;
+            stack_pointer = inlinee_localsplus + (int)inlinee_nlocalsplus;
         // And we're done! That's all that we need to push a new frame :).
         break;
     }
@@ -5512,7 +5513,7 @@
     case _SET_RECONSTRUCTION: {
         oparg = CURRENT_OPARG();
         PyObject *reconstruction = (PyObject *)CURRENT_OPERAND();
-        _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(((PyObject **)frame) + _PyFrame_GetCode(frame)->co_framesize);
+        _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(((PyObject **)frame) + oparg);
         inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
         frame->first_inlined_frame_offset = (int)(oparg);
         break;
@@ -5520,17 +5521,17 @@
 
     case _POP_SKELETON_FRAME: {
         oparg = CURRENT_OPARG();
-        uint32_t inlinee_nlocalsplus = (uint32_t)CURRENT_OPERAND();
+        PyObject *inlinee_nlocalsplus = (PyObject *)CURRENT_OPERAND();
         // Check to make sure sys._getframe didn't request for a reconstruction.
         if (!frame->has_inlinee) {
             UOP_STAT_INC(uopcode, miss);
             JUMP_TO_JUMP_TARGET();
         }
         int argcount = oparg;
-        _PyStackRef *start = stack_pointer - inlinee_nlocalsplus;
+        _PyStackRef *start = stack_pointer - (int)inlinee_nlocalsplus;
         // Note: Implement deferred refcounting for the args in the future.
         // Then this will just be a pointer bump.
-        for (int64_t i = 0; i < inlinee_nlocalsplus; i++) {
+        for (int64_t i = 0; i < (int)inlinee_nlocalsplus; i++) {
             PyStackRef_XCLOSE(start[i]);
         }
         stack_pointer = start - FRAME_SPECIALS_SIZE;
