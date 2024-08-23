@@ -206,8 +206,9 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsSymbol **locals;
     _Py_CODEUNIT *instr_ptr;
     int return_offset;
-    _PyUOpInstruction *push_frame;
+    PyFunctionObject *push_frame;
     int argcount;
+    bool took_self;
 
     bool is_inlined;
     // Offset of the first reconstructor for any inlined frames.

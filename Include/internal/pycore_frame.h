@@ -82,7 +82,6 @@ typedef struct _PyInterpreterFrame {
 
 typedef struct _PyInterpFrameReconstructor {
     PyObject *f_executable; /* Strong reference (code object or None) */
-    struct _PyInterpFrameReconstructor *next_frame_cons; /* The next inlined frame's constructor */
     PyObject *f_funcobj; /* Strong reference. Only valid if not on C stack */
     _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
     int n_stackentries;

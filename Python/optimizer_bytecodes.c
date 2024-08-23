@@ -605,6 +605,7 @@ dummy_func(void) {
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
             new_frame = frame_new(ctx, co, 0, args, argcount);
             new_frame->argcount = argcount;
+            new_frame->took_self = sym_is_not_null(self_or_null);
         } else {
             new_frame = frame_new(ctx, co, 0, NULL, 0);
 
@@ -659,6 +660,7 @@ dummy_func(void) {
         ctx->frame->stack_pointer = stack_pointer;
         bool old_frame_is_inlined = ctx->frame->is_inlined;
         int old_frame_argcount = ctx->frame->argcount;
+        bool old_frame_took_self = ctx->frame->took_self;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
         res = retval;
@@ -677,7 +679,7 @@ dummy_func(void) {
             ctx->done = true;
         }
         if (old_frame_is_inlined) {
-            inline_frame_pop(ctx, this_instr, co, old_frame_argcount);
+            inline_frame_pop(ctx, this_instr, co, old_frame_argcount, old_frame_took_self);
         }
     }
 
@@ -760,7 +762,7 @@ dummy_func(void) {
             corresponding_check_stack->opcode = _NOP;
         }
         corresponding_check_stack = NULL;
-        ctx->frame->push_frame = this_instr;
+        ctx->frame->push_frame = get_func(this_instr);
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg])) {

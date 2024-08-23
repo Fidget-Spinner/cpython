@@ -5500,7 +5500,6 @@
                 inlinee_localsplus[i] = PyStackRef_DUP(src[i]);
             }
             stack_pointer = inlinee_localsplus + argcount;
-            fprintf(stderr, "NLOCALS: %d, ARG: %d\n", (int)inlinee_nlocalsplus, argcount);
             // NULL out the remaining locals of the inlined frame.
             for (int i = 0; i < (int)inlinee_nlocalsplus - argcount; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
@@ -5520,13 +5519,18 @@
     }
 
     case _POP_SKELETON_FRAME: {
+        _PyStackRef retval1;
+        _PyStackRef retval2;
         oparg = CURRENT_OPARG();
+        retval1 = stack_pointer[-1];
         PyObject *inlinee_nlocalsplus = (PyObject *)CURRENT_OPERAND();
         // Check to make sure sys._getframe didn't request for a reconstruction.
         if (!frame->has_inlinee) {
             UOP_STAT_INC(uopcode, miss);
             JUMP_TO_JUMP_TARGET();
         }
+        frame->has_inlinee = false;
+        stack_pointer--;
         int argcount = oparg;
         _PyStackRef *start = stack_pointer - (int)inlinee_nlocalsplus;
         // Note: Implement deferred refcounting for the args in the future.
@@ -5546,7 +5550,9 @@
         // Callable
         PyStackRef_CLOSE(*stack_pointer);
         stack_pointer--;
+        retval2 = retval1;
     // And we're done! That's all that we need to pop a frame :).
+    stack_pointer[-1] = retval2;
     break;
 }
 

@@ -258,6 +258,7 @@ uop_dealloc(_PyExecutorObject *self) {
     _PyObject_GC_UNTRACK(self);
     assert(self->vm_data.code == NULL);
     unlink_executor(self);
+    PyMem_Free(self->reconstructors);
 #ifdef _Py_JIT
     _PyJIT_Free(self);
 #endif
@@ -1138,6 +1139,20 @@ sanity_check(_PyExecutorObject *executor)
 #undef CHECK
 #endif
 
+static int
+validate_reconstructors(_PyInterpFrameReconstructor *reconstructors, int recon_count)
+{
+    assert(recon_count % 2 == 0);
+    for (int i = 0; i < recon_count; i += 2) {
+        _PyInterpFrameReconstructor *curr = &reconstructors[i];
+        _PyInterpFrameReconstructor *next = curr + 1;
+
+        assert(curr->f_executable != NULL);
+        assert(next->f_executable != NULL);
+        assert(next->f_funcobj != NULL);
+    }
+}
+
 /* Makes an executor from a buffer of uops.
  * Account for the buffer having gaps and NOPs by computing a "used"
  * bit vector and only copying the used uops. Here "used" means reachable
@@ -1156,8 +1171,12 @@ make_executor_from_uops(
         return NULL;
     }
 
+    validate_reconstructors(constructors, recon_count);
+
     /* Copy frame reconstruction info over */
     memcpy(executor->reconstructors, constructors, recon_count * sizeof(_PyInterpFrameReconstructor));
+
+    validate_reconstructors(executor->reconstructors, recon_count);
 
     // Point all the frame reconstructors to their correct locations
     for (int pc = 0; pc < length; pc++) {

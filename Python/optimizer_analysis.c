@@ -194,7 +194,6 @@ static int
 remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                int buffer_size, _PyBloomFilter *dependencies)
 {
-    _PyUOpInstruction *push_frames[MAX_ABSTRACT_FRAME_DEPTH];
     int frame_depth = 1;
     PyInterpreterState *interp = _PyInterpreterState_GET();
     PyObject *builtins = frame->f_builtins;
@@ -228,6 +227,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
     if (interp->type_watchers[TYPE_WATCHER_ID] == NULL) {
         interp->type_watchers[TYPE_WATCHER_ID] = type_watcher_callback;
     }
+    _PyUOpInstruction *leaf_push_frame;
     for (int pc = 0; pc < buffer_size; pc++) {
         _PyUOpInstruction *inst = &buffer[pc];
         int opcode = inst->opcode;
@@ -312,8 +312,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                     OPT_STAT_INC(remove_globals_builtins_changed);
                     return 1;
                 }
-                push_frames[frame_depth] = &buffer[pc];
-                frame_depth++;
+                leaf_push_frame = &buffer[pc];
                 break;
             }
             case _RETURN_VALUE:
@@ -335,25 +334,10 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                 PyObject *old_globals = globals;
                 globals = func->func_globals;
                 builtins = func->func_builtins;
-                frame_depth--;
-                // We need the globals to match, otherwise this will just result in a DEOPT
-                // due to the global to constant promotion.
-                if (old_globals == globals && function_decide_inlineable(get_func(push_frames[frame_depth]))) {
-                    push_frames[frame_depth]->opcode = _PUSH_SKELETON_FRAME_CANDIDATE;
-                    // For now, ban non-leaf calls. We need a proper algorithm that works
-                    // from each nested call-outwards if we are to support non-leaf calls.
-                    for (int i = 0; i < frame_depth - 2; i++) {
-                        push_frames[i]->opcode = push_frames[i]->opcode == _PUSH_SKELETON_FRAME_CANDIDATE ? _PUSH_FRAME : push_frames[i]->opcode;
-                    }
+                if (leaf_push_frame != NULL) {
+                    leaf_push_frame->opcode = _PUSH_SKELETON_FRAME_CANDIDATE;
+                    leaf_push_frame = NULL;
                 }
-                else {
-                    // Cannot be inlined. Make sure we don't inline previous frames for simpler reconstruction.
-                    // In theory, this can be removed in a future version when we get better.
-                    for (int i = 0; i < frame_depth; i++) {
-                        push_frames[i]->opcode = push_frames[i]->opcode == _PUSH_SKELETON_FRAME_CANDIDATE ? _PUSH_FRAME : push_frames[i]->opcode;
-                    }
-                }
-
                 break;
             }
             case _CHECK_FUNCTION_EXACT_ARGS:
@@ -403,6 +387,7 @@ add_reconstruction_data(_Py_UOpsContext *ctx, PyCodeObject *f_executable)
     // 2. ... inlined frames (from bottom of stack to top)
     int res = ctx->reconstruction_count;
     if (ctx->reconstruction_count >= TRACE_MAX_FRAME_RECONSTRUCTIONS) {
+        DPRINTF(2, "inline_fail: out of space\n");
         return -1;
     }
     // Find host frame
@@ -430,28 +415,29 @@ add_reconstruction_data(_Py_UOpsContext *ctx, PyCodeObject *f_executable)
     cons->return_offset = curr_frame->return_offset;
     ctx->reconstruction_count++;
     i++;
-    _PyInterpFrameReconstructor *prev = cons;
-    // Do for remaining frames.
-    for (; i < ctx->curr_frame_depth; i++) {
-        curr_frame = &ctx->frames[i];
-        cons = &ctx->reconstruction_buffer[ctx->reconstruction_count];
-        cons->instr_ptr = curr_frame->instr_ptr;
-        cons->return_offset = curr_frame->return_offset;
-        cons->n_stackentries = (int)(curr_frame->stack_pointer - curr_frame->stack);
-        PyFunctionObject *func = (PyFunctionObject *)get_func(curr_frame->push_frame);
-        if (func == NULL) {
-            DPRINTF(2, "inline_fail: no func_obj %d, D:%d\n", i, ctx->curr_frame_depth);
-            return -1;
-        }
-        cons->f_funcobj = Py_NewRef(func);
-        cons->f_executable = Py_NewRef(func->func_code);
-
-        prev->next_frame_cons = cons;
-        prev = cons;
-        ctx->reconstruction_count++;
+    if (ctx->reconstruction_count >= TRACE_MAX_FRAME_RECONSTRUCTIONS) {
+        DPRINTF(2, "inline_fail: out of space\n");
+        return -1;
     }
+    // Do for remaining frames.
+    curr_frame = &ctx->frames[i];
+    cons = &ctx->reconstruction_buffer[ctx->reconstruction_count];
+    cons->instr_ptr = curr_frame->instr_ptr;
+    cons->return_offset = curr_frame->return_offset;
+    cons->n_stackentries = (int)(curr_frame->stack_pointer - curr_frame->stack);
+    PyFunctionObject *func = curr_frame->push_frame;
+    if (func == NULL) {
+        DPRINTF(2, "inline_fail: no func_obj %d, D:%d\n", i, ctx->curr_frame_depth);
+        return -1;
+    }
+    cons->f_funcobj = Py_NewRef(func);
+    cons->f_executable = Py_NewRef(func->func_code);
 
-    cons->next_frame_cons = NULL;
+    ctx->reconstruction_count++;
+    if (ctx->reconstruction_count >= TRACE_MAX_FRAME_RECONSTRUCTIONS) {
+        DPRINTF(2, "inline_fail: out of space\n");
+        return -1;
+    }
 
     return res;
 
@@ -527,14 +513,14 @@ err:
 }
 
 static inline void
-inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, PyCodeObject *inlinee_co, int old_frame_argcount)
+inline_frame_pop(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, PyCodeObject *inlinee_co, int old_frame_argcount, bool took_self)
 {
     assert(this_instr->opcode == _RETURN_VALUE);
     // Inline pop
     assert((this_instr + 1)->opcode == _NOP || (this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP);
-    assert(old_frame_argcount >= 0);
+    assert(old_frame_argcount - took_self >= 0);
 
-    REPLACE_OP(this_instr, _POP_SKELETON_FRAME, old_frame_argcount, inlinee_co->co_nlocalsplus);
+    REPLACE_OP(this_instr, _POP_SKELETON_FRAME, old_frame_argcount - took_self, inlinee_co->co_nlocalsplus);
     // REPLACE_OP((this_instr + 1), _SET_RECONSTRUCTION, 0, ctx->frame->first_inlined_frame_offset);
 }
 
@@ -691,6 +677,7 @@ optimize_uops(
             inline_frame_push(ctx, this_instr, f_executable);
         }
     }
+    *reconstruction_count_p = ctx->reconstruction_count;
     if (ctx->out_of_space) {
         DPRINTF(3, "\n");
         DPRINTF(1, "Out of space in abstract interpreter\n");
@@ -718,7 +705,6 @@ optimize_uops(
         first_valid_check_stack->opcode = _CHECK_STACK_SPACE_OPERAND;
         first_valid_check_stack->operand = max_space;
     }
-    *reconstruction_count_p = ctx->reconstruction_count;
     return trace_len;
 
 error:

@@ -1083,7 +1083,7 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _SET_RECONSTRUCTION:
             return 0;
         case _POP_SKELETON_FRAME:
-            return 0;
+            return 1;
         case _RECONSTRUCTION_INFO:
             return 0;
         case _DEOPT:

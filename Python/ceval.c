@@ -1060,6 +1060,11 @@ jump_to_error_target:
 error_tier_two:
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
     if (frame->has_inlinee) {
+#ifdef Py_DEBUG
+        if (lltrace >= 2) {
+            printf("Reconstructing frames\n");
+        }
+#endif
         frame = _PyFrame_Reconstruct(frame, stack_pointer);
     }
     assert(next_uop[-1].format == UOP_FORMAT_TARGET);
@@ -1077,6 +1082,11 @@ jump_to_jump_target:
 
 exit_to_tier1_dynamic:
     if (frame->has_inlinee) {
+#ifdef Py_DEBUG
+        if (lltrace >= 2) {
+            printf("Reconstructing frames\n");
+        }
+#endif
         frame = _PyFrame_Reconstruct(frame, stack_pointer);
     }
     next_instr = frame->instr_ptr;
