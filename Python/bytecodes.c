@@ -4684,6 +4684,10 @@ dummy_func(
         }
 
         tier2 op(_EXIT_TRACE, (exit_p/4 --)) {
+            if (frame->has_inlinee) {
+                fprintf(stderr, "Reconstructing frames in _EXIT_TRACE\n");
+                frame = _PyFrame_Reconstruct(frame, stack_pointer);
+            }
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyCode_CODE(code) + exit->target;
@@ -4692,10 +4696,11 @@ dummy_func(
             if (lltrace >= 2) {
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(", exit %u, temp %d, target %d -> %s]\n",
-                    exit - current_executor->exits, exit->temperature.as_counter,
-                    (int)(target - _PyCode_CODE(code)),
-                    _PyOpcode_OpName[target->op.code]);
+                printf(", exit %u, temp %d, target %d -> %s %d]\n",
+                       exit - current_executor->exits, exit->temperature.as_counter,
+                       (int)(target - _PyCode_CODE(code)),
+                       _PyOpcode_OpName[target->op.code],
+                        target->op.arg);
             }
         #endif
             if (exit->executor && !exit->executor->vm_data.valid) {
@@ -4839,34 +4844,46 @@ dummy_func(
         // This creates a "skeleton" frame -- a frame that has all the memory
         // space needed for a real frame, but with none of its fields filled in.
         // Thus saving us a bunch of work having to initialize a new frame.
-        tier2 op(_PUSH_SKELETON_FRAME, (inlinee_nlocalsplus/4 --)) {
+        tier2 op(_PUSH_SKELETON_FRAME, (inlinee_code/4 --)) {
+            int our_framesize = _PyFrame_GetCode(frame)->co_framesize;
             int argcount = oparg;
+            PyCodeObject *inlinee_co = (PyCodeObject *)inlinee_code;
             frame->has_inlinee = 1;
+            frame->stackpointer = stack_pointer;
             // Copy over old frame args to new frame locals.
             _PyStackRef *src = stack_pointer - argcount;
-            _PyStackRef *inlinee_localsplus = (_PyStackRef *)(((PyObject **)frame) +
-                _PyFrame_GetCode(frame)->co_framesize +
-                FRAME_SPECIALS_SIZE);
-            // Future optimization: if we defer all these
-            // args' refcounts (which we can, because
-            // the callee has strong references to them anyways),
-            // This will just become a memcpy.
-            for (int i = 0; i < argcount; i++) {
-                inlinee_localsplus[i] = PyStackRef_DUP(src[i]);
-            }
+            _PyInterpreterFrame *new_frame = (_PyInterpreterFrame *)tstate->datastack_top;
+            assert(tstate->datastack_top + our_framesize < tstate->datastack_limit);
+            _PyStackRef *inlinee_localsplus = new_frame->localsplus;
+            memcpy(inlinee_localsplus, src, argcount * sizeof(_PyStackRef));
+            frame->real_localsplus = inlinee_localsplus;
             stack_pointer = inlinee_localsplus + argcount;
             // NULL out the remaining locals of the inlined frame.
-            for (int i = 0; i < (int)inlinee_nlocalsplus - argcount; i++) {
+            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
+            for (int i = 0; i < inlinee_co->co_nlocalsplus - argcount; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
-            stack_pointer = inlinee_localsplus + (int)inlinee_nlocalsplus;
+            stack_pointer = inlinee_localsplus + inlinee_co->co_nlocalsplus;
+#ifdef Py_DEBUG
+            // NULL out the stack of the inlined frame.
+            for (int i = 0; i < inlinee_co->co_stacksize; i++) {
+                stack_pointer[i] = PyStackRef_NULL;
+            }
+#endif
             // And we're done! That's all that we need to push a new frame :).
         }
 
         tier2 op(_SET_RECONSTRUCTION, (reconstruction/4 --)) {
-            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(((PyObject **)frame) + oparg);
+            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus - FRAME_SPECIALS_SIZE);
             inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
-            frame->first_inlined_frame_offset = (int)(oparg);
+            // Save IP To constructor
+            ((_PyInterpFrameReconstructor *)reconstruction)->instr_ptr = frame->instr_ptr;
+            ((_PyInterpFrameReconstructor *)reconstruction)->stackpointer = frame->stackpointer;
+            frame->stackpointer = NULL;
+        }
+
+        tier2 op(_SET_FRAME_NAMES, (names/4 --)) {
+            FRAME_CO_NAMES = names;
         }
 
         // Postlude to an inlined call.
@@ -4874,27 +4891,22 @@ dummy_func(
         tier2 op(_POP_SKELETON_FRAME, (inlinee_nlocalsplus/4, retval1 -- retval2)) {
             // Check to make sure sys._getframe didn't request for a reconstruction.
             DEOPT_IF(!frame->has_inlinee);
+            fprintf(stderr, "POP\n");
             frame->has_inlinee = false;
-            stack_pointer--;
             int argcount = oparg;
-            _PyStackRef *start = stack_pointer - (int)inlinee_nlocalsplus;
-            // Note: Implement deferred refcounting for the args in the future.
+            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus -
+                FRAME_SPECIALS_SIZE);
+            _PyInterpFrameReconstructor *reconstructor = (_PyInterpFrameReconstructor *)inlined_frame->previous;
+            frame->real_localsplus = frame->localsplus;
             // Then this will just be a pointer bump.
-            for (int64_t i = 0; i < (int)inlinee_nlocalsplus; i++) {
-                PyStackRef_XCLOSE(start[i]);
-            }
-            stack_pointer = start - FRAME_SPECIALS_SIZE;
-            // Finally, pop off arguments and callable, self
-            for (int i = 0; i < argcount; i++) {
-                PyStackRef_CLOSE(*stack_pointer);
-                stack_pointer--;
-            }
-            // Self
-            PyStackRef_XCLOSE(*stack_pointer);
-            stack_pointer--;
-            // Callable
-            PyStackRef_CLOSE(*stack_pointer);
-            stack_pointer--;
+//            for (int64_t i = 0; i < (int)inlinee_nlocalsplus; i++) {
+//                PyStackRef_XCLOSE(start[i]);
+//            }
+            // No need to decref the args -- we stole their references.
+            // Finally, pop off arguments and self, callable
+            stack_pointer = reconstructor->stackpointer;
+            stack_pointer -= 2;
+            stack_pointer++;
             retval2 = retval1;
             // And we're done! That's all that we need to pop a frame :).
         }

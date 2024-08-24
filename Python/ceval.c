@@ -1082,17 +1082,14 @@ jump_to_jump_target:
 
 exit_to_tier1_dynamic:
     if (frame->has_inlinee) {
-#ifdef Py_DEBUG
-        if (lltrace >= 2) {
-            printf("Reconstructing frames\n");
-        }
-#endif
+        fprintf(stderr, "Reconstructing frames\n");
         frame = _PyFrame_Reconstruct(frame, stack_pointer);
     }
     next_instr = frame->instr_ptr;
     goto goto_to_tier1;
 exit_to_tier1:
     if (frame->has_inlinee) {
+        fprintf(stderr, "Reconstructing frames\n");
         frame = _PyFrame_Reconstruct(frame, stack_pointer);
     }
     assert(next_uop[-1].format == UOP_FORMAT_TARGET);

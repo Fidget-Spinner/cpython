@@ -13,36 +13,41 @@ _PyInterpreterFrame *
 _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 {
     assert(frame->has_inlinee);
-    assert(frame->first_inlined_frame_offset > 0);
     _PyStackRef *old_sp = stack_pointer != NULL ? stack_pointer : frame->stackpointer;
     _Py_CODEUNIT *old_ip = frame->instr_ptr;
-
-    _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)(((PyObject **)frame) + frame->first_inlined_frame_offset);
+    assert(frame->real_localsplus > frame->localsplus);
+    _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)((PyObject **)frame->real_localsplus - FRAME_SPECIALS_SIZE);
+    fprintf(stderr, "FIRST_INLINED_OFFSET(STACK): %ld\n", (_PyStackRef *)first_inlined - _PyFrame_Stackbase(frame));
     _PyInterpFrameReconstructor *reconstruction = (_PyInterpFrameReconstructor  *)first_inlined->previous;
     _PyInterpreterFrame *prev = frame;
     _PyInterpreterFrame *next = first_inlined;
 
     // Restore the host frame's reconstruction info (instr ptr and stackpointer)
+    assert(PyCode_Check(reconstruction->f_executable));
     frame->instr_ptr = (reconstruction->instr_ptr);
     frame->stackpointer = frame->localsplus
         + ((PyCodeObject *)frame->f_executable)->co_nlocalsplus
         + reconstruction->n_stackentries;
     frame->return_offset = (reconstruction->return_offset);
+    frame->f_names = ((PyCodeObject *)frame->f_executable)->co_names;
+    frame->has_inlinee = false;
+    frame->real_localsplus = frame->localsplus;
 
-    _PyInterpFrameReconstructor *prev_reconstruction = reconstruction;
     reconstruction++;
 
     next->f_globals = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_globals;
     next->f_builtins = ((PyFunctionObject *)(reconstruction->f_funcobj))->func_builtins;
+    assert(PyCode_Check(reconstruction->f_executable));
     next->f_executable = Py_NewRef(reconstruction->f_executable);
     next->f_funcobj = Py_NewRef(reconstruction->f_funcobj);
     next->instr_ptr = reconstruction->instr_ptr;
     next->stackpointer = next->localsplus + reconstruction->n_stackentries;
     next->return_offset = reconstruction->return_offset;
-    next->first_inlined_frame_offset = 0;
     next->has_inlinee = false;
     next->owner = FRAME_OWNED_BY_THREAD;
     next->previous = prev;
+    next->f_names = ((PyCodeObject *)reconstruction->f_executable)->co_names;
+    next->real_localsplus = next->localsplus;
 
     // If the frame is the topmost frame, set the stack pointer and instr ptr to the current one.
     next->stackpointer = NULL;

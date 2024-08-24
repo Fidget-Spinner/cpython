@@ -647,7 +647,7 @@
                 ctx->done = true;
             }
             if (old_frame_is_inlined) {
-                inline_frame_pop(ctx, this_instr, co, old_frame_argcount, old_frame_took_self);
+                inline_frame_pop(f_executable, ctx, this_instr, co, old_frame_argcount, old_frame_took_self);
             }
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1845,6 +1845,7 @@
             }
             corresponding_check_stack = NULL;
             ctx->frame->push_frame = get_func(this_instr);
+            ctx->frame->f_code = get_code(this_instr);
             break;
         }
 
@@ -2408,6 +2409,10 @@
         }
 
         case _SET_RECONSTRUCTION: {
+            break;
+        }
+
+        case _SET_FRAME_NAMES: {
             break;
         }
 

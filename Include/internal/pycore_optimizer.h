@@ -207,6 +207,7 @@ struct _Py_UOpsAbstractFrame {
     _Py_CODEUNIT *instr_ptr;
     int return_offset;
     PyFunctionObject *push_frame;
+    PyCodeObject *f_code;
     int argcount;
     bool took_self;
 

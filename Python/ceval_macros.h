@@ -241,12 +241,12 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 
 /* Data access macros */
 #define FRAME_CO_CONSTS (_PyFrame_GetCode(frame)->co_consts)
-#define FRAME_CO_NAMES  (_PyFrame_GetCode(frame)->co_names)
+#define FRAME_CO_NAMES  (frame->f_names)
 
 /* Local variable macros */
 
-#define LOCALS_ARRAY    (frame->localsplus)
-#define GETLOCAL(i)     (frame->localsplus[i])
+#define LOCALS_ARRAY    (frame->real_localsplus)
+#define GETLOCAL(i)     (frame->real_localsplus[i])
 
 /* The SETLOCAL() macro must not DECREF the local variable in-place and
    then store the new value; it must copy the old value to a temporary

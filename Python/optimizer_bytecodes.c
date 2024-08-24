@@ -679,7 +679,7 @@ dummy_func(void) {
             ctx->done = true;
         }
         if (old_frame_is_inlined) {
-            inline_frame_pop(ctx, this_instr, co, old_frame_argcount, old_frame_took_self);
+            inline_frame_pop(f_executable, ctx, this_instr, co, old_frame_argcount, old_frame_took_self);
         }
     }
 
@@ -763,6 +763,7 @@ dummy_func(void) {
         }
         corresponding_check_stack = NULL;
         ctx->frame->push_frame = get_func(this_instr);
+        ctx->frame->f_code = get_code(this_instr);
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg])) {

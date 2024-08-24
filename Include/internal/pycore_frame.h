@@ -65,18 +65,18 @@ typedef struct _PyInterpreterFrame {
     PyObject *f_funcobj; /* Strong reference. Only valid if not on C stack */
     PyObject *f_globals; /* Borrowed reference. Only valid if not on C stack */
     PyObject *f_builtins; /* Borrowed reference. Only valid if not on C stack */
+    PyObject *f_names; /* Borrowed reference. Only valid if not on C stack */
     PyObject *f_locals; /* Strong reference, may be NULL. Only valid if not on C stack */
     PyFrameObject *frame_obj; /* Strong reference, may be NULL. Only valid if not on C stack */
     _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
     _PyStackRef *stackpointer;
     uint16_t return_offset;  /* Only relevant during a function call */
-    /* This points to the first inlined frame in localsplus */
-    uint16_t first_inlined_frame_offset;
     /* Whether the frame contains an inlined frame. Purely to aid debuggers.
      * Note that when sys._getframe reconstructs the frame, this bit is unset.*/
     char has_inlinee;
     char owner;
     /* Locals and stack */
+    _PyStackRef *real_localsplus;
     _PyStackRef localsplus[1];
 } _PyInterpreterFrame;
 
@@ -86,6 +86,7 @@ typedef struct _PyInterpFrameReconstructor {
     _Py_CODEUNIT *instr_ptr; /* Instruction currently executing (or about to begin) */
     int n_stackentries;
     uint16_t return_offset;  /* Only relevant during a function call */
+    _PyStackRef *stackpointer; /* Only used by inlinee frame pop. Set by _SET_RECONSTRUCTION */
 } _PyInterpFrameReconstructor;
 
 #define _PyInterpreterFrame_LASTI(IF) \
@@ -170,8 +171,9 @@ _PyFrame_Initialize(
     frame->instr_ptr = _PyCode_CODE(code);
     frame->return_offset = 0;
     frame->owner = FRAME_OWNED_BY_THREAD;
-    frame->first_inlined_frame_offset = 0;
     frame->has_inlinee = 0;
+    frame->f_names = code->co_names;
+    frame->real_localsplus = frame->localsplus;
 
     for (int i = null_locals_from; i < code->co_nlocalsplus; i++) {
         frame->localsplus[i] = PyStackRef_NULL;

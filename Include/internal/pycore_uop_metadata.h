@@ -278,8 +278,9 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_FATAL_ERROR] = 0,
     [_CHECK_VALIDITY_AND_SET_IP] = HAS_DEOPT_FLAG,
     [_PUSH_SKELETON_FRAME] = HAS_ARG_FLAG,
-    [_SET_RECONSTRUCTION] = HAS_ARG_FLAG,
-    [_POP_SKELETON_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
+    [_SET_RECONSTRUCTION] = 0,
+    [_SET_FRAME_NAMES] = HAS_NAME_FLAG,
+    [_POP_SKELETON_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
     [_RECONSTRUCTION_INFO] = 0,
     [_DEOPT] = 0,
     [_ERROR_POP_N] = HAS_ARG_FLAG,
@@ -513,6 +514,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SEND_GEN_FRAME] = "_SEND_GEN_FRAME",
     [_SETUP_ANNOTATIONS] = "_SETUP_ANNOTATIONS",
     [_SET_ADD] = "_SET_ADD",
+    [_SET_FRAME_NAMES] = "_SET_FRAME_NAMES",
     [_SET_FUNCTION_ATTRIBUTE] = "_SET_FUNCTION_ATTRIBUTE",
     [_SET_IP] = "_SET_IP",
     [_SET_RECONSTRUCTION] = "_SET_RECONSTRUCTION",
@@ -1081,6 +1083,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _PUSH_SKELETON_FRAME:
             return 0;
         case _SET_RECONSTRUCTION:
+            return 0;
+        case _SET_FRAME_NAMES:
             return 0;
         case _POP_SKELETON_FRAME:
             return 1;
