@@ -1510,7 +1510,7 @@ class TestUopsOptimization(unittest.TestCase):
         def thing(a):
             x = 0
             for i in range(20):
-                ToInline.inline_me(i)
+                inline_sys_getframe(i).f_globals
             return x
 
         res, ex = self._run_with_optimizer(thing, 1)
@@ -1525,6 +1525,9 @@ class ToInline:
     @classmethod
     def inline_me(cls, x):
         return x
+
+def inline_sys_getframe(x):
+    return sys._getframe()
 
 
 if __name__ == "__main__":

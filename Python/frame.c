@@ -52,6 +52,8 @@ _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
     next->previous = prev;
     next->f_names = ((PyCodeObject *)reconstruction->f_executable)->co_names;
     next->real_localsplus = next->localsplus;
+    next->frame_obj = NULL;
+    next->f_locals = NULL;
 
     // If the frame is the topmost frame, set the stack pointer and instr ptr to the current one.
     next->stackpointer = NULL;
@@ -76,6 +78,7 @@ _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg)
 PyFrameObject *
 _PyFrame_MakeAndSetFrameObject(_PyInterpreterFrame *frame)
 {
+    _PyFrame_Reconstruct(frame, NULL);
     assert(frame->frame_obj == NULL);
     PyObject *exc = PyErr_GetRaisedException();
 

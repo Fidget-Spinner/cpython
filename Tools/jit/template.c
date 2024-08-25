@@ -119,12 +119,15 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     // Labels that the instruction implementations expect to exist:
 
 error_tier_two:
+    frame = _PyFrame_Reconstruct(frame, stack_pointer);
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(NULL);
 exit_to_tier1:
+    frame = _PyFrame_Reconstruct(frame, stack_pointer);
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target);
 exit_to_tier1_dynamic:
+    frame = _PyFrame_Reconstruct(frame, stack_pointer);
     tstate->previous_executor = (PyObject *)current_executor;
     GOTO_TIER_ONE(frame->instr_ptr);
 }

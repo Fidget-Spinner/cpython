@@ -5501,105 +5501,97 @@
             memcpy(inlinee_localsplus, src, argcount * sizeof(_PyStackRef));
             frame->real_localsplus = inlinee_localsplus;
             stack_pointer = inlinee_localsplus + argcount;
-            // NULL out the remaining locals of the inlined frame.
-            //            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
-            for (int i = 0; i < inlinee_co->co_nlocalsplus - argcount; i++) {
+            for (int i = 0; i < inlinee_co->co_nlocalsplus; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
             stack_pointer = inlinee_localsplus + inlinee_co->co_nlocalsplus;
             stack_pointer[0] = PyStackRef_NULL;
+            #ifdef Py_DEBUG
             // NULL out the stack of the inlined frame.
             for (int i = 0; i < inlinee_co->co_stacksize; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
-        // And we're done! That's all that we need to push a new frame :).
-        break;
-    }
-
-    case _SET_RECONSTRUCTION: {
-        PyObject *reconstruction = (PyObject *)CURRENT_OPERAND();
-        _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus - FRAME_SPECIALS_SIZE);
-        inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
-        // Save IP To constructor
-        ((_PyInterpFrameReconstructor *)reconstruction)->instr_ptr = frame->instr_ptr;
-        ((_PyInterpFrameReconstructor *)reconstruction)->stackpointer = frame->stackpointer;
-        ((_PyInterpFrameReconstructor *)reconstruction)->return_offset = frame->return_offset;
-        frame->stackpointer = NULL;
-        break;
-    }
-
-    case _SET_FRAME_NAMES: {
-        PyObject *names = (PyObject *)CURRENT_OPERAND();
-        FRAME_CO_NAMES = names;
-        break;
-    }
-
-    case _POP_SKELETON_FRAME: {
-        _PyStackRef retval1;
-        _PyStackRef retval2;
-        oparg = CURRENT_OPARG();
-        retval1 = stack_pointer[-1];
-        PyObject *inlinee_nlocalsplus = (PyObject *)CURRENT_OPERAND();
-        // Check to make sure sys._getframe didn't request for a reconstruction.
-        if (!frame->has_inlinee) {
-            UOP_STAT_INC(uopcode, miss);
-            JUMP_TO_JUMP_TARGET();
+            #endif
+            break;
         }
-        //            fprintf(stderr, "POP\n");
-        frame->has_inlinee = false;
-        int argcount = oparg;
-        _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus -
-            FRAME_SPECIALS_SIZE);
-        _PyInterpFrameReconstructor *reconstructor = (_PyInterpFrameReconstructor *)inlined_frame->previous;
-        frame->real_localsplus = frame->localsplus;
-        // Then this will just be a pointer bump.
-        //            for (int64_t i = 0; i < (int)inlinee_nlocalsplus; i++) {
-            //                PyStackRef_XCLOSE(start[i]);
-        //            }
-        // No need to decref the args -- we stole their references.
-        // Finally, pop off arguments and self, callable
-        stack_pointer = reconstructor->stackpointer;
-        stack_pointer -= 1;
-        retval2 = retval1;
-    // And we're done! That's all that we need to pop a frame :).
-    stack_pointer[-1] = retval2;
-    break;
-}
 
-case _RECONSTRUCTION_INFO: {
-    break;
-}
+        case _SET_RECONSTRUCTION: {
+            PyObject *reconstruction = (PyObject *)CURRENT_OPERAND();
+            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus - FRAME_SPECIALS_SIZE);
+            inlined_frame->previous = (struct _PyInterpreterFrame *)reconstruction;
+            // Save IP To constructor
+            ((_PyInterpFrameReconstructor *)reconstruction)->instr_ptr = frame->instr_ptr;
+            ((_PyInterpFrameReconstructor *)reconstruction)->stackpointer = frame->stackpointer;
+            ((_PyInterpFrameReconstructor *)reconstruction)->return_offset = frame->return_offset;
+            frame->stackpointer = NULL;
+            break;
+        }
 
-case _DEOPT: {
-    EXIT_TO_TIER1();
-    break;
-}
+        case _SET_FRAME_NAMES: {
+            PyObject *names = (PyObject *)CURRENT_OPERAND();
+            FRAME_CO_NAMES = names;
+            break;
+        }
 
-case _ERROR_POP_N: {
-    oparg = CURRENT_OPARG();
-    uint32_t target = (uint32_t)CURRENT_OPERAND();
-    frame->instr_ptr = ((_Py_CODEUNIT *)_PyFrame_GetCode(frame)->co_code_adaptive) + target;
-    stack_pointer += -oparg;
-    assert(WITHIN_STACK_BOUNDS());
-    GOTO_UNWIND();
-    break;
-}
+        case _POP_SKELETON_FRAME: {
+            _PyStackRef retval1;
+            _PyStackRef retval2;
+            oparg = CURRENT_OPARG();
+            retval1 = stack_pointer[-1];
+            PyObject *inlinee_nlocalsplus = (PyObject *)CURRENT_OPERAND();
+            // Check to make sure sys._getframe didn't request for a reconstruction.
+            if (!frame->has_inlinee) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            //            fprintf(stderr, "POP\n");
+            frame->has_inlinee = false;
+            int argcount = oparg;
+            _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus -
+                FRAME_SPECIALS_SIZE);
+            _PyInterpFrameReconstructor *reconstructor = (_PyInterpFrameReconstructor *)inlined_frame->previous;
+            frame->real_localsplus = frame->localsplus;
+            stack_pointer = reconstructor->stackpointer;
+            stack_pointer -= 1;
+            retval2 = retval1;
+            stack_pointer[-1] = retval2;
+            break;
+        }
 
-case _TIER2_RESUME_CHECK: {
-    #if defined(__EMSCRIPTEN__)
-    if (_Py_emscripten_signal_clock == 0) {
-        UOP_STAT_INC(uopcode, miss);
-        JUMP_TO_JUMP_TARGET();
-    }
-    _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
-    #endif
-    uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
-    if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
-        UOP_STAT_INC(uopcode, miss);
-        JUMP_TO_JUMP_TARGET();
-    }
-    assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
-    break;
-}
+        case _RECONSTRUCTION_INFO: {
+            break;
+        }
+
+        case _DEOPT: {
+            EXIT_TO_TIER1();
+            break;
+        }
+
+        case _ERROR_POP_N: {
+            oparg = CURRENT_OPARG();
+            uint32_t target = (uint32_t)CURRENT_OPERAND();
+            frame->instr_ptr = ((_Py_CODEUNIT *)_PyFrame_GetCode(frame)->co_code_adaptive) + target;
+            stack_pointer += -oparg;
+            assert(WITHIN_STACK_BOUNDS());
+            GOTO_UNWIND();
+            break;
+        }
+
+        case _TIER2_RESUME_CHECK: {
+            #if defined(__EMSCRIPTEN__)
+            if (_Py_emscripten_signal_clock == 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
+            #endif
+            uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
+            if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
+            break;
+        }
 
 #undef TIER_TWO

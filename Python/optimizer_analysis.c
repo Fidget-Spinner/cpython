@@ -440,7 +440,10 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     assert((this_instr - 1)->opcode == _SAVE_RETURN_OFFSET);
     assert((this_instr + 1)->opcode == _CHECK_VALIDITY_AND_SET_IP ||
            (this_instr + 1)->opcode == _CHECK_VALIDITY);
-    assert((this_instr + 2)->opcode == _RESUME_CHECK);
+    if (!((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP)) {
+        DPRINTF(2, "inline_fail: unexpectedly no RESUME_CHECK\n");
+        return -1;
+    }
     // Skip over the CHECK_VALIDITY when deciding,
     // as those can be optimized away later.
     PyFunctionObject *func = get_func(this_instr);
@@ -458,7 +461,6 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
 
     assert(co->co_nlocalsplus >= argcount);
 
-    assert((this_instr + 2)->opcode == _RESUME_CHECK || (this_instr + 2)->opcode == _NOP);
     int first_reconstructor = add_reconstruction_data(ctx, f_executable);
     if (first_reconstructor < 0) {
         DPRINTF(2, "inline_fail: no reconstruction data\n");

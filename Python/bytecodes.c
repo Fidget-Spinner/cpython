@@ -4856,9 +4856,7 @@ dummy_func(
             memcpy(inlinee_localsplus, src, argcount * sizeof(_PyStackRef));
             frame->real_localsplus = inlinee_localsplus;
             stack_pointer = inlinee_localsplus + argcount;
-            // NULL out the remaining locals of the inlined frame.
-//            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
-            for (int i = 0; i < inlinee_co->co_nlocalsplus - argcount; i++) {
+            for (int i = 0; i < inlinee_co->co_nlocalsplus; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
             stack_pointer = inlinee_localsplus + inlinee_co->co_nlocalsplus;
@@ -4869,7 +4867,6 @@ dummy_func(
                 stack_pointer[i] = PyStackRef_NULL;
             }
 #endif
-            // And we're done! That's all that we need to push a new frame :).
         }
 
         tier2 op(_SET_RECONSTRUCTION, (reconstruction/4 --)) {
@@ -4898,16 +4895,9 @@ dummy_func(
                 FRAME_SPECIALS_SIZE);
             _PyInterpFrameReconstructor *reconstructor = (_PyInterpFrameReconstructor *)inlined_frame->previous;
             frame->real_localsplus = frame->localsplus;
-            // Then this will just be a pointer bump.
-//            for (int64_t i = 0; i < (int)inlinee_nlocalsplus; i++) {
-//                PyStackRef_XCLOSE(start[i]);
-//            }
-            // No need to decref the args -- we stole their references.
-            // Finally, pop off arguments and self, callable
             stack_pointer = reconstructor->stackpointer;
             stack_pointer -= 1;
             retval2 = retval1;
-            // And we're done! That's all that we need to pop a frame :).
         }
 
 
