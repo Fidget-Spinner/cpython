@@ -760,6 +760,7 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     entry_frame.stackpointer = entry_frame.localsplus;
     entry_frame.owner = FRAME_OWNED_BY_CSTACK;
     entry_frame.return_offset = 0;
+    entry_frame.real_localsplus = entry_frame.localsplus;
     /* Push frame */
     entry_frame.previous = tstate->current_frame;
     frame->previous = &entry_frame;

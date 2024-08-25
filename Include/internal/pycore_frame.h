@@ -98,17 +98,17 @@ static inline PyCodeObject *_PyFrame_GetCode(_PyInterpreterFrame *f) {
 }
 
 static inline _PyStackRef *_PyFrame_Stackbase(_PyInterpreterFrame *f) {
-    return (f->localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
+    return (f->real_localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
 }
 
 static inline _PyStackRef _PyFrame_StackPeek(_PyInterpreterFrame *f) {
-    assert(f->stackpointer >  f->localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
+    assert(f->stackpointer >  f->real_localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
     assert(!PyStackRef_IsNull(f->stackpointer[-1]));
     return f->stackpointer[-1];
 }
 
 static inline _PyStackRef _PyFrame_StackPop(_PyInterpreterFrame *f) {
-    assert(f->stackpointer >  f->localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
+    assert(f->stackpointer >  f->real_localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
     f->stackpointer--;
     return *f->stackpointer;
 }
@@ -136,6 +136,7 @@ static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *
     int stacktop = (int)(src->stackpointer - src->localsplus);
     assert(stacktop >= _PyFrame_GetCode(src)->co_nlocalsplus);
     dest->stackpointer = dest->localsplus + stacktop;
+    dest->real_localsplus = dest->localsplus;
     for (int i = 1; i < stacktop; i++) {
         dest->localsplus[i] = src->localsplus[i];
     }
@@ -353,6 +354,7 @@ _PyFrame_PushTrampolineUnchecked(PyThreadState *tstate, PyCodeObject *code, int 
     frame->instr_ptr = _PyCode_CODE(code);
     frame->owner = FRAME_OWNED_BY_THREAD;
     frame->return_offset = 0;
+    frame->real_localsplus = frame->localsplus;
 
 #ifdef Py_GIL_DISABLED
     assert(code->co_nlocalsplus == 0);

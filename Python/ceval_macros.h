@@ -80,7 +80,7 @@
 
 /* PRE_DISPATCH_GOTO() does lltrace if enabled. Normally a no-op */
 #ifdef LLTRACE
-#define PRE_DISPATCH_GOTO() if (lltrace >= 5) { \
+#define PRE_DISPATCH_GOTO() assert(frame->localsplus == frame->real_localsplus); if (lltrace >= 5) { \
     lltrace_instruction(frame, stack_pointer, next_instr, opcode, oparg); }
 #else
 #define PRE_DISPATCH_GOTO() ((void)0)
@@ -237,7 +237,7 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #endif
 
 #define WITHIN_STACK_BOUNDS() \
-   (frame == &entry_frame || frame->has_inlinee || (STACK_LEVEL() >= 0 && STACK_LEVEL() <= STACK_SIZE()))
+   (frame == &entry_frame || (STACK_LEVEL() >= 0 && STACK_LEVEL() <= STACK_SIZE()))
 
 /* Data access macros */
 #define FRAME_CO_CONSTS (_PyFrame_GetCode(frame)->co_consts)
