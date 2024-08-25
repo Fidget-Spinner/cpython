@@ -468,12 +468,12 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     DPRINTF(2, "inline_success\n");
 
     REPLACE_OP((this_instr - 2), _SET_FRAME_NAMES, 0, co->co_names);
-    REPLACE_OP((this_instr - 1), _PUSH_SKELETON_FRAME, argcount, co);
-    REPLACE_OP((this_instr - 0), _SET_RECONSTRUCTION, f_executable->co_framesize, first_reconstructor);
+    // Keep the _SAVE_RETURN_OFFSET and -1
+    REPLACE_OP((this_instr - 0), _PUSH_SKELETON_FRAME, argcount << 1 | ctx->frame->took_self, co);
     ctx->frame->first_reconstructor = first_reconstructor;
     // Note: Leave the _CHECK_VALIDITY and +1
     // Remove RESUME_CHECK
-    REPLACE_OP((this_instr + 2), _NOP, 0, 0);
+    REPLACE_OP((this_instr + 2), _SET_RECONSTRUCTION, f_executable->co_framesize, first_reconstructor);
 }
 
 static inline void

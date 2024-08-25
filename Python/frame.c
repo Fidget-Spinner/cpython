@@ -12,6 +12,7 @@
 _PyInterpreterFrame *
 _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 {
+    printf("RECONSTRUCTING\n");
     assert(frame->has_inlinee);
     _PyStackRef *old_sp = stack_pointer != NULL ? stack_pointer : frame->stackpointer;
     _Py_CODEUNIT *old_ip = frame->instr_ptr;

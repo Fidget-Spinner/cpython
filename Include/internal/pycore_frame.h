@@ -98,17 +98,17 @@ static inline PyCodeObject *_PyFrame_GetCode(_PyInterpreterFrame *f) {
 }
 
 static inline _PyStackRef *_PyFrame_Stackbase(_PyInterpreterFrame *f) {
-    return (f->real_localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
+    return (f->localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
 }
 
 static inline _PyStackRef _PyFrame_StackPeek(_PyInterpreterFrame *f) {
-    assert(f->stackpointer >  f->real_localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
+    assert(f->stackpointer >  f->localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
     assert(!PyStackRef_IsNull(f->stackpointer[-1]));
     return f->stackpointer[-1];
 }
 
 static inline _PyStackRef _PyFrame_StackPop(_PyInterpreterFrame *f) {
-    assert(f->stackpointer >  f->real_localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
+    assert(f->stackpointer >  f->localsplus + _PyFrame_GetCode(f)->co_nlocalsplus);
     f->stackpointer--;
     return *f->stackpointer;
 }

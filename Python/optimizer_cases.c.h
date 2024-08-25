@@ -1800,6 +1800,9 @@
             }
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
                 new_frame = frame_new(ctx, co, 0, args, argcount);
+                if (new_frame == NULL) {
+                    break;
+                }
                 new_frame->argcount = argcount;
                 new_frame->took_self = sym_is_not_null(self_or_null);
             } else {

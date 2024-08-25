@@ -4846,10 +4846,11 @@ dummy_func(
         // Thus saving us a bunch of work having to initialize a new frame.
         tier2 op(_PUSH_SKELETON_FRAME, (inlinee_code/4 --)) {
             int our_framesize = _PyFrame_GetCode(frame)->co_framesize;
-            int argcount = oparg;
+            int argcount = oparg >> 1;
             PyCodeObject *inlinee_co = (PyCodeObject *)inlinee_code;
             frame->has_inlinee = 1;
-            frame->stackpointer = stack_pointer;
+            // argcount is overshot by one if self is not NULL
+            frame->stackpointer = stack_pointer - (argcount - (oparg & 1));
             // Copy over old frame args to new frame locals.
             _PyStackRef *src = stack_pointer - argcount;
             _PyInterpreterFrame *new_frame = (_PyInterpreterFrame *)tstate->datastack_top;
@@ -4879,6 +4880,7 @@ dummy_func(
             // Save IP To constructor
             ((_PyInterpFrameReconstructor *)reconstruction)->instr_ptr = frame->instr_ptr;
             ((_PyInterpFrameReconstructor *)reconstruction)->stackpointer = frame->stackpointer;
+            ((_PyInterpFrameReconstructor *)reconstruction)->return_offset = frame->return_offset;
             frame->stackpointer = NULL;
         }
 
@@ -4905,8 +4907,7 @@ dummy_func(
             // No need to decref the args -- we stole their references.
             // Finally, pop off arguments and self, callable
             stack_pointer = reconstructor->stackpointer;
-            stack_pointer -= 2;
-            stack_pointer++;
+            stack_pointer -= 1;
             retval2 = retval1;
             // And we're done! That's all that we need to pop a frame :).
         }
