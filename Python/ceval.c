@@ -1060,14 +1060,7 @@ jump_to_error_target:
 
 error_tier_two:
     OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-    if (frame->has_inlinee) {
-#ifdef Py_DEBUG
-        if (lltrace >= 2) {
-            printf("Reconstructing frames\n");
-        }
-#endif
-        frame = _PyFrame_Reconstruct(frame, stack_pointer);
-    }
+    frame = _PyFrame_Reconstruct(frame, stack_pointer);
     assert(next_uop[-1].format == UOP_FORMAT_TARGET);
     frame->return_offset = 0;  // Don't leave this random
     _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -1082,17 +1075,11 @@ jump_to_jump_target:
     goto tier2_dispatch;
 
 exit_to_tier1_dynamic:
-    if (frame->has_inlinee) {
-        fprintf(stderr, "Reconstructing frames\n");
-        frame = _PyFrame_Reconstruct(frame, stack_pointer);
-    }
+    frame = _PyFrame_Reconstruct(frame, stack_pointer);
     next_instr = frame->instr_ptr;
     goto goto_to_tier1;
 exit_to_tier1:
-    if (frame->has_inlinee) {
-        fprintf(stderr, "Reconstructing frames\n");
-        frame = _PyFrame_Reconstruct(frame, stack_pointer);
-    }
+    frame = _PyFrame_Reconstruct(frame, stack_pointer);
     assert(next_uop[-1].format == UOP_FORMAT_TARGET);
     next_instr = next_uop[-1].target + _PyCode_CODE(_PyFrame_GetCode(frame));
 goto_to_tier1:

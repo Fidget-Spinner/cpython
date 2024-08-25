@@ -5273,10 +5273,7 @@
 
         case _EXIT_TRACE: {
             PyObject *exit_p = (PyObject *)CURRENT_OPERAND();
-            if (frame->has_inlinee) {
-                fprintf(stderr, "Reconstructing frames in _EXIT_TRACE\n");
-                frame = _PyFrame_Reconstruct(frame, stack_pointer);
-            }
+            frame = _PyFrame_Reconstruct(frame, stack_pointer);
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyCode_CODE(code) + exit->target;
@@ -5505,7 +5502,7 @@
             frame->real_localsplus = inlinee_localsplus;
             stack_pointer = inlinee_localsplus + argcount;
             // NULL out the remaining locals of the inlined frame.
-            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
+            //            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
             for (int i = 0; i < inlinee_co->co_nlocalsplus - argcount; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
@@ -5549,7 +5546,7 @@
             UOP_STAT_INC(uopcode, miss);
             JUMP_TO_JUMP_TARGET();
         }
-        fprintf(stderr, "POP\n");
+        //            fprintf(stderr, "POP\n");
         frame->has_inlinee = false;
         int argcount = oparg;
         _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus -

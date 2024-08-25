@@ -12,13 +12,16 @@
 _PyInterpreterFrame *
 _PyFrame_Reconstruct(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 {
-    printf("RECONSTRUCTING\n");
+    if (!frame->has_inlinee) {
+        return frame;
+    }
+//    printf("RECONSTRUCTING\n");
     assert(frame->has_inlinee);
     _PyStackRef *old_sp = stack_pointer != NULL ? stack_pointer : frame->stackpointer;
     _Py_CODEUNIT *old_ip = frame->instr_ptr;
     assert(frame->real_localsplus > frame->localsplus);
     _PyInterpreterFrame *first_inlined = (_PyInterpreterFrame *)((PyObject **)frame->real_localsplus - FRAME_SPECIALS_SIZE);
-    fprintf(stderr, "FIRST_INLINED_OFFSET(STACK): %ld\n", (_PyStackRef *)first_inlined - _PyFrame_Stackbase(frame));
+//    fprintf(stderr, "FIRST_INLINED_OFFSET(STACK): %ld\n", (_PyStackRef *)first_inlined - _PyFrame_Stackbase(frame));
     _PyInterpFrameReconstructor *reconstruction = (_PyInterpFrameReconstructor  *)first_inlined->previous;
     _PyInterpreterFrame *prev = frame;
     _PyInterpreterFrame *next = first_inlined;

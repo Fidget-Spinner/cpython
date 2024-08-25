@@ -4684,10 +4684,7 @@ dummy_func(
         }
 
         tier2 op(_EXIT_TRACE, (exit_p/4 --)) {
-            if (frame->has_inlinee) {
-                fprintf(stderr, "Reconstructing frames in _EXIT_TRACE\n");
-                frame = _PyFrame_Reconstruct(frame, stack_pointer);
-            }
+            frame = _PyFrame_Reconstruct(frame, stack_pointer);
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyCode_CODE(code) + exit->target;
@@ -4860,7 +4857,7 @@ dummy_func(
             frame->real_localsplus = inlinee_localsplus;
             stack_pointer = inlinee_localsplus + argcount;
             // NULL out the remaining locals of the inlined frame.
-            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
+//            fprintf(stderr, "inlinee_co->co_nlocalsplus: %d\n", inlinee_co->co_nlocalsplus);
             for (int i = 0; i < inlinee_co->co_nlocalsplus - argcount; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
@@ -4893,7 +4890,7 @@ dummy_func(
         tier2 op(_POP_SKELETON_FRAME, (inlinee_nlocalsplus/4, retval1 -- retval2)) {
             // Check to make sure sys._getframe didn't request for a reconstruction.
             DEOPT_IF(!frame->has_inlinee);
-            fprintf(stderr, "POP\n");
+//            fprintf(stderr, "POP\n");
             frame->has_inlinee = false;
             int argcount = oparg;
             _PyInterpreterFrame *inlined_frame = (_PyInterpreterFrame *)(frame->real_localsplus -
