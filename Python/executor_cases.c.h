@@ -5506,12 +5506,10 @@
             }
             stack_pointer = inlinee_localsplus + inlinee_co->co_nlocalsplus;
             stack_pointer[0] = PyStackRef_NULL;
-            #ifdef Py_DEBUG
             // NULL out the stack of the inlined frame.
             for (int i = 0; i < inlinee_co->co_stacksize; i++) {
                 stack_pointer[i] = PyStackRef_NULL;
             }
-            #endif
             break;
         }
 

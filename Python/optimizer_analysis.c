@@ -476,6 +476,7 @@ inline_call_py_exact_args(_Py_UOpsContext *ctx, _PyUOpInstruction *this_instr, P
     // Note: Leave the _CHECK_VALIDITY and +1
     // Remove RESUME_CHECK
     REPLACE_OP((this_instr + 2), _SET_RECONSTRUCTION, f_executable->co_framesize, first_reconstructor);
+    return 0;
 }
 
 static inline void
