@@ -552,7 +552,6 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
                  * does need the IP for the return address */
                 bool needs_ip = (opcode == _PUSH_FRAME || opcode == _RETURN_GENERATOR);
                 if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
-                    needs_ip = (opcode == _PUSH_FRAME || opcode == _RETURN_GENERATOR);
                     may_have_escaped = true;
                 }
                 if (needs_ip && last_set_ip >= 0) {
