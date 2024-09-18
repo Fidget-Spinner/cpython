@@ -2536,6 +2536,8 @@ _Py_Specialize_ForIter(_PyStackRef iter, _Py_CODEUNIT *instr, int oparg)
             goto failure;
         }
         instr->op.code = FOR_ITER_GEN;
+        PyGenObject *gen = (PyGenObject *)iter_o;
+        write_u32(cache->func_version, function_get_version(gen->gi_iframe.f_funcobj, FOR_ITER));
         goto success;
     }
     SPECIALIZATION_FAIL(FOR_ITER,

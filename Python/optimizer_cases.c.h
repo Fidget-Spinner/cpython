@@ -1519,8 +1519,13 @@
         }
 
         case _FOR_ITER_GEN_FRAME: {
+            uint32_t func_version = (uint32_t)this_instr->operand;
             // We are about to hit the end of the trace:
             ctx->done = true;
+            break;
+        }
+
+        case _GUARD_GEN_NEWLY_CREATED: {
             break;
         }
 

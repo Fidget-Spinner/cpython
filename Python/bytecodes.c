@@ -1150,6 +1150,7 @@ dummy_func(
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
+            _Py_CODEUNIT *curr_instr = frame->instr_ptr;
             frame->instr_ptr += 4;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
@@ -1173,6 +1174,10 @@ dummy_func(
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == INTERPRETER_EXIT ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
             #endif
+#if TIER_ONE
+            _PyYieldValueCache *cache = (_PyYieldValueCache *)(curr_instr+1);
+            write_u32(cache->func_version, frame != &entry_frame ? _PyFunction_GetVersionForCurrentState(frame->f_funcobj) : 0);
+#endif
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             LOAD_SP();
             value = retval;
@@ -2981,10 +2986,11 @@ dummy_func(
             _ITER_JUMP_RANGE +
             _ITER_NEXT_RANGE;
 
-        op(_FOR_ITER_GEN_FRAME, (iter -- iter, gen_frame: _PyInterpreterFrame*)) {
+        op(_FOR_ITER_GEN_FRAME, (func_version/2, iter -- iter, gen_frame: _PyInterpreterFrame*)) {
             PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
-            DEOPT_IF(Py_TYPE(gen) != &PyGen_Type);
-            DEOPT_IF(gen->gi_frame_state >= FRAME_EXECUTING);
+            EXIT_IF(Py_TYPE(gen) != &PyGen_Type);
+            EXIT_IF(gen->gi_frame_state >= FRAME_EXECUTING);
+            EXIT_IF(((PyFunctionObject *)gen->gi_iframe.f_funcobj)->func_version != func_version);
             STAT_INC(FOR_ITER, hit);
             gen_frame = &gen->gi_iframe;
             _PyFrame_StackPush(gen_frame, PyStackRef_None);
@@ -2998,10 +3004,15 @@ dummy_func(
 
         macro(FOR_ITER_GEN) =
             unused/1 +
-            unused/2 +
             _CHECK_PEP_523 +
             _FOR_ITER_GEN_FRAME +
             _PUSH_FRAME;
+
+        tier2 op(_GUARD_GEN_NEWLY_CREATED, (iter -- iter)) {
+            PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
+            EXIT_IF(Py_TYPE(gen) != &PyGen_Type);
+            EXIT_IF(gen->gi_frame_state != FRAME_CREATED);
+        }
 
         inst(LOAD_SPECIAL, (owner -- attr, self_or_null)) {
             assert(oparg <= SPECIAL_MAX);

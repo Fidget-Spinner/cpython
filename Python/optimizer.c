@@ -507,7 +507,9 @@ add_to_trace(
     assert(func == NULL || func->func_code == (PyObject *)code); \
     trace_stack[trace_stack_depth].func = func; \
     trace_stack[trace_stack_depth].code = code; \
-    trace_stack[trace_stack_depth].instr = instr; \
+    trace_stack[trace_stack_depth].instr = instr;\
+    trace_stack[trace_stack_depth].in_generator = in_generator;  \
+    in_generator = false; \
     trace_stack_depth++;
 #define TRACE_STACK_POP() \
     if (trace_stack_depth <= 0) { \
@@ -517,7 +519,8 @@ add_to_trace(
     func = trace_stack[trace_stack_depth].func; \
     code = trace_stack[trace_stack_depth].code; \
     assert(func == NULL || func->func_code == (PyObject *)code); \
-    instr = trace_stack[trace_stack_depth].instr;
+    instr = trace_stack[trace_stack_depth].instr; \
+    in_generator = trace_stack[trace_stack_depth].in_generator;
 
 /* Returns the length of the trace on success,
  * 0 if it failed to produce a worthwhile trace,
@@ -545,10 +548,12 @@ translate_bytecode_to_trace(
         PyFunctionObject *func;
         PyCodeObject *code;
         _Py_CODEUNIT *instr;
+        int in_generator;
     } trace_stack[TRACE_STACK_SIZE];
     int trace_stack_depth = 0;
     int confidence = CONFIDENCE_RANGE;  // Adjusted by branch instructions
     bool jump_seen = false;
+    bool in_generator = false;
 
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
@@ -575,7 +580,7 @@ translate_bytecode_to_trace(
         uint32_t opcode = instr->op.code;
         uint32_t oparg = instr->op.arg;
 
-        if (!first && instr == initial_instr) {
+        if (!first && instr == initial_instr && !in_generator) {
             // We have looped around to the start:
             RESERVE(1);
             ADD_TO_TRACE(_JUMP_TO_TOP, 0, 0, 0);
@@ -679,7 +684,7 @@ translate_bytecode_to_trace(
             case JUMP_BACKWARD_NO_INTERRUPT:
             {
                 instr += 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] - (int)oparg;
-                if (jump_seen) {
+                if (jump_seen && !in_generator) {
                     OPT_STAT_INC(inner_loop);
                     DPRINTF(2, "JUMP_BACKWARD not to top ends trace\n");
                     goto done;
@@ -776,6 +781,28 @@ translate_bytecode_to_trace(
                             /* Set the operand to the function or code object returned to,
                              * to assist optimization passes. (See _PUSH_FRAME below.)
                              */
+                            if (uop == YIELD_VALUE) {
+                                int func_version_offset =
+                                    offsetof(_PyForIterCache, func_version) /
+                                    sizeof(_Py_CODEUNIT)
+                                    // Add one to account for the actual opcode/oparg pair:
+                                    + 1;
+                                uint32_t func_version = read_u32(
+                                    &instr[func_version_offset].cache);
+                                PyCodeObject *new_code = NULL;
+                                PyFunctionObject *new_func =
+                                    _PyFunction_LookupByVersion(func_version,
+                                                                (PyObject **) &new_code);
+                                DPRINTF(2,
+                                        "Function: version=%#x; new_func=%p, new_code=%p\n",
+                                        (int) func_version, new_func, new_code);
+                                if (new_code != NULL) {
+                                    code = new_code;
+                                }
+                                if (new_func != NULL) {
+                                    func = new_func;
+                                }
+                            }
                             if (func != NULL) {
                                 operand = (uintptr_t)func;
                             }
@@ -795,10 +822,14 @@ translate_bytecode_to_trace(
                             goto top;
                         }
 
+                        if (uop == _FOR_ITER_GEN_FRAME) {
+                            ADD_TO_TRACE(_GUARD_GEN_NEWLY_CREATED, oparg, 0, target);
+                            in_generator = true;
+                        }
+
                         if (uop == _PUSH_FRAME) {
                             assert(i + 1 == nuops);
-                            if (opcode == FOR_ITER_GEN ||
-                                opcode == LOAD_ATTR_PROPERTY ||
+                            if (opcode == LOAD_ATTR_PROPERTY ||
                                 opcode == BINARY_SUBSCR_GETITEM ||
                                 opcode == SEND_GEN)
                             {
@@ -807,11 +838,18 @@ translate_bytecode_to_trace(
                                 ADD_TO_TRACE(_DYNAMIC_EXIT, 0, 0, 0);
                                 goto done;
                             }
-                            assert(_PyOpcode_Deopt[opcode] == CALL || _PyOpcode_Deopt[opcode] == CALL_KW);
-                            int func_version_offset =
+                            assert(_PyOpcode_Deopt[opcode] == CALL || _PyOpcode_Deopt[opcode] == CALL_KW || opcode == FOR_ITER_GEN);
+                            int func_version_offset;
+                            func_version_offset =
                                 offsetof(_PyCallCache, func_version)/sizeof(_Py_CODEUNIT)
                                 // Add one to account for the actual opcode/oparg pair:
                                 + 1;
+                            if (opcode == FOR_ITER_GEN) {
+                                func_version_offset =
+                                    offsetof(_PyForIterCache, func_version)/sizeof(_Py_CODEUNIT)
+                                    // Add one to account for the actual opcode/oparg pair:
+                                    + 1;
+                            }
                             uint32_t func_version = read_u32(&instr[func_version_offset].cache);
                             PyCodeObject *new_code = NULL;
                             PyFunctionObject *new_func =
@@ -862,6 +900,16 @@ translate_bytecode_to_trace(
                                 code = new_code;
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
+                                if (trace_stack[trace_stack_depth-1].in_generator) {
+                                    while (instr->op.code != RETURN_GENERATOR) {
+                                        instr++;
+                                    }
+                                    assert(instr->op.code == RETURN_GENERATOR);
+                                    instr++;
+                                    assert(instr->op.code == POP_TOP);
+                                    instr++;
+                                    assert(instr->op.code == RESUME || instr->op.code == RESUME_CHECK);
+                                }
                                 DPRINTF(2,
                                     "Continuing in %s (%s:%d) at byte offset %d\n",
                                     PyUnicode_AsUTF8(code->co_qualname),

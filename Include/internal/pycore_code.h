@@ -191,6 +191,14 @@ typedef struct {
 
 #define INLINE_CACHE_ENTRIES_CONTAINS_OP CACHE_ENTRIES(_PyContainsOpCache)
 
+typedef struct {
+    _Py_BackoffCounter counter;
+    uint16_t func_version[2];
+} _PyYieldValueCache;
+
+#define INLINE_CACHE_ENTRIES_YIELD_VALUE CACHE_ENTRIES(_PyYieldValueCache)
+
+
 // Borrowed references to common callables:
 struct callable_cache {
     PyObject *isinstance;

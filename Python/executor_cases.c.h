@@ -1335,6 +1335,7 @@
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
+            _Py_CODEUNIT *curr_instr = frame->instr_ptr;
             frame->instr_ptr += 4;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
@@ -1358,6 +1359,10 @@
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == FOR_ITER ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == INTERPRETER_EXIT ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
+            #endif
+            #if TIER_ONE
+            _PyYieldValueCache *cache = (_PyYieldValueCache *)(curr_instr+1);
+            write_u32(cache->func_version, frame != &entry_frame ? _PyFunction_GetVersionForCurrentState(frame->f_funcobj) : 0);
             #endif
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             LOAD_SP();
@@ -3306,12 +3311,17 @@
             _PyInterpreterFrame *gen_frame;
             oparg = CURRENT_OPARG();
             iter = stack_pointer[-1];
+            uint32_t func_version = (uint32_t)CURRENT_OPERAND();
             PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(gen) != &PyGen_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             if (gen->gi_frame_state >= FRAME_EXECUTING) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (((PyFunctionObject *)gen->gi_iframe.f_funcobj)->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3327,6 +3337,21 @@
             stack_pointer[0].bits = (uintptr_t)gen_frame;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _GUARD_GEN_NEWLY_CREATED: {
+            _PyStackRef iter;
+            iter = stack_pointer[-1];
+            PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
+            if (Py_TYPE(gen) != &PyGen_Type) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (gen->gi_frame_state != FRAME_CREATED) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
             break;
         }
 

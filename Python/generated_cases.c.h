@@ -3661,7 +3661,7 @@
         }
 
         TARGET(FOR_ITER_GEN) {
-            frame->instr_ptr = next_instr;
+            _Py_CODEUNIT *this_instr = frame->instr_ptr = next_instr;
             next_instr += 4;
             INSTRUCTION_STATS(FOR_ITER_GEN);
             static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 3, "incorrect cache size");
@@ -3669,7 +3669,6 @@
             _PyInterpreterFrame *gen_frame;
             _PyInterpreterFrame *new_frame;
             /* Skip 1 cache entry */
-            /* Skip 2 cache entries */
             // _CHECK_PEP_523
             {
                 DEOPT_IF(tstate->interp->eval_frame, FOR_ITER);
@@ -3677,9 +3676,11 @@
             // _FOR_ITER_GEN_FRAME
             iter = stack_pointer[-1];
             {
+                uint32_t func_version = read_u32(&this_instr[2].cache);
                 PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
                 DEOPT_IF(Py_TYPE(gen) != &PyGen_Type, FOR_ITER);
                 DEOPT_IF(gen->gi_frame_state >= FRAME_EXECUTING, FOR_ITER);
+                DEOPT_IF(((PyFunctionObject *)gen->gi_iframe.f_funcobj)->func_version != func_version, FOR_ITER);
                 STAT_INC(FOR_ITER, hit);
                 gen_frame = &gen->gi_iframe;
                 _PyFrame_StackPush(gen_frame, PyStackRef_None);
@@ -4638,6 +4639,7 @@
                 #if TIER_ONE
                 assert(frame != &entry_frame);
                 #endif
+                _Py_CODEUNIT *curr_instr = frame->instr_ptr;
                 frame->instr_ptr += 4;
                 PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
                 assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
@@ -4661,6 +4663,10 @@
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == FOR_ITER ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == INTERPRETER_EXIT ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
+                #endif
+                #if TIER_ONE
+                _PyYieldValueCache *cache = (_PyYieldValueCache *)(curr_instr+1);
+                write_u32(cache->func_version, frame != &entry_frame ? _PyFunction_GetVersionForCurrentState(frame->f_funcobj) : 0);
                 #endif
                 LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
                 LOAD_SP();
@@ -7628,6 +7634,7 @@
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
+            _Py_CODEUNIT *curr_instr = frame->instr_ptr;
             frame->instr_ptr += 4;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
@@ -7651,6 +7658,10 @@
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == FOR_ITER ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == INTERPRETER_EXIT ||
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
+            #endif
+            #if TIER_ONE
+            _PyYieldValueCache *cache = (_PyYieldValueCache *)(curr_instr+1);
+            write_u32(cache->func_version, frame != &entry_frame ? _PyFunction_GetVersionForCurrentState(frame->f_funcobj) : 0);
             #endif
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             LOAD_SP();
