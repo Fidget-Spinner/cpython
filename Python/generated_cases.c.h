@@ -4265,9 +4265,9 @@
         TARGET(INSTRUMENTED_FOR_ITER) {
             _Py_CODEUNIT *this_instr = frame->instr_ptr = next_instr;
             (void)this_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(INSTRUMENTED_FOR_ITER);
-            /* Skip 1 cache entry */
+            /* Skip 3 cache entries */
             _Py_CODEUNIT *target;
             _PyStackRef iter_stackref = TOP();
             PyObject *iter = PyStackRef_AsPyObjectBorrow(iter_stackref);

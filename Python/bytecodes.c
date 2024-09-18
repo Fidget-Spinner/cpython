@@ -2802,7 +2802,7 @@ dummy_func(
 
         macro(FOR_ITER) = _SPECIALIZE_FOR_ITER + unused/2 + _FOR_ITER;
 
-        inst(INSTRUMENTED_FOR_ITER, (unused/1 -- )) {
+        inst(INSTRUMENTED_FOR_ITER, (unused/3 -- )) {
             _Py_CODEUNIT *target;
             _PyStackRef iter_stackref = TOP();
             PyObject *iter = PyStackRef_AsPyObjectBorrow(iter_stackref);
