@@ -695,8 +695,15 @@ static const _Py_CODEUNIT _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS[] = {
     * the code, rather than before it */
     { .op.code = NOP, .op.arg = 0 },
     { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on return */
+    // Note: keep in sync with FOR_ITER
+    { .op.code = NOP, .op.arg = 0 },
+    { .op.code = NOP, .op.arg = 0 },
+    { .op.code = NOP, .op.arg = 0 },
     { .op.code = NOP, .op.arg = 0 },
     { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on yield */
+    { .op.code = NOP, .op.arg = 0 },
+    { .op.code = NOP, .op.arg = 0 },
+    { .op.code = NOP, .op.arg = 0 },
     { .op.code = RESUME, .op.arg = RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START }
 };
 

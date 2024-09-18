@@ -1519,7 +1519,7 @@
         }
 
         case _FOR_ITER_GEN_FRAME: {
-            /* We are about to hit the end of the trace */
+            // We are about to hit the end of the trace:
             ctx->done = true;
             break;
         }

@@ -1335,7 +1335,7 @@
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
-            frame->instr_ptr++;
+            frame->instr_ptr += 4;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
             assert(oparg == 0 || oparg == 1);

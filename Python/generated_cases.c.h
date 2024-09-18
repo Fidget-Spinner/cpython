@@ -3604,10 +3604,10 @@
 
         TARGET(FOR_ITER) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(FOR_ITER);
             PREDICTED(FOR_ITER);
-            _Py_CODEUNIT *this_instr = next_instr - 2;
+            _Py_CODEUNIT *this_instr = next_instr - 4;
             (void)this_instr;
             _PyStackRef iter;
             _PyStackRef next;
@@ -3626,6 +3626,7 @@
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 #endif  /* ENABLE_SPECIALIZATION */
             }
+            /* Skip 2 cache entries */
             // _FOR_ITER
             {
                 /* before: [iter]; after: [iter, iter()] *or* [] (and jump over END_FOR.) */
@@ -3661,13 +3662,14 @@
 
         TARGET(FOR_ITER_GEN) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(FOR_ITER_GEN);
-            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
+            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 3, "incorrect cache size");
             _PyStackRef iter;
             _PyInterpreterFrame *gen_frame;
             _PyInterpreterFrame *new_frame;
             /* Skip 1 cache entry */
+            /* Skip 2 cache entries */
             // _CHECK_PEP_523
             {
                 DEOPT_IF(tstate->interp->eval_frame, FOR_ITER);
@@ -3708,12 +3710,13 @@
 
         TARGET(FOR_ITER_LIST) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(FOR_ITER_LIST);
-            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
+            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 3, "incorrect cache size");
             _PyStackRef iter;
             _PyStackRef next;
             /* Skip 1 cache entry */
+            /* Skip 2 cache entries */
             // _ITER_CHECK_LIST
             iter = stack_pointer[-1];
             {
@@ -3759,12 +3762,13 @@
 
         TARGET(FOR_ITER_RANGE) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(FOR_ITER_RANGE);
-            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
+            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 3, "incorrect cache size");
             _PyStackRef iter;
             _PyStackRef next;
             /* Skip 1 cache entry */
+            /* Skip 2 cache entries */
             // _ITER_CHECK_RANGE
             iter = stack_pointer[-1];
             {
@@ -3804,12 +3808,13 @@
 
         TARGET(FOR_ITER_TUPLE) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(FOR_ITER_TUPLE);
-            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
+            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 3, "incorrect cache size");
             _PyStackRef iter;
             _PyStackRef next;
             /* Skip 1 cache entry */
+            /* Skip 2 cache entries */
             // _ITER_CHECK_TUPLE
             iter = stack_pointer[-1];
             {
@@ -4604,11 +4609,12 @@
         TARGET(INSTRUMENTED_YIELD_VALUE) {
             _Py_CODEUNIT *this_instr = frame->instr_ptr = next_instr;
             (void)this_instr;
-            next_instr += 1;
+            next_instr += 4;
             INSTRUCTION_STATS(INSTRUMENTED_YIELD_VALUE);
             _PyStackRef val;
             _PyStackRef retval;
             _PyStackRef value;
+            /* Skip 3 cache entries */
             // _YIELD_VALUE_EVENT
             val = stack_pointer[-1];
             {
@@ -4632,7 +4638,7 @@
                 #if TIER_ONE
                 assert(frame != &entry_frame);
                 #endif
-                frame->instr_ptr++;
+                frame->instr_ptr += 4;
                 PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
                 assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
                 assert(oparg == 0 || oparg == 1);
@@ -6563,10 +6569,10 @@
 
         TARGET(SEND) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(SEND);
             PREDICTED(SEND);
-            _Py_CODEUNIT *this_instr = next_instr - 2;
+            _Py_CODEUNIT *this_instr = next_instr - 4;
             (void)this_instr;
             _PyStackRef receiver;
             _PyStackRef v;
@@ -6586,6 +6592,7 @@
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 #endif  /* ENABLE_SPECIALIZATION */
             }
+            /* Skip 2 cache entries */
             // _SEND
             v = stack_pointer[-1];
             {
@@ -6640,14 +6647,15 @@
 
         TARGET(SEND_GEN) {
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 4;
             INSTRUCTION_STATS(SEND_GEN);
-            static_assert(INLINE_CACHE_ENTRIES_SEND == 1, "incorrect cache size");
+            static_assert(INLINE_CACHE_ENTRIES_SEND == 3, "incorrect cache size");
             _PyStackRef receiver;
             _PyStackRef v;
             _PyInterpreterFrame *gen_frame;
             _PyInterpreterFrame *new_frame;
             /* Skip 1 cache entry */
+            /* Skip 2 cache entries */
             // _CHECK_PEP_523
             {
                 DEOPT_IF(tstate->interp->eval_frame, SEND);
@@ -7608,10 +7616,11 @@
 
         TARGET(YIELD_VALUE) {
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 4;
             INSTRUCTION_STATS(YIELD_VALUE);
             _PyStackRef retval;
             _PyStackRef value;
+            /* Skip 3 cache entries */
             retval = stack_pointer[-1];
             // NOTE: It's important that YIELD_VALUE never raises an exception!
             // The compiler treats any exception raised here as a failed close()
@@ -7619,7 +7628,7 @@
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
-            frame->instr_ptr++;
+            frame->instr_ptr += 4;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
             assert(oparg == 0 || oparg == 1);

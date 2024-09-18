@@ -1119,7 +1119,7 @@ dummy_func(
             retval = PyStackRef_FromPyObjectSteal(retval_o);
         }
 
-        macro(SEND) = _SPECIALIZE_SEND + _SEND;
+        macro(SEND) = _SPECIALIZE_SEND + unused/2 + _SEND;
 
         op(_SEND_GEN_FRAME, (receiver, v -- receiver, gen_frame: _PyInterpreterFrame *)) {
             PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(receiver);
@@ -1138,18 +1138,19 @@ dummy_func(
 
         macro(SEND_GEN) =
             unused/1 +
+            unused/2 +
             _CHECK_PEP_523 +
             _SEND_GEN_FRAME +
             _PUSH_FRAME;
 
-        inst(YIELD_VALUE, (retval -- value)) {
+        inst(YIELD_VALUE, (unused/3, retval -- value)) {
             // NOTE: It's important that YIELD_VALUE never raises an exception!
             // The compiler treats any exception raised here as a failed close()
             // or throw() call.
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
-            frame->instr_ptr++;
+            frame->instr_ptr += 4;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
             assert(oparg == 0 || oparg == 1);
@@ -1192,6 +1193,7 @@ dummy_func(
         }
 
         macro(INSTRUMENTED_YIELD_VALUE) =
+            unused/3 +
             _YIELD_VALUE_EVENT +
             YIELD_VALUE;
 
@@ -2798,7 +2800,7 @@ dummy_func(
             // Common case: no jump, leave it to the code generator
         }
 
-        macro(FOR_ITER) = _SPECIALIZE_FOR_ITER + _FOR_ITER;
+        macro(FOR_ITER) = _SPECIALIZE_FOR_ITER + unused/2 + _FOR_ITER;
 
         inst(INSTRUMENTED_FOR_ITER, (unused/1 -- )) {
             _Py_CODEUNIT *target;
@@ -2880,6 +2882,7 @@ dummy_func(
 
         macro(FOR_ITER_LIST) =
             unused/1 +  // Skip over the counter
+            unused/2 +  // Skip over the function version
             _ITER_CHECK_LIST +
             _ITER_JUMP_LIST +
             _ITER_NEXT_LIST;
@@ -2929,6 +2932,7 @@ dummy_func(
 
         macro(FOR_ITER_TUPLE) =
             unused/1 +  // Skip over the counter
+            unused/2 +  // Skip over the function version
             _ITER_CHECK_TUPLE +
             _ITER_JUMP_TUPLE +
             _ITER_NEXT_TUPLE;
@@ -2972,6 +2976,7 @@ dummy_func(
 
         macro(FOR_ITER_RANGE) =
             unused/1 +  // Skip over the counter
+            unused/2 +  // Skip over the function version
             _ITER_CHECK_RANGE +
             _ITER_JUMP_RANGE +
             _ITER_NEXT_RANGE;
@@ -2993,6 +2998,7 @@ dummy_func(
 
         macro(FOR_ITER_GEN) =
             unused/1 +
+            unused/2 +
             _CHECK_PEP_523 +
             _FOR_ITER_GEN_FRAME +
             _PUSH_FRAME;

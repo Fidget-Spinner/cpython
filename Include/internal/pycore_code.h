@@ -166,12 +166,14 @@ typedef struct {
 
 typedef struct {
     _Py_BackoffCounter counter;
+    uint16_t func_version[2];
 } _PyForIterCache;
 
 #define INLINE_CACHE_ENTRIES_FOR_ITER CACHE_ENTRIES(_PyForIterCache)
 
 typedef struct {
     _Py_BackoffCounter counter;
+    uint16_t func_version[2];
 } _PySendCache;
 
 #define INLINE_CACHE_ENTRIES_SEND CACHE_ENTRIES(_PySendCache)
