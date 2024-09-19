@@ -252,26 +252,13 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            if (sym_is_const(left) && sym_is_const(right) &&
-                sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-            {
-                assert(PyLong_CheckExact(sym_get_const(left)));
-                assert(PyLong_CheckExact(sym_get_const(right)));
-                PyObject *temp = _PyLong_Multiply((PyLongObject *)sym_get_const(left),
-                    (PyLongObject *)sym_get_const(right));
-                if (temp == NULL) {
-                    goto error;
-                }
-                res = sym_new_const(ctx, temp);
-                Py_DECREF(temp);
-                // TODO gh-115506:
-                // replace opcode with constant propagated one and add tests!
-            }
-            else {
-                res = sym_new_type(ctx, &PyLong_Type);
-            }
+            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+            APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
+            APPEND_OP(_BOX_INT, 1, 0);
+            APPEND_OP(_ERROR_IF_NULL, 1, 0);
+            SKIP_INST();
+            res = sym_new_type(ctx, &PyLong_Type);
+            //        res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -299,26 +286,13 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            if (sym_is_const(left) && sym_is_const(right) &&
-                sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-            {
-                assert(PyLong_CheckExact(sym_get_const(left)));
-                assert(PyLong_CheckExact(sym_get_const(right)));
-                PyObject *temp = _PyLong_Subtract((PyLongObject *)sym_get_const(left),
-                    (PyLongObject *)sym_get_const(right));
-                if (temp == NULL) {
-                    goto error;
-                }
-                res = sym_new_const(ctx, temp);
-                Py_DECREF(temp);
-                // TODO gh-115506:
-                // replace opcode with constant propagated one and add tests!
-            }
-            else {
-                res = sym_new_type(ctx, &PyLong_Type);
-            }
+            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+            APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
+            APPEND_OP(_BOX_INT, 1, 0);
+            APPEND_OP(_ERROR_IF_NULL, 1, 0);
+            SKIP_INST();
+            res = sym_new_type(ctx, &PyLong_Type);
+            //        res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -2432,6 +2406,24 @@
         }
 
         case _ADD_INT_UNBOXED: {
+            _Py_UopsLocalsPlusSlot out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _SUB_INT_UNBOXED: {
+            _Py_UopsLocalsPlusSlot out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _MUL_INT_UNBOXED: {
             _Py_UopsLocalsPlusSlot out;
             out = sym_new_not_null(ctx);
             stack_pointer[-2] = out;

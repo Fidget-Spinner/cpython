@@ -4885,11 +4885,39 @@ dummy_func(
             ERROR_IF(PyStackRef_IsNull(*val), error);
         }
 
-        tier2 op(_ADD_INT_UNBOXED, (val1, val2 -- out)) {
+        tier2 op(_ADD_INT_UNBOXED, (val1[1], val2[1] -- out)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow((long)val1.bits, (long)val2.bits, &res);
-            DEOPT_IF(ovf);
+            int ovf = __builtin_saddl_overflow((long)val1->bits, (long)val2->bits, &res);
+            if (ovf) {
+                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                DEOPT_IF(1); // TODO, we need to error if it can't be created
+            }
+            out.bits = (uintptr_t)res;
+        }
+
+        tier2 op(_SUB_INT_UNBOXED, (val1[1], val2[1] -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_ssubl_overflow((long)val1->bits, (long)val2->bits, &res);
+            if (ovf) {
+                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                DEOPT_IF(1); // TODO, we need to error if it can't be created
+            }
+            out.bits = (uintptr_t)res;
+        }
+
+        tier2 op(_MUL_INT_UNBOXED, (val1[1], val2[1] -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_smull_overflow((long)val1->bits, (long)val2->bits, &res);
+            if (ovf) {
+                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                DEOPT_IF(1); // TODO, we need to error if it can't be created
+            }
             out.bits = (uintptr_t)res;
         }
 

@@ -5596,17 +5596,72 @@
         }
 
         case _ADD_INT_UNBOXED: {
-            _PyStackRef val2;
-            _PyStackRef val1;
+            _PyStackRef *val2;
+            _PyStackRef *val1;
             _PyStackRef out;
-            val2 = stack_pointer[-1];
-            val1 = stack_pointer[-2];
+            val2 = &stack_pointer[-1];
+            val1 = &stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow((long)val1.bits, (long)val2.bits, &res);
+            int ovf = __builtin_saddl_overflow((long)val1->bits, (long)val2->bits, &res);
             if (ovf) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+                // TODO, we need to error if it can't be created
+            }
+            out.bits = (uintptr_t)res;
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _SUB_INT_UNBOXED: {
+            _PyStackRef *val2;
+            _PyStackRef *val1;
+            _PyStackRef out;
+            val2 = &stack_pointer[-1];
+            val1 = &stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_ssubl_overflow((long)val1->bits, (long)val2->bits, &res);
+            if (ovf) {
+                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+                // TODO, we need to error if it can't be created
+            }
+            out.bits = (uintptr_t)res;
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _MUL_INT_UNBOXED: {
+            _PyStackRef *val2;
+            _PyStackRef *val1;
+            _PyStackRef out;
+            val2 = &stack_pointer[-1];
+            val1 = &stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_smull_overflow((long)val1->bits, (long)val2->bits, &res);
+            if (ovf) {
+                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+                // TODO, we need to error if it can't be created
             }
             out.bits = (uintptr_t)res;
             stack_pointer[-2] = out;

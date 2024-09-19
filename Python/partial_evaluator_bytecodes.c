@@ -114,6 +114,26 @@ dummy_func(void) {
 //        res.is_unboxed = true;
     }
 
+    override op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
+        APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
+        APPEND_OP(_BOX_INT, 1, 0);
+        APPEND_OP(_ERROR_IF_NULL, 1, 0);
+        SKIP_INST();
+        res = sym_new_type(ctx, &PyLong_Type);
+//        res.is_unboxed = true;
+    }
+
+    override op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
+        APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
+        APPEND_OP(_BOX_INT, 1, 0);
+        APPEND_OP(_ERROR_IF_NULL, 1, 0);
+        SKIP_INST();
+        res = sym_new_type(ctx, &PyLong_Type);
+//        res.is_unboxed = true;
+    }
+
     override op(_CHECK_STACK_SPACE_OPERAND, ( -- )) {
         (void)framesize;
     }

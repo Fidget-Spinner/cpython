@@ -287,6 +287,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_BOX_INT] = HAS_ARG_FLAG,
     [_ERROR_IF_NULL] = HAS_ARG_FLAG | HAS_ERROR_FLAG,
     [_ADD_INT_UNBOXED] = HAS_DEOPT_FLAG,
+    [_SUB_INT_UNBOXED] = HAS_DEOPT_FLAG,
+    [_MUL_INT_UNBOXED] = HAS_DEOPT_FLAG,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -503,6 +505,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_MATCH_MAPPING] = "_MATCH_MAPPING",
     [_MATCH_SEQUENCE] = "_MATCH_SEQUENCE",
     [_MAYBE_EXPAND_METHOD] = "_MAYBE_EXPAND_METHOD",
+    [_MUL_INT_UNBOXED] = "_MUL_INT_UNBOXED",
     [_NOP] = "_NOP",
     [_POP_EXCEPT] = "_POP_EXCEPT",
     [_POP_TOP] = "_POP_TOP",
@@ -546,6 +549,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_STORE_SUBSCR] = "_STORE_SUBSCR",
     [_STORE_SUBSCR_DICT] = "_STORE_SUBSCR_DICT",
     [_STORE_SUBSCR_LIST_INT] = "_STORE_SUBSCR_LIST_INT",
+    [_SUB_INT_UNBOXED] = "_SUB_INT_UNBOXED",
     [_SWAP] = "_SWAP",
     [_TIER2_RESUME_CHECK] = "_TIER2_RESUME_CHECK",
     [_TO_BOOL] = "_TO_BOOL",
@@ -1104,6 +1108,10 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _ERROR_IF_NULL:
             return oparg;
         case _ADD_INT_UNBOXED:
+            return 2;
+        case _SUB_INT_UNBOXED:
+            return 2;
+        case _MUL_INT_UNBOXED:
             return 2;
         default:
             return -1;

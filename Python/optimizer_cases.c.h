@@ -2435,3 +2435,21 @@
             break;
         }
 
+        case _SUB_INT_UNBOXED: {
+            _Py_UopsLocalsPlusSlot out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _MUL_INT_UNBOXED: {
+            _Py_UopsLocalsPlusSlot out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
