@@ -2421,3 +2421,25 @@
             break;
         }
 
+        case _UNBOX_INT: {
+            _Py_UopsLocalsPlusSlot *num;
+            num = &stack_pointer[-oparg];
+            for (int _i = oparg; --_i >= 0;) {
+                num[_i] = sym_new_not_null(ctx);
+            }
+            break;
+        }
+
+        case _BOX_INT: {
+            _Py_UopsLocalsPlusSlot *num;
+            num = &stack_pointer[-oparg];
+            for (int _i = oparg; --_i >= 0;) {
+                num[_i] = sym_new_not_null(ctx);
+            }
+            break;
+        }
+
+        case _ERROR_IF_NULL: {
+            break;
+        }
+

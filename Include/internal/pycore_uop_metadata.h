@@ -279,12 +279,20 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_DEOPT] = 0,
     [_ERROR_POP_N] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
+    [_UNBOX_INT_0] = HAS_DEOPT_FLAG,
+    [_UNBOX_INT_1] = HAS_DEOPT_FLAG,
+    [_UNBOX_INT_2] = HAS_DEOPT_FLAG,
+    [_UNBOX_INT_3] = HAS_DEOPT_FLAG,
+    [_UNBOX_INT] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
+    [_BOX_INT] = HAS_ARG_FLAG,
+    [_ERROR_IF_NULL] = HAS_ARG_FLAG | HAS_ERROR_FLAG,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
     [_LOAD_FAST] = 8,
     [_STORE_FAST] = 8,
     [_INIT_CALL_PY_EXACT_ARGS] = 5,
+    [_UNBOX_INT] = 4,
 };
 
 const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
@@ -305,6 +313,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_BINARY_SUBSCR_LIST_INT] = "_BINARY_SUBSCR_LIST_INT",
     [_BINARY_SUBSCR_STR_INT] = "_BINARY_SUBSCR_STR_INT",
     [_BINARY_SUBSCR_TUPLE_INT] = "_BINARY_SUBSCR_TUPLE_INT",
+    [_BOX_INT] = "_BOX_INT",
     [_BUILD_LIST] = "_BUILD_LIST",
     [_BUILD_MAP] = "_BUILD_MAP",
     [_BUILD_SET] = "_BUILD_SET",
@@ -375,6 +384,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_DICT_UPDATE] = "_DICT_UPDATE",
     [_DYNAMIC_EXIT] = "_DYNAMIC_EXIT",
     [_END_SEND] = "_END_SEND",
+    [_ERROR_IF_NULL] = "_ERROR_IF_NULL",
     [_ERROR_POP_N] = "_ERROR_POP_N",
     [_EXIT_INIT_CHECK] = "_EXIT_INIT_CHECK",
     [_EXIT_TRACE] = "_EXIT_TRACE",
@@ -541,6 +551,11 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_UNARY_INVERT] = "_UNARY_INVERT",
     [_UNARY_NEGATIVE] = "_UNARY_NEGATIVE",
     [_UNARY_NOT] = "_UNARY_NOT",
+    [_UNBOX_INT] = "_UNBOX_INT",
+    [_UNBOX_INT_0] = "_UNBOX_INT_0",
+    [_UNBOX_INT_1] = "_UNBOX_INT_1",
+    [_UNBOX_INT_2] = "_UNBOX_INT_2",
+    [_UNBOX_INT_3] = "_UNBOX_INT_3",
     [_UNPACK_EX] = "_UNPACK_EX",
     [_UNPACK_SEQUENCE] = "_UNPACK_SEQUENCE",
     [_UNPACK_SEQUENCE_LIST] = "_UNPACK_SEQUENCE_LIST",
@@ -1072,6 +1087,20 @@ int _PyUop_num_popped(int opcode, int oparg)
             return oparg;
         case _TIER2_RESUME_CHECK:
             return 0;
+        case _UNBOX_INT_0:
+            return oparg;
+        case _UNBOX_INT_1:
+            return oparg;
+        case _UNBOX_INT_2:
+            return oparg;
+        case _UNBOX_INT_3:
+            return oparg;
+        case _UNBOX_INT:
+            return oparg;
+        case _BOX_INT:
+            return oparg;
+        case _ERROR_IF_NULL:
+            return oparg;
         default:
             return -1;
     }

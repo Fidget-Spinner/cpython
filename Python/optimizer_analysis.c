@@ -326,6 +326,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 #define sym_set_const(SYM, CNST) _Py_uop_sym_set_const(ctx, SYM, CNST)
 #define sym_set_locals_idx _Py_uop_sym_set_locals_idx
 #define sym_get_locals_idx _Py_uop_sym_get_locals_idx
+#define sym_set_unboxed(SYM) _Py_uop_sym_set_unboxed(ctx, SYM)
 #define sym_is_bottom _Py_uop_sym_is_bottom
 #define sym_truthiness _Py_uop_sym_truthiness
 #define frame_new _Py_uop_frame_new

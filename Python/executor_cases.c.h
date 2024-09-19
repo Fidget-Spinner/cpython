@@ -5496,4 +5496,113 @@
             break;
         }
 
+        case _UNBOX_INT_0: {
+            _PyStackRef *val;
+            _PyStackRef *num;
+            oparg = 0;
+            assert(oparg == CURRENT_OPARG());
+            val = &stack_pointer[-oparg];
+            num = &stack_pointer[-oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
+            assert(PyLong_CheckExact(val_o));
+            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            break;
+        }
+
+        case _UNBOX_INT_1: {
+            _PyStackRef *val;
+            _PyStackRef *num;
+            oparg = 1;
+            assert(oparg == CURRENT_OPARG());
+            val = &stack_pointer[-oparg];
+            num = &stack_pointer[-oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
+            assert(PyLong_CheckExact(val_o));
+            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            break;
+        }
+
+        case _UNBOX_INT_2: {
+            _PyStackRef *val;
+            _PyStackRef *num;
+            oparg = 2;
+            assert(oparg == CURRENT_OPARG());
+            val = &stack_pointer[-oparg];
+            num = &stack_pointer[-oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
+            assert(PyLong_CheckExact(val_o));
+            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            break;
+        }
+
+        case _UNBOX_INT_3: {
+            _PyStackRef *val;
+            _PyStackRef *num;
+            oparg = 3;
+            assert(oparg == CURRENT_OPARG());
+            val = &stack_pointer[-oparg];
+            num = &stack_pointer[-oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
+            assert(PyLong_CheckExact(val_o));
+            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            break;
+        }
+
+        case _UNBOX_INT: {
+            _PyStackRef *val;
+            _PyStackRef *num;
+            oparg = CURRENT_OPARG();
+            val = &stack_pointer[-oparg];
+            num = &stack_pointer[-oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
+            assert(PyLong_CheckExact(val_o));
+            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            break;
+        }
+
+        case _BOX_INT: {
+            _PyStackRef *val;
+            _PyStackRef *num;
+            oparg = CURRENT_OPARG();
+            val = &stack_pointer[-oparg];
+            num = &stack_pointer[-oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            // No null checking -- that is done by _ERROR_IF_NULL.
+            *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));
+            break;
+        }
+
+        case _ERROR_IF_NULL: {
+            _PyStackRef *val;
+            oparg = CURRENT_OPARG();
+            val = &stack_pointer[-oparg];
+            if (PyStackRef_IsNull(*val)) JUMP_TO_ERROR();
+            break;
+        }
+
 #undef TIER_TWO

@@ -4863,6 +4863,24 @@ dummy_func(
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
         }
 
+        replicate(4) tier2 op(_UNBOX_INT, (val[oparg] -- num[oparg])) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
+            assert(PyLong_CheckExact(val_o));
+            DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)val_o));
+            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+        }
+
+        tier2 op (_BOX_INT, (val[oparg] -- num[oparg])) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            // No null checking -- that is done by _ERROR_IF_NULL.
+            *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));
+        }
+
+        tier2 op (_ERROR_IF_NULL, (val[oparg] -- val[oparg])) {
+            ERROR_IF(PyStackRef_IsNull(*val), error);
+        }
+
 // END BYTECODES //
 
     }
