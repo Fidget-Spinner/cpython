@@ -5605,8 +5605,8 @@
             long res;
             int ovf = __builtin_saddl_overflow((long)val1->bits, (long)val2->bits, &res);
             if (ovf) {
-                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
-                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                //                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                //                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
@@ -5630,8 +5630,8 @@
             long res;
             int ovf = __builtin_ssubl_overflow((long)val1->bits, (long)val2->bits, &res);
             if (ovf) {
-                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
-                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                //                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                //                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
@@ -5655,8 +5655,8 @@
             long res;
             int ovf = __builtin_smull_overflow((long)val1->bits, (long)val2->bits, &res);
             if (ovf) {
-                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
-                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
+                //                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
+                //                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
