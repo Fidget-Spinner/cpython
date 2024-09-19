@@ -197,6 +197,7 @@ typedef struct _Py_UopsSymbol _Py_UopsSymbol;
 typedef struct _Py_UopsLocalsPlusSlot {
     _Py_UopsSymbol *sym;
     char is_virtual;
+    char is_unboxed;
 } _Py_UopsLocalsPlusSlot;
 
 struct _Py_UOpsAbstractFrame {

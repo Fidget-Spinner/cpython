@@ -327,6 +327,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 #define sym_set_locals_idx _Py_uop_sym_set_locals_idx
 #define sym_get_locals_idx _Py_uop_sym_get_locals_idx
 #define sym_set_unboxed(SYM) _Py_uop_sym_set_unboxed(ctx, SYM)
+#define sym_is_unboxed _Py_uop_sym_is_unboxed
 #define sym_is_bottom _Py_uop_sym_is_bottom
 #define sym_truthiness _Py_uop_sym_truthiness
 #define frame_new _Py_uop_frame_new
@@ -500,6 +501,7 @@ error:
     (INST)->operand = OPERAND;
 
 #define SET_STATIC_INST() instr_is_truly_static = true;
+#define SKIP_INST() skip_inst = true;
 
 static void
 reify_shadow_stack(_Py_UOpsContext *ctx)
@@ -508,6 +510,7 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
     for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
         assert(slot.sym != NULL);
+        assert(!(slot.is_virtual && slot.is_unboxed));
         // Need reifying.
         if (slot.is_virtual) {
             sp->is_virtual = false;
@@ -540,8 +543,33 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
                 return;
             }
         }
+        // Need reboxing
+//        else if (slot.is_unboxed) {
+//            sp->is_unboxed = false;
+//            if (sym_matches_type(slot, &PyLong_Type)) {
+//                DPRINTF(3, "reifying %d BOX_INT\n", (int)(ctx->frame->stack_pointer - sp));
+//                WRITE_OP(&trace_dest[ctx->n_trace_dest], _BOX_INT, (ctx->frame->stack_pointer - sp), 0);
+//                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+//                trace_dest[ctx->n_trace_dest].target = 0;
+//                ctx->n_trace_dest++;
+//            }
+//            else {
+//                // Not something that is boxed!!!
+//                Py_UNREACHABLE();
+//            }
+//        }
     }
 }
+
+#define APPEND_OP(OPCODE, OPARG, OPERAND) \
+    WRITE_OP(&trace_dest[ctx->n_trace_dest], OPCODE, OPARG, OPERAND); \
+    trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET; \
+    trace_dest[ctx->n_trace_dest].target = this_instr->target;  \
+    ctx->n_trace_dest++;                        \
+    if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) { \
+        ctx->out_of_space = true; \
+        ctx->done = true; \
+    }
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */
 static int
@@ -590,6 +618,7 @@ partial_evaluate_uops(
         // are static.
         // If so, whether it can be eliminated is up to whether it has an implementation.
         bool instr_is_truly_static = false;
+        bool skip_inst = false;
         if (!(_PyUop_Flags[opcode] & HAS_STATIC_FLAG)) {
             reify_shadow_stack(ctx);
         }
@@ -614,7 +643,7 @@ partial_evaluate_uops(
         DPRINTF(3, " stack_level %d\n", STACK_LEVEL());
         ctx->frame->stack_pointer = stack_pointer;
         assert(STACK_LEVEL() >= 0);
-        if (!instr_is_truly_static) {
+        if (!skip_inst && !instr_is_truly_static) {
             trace_dest[ctx->n_trace_dest] = *this_instr;
             ctx->n_trace_dest++;
             if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
@@ -624,10 +653,10 @@ partial_evaluate_uops(
         }
         else {
             // Inst is static. Nothing written :)!
-            assert((_PyUop_Flags[opcode] & HAS_STATIC_FLAG));
+            assert(skip_inst || (_PyUop_Flags[opcode] & HAS_STATIC_FLAG));
 #ifdef Py_DEBUG
             if (get_lltrace() >= 3) {
-                printf("%4d pe -STATIC-\n", (int) (this_instr - trace));
+                printf("%4d pe -SKIP|STATIC-\n", (int) (this_instr - trace));
             }
 #endif
         }
@@ -660,7 +689,6 @@ partial_evaluate_uops(
         // That's the only time the PE's residual is valid.
         assert(ctx->n_trace_dest < UOP_MAX_TRACE_LENGTH);
         assert(is_terminator(this_instr));
-        assert(ctx->n_trace_dest <= trace_len);
 
         // Copy trace_dest into trace.
         memcpy(trace, trace_dest, ctx->n_trace_dest * sizeof(_PyUOpInstruction ));

@@ -32,6 +32,7 @@
 #define IS_NULL    1 << 0
 #define NOT_NULL   1 << 1
 #define NO_SPACE   1 << 2
+#define UNBOXED    1 << 3
 
 #ifdef Py_DEBUG
 static inline int get_lltrace(void) {
@@ -58,6 +59,7 @@ static _Py_UopsSymbol NO_SPACE_SYMBOL = {
 static _Py_UopsLocalsPlusSlot NO_SPACE_SLOT = {
     .sym = &NO_SPACE_SYMBOL,
     .is_virtual = 0,
+    .is_unboxed = 0,
 };
 
 _Py_UopsLocalsPlusSlot

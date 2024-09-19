@@ -4863,15 +4863,19 @@ dummy_func(
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
         }
 
-        replicate(4) tier2 op(_UNBOX_INT, (val[oparg] -- num[oparg])) {
+        tier2 op(_UNBOX_BINARY_INT, (val1, val2 -- out1, out2)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
-            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
-            assert(PyLong_CheckExact(val_o));
-            DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)val_o));
-            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            PyObject *val1_o = PyStackRef_AsPyObjectBorrow(val1);
+            PyObject *val2_o = PyStackRef_AsPyObjectBorrow(val2);
+            assert(PyLong_CheckExact(val1_o));
+            assert(PyLong_CheckExact(val2_o));
+            DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)val1_o));
+            DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)val2_o));
+            out1.bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val1_o);
+            out2.bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val2_o);
         }
 
-        tier2 op (_BOX_INT, (val[oparg] -- num[oparg])) {
+        replicate(4) tier2 op (_BOX_INT, (val[oparg] -- num[oparg])) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             // No null checking -- that is done by _ERROR_IF_NULL.
             *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));

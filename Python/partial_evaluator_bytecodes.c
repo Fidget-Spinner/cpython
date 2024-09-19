@@ -104,6 +104,16 @@ dummy_func(void) {
         SET_STATIC_INST();
     }
 
+    override op(_BINARY_OP_ADD_INT, (left, right -- res)) {
+        APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
+        APPEND_OP(_BOX_INT, 1, 0);
+        APPEND_OP(_ERROR_IF_NULL, 1, 0);
+        SKIP_INST();
+        res = sym_new_type(ctx, &PyLong_Type);
+//        res.is_unboxed = true;
+    }
+
     override op(_CHECK_STACK_SPACE_OPERAND, ( -- )) {
         (void)framesize;
     }

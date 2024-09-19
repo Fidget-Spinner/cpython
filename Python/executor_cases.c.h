@@ -5496,7 +5496,34 @@
             break;
         }
 
-        case _UNBOX_INT_0: {
+        case _UNBOX_BINARY_INT: {
+            _PyStackRef val2;
+            _PyStackRef val1;
+            _PyStackRef out1;
+            _PyStackRef out2;
+            val2 = stack_pointer[-1];
+            val1 = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val1_o = PyStackRef_AsPyObjectBorrow(val1);
+            PyObject *val2_o = PyStackRef_AsPyObjectBorrow(val2);
+            assert(PyLong_CheckExact(val1_o));
+            assert(PyLong_CheckExact(val2_o));
+            if (!_PyLong_IsCompact((PyLongObject *)val1_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (!_PyLong_IsCompact((PyLongObject *)val2_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out1.bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val1_o);
+            out2.bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val2_o);
+            stack_pointer[-2] = out1;
+            stack_pointer[-1] = out2;
+            break;
+        }
+
+        case _BOX_INT_0: {
             _PyStackRef *val;
             _PyStackRef *num;
             oparg = 0;
@@ -5504,17 +5531,12 @@
             val = &stack_pointer[-oparg];
             num = &stack_pointer[-oparg];
             assert(sizeof(uintptr_t) >= sizeof(long));
-            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
-            assert(PyLong_CheckExact(val_o));
-            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            // No null checking -- that is done by _ERROR_IF_NULL.
+            *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));
             break;
         }
 
-        case _UNBOX_INT_1: {
+        case _BOX_INT_1: {
             _PyStackRef *val;
             _PyStackRef *num;
             oparg = 1;
@@ -5522,17 +5544,12 @@
             val = &stack_pointer[-oparg];
             num = &stack_pointer[-oparg];
             assert(sizeof(uintptr_t) >= sizeof(long));
-            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
-            assert(PyLong_CheckExact(val_o));
-            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            // No null checking -- that is done by _ERROR_IF_NULL.
+            *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));
             break;
         }
 
-        case _UNBOX_INT_2: {
+        case _BOX_INT_2: {
             _PyStackRef *val;
             _PyStackRef *num;
             oparg = 2;
@@ -5540,17 +5557,12 @@
             val = &stack_pointer[-oparg];
             num = &stack_pointer[-oparg];
             assert(sizeof(uintptr_t) >= sizeof(long));
-            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
-            assert(PyLong_CheckExact(val_o));
-            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            // No null checking -- that is done by _ERROR_IF_NULL.
+            *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));
             break;
         }
 
-        case _UNBOX_INT_3: {
+        case _BOX_INT_3: {
             _PyStackRef *val;
             _PyStackRef *num;
             oparg = 3;
@@ -5558,30 +5570,8 @@
             val = &stack_pointer[-oparg];
             num = &stack_pointer[-oparg];
             assert(sizeof(uintptr_t) >= sizeof(long));
-            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
-            assert(PyLong_CheckExact(val_o));
-            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
-            break;
-        }
-
-        case _UNBOX_INT: {
-            _PyStackRef *val;
-            _PyStackRef *num;
-            oparg = CURRENT_OPARG();
-            val = &stack_pointer[-oparg];
-            num = &stack_pointer[-oparg];
-            assert(sizeof(uintptr_t) >= sizeof(long));
-            PyObject *val_o = PyStackRef_AsPyObjectBorrow(*val);
-            assert(PyLong_CheckExact(val_o));
-            if (!_PyLong_IsCompact((PyLongObject *)val_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            num->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val_o);
+            // No null checking -- that is done by _ERROR_IF_NULL.
+            *num = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val->bits));
             break;
         }
 
