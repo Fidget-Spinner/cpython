@@ -286,6 +286,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_UNBOX_INT] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
     [_BOX_INT] = HAS_ARG_FLAG,
     [_ERROR_IF_NULL] = HAS_ARG_FLAG | HAS_ERROR_FLAG,
+    [_ADD_INT_UNBOXED] = HAS_DEOPT_FLAG,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -296,6 +297,7 @@ const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
 };
 
 const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
+    [_ADD_INT_UNBOXED] = "_ADD_INT_UNBOXED",
     [_BINARY_OP] = "_BINARY_OP",
     [_BINARY_OP_ADD_FLOAT] = "_BINARY_OP_ADD_FLOAT",
     [_BINARY_OP_ADD_INT] = "_BINARY_OP_ADD_INT",
@@ -1101,6 +1103,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return oparg;
         case _ERROR_IF_NULL:
             return oparg;
+        case _ADD_INT_UNBOXED:
+            return 2;
         default:
             return -1;
     }

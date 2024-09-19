@@ -4881,6 +4881,14 @@ dummy_func(
             ERROR_IF(PyStackRef_IsNull(*val), error);
         }
 
+        tier2 op(_ADD_INT_UNBOXED, (val1, val2 -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_saddl_overflow((long)val1.bits, (long)val2.bits, &res);
+            DEOPT_IF(ovf);
+            out.bits = (uintptr_t)res;
+        }
+
 // END BYTECODES //
 
     }
