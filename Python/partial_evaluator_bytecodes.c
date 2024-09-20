@@ -85,7 +85,8 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx, this_instr->target);
+            reify_shadow_stack(ctx, this_instr->target, true);
+            rebox_concrete_stack(ctx, this_instr->target);
             value.is_virtual = false;
         }
         GETLOCAL(oparg) = value;
@@ -96,7 +97,8 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx, this_instr->target);
+            reify_shadow_stack(ctx, this_instr->target, true);
+            rebox_concrete_stack(ctx, this_instr->target);
         }
     }
 
@@ -124,23 +126,41 @@ dummy_func(void) {
     }
 
     override op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
-        APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        if (!left.is_unboxed && !right.is_unboxed) {
+            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        }
+        else if (!left.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+        }
+        else {
+            assert(!right.is_unboxed);
+            APPEND_OP(_UNBOX_INT, 1, 0);
+        }
         APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
-        APPEND_OP(_BOX_INT, 1, 0);
-        APPEND_OP(_ERROR_IF_NULL, 1, 0);
+//        APPEND_OP(_BOX_INT, 1, 0);
+//        APPEND_OP(_ERROR_IF_NULL, 1, 0);
         SKIP_INST();
         res = sym_new_type(ctx, &PyLong_Type);
-//        res.is_unboxed = true;
+        res.is_unboxed = true;
     }
 
     override op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
-        APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        if (!left.is_unboxed && !right.is_unboxed) {
+            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+        }
+        else if (!left.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+        }
+        else {
+            assert(!right.is_unboxed);
+            APPEND_OP(_UNBOX_INT, 1, 0);
+        }
         APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
-        APPEND_OP(_BOX_INT, 1, 0);
-        APPEND_OP(_ERROR_IF_NULL, 1, 0);
+//        APPEND_OP(_BOX_INT, 1, 0);
+//        APPEND_OP(_ERROR_IF_NULL, 1, 0);
         SKIP_INST();
         res = sym_new_type(ctx, &PyLong_Type);
-//        res.is_unboxed = true;
+        res.is_unboxed = true;
     }
 
     override op(_CHECK_STACK_SPACE_OPERAND, ( -- )) {
