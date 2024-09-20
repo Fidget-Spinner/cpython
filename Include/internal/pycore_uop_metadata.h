@@ -11,14 +11,14 @@ extern "C" {
 
 #include <stdint.h>
 #include "pycore_uop_ids.h"
-extern const uint16_t _PyUop_Flags[MAX_UOP_ID+1];
+extern const uint32_t _PyUop_Flags[MAX_UOP_ID+1];
 extern const uint8_t _PyUop_Replication[MAX_UOP_ID+1];
 extern const char * const _PyOpcode_uop_name[MAX_UOP_ID+1];
 
 extern int _PyUop_num_popped(int opcode, int oparg);
 
 #ifdef NEED_OPCODE_METADATA
-const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
+const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_NOP] = HAS_STATIC_FLAG,
     [_CHECK_PERIODIC] = HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -64,7 +64,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GUARD_NOS_INT] = HAS_EXIT_FLAG,
     [_GUARD_TOS_INT] = HAS_EXIT_FLAG,
     [_BINARY_OP_MULTIPLY_INT] = HAS_ERROR_FLAG | HAS_PURE_FLAG,
-    [_BINARY_OP_ADD_INT] = HAS_ERROR_FLAG | HAS_PURE_FLAG,
+    [_BINARY_OP_ADD_INT] = HAS_ERROR_FLAG | HAS_UNBOXED_FLAG,
     [_BINARY_OP_SUBTRACT_INT] = HAS_ERROR_FLAG | HAS_PURE_FLAG,
     [_GUARD_BOTH_FLOAT] = HAS_EXIT_FLAG,
     [_GUARD_NOS_FLOAT] = HAS_EXIT_FLAG,

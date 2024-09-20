@@ -23,7 +23,8 @@ class Properties:
     has_free: bool
     side_exit: bool
     pure: bool
-    static: bool = False
+    unboxed: bool
+    static: bool
     tier: int | None = None
     oparg_and_1: bool = False
     const_oparg: int = -1
@@ -54,6 +55,8 @@ class Properties:
             side_exit=any(p.side_exit for p in properties),
             pure=all(p.pure for p in properties),
             needs_prev=any(p.needs_prev for p in properties),
+            static=all(p.static for p in properties),
+            unboxed=all(p.unboxed for p in properties),
         )
 
     @property
@@ -78,6 +81,8 @@ SKIP_PROPERTIES = Properties(
     has_free=False,
     side_exit=False,
     pure=True,
+    unboxed=False,
+    static=False,
 )
 
 
@@ -676,6 +681,7 @@ def compute_properties(op: parser.InstDef) -> Properties:
         has_free=has_free,
         pure="pure" in op.annotations,
         static="_static" in op.annotations,
+        unboxed="unboxed" in op.annotations,
         tier=tier_variable(op),
         needs_prev=variable_used(op, "prev_instr"),
     )

@@ -53,6 +53,7 @@ FLAGS = [
     "OPARG_AND_1",
     "ERROR_NO_POP",
     "STATIC",
+    "UNBOXED",
 ]
 
 
