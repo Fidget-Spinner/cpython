@@ -504,8 +504,9 @@ error:
 #define SKIP_INST() skip_inst = true;
 
 static void
-reify_shadow_stack(_Py_UOpsContext *ctx)
+reify_shadow_stack(_Py_UOpsContext *ctx, int target)
 {
+    int concrete_items_on_stack = 0;
     _PyUOpInstruction *trace_dest = ctx->trace_dest;
     for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
@@ -544,20 +545,30 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
             }
         }
         // Need reboxing
-//        else if (slot.is_unboxed) {
-//            sp->is_unboxed = false;
-//            if (sym_matches_type(slot, &PyLong_Type)) {
-//                DPRINTF(3, "reifying %d BOX_INT\n", (int)(ctx->frame->stack_pointer - sp));
-//                WRITE_OP(&trace_dest[ctx->n_trace_dest], _BOX_INT, (ctx->frame->stack_pointer - sp), 0);
-//                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
-//                trace_dest[ctx->n_trace_dest].target = 0;
-//                ctx->n_trace_dest++;
-//            }
-//            else {
-//                // Not something that is boxed!!!
-//                Py_UNREACHABLE();
-//            }
-//        }
+        else if (slot.is_unboxed) {
+            if (ctx->n_trace_dest + 2 >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            sp->is_unboxed = false;
+            if (sym_matches_type(slot, &PyLong_Type)) {
+                DPRINTF(3, "reifying BOX_INT\n");
+                WRITE_OP(&trace_dest[ctx->n_trace_dest], _BOX_INT, 1, 0);
+                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+                trace_dest[ctx->n_trace_dest].target = 0;
+                ctx->n_trace_dest++;
+                WRITE_OP(&trace_dest[ctx->n_trace_dest], _ERROR_IF_NULL, 1, 0);
+                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+                trace_dest[ctx->n_trace_dest].target = target;
+                ctx->n_trace_dest++;
+            }
+            else {
+                // Not something that is boxed!!!
+                Py_UNREACHABLE();
+            }
+        }
+        concrete_items_on_stack++;
     }
 }
 
@@ -620,7 +631,7 @@ partial_evaluate_uops(
         bool instr_is_truly_static = false;
         bool skip_inst = false;
         if (!(_PyUop_Flags[opcode] & HAS_STATIC_FLAG)) {
-            reify_shadow_stack(ctx);
+            reify_shadow_stack(ctx, this_instr->target);
         }
 
 #ifdef Py_DEBUG

@@ -4863,6 +4863,14 @@ dummy_func(
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
         }
 
+        replicate(4) tier2 op(_UNBOX_INT, (val1[oparg] -- out1[oparg])) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            PyObject *val1_o = PyStackRef_AsPyObjectBorrow(*val1);
+            assert(PyLong_CheckExact(val1_o));
+            DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)val1_o));
+            out1->bits = (uintptr_t)_PyLong_CompactValue((PyLongObject *)val1_o);
+        }
+
         tier2 op(_UNBOX_BINARY_INT, (val1, val2 -- out1, out2)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             PyObject *val1_o = PyStackRef_AsPyObjectBorrow(val1);
@@ -4889,11 +4897,7 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
             int ovf = __builtin_saddl_overflow((long)val1->bits, (long)val2->bits, &res);
-            if (ovf) {
-                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
-                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
-                DEOPT_IF(1); // TODO, we need to error if it can't be created
-            }
+            DEOPT_IF(ovf);
             out.bits = (uintptr_t)res;
         }
 
@@ -4901,11 +4905,7 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
             int ovf = __builtin_ssubl_overflow((long)val1->bits, (long)val2->bits, &res);
-            if (ovf) {
-                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
-                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
-                DEOPT_IF(1); // TODO, we need to error if it can't be created
-            }
+            DEOPT_IF(ovf);
             out.bits = (uintptr_t)res;
         }
 
@@ -4913,11 +4913,7 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
             int ovf = __builtin_smull_overflow((long)val1->bits, (long)val2->bits, &res);
-            if (ovf) {
-                *val1 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val1->bits));
-                *val2 = PyStackRef_FromPyObjectSteal(PyLong_FromLong((long)val2->bits));
-                DEOPT_IF(1); // TODO, we need to error if it can't be created
-            }
+            DEOPT_IF(ovf);
             out.bits = (uintptr_t)res;
         }
 

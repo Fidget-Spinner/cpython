@@ -2403,6 +2403,15 @@
             break;
         }
 
+        case _UNBOX_INT: {
+            _Py_UopsLocalsPlusSlot *out1;
+            out1 = &stack_pointer[-oparg];
+            for (int _i = oparg; --_i >= 0;) {
+                out1[_i] = sym_new_not_null(ctx);
+            }
+            break;
+        }
+
         case _UNBOX_BINARY_INT: {
             _Py_UopsLocalsPlusSlot out1;
             _Py_UopsLocalsPlusSlot out2;
