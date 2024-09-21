@@ -138,6 +138,10 @@ _PyLong_CompactValue(const PyLongObject *op)
 
 #define PyUnstable_Long_CompactValue _PyLong_CompactValue
 
+static inline int
+_PyLong_IsCompact63(const PyLongObject* op) {
+    return _PyLong_IsCompact(op) && ((_PyLong_CompactValue(op) & (1L << 63)) == 0);
+}
 
 #ifdef __cplusplus
 }
