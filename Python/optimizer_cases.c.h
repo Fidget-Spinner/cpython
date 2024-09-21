@@ -223,7 +223,7 @@
             break;
         }
 
-        case _GUARD_BOTH_UNBOXED_INT: {
+        case _GUARD_BOTH_INT_UNBOXED: {
             break;
         }
 

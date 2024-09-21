@@ -503,7 +503,7 @@
             break;
         }
 
-        case _GUARD_BOTH_UNBOXED_INT: {
+        case _GUARD_BOTH_INT_UNBOXED: {
             _PyStackRef right;
             _PyStackRef left;
             right = stack_pointer[-1];

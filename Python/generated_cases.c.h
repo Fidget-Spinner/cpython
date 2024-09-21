@@ -135,16 +135,12 @@
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef out;
-            // _GUARD_BOTH_INT
+            // _GUARD_BOTH_INT_UNBOXED
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
-                DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
-                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
-                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
+                DEOPT_IF(!PyStackRef_IsUnboxedInt(left), BINARY_OP);
+                DEOPT_IF(!PyStackRef_IsUnboxedInt(right), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_ADD_INT_UNBOXED
@@ -339,16 +335,12 @@
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef out;
-            // _GUARD_BOTH_INT
+            // _GUARD_BOTH_INT_UNBOXED
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
-                DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
-                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
-                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
+                DEOPT_IF(!PyStackRef_IsUnboxedInt(left), BINARY_OP);
+                DEOPT_IF(!PyStackRef_IsUnboxedInt(right), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_MULTIPLY_INT_UNBOXED
@@ -447,16 +439,12 @@
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef out;
-            // _GUARD_BOTH_INT
+            // _GUARD_BOTH_INT_UNBOXED
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
-                DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
-                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
-                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
+                DEOPT_IF(!PyStackRef_IsUnboxedInt(left), BINARY_OP);
+                DEOPT_IF(!PyStackRef_IsUnboxedInt(right), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_SUBTRACT_INT_UNBOXED

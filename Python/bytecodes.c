@@ -453,7 +453,7 @@ dummy_func(
             EXIT_IF(_PyLong_IsCompact63((PyLongObject *)right_o));
         }
 
-        op(_GUARD_BOTH_UNBOXED_INT, (left, right -- left, right)) {
+        op(_GUARD_BOTH_INT_UNBOXED, (left, right -- left, right)) {
             EXIT_IF(!PyStackRef_IsUnboxedInt(left));
             EXIT_IF(!PyStackRef_IsUnboxedInt(right));
         }
@@ -541,11 +541,11 @@ dummy_func(
             _GUARD_BOTH_INT + unused/1 + _BINARY_OP_SUBTRACT_INT;
 
         macro(BINARY_OP_MULTIPLY_INT_UNBOXED) =
-            _GUARD_BOTH_INT + unused/1 + _BINARY_OP_MULTIPLY_INT_UNBOXED;
+            _GUARD_BOTH_INT_UNBOXED + unused/1 + _BINARY_OP_MULTIPLY_INT_UNBOXED;
         macro(BINARY_OP_ADD_INT_UNBOXED) =
-            _GUARD_BOTH_INT + unused/1 + _BINARY_OP_ADD_INT_UNBOXED;
+            _GUARD_BOTH_INT_UNBOXED + unused/1 + _BINARY_OP_ADD_INT_UNBOXED;
         macro(BINARY_OP_SUBTRACT_INT_UNBOXED) =
-            _GUARD_BOTH_INT + unused/1 + _BINARY_OP_SUBTRACT_INT_UNBOXED;
+            _GUARD_BOTH_INT_UNBOXED + unused/1 + _BINARY_OP_SUBTRACT_INT_UNBOXED;
 
         op(_GUARD_BOTH_FLOAT, (left, right -- left, right)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
