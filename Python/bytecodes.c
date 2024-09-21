@@ -459,8 +459,8 @@ dummy_func(
         }
 
         pure op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
@@ -471,8 +471,8 @@ dummy_func(
         }
 
         pure op(_BINARY_OP_ADD_INT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Add((PyLongObject *)left_o, (PyLongObject *)right_o);
@@ -483,8 +483,8 @@ dummy_func(
         }
 
         pure op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Subtract((PyLongObject *)left_o, (PyLongObject *)right_o);
@@ -519,8 +519,8 @@ dummy_func(
         }
 
         pure op(_BINARY_OP_MULTIPLY_FLOAT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             STAT_INC(BINARY_OP, hit);
             double dres =
@@ -532,8 +532,8 @@ dummy_func(
         }
 
         pure op(_BINARY_OP_ADD_FLOAT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             STAT_INC(BINARY_OP, hit);
             double dres =
@@ -545,8 +545,8 @@ dummy_func(
         }
 
         pure op(_BINARY_OP_SUBTRACT_FLOAT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             STAT_INC(BINARY_OP, hit);
             double dres =

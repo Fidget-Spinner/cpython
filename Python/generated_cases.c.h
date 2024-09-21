@@ -74,8 +74,8 @@
             /* Skip 1 cache entry */
             // _BINARY_OP_ADD_FLOAT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+                PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
                 STAT_INC(BINARY_OP, hit);
                 double dres =
                 ((PyFloatObject *)left_o)->ob_fval +
@@ -110,8 +110,8 @@
             /* Skip 1 cache entry */
             // _BINARY_OP_ADD_INT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+                PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
                 STAT_INC(BINARY_OP, hit);
                 PyObject *res_o = _PyLong_Add((PyLongObject *)left_o, (PyLongObject *)right_o);
                 _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
@@ -241,8 +241,8 @@
             /* Skip 1 cache entry */
             // _BINARY_OP_MULTIPLY_FLOAT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+                PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
                 STAT_INC(BINARY_OP, hit);
                 double dres =
                 ((PyFloatObject *)left_o)->ob_fval *
@@ -277,8 +277,8 @@
             /* Skip 1 cache entry */
             // _BINARY_OP_MULTIPLY_INT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+                PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
                 STAT_INC(BINARY_OP, hit);
                 PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
                 _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
@@ -312,8 +312,8 @@
             /* Skip 1 cache entry */
             // _BINARY_OP_SUBTRACT_FLOAT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+                PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
                 STAT_INC(BINARY_OP, hit);
                 double dres =
                 ((PyFloatObject *)left_o)->ob_fval -
@@ -348,8 +348,8 @@
             /* Skip 1 cache entry */
             // _BINARY_OP_SUBTRACT_INT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+                PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
                 STAT_INC(BINARY_OP, hit);
                 PyObject *res_o = _PyLong_Subtract((PyLongObject *)left_o, (PyLongObject *)right_o);
                 _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);

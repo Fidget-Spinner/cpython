@@ -523,8 +523,8 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
             _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
@@ -543,8 +543,8 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Add((PyLongObject *)left_o, (PyLongObject *)right_o);
             _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
@@ -563,8 +563,8 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Subtract((PyLongObject *)left_o, (PyLongObject *)right_o);
             _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
@@ -623,8 +623,8 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             STAT_INC(BINARY_OP, hit);
             double dres =
             ((PyFloatObject *)left_o)->ob_fval *
@@ -644,8 +644,8 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             STAT_INC(BINARY_OP, hit);
             double dres =
             ((PyFloatObject *)left_o)->ob_fval +
@@ -665,8 +665,8 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             STAT_INC(BINARY_OP, hit);
             double dres =
             ((PyFloatObject *)left_o)->ob_fval -
