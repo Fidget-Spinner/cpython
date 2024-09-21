@@ -434,6 +434,9 @@ dummy_func(
             BINARY_OP_MULTIPLY_INT,
             BINARY_OP_ADD_INT,
             BINARY_OP_SUBTRACT_INT,
+            BINARY_OP_MULTIPLY_INT_UNBOXED,
+            BINARY_OP_ADD_INT_UNBOXED,
+            BINARY_OP_SUBTRACT_INT_UNBOXED,
             BINARY_OP_MULTIPLY_FLOAT,
             BINARY_OP_ADD_FLOAT,
             BINARY_OP_SUBTRACT_FLOAT,
@@ -446,23 +449,59 @@ dummy_func(
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             EXIT_IF(!PyLong_CheckExact(left_o));
             EXIT_IF(!PyLong_CheckExact(right_o));
+            EXIT_IF(_PyLong_IsCompact63((PyLongObject *)left_o));
+            EXIT_IF(_PyLong_IsCompact63((PyLongObject *)right_o));
+        }
+
+        op(_GUARD_BOTH_UNBOXED_INT, (left, right -- left, right)) {
+            EXIT_IF(!PyStackRef_IsUnboxedInt(left));
+            EXIT_IF(!PyStackRef_IsUnboxedInt(right));
         }
 
         op(_GUARD_NOS_INT, (left, unused -- left, unused)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             EXIT_IF(!PyLong_CheckExact(left_o));
+            EXIT_IF(_PyLong_IsCompact63((PyLongObject *)left_o));
         }
 
         op(_GUARD_TOS_INT, (value -- value)) {
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             EXIT_IF(!PyLong_CheckExact(value_o));
+            EXIT_IF(_PyLong_IsCompact63((PyLongObject *)value_o));
+        }
+
+        pure op(_BINARY_OP_MULTIPLY_INT_UNBOXED, (left, right -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_smull_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            DEOPT_IF(ovf);
+            DEOPT_IF(((1L << 63) & res) != 0);
+            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+        }
+
+        pure op(_BINARY_OP_ADD_INT_UNBOXED, (left, right -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_saddl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            DEOPT_IF(ovf);
+            DEOPT_IF(((1L << 63) & res) != 0);
+            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+        }
+
+        pure op(_BINARY_OP_SUBTRACT_INT_UNBOXED, (left, right -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_ssubl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            DEOPT_IF(ovf);
+            DEOPT_IF(((1L << 63) & res) != 0);
+            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
         }
 
         pure op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
+            STAT_INC(BINARY_OP, hit);
             PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
             PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
-            STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
             _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
             _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);
@@ -500,6 +539,13 @@ dummy_func(
             _GUARD_BOTH_INT + unused/1 + _BINARY_OP_ADD_INT;
         macro(BINARY_OP_SUBTRACT_INT) =
             _GUARD_BOTH_INT + unused/1 + _BINARY_OP_SUBTRACT_INT;
+
+        macro(BINARY_OP_MULTIPLY_INT_UNBOXED) =
+            _GUARD_BOTH_INT + unused/1 + _BINARY_OP_MULTIPLY_INT_UNBOXED;
+        macro(BINARY_OP_ADD_INT_UNBOXED) =
+            _GUARD_BOTH_INT + unused/1 + _BINARY_OP_ADD_INT_UNBOXED;
+        macro(BINARY_OP_SUBTRACT_INT_UNBOXED) =
+            _GUARD_BOTH_INT + unused/1 + _BINARY_OP_SUBTRACT_INT_UNBOXED;
 
         op(_GUARD_BOTH_FLOAT, (left, right -- left, right)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);

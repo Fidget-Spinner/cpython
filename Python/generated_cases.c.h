@@ -106,6 +106,8 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
                 DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_ADD_INT
@@ -120,6 +122,41 @@
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
             stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_ADD_INT_UNBOXED) {
+            frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(BINARY_OP_ADD_INT_UNBOXED);
+            static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 1, "incorrect cache size");
+            _PyStackRef left;
+            _PyStackRef right;
+            _PyStackRef out;
+            // _GUARD_BOTH_INT
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            {
+                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
+                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
+            }
+            /* Skip 1 cache entry */
+            // _BINARY_OP_ADD_INT_UNBOXED
+            {
+                assert(sizeof(uintptr_t) >= sizeof(long));
+                long res;
+                int ovf = __builtin_saddl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+                DEOPT_IF(ovf, BINARY_OP);
+                DEOPT_IF(((1L << 63) & res) != 0, BINARY_OP);
+                out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            }
+            stack_pointer[-2] = out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
@@ -273,13 +310,15 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
                 DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_MULTIPLY_INT
             {
+                STAT_INC(BINARY_OP, hit);
                 PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
                 PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
-                STAT_INC(BINARY_OP, hit);
                 PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
                 _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
                 _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);
@@ -287,6 +326,41 @@
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
             stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_MULTIPLY_INT_UNBOXED) {
+            frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(BINARY_OP_MULTIPLY_INT_UNBOXED);
+            static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 1, "incorrect cache size");
+            _PyStackRef left;
+            _PyStackRef right;
+            _PyStackRef out;
+            // _GUARD_BOTH_INT
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            {
+                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
+                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
+            }
+            /* Skip 1 cache entry */
+            // _BINARY_OP_MULTIPLY_INT_UNBOXED
+            {
+                assert(sizeof(uintptr_t) >= sizeof(long));
+                long res;
+                int ovf = __builtin_smull_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+                DEOPT_IF(ovf, BINARY_OP);
+                DEOPT_IF(((1L << 63) & res) != 0, BINARY_OP);
+                out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            }
+            stack_pointer[-2] = out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
@@ -344,6 +418,8 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
                 DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_SUBTRACT_INT
@@ -358,6 +434,41 @@
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
             stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            DISPATCH();
+        }
+
+        TARGET(BINARY_OP_SUBTRACT_INT_UNBOXED) {
+            frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(BINARY_OP_SUBTRACT_INT_UNBOXED);
+            static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 1, "incorrect cache size");
+            _PyStackRef left;
+            _PyStackRef right;
+            _PyStackRef out;
+            // _GUARD_BOTH_INT
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            {
+                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
+                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                DEOPT_IF(!PyLong_CheckExact(left_o), BINARY_OP);
+                DEOPT_IF(!PyLong_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), BINARY_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), BINARY_OP);
+            }
+            /* Skip 1 cache entry */
+            // _BINARY_OP_SUBTRACT_INT_UNBOXED
+            {
+                assert(sizeof(uintptr_t) >= sizeof(long));
+                long res;
+                int ovf = __builtin_ssubl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+                DEOPT_IF(ovf, BINARY_OP);
+                DEOPT_IF(((1L << 63) & res) != 0, BINARY_OP);
+                out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            }
+            stack_pointer[-2] = out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
@@ -3075,6 +3186,8 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 DEOPT_IF(!PyLong_CheckExact(left_o), COMPARE_OP);
                 DEOPT_IF(!PyLong_CheckExact(right_o), COMPARE_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)left_o), COMPARE_OP);
+                DEOPT_IF(_PyLong_IsCompact63((PyLongObject *)right_o), COMPARE_OP);
             }
             /* Skip 1 cache entry */
             // _COMPARE_OP_INT

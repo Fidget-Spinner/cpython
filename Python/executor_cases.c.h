@@ -492,6 +492,30 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
+            if (_PyLong_IsCompact63((PyLongObject *)left_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (_PyLong_IsCompact63((PyLongObject *)right_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
+        case _GUARD_BOTH_UNBOXED_INT: {
+            _PyStackRef right;
+            _PyStackRef left;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!PyStackRef_IsUnboxedInt(left)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (!PyStackRef_IsUnboxedInt(right)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
             break;
         }
 
@@ -500,6 +524,10 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (_PyLong_IsCompact63((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -514,6 +542,82 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
+            if (_PyLong_IsCompact63((PyLongObject *)value_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_smull_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            if (ovf) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (((1L << 63) & res) != 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_ADD_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_saddl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            if (ovf) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (((1L << 63) & res) != 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            long res;
+            int ovf = __builtin_ssubl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            if (ovf) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (((1L << 63) & res) != 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -523,9 +627,9 @@
             _PyStackRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            STAT_INC(BINARY_OP, hit);
             PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
             PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
-            STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
             _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
             _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);

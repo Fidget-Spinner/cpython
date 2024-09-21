@@ -223,11 +223,42 @@
             break;
         }
 
+        case _GUARD_BOTH_UNBOXED_INT: {
+            break;
+        }
+
         case _GUARD_NOS_INT: {
             break;
         }
 
         case _GUARD_TOS_INT: {
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_INT_UNBOXED: {
+            _Py_UopsSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_ADD_INT_UNBOXED: {
+            _Py_UopsSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_INT_UNBOXED: {
+            _Py_UopsSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
