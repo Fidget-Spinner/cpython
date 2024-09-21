@@ -5685,14 +5685,14 @@
         }
 
         case _ADD_INT_UNBOXED: {
-            _PyStackRef *val2;
-            _PyStackRef *val1;
+            _PyStackRef val2;
+            _PyStackRef val1;
             _PyStackRef out;
-            val2 = &stack_pointer[-1];
-            val1 = &stack_pointer[-2];
+            val2 = stack_pointer[-1];
+            val1 = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow((long)val1->bits, (long)val2->bits, &res);
+            int ovf = __builtin_saddl_overflow((long)val1.bits, (long)val2.bits, &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
@@ -5705,14 +5705,14 @@
         }
 
         case _SUB_INT_UNBOXED: {
-            _PyStackRef *val2;
-            _PyStackRef *val1;
+            _PyStackRef val2;
+            _PyStackRef val1;
             _PyStackRef out;
-            val2 = &stack_pointer[-1];
-            val1 = &stack_pointer[-2];
+            val2 = stack_pointer[-1];
+            val1 = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_ssubl_overflow((long)val1->bits, (long)val2->bits, &res);
+            int ovf = __builtin_ssubl_overflow((long)val1.bits, (long)val2.bits, &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
@@ -5725,14 +5725,14 @@
         }
 
         case _MUL_INT_UNBOXED: {
-            _PyStackRef *val2;
-            _PyStackRef *val1;
+            _PyStackRef val2;
+            _PyStackRef val1;
             _PyStackRef out;
-            val2 = &stack_pointer[-1];
-            val1 = &stack_pointer[-2];
+            val2 = stack_pointer[-1];
+            val1 = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_smull_overflow((long)val1->bits, (long)val2->bits, &res);
+            int ovf = __builtin_smull_overflow((long)val1.bits, (long)val2.bits, &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();

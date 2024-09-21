@@ -4893,26 +4893,26 @@ dummy_func(
             ERROR_IF(PyStackRef_IsNull(*val), error);
         }
 
-        tier2 op(_ADD_INT_UNBOXED, (val1[1], val2[1] -- out)) {
+        tier2 op(_ADD_INT_UNBOXED, (val1, val2 -- out)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow((long)val1->bits, (long)val2->bits, &res);
+            int ovf = __builtin_saddl_overflow((long)val1.bits, (long)val2.bits, &res);
             DEOPT_IF(ovf);
             out.bits = (uintptr_t)res;
         }
 
-        tier2 op(_SUB_INT_UNBOXED, (val1[1], val2[1] -- out)) {
+        tier2 op(_SUB_INT_UNBOXED, (val1, val2 -- out)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_ssubl_overflow((long)val1->bits, (long)val2->bits, &res);
+            int ovf = __builtin_ssubl_overflow((long)val1.bits, (long)val2.bits, &res);
             DEOPT_IF(ovf);
             out.bits = (uintptr_t)res;
         }
 
-        tier2 op(_MUL_INT_UNBOXED, (val1[1], val2[1] -- out)) {
+        tier2 op(_MUL_INT_UNBOXED, (val1, val2 -- out)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_smull_overflow((long)val1->bits, (long)val2->bits, &res);
+            int ovf = __builtin_smull_overflow((long)val1.bits, (long)val2.bits, &res);
             DEOPT_IF(ovf);
             out.bits = (uintptr_t)res;
         }
