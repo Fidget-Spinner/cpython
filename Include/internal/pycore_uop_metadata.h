@@ -33,6 +33,15 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_LOAD_FAST_6] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
     [_LOAD_FAST_7] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
     [_LOAD_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_0] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_1] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_2] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_3] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_4] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_5] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_6] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED_7] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_LOAD_FAST_UNBOXED] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
     [_LOAD_FAST_AND_CLEAR] = HAS_ARG_FLAG | HAS_LOCAL_FLAG,
     [_LOAD_FAST_LOAD_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG,
     [_LOAD_CONST] = HAS_ARG_FLAG | HAS_CONST_FLAG | HAS_PURE_FLAG,
@@ -45,6 +54,33 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_STORE_FAST_6] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
     [_STORE_FAST_7] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
     [_STORE_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_0] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_1] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_2] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_3] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_4] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_5] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_6] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP_7] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_NO_POP] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_0] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_1] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_2] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_3] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_4] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_5] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_6] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_7] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_0] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_1] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_2] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_3] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_4] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_5] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_6] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP_7] = HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
+    [_STORE_FAST_UNBOXED_NO_POP] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_STATIC_FLAG,
     [_STORE_FAST_LOAD_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG,
     [_STORE_FAST_STORE_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG,
     [_POP_TOP] = HAS_STATIC_FLAG,
@@ -265,6 +301,7 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_SAVE_RETURN_OFFSET] = HAS_ARG_FLAG,
     [_EXIT_TRACE] = HAS_ESCAPES_FLAG,
     [_CHECK_VALIDITY] = HAS_DEOPT_FLAG,
+    [_LOAD_UNBOXED_INT] = HAS_STATIC_FLAG,
     [_LOAD_CONST_INLINE] = HAS_STATIC_FLAG,
     [_LOAD_CONST_INLINE_BORROW] = HAS_STATIC_FLAG,
     [_POP_TOP_LOAD_CONST_INLINE_BORROW] = HAS_PURE_FLAG,
@@ -298,7 +335,11 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
     [_LOAD_FAST] = 8,
+    [_LOAD_FAST_UNBOXED] = 8,
     [_STORE_FAST] = 8,
+    [_STORE_FAST_NO_POP] = 8,
+    [_STORE_FAST_UNBOXED] = 8,
+    [_STORE_FAST_UNBOXED_NO_POP] = 8,
     [_INIT_CALL_PY_EXACT_ARGS] = 5,
     [_UNBOX_INT] = 4,
     [_BOX_INT] = 4,
@@ -494,6 +535,15 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_LOAD_FAST_AND_CLEAR] = "_LOAD_FAST_AND_CLEAR",
     [_LOAD_FAST_CHECK] = "_LOAD_FAST_CHECK",
     [_LOAD_FAST_LOAD_FAST] = "_LOAD_FAST_LOAD_FAST",
+    [_LOAD_FAST_UNBOXED] = "_LOAD_FAST_UNBOXED",
+    [_LOAD_FAST_UNBOXED_0] = "_LOAD_FAST_UNBOXED_0",
+    [_LOAD_FAST_UNBOXED_1] = "_LOAD_FAST_UNBOXED_1",
+    [_LOAD_FAST_UNBOXED_2] = "_LOAD_FAST_UNBOXED_2",
+    [_LOAD_FAST_UNBOXED_3] = "_LOAD_FAST_UNBOXED_3",
+    [_LOAD_FAST_UNBOXED_4] = "_LOAD_FAST_UNBOXED_4",
+    [_LOAD_FAST_UNBOXED_5] = "_LOAD_FAST_UNBOXED_5",
+    [_LOAD_FAST_UNBOXED_6] = "_LOAD_FAST_UNBOXED_6",
+    [_LOAD_FAST_UNBOXED_7] = "_LOAD_FAST_UNBOXED_7",
     [_LOAD_FROM_DICT_OR_DEREF] = "_LOAD_FROM_DICT_OR_DEREF",
     [_LOAD_GLOBAL] = "_LOAD_GLOBAL",
     [_LOAD_GLOBAL_BUILTINS] = "_LOAD_GLOBAL_BUILTINS",
@@ -503,6 +553,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_LOAD_SPECIAL] = "_LOAD_SPECIAL",
     [_LOAD_SUPER_ATTR_ATTR] = "_LOAD_SUPER_ATTR_ATTR",
     [_LOAD_SUPER_ATTR_METHOD] = "_LOAD_SUPER_ATTR_METHOD",
+    [_LOAD_UNBOXED_INT] = "_LOAD_UNBOXED_INT",
     [_MAKE_CELL] = "_MAKE_CELL",
     [_MAKE_FUNCTION] = "_MAKE_FUNCTION",
     [_MAP_ADD] = "_MAP_ADD",
@@ -548,7 +599,34 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_STORE_FAST_6] = "_STORE_FAST_6",
     [_STORE_FAST_7] = "_STORE_FAST_7",
     [_STORE_FAST_LOAD_FAST] = "_STORE_FAST_LOAD_FAST",
+    [_STORE_FAST_NO_POP] = "_STORE_FAST_NO_POP",
+    [_STORE_FAST_NO_POP_0] = "_STORE_FAST_NO_POP_0",
+    [_STORE_FAST_NO_POP_1] = "_STORE_FAST_NO_POP_1",
+    [_STORE_FAST_NO_POP_2] = "_STORE_FAST_NO_POP_2",
+    [_STORE_FAST_NO_POP_3] = "_STORE_FAST_NO_POP_3",
+    [_STORE_FAST_NO_POP_4] = "_STORE_FAST_NO_POP_4",
+    [_STORE_FAST_NO_POP_5] = "_STORE_FAST_NO_POP_5",
+    [_STORE_FAST_NO_POP_6] = "_STORE_FAST_NO_POP_6",
+    [_STORE_FAST_NO_POP_7] = "_STORE_FAST_NO_POP_7",
     [_STORE_FAST_STORE_FAST] = "_STORE_FAST_STORE_FAST",
+    [_STORE_FAST_UNBOXED] = "_STORE_FAST_UNBOXED",
+    [_STORE_FAST_UNBOXED_0] = "_STORE_FAST_UNBOXED_0",
+    [_STORE_FAST_UNBOXED_1] = "_STORE_FAST_UNBOXED_1",
+    [_STORE_FAST_UNBOXED_2] = "_STORE_FAST_UNBOXED_2",
+    [_STORE_FAST_UNBOXED_3] = "_STORE_FAST_UNBOXED_3",
+    [_STORE_FAST_UNBOXED_4] = "_STORE_FAST_UNBOXED_4",
+    [_STORE_FAST_UNBOXED_5] = "_STORE_FAST_UNBOXED_5",
+    [_STORE_FAST_UNBOXED_6] = "_STORE_FAST_UNBOXED_6",
+    [_STORE_FAST_UNBOXED_7] = "_STORE_FAST_UNBOXED_7",
+    [_STORE_FAST_UNBOXED_NO_POP] = "_STORE_FAST_UNBOXED_NO_POP",
+    [_STORE_FAST_UNBOXED_NO_POP_0] = "_STORE_FAST_UNBOXED_NO_POP_0",
+    [_STORE_FAST_UNBOXED_NO_POP_1] = "_STORE_FAST_UNBOXED_NO_POP_1",
+    [_STORE_FAST_UNBOXED_NO_POP_2] = "_STORE_FAST_UNBOXED_NO_POP_2",
+    [_STORE_FAST_UNBOXED_NO_POP_3] = "_STORE_FAST_UNBOXED_NO_POP_3",
+    [_STORE_FAST_UNBOXED_NO_POP_4] = "_STORE_FAST_UNBOXED_NO_POP_4",
+    [_STORE_FAST_UNBOXED_NO_POP_5] = "_STORE_FAST_UNBOXED_NO_POP_5",
+    [_STORE_FAST_UNBOXED_NO_POP_6] = "_STORE_FAST_UNBOXED_NO_POP_6",
+    [_STORE_FAST_UNBOXED_NO_POP_7] = "_STORE_FAST_UNBOXED_NO_POP_7",
     [_STORE_GLOBAL] = "_STORE_GLOBAL",
     [_STORE_NAME] = "_STORE_NAME",
     [_STORE_SLICE] = "_STORE_SLICE",
@@ -612,6 +690,24 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 0;
         case _LOAD_FAST:
             return 0;
+        case _LOAD_FAST_UNBOXED_0:
+            return 0;
+        case _LOAD_FAST_UNBOXED_1:
+            return 0;
+        case _LOAD_FAST_UNBOXED_2:
+            return 0;
+        case _LOAD_FAST_UNBOXED_3:
+            return 0;
+        case _LOAD_FAST_UNBOXED_4:
+            return 0;
+        case _LOAD_FAST_UNBOXED_5:
+            return 0;
+        case _LOAD_FAST_UNBOXED_6:
+            return 0;
+        case _LOAD_FAST_UNBOXED_7:
+            return 0;
+        case _LOAD_FAST_UNBOXED:
+            return 0;
         case _LOAD_FAST_AND_CLEAR:
             return 0;
         case _LOAD_FAST_LOAD_FAST:
@@ -635,6 +731,60 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _STORE_FAST_7:
             return 1;
         case _STORE_FAST:
+            return 1;
+        case _STORE_FAST_NO_POP_0:
+            return 1;
+        case _STORE_FAST_NO_POP_1:
+            return 1;
+        case _STORE_FAST_NO_POP_2:
+            return 1;
+        case _STORE_FAST_NO_POP_3:
+            return 1;
+        case _STORE_FAST_NO_POP_4:
+            return 1;
+        case _STORE_FAST_NO_POP_5:
+            return 1;
+        case _STORE_FAST_NO_POP_6:
+            return 1;
+        case _STORE_FAST_NO_POP_7:
+            return 1;
+        case _STORE_FAST_NO_POP:
+            return 1;
+        case _STORE_FAST_UNBOXED_0:
+            return 1;
+        case _STORE_FAST_UNBOXED_1:
+            return 1;
+        case _STORE_FAST_UNBOXED_2:
+            return 1;
+        case _STORE_FAST_UNBOXED_3:
+            return 1;
+        case _STORE_FAST_UNBOXED_4:
+            return 1;
+        case _STORE_FAST_UNBOXED_5:
+            return 1;
+        case _STORE_FAST_UNBOXED_6:
+            return 1;
+        case _STORE_FAST_UNBOXED_7:
+            return 1;
+        case _STORE_FAST_UNBOXED:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_0:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_1:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_2:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_3:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_4:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_5:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_6:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP_7:
+            return 1;
+        case _STORE_FAST_UNBOXED_NO_POP:
             return 1;
         case _STORE_FAST_LOAD_FAST:
             return 1;
@@ -1075,6 +1225,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _EXIT_TRACE:
             return 0;
         case _CHECK_VALIDITY:
+            return 0;
+        case _LOAD_UNBOXED_INT:
             return 0;
         case _LOAD_CONST_INLINE:
             return 0;

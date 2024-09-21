@@ -69,20 +69,43 @@ dummy_func(void) {
 
     override op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
         value = sym_new_const(ctx, ptr);
-        SET_STATIC_INST();
-        value.is_virtual = true;
+        if (PyLong_CheckExact(ptr) && _PyLong_IsCompact(ptr)) {
+            APPEND_OP(_LOAD_UNBOXED_INT, 0, _PyLong_CompactValue((PyLongObject *)ptr));
+            SKIP_INST();
+            value.is_unboxed = true;
+        }
+        else {
+            SET_STATIC_INST();
+            value.is_virtual = true;
+        }
     }
 
     override op(_LOAD_CONST_INLINE_BORROW, (ptr/4 -- value)) {
         value = sym_new_const(ctx, ptr);
-        SET_STATIC_INST();
-        value.is_virtual = true;
+        if (PyLong_CheckExact(ptr) && _PyLong_IsCompact(ptr)) {
+            APPEND_OP(_LOAD_UNBOXED_INT, 0, _PyLong_CompactValue((PyLongObject *)ptr));
+            SKIP_INST();
+            value.is_unboxed = true;
+        }
+        else {
+            SET_STATIC_INST();
+            value.is_virtual = true;
+        }
     }
 
     override op(_STORE_FAST, (value --)) {
         // Gets rid of stores by the same load
         if (value.is_virtual && oparg == sym_get_locals_idx(value)) {
             SET_STATIC_INST();
+        }
+        else if (value.is_unboxed) {
+            if (GETLOCAL(oparg).is_unboxed) {
+                APPEND_OP(_STORE_FAST_UNBOXED, oparg, 0);
+            }
+            else {
+                APPEND_OP(STORE_FAST, oparg, 0);
+            }
+            SKIP_INST();
         }
         else {
             reify_shadow_stack(ctx, this_instr->target, true);
@@ -107,54 +130,103 @@ dummy_func(void) {
     }
 
     override op(_BINARY_OP_ADD_INT, (left, right -- res)) {
-//        if (!left.is_unboxed && !right.is_unboxed) {
-//            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-//        }
-//        else if (!left.is_unboxed) {
-//            APPEND_OP(_UNBOX_INT, 2, 0);
-//        }
-//        else {
-//            assert(!right.is_unboxed);
-//            APPEND_OP(_UNBOX_INT, 1, 0);
-//        }
-//        APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
-//        SKIP_INST();
+        int left_locals_idx = sym_get_locals_idx(left);
+        int right_locals_idx = sym_get_locals_idx(right);
+        if (!left.is_unboxed && !right.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+            if (left_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                GETLOCAL(left_locals_idx).is_unboxed = true;
+            }
+            APPEND_OP(_UNBOX_INT, 1, 0);
+            if (right_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                GETLOCAL(right_locals_idx).is_unboxed = true;
+            }
+        }
+        else if (!left.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+            if (left_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+            }
+        }
+        else if (!right.is_unboxed) {
+            assert(!right.is_unboxed);
+            APPEND_OP(_UNBOX_INT, 1, 0);
+            if (right_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+            }
+        }
+        APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
+        SKIP_INST();
         res = sym_new_type(ctx, &PyLong_Type);
-//        res.is_unboxed = true;
+        res.is_unboxed = true;
     }
 
     override op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
-//        if (!left.is_unboxed && !right.is_unboxed) {
-//            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-//        }
-//        else if (!left.is_unboxed) {
-//            APPEND_OP(_UNBOX_INT, 2, 0);
-//        }
-//        else {
-//            assert(!right.is_unboxed);
-//            APPEND_OP(_UNBOX_INT, 1, 0);
-//        }
-//        APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
-//        SKIP_INST();
+        int left_locals_idx = sym_get_locals_idx(left);
+        int right_locals_idx = sym_get_locals_idx(right);
+        if (!left.is_unboxed && !right.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+            if (left_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                GETLOCAL(left_locals_idx).is_unboxed = true;
+            }
+            APPEND_OP(_UNBOX_INT, 1, 0);
+            if (right_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                GETLOCAL(right_locals_idx).is_unboxed = true;
+            }
+        }
+        else if (!left.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+            if (left_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+            }
+        }
+        else if (!right.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 1, 0);
+            if (right_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+            }
+        }
+        APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
+        SKIP_INST();
         res = sym_new_type(ctx, &PyLong_Type);
-//        res.is_unboxed = true;
+        res.is_unboxed = true;
     }
 
     override op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
-//        if (!left.is_unboxed && !right.is_unboxed) {
-//            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-//        }
-//        else if (!left.is_unboxed) {
-//            APPEND_OP(_UNBOX_INT, 2, 0);
-//        }
-//        else {
-//            assert(!right.is_unboxed);
-//            APPEND_OP(_UNBOX_INT, 1, 0);
-//        }
-//        APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
-//        SKIP_INST();
+        int left_locals_idx = sym_get_locals_idx(left);
+        int right_locals_idx = sym_get_locals_idx(right);
+        if (!left.is_unboxed && !right.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+            if (left_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                GETLOCAL(left_locals_idx).is_unboxed = true;
+            }
+            APPEND_OP(_UNBOX_INT, 1, 0);
+            if (right_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                GETLOCAL(right_locals_idx).is_unboxed = true;
+            }
+        }
+        else if (!left.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 2, 0);
+            if (left_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+            }
+        }
+        else if (!right.is_unboxed) {
+            APPEND_OP(_UNBOX_INT, 1, 0);
+            if (right_locals_idx >= 0) {
+                APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+            }
+        }
+        APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
+        SKIP_INST();
         res = sym_new_type(ctx, &PyLong_Type);
-//        res.is_unboxed = true;
+        res.is_unboxed = true;
     }
 
     override op(_CHECK_STACK_SPACE_OPERAND, ( -- )) {

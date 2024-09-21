@@ -244,6 +244,10 @@ dummy_func(
             value = PyStackRef_DUP(GETLOCAL(oparg));
         }
 
+        replicate(8) tier2 _static op(_LOAD_FAST_UNBOXED, (-- value)) {
+            value = GETLOCAL(oparg);
+        }
+
         inst(LOAD_FAST_AND_CLEAR, (-- value)) {
             value = GETLOCAL(oparg);
             // do not use SETLOCAL here, it decrefs the old value
@@ -263,6 +267,18 @@ dummy_func(
 
         replicate(8) _static inst(STORE_FAST, (value --)) {
             SETLOCAL(oparg, value);
+        }
+
+        replicate(8) tier2 _static op(_STORE_FAST_NO_POP, (value -- value)) {
+            SETLOCAL(oparg, value);
+        }
+
+        replicate(8) tier2 _static op(_STORE_FAST_UNBOXED, (value --)) {
+            GETLOCAL(oparg) = value;
+        }
+
+        replicate(8) tier2 _static op(_STORE_FAST_UNBOXED_NO_POP, (value -- value)) {
+            GETLOCAL(oparg) = value;
         }
 
         pseudo(STORE_FAST_MAYBE_NULL, (unused --)) = {
@@ -4745,6 +4761,10 @@ dummy_func(
 
         tier2 op(_CHECK_VALIDITY, (--)) {
             DEOPT_IF(!current_executor->vm_data.valid);
+        }
+
+        tier2 _static op(_LOAD_UNBOXED_INT, (ptr/4 -- value)) {
+           value.bits = (uintptr_t)ptr;
         }
 
         tier2 _static op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {

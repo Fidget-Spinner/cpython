@@ -45,6 +45,15 @@
             break;
         }
 
+        case _LOAD_FAST_UNBOXED: {
+            _Py_UopsLocalsPlusSlot value;
+            value = sym_new_not_null(ctx);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _LOAD_FAST_AND_CLEAR: {
             _Py_UopsLocalsPlusSlot value;
             value = GETLOCAL(oparg);
@@ -74,6 +83,20 @@
             GETLOCAL(oparg) = value;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_NO_POP: {
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP: {
             break;
         }
 
@@ -2307,6 +2330,15 @@
         }
 
         case _CHECK_VALIDITY: {
+            break;
+        }
+
+        case _LOAD_UNBOXED_INT: {
+            _Py_UopsLocalsPlusSlot value;
+            value = sym_new_not_null(ctx);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 

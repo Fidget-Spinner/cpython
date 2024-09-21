@@ -511,13 +511,12 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int target, bool should_rebox)
     for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
         assert(slot.sym != NULL);
-        assert(!(slot.is_virtual && slot.is_unboxed));
         // Need reifying.
         if (slot.is_virtual) {
             sp->is_virtual = false;
             if (slot.sym->locals_idx >= 0) {
                 DPRINTF(3, "reifying %d LOAD_FAST %d\n", (int)(sp - ctx->frame->stack), slot.sym->locals_idx);
-                WRITE_OP(&trace_dest[ctx->n_trace_dest], _LOAD_FAST, slot.sym->locals_idx, 0);
+                WRITE_OP(&trace_dest[ctx->n_trace_dest], slot.is_unboxed ? _LOAD_FAST_UNBOXED : _LOAD_FAST, slot.sym->locals_idx, 0);
                 trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
                 trace_dest[ctx->n_trace_dest].target = 0;
             }
@@ -644,7 +643,9 @@ partial_evaluate_uops(
         bool skip_inst = false;
         if (!(_PyUop_Flags[opcode] & HAS_STATIC_FLAG)) {
             reify_shadow_stack(ctx, this_instr->target, false);
-            rebox_concrete_stack(ctx, this_instr->target);
+            if (!(_PyUop_Flags[opcode] & HAS_UNBOXED_FLAG)) {
+                rebox_concrete_stack(ctx, this_instr->target);
+            }
         }
 
 #ifdef Py_DEBUG

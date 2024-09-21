@@ -1180,7 +1180,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
     if (python_lltrace != NULL && *python_lltrace >= '0') {
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
-    if (lltrace >= 2) {
+    if (lltrace >= 0) {
         printf("Optimized trace (length %d):\n", length);
         for (int i = 0; i < length; i++) {
             printf("%4d OPTIMIZED: ", i);

@@ -182,6 +182,104 @@
             break;
         }
 
+        case _LOAD_FAST_UNBOXED_0: {
+            _PyStackRef value;
+            oparg = 0;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_1: {
+            _PyStackRef value;
+            oparg = 1;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_2: {
+            _PyStackRef value;
+            oparg = 2;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_3: {
+            _PyStackRef value;
+            oparg = 3;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_4: {
+            _PyStackRef value;
+            oparg = 4;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_5: {
+            _PyStackRef value;
+            oparg = 5;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_6: {
+            _PyStackRef value;
+            oparg = 6;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED_7: {
+            _PyStackRef value;
+            oparg = 7;
+            assert(oparg == CURRENT_OPARG());
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_FAST_UNBOXED: {
+            _PyStackRef value;
+            oparg = CURRENT_OPARG();
+            value = GETLOCAL(oparg);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _LOAD_FAST_AND_CLEAR: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -299,6 +397,264 @@
             SETLOCAL(oparg, value);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_0: {
+            _PyStackRef value;
+            oparg = 0;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_1: {
+            _PyStackRef value;
+            oparg = 1;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_2: {
+            _PyStackRef value;
+            oparg = 2;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_3: {
+            _PyStackRef value;
+            oparg = 3;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_4: {
+            _PyStackRef value;
+            oparg = 4;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_5: {
+            _PyStackRef value;
+            oparg = 5;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_6: {
+            _PyStackRef value;
+            oparg = 6;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP_7: {
+            _PyStackRef value;
+            oparg = 7;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_NO_POP: {
+            _PyStackRef value;
+            oparg = CURRENT_OPARG();
+            value = stack_pointer[-1];
+            SETLOCAL(oparg, value);
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_0: {
+            _PyStackRef value;
+            oparg = 0;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_1: {
+            _PyStackRef value;
+            oparg = 1;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_2: {
+            _PyStackRef value;
+            oparg = 2;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_3: {
+            _PyStackRef value;
+            oparg = 3;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_4: {
+            _PyStackRef value;
+            oparg = 4;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_5: {
+            _PyStackRef value;
+            oparg = 5;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_6: {
+            _PyStackRef value;
+            oparg = 6;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_7: {
+            _PyStackRef value;
+            oparg = 7;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED: {
+            _PyStackRef value;
+            oparg = CURRENT_OPARG();
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_0: {
+            _PyStackRef value;
+            oparg = 0;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_1: {
+            _PyStackRef value;
+            oparg = 1;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_2: {
+            _PyStackRef value;
+            oparg = 2;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_3: {
+            _PyStackRef value;
+            oparg = 3;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_4: {
+            _PyStackRef value;
+            oparg = 4;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_5: {
+            _PyStackRef value;
+            oparg = 5;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_6: {
+            _PyStackRef value;
+            oparg = 6;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP_7: {
+            _PyStackRef value;
+            oparg = 7;
+            assert(oparg == CURRENT_OPARG());
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP: {
+            _PyStackRef value;
+            oparg = CURRENT_OPARG();
+            value = stack_pointer[-1];
+            GETLOCAL(oparg) = value;
             break;
         }
 
@@ -5314,6 +5670,16 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
+            break;
+        }
+
+        case _LOAD_UNBOXED_INT: {
+            _PyStackRef value;
+            PyObject *ptr = (PyObject *)CURRENT_OPERAND();
+            value.bits = (uintptr_t)ptr;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 

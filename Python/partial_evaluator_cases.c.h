@@ -49,6 +49,15 @@
             break;
         }
 
+        case _LOAD_FAST_UNBOXED: {
+            _Py_UopsLocalsPlusSlot value;
+            value = sym_new_not_null(ctx);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _LOAD_FAST_AND_CLEAR: {
             _Py_UopsLocalsPlusSlot value;
             value = GETLOCAL(oparg);
@@ -76,6 +85,15 @@
             if (value.is_virtual && oparg == sym_get_locals_idx(value)) {
                 SET_STATIC_INST();
             }
+            else if (value.is_unboxed) {
+                if (GETLOCAL(oparg).is_unboxed) {
+                    APPEND_OP(_STORE_FAST_UNBOXED, oparg, 0);
+                }
+                else {
+                    APPEND_OP(STORE_FAST, oparg, 0);
+                }
+                SKIP_INST();
+            }
             else {
                 reify_shadow_stack(ctx, this_instr->target, true);
                 rebox_concrete_stack(ctx, this_instr->target);
@@ -84,6 +102,20 @@
             GETLOCAL(oparg) = value;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_NO_POP: {
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_FAST_UNBOXED_NO_POP: {
             break;
         }
 
@@ -254,20 +286,38 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            //        if (!left.is_unboxed && !right.is_unboxed) {
-                //            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-            //        }
-            //        else if (!left.is_unboxed) {
-                //            APPEND_OP(_UNBOX_INT, 2, 0);
-            //        }
-            //        else {
-                //            assert(!right.is_unboxed);
-                //            APPEND_OP(_UNBOX_INT, 1, 0);
-            //        }
-            //        APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
-            //        SKIP_INST();
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            int left_locals_idx = sym_get_locals_idx(left);
+            int right_locals_idx = sym_get_locals_idx(right);
+            if (!left.is_unboxed && !right.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 2, 0);
+                if (left_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                    GETLOCAL(left_locals_idx).is_unboxed = true;
+                }
+                APPEND_OP(_UNBOX_INT, 1, 0);
+                if (right_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                    GETLOCAL(right_locals_idx).is_unboxed = true;
+                }
+            }
+            else if (!left.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 2, 0);
+                if (left_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                }
+            }
+            else if (!right.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 1, 0);
+                if (right_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                }
+            }
+            APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
+            SKIP_INST();
             res = sym_new_type(ctx, &PyLong_Type);
-            //        res.is_unboxed = true;
+            res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -278,20 +328,39 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            //        if (!left.is_unboxed && !right.is_unboxed) {
-                //            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-            //        }
-            //        else if (!left.is_unboxed) {
-                //            APPEND_OP(_UNBOX_INT, 2, 0);
-            //        }
-            //        else {
-                //            assert(!right.is_unboxed);
-                //            APPEND_OP(_UNBOX_INT, 1, 0);
-            //        }
-            //        APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
-            //        SKIP_INST();
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            int left_locals_idx = sym_get_locals_idx(left);
+            int right_locals_idx = sym_get_locals_idx(right);
+            if (!left.is_unboxed && !right.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 2, 0);
+                if (left_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                    GETLOCAL(left_locals_idx).is_unboxed = true;
+                }
+                APPEND_OP(_UNBOX_INT, 1, 0);
+                if (right_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                    GETLOCAL(right_locals_idx).is_unboxed = true;
+                }
+            }
+            else if (!left.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 2, 0);
+                if (left_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                }
+            }
+            else if (!right.is_unboxed) {
+                assert(!right.is_unboxed);
+                APPEND_OP(_UNBOX_INT, 1, 0);
+                if (right_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                }
+            }
+            APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
+            SKIP_INST();
             res = sym_new_type(ctx, &PyLong_Type);
-            //        res.is_unboxed = true;
+            res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -302,20 +371,38 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            //        if (!left.is_unboxed && !right.is_unboxed) {
-                //            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-            //        }
-            //        else if (!left.is_unboxed) {
-                //            APPEND_OP(_UNBOX_INT, 2, 0);
-            //        }
-            //        else {
-                //            assert(!right.is_unboxed);
-                //            APPEND_OP(_UNBOX_INT, 1, 0);
-            //        }
-            //        APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
-            //        SKIP_INST();
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            int left_locals_idx = sym_get_locals_idx(left);
+            int right_locals_idx = sym_get_locals_idx(right);
+            if (!left.is_unboxed && !right.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 2, 0);
+                if (left_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                    GETLOCAL(left_locals_idx).is_unboxed = true;
+                }
+                APPEND_OP(_UNBOX_INT, 1, 0);
+                if (right_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                    GETLOCAL(right_locals_idx).is_unboxed = true;
+                }
+            }
+            else if (!left.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 2, 0);
+                if (left_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, left_locals_idx, 0);
+                }
+            }
+            else if (!right.is_unboxed) {
+                APPEND_OP(_UNBOX_INT, 1, 0);
+                if (right_locals_idx >= 0) {
+                    APPEND_OP(_STORE_FAST_NO_POP, right_locals_idx, 0);
+                }
+            }
+            APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
+            SKIP_INST();
             res = sym_new_type(ctx, &PyLong_Type);
-            //        res.is_unboxed = true;
+            res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -2308,12 +2395,28 @@
             break;
         }
 
+        case _LOAD_UNBOXED_INT: {
+            _Py_UopsLocalsPlusSlot value;
+            value = sym_new_not_null(ctx);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _LOAD_CONST_INLINE: {
             _Py_UopsLocalsPlusSlot value;
             PyObject *ptr = (PyObject *)this_instr->operand;
             value = sym_new_const(ctx, ptr);
-            SET_STATIC_INST();
-            value.is_virtual = true;
+            if (PyLong_CheckExact(ptr) && _PyLong_IsCompact(ptr)) {
+                APPEND_OP(_LOAD_UNBOXED_INT, 0, _PyLong_CompactValue((PyLongObject *)ptr));
+                SKIP_INST();
+                value.is_unboxed = true;
+            }
+            else {
+                SET_STATIC_INST();
+                value.is_virtual = true;
+            }
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -2324,8 +2427,15 @@
             _Py_UopsLocalsPlusSlot value;
             PyObject *ptr = (PyObject *)this_instr->operand;
             value = sym_new_const(ctx, ptr);
-            SET_STATIC_INST();
-            value.is_virtual = true;
+            if (PyLong_CheckExact(ptr) && _PyLong_IsCompact(ptr)) {
+                APPEND_OP(_LOAD_UNBOXED_INT, 0, _PyLong_CompactValue((PyLongObject *)ptr));
+                SKIP_INST();
+                value.is_unboxed = true;
+            }
+            else {
+                SET_STATIC_INST();
+                value.is_virtual = true;
+            }
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
