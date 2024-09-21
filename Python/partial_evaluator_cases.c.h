@@ -254,24 +254,20 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            if (!left.is_unboxed && !right.is_unboxed) {
-                APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-            }
-            else if (!left.is_unboxed) {
-                APPEND_OP(_UNBOX_INT, 2, 0);
-            }
-            else {
-                assert(!right.is_unboxed);
-                APPEND_OP(_UNBOX_INT, 1, 0);
-            }
-            APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
-            //        APPEND_OP(_BOX_INT, 1, 0);
-            //        APPEND_OP(_ERROR_IF_NULL, 1, 0);
-            SKIP_INST();
+            //        if (!left.is_unboxed && !right.is_unboxed) {
+                //            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+            //        }
+            //        else if (!left.is_unboxed) {
+                //            APPEND_OP(_UNBOX_INT, 2, 0);
+            //        }
+            //        else {
+                //            assert(!right.is_unboxed);
+                //            APPEND_OP(_UNBOX_INT, 1, 0);
+            //        }
+            //        APPEND_OP(_MUL_INT_UNBOXED, 0, 0);
+            //        SKIP_INST();
             res = sym_new_type(ctx, &PyLong_Type);
-            res.is_unboxed = true;
+            //        res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -282,24 +278,20 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            if (!left.is_unboxed && !right.is_unboxed) {
-                APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-            }
-            else if (!left.is_unboxed) {
-                APPEND_OP(_UNBOX_INT, 2, 0);
-            }
-            else {
-                assert(!right.is_unboxed);
-                APPEND_OP(_UNBOX_INT, 1, 0);
-            }
-            APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
-            //        APPEND_OP(_BOX_INT, 1, 0);
-            //        APPEND_OP(_ERROR_IF_NULL, 1, 0);
-            SKIP_INST();
+            //        if (!left.is_unboxed && !right.is_unboxed) {
+                //            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+            //        }
+            //        else if (!left.is_unboxed) {
+                //            APPEND_OP(_UNBOX_INT, 2, 0);
+            //        }
+            //        else {
+                //            assert(!right.is_unboxed);
+                //            APPEND_OP(_UNBOX_INT, 1, 0);
+            //        }
+            //        APPEND_OP(_ADD_INT_UNBOXED, 0, 0);
+            //        SKIP_INST();
             res = sym_new_type(ctx, &PyLong_Type);
-            res.is_unboxed = true;
+            //        res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -310,24 +302,20 @@
             _Py_UopsLocalsPlusSlot right;
             _Py_UopsLocalsPlusSlot left;
             _Py_UopsLocalsPlusSlot res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            if (!left.is_unboxed && !right.is_unboxed) {
-                APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
-            }
-            else if (!left.is_unboxed) {
-                APPEND_OP(_UNBOX_INT, 2, 0);
-            }
-            else {
-                assert(!right.is_unboxed);
-                APPEND_OP(_UNBOX_INT, 1, 0);
-            }
-            APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
-            //        APPEND_OP(_BOX_INT, 1, 0);
-            //        APPEND_OP(_ERROR_IF_NULL, 1, 0);
-            SKIP_INST();
+            //        if (!left.is_unboxed && !right.is_unboxed) {
+                //            APPEND_OP(_UNBOX_BINARY_INT, 0, 0);
+            //        }
+            //        else if (!left.is_unboxed) {
+                //            APPEND_OP(_UNBOX_INT, 2, 0);
+            //        }
+            //        else {
+                //            assert(!right.is_unboxed);
+                //            APPEND_OP(_UNBOX_INT, 1, 0);
+            //        }
+            //        APPEND_OP(_SUB_INT_UNBOXED, 0, 0);
+            //        SKIP_INST();
             res = sym_new_type(ctx, &PyLong_Type);
-            res.is_unboxed = true;
+            //        res.is_unboxed = true;
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
