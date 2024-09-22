@@ -131,7 +131,11 @@ static inline PyObject *
 PyStackRef_AsPyObjectBorrow(_PyStackRef stackref)
 {
     if (PyStackRef_IsUnboxedInt(stackref)) {
-        return PyLong_FromLong(_PyUnbox_toLong(stackref.bits));
+        PyObject *res = (PyObject *)_PyLong_FromUnboxedIntBorrow(_PyUnbox_toLong(stackref.bits));
+        if (res == NULL) {
+            Py_FatalError("Unrecoverable error: converting unboxed int to int failed, out of memory maybe?");
+        }
+        return res;
     }
     PyObject *cleared = ((PyObject *)((stackref).bits & (~Py_TAG_BITS)));
     return cleared;

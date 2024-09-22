@@ -844,6 +844,7 @@ static PyStatus
 pycore_interp_init(PyThreadState *tstate)
 {
     PyInterpreterState *interp = tstate->interp;
+    interp->object_state.freelists.borrowed_long = NULL;
     PyStatus status;
     PyObject *sysmod = NULL;
 

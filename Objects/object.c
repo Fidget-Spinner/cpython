@@ -866,6 +866,26 @@ _PyObject_ClearFreeLists(struct _Py_freelists *freelists, int is_finalization)
         // stacks during GC, so emptying the free-list is counterproductive.
         clear_freelist(&freelists->object_stack_chunks, 1, PyMem_RawFree);
     }
+    _PyBorrowedLong *curr = (_PyBorrowedLong *)freelists->borrowed_long;
+    while (curr != NULL) {
+        if (!curr->is_smallint) {
+            PyObject *long_oo = ((PyObject *)curr->long_o);
+//            if (!(long_oo->ob_refcnt >= (UINT_MAX >> 2))) {
+//                fprintf(stderr, "OHNO %ld", long_oo->ob_refcnt);
+//                PyObject_Print(long_oo, stderr, Py_PRINT_RAW);
+//                fprintf(stderr, "\n");
+//            }
+//            assert(long_oo->ob_refcnt >= (UINT_MAX >> 2));
+            if (!_Py_IsImmortalLoose(long_oo)) {;
+                if (long_oo->ob_refcnt - (UINT_MAX >> 6) <= -2) {
+                    PyObject_Free(long_oo);
+                }
+            }
+        }
+        _PyBorrowedLong *prev = curr;
+        curr = (_PyBorrowedLong *)curr->next;
+//        PyMem_Free(prev);
+    }
 #endif
 }
 

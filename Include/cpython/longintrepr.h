@@ -102,6 +102,8 @@ struct _longobject {
 
 PyAPI_FUNC(PyLongObject*) _PyLong_New(Py_ssize_t);
 
+PyAPI_FUNC(PyLongObject*) _PyLong_FromUnboxedIntBorrow(long);
+
 // Return a copy of src.
 PyAPI_FUNC(PyObject*) _PyLong_Copy(PyLongObject *src);
 

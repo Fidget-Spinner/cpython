@@ -50,10 +50,20 @@ struct _Py_freelists {
     struct _Py_freelist async_gen_asends;
     struct _Py_freelist futureiters;
     struct _Py_freelist object_stack_chunks;
+    struct _PyBorrowedLong *borrowed_long;
 #else
     char _unused;  // Empty structs are not allowed.
 #endif
 };
+
+// The difference between this list and the freelists above
+// is that this list OWNS the object it holds.
+typedef struct {
+    struct _PyBorrowedLong *next;
+    PyLongObject *long_o;
+    int is_smallint;
+} _PyBorrowedLong;
+
 
 #ifdef __cplusplus
 }

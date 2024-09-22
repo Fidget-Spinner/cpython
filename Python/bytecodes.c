@@ -503,8 +503,8 @@ dummy_func(
             PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
 
             PyObject *res_o = _PyLong_Multiply((PyLongObject *)left_o, (PyLongObject *)right_o);
-            _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
-            _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(left);
+            PyStackRef_CLOSE(right);
             ERROR_IF(res_o == NULL, error);
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
@@ -515,8 +515,8 @@ dummy_func(
 
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Add((PyLongObject *)left_o, (PyLongObject *)right_o);
-            _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
-            _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(left);
+            PyStackRef_CLOSE(right);
             ERROR_IF(res_o == NULL, error);
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
@@ -527,8 +527,8 @@ dummy_func(
 
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = _PyLong_Subtract((PyLongObject *)left_o, (PyLongObject *)right_o);
-            _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
-            _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);;
+            PyStackRef_CLOSE(left);
+            PyStackRef_CLOSE(right);
             ERROR_IF(res_o == NULL, error);
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
@@ -781,7 +781,7 @@ dummy_func(
             PyObject *res_o = PyList_GET_ITEM(list, index);
             assert(res_o != NULL);
             Py_INCREF(res_o);
-            _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(sub_st);
             PyStackRef_CLOSE(list_st);
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
@@ -800,7 +800,7 @@ dummy_func(
             DEOPT_IF(Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c);
             STAT_INC(BINARY_SUBSCR, hit);
             PyObject *res_o = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
-            _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(sub_st);
             PyStackRef_CLOSE(str_st);
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
@@ -820,7 +820,7 @@ dummy_func(
             PyObject *res_o = PyTuple_GET_ITEM(tuple, index);
             assert(res_o != NULL);
             Py_INCREF(res_o);
-            _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(sub_st);
             PyStackRef_CLOSE(tuple_st);
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
@@ -931,7 +931,7 @@ dummy_func(
             PyList_SET_ITEM(list, index, PyStackRef_AsPyObjectSteal(value));
             assert(old_value != NULL);
             Py_DECREF(old_value);
-            _Py_DECREF_SPECIALIZED(sub, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(sub_st);
             PyStackRef_CLOSE(list_st);
         }
 
@@ -2419,8 +2419,8 @@ dummy_func(
             Py_ssize_t iright = _PyLong_CompactValue((PyLongObject *)right_o);
             // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg
             int sign_ish = COMPARISON_BIT(ileft, iright);
-            _Py_DECREF_SPECIALIZED(left_o, (destructor)PyObject_Free);
-            _Py_DECREF_SPECIALIZED(right_o, (destructor)PyObject_Free);
+            PyStackRef_CLOSE(left);
+            PyStackRef_CLOSE(right);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
             // It's always a bool, so we don't care about oparg & 16.
         }
