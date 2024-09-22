@@ -131,7 +131,7 @@ static inline PyObject *
 PyStackRef_AsPyObjectBorrow(_PyStackRef stackref)
 {
     if (PyStackRef_IsUnboxedInt(stackref)) {
-        PyObject *res = (PyObject *)_PyLong_FromUnboxedIntBorrow(_PyUnbox_toLong(stackref.bits));
+        PyObject *res = (PyObject *)PyLong_FromLong(_PyUnbox_toLong(stackref.bits));
         if (res == NULL) {
             Py_FatalError("Unrecoverable error: converting unboxed int to int failed, out of memory maybe?");
         }
@@ -348,6 +348,15 @@ PyStackRef_FunctionCheck(_PyStackRef stackref)
         return false;
     }
     return PyFunction_Check(PyStackRef_AsPyObjectBorrow(stackref));
+}
+
+static inline bool
+PyStackRef_FloatCheck(_PyStackRef stackref)
+{
+    if (PyStackRef_IsUnboxedInt(stackref)) {
+        return false;
+    }
+    return PyFloat_CheckExact(PyStackRef_AsPyObjectBorrow(stackref));
 }
 
 #ifdef __cplusplus

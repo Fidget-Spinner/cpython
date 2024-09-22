@@ -66,10 +66,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyFloat_CheckExact(left_o), BINARY_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(left), BINARY_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(right), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_ADD_FLOAT
@@ -266,10 +264,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyFloat_CheckExact(left_o), BINARY_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(left), BINARY_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(right), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_MULTIPLY_FLOAT
@@ -370,10 +366,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyFloat_CheckExact(left_o), BINARY_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right_o), BINARY_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(left), BINARY_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(right), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_SUBTRACT_FLOAT
@@ -3132,10 +3126,8 @@
             right = stack_pointer[-1];
             left = stack_pointer[-2];
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-                DEOPT_IF(!PyFloat_CheckExact(left_o), COMPARE_OP);
-                DEOPT_IF(!PyFloat_CheckExact(right_o), COMPARE_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(left), COMPARE_OP);
+                DEOPT_IF(!PyStackRef_FloatCheck(right), COMPARE_OP);
             }
             /* Skip 1 cache entry */
             // _COMPARE_OP_FLOAT
@@ -7409,9 +7401,9 @@
             /* Skip 1 cache entry */
             /* Skip 2 cache entries */
             value = stack_pointer[-1];
-            PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
-            DEOPT_IF(!PyLong_CheckExact(value_o), TO_BOOL);
+            DEOPT_IF(!PyStackRef_LongCheck(value), TO_BOOL);
             STAT_INC(TO_BOOL, hit);
+            PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (_PyLong_IsZero((PyLongObject *)value_o)) {
                 res = PyStackRef_False;
             }
