@@ -177,26 +177,27 @@ _PyLong_FromUnboxedIntBorrow(long val)
 {
     int is_small_int = IS_SMALL_INT(val);
     PyLongObject *long_o = (PyLongObject *)PyLong_FromLong(val);
-    if (long_o == NULL) {
-        return NULL;
-    }
-    // Transfer ownership to freelist.
-    _PyBorrowedLong *long_borrowed = PyMem_Malloc(sizeof(_PyBorrowedLong));
-    if (long_borrowed == NULL) {
-        Py_DECREF(long_o);
-        return NULL;
-    }
-    struct _Py_freelists *freelists = _Py_freelists_GET();
-    long_borrowed->next = freelists->borrowed_long;
-    long_borrowed->long_o = long_o;
-    long_borrowed->is_smallint = is_small_int;
-    if (!is_small_int) {
-        // Set to 1/4th of an immortal, to let it track immortal but also re-mortalize it later.
-        ((PyObject *) long_o)->ob_refcnt = (UINT_MAX >> 6) + 1;
-        Py_DECREF(long_o);
-    }
-    freelists->borrowed_long = (struct _PyBorrowedLong *)long_borrowed;
     return long_o;
+//    if (long_o == NULL) {
+//        return NULL;
+//    }
+//    // Transfer ownership to freelist.
+//    _PyBorrowedLong *long_borrowed = PyMem_Malloc(sizeof(_PyBorrowedLong));
+//    if (long_borrowed == NULL) {
+//        Py_DECREF(long_o);
+//        return NULL;
+//    }
+//    struct _Py_freelists *freelists = _Py_freelists_GET();
+//    long_borrowed->next = freelists->borrowed_long;
+//    long_borrowed->long_o = long_o;
+//    long_borrowed->is_smallint = is_small_int;
+//    if (!is_small_int) {
+//        // Set to 1/4th of an immortal, to let it track immortal but also re-mortalize it later.
+//        ((PyObject *) long_o)->ob_refcnt = (UINT_MAX >> 6) + 1;
+//        Py_DECREF(long_o);
+//    }
+//    freelists->borrowed_long = (struct _PyBorrowedLong *)long_borrowed;
+//    return long_o;
 }
 
 PyLongObject *
