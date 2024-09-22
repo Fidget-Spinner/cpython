@@ -80,10 +80,16 @@
 
 /* PRE_DISPATCH_GOTO() does lltrace if enabled. Normally a no-op */
 #ifdef LLTRACE
-#define PRE_DISPATCH_GOTO() if (lltrace >= 5) { \
+#define PRE_DISPATCH_GOTO() VALIDATE_STACK(&entry_frame, frame, stack_pointer); if (lltrace >= 5) { \
     lltrace_instruction(frame, stack_pointer, next_instr, opcode, oparg); }
 #else
-#define PRE_DISPATCH_GOTO() ((void)0)
+#define PRE_DISPATCH_GOTO() VALIDATE_STACK(&entry_frame, frame, stack_pointer);
+#endif
+
+#ifdef Py_DEBUG
+#define VALIDATE_STACK(entry_frame, frame, stack_pointer) validate_stack(entry_frame, frame, stack_pointer)
+#else
+#define VALIDATE_STACK(frame, stack_pointer) ((void)(0))
 #endif
 
 #if LLTRACE

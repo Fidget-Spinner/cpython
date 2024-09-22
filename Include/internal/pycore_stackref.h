@@ -95,24 +95,13 @@ typedef union _PyStackRef {
 
 #define PyStackRef_IsDeferred(ref) (((ref).bits & Py_TAG_BITS) == Py_TAG_DEFERRED)
 
-static inline int PyStackRef_IsUnboxedInt(_PyStackRef ref) {
-    int check = (ref.bits & Py_TAG_BITS) == Py_TAG_INT;
-#ifdef Py_DEBUG
-    if (check) {
-        assert(_PyUnbox_isSmall(ref.bits));
-    }
-#endif
-    return check;
-}
-
-
 static inline uintptr_t
 _PyLong_toUnbox(long val)
 {
     assert(sizeof(uintptr_t) >= sizeof(val));
     long sign = val < 0;
     long without_sign = val << 1 >> 1;
-    assert(_PyUnbox_isSmall(val));
+    // assert(_PyUnbox_isSmall(val));
     return (without_sign << Py_UNBOX_SHIFT) | Py_TAG_INT | (sign << 63);
 }
 
@@ -120,11 +109,21 @@ static inline long
 _PyUnbox_toLong(uintptr_t val)
 {
     assert(sizeof(uintptr_t) >= sizeof(val));
-    int sign = ((val & (1L << 63)) != 0);
+    long sign = (long)val < 0;
     long without_sign = (long)val << 1 >> 1;
-    long res = (without_sign >> Py_UNBOX_SHIFT) | sign;
-    assert(_PyUnbox_isSmall(res));
+    long res = ((long)without_sign >> Py_UNBOX_SHIFT) | (sign << 63);
+    // assert(_PyUnbox_isSmall(res));
     return res;
+}
+
+static inline int PyStackRef_IsUnboxedInt(_PyStackRef ref) {
+    int check = (ref.bits & Py_TAG_BITS) == Py_TAG_INT;
+#ifdef Py_DEBUG
+    if (check) {
+        _PyUnbox_toLong(ref.bits);
+    }
+#endif
+    return check;
 }
 
 // Gets a PyObject * from a _PyStackRef

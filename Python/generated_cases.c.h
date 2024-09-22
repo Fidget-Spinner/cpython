@@ -141,8 +141,6 @@
             {
                 DEOPT_IF(!PyStackRef_IsUnboxedInt(left), BINARY_OP);
                 DEOPT_IF(!PyStackRef_IsUnboxedInt(right), BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(left.bits), BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(right.bits), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_ADD_INT_UNBOXED
@@ -343,8 +341,6 @@
             {
                 DEOPT_IF(!PyStackRef_IsUnboxedInt(left), BINARY_OP);
                 DEOPT_IF(!PyStackRef_IsUnboxedInt(right), BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(left.bits), BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(right.bits), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_MULTIPLY_INT_UNBOXED
@@ -353,7 +349,7 @@
                 long res;
                 int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
                 DEOPT_IF(ovf, BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(res), BINARY_OP);
+                DEOPT_IF(_PyUnbox_toLong(_PyLong_toUnbox(res)) != res, BINARY_OP);
                 out.bits = _PyLong_toUnbox(res);
             }
             stack_pointer[-2] = out;
@@ -449,8 +445,6 @@
             {
                 DEOPT_IF(!PyStackRef_IsUnboxedInt(left), BINARY_OP);
                 DEOPT_IF(!PyStackRef_IsUnboxedInt(right), BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(left.bits), BINARY_OP);
-                DEOPT_IF(!_PyUnbox_isSmall(right.bits), BINARY_OP);
             }
             /* Skip 1 cache entry */
             // _BINARY_OP_SUBTRACT_INT_UNBOXED

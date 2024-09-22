@@ -131,6 +131,19 @@
 #endif
 #endif
 
+#ifdef Py_DEBUG
+static void
+validate_stack(_PyInterpreterFrame *entry_frame, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
+{
+    if (entry_frame == frame) {
+        return;
+    }
+    _PyStackRef *stack_base = _PyFrame_Stackbase(frame);
+    for (_PyStackRef *ptr = stack_base; ptr < stack_pointer; ptr++) {
+        PyStackRef_IsUnboxedInt(*ptr);
+    }
+}
+#endif
 
 #ifdef LLTRACE
 static void

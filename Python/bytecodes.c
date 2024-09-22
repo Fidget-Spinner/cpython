@@ -456,8 +456,6 @@ dummy_func(
         op(_GUARD_BOTH_INT_UNBOXED, (left, right -- left, right)) {
             EXIT_IF(!PyStackRef_IsUnboxedInt(left));
             EXIT_IF(!PyStackRef_IsUnboxedInt(right));
-            assert(!_PyUnbox_isSmall(left.bits));
-            assert(!_PyUnbox_isSmall(right.bits));
         }
 
         op(_GUARD_NOS_INT, (left, unused -- left, unused)) {
@@ -477,7 +475,7 @@ dummy_func(
             long res;
             int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
             DEOPT_IF(ovf);
-            DEOPT_IF(!_PyUnbox_isSmall(res));
+            DEOPT_IF(_PyUnbox_toLong(_PyLong_toUnbox(res)) != res);
             out.bits = _PyLong_toUnbox(res);
         }
 
