@@ -60,6 +60,8 @@ typedef union _PyStackRef {
 #define Py_TAG_PTR      ((uintptr_t)0)
 #define Py_TAG_BITS     ((uintptr_t)1)
 
+#define Py_UNBOX_SHIFT  (2)
+
 #ifdef Py_GIL_DISABLED
     static const _PyStackRef PyStackRef_NULL = { .bits = 0 | Py_TAG_DEFERRED};
 #else
@@ -93,15 +95,44 @@ typedef union _PyStackRef {
 
 #define PyStackRef_IsDeferred(ref) (((ref).bits & Py_TAG_BITS) == Py_TAG_DEFERRED)
 
-#define PyStackRef_IsUnboxedInt(ref) (((ref).bits & Py_TAG_BITS) == Py_TAG_INT)
+static inline int PyStackRef_IsUnboxedInt(_PyStackRef ref) {
+    int check = (ref.bits & Py_TAG_BITS) == Py_TAG_INT;
+#ifdef Py_DEBUG
+    if (check) {
+        assert(_PyUnbox_isSmall(ref.bits));
+    }
+#endif
+    return check;
+}
 
+
+static inline uintptr_t
+_PyLong_toUnbox(long val)
+{
+    assert(sizeof(uintptr_t) >= sizeof(val));
+    long sign = val < 0;
+    long without_sign = val << 1 >> 1;
+    assert(_PyUnbox_isSmall(val));
+    return (without_sign << Py_UNBOX_SHIFT) | Py_TAG_INT | (sign << 63);
+}
+
+static inline long
+_PyUnbox_toLong(uintptr_t val)
+{
+    assert(sizeof(uintptr_t) >= sizeof(val));
+    int sign = ((val & (1L << 63)) != 0);
+    long without_sign = (long)val << 1 >> 1;
+    long res = (without_sign >> Py_UNBOX_SHIFT) | sign;
+    assert(_PyUnbox_isSmall(res));
+    return res;
+}
 
 // Gets a PyObject * from a _PyStackRef
 static inline PyObject *
 PyStackRef_AsPyObjectBorrow(_PyStackRef stackref)
 {
     if (PyStackRef_IsUnboxedInt(stackref)) {
-        return PyLong_FromLong((long)stackref.bits >> 1);
+        return PyLong_FromLong(_PyUnbox_toLong(stackref.bits));
     }
     PyObject *cleared = ((PyObject *)((stackref).bits & (~Py_TAG_BITS)));
     return cleared;
@@ -137,8 +168,9 @@ _PyStackRef_FromPyObjectSteal(PyObject *obj)
     unsigned int tag = (obj == NULL || _Py_IsImmortal(obj)) ? (Py_TAG_DEFERRED) : Py_TAG_PTR;
     return ((_PyStackRef){.bits = ((uintptr_t)(obj)) | tag});
 #else
-    if (obj != NULL && (PyLong_CheckExact(obj) && _PyLong_IsCompact63((PyLongObject *)obj))) {
-        return ((_PyStackRef){.bits = ((uintptr_t)(_PyLong_CompactValue((PyLongObject *)obj)) << 1) | Py_TAG_INT});
+    if (obj != NULL && (PyLong_CheckExact(obj) && _PyLong_IsCompact62((PyLongObject *)obj))) {
+        uintptr_t val = _PyLong_toUnbox(_PyLong_CompactValue((PyLongObject *)obj));
+        return ((_PyStackRef){.bits = val});
     }
     return ((_PyStackRef){.bits = (uintptr_t)(obj) | Py_TAG_PTR});
 #endif
@@ -161,8 +193,9 @@ PyStackRef_FromPyObjectNew(PyObject *obj)
         return (_PyStackRef){ .bits = (uintptr_t)(Py_NewRef(obj)) | Py_TAG_PTR };
     }
 #endif
-    if ((PyLong_CheckExact(obj) && _PyLong_IsCompact63((PyLongObject *)obj))) {
-        return ((_PyStackRef){.bits = ((uintptr_t)(_PyLong_CompactValue((PyLongObject *)obj)) << 1) | Py_TAG_INT});
+    if ((PyLong_CheckExact(obj) && _PyLong_IsCompact62((PyLongObject *)obj))) {
+        uintptr_t val = _PyLong_toUnbox(_PyLong_CompactValue((PyLongObject *)obj));
+        return ((_PyStackRef){.bits = val});
     }
     return ((_PyStackRef){.bits = (uintptr_t)(Py_NewRef(obj)) | Py_TAG_PTR});
 }

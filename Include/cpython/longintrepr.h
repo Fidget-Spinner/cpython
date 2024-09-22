@@ -139,8 +139,15 @@ _PyLong_CompactValue(const PyLongObject *op)
 #define PyUnstable_Long_CompactValue _PyLong_CompactValue
 
 static inline int
-_PyLong_IsCompact63(const PyLongObject* op) {
-    return _PyLong_IsCompact(op) && ((_PyLong_CompactValue(op) & (1L << 63)) == 0);
+_PyUnbox_isSmall(long val)
+{
+    return ((3L << 60) & val) == 0;
+}
+
+
+static inline int
+_PyLong_IsCompact62(const PyLongObject* op) {
+    return _PyLong_IsCompact(op) && _PyUnbox_isSmall((_PyLong_CompactValue(op)));
 }
 
 #ifdef __cplusplus

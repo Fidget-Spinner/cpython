@@ -2245,12 +2245,12 @@ _Py_Specialize_BinaryOp(_PyStackRef lhs_st, _PyStackRef rhs_st, _Py_CODEUNIT *in
                 goto success;
             }
             if (PyLong_CheckExact(lhs)) {
-                if (_PyLong_IsCompact63((PyLongObject *)lhs) !=
-                    _PyLong_IsCompact63((PyLongObject *)rhs)) {
+                if (_PyLong_IsCompact62((PyLongObject *)lhs) !=
+                    _PyLong_IsCompact62((PyLongObject *)rhs)) {
                     break;
                 }
-                if (_PyLong_IsCompact63((PyLongObject *)lhs) &&
-                    _PyLong_IsCompact63((PyLongObject *)rhs)) {
+                if (_PyLong_IsCompact62((PyLongObject *)lhs) &&
+                    _PyLong_IsCompact62((PyLongObject *)rhs)) {
                     instr->op.code = BINARY_OP_ADD_INT_UNBOXED;
                     goto success;
                 }
@@ -2268,12 +2268,12 @@ _Py_Specialize_BinaryOp(_PyStackRef lhs_st, _PyStackRef rhs_st, _Py_CODEUNIT *in
                 break;
             }
             if (PyLong_CheckExact(lhs)) {
-                if (_PyLong_IsCompact63((PyLongObject *)lhs) !=
-                    _PyLong_IsCompact63((PyLongObject *)rhs)) {
+                if (_PyLong_IsCompact62((PyLongObject *)lhs) !=
+                    _PyLong_IsCompact62((PyLongObject *)rhs)) {
                     break;
                 }
-                if (_PyLong_IsCompact63((PyLongObject *)lhs) &&
-                    _PyLong_IsCompact63((PyLongObject *)rhs)) {
+                if (_PyLong_IsCompact62((PyLongObject *)lhs) &&
+                    _PyLong_IsCompact62((PyLongObject *)rhs)) {
                     instr->op.code = BINARY_OP_MULTIPLY_INT_UNBOXED;
                     goto success;
                 }
@@ -2291,12 +2291,12 @@ _Py_Specialize_BinaryOp(_PyStackRef lhs_st, _PyStackRef rhs_st, _Py_CODEUNIT *in
                 break;
             }
             if (PyLong_CheckExact(lhs)) {
-                if (_PyLong_IsCompact63((PyLongObject *)lhs) !=
-                    _PyLong_IsCompact63((PyLongObject *)rhs)) {
+                if (_PyLong_IsCompact62((PyLongObject *)lhs) !=
+                    _PyLong_IsCompact62((PyLongObject *)rhs)) {
                     break;
                 }
-                if (_PyLong_IsCompact63((PyLongObject *)lhs) &&
-                    _PyLong_IsCompact63((PyLongObject *)rhs)) {
+                if (_PyLong_IsCompact62((PyLongObject *)lhs) &&
+                    _PyLong_IsCompact62((PyLongObject *)rhs)) {
                     instr->op.code = BINARY_OP_SUBTRACT_INT_UNBOXED;
                     goto success;
                 }

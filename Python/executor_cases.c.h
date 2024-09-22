@@ -492,11 +492,11 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (_PyLong_IsCompact63((PyLongObject *)left_o)) {
+            if (_PyLong_IsCompact62((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (_PyLong_IsCompact63((PyLongObject *)right_o)) {
+            if (_PyLong_IsCompact62((PyLongObject *)right_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -516,6 +516,14 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
+            if (!_PyUnbox_isSmall(left.bits)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (!_PyUnbox_isSmall(right.bits)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
             break;
         }
 
@@ -527,7 +535,7 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (_PyLong_IsCompact63((PyLongObject *)left_o)) {
+            if (_PyLong_IsCompact62((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -542,7 +550,7 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (_PyLong_IsCompact63((PyLongObject *)value_o)) {
+            if (_PyLong_IsCompact62((PyLongObject *)value_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -557,16 +565,16 @@
             left = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_smull_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (((1L << 63) & res) != 0) {
+            if (!_PyUnbox_isSmall(res)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            out.bits = _PyLong_toUnbox(res);
             stack_pointer[-2] = out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -581,16 +589,16 @@
             left = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            int ovf = __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (((1L << 63) & res) != 0) {
+            if (!_PyUnbox_isSmall(res)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            out.bits = _PyLong_toUnbox(res);
             stack_pointer[-2] = out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -605,16 +613,16 @@
             left = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_ssubl_overflow((long)left.bits >> 1, (long)right.bits >> 1, &res);
+            int ovf = __builtin_ssubl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (((1L << 63) & res) != 0) {
+            if (!_PyUnbox_isSmall(res)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            out.bits = (uintptr_t)res << 1 | Py_TAG_INT;
+            out.bits = _PyLong_toUnbox(res);
             stack_pointer[-2] = out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
