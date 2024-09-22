@@ -89,7 +89,7 @@
 #ifdef Py_DEBUG
 #define VALIDATE_STACK(entry_frame, frame, stack_pointer) validate_stack(entry_frame, frame, stack_pointer)
 #else
-#define VALIDATE_STACK(frame, stack_pointer) ((void)(0))
+#define VALIDATE_STACK(entry_frame, frame, stack_pointer) ((void)(0))
 #endif
 
 #if LLTRACE

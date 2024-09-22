@@ -876,11 +876,11 @@ _PyObject_ClearFreeLists(struct _Py_freelists *freelists, int is_finalization)
 //                fprintf(stderr, "\n");
 //            }
 //            assert(long_oo->ob_refcnt >= (UINT_MAX >> 2));
-            if (!_Py_IsImmortalLoose(long_oo)) {;
-                if (long_oo->ob_refcnt - (UINT_MAX >> 6) <= -2) {
-                    PyObject_Free(long_oo);
-                }
-            }
+//            if (!_Py_IsImmortalLoose(long_oo)) {;
+//                if (long_oo->ob_refcnt - (UINT_MAX >> 6) <= -2) {
+//                    PyObject_Free(long_oo);
+//                }
+//            }
         }
         _PyBorrowedLong *prev = curr;
         curr = (_PyBorrowedLong *)curr->next;
