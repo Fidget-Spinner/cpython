@@ -113,6 +113,20 @@ dummy_func(void) {
         }
         sym_set_type(left, &PyLong_Type);
         sym_set_type(right, &PyLong_Type);
+        sym_set_boxed(left);
+        sym_set_boxed(right);
+    }
+
+    op(_GUARD_BOTH_INT_UNBOXED, (left, right -- left, right)) {
+        if (sym_matches_type(left, &PyLong_Type) && sym_is_unboxed(left)) {
+            if (sym_matches_type(right, &PyLong_Type) && sym_is_unboxed(right)) {
+                REPLACE_OP(this_instr, _NOP, 0, 0);
+            }
+        }
+        sym_set_type(left, &PyLong_Type);
+        sym_set_type(right, &PyLong_Type);
+        sym_set_unboxed(left);
+        sym_set_unboxed(right);
     }
 
     op(_GUARD_TYPE_VERSION, (type_version/2, owner -- owner)) {

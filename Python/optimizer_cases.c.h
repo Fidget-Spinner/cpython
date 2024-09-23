@@ -220,10 +220,25 @@
             }
             sym_set_type(left, &PyLong_Type);
             sym_set_type(right, &PyLong_Type);
+            sym_set_boxed(left);
+            sym_set_boxed(right);
             break;
         }
 
         case _GUARD_BOTH_INT_UNBOXED: {
+            _Py_UopsSymbol *right;
+            _Py_UopsSymbol *left;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (sym_matches_type(left, &PyLong_Type) && sym_is_unboxed(left)) {
+                if (sym_matches_type(right, &PyLong_Type) && sym_is_unboxed(right)) {
+                    REPLACE_OP(this_instr, _NOP, 0, 0);
+                }
+            }
+            sym_set_type(left, &PyLong_Type);
+            sym_set_type(right, &PyLong_Type);
+            sym_set_unboxed(left);
+            sym_set_unboxed(right);
             break;
         }
 

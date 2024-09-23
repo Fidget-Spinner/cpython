@@ -50,6 +50,7 @@ struct _Py_freelists {
     struct _Py_freelist async_gen_asends;
     struct _Py_freelist futureiters;
     struct _Py_freelist object_stack_chunks;
+    struct _Py_freelist longs;
     struct _PyBorrowedLong *borrowed_long;
 #else
     char _unused;  // Empty structs are not allowed.

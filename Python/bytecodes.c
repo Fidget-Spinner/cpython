@@ -481,8 +481,7 @@ dummy_func(
         pure op(_BINARY_OP_ADD_INT_UNBOXED, (left, right -- out)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
-            DEOPT_IF(ovf);
+            __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
             DEOPT_IF(!_PyUnbox_isSmall(res));
             out.bits = _PyLong_toUnbox(res);
         }

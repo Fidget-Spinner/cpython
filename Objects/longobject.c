@@ -232,13 +232,23 @@ _PyLong_Copy(PyLongObject *src)
     return (PyObject *)_PyLong_FromDigits(_PyLong_IsNegative(src), size, src->long_value.ob_digit);
 }
 
+static inline PyLongObject *
+try_medium_from_freelist(void)
+{
+    PyLongObject *o = _Py_FREELIST_POP(PyLongObject, longs);
+    if (o == NULL) {
+        return PyObject_Malloc(sizeof(PyLongObject));
+    }
+    return o;
+}
+
 static PyObject *
 _PyLong_FromMedium(sdigit x)
 {
     assert(!IS_SMALL_INT(x));
     assert(is_medium_int(x));
     /* We could use a freelist here */
-    PyLongObject *v = PyObject_Malloc(sizeof(PyLongObject));
+    PyLongObject *v = try_medium_from_freelist();
     if (v == NULL) {
         PyErr_NoMemory();
         return NULL;
@@ -3643,6 +3653,12 @@ long_dealloc(PyObject *self)
                 return;
             }
         }
+        else {
+            if (_Py_FREELIST_PUSH(longs, pylong, 4096)) {
+                return;
+            }
+        }
+
     }
     Py_TYPE(self)->tp_free(self);
 }

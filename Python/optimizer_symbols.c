@@ -32,6 +32,8 @@
 #define IS_NULL    1 << 0
 #define NOT_NULL   1 << 1
 #define NO_SPACE   1 << 2
+#define IS_BOXED   1 << 3
+#define IS_UNBOXED 1 << 4
 
 #ifdef Py_DEBUG
 static inline int get_lltrace(void) {
@@ -122,6 +124,18 @@ _Py_uop_sym_is_null(_Py_UopsSymbol *sym)
 }
 
 bool
+_Py_uop_sym_is_boxed(_Py_UopsSymbol *sym)
+{
+    return sym->flags & IS_BOXED;
+}
+
+bool
+_Py_uop_sym_is_unboxed(_Py_UopsSymbol *sym)
+{
+    return sym->flags & IS_UNBOXED;
+}
+
+bool
 _Py_uop_sym_is_const(_Py_UopsSymbol *sym)
 {
     return sym->const_val != NULL;
@@ -196,6 +210,24 @@ _Py_uop_sym_set_null(_Py_UOpsContext *ctx, _Py_UopsSymbol *sym)
         sym_set_bottom(ctx, sym);
     }
     sym_set_flag(sym, IS_NULL);
+}
+
+void
+_Py_uop_sym_set_unboxed(_Py_UOpsContext *ctx, _Py_UopsSymbol *sym)
+{
+    if (sym->flags & IS_BOXED) {
+        sym_set_bottom(ctx, sym);
+    }
+    sym_set_flag(sym, IS_UNBOXED);
+}
+
+void
+_Py_uop_sym_set_boxed(_Py_UOpsContext *ctx, _Py_UopsSymbol *sym)
+{
+    if (sym->flags & IS_UNBOXED) {
+        sym_set_bottom(ctx, sym);
+    }
+    sym_set_flag(sym, IS_BOXED);
 }
 
 void

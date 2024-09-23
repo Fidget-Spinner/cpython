@@ -578,11 +578,7 @@
             left = stack_pointer[-2];
             assert(sizeof(uintptr_t) >= sizeof(long));
             long res;
-            int ovf = __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
-            if (ovf) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
+            __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
             if (!_PyUnbox_isSmall(res)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();

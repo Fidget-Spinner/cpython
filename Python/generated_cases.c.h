@@ -149,8 +149,7 @@
             {
                 assert(sizeof(uintptr_t) >= sizeof(long));
                 long res;
-                int ovf = __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
-                DEOPT_IF(ovf, BINARY_OP);
+                __builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
                 DEOPT_IF(!_PyUnbox_isSmall(res), BINARY_OP);
                 out.bits = _PyLong_toUnbox(res);
             }
