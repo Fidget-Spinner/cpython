@@ -527,6 +527,9 @@ NON_ESCAPING_FUNCTIONS = (
     "_PyList_FromStackRefSteal",
     "_PyTuple_FromArraySteal",
     "_PyTuple_FromStackRefSteal",
+    "_PyLong_toUnbox",
+    "_PyUnbox_toLong",
+    "_PyUnbox_isSmall",
 )
 
 ESCAPING_FUNCTIONS = (

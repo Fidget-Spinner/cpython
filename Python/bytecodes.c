@@ -443,13 +443,13 @@ dummy_func(
             // BINARY_OP_INPLACE_ADD_UNICODE,  // See comments at that opcode.
         };
 
-        op(_GUARD_BOTH_INT, (left, right -- left, right)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+        op(_GUARD_BOTH_INT, (left, right -- left_out, right_out)) {
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             EXIT_IF(!PyLong_CheckExact(left_o));
             EXIT_IF(!PyLong_CheckExact(right_o));
-            EXIT_IF(_PyLong_IsCompact62((PyLongObject *)left_o));
-            EXIT_IF(_PyLong_IsCompact62((PyLongObject *)right_o));
+            left_out = PyStackRef_FromPyObjectSteal(left_o);
+            right_out = PyStackRef_FromPyObjectSteal(right_o);
         }
 
         op(_GUARD_BOTH_INT_UNBOXED, (left, right -- left, right)) {
@@ -2341,6 +2341,7 @@ dummy_func(
             COMPARE_OP_FLOAT,
             COMPARE_OP_INT,
             COMPARE_OP_STR,
+            COMPARE_OP_INT_UNBOXED,
         };
 
         specializing op(_SPECIALIZE_COMPARE_OP, (counter/1, left, right -- left, right)) {
@@ -2382,6 +2383,9 @@ dummy_func(
         macro(COMPARE_OP_INT) =
             _GUARD_BOTH_INT + unused/1 + _COMPARE_OP_INT;
 
+        macro(COMPARE_OP_INT_UNBOXED) =
+            _GUARD_BOTH_INT_UNBOXED + unused/1 + _COMPARE_OP_INT_UNBOXED;
+
         macro(COMPARE_OP_STR) =
             _GUARD_BOTH_UNICODE + unused/1 + _COMPARE_OP_STR;
 
@@ -2416,6 +2420,15 @@ dummy_func(
             int sign_ish = COMPARISON_BIT(ileft, iright);
             PyStackRef_CLOSE(left);
             PyStackRef_CLOSE(right);
+            res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            // It's always a bool, so we don't care about oparg & 16.
+        }
+
+        op(_COMPARE_OP_INT_UNBOXED, (left, right -- res)) {
+            long ileft = _PyUnbox_toLong(left.bits);
+            long iright = _PyUnbox_toLong(right.bits);
+            // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg
+            int sign_ish = COMPARISON_BIT(ileft, iright);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
             // It's always a bool, so we don't care about oparg & 16.
         }
@@ -3006,9 +3019,14 @@ dummy_func(
             long value = r->start;
             r->start = value + r->step;
             r->len--;
-            PyObject *res = PyLong_FromLong(value);
-            ERROR_IF(res == NULL, error);
-            next = PyStackRef_FromPyObjectSteal(res);
+            if (_PyUnbox_isSmall(value)) {
+                next.bits = (_PyLong_toUnbox(value));
+            }
+            else {
+                PyObject *res = PyLong_FromLong(value);
+                ERROR_IF(res == NULL, error);
+                next = PyStackRef_FromPyObjectSteal(res);
+            }
         }
 
         macro(FOR_ITER_RANGE) =

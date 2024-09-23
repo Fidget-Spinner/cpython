@@ -2376,6 +2376,11 @@ _Py_Specialize_CompareOp(_PyStackRef lhs_st, _PyStackRef rhs_st, _Py_CODEUNIT *i
         goto success;
     }
     if (PyLong_CheckExact(lhs)) {
+        if (_PyLong_IsCompact62((PyLongObject *)lhs) &&
+            _PyLong_IsCompact62((PyLongObject *)rhs)) {
+            instr->op.code = COMPARE_OP_INT_UNBOXED;
+            goto success;
+        }
         if (_PyLong_IsCompact((PyLongObject *)lhs) && _PyLong_IsCompact((PyLongObject *)rhs)) {
             instr->op.code = COMPARE_OP_INT;
             goto success;

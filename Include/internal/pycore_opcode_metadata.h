@@ -153,6 +153,8 @@ int _PyOpcode_num_popped(int opcode, int oparg)  {
             return 2;
         case COMPARE_OP_INT:
             return 2;
+        case COMPARE_OP_INT_UNBOXED:
+            return 2;
         case COMPARE_OP_STR:
             return 2;
         case CONTAINS_OP:
@@ -616,6 +618,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg)  {
             return 1;
         case COMPARE_OP_INT:
             return 1;
+        case COMPARE_OP_INT_UNBOXED:
+            return 1;
         case COMPARE_OP_STR:
             return 1;
         case CONTAINS_OP:
@@ -1022,15 +1026,15 @@ extern const struct opcode_metadata _PyOpcode_opcode_metadata[264];
 const struct opcode_metadata _PyOpcode_opcode_metadata[264] = {
     [BINARY_OP] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_OP_ADD_FLOAT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG },
-    [BINARY_OP_ADD_INT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
+    [BINARY_OP_ADD_INT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG },
     [BINARY_OP_ADD_INT_UNBOXED] = { true, INSTR_FMT_IXC, HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_OP_ADD_UNICODE] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG },
     [BINARY_OP_INPLACE_ADD_UNICODE] = { true, INSTR_FMT_IXC, HAS_LOCAL_FLAG | HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_OP_MULTIPLY_FLOAT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG },
-    [BINARY_OP_MULTIPLY_INT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
+    [BINARY_OP_MULTIPLY_INT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG },
     [BINARY_OP_MULTIPLY_INT_UNBOXED] = { true, INSTR_FMT_IXC, HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_OP_SUBTRACT_FLOAT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG },
-    [BINARY_OP_SUBTRACT_INT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
+    [BINARY_OP_SUBTRACT_INT] = { true, INSTR_FMT_IXC, HAS_EXIT_FLAG | HAS_ERROR_FLAG },
     [BINARY_OP_SUBTRACT_INT_UNBOXED] = { true, INSTR_FMT_IXC, HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_SLICE] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [BINARY_SUBSCR] = { true, INSTR_FMT_IXC, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
@@ -1079,7 +1083,8 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[264] = {
     [CLEANUP_THROW] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG },
     [COMPARE_OP] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [COMPARE_OP_FLOAT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_EXIT_FLAG },
-    [COMPARE_OP_INT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
+    [COMPARE_OP_INT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_EXIT_FLAG },
+    [COMPARE_OP_INT_UNBOXED] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
     [COMPARE_OP_STR] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_EXIT_FLAG },
     [CONTAINS_OP] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [CONTAINS_OP_DICT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
@@ -1314,6 +1319,7 @@ _PyOpcode_macro_expansion[256] = {
     [COMPARE_OP] = { .nuops = 1, .uops = { { _COMPARE_OP, 0, 0 } } },
     [COMPARE_OP_FLOAT] = { .nuops = 2, .uops = { { _GUARD_BOTH_FLOAT, 0, 0 }, { _COMPARE_OP_FLOAT, 0, 0 } } },
     [COMPARE_OP_INT] = { .nuops = 2, .uops = { { _GUARD_BOTH_INT, 0, 0 }, { _COMPARE_OP_INT, 0, 0 } } },
+    [COMPARE_OP_INT_UNBOXED] = { .nuops = 2, .uops = { { _GUARD_BOTH_INT_UNBOXED, 0, 0 }, { _COMPARE_OP_INT_UNBOXED, 0, 0 } } },
     [COMPARE_OP_STR] = { .nuops = 2, .uops = { { _GUARD_BOTH_UNICODE, 0, 0 }, { _COMPARE_OP_STR, 0, 0 } } },
     [CONTAINS_OP] = { .nuops = 1, .uops = { { _CONTAINS_OP, 0, 0 } } },
     [CONTAINS_OP_DICT] = { .nuops = 1, .uops = { { _CONTAINS_OP_DICT, 0, 0 } } },
@@ -1503,6 +1509,7 @@ const char *_PyOpcode_OpName[264] = {
     [COMPARE_OP] = "COMPARE_OP",
     [COMPARE_OP_FLOAT] = "COMPARE_OP_FLOAT",
     [COMPARE_OP_INT] = "COMPARE_OP_INT",
+    [COMPARE_OP_INT_UNBOXED] = "COMPARE_OP_INT_UNBOXED",
     [COMPARE_OP_STR] = "COMPARE_OP_STR",
     [CONTAINS_OP] = "CONTAINS_OP",
     [CONTAINS_OP_DICT] = "CONTAINS_OP_DICT",
@@ -1761,6 +1768,7 @@ const uint8_t _PyOpcode_Deopt[256] = {
     [COMPARE_OP] = COMPARE_OP,
     [COMPARE_OP_FLOAT] = COMPARE_OP,
     [COMPARE_OP_INT] = COMPARE_OP,
+    [COMPARE_OP_INT_UNBOXED] = COMPARE_OP,
     [COMPARE_OP_STR] = COMPARE_OP,
     [CONTAINS_OP] = CONTAINS_OP,
     [CONTAINS_OP_DICT] = CONTAINS_OP,
@@ -1956,7 +1964,6 @@ const uint8_t _PyOpcode_Deopt[256] = {
     case 146: \
     case 147: \
     case 148: \
-    case 230: \
     case 231: \
     case 232: \
     case 233: \

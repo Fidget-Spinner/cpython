@@ -479,10 +479,12 @@
         case _GUARD_BOTH_INT: {
             _PyStackRef right;
             _PyStackRef left;
+            _PyStackRef left_out;
+            _PyStackRef right_out;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsPyObjectSteal(left);
+            PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
@@ -491,14 +493,10 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (_PyLong_IsCompact62((PyLongObject *)left_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            if (_PyLong_IsCompact62((PyLongObject *)right_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
+            left_out = PyStackRef_FromPyObjectSteal(left_o);
+            right_out = PyStackRef_FromPyObjectSteal(right_o);
+            stack_pointer[-2] = left_out;
+            stack_pointer[-1] = right_out;
             break;
         }
 
@@ -2859,6 +2857,25 @@
             break;
         }
 
+        case _COMPARE_OP_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            oparg = CURRENT_OPARG();
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            long ileft = _PyUnbox_toLong(left.bits);
+            long iright = _PyUnbox_toLong(right.bits);
+            // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg
+            int sign_ish = COMPARISON_BIT(ileft, iright);
+            res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            // It's always a bool, so we don't care about oparg & 16.
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _COMPARE_OP_STR: {
             _PyStackRef right;
             _PyStackRef left;
@@ -3391,9 +3408,14 @@
             long value = r->start;
             r->start = value + r->step;
             r->len--;
-            PyObject *res = PyLong_FromLong(value);
-            if (res == NULL) JUMP_TO_ERROR();
-            next = PyStackRef_FromPyObjectSteal(res);
+            if (_PyUnbox_isSmall(value)) {
+                next.bits = (_PyLong_toUnbox(value));
+            }
+            else {
+                PyObject *res = PyLong_FromLong(value);
+                if (res == NULL) JUMP_TO_ERROR();
+                next = PyStackRef_FromPyObjectSteal(res);
+            }
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());

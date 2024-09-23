@@ -1308,6 +1308,15 @@
             break;
         }
 
+        case _COMPARE_OP_INT_UNBOXED: {
+            _Py_UopsSymbol *res;
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _COMPARE_OP_STR: {
             _Py_UopsSymbol *right;
             _Py_UopsSymbol *left;
