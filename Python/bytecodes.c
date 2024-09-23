@@ -4674,7 +4674,7 @@ dummy_func(
             JUMP_TO_JUMP_TARGET();
         }
 
-        tier2 op(_SET_IP, (instr_ptr/4 --)) {
+        tier2 _static op(_SET_IP, (instr_ptr/4 --)) {
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 
@@ -4836,7 +4836,7 @@ dummy_func(
             Py_FatalError("Fatal error uop executed.");
         }
 
-        tier2 op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
+        tier2 _static op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
             DEOPT_IF(!current_executor->vm_data.valid);
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }

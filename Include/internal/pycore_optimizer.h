@@ -130,7 +130,8 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateAll(PyInterpreterState *interp, int is_
 
 
 // This is the length of the trace we project initially.
-#define UOP_MAX_TRACE_LENGTH 800
+#define UOP_MAX_TRACE_PROJECTION 800
+#define UOP_MAX_TRACE_LENGTH (UOP_MAX_TRACE_PROJECTION * 2)
 
 #define TRACE_STACK_SIZE 5
 
@@ -237,6 +238,7 @@ struct _Py_UOpsContext {
 
     _PyUOpInstruction *trace_dest;
     int n_trace_dest;
+    int n_side_exit_dest;
 };
 
 typedef struct _Py_UOpsContext _Py_UOpsContext;

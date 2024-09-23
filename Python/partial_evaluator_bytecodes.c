@@ -108,6 +108,59 @@ dummy_func(void) {
         (void)framesize;
     }
 
+    override op(_PUSH_FRAME, (new_frame -- unused if (0))) {
+        SYNC_SP();
+        APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+        ctx->frame->stack_pointer = stack_pointer;
+        ctx->frame = (_Py_UOpsAbstractFrame *)new_frame.sym;
+        ctx->curr_frame_depth++;
+        stack_pointer = ((_Py_UOpsAbstractFrame *)new_frame.sym)->stack_pointer;
+        co = get_code(this_instr);
+        if (co == NULL) {
+            // should be about to _EXIT_TRACE anyway
+            ctx->done = true;
+            break;
+        }
+    }
+
+    override op(_RETURN_GENERATOR, ( -- res)) {
+        SYNC_SP();
+        APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+        ctx->frame->stack_pointer = stack_pointer;
+        frame_pop(ctx);
+        stack_pointer = ctx->frame->stack_pointer;
+        res = sym_new_unknown(ctx);
+
+        co = get_code(this_instr);
+        if (co == NULL) {
+            // might be impossible, but bailing is still safe
+            ctx->done = true;
+        }
+    }
+
+    override op(_RETURN_VALUE, (retval -- res)) {
+        SYNC_SP();
+        ctx->frame->stack_pointer = stack_pointer;
+        frame_pop(ctx);
+        stack_pointer = ctx->frame->stack_pointer;
+        res = retval;
+
+        co = get_code(this_instr);
+        if (co == NULL) {
+            // might be impossible, but bailing is still safe
+            ctx->done = true;
+        }
+    }
+
+    override op(_SET_IP, (instr_ptr/4 --)) {
+        SET_STATIC_INST();
+        ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+    }
+
+    override op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
+        ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+    }
+
 // END BYTECODES //
 
 }

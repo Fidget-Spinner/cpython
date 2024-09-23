@@ -648,13 +648,6 @@
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
             res = retval;
-            /* Stack space handling */
-            assert(corresponding_check_stack == NULL);
-            assert(co != NULL);
-            int framesize = co->co_framesize;
-            assert(framesize > 0);
-            assert(framesize <= curr_space);
-            curr_space -= framesize;
             co = get_code(this_instr);
             if (co == NULL) {
                 // might be impossible, but bailing is still safe
@@ -1829,6 +1822,7 @@
             new_frame = stack_pointer[-1];
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
             ctx->frame->stack_pointer = stack_pointer;
             ctx->frame = (_Py_UOpsAbstractFrame *)new_frame.sym;
             ctx->curr_frame_depth++;
@@ -1839,24 +1833,6 @@
                 ctx->done = true;
                 break;
             }
-            /* Stack space handling */
-            int framesize = co->co_framesize;
-            assert(framesize > 0);
-            curr_space += framesize;
-            if (curr_space < 0 || curr_space > INT32_MAX) {
-                // won't fit in signed 32-bit int
-                ctx->done = true;
-                break;
-            }
-            max_space = curr_space > max_space ? curr_space : max_space;
-            if (first_valid_check_stack == NULL) {
-                first_valid_check_stack = corresponding_check_stack;
-            }
-            else if (corresponding_check_stack) {
-                // delete all but the first valid _CHECK_STACK_SPACE
-                corresponding_check_stack->opcode = _NOP;
-            }
-            corresponding_check_stack = NULL;
             break;
         }
 
@@ -2114,17 +2090,11 @@
 
         case _RETURN_GENERATOR: {
             _Py_UopsLocalsPlusSlot res;
+            APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
             res = sym_new_unknown(ctx);
-            /* Stack space handling */
-            assert(corresponding_check_stack == NULL);
-            assert(co != NULL);
-            int framesize = co->co_framesize;
-            assert(framesize > 0);
-            assert(framesize <= curr_space);
-            curr_space -= framesize;
             co = get_code(this_instr);
             if (co == NULL) {
                 // might be impossible, but bailing is still safe
@@ -2300,6 +2270,9 @@
         }
 
         case _SET_IP: {
+            PyObject *instr_ptr = (PyObject *)this_instr->operand;
+            SET_STATIC_INST();
+            ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
             break;
         }
 
@@ -2404,6 +2377,8 @@
         }
 
         case _CHECK_VALIDITY_AND_SET_IP: {
+            PyObject *instr_ptr = (PyObject *)this_instr->operand;
+            ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
             break;
         }
 
