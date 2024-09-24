@@ -1,4 +1,3 @@
-#ifdef _Py_TIER2
 
 /*
  * This file contains the support code for CPython's uops optimizer.
@@ -542,6 +541,31 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
     }
 }
 
+static const uint8_t is_for_iter_test[MAX_UOP_ID + 1] = {
+    [_GUARD_NOT_EXHAUSTED_RANGE] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE] = 1,
+    [_FOR_ITER_TIER_TWO] = 1,
+};
+
+#define APPEND_OP(OPCODE, OPARG, OPERAND) \
+    WRITE_OP(&trace_dest[ctx->n_trace_dest], OPCODE, OPARG, OPERAND); \
+    trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET; \
+    trace_dest[ctx->n_trace_dest].target = this_instr->target;  \
+    ctx->n_trace_dest++;                        \
+    if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH / 2) { \
+        ctx->out_of_space = true; \
+        ctx->done = true; \
+    }
+
+#define APPEND_SIDE_OP(OPCODE, OPARG, OPERAND) \
+    WRITE_OP(&trace_dest[ctx->n_side_exit_dest], OPCODE, OPARG, OPERAND); \
+    ctx->n_side_exit_dest++;                        \
+    if (ctx->n_side_exit_dest >= UOP_MAX_TRACE_LENGTH) { \
+        ctx->out_of_space = true; \
+        ctx->done = true; \
+    }
+
 /* 1 for success, 0 for not ready, cannot error at the moment. */
 static int
 partial_evaluate_uops(
@@ -549,14 +573,20 @@ partial_evaluate_uops(
     _PyUOpInstruction *trace,
     int trace_len,
     int curr_stacklen,
-    _PyBloomFilter *dependencies
+    _PyBloomFilter *dependencies,
+    int *main_trace_len,
+    bool *partial_eval_success
 )
 {
 
     _PyUOpInstruction trace_dest[UOP_MAX_TRACE_LENGTH];
+    for (int i = 0; i < UOP_MAX_TRACE_LENGTH; i++) {
+        trace_dest[i].opcode = _NOP;
+    }
     _Py_UOpsContext context;
     context.trace_dest = trace_dest;
     context.n_trace_dest = 0;
+    context.n_side_exit_dest = UOP_MAX_TRACE_LENGTH / 2;
     _Py_UOpsContext *ctx = &context;
     uint32_t opcode = UINT16_MAX;
     int curr_space = 0;
@@ -620,6 +650,50 @@ partial_evaluate_uops(
                 ctx->out_of_space = true;
                 ctx->done = true;
             }
+            // Deopts or errors, need to write a side exit to reconstruct state.
+            if ((_PyUop_Flags[opcode] & (HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ERROR_FLAG))) {
+                int32_t original_target = (int32_t)uop_get_target(this_instr);
+                if (_PyUop_Flags[opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG)) {
+                    uint16_t exit_op = (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) ?
+                                       _EXIT_TRACE : _DEOPT;
+                    int32_t jump_target = original_target;
+                    if (is_for_iter_test[opcode]) {
+                        /* Target the POP_TOP immediately after the END_FOR,
+                         * leaving only the iterator on the stack. */
+                        int extended_arg = this_instr->oparg > 255;
+                        int32_t next_inst = original_target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + extended_arg;
+                        jump_target = next_inst + this_instr->oparg + 1;
+                    }
+                    int start_of_side_exit = ctx->n_side_exit_dest;
+                    // Write back the SET_IP
+                    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+                    APPEND_SIDE_OP(exit_op, 0, 0);
+                    trace_dest[ctx->n_side_exit_dest - 1].target = jump_target;
+                    trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
+
+                    trace_dest[ctx->n_trace_dest - 1].jump_target = start_of_side_exit;
+                    trace_dest[ctx->n_trace_dest - 1].format = UOP_FORMAT_JUMP;
+                }
+                if (_PyUop_Flags[opcode] & HAS_ERROR_FLAG) {
+                    int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
+                                 0 : _PyUop_num_popped(opcode, this_instr->oparg);
+                    int start_of_side_exit = ctx->n_side_exit_dest;
+                    // Write back the SET_IP
+                    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+                    trace_dest[ctx->n_side_exit_dest - 1].target = original_target;
+                    APPEND_SIDE_OP(_ERROR_POP_N, popped, 0);
+                    trace_dest[ctx->n_side_exit_dest - 1].operand = original_target;
+                    trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
+
+                    trace_dest[ctx->n_trace_dest - 1].error_target = start_of_side_exit;
+
+                    if (trace_dest[ctx->n_trace_dest - 1].format == UOP_FORMAT_TARGET) {
+                        trace_dest[ctx->n_trace_dest - 1].format = UOP_FORMAT_JUMP;
+                        trace_dest[ctx->n_trace_dest - 1].jump_target = 0;
+                    }
+                }
+            }
+
         }
         else {
             // Inst is static. Nothing written :)!
@@ -647,7 +721,7 @@ partial_evaluate_uops(
         DPRINTF(3, "\n");
         DPRINTF(1, "Hit bottom in pe's abstract interpreter\n");
         _Py_uop_abstractcontext_fini(ctx);
-        return 0;
+        return trace_len;
     }
 
     if (ctx->out_of_space || !is_terminator(this_instr)) {
@@ -659,12 +733,24 @@ partial_evaluate_uops(
         // That's the only time the PE's residual is valid.
         assert(ctx->n_trace_dest < UOP_MAX_TRACE_LENGTH);
         assert(is_terminator(this_instr));
-        assert(ctx->n_trace_dest <= trace_len);
 
+        // Fix up _JUMP_TO_TOP
+        for (_PyUOpInstruction *inst = trace_dest; inst < trace_dest + UOP_MAX_TRACE_LENGTH; inst++) {
+            if (inst->opcode == _JUMP_TO_TOP) {
+                assert(trace_dest[0].opcode == _START_EXECUTOR);
+                inst->format = UOP_FORMAT_JUMP;
+                inst->jump_target = 1;
+            }
+        }
         // Copy trace_dest into trace.
-        memcpy(trace, trace_dest, ctx->n_trace_dest * sizeof(_PyUOpInstruction ));
-        int trace_dest_len = ctx->n_trace_dest;
+        memcpy(trace, trace_dest, UOP_MAX_TRACE_LENGTH * sizeof(_PyUOpInstruction));
+        int main_trace_length = ctx->n_trace_dest;
+        assert(ctx->n_side_exit_dest >= UOP_MAX_TRACE_LENGTH / 2);
+        int trace_dest_len = ctx->n_side_exit_dest;
         _Py_uop_abstractcontext_fini(ctx);
+        *main_trace_len = main_trace_length;
+        assert(trace_dest_len >= 1);
+        *partial_eval_success = true;
         return trace_dest_len;
     }
 
@@ -764,6 +850,131 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
     Py_UNREACHABLE();
 }
 
+int
+remove_nop_sled(_PyUOpInstruction *buffer, int whole_trace_len, int main_trace_len) {
+    int side_exit_lens = whole_trace_len - UOP_MAX_TRACE_LENGTH / 2;
+    int offset = (UOP_MAX_TRACE_LENGTH / 2) - main_trace_len;
+    _PyUOpInstruction *side_exit_dest_start = &buffer[main_trace_len];
+    _PyUOpInstruction *side_exit_curr_start = &buffer[UOP_MAX_TRACE_LENGTH / 2];
+    for (_PyUOpInstruction *start = side_exit_dest_start; start < (side_exit_dest_start + side_exit_lens); start ++) {
+        *start = *side_exit_curr_start;
+        side_exit_curr_start++;
+    }
+
+    // _NOP out the rest
+    for (_PyUOpInstruction *start = side_exit_curr_start; start < buffer + UOP_MAX_TRACE_LENGTH; start++) {
+        start->opcode = _NOP;
+    }
+
+    for (_PyUOpInstruction *inst = buffer; inst < buffer + (main_trace_len); inst++) {
+        int opcode = inst->opcode;
+        if (inst->format == UOP_FORMAT_JUMP) {
+            if (opcode == _JUMP_TO_TOP) {
+                continue;
+            }
+            if (is_for_iter_test[opcode]) {
+                inst->jump_target -= offset;
+                inst->error_target -= offset;
+                continue;
+            }
+            int flags = _PyUop_Flags[opcode];
+            if (flags & HAS_ERROR_FLAG) {
+                inst->error_target -= offset;
+            }
+            if (flags & (HAS_DEOPT_FLAG | HAS_EXIT_FLAG)) {
+                inst->jump_target -= offset;
+            }
+        }
+    }
+
+    return side_exit_lens + main_trace_len;
+}
+
+static void make_exit(_PyUOpInstruction *inst, int opcode, int target)
+{
+    inst->opcode = opcode;
+    inst->oparg = 0;
+    inst->operand = 0;
+    inst->format = UOP_FORMAT_TARGET;
+    inst->target = target;
+}
+
+/* Convert implicit exits, errors and deopts
+ * into explicit ones. */
+static int
+prepare_for_execution(_PyUOpInstruction *buffer, int length)
+{
+    int32_t current_jump = -1;
+    int32_t current_jump_target = -1;
+    int32_t current_error = -1;
+    int32_t current_error_target = -1;
+    int32_t current_popped = -1;
+    int32_t current_exit_op = -1;
+    /* Leaving in NOPs slows down the interpreter and messes up the stats */
+    _PyUOpInstruction *copy_to = &buffer[0];
+    for (int i = 0; i < length; i++) {
+        _PyUOpInstruction *inst = &buffer[i];
+        if (inst->opcode != _NOP) {
+            if (copy_to != inst) {
+                *copy_to = *inst;
+            }
+            copy_to++;
+        }
+    }
+    length = (int)(copy_to - buffer);
+    int next_spare = length;
+    for (int i = 0; i < length; i++) {
+        _PyUOpInstruction *inst = &buffer[i];
+        int opcode = inst->opcode;
+        int32_t target = (int32_t)uop_get_target(inst);
+        if (_PyUop_Flags[opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG)) {
+            uint16_t exit_op = (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) ?
+                               _EXIT_TRACE : _DEOPT;
+            int32_t jump_target = target;
+            if (is_for_iter_test[opcode]) {
+                /* Target the POP_TOP immediately after the END_FOR,
+                 * leaving only the iterator on the stack. */
+                int extended_arg = inst->oparg > 255;
+                int32_t next_inst = target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + extended_arg;
+                jump_target = next_inst + inst->oparg + 1;
+            }
+            if (jump_target != current_jump_target || current_exit_op != exit_op) {
+                make_exit(&buffer[next_spare], exit_op, jump_target);
+                current_exit_op = exit_op;
+                current_jump_target = jump_target;
+                current_jump = next_spare;
+                next_spare++;
+            }
+            buffer[i].jump_target = current_jump;
+            buffer[i].format = UOP_FORMAT_JUMP;
+        }
+        if (_PyUop_Flags[opcode] & HAS_ERROR_FLAG) {
+            int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
+                         0 : _PyUop_num_popped(opcode, inst->oparg);
+            if (target != current_error_target || popped != current_popped) {
+                current_popped = popped;
+                current_error = next_spare;
+                current_error_target = target;
+                make_exit(&buffer[next_spare], _ERROR_POP_N, 0);
+                buffer[next_spare].oparg = popped;
+                buffer[next_spare].operand = target;
+                next_spare++;
+            }
+            buffer[i].error_target = current_error;
+            if (buffer[i].format == UOP_FORMAT_TARGET) {
+                buffer[i].format = UOP_FORMAT_JUMP;
+                buffer[i].jump_target = 0;
+            }
+        }
+        if (opcode == _JUMP_TO_TOP) {
+            assert(buffer[0].opcode == _START_EXECUTOR);
+            buffer[i].format = UOP_FORMAT_JUMP;
+            buffer[i].jump_target = 1;
+        }
+    }
+    return next_spare;
+}
+
 //  0 - failure, no error raised, just fall back to Tier 1
 // -1 - failure, and raise error
 //  > 0 - length of optimized trace
@@ -796,17 +1007,26 @@ _Py_uop_analyze_and_optimize(
     length = remove_unneeded_uops(buffer, length);
     assert(length > 0);
 
+    int main_trace_length;
+    bool success = false;
     length = partial_evaluate_uops(
         _PyFrame_GetCode(frame), buffer,
-        length, curr_stacklen, dependencies);
+        length, curr_stacklen, dependencies, &main_trace_length, &success);
 
     if (length <= 0) {
         return length;
     }
 
+    if (success) {
+        length = remove_nop_sled(buffer, length, main_trace_length);
+    }
+    else {
+        // Partial eval failed, we have to prepare the exits ourselves.
+        length = prepare_for_execution(buffer, length);
+    }
 
     OPT_STAT_INC(optimizer_successes);
     return length;
 }
 
-#endif /* _Py_TIER2 */
+
