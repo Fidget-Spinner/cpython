@@ -566,6 +566,15 @@ static const uint8_t is_for_iter_test[MAX_UOP_ID + 1] = {
         ctx->done = true; \
     }
 
+
+static void
+restore_state_in_side_exit(_Py_UOpsContext *ctx, _PyUOpInstruction *trace_dest, int original_target)
+{
+    // Write back the SET_IP
+    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+    // trace_dest[ctx->n_side_exit_dest - 1].target = ctx->n_side_exit_dest;
+}
+
 /* 1 for success, 0 for not ready, cannot error at the moment. */
 static int
 partial_evaluate_uops(
@@ -666,7 +675,7 @@ partial_evaluate_uops(
                     }
                     int start_of_side_exit = ctx->n_side_exit_dest;
                     // Write back the SET_IP
-                    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+                    restore_state_in_side_exit(ctx, trace_dest, original_target);
                     APPEND_SIDE_OP(exit_op, 0, 0);
                     trace_dest[ctx->n_side_exit_dest - 1].target = jump_target;
                     trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
@@ -678,9 +687,7 @@ partial_evaluate_uops(
                     int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
                                  0 : _PyUop_num_popped(opcode, this_instr->oparg);
                     int start_of_side_exit = ctx->n_side_exit_dest;
-                    // Write back the SET_IP
-                    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
-                    trace_dest[ctx->n_side_exit_dest - 1].target = original_target;
+                    restore_state_in_side_exit(ctx, trace_dest, original_target);
                     APPEND_SIDE_OP(_ERROR_POP_N, popped, 0);
                     trace_dest[ctx->n_side_exit_dest - 1].operand = original_target;
                     trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
