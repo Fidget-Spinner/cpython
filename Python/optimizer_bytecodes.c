@@ -603,9 +603,9 @@ dummy_func(void) {
         }
 
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, true);
         } else {
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, true);
 
         }
     }

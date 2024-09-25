@@ -40,7 +40,6 @@
         case _LOAD_FAST: {
             _Py_UopsLocalsPlusSlot value;
             value = GETLOCAL(oparg);
-            sym_set_locals_idx(value, oparg);
             SET_STATIC_INST();
             value.is_virtual = true;
             stack_pointer[0] = value;
@@ -72,12 +71,25 @@
         case _STORE_FAST: {
             _Py_UopsLocalsPlusSlot value;
             value = stack_pointer[-1];
-            // Gets rid of stores by the same load
-            if (value.is_virtual && oparg == sym_get_locals_idx(value)) {
+            // If the locals is known, we can copy propagate/dead store eliminate it.
+            if (value.sym->locals_idx != -1) {
+                SET_STATIC_INST();
+            }
+            else if (value.is_virtual &&
+                 (sym_is_const(value) && sym_is_const(GETLOCAL(oparg))) &&
+                 sym_get_const(value) == sym_get_const(GETLOCAL(oparg))) {
                 SET_STATIC_INST();
             }
             else {
                 reify_shadow_stack(ctx);
+                _Py_UopsLocalsPlusSlot old_value = value;
+                if (sym_is_const(old_value)) {
+                    value = sym_new_const(ctx, sym_get_const(old_value));
+                }
+                else {
+                    value = sym_new_not_null(ctx);
+                }
+                value.sym->locals_idx = oparg;
                 value.is_virtual = false;
             }
             GETLOCAL(oparg) = value;
@@ -641,13 +653,12 @@
         case _RETURN_VALUE: {
             _Py_UopsLocalsPlusSlot retval;
             _Py_UopsLocalsPlusSlot res;
-            retval = stack_pointer[-1];
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
-            res = retval;
+            res = sym_new_unknown(ctx);
             co = get_code(this_instr);
             if (co == NULL) {
                 // might be impossible, but bailing is still safe
@@ -1807,9 +1818,9 @@
                 argcount++;
             }
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount);
+                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, false);
             } else {
-                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0);
+                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
             }
             stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;
@@ -2141,9 +2152,8 @@
         case _COPY: {
             _Py_UopsLocalsPlusSlot bottom;
             _Py_UopsLocalsPlusSlot top;
-            bottom = stack_pointer[-1 - (oparg-1)];
             assert(oparg > 0);
-            top = bottom;
+            top = sym_new_not_null(ctx);
             stack_pointer[0] = top;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -2283,6 +2293,7 @@
         }
 
         case _SAVE_RETURN_OFFSET: {
+            ctx->frame->return_offset = oparg;
             break;
         }
 

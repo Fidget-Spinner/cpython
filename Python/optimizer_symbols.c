@@ -363,7 +363,8 @@ _Py_uop_frame_new(
     PyCodeObject *co,
     int curr_stackentries,
     _Py_UopsLocalsPlusSlot *args,
-    int arg_len)
+    int arg_len,
+    int propagate_locals)
 {
     assert(ctx->curr_frame_depth < MAX_ABSTRACT_FRAME_DEPTH);
     _Py_UOpsAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
@@ -381,13 +382,17 @@ _Py_uop_frame_new(
         return NULL;
     }
 
+    if (!propagate_locals) {
+        arg_len = 0;
+    }
+
     // Initialize with the initial state of all local variables
     for (int i = 0; i < arg_len; i++) {
         frame->locals[i] = args[i];
     }
 
     for (int i = arg_len; i < co->co_nlocalsplus; i++) {
-        frame->locals[i] = _Py_uop_sym_new_unknown(ctx);;
+        frame->locals[i] = _Py_uop_sym_new_unknown(ctx);
     }
 
     for (int i = 0; i < co->co_nlocalsplus; i++) {
@@ -399,6 +404,8 @@ _Py_uop_frame_new(
     for (int i = 0; i < curr_stackentries; i++) {
         frame->stack[i] = _Py_uop_sym_new_unknown(ctx);
     }
+
+    frame->return_offset = -1;
 
     return frame;
 }

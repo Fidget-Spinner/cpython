@@ -52,7 +52,6 @@ dummy_func(void) {
 
     override op(_LOAD_FAST, (-- value)) {
         value = GETLOCAL(oparg);
-        sym_set_locals_idx(value, oparg);
         SET_STATIC_INST();
         value.is_virtual = true;
     }
@@ -80,12 +79,25 @@ dummy_func(void) {
     }
 
     override op(_STORE_FAST, (value --)) {
-        // Gets rid of stores by the same load
-        if (value.is_virtual && oparg == sym_get_locals_idx(value)) {
+        // If the locals is known, we can copy propagate/dead store eliminate it.
+        if (value.sym->locals_idx != -1) {
+            SET_STATIC_INST();
+        }
+        else if (value.is_virtual &&
+            (sym_is_const(value) && sym_is_const(GETLOCAL(oparg))) &&
+            sym_get_const(value) == sym_get_const(GETLOCAL(oparg))) {
             SET_STATIC_INST();
         }
         else {
             reify_shadow_stack(ctx);
+            _Py_UopsLocalsPlusSlot old_value = value;
+            if (sym_is_const(old_value)) {
+                value = sym_new_const(ctx, sym_get_const(old_value));
+            }
+            else {
+                value = sym_new_not_null(ctx);
+            }
+            value.sym->locals_idx = oparg;
             value.is_virtual = false;
         }
         GETLOCAL(oparg) = value;
@@ -143,12 +155,54 @@ dummy_func(void) {
         ctx->frame->stack_pointer = stack_pointer;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
-        res = retval;
+        res = sym_new_unknown(ctx);
 
         co = get_code(this_instr);
         if (co == NULL) {
             // might be impossible, but bailing is still safe
             ctx->done = true;
+        }
+    }
+
+    override op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null, args[oparg] -- new_frame)) {
+        int argcount = oparg;
+
+        (void)callable;
+
+        PyCodeObject *co = NULL;
+        assert((this_instr + 2)->opcode == _PUSH_FRAME);
+        uint64_t push_operand = (this_instr + 2)->operand;
+        if (push_operand & 1) {
+            co = (PyCodeObject *)(push_operand & ~1);
+            DPRINTF(3, "code=%p ", co);
+            assert(PyCode_Check(co));
+        }
+        else {
+            PyFunctionObject *func = (PyFunctionObject *)push_operand;
+            DPRINTF(3, "func=%p ", func);
+            if (func == NULL) {
+                DPRINTF(3, "\n");
+                DPRINTF(1, "Missing function\n");
+                ctx->done = true;
+                break;
+            }
+            co = (PyCodeObject *)func->func_code;
+            DPRINTF(3, "code=%p ", co);
+        }
+
+        assert(self_or_null.sym != NULL);
+        assert(args != NULL);
+        if (sym_is_not_null(self_or_null)) {
+            // Bound method fiddling, same as _INIT_CALL_PY_EXACT_ARGS in VM
+            args--;
+            argcount++;
+        }
+
+        if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, false);
+        } else {
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
+
         }
     }
 
@@ -159,6 +213,15 @@ dummy_func(void) {
 
     override op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
         ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+    }
+
+    override op(_SAVE_RETURN_OFFSET, (--)) {
+        ctx->frame->return_offset = oparg;
+    }
+
+    override op(_COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
+        assert(oparg > 0);
+        top = sym_new_not_null(ctx);
     }
 
 // END BYTECODES //

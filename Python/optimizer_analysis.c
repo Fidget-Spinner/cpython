@@ -412,7 +412,7 @@ optimize_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_abstractcontext_init(ctx);
-    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0);
+    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0, true);
     if (frame == NULL) {
         return -1;
     }
@@ -499,9 +499,12 @@ error:
 
 #define SET_STATIC_INST() instr_is_truly_static = true;
 
+
+
 static void
 reify_shadow_stack(_Py_UOpsContext *ctx)
 {
+    DPRINTF(3, "reifying shadow ctx\n");
     _PyUOpInstruction *trace_dest = ctx->trace_dest;
     for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
@@ -539,6 +542,104 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
             }
         }
     }
+    int locals_loaded = 0;
+    // Restore locals from bottom to top
+    for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals; local < ctx->frame->locals + ctx->frame->locals_len; local++) {
+        // Locals did not change. No need to update it.
+        if (local->sym->locals_idx == (local - ctx->frame->locals)) {
+            continue;
+        }
+        if (sym_is_null(*local)) {
+            continue;
+        }
+        locals_loaded++;
+        assert(local->sym->locals_idx != -1 || sym_is_const(*local));
+        // Locals DID change.
+        DPRINTF(3, "reifying locals LOAD_FAST %d\n", (int)(local->sym->locals_idx));
+        if (local->sym->locals_idx != -1) {
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _LOAD_FAST,
+                     local->sym->locals_idx, 0);
+        }
+        else {
+            assert(sym_is_const(*local));
+            PyObject *const_val = sym_get_const(*local);
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _Py_IsImmortal(const_val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE,
+                     0, (uintptr_t)const_val);
+        }
+        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+        trace_dest[ctx->n_trace_dest].target = 0;
+        ctx->n_trace_dest++;
+        if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+            ctx->out_of_space = true;
+            ctx->done = true;
+            return;
+        }
+    }
+    if (locals_loaded + ctx->frame->stack_pointer > ctx->frame->stack + ctx->frame->stack_len) {
+        ctx->out_of_space = true;
+        ctx->done = true;
+        return;
+    }
+    assert(locals_loaded + ctx->frame->stack_pointer <= ctx->frame->stack + ctx->frame->stack_len);
+    // Store in REVERSE order (due to nature of stack)
+    for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals + ctx->frame->locals_len - 1; local >= ctx->frame->locals ; local--) {
+        // Locals did not change. No need to update it.
+        if (local->sym->locals_idx == (local - ctx->frame->locals)) {
+            continue;
+        }
+        if (sym_is_null(*local)) {
+            continue;
+        }
+        // Locals DID change.
+        DPRINTF(3, "reifying locals STORE_FAST %d\n", (int)(local - ctx->frame->locals));
+        WRITE_OP(&trace_dest[ctx->n_trace_dest], _STORE_FAST, (local - ctx->frame->locals), 0);
+        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+        trace_dest[ctx->n_trace_dest].target = 0;
+        ctx->n_trace_dest++;
+        if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+            ctx->out_of_space = true;
+            ctx->done = true;
+            return;
+        }
+    }
+    for (int i = 0; i <  ctx->frame->locals_len; i++) {
+        if (sym_is_null(ctx->frame->locals[i])) {
+            continue;
+        }
+        if (sym_is_const(ctx->frame->locals[i])) {
+            ctx->frame->locals[i] = sym_new_const(ctx, sym_get_const(ctx->frame->locals[i]));
+        }
+        else {
+            ctx->frame->locals[i] = sym_new_not_null(ctx);
+        }
+        ctx->frame->locals[i].sym->locals_idx = i;
+    }
+    for (int i = 0; i < (int)(ctx->frame->stack_pointer - ctx->frame->stack); i++) {
+        if (sym_is_null(ctx->frame->stack[i])) {
+            continue;
+        }
+        ctx->frame->stack[i] = sym_new_not_null(ctx);
+    }
+}
+
+static bool
+stack_wont_have_enough_space_for_temp_locals(_Py_UOpsContext *ctx, int next_opcode_stackeffect, int opcode)
+{
+    int total = 0;
+    for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals; local < ctx->frame->locals + ctx->frame->locals_len; local++) {
+        // Locals did not change. No need to update it.
+        if (local->sym->locals_idx == (local - ctx->frame->locals)) {
+            continue;
+        }
+        total++;
+    }
+    int current_stackentries = (int)(ctx->frame->stack_pointer - ctx->frame->stack);
+    next_opcode_stackeffect = next_opcode_stackeffect < 0 ? 0 : next_opcode_stackeffect;
+    int is_load_fast_or_store_fast = opcode == _LOAD_FAST || opcode == _STORE_FAST;
+    int res = (total + current_stackentries) + is_load_fast_or_store_fast >= ctx->frame->stack_len - next_opcode_stackeffect;
+    fprintf(stderr, "TOTAL: %d FULL? %d\n", total, res);
+    return  res;
+
 }
 
 static const uint8_t is_for_iter_test[MAX_UOP_ID + 1] = {
@@ -572,7 +673,6 @@ restore_state_in_side_exit(_Py_UOpsContext *ctx, _PyUOpInstruction *trace_dest, 
 {
     // Write back the SET_IP
     APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
-    // trace_dest[ctx->n_side_exit_dest - 1].target = ctx->n_side_exit_dest;
 }
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */
@@ -604,7 +704,7 @@ partial_evaluate_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_abstractcontext_init(ctx);
-    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0);
+    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0, false);
     if (frame == NULL) {
         return -1;
     }
@@ -628,7 +728,10 @@ partial_evaluate_uops(
         // are static.
         // If so, whether it can be eliminated is up to whether it has an implementation.
         bool instr_is_truly_static = false;
-        if (!(_PyUop_Flags[opcode] & HAS_STATIC_FLAG)) {
+        if (!(_PyUop_Flags[opcode] & HAS_STATIC_FLAG) &&
+            // _INIT_CALL_PY_EXACT_ARGS pushes a non-symbol on the stack, so just don't reify it
+            // because the stack is inconsistent.
+            (opcode != _SAVE_RETURN_OFFSET && opcode !=_PUSH_FRAME) ) {
             reify_shadow_stack(ctx);
         }
 

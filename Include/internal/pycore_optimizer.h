@@ -210,6 +210,7 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsLocalsPlusSlot *locals;
 
     void *instr_ptr;
+    int return_offset;
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;
@@ -276,7 +277,8 @@ extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     PyCodeObject *co,
     int curr_stackentries,
     _Py_UopsLocalsPlusSlot *args,
-    int arg_len);
+    int arg_len,
+    int propagate_locals);
 extern int _Py_uop_frame_pop(_Py_UOpsContext *ctx);
 
 PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
