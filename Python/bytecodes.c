@@ -966,7 +966,7 @@ dummy_func(
         // We definitely pop the return value off the stack on entry.
         // We also push it onto the stack on exit, but that's a
         // different frame, and it's accounted for by _PUSH_FRAME.
-        replicate(6) _static inst(RETURN_VALUE, (retval -- res)) {
+        _static inst(RETURN_VALUE, (retval -- res)) {
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
@@ -984,7 +984,7 @@ dummy_func(
             LLTRACE_RESUME_FRAME();
         }
 
-        tier2 op(_RETURN_N, (--)) {
+        replicate(6) tier2 op(_RETURN_N, (--)) {
             _PyStackRef *old_sp = stack_pointer;
             stack_pointer -= oparg;
             assert(EMPTY());
