@@ -943,8 +943,29 @@
         }
 
         case _BUILD_TUPLE: {
+            _Py_UopsLocalsPlusSlot *values;
             _Py_UopsLocalsPlusSlot tup;
-            tup = sym_new_not_null(ctx);
+            values = &stack_pointer[-oparg];
+            bool all_virtual = oparg <= 6;
+            for (int i = 0; i < oparg; i++) {
+                all_virtual = all_virtual && values[i].is_virtual;
+            }
+            if (all_virtual) {
+                SET_STATIC_INST();
+            }
+            else {
+                reify_shadow_stack(ctx);
+            }
+            if (oparg <= 6) {
+                tup = _Py_uop_sym_new_tuple(ctx, oparg);
+                for (int i = 0; i < oparg; i++) {
+                    _Py_uop_sym_tuple_setitem(ctx, tup, i, values[i]);
+                }
+                tup.is_virtual = all_virtual;
+            }
+            else {
+                tup = sym_new_not_null(ctx);
+            }
             stack_pointer[-oparg] = tup;
             stack_pointer += 1 - oparg;
             assert(WITHIN_STACK_BOUNDS());

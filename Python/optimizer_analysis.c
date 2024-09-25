@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdint-gcc.h>
 
 #ifdef Py_DEBUG
     extern const char *_PyUOpName(int index);
@@ -500,6 +501,60 @@ error:
 #define SET_STATIC_INST() instr_is_truly_static = true;
 
 
+static bool
+write_single_locals_or_const(
+    _Py_UOpsContext *ctx,
+    _PyUOpInstruction *trace_dest,
+    const _Py_UopsLocalsPlusSlot *sp,
+    _Py_UopsLocalsPlusSlot *slot,
+    int err_on_false
+    )
+{
+    if ((*slot).sym->locals_idx >= 0) {
+        DPRINTF(3, "reifying %d LOAD_FAST %d\n", (int)(sp - ctx->frame->stack), (*slot).sym->locals_idx);
+        WRITE_OP(&trace_dest[ctx->n_trace_dest], _LOAD_FAST, (*slot).sym->locals_idx, 0);
+        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+        trace_dest[ctx->n_trace_dest].target = 0;
+        ctx->n_trace_dest++;
+        return true;
+    }
+    else if ((*slot).sym->const_val) {
+        DPRINTF(3, "reifying %d LOAD_CONST_INLINE %p\n", (int)(sp - ctx->frame->stack), (*slot).sym->const_val);
+        WRITE_OP(&trace_dest[ctx->n_trace_dest], _Py_IsImmortal((*slot).sym->const_val) ?
+            _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uint64_t) (*slot).sym->const_val);
+        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+        trace_dest[ctx->n_trace_dest].target = 0;
+        ctx->n_trace_dest++;
+        return true;
+    }
+    else if (_Py_uop_sym_is_tuple(*slot)) {
+        DPRINTF(3, "reifying %d BUILD_TUPLE start\n", (int)(sp - ctx->frame->stack));
+        if (slot->sym->tuple_size + ctx->frame->stack_pointer - 1 > ctx->frame->stack + ctx->frame->stack_len) {
+            ctx->out_of_space = true;
+            ctx->done = true;
+            return true;
+        }
+        for (int i = 0; i < slot->sym->tuple_size; i++) {
+            _Py_UopsLocalsPlusSlot temp_slot = {
+                _Py_uop_sym_tuple_getitem(ctx, *slot, i), false};
+            write_single_locals_or_const(ctx, trace_dest, sp, &temp_slot, true);
+        }
+        // TODO we need a proper target for this eventually for errors.
+        // But the chance of a small tuple erroring means OOM and freelist fail. Which is exceedingly rare.
+        WRITE_OP(&trace_dest[ctx->n_trace_dest], _BUILD_TUPLE, slot->sym->tuple_size, 0);
+        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_JUMP;
+        trace_dest[ctx->n_trace_dest].error_target = UOP_MAX_TRACE_LENGTH / 2 - 1;
+        trace_dest[ctx->n_trace_dest].jump_target = 0;
+        // trace_dest[ctx->n_trace_dest].jump_target = 0;
+        ctx->n_trace_dest++;
+        DPRINTF(3, "reifying %d BUILD_TUPLE end\n", (int)(sp - ctx->frame->stack));
+        return true;
+    }
+    else if (err_on_false) {
+        Py_UNREACHABLE();
+    }
+    return false;
+}
 
 static void
 reify_shadow_stack(_Py_UOpsContext *ctx)
@@ -512,29 +567,18 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
         // Need reifying.
         if (slot.is_virtual) {
             sp->is_virtual = false;
-            if (slot.sym->locals_idx >= 0) {
-                DPRINTF(3, "reifying %d LOAD_FAST %d\n", (int)(sp - ctx->frame->stack), slot.sym->locals_idx);
-                WRITE_OP(&trace_dest[ctx->n_trace_dest], _LOAD_FAST, slot.sym->locals_idx, 0);
-                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
-                trace_dest[ctx->n_trace_dest].target = 0;
-            }
-            else if (slot.sym->const_val) {
-                DPRINTF(3, "reifying %d LOAD_CONST_INLINE %p\n", (int)(sp - ctx->frame->stack), slot.sym->const_val);
-                WRITE_OP(&trace_dest[ctx->n_trace_dest], _Py_IsImmortal(slot.sym->const_val) ?
-                    _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uint64_t)slot.sym->const_val);
-                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
-                trace_dest[ctx->n_trace_dest].target = 0;
+            if (write_single_locals_or_const(ctx, trace_dest, sp, &slot, false)) {
             }
             else if (sym_is_null(slot)) {
                 DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(sp - ctx->frame->stack));
                 WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_NULL, 0, 0);
+                ctx->n_trace_dest++;
             }
             else {
                 // Is static but not a constant value of locals or NULL.
                 // How is that possible?
                 Py_UNREACHABLE();
             }
-            ctx->n_trace_dest++;
             if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
                 ctx->out_of_space = true;
                 ctx->done = true;
@@ -980,7 +1024,7 @@ remove_nop_sled(_PyUOpInstruction *buffer, int whole_trace_len, int main_trace_l
         int opcode = inst->opcode;
         if (inst->format == UOP_FORMAT_JUMP) {
             if (opcode == _JUMP_TO_TOP) {
-                continue;
+                break;
             }
             if (is_for_iter_test[opcode]) {
                 inst->jump_target -= offset;

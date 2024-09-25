@@ -145,6 +145,7 @@ extern PyTypeObject _PyDefaultOptimizer_Type;
 extern PyTypeObject _PyUOpExecutor_Type;
 extern PyTypeObject _PyUOpOptimizer_Type;
 
+#define MAX_TUPLE_SIZE 6
 /* Symbols */
 /* See explanation in optimizer_symbols.c */
 
@@ -154,7 +155,8 @@ struct _Py_UopsSymbol {
     PyObject *const_val;  // Owned reference (!)
     unsigned int type_version; // currently stores type version
     int locals_idx;
-    char is_static;  // used for binding-time analysis
+    uint8_t tuple_size;
+    uint16_t tuples_elts_idxs[MAX_TUPLE_SIZE];
 };
 
 #define UOP_FORMAT_TARGET 0
@@ -254,6 +256,14 @@ extern _Py_UopsLocalsPlusSlot _Py_uop_sym_new_type(
     _Py_UOpsContext *ctx, PyTypeObject *typ);
 extern _Py_UopsLocalsPlusSlot _Py_uop_sym_new_const(_Py_UOpsContext *ctx, PyObject *const_val);
 extern _Py_UopsLocalsPlusSlot _Py_uop_sym_new_null(_Py_UOpsContext *ctx);
+_Py_UopsLocalsPlusSlot
+_Py_uop_sym_new_tuple(_Py_UOpsContext *ctx, int size);
+extern bool
+_Py_uop_sym_is_tuple(_Py_UopsLocalsPlusSlot tuple);
+extern void
+_Py_uop_sym_tuple_setitem(_Py_UOpsContext *ctx, _Py_UopsLocalsPlusSlot tuple, int idx, _Py_UopsLocalsPlusSlot item);
+extern _Py_UopsSymbol *
+_Py_uop_sym_tuple_getitem(_Py_UOpsContext *ctx, _Py_UopsLocalsPlusSlot tuple, int idx);
 extern bool _Py_uop_sym_has_type(_Py_UopsLocalsPlusSlot sym);
 extern bool _Py_uop_sym_matches_type(_Py_UopsLocalsPlusSlot sym, PyTypeObject *typ);
 extern bool _Py_uop_sym_matches_type_version(_Py_UopsLocalsPlusSlot sym, unsigned int version);

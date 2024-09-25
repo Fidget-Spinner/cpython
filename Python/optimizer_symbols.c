@@ -32,6 +32,7 @@
 #define IS_NULL    1 << 0
 #define NOT_NULL   1 << 1
 #define NO_SPACE   1 << 2
+#define IS_TUPLE   1 << 3
 
 #ifdef Py_DEBUG
 static inline int get_lltrace(void) {
@@ -82,8 +83,8 @@ sym_new(_Py_UOpsContext *ctx)
     self->typ = NULL;
     self->const_val = NULL;
     self->type_version = 0;
-    self->is_static = false;
     self->locals_idx = -1;
+    self->tuple_size = 0;
 
     return self;
 }
@@ -195,7 +196,6 @@ _Py_uop_sym_set_const(_Py_UOpsContext *ctx, _Py_UopsLocalsPlusSlot sym, PyObject
         sym.sym->typ = typ;
         sym.sym->const_val = Py_NewRef(const_val);
     }
-    sym.sym->is_static = true;
 }
 
 void
@@ -205,7 +205,6 @@ _Py_uop_sym_set_null(_Py_UOpsContext *ctx, _Py_UopsLocalsPlusSlot sym)
         sym_set_bottom(ctx, sym);
     }
     sym_set_flag(sym, IS_NULL);
-    sym.sym->is_static = true;
 }
 
 void
@@ -271,6 +270,42 @@ _Py_uop_sym_new_null(_Py_UOpsContext *ctx)
     _Py_uop_sym_set_null(ctx, null_sym);
     return null_sym;
 }
+
+_Py_UopsLocalsPlusSlot
+_Py_uop_sym_new_tuple(_Py_UOpsContext *ctx,
+                      int size)
+{
+    _Py_UopsLocalsPlusSlot non_null_sym = _Py_uop_sym_new_not_null(ctx);
+    if (non_null_sym.sym == NULL) {
+        return out_of_space(ctx);
+    }
+    sym_set_flag(non_null_sym, IS_TUPLE);
+    assert(size == (uint8_t)size);
+    non_null_sym.sym->tuple_size = size;
+    return non_null_sym;
+}
+
+bool
+_Py_uop_sym_is_tuple(_Py_UopsLocalsPlusSlot tuple)
+{
+    return tuple.sym->flags & IS_TUPLE;
+}
+
+void
+_Py_uop_sym_tuple_setitem(_Py_UOpsContext *ctx, _Py_UopsLocalsPlusSlot tuple, int idx, _Py_UopsLocalsPlusSlot item)
+{
+    assert(_Py_uop_sym_is_tuple(tuple));
+    assert(idx <= 5);
+    tuple.sym->tuples_elts_idxs[idx] = (item.sym - ctx->t_arena.arena);
+}
+
+_Py_UopsSymbol *
+_Py_uop_sym_tuple_getitem(_Py_UOpsContext *ctx, _Py_UopsLocalsPlusSlot tuple, int idx)
+{
+    assert(_Py_uop_sym_is_tuple(tuple));
+    return &ctx->t_arena.arena[tuple.sym->tuples_elts_idxs[idx]];
+}
+
 
 PyTypeObject *
 _Py_uop_sym_get_type(_Py_UopsLocalsPlusSlot sym)
