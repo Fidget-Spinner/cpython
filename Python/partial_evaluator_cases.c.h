@@ -669,6 +669,15 @@
                 APPEND_OP(_RETURN_N, 2, 0);
                 DONT_EMIT_N_INSTRUCTIONS(3);
             }
+            if ((this_instr+2)->opcode == _UNPACK_SEQUENCE_TUPLE &&
+                (_Py_uop_sym_is_tuple(retval) && retval.sym->tuple_size == (this_instr+2)->oparg) &&
+                // Check the callee stack has enough space.
+                _Py_uop_frame_prev(ctx)->stack_len >= (this_instr+2)->oparg &&
+                trace_dest[ctx->n_trace_dest - 1].opcode == BUILD_TUPLE) {
+                trace_dest[ctx->n_trace_dest - 1].opcode = _NOP;
+                APPEND_OP(_RETURN_N, (this_instr+2)->oparg, 0);
+                DONT_EMIT_N_INSTRUCTIONS(3);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
