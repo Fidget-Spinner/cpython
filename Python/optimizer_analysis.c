@@ -500,18 +500,19 @@ error:
 
 #define SET_STATIC_INST() instr_is_truly_static = true;
 
+#define DONT_EMIT_N_INSTRUCTIONS(n) dont_emit_n_insts = n;
 
 static bool
-write_single_locals_or_const(
+write_single_locals_or_const_or_tuple(
     _Py_UOpsContext *ctx,
     _PyUOpInstruction *trace_dest,
-    const _Py_UopsLocalsPlusSlot *sp,
     _Py_UopsLocalsPlusSlot *slot,
-    int err_on_false
+    int err_on_false,
+    int reconstruct_tuples
     )
 {
     if ((*slot).sym->locals_idx >= 0) {
-        DPRINTF(3, "reifying %d LOAD_FAST %d\n", (int)(sp - ctx->frame->stack), (*slot).sym->locals_idx);
+        DPRINTF(3, "reifying LOAD_FAST %d\n", (*slot).sym->locals_idx);
         WRITE_OP(&trace_dest[ctx->n_trace_dest], _LOAD_FAST, (*slot).sym->locals_idx, 0);
         trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
         trace_dest[ctx->n_trace_dest].target = 0;
@@ -519,7 +520,7 @@ write_single_locals_or_const(
         return true;
     }
     else if ((*slot).sym->const_val) {
-        DPRINTF(3, "reifying %d LOAD_CONST_INLINE %p\n", (int)(sp - ctx->frame->stack), (*slot).sym->const_val);
+        DPRINTF(3, "reifying LOAD_CONST_INLINE %p\n", (*slot).sym->const_val);
         WRITE_OP(&trace_dest[ctx->n_trace_dest], _Py_IsImmortal((*slot).sym->const_val) ?
             _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uint64_t) (*slot).sym->const_val);
         trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
@@ -528,7 +529,7 @@ write_single_locals_or_const(
         return true;
     }
     else if (_Py_uop_sym_is_tuple(*slot)) {
-        DPRINTF(3, "reifying %d BUILD_TUPLE start\n", (int)(sp - ctx->frame->stack));
+        DPRINTF(3, "reifying BUILD_TUPLE start\n");
         if (slot->sym->tuple_size + ctx->frame->stack_pointer - 1 > ctx->frame->stack + ctx->frame->stack_len) {
             ctx->out_of_space = true;
             ctx->done = true;
@@ -537,17 +538,21 @@ write_single_locals_or_const(
         for (int i = 0; i < slot->sym->tuple_size; i++) {
             _Py_UopsLocalsPlusSlot temp_slot = {
                 _Py_uop_sym_tuple_getitem(ctx, *slot, i), false};
-            write_single_locals_or_const(ctx, trace_dest, sp, &temp_slot, true);
+            write_single_locals_or_const_or_tuple(ctx, trace_dest, &temp_slot, true, true);
         }
-        // TODO we need a proper target for this eventually for errors.
-        // But the chance of a small tuple erroring means OOM and freelist fail. Which is exceedingly rare.
-        WRITE_OP(&trace_dest[ctx->n_trace_dest], _BUILD_TUPLE, slot->sym->tuple_size, 0);
-        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_JUMP;
-        trace_dest[ctx->n_trace_dest].error_target = UOP_MAX_TRACE_LENGTH / 2 - 1;
-        trace_dest[ctx->n_trace_dest].jump_target = 0;
-        // trace_dest[ctx->n_trace_dest].jump_target = 0;
-        ctx->n_trace_dest++;
-        DPRINTF(3, "reifying %d BUILD_TUPLE end\n", (int)(sp - ctx->frame->stack));
+        if (reconstruct_tuples) {
+            // TODO we need a proper target for this eventually for errors.
+            // But the chance of a small tuple erroring means OOM and freelist fail. Which is exceedingly rare.
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _BUILD_TUPLE,
+                     slot->sym->tuple_size, 0);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_JUMP;
+            trace_dest[ctx->n_trace_dest].error_target =
+                UOP_MAX_TRACE_LENGTH / 2 - 1;
+            trace_dest[ctx->n_trace_dest].jump_target = 0;
+            // trace_dest[ctx->n_trace_dest].jump_target = 0;
+            ctx->n_trace_dest++;
+            DPRINTF(3, "reifying BUILD_TUPLE end\n");
+        }
         return true;
     }
     else if (err_on_false) {
@@ -557,7 +562,7 @@ write_single_locals_or_const(
 }
 
 static void
-reify_shadow_stack(_Py_UOpsContext *ctx)
+reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
 {
     DPRINTF(3, "reifying shadow ctx\n");
     _PyUOpInstruction *trace_dest = ctx->trace_dest;
@@ -567,7 +572,7 @@ reify_shadow_stack(_Py_UOpsContext *ctx)
         // Need reifying.
         if (slot.is_virtual) {
             sp->is_virtual = false;
-            if (write_single_locals_or_const(ctx, trace_dest, sp, &slot, false)) {
+            if (write_single_locals_or_const_or_tuple(ctx, trace_dest, &slot, false, reconstruct_topmost_tuple)) {
             }
             else if (sym_is_null(slot)) {
                 DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(sp - ctx->frame->stack));
@@ -760,6 +765,7 @@ partial_evaluate_uops(
 
     _PyUOpInstruction *this_instr = NULL;
     int i = 0;
+    int dont_emit_n_insts = 0;
     for (; !ctx->done; i++) {
         assert(i < trace_len);
         this_instr = &trace[i];
@@ -776,7 +782,7 @@ partial_evaluate_uops(
             // _INIT_CALL_PY_EXACT_ARGS pushes a non-symbol on the stack, so just don't reify it
             // because the stack is inconsistent.
             (opcode != _SAVE_RETURN_OFFSET && opcode !=_PUSH_FRAME) ) {
-            reify_shadow_stack(ctx);
+            reify_shadow_stack(ctx, true);
         }
 
 #ifdef Py_DEBUG
@@ -799,7 +805,7 @@ partial_evaluate_uops(
         DPRINTF(3, " stack_level %d\n", STACK_LEVEL());
         ctx->frame->stack_pointer = stack_pointer;
         assert(STACK_LEVEL() >= 0);
-        if (!instr_is_truly_static) {
+        if (!instr_is_truly_static && dont_emit_n_insts == 0) {
             trace_dest[ctx->n_trace_dest] = *this_instr;
             ctx->n_trace_dest++;
             if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
@@ -851,7 +857,10 @@ partial_evaluate_uops(
         }
         else {
             // Inst is static. Nothing written :)!
-            assert((_PyUop_Flags[opcode] & HAS_STATIC_FLAG));
+            assert((_PyUop_Flags[opcode] & HAS_STATIC_FLAG) || dont_emit_n_insts > 0);
+            if (dont_emit_n_insts > 0) {
+                dont_emit_n_insts--;
+            }
 #ifdef Py_DEBUG
             if (get_lltrace() >= 3) {
                 printf("%4d pe -STATIC-\n", (int) (this_instr - trace));

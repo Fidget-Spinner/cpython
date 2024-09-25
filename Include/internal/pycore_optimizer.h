@@ -290,6 +290,7 @@ extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     int arg_len,
     int propagate_locals);
 extern int _Py_uop_frame_pop(_Py_UOpsContext *ctx);
+extern _Py_UOpsAbstractFrame *_Py_uop_frame_prev(_Py_UOpsContext *ctx);
 
 PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 

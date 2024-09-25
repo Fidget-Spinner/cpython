@@ -649,6 +649,10 @@
             break;
         }
 
+        case _RETURN_N: {
+            break;
+        }
+
         case _GET_AITER: {
             _Py_UopsLocalsPlusSlot iter;
             iter = sym_new_not_null(ctx);

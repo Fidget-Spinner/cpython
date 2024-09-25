@@ -89,7 +89,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx);
+            reify_shadow_stack(ctx, true);
             _Py_UopsLocalsPlusSlot old_value = value;
             if (sym_is_const(old_value)) {
                 value = sym_new_const(ctx, sym_get_const(old_value));
@@ -108,7 +108,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx);
+            reify_shadow_stack(ctx, true);
         }
     }
 
@@ -151,17 +151,27 @@ dummy_func(void) {
     }
 
     override op(_RETURN_VALUE, (retval -- res)) {
-        SYNC_SP();
-        ctx->frame->stack_pointer = stack_pointer;
-        frame_pop(ctx);
-        stack_pointer = ctx->frame->stack_pointer;
-        res = sym_new_unknown(ctx);
-
+        reify_shadow_stack(ctx, true);
         co = get_code(this_instr);
         if (co == NULL) {
             // might be impossible, but bailing is still safe
             ctx->done = true;
         }
+
+        if ((this_instr+2)->opcode == _UNPACK_SEQUENCE_TWO_TUPLE &&
+            (_Py_uop_sym_is_tuple(retval) && retval.sym->tuple_size == 2) &&
+            // Check the callee stack has enough space.
+            _Py_uop_frame_prev(ctx)->stack_len >= 2 &&
+            trace_dest[ctx->n_trace_dest - 1].opcode == BUILD_TUPLE) {
+            trace_dest[ctx->n_trace_dest - 1].opcode = _NOP;
+            APPEND_OP(_RETURN_N, 2, 0);
+            DONT_EMIT_N_INSTRUCTIONS(3);
+        }
+        SYNC_SP();
+        ctx->frame->stack_pointer = stack_pointer;
+        frame_pop(ctx);
+        stack_pointer = ctx->frame->stack_pointer;
+        res = sym_new_unknown(ctx);
     }
 
     override op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null, args[oparg] -- new_frame)) {
@@ -235,7 +245,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx);
+            reify_shadow_stack(ctx, true);
         }
         if (oparg <= 6) {
             tup = _Py_uop_sym_new_tuple(ctx, oparg);

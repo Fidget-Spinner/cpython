@@ -1229,6 +1229,28 @@
             break;
         }
 
+        case _RETURN_N: {
+            oparg = CURRENT_OPARG();
+            _PyStackRef *old_sp = stack_pointer;
+            stack_pointer -= oparg;
+            assert(EMPTY());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            _Py_LeaveRecursiveCallPy(tstate);
+            // GH-99729: We need to unlink the frame *before* clearing it:
+            _PyInterpreterFrame *dying = frame;
+            frame = tstate->current_frame = dying->previous;
+            _PyEval_FrameClearAndPop(tstate, dying);
+            LOAD_SP();
+            LOAD_IP(frame->return_offset);
+            _PyStackRef *res = stack_pointer;
+            for (int i = 0; i < oparg; i++) {
+                res[i] = old_sp[-1-i];
+            }
+            stack_pointer += oparg;
+            LLTRACE_RESUME_FRAME();
+            break;
+        }
+
         case _GET_AITER: {
             _PyStackRef obj;
             _PyStackRef iter;

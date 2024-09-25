@@ -490,6 +490,13 @@ _Py_uop_frame_pop(_Py_UOpsContext *ctx)
     return 0;
 }
 
+_Py_UOpsAbstractFrame*
+_Py_uop_frame_prev(_Py_UOpsContext *ctx)
+{
+    assert(ctx->curr_frame_depth >= 2);
+    return &ctx->frames[ctx->curr_frame_depth - 2];
+}
+
 #define TEST_PREDICATE(PRED, MSG) \
 do { \
     if (!(PRED)) { \

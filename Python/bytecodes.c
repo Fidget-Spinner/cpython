@@ -966,7 +966,7 @@ dummy_func(
         // We definitely pop the return value off the stack on entry.
         // We also push it onto the stack on exit, but that's a
         // different frame, and it's accounted for by _PUSH_FRAME.
-        inst(RETURN_VALUE, (retval -- res)) {
+        _static inst(RETURN_VALUE, (retval -- res)) {
             #if TIER_ONE
             assert(frame != &entry_frame);
             #endif
@@ -981,6 +981,26 @@ dummy_func(
             LOAD_SP();
             LOAD_IP(frame->return_offset);
             res = retval;
+            LLTRACE_RESUME_FRAME();
+        }
+
+        tier2 op(_RETURN_N, (--)) {
+            _PyStackRef *old_sp = stack_pointer;
+            stack_pointer -= oparg;
+            assert(EMPTY());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            _Py_LeaveRecursiveCallPy(tstate);
+            // GH-99729: We need to unlink the frame *before* clearing it:
+            _PyInterpreterFrame *dying = frame;
+            frame = tstate->current_frame = dying->previous;
+            _PyEval_FrameClearAndPop(tstate, dying);
+            LOAD_SP();
+            LOAD_IP(frame->return_offset);
+            _PyStackRef *res = stack_pointer;
+            for (int i = 0; i < oparg; i++) {
+                res[i] = old_sp[-1-i];
+            }
+            stack_pointer += oparg;
             LLTRACE_RESUME_FRAME();
         }
 
