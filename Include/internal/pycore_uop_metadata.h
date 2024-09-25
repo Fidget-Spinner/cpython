@@ -94,6 +94,12 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_DELETE_SUBSCR] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CALL_INTRINSIC_1] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CALL_INTRINSIC_2] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_RETURN_VALUE_0] = HAS_STATIC_FLAG,
+    [_RETURN_VALUE_1] = HAS_STATIC_FLAG,
+    [_RETURN_VALUE_2] = HAS_STATIC_FLAG,
+    [_RETURN_VALUE_3] = HAS_STATIC_FLAG,
+    [_RETURN_VALUE_4] = HAS_STATIC_FLAG,
+    [_RETURN_VALUE_5] = HAS_STATIC_FLAG,
     [_RETURN_VALUE] = HAS_STATIC_FLAG,
     [_RETURN_N] = HAS_ARG_FLAG,
     [_GET_AITER] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -287,6 +293,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
     [_LOAD_FAST] = 8,
     [_STORE_FAST] = 8,
+    [_RETURN_VALUE] = 6,
     [_INIT_CALL_PY_EXACT_ARGS] = 5,
 };
 
@@ -504,6 +511,12 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_RETURN_GENERATOR] = "_RETURN_GENERATOR",
     [_RETURN_N] = "_RETURN_N",
     [_RETURN_VALUE] = "_RETURN_VALUE",
+    [_RETURN_VALUE_0] = "_RETURN_VALUE_0",
+    [_RETURN_VALUE_1] = "_RETURN_VALUE_1",
+    [_RETURN_VALUE_2] = "_RETURN_VALUE_2",
+    [_RETURN_VALUE_3] = "_RETURN_VALUE_3",
+    [_RETURN_VALUE_4] = "_RETURN_VALUE_4",
+    [_RETURN_VALUE_5] = "_RETURN_VALUE_5",
     [_SAVE_RETURN_OFFSET] = "_SAVE_RETURN_OFFSET",
     [_SEND_GEN_FRAME] = "_SEND_GEN_FRAME",
     [_SETUP_ANNOTATIONS] = "_SETUP_ANNOTATIONS",
@@ -702,6 +715,18 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _CALL_INTRINSIC_2:
             return 2;
+        case _RETURN_VALUE_0:
+            return 1;
+        case _RETURN_VALUE_1:
+            return 1;
+        case _RETURN_VALUE_2:
+            return 1;
+        case _RETURN_VALUE_3:
+            return 1;
+        case _RETURN_VALUE_4:
+            return 1;
+        case _RETURN_VALUE_5:
+            return 1;
         case _RETURN_VALUE:
             return 1;
         case _RETURN_N:
@@ -1231,6 +1256,18 @@ int _PyUop_num_pushed(int opcode, int oparg)
         case _CALL_INTRINSIC_1:
             return 1;
         case _CALL_INTRINSIC_2:
+            return 1;
+        case _RETURN_VALUE_0:
+            return 1;
+        case _RETURN_VALUE_1:
+            return 1;
+        case _RETURN_VALUE_2:
+            return 1;
+        case _RETURN_VALUE_3:
+            return 1;
+        case _RETURN_VALUE_4:
+            return 1;
+        case _RETURN_VALUE_5:
             return 1;
         case _RETURN_VALUE:
             return 1;
