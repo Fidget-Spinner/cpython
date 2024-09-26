@@ -215,6 +215,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_MAYBE_EXPAND_METHOD] = HAS_ARG_FLAG,
     [_PY_FRAME_GENERAL] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_CHECK_FUNCTION_VERSION] = HAS_ARG_FLAG | HAS_EXIT_FLAG,
+    [_CHECK_FUNCTION_VERSION_INLINE] = HAS_ARG_FLAG | HAS_EXIT_FLAG,
     [_CHECK_METHOD_VERSION] = HAS_ARG_FLAG | HAS_EXIT_FLAG,
     [_EXPAND_METHOD] = HAS_ARG_FLAG,
     [_CHECK_IS_NOT_PY_CALLABLE] = HAS_ARG_FLAG | HAS_EXIT_FLAG,
@@ -350,6 +351,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_CHECK_FUNCTION] = "_CHECK_FUNCTION",
     [_CHECK_FUNCTION_EXACT_ARGS] = "_CHECK_FUNCTION_EXACT_ARGS",
     [_CHECK_FUNCTION_VERSION] = "_CHECK_FUNCTION_VERSION",
+    [_CHECK_FUNCTION_VERSION_INLINE] = "_CHECK_FUNCTION_VERSION_INLINE",
     [_CHECK_FUNCTION_VERSION_KW] = "_CHECK_FUNCTION_VERSION_KW",
     [_CHECK_IS_NOT_PY_CALLABLE] = "_CHECK_IS_NOT_PY_CALLABLE",
     [_CHECK_IS_NOT_PY_CALLABLE_KW] = "_CHECK_IS_NOT_PY_CALLABLE_KW",
@@ -957,6 +959,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 2 + oparg;
         case _CHECK_FUNCTION_VERSION:
             return 2 + oparg;
+        case _CHECK_FUNCTION_VERSION_INLINE:
+            return 0;
         case _CHECK_METHOD_VERSION:
             return 2 + oparg;
         case _EXPAND_METHOD:
@@ -1499,6 +1503,8 @@ int _PyUop_num_pushed(int opcode, int oparg)
             return 1;
         case _CHECK_FUNCTION_VERSION:
             return 2 + oparg;
+        case _CHECK_FUNCTION_VERSION_INLINE:
+            return 0;
         case _CHECK_METHOD_VERSION:
             return 2 + oparg;
         case _EXPAND_METHOD:

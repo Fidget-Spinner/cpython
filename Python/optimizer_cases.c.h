@@ -1699,10 +1699,15 @@
             _Py_UopsLocalsPlusSlot callable;
             callable = stack_pointer[-2 - oparg];
             uint32_t func_version = (uint32_t)this_instr->operand;
-            //        if (sym_is_const(callable) && sym_matches_type(callable, &PyFunction_Type)) {
-                //            // TODO strength reduce the guard to a cheaper one.
-            //        }
+            if (sym_is_const(callable) && sym_matches_type(callable, &PyFunction_Type)) {
+                assert(PyFunction_Check(sym_get_const(callable)));
+                REPLACE_OP(this_instr, _CHECK_FUNCTION_VERSION_INLINE, func_version, sym_get_const(callable));
+            }
             sym_set_type(callable, &PyFunction_Type);
+            break;
+        }
+
+        case _CHECK_FUNCTION_VERSION_INLINE: {
             break;
         }
 
@@ -1772,7 +1777,7 @@
             _Py_UopsLocalsPlusSlot callable;
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
-            assert((this_instr-1)->opcode == _CHECK_FUNCTION_VERSION);
+            assert((this_instr-1)->opcode == _CHECK_FUNCTION_VERSION || (this_instr-1)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
             if (sym_is_const(callable) && sym_matches_type(callable, &PyFunction_Type)) {
                 if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
                     PyFunctionObject *func = (PyFunctionObject *)sym_get_const(callable);
