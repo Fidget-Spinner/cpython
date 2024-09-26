@@ -19,6 +19,8 @@
         /* _QUICKEN_RESUME is not a viable micro-op for tier 2 */
 
         case _RESUME_CHECK: {
+            SET_STATIC_INST();
+            ctx->frame->resume_check_inst = this_instr;
             break;
         }
 
@@ -81,7 +83,7 @@
                 SET_STATIC_INST();
             }
             else {
-                reify_shadow_stack(ctx, true);
+                reify_shadow_ctx(ctx, true);
                 _Py_UopsLocalsPlusSlot old_value = value;
                 if (sym_is_const(old_value)) {
                     value = sym_new_const(ctx, sym_get_const(old_value));
@@ -105,7 +107,7 @@
                 SET_STATIC_INST();
             }
             else {
-                reify_shadow_stack(ctx, true);
+                reify_shadow_ctx(ctx, true);
             }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -654,7 +656,14 @@
             _Py_UopsLocalsPlusSlot retval;
             _Py_UopsLocalsPlusSlot res;
             retval = stack_pointer[-1];
-            reify_shadow_stack(ctx, true);
+            bool is_virtual = false;
+            if (ctx->frame->is_virtual && retval.is_virtual) {
+                SET_STATIC_INST();
+                is_virtual = true;
+            }
+            else {
+                reify_shadow_ctx(ctx, true);
+            }
             co = get_code(this_instr);
             if (co == NULL) {
                 // might be impossible, but bailing is still safe
@@ -683,7 +692,13 @@
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
-            res = sym_new_unknown(ctx);
+            if (!is_virtual) {
+                res = sym_new_unknown(ctx);
+            }
+            else {
+                res = retval;
+            }
+            res.is_virtual = is_virtual;
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -978,7 +993,7 @@
                 SET_STATIC_INST();
             }
             else {
-                reify_shadow_stack(ctx, true);
+                reify_shadow_ctx(ctx, true);
             }
             if (oparg <= 6) {
                 tup = _Py_uop_sym_new_tuple(ctx, oparg);
@@ -1749,7 +1764,7 @@
                 co = (PyCodeObject *)func->func_code;
                 DPRINTF(3, "code=%p ", co);
             }
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false, false, oparg);
             stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;
             assert(WITHIN_STACK_BOUNDS());
@@ -1770,6 +1785,10 @@
         }
 
         case _CHECK_FUNCTION_VERSION_INLINE: {
+            _Py_UopsLocalsPlusSlot self_or_null;
+            _Py_UopsLocalsPlusSlot callable;
+            PyObject *callable_o = (PyObject *)this_instr->operand;
+            SET_STATIC_INST();
             break;
         }
 
@@ -1898,9 +1917,16 @@
                 argcount++;
             }
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, false);
+                bool all_virtual = true;
+                for (int i = 0; i < argcount; i++) {
+                    all_virtual = all_virtual && args[i].is_virtual;
+                }
+                if (all_virtual) {
+                    SET_STATIC_INST();
+                }
+                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, all_virtual, all_virtual, oparg);
             } else {
-                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
+                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false, false, oparg);
             }
             stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;
@@ -1923,6 +1949,9 @@
                 // should be about to _EXIT_TRACE anyway
                 ctx->done = true;
                 break;
+            }
+            if (ctx->frame->is_virtual) {
+                SET_STATIC_INST();
             }
             break;
         }
@@ -2373,7 +2402,13 @@
         }
 
         case _SAVE_RETURN_OFFSET: {
+            _Py_UopsLocalsPlusSlot new_frame;
+            new_frame = stack_pointer[-1];
             ctx->frame->return_offset = oparg;
+            _Py_UOpsAbstractFrame *n_frame = (_Py_UOpsAbstractFrame *)new_frame.sym;
+            if (n_frame->is_virtual) {
+                SET_STATIC_INST();
+            }
             break;
         }
 
@@ -2425,6 +2460,9 @@
             PyObject *ptr = (PyObject *)this_instr->operand;
             value = sym_new_const(ctx, ptr);
             null = sym_new_null(ctx);
+            SET_STATIC_INST();
+            value.is_virtual = true;
+            null.is_virtual = true;
             stack_pointer[0] = value;
             stack_pointer[1] = null;
             stack_pointer += 2;
@@ -2446,6 +2484,9 @@
         }
 
         case _CHECK_FUNCTION: {
+            uint32_t func_version = (uint32_t)this_instr->operand;
+            SET_STATIC_INST();
+            // TODO we should collect all _CHECK_FUNCTION together at the top of the trace.
             break;
         }
 

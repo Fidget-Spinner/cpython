@@ -211,8 +211,16 @@ struct _Py_UOpsAbstractFrame {
     _Py_UopsLocalsPlusSlot *stack;
     _Py_UopsLocalsPlusSlot *locals;
 
+    // The state of the stack upon creating this frame.
+    _Py_UopsLocalsPlusSlot *args_stack_state;
+
     void *instr_ptr;
     int return_offset;
+    int is_virtual;
+    int init_frame_oparg;
+
+    _PyUOpInstruction *resume_check_inst;
+    _PyUOpInstruction *check_func_version_inst;
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;
@@ -288,7 +296,9 @@ extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     int curr_stackentries,
     _Py_UopsLocalsPlusSlot *args,
     int arg_len,
-    int propagate_locals);
+    int propagate_locals,
+    int is_virtual,
+    int init_frame_oparg);
 extern int _Py_uop_frame_pop(_Py_UOpsContext *ctx);
 extern _Py_UOpsAbstractFrame *_Py_uop_frame_prev(_Py_UOpsContext *ctx);
 

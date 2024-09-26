@@ -78,6 +78,14 @@ dummy_func(void) {
         value.is_virtual = true;
     }
 
+    override op(_LOAD_CONST_INLINE_WITH_NULL, (ptr/4 -- value, null)) {
+        value = sym_new_const(ctx, ptr);
+        null = sym_new_null(ctx);
+        SET_STATIC_INST();
+        value.is_virtual = true;
+        null.is_virtual = true;
+    }
+
     override op(_STORE_FAST, (value --)) {
         // If the locals is known, we can copy propagate/dead store eliminate it.
         if (value.sym->locals_idx != -1) {
@@ -89,7 +97,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx, true);
+            reify_shadow_ctx(ctx, true);
             _Py_UopsLocalsPlusSlot old_value = value;
             if (sym_is_const(old_value)) {
                 value = sym_new_const(ctx, sym_get_const(old_value));
@@ -108,7 +116,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx, true);
+            reify_shadow_ctx(ctx, true);
         }
     }
 
@@ -118,6 +126,15 @@ dummy_func(void) {
 
     override op(_CHECK_STACK_SPACE_OPERAND, ( -- )) {
         (void)framesize;
+    }
+
+    op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
+        SET_STATIC_INST();
+    }
+
+    op(_CHECK_FUNCTION, (func_version/2 -- )) {
+        SET_STATIC_INST();
+        // TODO we should collect all _CHECK_FUNCTION together at the top of the trace.
     }
 
     override op(_PUSH_FRAME, (new_frame -- unused if (0))) {
@@ -132,6 +149,9 @@ dummy_func(void) {
             // should be about to _EXIT_TRACE anyway
             ctx->done = true;
             break;
+        }
+        if (ctx->frame->is_virtual) {
+            SET_STATIC_INST();
         }
     }
 
@@ -151,7 +171,14 @@ dummy_func(void) {
     }
 
     override op(_RETURN_VALUE, (retval -- res)) {
-        reify_shadow_stack(ctx, true);
+        bool is_virtual = false;
+        if (ctx->frame->is_virtual && retval.is_virtual) {
+            SET_STATIC_INST();
+            is_virtual = true;
+        }
+        else {
+            reify_shadow_ctx(ctx, true);
+        }
         co = get_code(this_instr);
         if (co == NULL) {
             // might be impossible, but bailing is still safe
@@ -180,7 +207,13 @@ dummy_func(void) {
         ctx->frame->stack_pointer = stack_pointer;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
-        res = sym_new_unknown(ctx);
+        if (!is_virtual) {
+            res = sym_new_unknown(ctx);
+        }
+        else {
+            res = retval;
+        }
+        res.is_virtual = is_virtual;
     }
 
     override op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null, args[oparg] -- new_frame)) {
@@ -218,9 +251,16 @@ dummy_func(void) {
         }
 
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, false);
+            bool all_virtual = true;
+            for (int i = 0; i < argcount; i++) {
+                all_virtual = all_virtual && args[i].is_virtual;
+            }
+            if (all_virtual) {
+                SET_STATIC_INST();
+            }
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, all_virtual, all_virtual, oparg);
         } else {
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false, false, oparg);
 
         }
     }
@@ -234,8 +274,17 @@ dummy_func(void) {
         ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
     }
 
-    override op(_SAVE_RETURN_OFFSET, (--)) {
+    override op(_SAVE_RETURN_OFFSET, (new_frame -- new_frame)) {
         ctx->frame->return_offset = oparg;
+        _Py_UOpsAbstractFrame *n_frame = (_Py_UOpsAbstractFrame *)new_frame.sym;
+        if (n_frame->is_virtual) {
+            SET_STATIC_INST();
+        }
+    }
+
+    override op(_RESUME_CHECK, (--)) {
+        SET_STATIC_INST();
+        ctx->frame->resume_check_inst = this_instr;
     }
 
     override op(_COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
@@ -254,7 +303,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_stack(ctx, true);
+            reify_shadow_ctx(ctx, true);
         }
         if (oparg <= 6) {
             tup = _Py_uop_sym_new_tuple(ctx, oparg);

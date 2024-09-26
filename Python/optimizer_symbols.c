@@ -399,15 +399,19 @@ _Py_uop_frame_new(
     int curr_stackentries,
     _Py_UopsLocalsPlusSlot *args,
     int arg_len,
-    int propagate_locals)
+    int propagate_locals,
+    int is_virtual,
+    int init_frame_oparg)
 {
     assert(ctx->curr_frame_depth < MAX_ABSTRACT_FRAME_DEPTH);
+    _Py_UOpsAbstractFrame *prev_frame = ctx->curr_frame_depth == 0 ? NULL : &ctx->frames[ctx->curr_frame_depth - 1];
     _Py_UOpsAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
 
     frame->stack_len = co->co_stacksize;
     frame->locals_len = co->co_nlocalsplus;
 
-    frame->locals = ctx->n_consumed;
+    frame->args_stack_state = ctx->n_consumed;
+    frame->locals = frame->args_stack_state + (prev_frame == NULL ? 0 : prev_frame->stack_len);
     frame->stack = frame->locals + co->co_nlocalsplus;
     frame->stack_pointer = frame->stack + curr_stackentries;
     ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize);
@@ -415,6 +419,13 @@ _Py_uop_frame_new(
         ctx->done = true;
         ctx->out_of_space = true;
         return NULL;
+    }
+
+
+    if (ctx->curr_frame_depth != 0) {
+        for (int i = 0; i < prev_frame->stack_len; i++) {
+            frame->args_stack_state[i] = prev_frame->stack[i];
+        }
     }
 
     if (!propagate_locals) {
@@ -429,9 +440,16 @@ _Py_uop_frame_new(
     for (int i = arg_len; i < co->co_nlocalsplus; i++) {
         frame->locals[i] = _Py_uop_sym_new_unknown(ctx);
     }
-
-    for (int i = 0; i < co->co_nlocalsplus; i++) {
-        frame->locals[i].sym->locals_idx = i;
+    if (is_virtual) {
+        // Virtual -- keep the original LOAD_FAST idx because they are indeed from there.
+        for (int x = arg_len; x < co->co_nlocalsplus; x++) {
+            frame->locals[x].sym->locals_idx = x;
+        }
+    }
+    else {
+        for (int x = 0; x < co->co_nlocalsplus; x++) {
+            frame->locals[x].sym->locals_idx = x;
+        }
     }
 
 
@@ -441,6 +459,10 @@ _Py_uop_frame_new(
     }
 
     frame->return_offset = -1;
+    frame->is_virtual = is_virtual;
+    frame->init_frame_oparg = init_frame_oparg;
+
+    frame->resume_check_inst = NULL;
 
     return frame;
 }

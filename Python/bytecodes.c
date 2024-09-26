@@ -195,7 +195,7 @@ dummy_func(
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (--)) {
+        _static inst(RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -3378,7 +3378,7 @@ dummy_func(
             EXIT_IF(func->func_version != func_version);
         }
 
-        tier2 op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4 --)) {
+        tier2 _static op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4 --)) {
             uint16_t func_version = oparg;
             assert(PyFunction_Check(callable_o));
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
@@ -3501,7 +3501,7 @@ dummy_func(
             DEOPT_IF(tstate->py_recursion_remaining <= 1);
         }
 
-        replicate(5) pure op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null[1], args[oparg] -- new_frame: _PyInterpreterFrame*)) {
+        replicate(5) _static op(_INIT_CALL_PY_EXACT_ARGS, (callable, self_or_null[1], args[oparg] -- new_frame: _PyInterpreterFrame*)) {
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
             int has_self = !PyStackRef_IsNull(self_or_null[0]);
             STAT_INC(CALL, hit);
@@ -3514,7 +3514,7 @@ dummy_func(
             }
         }
 
-        op(_PUSH_FRAME, (new_frame: _PyInterpreterFrame* -- )) {
+        _static op(_PUSH_FRAME, (new_frame: _PyInterpreterFrame* -- )) {
             // Write it out explicitly because it's subtly different.
             // Eventually this should be the only occurrence of this code.
             assert(tstate->interp->eval_frame == NULL);
@@ -4705,13 +4705,13 @@ dummy_func(
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 
-        tier2 op(_CHECK_STACK_SPACE_OPERAND, (framesize/2 --)) {
+        tier2 _static op(_CHECK_STACK_SPACE_OPERAND, (framesize/2 --)) {
             assert(framesize <= INT_MAX);
             DEOPT_IF(!_PyThreadState_HasStackSpace(tstate, framesize));
             DEOPT_IF(tstate->py_recursion_remaining <= 1);
         }
 
-        _static op(_SAVE_RETURN_OFFSET, (--)) {
+        _static op(_SAVE_RETURN_OFFSET, (new_frame -- new_frame)) {
             #if TIER_ONE
             frame->return_offset = (uint16_t)(next_instr - this_instr);
             #endif
@@ -4787,7 +4787,7 @@ dummy_func(
             value = PyStackRef_FromPyObjectImmortal(ptr);
         }
 
-        tier2 pure op(_LOAD_CONST_INLINE_WITH_NULL, (ptr/4 -- value, null)) {
+        tier2 _static op(_LOAD_CONST_INLINE_WITH_NULL, (ptr/4 -- value, null)) {
             value = PyStackRef_FromPyObjectNew(ptr);
             null = PyStackRef_NULL;
         }
@@ -4797,7 +4797,7 @@ dummy_func(
             null = PyStackRef_NULL;
         }
 
-        tier2 op(_CHECK_FUNCTION, (func_version/2 -- )) {
+        tier2 _static op(_CHECK_FUNCTION, (func_version/2 -- )) {
             assert(PyFunction_Check(frame->f_funcobj));
             DEOPT_IF(((PyFunctionObject *)frame->f_funcobj)->func_version != func_version);
         }

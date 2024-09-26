@@ -1687,7 +1687,7 @@
                 co = (PyCodeObject *)func->func_code;
                 DPRINTF(3, "code=%p ", co);
             }
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false, false, oparg);
             stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;
             assert(WITHIN_STACK_BOUNDS());
@@ -1836,9 +1836,9 @@
                 argcount++;
             }
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, true);
+                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, true, false, oparg);
             } else {
-                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, true);
+                new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, true, false, oparg);
             }
             stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;

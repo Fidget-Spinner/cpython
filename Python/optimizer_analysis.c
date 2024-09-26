@@ -413,7 +413,7 @@ optimize_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_abstractcontext_init(ctx);
-    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0, true);
+    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0, true, false, 0);
     if (frame == NULL) {
         return -1;
     }
@@ -502,9 +502,88 @@ error:
 
 #define DONT_EMIT_N_INSTRUCTIONS(n) dont_emit_n_insts = n;
 
+
+static const uint8_t is_for_iter_test[MAX_UOP_ID + 1] = {
+    [_GUARD_NOT_EXHAUSTED_RANGE] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE] = 1,
+    [_FOR_ITER_TIER_TWO] = 1,
+};
+
+#define APPEND_OP(OPCODE, OPARG, OPERAND) \
+    WRITE_OP(&trace_dest[ctx->n_trace_dest], OPCODE, OPARG, OPERAND); \
+    trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET; \
+    trace_dest[ctx->n_trace_dest].target = this_instr->target;  \
+    ctx->n_trace_dest++;                        \
+    if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH / 2) { \
+        ctx->out_of_space = true; \
+        ctx->done = true; \
+    }
+
+#define APPEND_SIDE_OP(OPCODE, OPARG, OPERAND) \
+    WRITE_OP(&trace_dest[ctx->n_side_exit_dest], OPCODE, OPARG, OPERAND); \
+    ctx->n_side_exit_dest++;                        \
+    if (ctx->n_side_exit_dest >= UOP_MAX_TRACE_LENGTH) { \
+        ctx->out_of_space = true; \
+        ctx->done = true; \
+    }
+
+static void
+restore_state_in_side_exit(_Py_UOpsContext *ctx, _PyUOpInstruction *trace_dest, int original_target)
+{
+    // Write back the SET_IP
+    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+}
+
+static void
+write_side_exit(_Py_UOpsContext *ctx, _PyUOpInstruction *trace_dest, int opcode, _PyUOpInstruction *this_instr)
+{
+    assert((_PyUop_Flags[opcode] & (HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ERROR_FLAG)));
+    // Deopts or errors, need to write a side exit to reconstruct state.
+    int32_t original_target = (int32_t)uop_get_target(this_instr);
+    if (_PyUop_Flags[opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG)) {
+        uint16_t exit_op = (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) ?
+                           _EXIT_TRACE : _DEOPT;
+        int32_t jump_target = original_target;
+        if (is_for_iter_test[opcode]) {
+            /* Target the POP_TOP immediately after the END_FOR,
+             * leaving only the iterator on the stack. */
+            int extended_arg = this_instr->oparg > 255;
+            int32_t next_inst = original_target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + extended_arg;
+            jump_target = next_inst + this_instr->oparg + 1;
+        }
+        int start_of_side_exit = ctx->n_side_exit_dest;
+        // Write back the SET_IP
+        restore_state_in_side_exit(ctx, trace_dest, original_target);
+        APPEND_SIDE_OP(exit_op, 0, 0);
+        trace_dest[ctx->n_side_exit_dest - 1].target = jump_target;
+        trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
+
+        trace_dest[ctx->n_trace_dest - 1].jump_target = start_of_side_exit;
+        trace_dest[ctx->n_trace_dest - 1].format = UOP_FORMAT_JUMP;
+    }
+    if (_PyUop_Flags[opcode] & HAS_ERROR_FLAG) {
+        int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
+                     0 : _PyUop_num_popped(opcode, this_instr->oparg);
+        int start_of_side_exit = ctx->n_side_exit_dest;
+        restore_state_in_side_exit(ctx, trace_dest, original_target);
+        APPEND_SIDE_OP(_ERROR_POP_N, popped, 0);
+        trace_dest[ctx->n_side_exit_dest - 1].operand = original_target;
+        trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
+
+        trace_dest[ctx->n_trace_dest - 1].error_target = start_of_side_exit;
+
+        if (trace_dest[ctx->n_trace_dest - 1].format == UOP_FORMAT_TARGET) {
+            trace_dest[ctx->n_trace_dest - 1].format = UOP_FORMAT_JUMP;
+            trace_dest[ctx->n_trace_dest - 1].jump_target = 0;
+        }
+    }
+}
+
 static bool
-write_single_locals_or_const_or_tuple(
+write_single_locals_or_const_or_tuple_or_null(
     _Py_UOpsContext *ctx,
+    _Py_UOpsAbstractFrame *frame,
     _PyUOpInstruction *trace_dest,
     _Py_UopsLocalsPlusSlot *slot,
     int err_on_false,
@@ -530,7 +609,7 @@ write_single_locals_or_const_or_tuple(
     }
     else if (_Py_uop_sym_is_tuple(*slot)) {
         DPRINTF(3, "reifying BUILD_TUPLE start\n");
-        if (slot->sym->tuple_size + ctx->frame->stack_pointer - 1 > ctx->frame->stack + ctx->frame->stack_len) {
+        if (slot->sym->tuple_size + frame->stack_pointer - 1 > frame->stack + frame->stack_len) {
             ctx->out_of_space = true;
             ctx->done = true;
             return true;
@@ -538,7 +617,7 @@ write_single_locals_or_const_or_tuple(
         for (int i = 0; i < slot->sym->tuple_size; i++) {
             _Py_UopsLocalsPlusSlot temp_slot = {
                 _Py_uop_sym_tuple_getitem(ctx, *slot, i), false};
-            write_single_locals_or_const_or_tuple(ctx, trace_dest, &temp_slot, true, true);
+            write_single_locals_or_const_or_tuple_or_null(ctx, frame, trace_dest, &temp_slot, true, true);
         }
         if (reconstruct_tuples) {
             // TODO we need a proper target for this eventually for errors.
@@ -555,6 +634,12 @@ write_single_locals_or_const_or_tuple(
         }
         return true;
     }
+    else if (sym_is_null(*slot)) {
+        DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(slot - frame->stack));
+        WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_NULL, 0, 0);
+        ctx->n_trace_dest++;
+        return true;
+    }
     else if (err_on_false) {
         Py_UNREACHABLE();
     }
@@ -562,22 +647,16 @@ write_single_locals_or_const_or_tuple(
 }
 
 static void
-reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
+reify_single_frame(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, int reconstruct_topmost_tuple)
 {
-    DPRINTF(3, "reifying shadow ctx\n");
     _PyUOpInstruction *trace_dest = ctx->trace_dest;
-    for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
+    for (_Py_UopsLocalsPlusSlot *sp = frame->stack; sp < frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
         assert(slot.sym != NULL);
         // Need reifying.
         if (slot.is_virtual) {
             sp->is_virtual = false;
-            if (write_single_locals_or_const_or_tuple(ctx, trace_dest, &slot, false, reconstruct_topmost_tuple)) {
-            }
-            else if (sym_is_null(slot)) {
-                DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(sp - ctx->frame->stack));
-                WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_NULL, 0, 0);
-                ctx->n_trace_dest++;
+            if (write_single_locals_or_const_or_tuple_or_null(ctx, frame, trace_dest, &slot, false, reconstruct_topmost_tuple)) {
             }
             else {
                 // Is static but not a constant value of locals or NULL.
@@ -593,9 +672,9 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
     }
     int locals_loaded = 0;
     // Restore locals from bottom to top
-    for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals; local < ctx->frame->locals + ctx->frame->locals_len; local++) {
+    for (_Py_UopsLocalsPlusSlot *local = frame->locals; local < frame->locals + frame->locals_len; local++) {
         // Locals did not change. No need to update it.
-        if (local->sym->locals_idx == (local - ctx->frame->locals)) {
+        if (local->sym->locals_idx == (local - frame->locals)) {
             continue;
         }
         if (sym_is_null(*local)) {
@@ -624,24 +703,24 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
             return;
         }
     }
-    if (locals_loaded + ctx->frame->stack_pointer > ctx->frame->stack + ctx->frame->stack_len) {
+    if (locals_loaded + frame->stack_pointer > frame->stack + frame->stack_len) {
         ctx->out_of_space = true;
         ctx->done = true;
         return;
     }
-    assert(locals_loaded + ctx->frame->stack_pointer <= ctx->frame->stack + ctx->frame->stack_len);
+    assert(locals_loaded + frame->stack_pointer <= frame->stack + frame->stack_len);
     // Store in REVERSE order (due to nature of stack)
-    for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals + ctx->frame->locals_len - 1; local >= ctx->frame->locals ; local--) {
+    for (_Py_UopsLocalsPlusSlot *local = frame->locals + frame->locals_len - 1; local >= ctx->frame->locals ; local--) {
         // Locals did not change. No need to update it.
-        if (local->sym->locals_idx == (local - ctx->frame->locals)) {
+        if (local->sym->locals_idx == (local - frame->locals)) {
             continue;
         }
         if (sym_is_null(*local)) {
             continue;
         }
         // Locals DID change.
-        DPRINTF(3, "reifying locals STORE_FAST %d\n", (int)(local - ctx->frame->locals));
-        WRITE_OP(&trace_dest[ctx->n_trace_dest], _STORE_FAST, (local - ctx->frame->locals), 0);
+        DPRINTF(3, "reifying locals STORE_FAST %d\n", (int)(local - frame->locals));
+        WRITE_OP(&trace_dest[ctx->n_trace_dest], _STORE_FAST, (local - frame->locals), 0);
         trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
         trace_dest[ctx->n_trace_dest].target = 0;
         ctx->n_trace_dest++;
@@ -651,78 +730,111 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
             return;
         }
     }
-    for (int i = 0; i <  ctx->frame->locals_len; i++) {
-        if (sym_is_null(ctx->frame->locals[i])) {
+    for (int i = 0; i <  frame->locals_len; i++) {
+        if (sym_is_null(frame->locals[i])) {
             continue;
         }
-        if (sym_is_const(ctx->frame->locals[i])) {
-            ctx->frame->locals[i] = sym_new_const(ctx, sym_get_const(ctx->frame->locals[i]));
+        if (sym_is_const(frame->locals[i])) {
+            frame->locals[i] = sym_new_const(ctx, sym_get_const(frame->locals[i]));
         }
         else {
-            ctx->frame->locals[i] = sym_new_not_null(ctx);
+            frame->locals[i] = sym_new_not_null(ctx);
         }
-        ctx->frame->locals[i].sym->locals_idx = i;
+        frame->locals[i].sym->locals_idx = i;
     }
-    for (int i = 0; i < (int)(ctx->frame->stack_pointer - ctx->frame->stack); i++) {
-        if (sym_is_null(ctx->frame->stack[i])) {
+    for (int i = 0; i < (int)(frame->stack_pointer - frame->stack); i++) {
+        if (sym_is_null(frame->stack[i])) {
             continue;
         }
-        ctx->frame->stack[i] = sym_new_not_null(ctx);
+        frame->stack[i] = sym_new_not_null(ctx);
     }
 }
-
-static bool
-stack_wont_have_enough_space_for_temp_locals(_Py_UOpsContext *ctx, int next_opcode_stackeffect, int opcode)
-{
-    int total = 0;
-    for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals; local < ctx->frame->locals + ctx->frame->locals_len; local++) {
-        // Locals did not change. No need to update it.
-        if (local->sym->locals_idx == (local - ctx->frame->locals)) {
-            continue;
-        }
-        total++;
-    }
-    int current_stackentries = (int)(ctx->frame->stack_pointer - ctx->frame->stack);
-    next_opcode_stackeffect = next_opcode_stackeffect < 0 ? 0 : next_opcode_stackeffect;
-    int is_load_fast_or_store_fast = opcode == _LOAD_FAST || opcode == _STORE_FAST;
-    int res = (total + current_stackentries) + is_load_fast_or_store_fast >= ctx->frame->stack_len - next_opcode_stackeffect;
-    fprintf(stderr, "TOTAL: %d FULL? %d\n", total, res);
-    return  res;
-
-}
-
-static const uint8_t is_for_iter_test[MAX_UOP_ID + 1] = {
-    [_GUARD_NOT_EXHAUSTED_RANGE] = 1,
-    [_GUARD_NOT_EXHAUSTED_LIST] = 1,
-    [_GUARD_NOT_EXHAUSTED_TUPLE] = 1,
-    [_FOR_ITER_TIER_TWO] = 1,
-};
-
-#define APPEND_OP(OPCODE, OPARG, OPERAND) \
-    WRITE_OP(&trace_dest[ctx->n_trace_dest], OPCODE, OPARG, OPERAND); \
-    trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET; \
-    trace_dest[ctx->n_trace_dest].target = this_instr->target;  \
-    ctx->n_trace_dest++;                        \
-    if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH / 2) { \
-        ctx->out_of_space = true; \
-        ctx->done = true; \
-    }
-
-#define APPEND_SIDE_OP(OPCODE, OPARG, OPERAND) \
-    WRITE_OP(&trace_dest[ctx->n_side_exit_dest], OPCODE, OPARG, OPERAND); \
-    ctx->n_side_exit_dest++;                        \
-    if (ctx->n_side_exit_dest >= UOP_MAX_TRACE_LENGTH) { \
-        ctx->out_of_space = true; \
-        ctx->done = true; \
-    }
 
 
 static void
-restore_state_in_side_exit(_Py_UOpsContext *ctx, _PyUOpInstruction *trace_dest, int original_target)
+reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
 {
-    // Write back the SET_IP
-    APPEND_SIDE_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+    _PyUOpInstruction *trace_dest = ctx->trace_dest;
+    (void)reconstruct_topmost_tuple;
+    DPRINTF(3, "reifying shadow ctx\n");
+    for (int frame_i = 0; frame_i < ctx->curr_frame_depth; frame_i++) {
+        _Py_UOpsAbstractFrame *frame = &ctx->frames[frame_i];
+        // Reify the frame first.
+        if (frame->is_virtual) {
+            frame->is_virtual = false;
+            // 0-th frame can't be virtual.
+            assert(frame_i != 0);
+            DPRINTF(3, "reifying frame %d\n", frame_i);
+            _Py_UOpsAbstractFrame *prev_frame = frame - 1;
+            // Push the stuff we need to init the frame first.
+            // First sym is not null, means we need to push a null to the stack.
+            for (int i = 0; i < prev_frame->stack_len; i++) {
+                if (frame->args_stack_state[i].is_virtual) {
+                    write_single_locals_or_const_or_tuple_or_null(ctx,
+                                                                  prev_frame,
+                                                                  trace_dest,
+                                                                  &frame->args_stack_state[i],
+                                                                  true, true);
+                }
+            }
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7), 0);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+            trace_dest[ctx->n_trace_dest].target = 0;
+            ctx->n_trace_dest++;
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            write_side_exit(ctx, trace_dest, _CHECK_FUNCTION_VERSION_INLINE, frame->resume_check_inst);
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _INIT_CALL_PY_EXACT_ARGS, frame->init_frame_oparg, 0);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+            trace_dest[ctx->n_trace_dest].target = 0;
+            ctx->n_trace_dest++;
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _SAVE_RETURN_OFFSET, prev_frame->return_offset, 0);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+            trace_dest[ctx->n_trace_dest].target = 0;
+            ctx->n_trace_dest++;
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_FRAME, 0, 0);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+            trace_dest[ctx->n_trace_dest].target = 0;
+            ctx->n_trace_dest++;
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _RESUME_CHECK, 0, 0);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+            trace_dest[ctx->n_trace_dest].target = 0;
+            ctx->n_trace_dest++;
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            write_side_exit(ctx, trace_dest, _RESUME_CHECK, frame->resume_check_inst);
+        }
+        reify_single_frame(ctx, frame, reconstruct_topmost_tuple);
+    }
 }
+
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */
 static int
@@ -753,7 +865,7 @@ partial_evaluate_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_abstractcontext_init(ctx);
-    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0, false);
+    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0, false, false, 0);
     if (frame == NULL) {
         return -1;
     }
@@ -781,8 +893,8 @@ partial_evaluate_uops(
         if (!(_PyUop_Flags[opcode] & HAS_STATIC_FLAG) &&
             // _INIT_CALL_PY_EXACT_ARGS pushes a non-symbol on the stack, so just don't reify it
             // because the stack is inconsistent.
-            (opcode != _SAVE_RETURN_OFFSET && opcode !=_PUSH_FRAME) ) {
-            reify_shadow_stack(ctx, true);
+            (opcode != _SAVE_RETURN_OFFSET && opcode !=_PUSH_FRAME)) {
+            reify_shadow_ctx(ctx, true);
         }
 
 #ifdef Py_DEBUG
@@ -812,46 +924,8 @@ partial_evaluate_uops(
                 ctx->out_of_space = true;
                 ctx->done = true;
             }
-            // Deopts or errors, need to write a side exit to reconstruct state.
             if ((_PyUop_Flags[opcode] & (HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ERROR_FLAG))) {
-                int32_t original_target = (int32_t)uop_get_target(this_instr);
-                if (_PyUop_Flags[opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG)) {
-                    uint16_t exit_op = (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) ?
-                                       _EXIT_TRACE : _DEOPT;
-                    int32_t jump_target = original_target;
-                    if (is_for_iter_test[opcode]) {
-                        /* Target the POP_TOP immediately after the END_FOR,
-                         * leaving only the iterator on the stack. */
-                        int extended_arg = this_instr->oparg > 255;
-                        int32_t next_inst = original_target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + extended_arg;
-                        jump_target = next_inst + this_instr->oparg + 1;
-                    }
-                    int start_of_side_exit = ctx->n_side_exit_dest;
-                    // Write back the SET_IP
-                    restore_state_in_side_exit(ctx, trace_dest, original_target);
-                    APPEND_SIDE_OP(exit_op, 0, 0);
-                    trace_dest[ctx->n_side_exit_dest - 1].target = jump_target;
-                    trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
-
-                    trace_dest[ctx->n_trace_dest - 1].jump_target = start_of_side_exit;
-                    trace_dest[ctx->n_trace_dest - 1].format = UOP_FORMAT_JUMP;
-                }
-                if (_PyUop_Flags[opcode] & HAS_ERROR_FLAG) {
-                    int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
-                                 0 : _PyUop_num_popped(opcode, this_instr->oparg);
-                    int start_of_side_exit = ctx->n_side_exit_dest;
-                    restore_state_in_side_exit(ctx, trace_dest, original_target);
-                    APPEND_SIDE_OP(_ERROR_POP_N, popped, 0);
-                    trace_dest[ctx->n_side_exit_dest - 1].operand = original_target;
-                    trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
-
-                    trace_dest[ctx->n_trace_dest - 1].error_target = start_of_side_exit;
-
-                    if (trace_dest[ctx->n_trace_dest - 1].format == UOP_FORMAT_TARGET) {
-                        trace_dest[ctx->n_trace_dest - 1].format = UOP_FORMAT_JUMP;
-                        trace_dest[ctx->n_trace_dest - 1].jump_target = 0;
-                    }
-                }
+                write_side_exit(ctx, trace_dest, opcode, this_instr);
             }
 
         }

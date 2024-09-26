@@ -621,9 +621,9 @@ dummy_func(void) {
         }
 
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, true);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, true, false, oparg);
         } else {
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, true);
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, true, false, oparg);
 
         }
     }
@@ -659,7 +659,7 @@ dummy_func(void) {
             DPRINTF(3, "code=%p ", co);
         }
 
-        new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false);
+        new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false, false, oparg);
     }
 
     op(_PY_FRAME_KW, (callable, self_or_null, args[oparg], kwnames -- new_frame)) {
