@@ -637,6 +637,8 @@ write_single_locals_or_const_or_tuple_or_null(
     else if (sym_is_null(*slot)) {
         DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(slot - frame->stack));
         WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_NULL, 0, 0);
+        trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+        trace_dest[ctx->n_trace_dest].target = 0;
         ctx->n_trace_dest++;
         return true;
     }
