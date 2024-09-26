@@ -787,17 +787,6 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
                 return;
             }
             assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
-            WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_PEP_523, 0, 0);
-            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
-            trace_dest[ctx->n_trace_dest].target = 0;
-            ctx->n_trace_dest++;
-            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
-                ctx->out_of_space = true;
-                ctx->done = true;
-                return;
-            }
-            write_side_exit(ctx, trace_dest, _CHECK_PEP_523, (frame->resume_check_inst-7));
-            assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
             WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7)->oparg, (frame->resume_check_inst-7)->operand);
             trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
             trace_dest[ctx->n_trace_dest].target = 0;

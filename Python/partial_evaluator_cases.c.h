@@ -1785,10 +1785,6 @@
         }
 
         case _CHECK_FUNCTION_VERSION_INLINE: {
-            _Py_UopsLocalsPlusSlot self_or_null;
-            _Py_UopsLocalsPlusSlot callable;
-            PyObject *callable_o = (PyObject *)this_instr->operand;
-            SET_STATIC_INST();
             break;
         }
 

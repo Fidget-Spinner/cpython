@@ -128,9 +128,9 @@ dummy_func(void) {
         (void)framesize;
     }
 
-    op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
-        SET_STATIC_INST();
-    }
+//    op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
+//        SET_STATIC_INST();
+//    }
 
     op(_CHECK_FUNCTION, (func_version/2 -- )) {
         SET_STATIC_INST();
