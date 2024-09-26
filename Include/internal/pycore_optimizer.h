@@ -218,9 +218,11 @@ struct _Py_UOpsAbstractFrame {
     int return_offset;
     int is_virtual;
     int init_frame_oparg;
+    int host_frame_stackentries;
 
     _PyUOpInstruction *resume_check_inst;
     _PyUOpInstruction *check_func_version_inst;
+
 };
 
 typedef struct _Py_UOpsAbstractFrame _Py_UOpsAbstractFrame;

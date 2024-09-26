@@ -404,27 +404,33 @@ _Py_uop_frame_new(
     int init_frame_oparg)
 {
     assert(ctx->curr_frame_depth < MAX_ABSTRACT_FRAME_DEPTH);
-    _Py_UOpsAbstractFrame *prev_frame = ctx->curr_frame_depth == 0 ? NULL : &ctx->frames[ctx->curr_frame_depth - 1];
+    _Py_UOpsAbstractFrame *prev_frame = ctx->curr_frame_depth == 0 ? NULL : ctx->frame;
     _Py_UOpsAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
+
+    int prev_frame_stack_size = prev_frame == NULL ? 0 : prev_frame->stack_len;
+    assert(prev_frame_stack_size >= 0);
 
     frame->stack_len = co->co_stacksize;
     frame->locals_len = co->co_nlocalsplus;
 
     frame->args_stack_state = ctx->n_consumed;
-    frame->locals = frame->args_stack_state + (prev_frame == NULL ? 0 : prev_frame->stack_len);
+    frame->locals = frame->args_stack_state + prev_frame_stack_size;
     frame->stack = frame->locals + co->co_nlocalsplus;
     frame->stack_pointer = frame->stack + curr_stackentries;
-    ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize);
+    ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize + prev_frame_stack_size);
     if (ctx->n_consumed >= ctx->limit) {
         ctx->done = true;
         ctx->out_of_space = true;
         return NULL;
     }
 
-
+    int host_frame_stackentries = 0;
     if (ctx->curr_frame_depth != 0) {
-        for (int i = 0; i < prev_frame->stack_len; i++) {
-            frame->args_stack_state[i] = prev_frame->stack[i];
+        host_frame_stackentries = (int)(ctx->frame->stack_pointer - ctx->frame->stack);
+        assert(prev_frame != NULL);
+        assert(host_frame_stackentries <= prev_frame_stack_size);
+        for (int i = 0; i < host_frame_stackentries; i++) {
+            frame->args_stack_state[i] = ctx->frame->stack[i];
         }
     }
 
@@ -434,6 +440,7 @@ _Py_uop_frame_new(
 
     // Initialize with the initial state of all local variables
     for (int i = 0; i < arg_len; i++) {
+        assert(args[i].sym != NULL);
         frame->locals[i] = args[i];
     }
 
@@ -463,6 +470,8 @@ _Py_uop_frame_new(
     frame->init_frame_oparg = init_frame_oparg;
 
     frame->resume_check_inst = NULL;
+
+    frame->host_frame_stackentries = host_frame_stackentries;
 
     return frame;
 }

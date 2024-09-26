@@ -710,7 +710,7 @@ reify_single_frame(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, int recon
     }
     assert(locals_loaded + frame->stack_pointer <= frame->stack + frame->stack_len);
     // Store in REVERSE order (due to nature of stack)
-    for (_Py_UopsLocalsPlusSlot *local = frame->locals + frame->locals_len - 1; local >= ctx->frame->locals ; local--) {
+    for (_Py_UopsLocalsPlusSlot *local = frame->locals + frame->locals_len - 1; local >= frame->locals ; local--) {
         // Locals did not change. No need to update it.
         if (local->sym->locals_idx == (local - frame->locals)) {
             continue;
@@ -718,6 +718,7 @@ reify_single_frame(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, int recon
         if (sym_is_null(*local)) {
             continue;
         }
+        locals_loaded--;
         // Locals DID change.
         DPRINTF(3, "reifying locals STORE_FAST %d\n", (int)(local - frame->locals));
         WRITE_OP(&trace_dest[ctx->n_trace_dest], _STORE_FAST, (local - frame->locals), 0);
@@ -730,6 +731,7 @@ reify_single_frame(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, int recon
             return;
         }
     }
+    assert(locals_loaded == 0);
     for (int i = 0; i <  frame->locals_len; i++) {
         if (sym_is_null(frame->locals[i])) {
             continue;
@@ -767,8 +769,7 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
             DPRINTF(3, "reifying frame %d\n", frame_i);
             _Py_UOpsAbstractFrame *prev_frame = frame - 1;
             // Push the stuff we need to init the frame first.
-            // First sym is not null, means we need to push a null to the stack.
-            for (int i = 0; i < prev_frame->stack_len; i++) {
+            for (int i = 0; i < frame->host_frame_stackentries; i++) {
                 if (frame->args_stack_state[i].is_virtual) {
                     write_single_locals_or_const_or_tuple_or_null(ctx,
                                                                   prev_frame,
@@ -776,6 +777,7 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
                                                                   &frame->args_stack_state[i],
                                                                   true, true);
                 }
+                frame->args_stack_state[i].is_virtual = false;
             }
             if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
                 ctx->out_of_space = true;
@@ -783,7 +785,7 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
                 return;
             }
             assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
-            WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7), 0);
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_PEP_523, 0, 0);
             trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
             trace_dest[ctx->n_trace_dest].target = 0;
             ctx->n_trace_dest++;
@@ -792,7 +794,18 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
                 ctx->done = true;
                 return;
             }
-            write_side_exit(ctx, trace_dest, _CHECK_FUNCTION_VERSION_INLINE, frame->resume_check_inst);
+            write_side_exit(ctx, trace_dest, _CHECK_PEP_523, (frame->resume_check_inst-7));
+            assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
+            WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7)->oparg, (frame->resume_check_inst-7)->operand);
+            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+            trace_dest[ctx->n_trace_dest].target = 0;
+            ctx->n_trace_dest++;
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            write_side_exit(ctx, trace_dest, _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7));
             WRITE_OP(&trace_dest[ctx->n_trace_dest], _INIT_CALL_PY_EXACT_ARGS, frame->init_frame_oparg, 0);
             trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
             trace_dest[ctx->n_trace_dest].target = 0;
