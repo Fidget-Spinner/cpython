@@ -1927,6 +1927,7 @@
                 if (all_virtual) {
                     assert((this_instr-3)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
                     APPEND_OP(_CHECK_FUNCTION_VERSION_INLINE, (this_instr-3)->oparg, (this_instr-3)->operand);
+                    write_side_exit(ctx, ctx->frame, trace_dest, _CHECK_FUNCTION_VERSION_INLINE, (this_instr-3));
                     SET_STATIC_INST();
                 }
                 else {
