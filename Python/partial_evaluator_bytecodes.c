@@ -128,9 +128,9 @@ dummy_func(void) {
         (void)framesize;
     }
 
-//    op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
-//        SET_STATIC_INST();
-//    }
+    op(_CHECK_FUNCTION_VERSION_INLINE, (callable_o/4, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
+        SET_STATIC_INST();
+    }
 
     op(_CHECK_FUNCTION, (func_version/2 -- )) {
         SET_STATIC_INST();
@@ -260,6 +260,8 @@ dummy_func(void) {
                 all_virtual = all_virtual && args[i].is_virtual;
             }
             if (all_virtual) {
+                assert((this_instr-3)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
+                APPEND_OP(_CHECK_FUNCTION_VERSION_INLINE, (this_instr-3)->oparg, (this_instr-3)->operand);
                 SET_STATIC_INST();
             }
             else {

@@ -1788,6 +1788,10 @@
         }
 
         case _CHECK_FUNCTION_VERSION_INLINE: {
+            _Py_UopsLocalsPlusSlot self_or_null;
+            _Py_UopsLocalsPlusSlot callable;
+            PyObject *callable_o = (PyObject *)this_instr->operand;
+            SET_STATIC_INST();
             break;
         }
 
@@ -1921,6 +1925,8 @@
                     all_virtual = all_virtual && args[i].is_virtual;
                 }
                 if (all_virtual) {
+                    assert((this_instr-3)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
+                    APPEND_OP(_CHECK_FUNCTION_VERSION_INLINE, (this_instr-3)->oparg, (this_instr-3)->operand);
                     SET_STATIC_INST();
                 }
                 else {
