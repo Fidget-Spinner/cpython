@@ -139,7 +139,7 @@ dummy_func(void) {
 
     override op(_PUSH_FRAME, (new_frame -- unused if (0))) {
         SYNC_SP();
-        APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
+        _Py_UOpsAbstractFrame *old_frame = ctx->frame;
         ctx->frame->stack_pointer = stack_pointer;
         ctx->frame = (_Py_UOpsAbstractFrame *)new_frame.sym;
         ctx->curr_frame_depth++;
@@ -152,6 +152,9 @@ dummy_func(void) {
         }
         if (ctx->frame->is_virtual) {
             SET_STATIC_INST();
+        }
+        else {
+            APPEND_OP(_SET_IP, 0, (uintptr_t)old_frame->instr_ptr);
         }
     }
 
@@ -258,7 +261,10 @@ dummy_func(void) {
             if (all_virtual) {
                 SET_STATIC_INST();
             }
-            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, all_virtual, all_virtual, oparg);
+            else {
+                reify_shadow_ctx(ctx, true);
+            }
+            new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, false, all_virtual, oparg);
         } else {
             new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, NULL, 0, false, false, oparg);
 
