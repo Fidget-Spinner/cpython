@@ -407,30 +407,26 @@ _Py_uop_frame_new(
     _Py_UOpsAbstractFrame *prev_frame = ctx->curr_frame_depth == 0 ? NULL : ctx->frame;
     _Py_UOpsAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
 
-    int prev_frame_stack_size = prev_frame == NULL ? 0 : prev_frame->stack_len;
-    assert(prev_frame_stack_size >= 0);
+    int stack_consumed_n = prev_frame == NULL ? 0 : (init_frame_oparg + 2);
 
     frame->stack_len = co->co_stacksize;
     frame->locals_len = co->co_nlocalsplus;
 
     frame->args_stack_state = ctx->n_consumed;
-    frame->locals = frame->args_stack_state + prev_frame_stack_size;
+    frame->locals = frame->args_stack_state + stack_consumed_n;
     frame->stack = frame->locals + co->co_nlocalsplus;
     frame->stack_pointer = frame->stack + curr_stackentries;
-    ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize + prev_frame_stack_size);
+    ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize + stack_consumed_n);
     if (ctx->n_consumed >= ctx->limit) {
         ctx->done = true;
         ctx->out_of_space = true;
         return NULL;
     }
 
-    int host_frame_stackentries = 0;
     if (ctx->curr_frame_depth != 0) {
-        host_frame_stackentries = (int)(ctx->frame->stack_pointer - ctx->frame->stack);
         assert(prev_frame != NULL);
-        assert(host_frame_stackentries <= prev_frame_stack_size);
-        for (int i = 0; i < host_frame_stackentries; i++) {
-            frame->args_stack_state[i] = ctx->frame->stack[i];
+        for (int i = 0; i < stack_consumed_n; i++) {
+            frame->args_stack_state[i] = ctx->frame->stack_pointer[i - stack_consumed_n];
         }
     }
 
@@ -470,8 +466,6 @@ _Py_uop_frame_new(
     frame->init_frame_oparg = init_frame_oparg;
 
     frame->resume_check_inst = NULL;
-
-    frame->host_frame_stackentries = host_frame_stackentries;
 
     return frame;
 }

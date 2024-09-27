@@ -19,8 +19,10 @@
         /* _QUICKEN_RESUME is not a viable micro-op for tier 2 */
 
         case _RESUME_CHECK: {
-            SET_STATIC_INST();
             ctx->frame->resume_check_inst = this_instr;
+            if (ctx->frame->is_virtual) {
+                SET_STATIC_INST();
+            }
             break;
         }
 
@@ -663,6 +665,7 @@
             }
             else {
                 reify_shadow_ctx(ctx, true);
+                APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
             }
             co = get_code(this_instr);
             if (co == NULL) {
@@ -2512,6 +2515,7 @@
 
         case _CHECK_VALIDITY_AND_SET_IP: {
             PyObject *instr_ptr = (PyObject *)this_instr->operand;
+            reify_shadow_ctx(ctx, true);
             ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
             break;
         }

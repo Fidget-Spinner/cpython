@@ -181,6 +181,7 @@ dummy_func(void) {
         }
         else {
             reify_shadow_ctx(ctx, true);
+            APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
         }
         co = get_code(this_instr);
         if (co == NULL) {
@@ -277,6 +278,7 @@ dummy_func(void) {
     }
 
     override op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
+        reify_shadow_ctx(ctx, true);
         ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
     }
 
@@ -289,8 +291,10 @@ dummy_func(void) {
     }
 
     override op(_RESUME_CHECK, (--)) {
-        SET_STATIC_INST();
         ctx->frame->resume_check_inst = this_instr;
+        if (ctx->frame->is_virtual) {
+            SET_STATIC_INST();
+        }
     }
 
     override op(_COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
