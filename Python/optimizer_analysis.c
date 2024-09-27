@@ -566,32 +566,13 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
 {
     DPRINTF(3, "reifying shadow ctx\n");
     _PyUOpInstruction *trace_dest = ctx->trace_dest;
+    int locals_loaded = 0;
+    int concrete_stack_count = 0;
     for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
-        _Py_UopsLocalsPlusSlot slot = *sp;
-        assert(slot.sym != NULL);
-        // Need reifying.
-        if (slot.is_virtual) {
-            sp->is_virtual = false;
-            if (write_single_locals_or_const_or_tuple(ctx, trace_dest, &slot, false, reconstruct_topmost_tuple)) {
-            }
-            else if (sym_is_null(slot)) {
-                DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(sp - ctx->frame->stack));
-                WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_NULL, 0, 0);
-                ctx->n_trace_dest++;
-            }
-            else {
-                // Is static but not a constant value of locals or NULL.
-                // How is that possible?
-                Py_UNREACHABLE();
-            }
-            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
-                ctx->out_of_space = true;
-                ctx->done = true;
-                return;
-            }
+        if (!sp->is_virtual) {
+            concrete_stack_count++;
         }
     }
-    int locals_loaded = 0;
     // Restore locals from bottom to top
     for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals; local < ctx->frame->locals + ctx->frame->locals_len; local++) {
         // Locals did not change. No need to update it.
@@ -624,12 +605,12 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
             return;
         }
     }
-    if (locals_loaded + ctx->frame->stack_pointer > ctx->frame->stack + ctx->frame->stack_len) {
+    if (locals_loaded + concrete_stack_count + ctx->frame->stack > ctx->frame->stack + ctx->frame->stack_len) {
         ctx->out_of_space = true;
         ctx->done = true;
         return;
     }
-    assert(locals_loaded + ctx->frame->stack_pointer <= ctx->frame->stack + ctx->frame->stack_len);
+    assert(locals_loaded + concrete_stack_count + ctx->frame->stack <= ctx->frame->stack + ctx->frame->stack_len);
     // Store in REVERSE order (due to nature of stack)
     for (_Py_UopsLocalsPlusSlot *local = ctx->frame->locals + ctx->frame->locals_len - 1; local >= ctx->frame->locals ; local--) {
         // Locals did not change. No need to update it.
@@ -662,6 +643,31 @@ reify_shadow_stack(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
             ctx->frame->locals[i] = sym_new_not_null(ctx);
         }
         ctx->frame->locals[i].sym->locals_idx = i;
+    }
+    for (_Py_UopsLocalsPlusSlot *sp = ctx->frame->stack; sp < ctx->frame->stack_pointer; sp++) {
+        _Py_UopsLocalsPlusSlot slot = *sp;
+        assert(slot.sym != NULL);
+        // Need reifying.
+        if (slot.is_virtual) {
+            sp->is_virtual = false;
+            if (write_single_locals_or_const_or_tuple(ctx, trace_dest, &slot, false, reconstruct_topmost_tuple)) {
+            }
+            else if (sym_is_null(slot)) {
+                DPRINTF(3, "reifying %d PUSH_NULL\n", (int)(sp - ctx->frame->stack));
+                WRITE_OP(&trace_dest[ctx->n_trace_dest], _PUSH_NULL, 0, 0);
+                ctx->n_trace_dest++;
+            }
+            else {
+                // Is static but not a constant value of locals or NULL.
+                // How is that possible?
+                Py_UNREACHABLE();
+            }
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+        }
     }
     for (int i = 0; i < (int)(ctx->frame->stack_pointer - ctx->frame->stack); i++) {
         if (sym_is_null(ctx->frame->stack[i])) {
