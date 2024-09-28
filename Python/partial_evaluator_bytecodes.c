@@ -255,7 +255,7 @@ dummy_func(void) {
         }
 
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-            bool all_virtual = true;
+            bool all_virtual = (this_instr-3)->opcode == _CHECK_FUNCTION_VERSION_INLINE;
             for (int i = 0; i < argcount; i++) {
                 all_virtual = all_virtual && args[i].is_virtual;
             }

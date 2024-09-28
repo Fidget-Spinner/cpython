@@ -794,6 +794,17 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int reconstruct_topmost_tuple)
                 return;
             }
             DPRINTF(3, "reifying _INIT_CALL_PY_EXACT_ARGS and friends\n");
+            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
+            // Could be due to _RETURN_GENERATOR at the start instead of _RESUME_CHECK
+            if (frame->resume_check_inst == NULL) {
+                ctx->out_of_space = true;
+                ctx->done = true;
+                return;
+            }
             assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
             WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7)->oparg, (frame->resume_check_inst-7)->operand);
             trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
@@ -915,6 +926,7 @@ partial_evaluate_uops(
             // _INIT_CALL_PY_EXACT_ARGS pushes a non-symbol on the stack, so just don't reify it
             // because the stack is inconsistent.
             (opcode != _SAVE_RETURN_OFFSET && opcode !=_PUSH_FRAME)) {
+            DPRINTF(2, "Reifying over %s\n", _PyUOpName(opcode));
             reify_shadow_ctx(ctx, true);
         }
 
