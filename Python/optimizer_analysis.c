@@ -660,7 +660,9 @@ write_single_locals_or_const_or_tuple_or_null(
         return true;
     }
     else if (err_on_false) {
-        Py_UNREACHABLE();
+        ctx->out_of_space = true;
+        ctx->done = true;
+        return true;
     }
     return false;
 }
