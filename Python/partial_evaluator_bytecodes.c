@@ -97,7 +97,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_ctx(ctx, true);
+            reify_shadow_ctx(ctx, false, false);
             _Py_UopsLocalsPlusSlot old_value = value;
             if (sym_is_const(old_value)) {
                 value = sym_new_const(ctx, sym_get_const(old_value));
@@ -116,7 +116,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_ctx(ctx, true);
+            reify_shadow_ctx(ctx, false, false);
         }
     }
 
@@ -180,7 +180,7 @@ dummy_func(void) {
             is_virtual = true;
         }
         else {
-            reify_shadow_ctx(ctx, true);
+            reify_shadow_ctx(ctx, false, false);
             APPEND_OP(_SET_IP, 0, (uintptr_t)ctx->frame->instr_ptr);
         }
         co = get_code(this_instr);
@@ -266,7 +266,7 @@ dummy_func(void) {
                 SET_STATIC_INST();
             }
             else {
-                reify_shadow_ctx(ctx, true);
+                reify_shadow_ctx(ctx, false, false);
             }
             new_frame.sym = (_Py_UopsSymbol *)frame_new(ctx, co, 0, args, argcount, false, all_virtual, oparg);
         } else {
@@ -281,7 +281,7 @@ dummy_func(void) {
     }
 
     override op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
-        reify_shadow_ctx(ctx, true);
+        reify_shadow_ctx(ctx, false, false);
         ctx->frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
     }
 
@@ -316,7 +316,7 @@ dummy_func(void) {
             SET_STATIC_INST();
         }
         else {
-            reify_shadow_ctx(ctx, true);
+            reify_shadow_ctx(ctx, false, false);
         }
         if (oparg <= 6) {
             tup = _Py_uop_sym_new_tuple(ctx, oparg);
