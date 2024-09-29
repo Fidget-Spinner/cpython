@@ -2499,6 +2499,8 @@
             uint32_t func_version = (uint32_t)this_instr->operand;
             SET_STATIC_INST();
             // TODO we should collect all _CHECK_FUNCTION together at the top of the trace.
+            APPEND_OP(_CHECK_FUNCTION, 0, func_version);
+            write_side_exit(ctx, ctx->frame, trace_dest, _CHECK_FUNCTION, (this_instr));
             break;
         }
 

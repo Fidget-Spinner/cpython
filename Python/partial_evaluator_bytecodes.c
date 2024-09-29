@@ -135,6 +135,8 @@ dummy_func(void) {
     op(_CHECK_FUNCTION, (func_version/2 -- )) {
         SET_STATIC_INST();
         // TODO we should collect all _CHECK_FUNCTION together at the top of the trace.
+        APPEND_OP(_CHECK_FUNCTION, 0, func_version);
+        write_side_exit(ctx, ctx->frame, trace_dest, _CHECK_FUNCTION, (this_instr));
     }
 
     override op(_PUSH_FRAME, (new_frame -- unused if (0))) {

@@ -539,12 +539,16 @@ restore_state_in_main_exit(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, _
 static void reify_shadow_ctx(_Py_UOpsContext *ctx, int remain_virtual, int);
 
 static void
-restore_state_in_side_exit(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, _PyUOpInstruction *trace_dest, int original_target)
+restore_state_in_side_exit(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, _PyUOpInstruction *trace_dest, int original_target, int opcode)
 {
     // Write back the SET_IP
     int old_n_trace_dest = ctx->n_trace_dest;
     ctx->n_trace_dest = ctx->n_side_exit_dest;
-    reify_shadow_ctx(ctx, true, true);
+    // If it's not static, we would have reified already anyways. So there's
+    // no need to reify again.
+    if ((_PyUop_Flags[opcode] & HAS_STATIC_FLAG)) {
+        reify_shadow_ctx(ctx, true, true);
+    }
     ctx->n_side_exit_dest = ctx->n_trace_dest;
     ctx->n_trace_dest = old_n_trace_dest;
     if (ctx->n_side_exit_dest >= UOP_MAX_TRACE_LENGTH) { \
@@ -574,7 +578,7 @@ write_side_exit(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, _PyUOpInstru
         }
         int start_of_side_exit = ctx->n_side_exit_dest;
         // Write back the SET_IP
-        restore_state_in_side_exit(ctx, frame, trace_dest, original_target);
+        restore_state_in_side_exit(ctx, frame, trace_dest, original_target, opcode);
         APPEND_SIDE_OP(exit_op, 0, 0);
         trace_dest[ctx->n_side_exit_dest - 1].target = jump_target;
         trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
@@ -586,7 +590,7 @@ write_side_exit(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, _PyUOpInstru
         int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
                      0 : _PyUop_num_popped(opcode, this_instr->oparg);
         int start_of_side_exit = ctx->n_side_exit_dest;
-        restore_state_in_side_exit(ctx, frame, trace_dest, original_target);
+        restore_state_in_side_exit(ctx, frame, trace_dest, original_target, opcode);
         APPEND_SIDE_OP(_ERROR_POP_N, popped, original_target);
         trace_dest[ctx->n_side_exit_dest - 1].operand = original_target;
         trace_dest[ctx->n_side_exit_dest - 1].format = UOP_FORMAT_TARGET;
@@ -737,17 +741,20 @@ reify_single_frame(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, int remai
         }
     }
     assert(locals_loaded == 0);
-    for (int i = 0; i <  frame->locals_len; i++) {
-        if (sym_is_null(frame->locals[i])) {
-            continue;
+    if (!remain_virtual) {
+        for (int i = 0; i < frame->locals_len; i++) {
+            if (sym_is_null(frame->locals[i])) {
+                continue;
+            }
+            if (sym_is_const(frame->locals[i])) {
+                frame->locals[i] = sym_new_const(ctx, sym_get_const(
+                    frame->locals[i]));
+            }
+            else {
+                frame->locals[i] = sym_new_not_null(ctx);
+            }
+            frame->locals[i].sym->locals_idx = i;
         }
-        if (sym_is_const(frame->locals[i])) {
-            frame->locals[i] = sym_new_const(ctx, sym_get_const(frame->locals[i]));
-        }
-        else {
-            frame->locals[i] = sym_new_not_null(ctx);
-        }
-        frame->locals[i].sym->locals_idx = i;
     }
     for (_Py_UopsLocalsPlusSlot *sp = frame->stack; sp < frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
