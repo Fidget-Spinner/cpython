@@ -660,9 +660,7 @@ write_single_locals_or_const_or_tuple_or_null(
         return true;
     }
     else if (err_on_false) {
-        ctx->out_of_space = true;
-        ctx->done = true;
-        return true;
+        Py_UNREACHABLE();
     }
     return false;
 }
@@ -753,12 +751,6 @@ reify_single_frame(_Py_UOpsContext *ctx, _Py_UOpsAbstractFrame *frame, int remai
     }
     for (_Py_UopsLocalsPlusSlot *sp = frame->stack; sp < frame->stack_pointer; sp++) {
         _Py_UopsLocalsPlusSlot slot = *sp;
-        // Likely in _INIT_CALL_PY_EXACT_ARGS or something
-        if (slot.sym == NULL) {
-            ctx->out_of_space = true;
-            ctx->done = true;
-            return;
-        }
         assert(slot.sym != NULL);
         // Need reifying.
         if (slot.is_virtual) {
@@ -831,17 +823,17 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int remain_virtual, int in_side_exit)
                 ctx->done = true;
                 return;
             }
-            assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
-            WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7)->oparg, (frame->resume_check_inst-7)->operand);
-            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
-            trace_dest[ctx->n_trace_dest].target = 0;
-            ctx->n_trace_dest++;
-            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
-                ctx->out_of_space = true;
-                ctx->done = true;
-                return;
-            }
             if (!in_side_exit) {
+                assert((frame->resume_check_inst-7)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
+                WRITE_OP(&trace_dest[ctx->n_trace_dest], _CHECK_FUNCTION_VERSION_INLINE, (frame->resume_check_inst-7)->oparg, (frame->resume_check_inst-7)->operand);
+                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+                trace_dest[ctx->n_trace_dest].target = 0;
+                ctx->n_trace_dest++;
+                if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                    ctx->out_of_space = true;
+                    ctx->done = true;
+                    return;
+                }
                 write_side_exit(ctx, frame, trace_dest,
                                 _CHECK_FUNCTION_VERSION_INLINE,
                                 (frame->resume_check_inst - 7));
@@ -882,16 +874,16 @@ reify_shadow_ctx(_Py_UOpsContext *ctx, int remain_virtual, int in_side_exit)
                 ctx->done = true;
                 return;
             }
-            WRITE_OP(&trace_dest[ctx->n_trace_dest], _RESUME_CHECK, 0, 0);
-            trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
-            trace_dest[ctx->n_trace_dest].target = 0;
-            ctx->n_trace_dest++;
-            if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
-                ctx->out_of_space = true;
-                ctx->done = true;
-                return;
-            }
             if (!in_side_exit) {
+                WRITE_OP(&trace_dest[ctx->n_trace_dest], _RESUME_CHECK, 0, 0);
+                trace_dest[ctx->n_trace_dest].format = UOP_FORMAT_TARGET;
+                trace_dest[ctx->n_trace_dest].target = 0;
+                ctx->n_trace_dest++;
+                if (ctx->n_trace_dest >= UOP_MAX_TRACE_LENGTH) {
+                    ctx->out_of_space = true;
+                    ctx->done = true;
+                    return;
+                }
                 write_side_exit(ctx, frame, trace_dest, _RESUME_CHECK,
                                 frame->resume_check_inst);
             }
