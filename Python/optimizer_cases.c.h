@@ -1747,6 +1747,23 @@
         }
 
         case _CHECK_FUNCTION_VERSION: {
+            _Py_UopsSymbol *self_or_null;
+            _Py_UopsSymbol *callable;
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            uint32_t func_version = (uint32_t)this_instr->operand;
+            (void)self_or_null;
+            if (sym_is_const(callable) && sym_matches_type(callable, &PyFunction_Type)) {
+                assert(PyFunction_Check(sym_get_const(callable)));
+                if (func_version == (uint16_t)func_version) {
+                    REPLACE_OP(this_instr, _CHECK_FUNCTION_VERSION_INLINE, func_version, (uintptr_t)sym_get_const(callable));
+                }
+            }
+            sym_set_type(callable, &PyFunction_Type);
+            break;
+        }
+
+        case _CHECK_FUNCTION_VERSION_INLINE: {
             break;
         }
 
@@ -1814,7 +1831,17 @@
             _Py_UopsSymbol *callable;
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
-            sym_set_type(callable, &PyFunction_Type);
+            assert((this_instr-1)->opcode == _CHECK_FUNCTION_VERSION || (this_instr-1)->opcode == _CHECK_FUNCTION_VERSION_INLINE);
+            if (sym_is_const(callable) && sym_matches_type(callable, &PyFunction_Type)) {
+                if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
+                    PyFunctionObject *func = (PyFunctionObject *)sym_get_const(callable);
+                    PyCodeObject *co = (PyCodeObject *)func->func_code;
+                    if (co->co_argcount == oparg + !sym_is_null(self_or_null)) {
+                        // Note: this is only valid if CHECK_FUNCTION_VERSION precedes this instruction.
+                        REPLACE_OP(this_instr, _NOP, 0 ,0);
+                    }
+                }
+            }
             (void)self_or_null;
             break;
         }

@@ -1509,5 +1509,30 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertEqual(list(iter_opnames(ex)).count("_LOAD_FAST_1"), 0)
         self.assertTrue(ex.is_valid())
 
+    def test_func_guards_removed_or_reduced(self):
+        def testfunc(n):
+            for i in range(n):
+                # Only works on functions promoted to constants
+                global_identity(i)
+
+        opt = _testinternalcapi.new_uop_optimizer()
+        with temporary_optimizer(opt):
+            testfunc(20)
+
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
+        uops = get_opnames(ex)
+        self.assertIn("_PUSH_FRAME", uops)
+        # Strength reduced version
+        self.assertIn("_CHECK_FUNCTION_VERSION_INLINE", uops)
+        self.assertNotIn("_CHECK_FUNCTION_VERSION", uops)
+        # Removed guard
+        self.assertNotIn("_CHECK_FUNCTION_EXACT_ARGS", uops)
+
+
+def global_identity(x):
+    return x
+
+
 if __name__ == "__main__":
     unittest.main()
