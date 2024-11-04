@@ -260,7 +260,8 @@ _Py_uop_pe_frame_new(
     int curr_stackentries,
     _Py_UopsPESlot *args,
     int arg_len,
-    int oparg)
+    int oparg,
+    _PyUOpInstruction *init_frame_inst)
 {
     assert(ctx->curr_frame_depth < MAX_ABSTRACT_FRAME_DEPTH);
     _Py_UOpsPEAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
@@ -304,6 +305,8 @@ _Py_uop_pe_frame_new(
             frame->original_args[i] = ctx->frame->stack_pointer[-i-1];
         }
     }
+
+    frame->init_frame_inst = init_frame_inst;
 
     return frame;
 }

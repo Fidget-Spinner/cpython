@@ -118,9 +118,6 @@ dummy_func(void) {
     }
 
     op(_INIT_CALL_PY_EXACT_ARGS, (callable[1], self_or_null[1], args[oparg] -- new_frame)) {
-//        MATERIALIZE_INST();
-//        MATERIALIZE_INPUTS();
-
         int argcount = oparg;
 
         PyCodeObject *co = NULL;
@@ -142,18 +139,45 @@ dummy_func(void) {
 
         _Py_UopsPESlot temp;
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
+            _PyUOpInstruction *is_virtual = NULL;
+            // Check if the frame can be virtualized.
+            // Temporarily for simplicity, we require all inputs to be virtual
+            if ((sym_is_virtual(callable)) && sym_is_virtual(self_or_null)) {
+                int x = 0;
+                for (; x < argcount; x++) {
+                    if (!sym_is_virtual(&args[x])) {
+                        break;
+                    }
+                }
+                if (x == argcount) {
+                    DPRINTF(3, "Virtualizing frame\n");
+                    is_virtual = this_instr;
+                }
+            }
+            if (is_virtual == NULL) {
+                MATERIALIZE_INST();
+                MATERIALIZE_INPUTS();
+            }
              temp = (_Py_UopsPESlot){
-                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg), this_instr
+                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg, is_virtual), is_virtual
             };
         } else {
             // Not statically known --- materialize everything.
             MATERIALIZE_INST();
             MATERIALIZE_INPUTS();
             temp = (_Py_UopsPESlot){
-                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg), this_instr
+                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL), NULL
             };
         }
         new_frame = temp;
+    }
+
+    op(_SAVE_RETURN_OFFSET, (--)) {
+        _Py_UopsPESlot frame = stack_pointer[-1];
+        if (!sym_is_virtual(&frame)) {
+            MATERIALIZE_INST();
+        }
+        // Else, it's a virtual frame on top.
     }
 
     op(_PY_FRAME_GENERAL, (callable[1], self_or_null[1], args[oparg] -- new_frame)) {
@@ -167,7 +191,7 @@ dummy_func(void) {
             break;
         }
 
-        _Py_UopsPESlot temp = (_Py_UopsPESlot){(_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg), NULL};
+        _Py_UopsPESlot temp = (_Py_UopsPESlot){(_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL), NULL};
         new_frame = temp;
     }
 
@@ -208,7 +232,9 @@ dummy_func(void) {
     }
 
     op(_PUSH_FRAME, (new_frame --)) {
-        materialize(&new_frame);
+        if (!sym_is_virtual(&new_frame)) {
+            MATERIALIZE_INST();
+        }
         MATERIALIZE_INST();
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;

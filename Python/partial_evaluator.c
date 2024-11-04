@@ -130,6 +130,28 @@ get_code_with_logging(_PyUOpInstruction *op)
 #define sym_is_virtual _Py_uop_sym_is_virtual
 #define sym_get_origin _Py_uop_sym_get_origin
 
+static void materialize(_Py_UopsPESlot *slot);
+
+static void
+materialize_frame_push(_Py_UOpsPEAbstractFrame *frame)
+{
+    // Materialize arguments
+    if (frame->init_frame_inst) {
+        for (int i = 0; i < frame->oparg; i++) {
+            materialize(&frame->original_args[i]);
+        }
+        // Materialize instructions up till _PUSH_FRAME
+        _PyUOpInstruction *curr = frame->init_frame_inst;
+        assert(curr->opcode == _INIT_CALL_PY_EXACT_ARGS);
+        while (curr->opcode != _PUSH_FRAME) {
+            curr->is_virtual = false;
+            curr++;
+        }
+        assert(curr->opcode == _PUSH_FRAME);
+        curr->is_virtual = false;
+    }
+}
+
 static void
 materialize(_Py_UopsPESlot *slot)
 {
@@ -139,9 +161,7 @@ materialize(_Py_UopsPESlot *slot)
         if (slot->origin_inst->opcode == _INIT_CALL_PY_EXACT_ARGS) {
             assert(slot->sym != NULL);
             _Py_UOpsPEAbstractFrame *frame = (_Py_UOpsPEAbstractFrame *)slot->sym;
-            for (int i = 0; i < frame->oparg; i++) {
-                materialize(&frame->original_args[i]);
-            }
+            materialize_frame_push(frame);
         }
         DPRINTF(3, "Materialize: op[%s] arg[%d]", _PyUOpName(slot->origin_inst->opcode), slot->origin_inst->oparg);
         slot->origin_inst->is_virtual = false;
@@ -161,6 +181,7 @@ static void
 materialize_frame(_Py_UOpsPEAbstractFrame *frame)
 {
     materialize_stack(frame->stack, frame->stack_pointer);
+    materialize_frame_push(frame);
 }
 
 static void
@@ -191,7 +212,7 @@ partial_evaluate_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_pe_abstractcontext_init(ctx);
-    _Py_UOpsPEAbstractFrame *frame = _Py_uop_pe_frame_new(ctx, co, curr_stacklen, NULL, 0, 0);
+    _Py_UOpsPEAbstractFrame *frame = _Py_uop_pe_frame_new(ctx, co, curr_stacklen, NULL, 0, 0, NULL);
     if (frame == NULL) {
         return -1;
     }

@@ -320,6 +320,8 @@ struct _Py_UOpsPEAbstractFrame {
 
     int oparg;
     _Py_UopsPESlot *original_args;
+
+    _PyUOpInstruction *init_frame_inst;
 };
 
 typedef struct _Py_UOpsPEAbstractFrame _Py_UOpsPEAbstractFrame;
@@ -374,7 +376,8 @@ _Py_uop_pe_frame_new(
     int curr_stackentries,
     _Py_UopsPESlot *args,
     int arg_len,
-    int oparg);
+    int oparg,
+    _PyUOpInstruction *init_frame_inst);
 
 int _Py_uop_pe_frame_pop(_Py_UOpsPEContext *ctx);
 
