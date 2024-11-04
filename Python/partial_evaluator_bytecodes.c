@@ -73,6 +73,20 @@ dummy_func(void) {
         sym_set_origin_inst_override(&value, this_instr);
     }
 
+    op(_LOAD_CONST_INLINE_WITH_NULL, (ptr/4 -- value, null)) {
+        value = sym_new_const(ctx, ptr);
+        null = sym_new_null(ctx);
+        sym_set_origin_inst_override(&value, this_instr);
+        sym_set_origin_inst_override(&null, this_instr);
+    }
+
+    op(_LOAD_CONST_INLINE_BORROW_WITH_NULL, (ptr/4 -- value, null)) {
+        value = sym_new_const(ctx, ptr);
+        null = sym_new_null(ctx);
+        sym_set_origin_inst_override(&value, this_instr);
+        sym_set_origin_inst_override(&null, this_instr);
+    }
+
     op(_STORE_FAST, (value --)) {
         _PyUOpInstruction *origin = sym_get_origin(&value);
         // Gets rid of things like x = x.
@@ -235,7 +249,6 @@ dummy_func(void) {
         if (!sym_is_virtual(&new_frame)) {
             MATERIALIZE_INST();
         }
-        MATERIALIZE_INST();
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
         ctx->frame = (_Py_UOpsPEAbstractFrame *)new_frame.sym;
@@ -268,9 +281,17 @@ dummy_func(void) {
         corresponding_check_stack = NULL;
     }
 
+    op(_RESUME_CHECK, (--)) {
+        // Is NOT virtual
+        if (!ctx->frame->init_frame_inst) {
+            MATERIALIZE_INST();
+        }
+    }
+
     op(_RETURN_VALUE, (retval -- res)) {
-        MATERIALIZE_INST();
-        MATERIALIZE_INPUTS();
+        if (!ctx->frame->init_frame_inst) {
+            MATERIALIZE_INST();
+        }
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
         frame_pop(ctx);
@@ -319,6 +340,13 @@ dummy_func(void) {
         MATERIALIZE_INST();
         MATERIALIZE_INPUTS();
         value = sym_new_unknown(ctx);
+    }
+
+    op(_CHECK_FUNCTION, ( -- )) {
+        // TODO hoist this out, or burn value into operand.
+        if (!ctx->frame->init_frame_inst) {
+            MATERIALIZE_INST();
+        }
     }
 
     op(_JUMP_TO_TOP, (--)) {
