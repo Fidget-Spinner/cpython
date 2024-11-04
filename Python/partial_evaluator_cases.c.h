@@ -2292,6 +2292,11 @@
             break;
         }
 
+        case _CHECK_FUNCTION_VERSION_INLINE: {
+            MATERIALIZE_INST();
+            break;
+        }
+
         case _CHECK_METHOD_VERSION: {
             _Py_UopsPESlot *unused_0;
             _Py_UopsPESlot *null;
