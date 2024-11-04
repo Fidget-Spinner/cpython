@@ -317,6 +317,9 @@ struct _Py_UOpsPEAbstractFrame {
     _Py_UopsPESlot *stack_pointer;
     _Py_UopsPESlot *stack;
     _Py_UopsPESlot *locals;
+
+    int oparg;
+    _Py_UopsPESlot *original_args;
 };
 
 typedef struct _Py_UOpsPEAbstractFrame _Py_UOpsPEAbstractFrame;
@@ -370,7 +373,8 @@ _Py_uop_pe_frame_new(
     PyCodeObject *co,
     int curr_stackentries,
     _Py_UopsPESlot *args,
-    int arg_len);
+    int arg_len,
+    int oparg);
 
 int _Py_uop_pe_frame_pop(_Py_UOpsPEContext *ctx);
 

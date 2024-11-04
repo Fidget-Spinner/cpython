@@ -2263,7 +2263,7 @@
                 break;
             }
             _Py_UopsPESlot temp = (_Py_UopsPESlot){
-                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0), NULL};
+                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg), NULL};
             new_frame = temp;
             stack_pointer[0] = new_frame;
             stack_pointer += 1;
@@ -2498,12 +2498,8 @@
             args = &stack_pointer[-2 - oparg];
             self_or_null = &stack_pointer[-2];
             callable = &stack_pointer[-1];
-            MATERIALIZE_INST();
-            materialize(&callable[0]);
-            materialize(&self_or_null[0]);
-            for (int _i = oparg; --_i >= 0;) {
-                materialize(&args[_i]);
-            }
+            //        MATERIALIZE_INST();
+            //        MATERIALIZE_INPUTS();
             int argcount = oparg;
             PyCodeObject *co = NULL;
             assert((this_instr + 2)->opcode == _PUSH_FRAME);
@@ -2524,11 +2520,18 @@
             _Py_UopsPESlot temp;
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
                 temp = (_Py_UopsPESlot){
-                    (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount), NULL
+                    (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg), this_instr
                 };
             } else {
+                // Not statically known --- materialize everything.
+                MATERIALIZE_INST();
+                materialize(&callable[0]);
+                materialize(&self_or_null[0]);
+                for (int _i = oparg; --_i >= 0;) {
+                    materialize(&args[_i]);
+                }
                 temp = (_Py_UopsPESlot){
-                    (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0), NULL
+                    (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg), this_instr
                 };
             }
             new_frame = temp;
@@ -2542,9 +2545,10 @@
             _Py_UopsPESlot new_frame;
             new_frame = stack_pointer[-1];
             new_frame = stack_pointer[-1];
-            MATERIALIZE_INST();
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            materialize(&new_frame);
+            MATERIALIZE_INST();
             ctx->frame->stack_pointer = stack_pointer;
             ctx->frame = (_Py_UOpsPEAbstractFrame *)new_frame.sym;
             ctx->curr_frame_depth++;

@@ -259,18 +259,21 @@ _Py_uop_pe_frame_new(
     PyCodeObject *co,
     int curr_stackentries,
     _Py_UopsPESlot *args,
-    int arg_len)
+    int arg_len,
+    int oparg)
 {
     assert(ctx->curr_frame_depth < MAX_ABSTRACT_FRAME_DEPTH);
     _Py_UOpsPEAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
 
     frame->stack_len = co->co_stacksize;
     frame->locals_len = co->co_nlocalsplus;
+    frame->oparg = 2 + oparg;
 
-    frame->locals = ctx->n_consumed;
+    frame->original_args = ctx->n_consumed;
+    frame->locals = ctx->n_consumed + (frame->oparg);
     frame->stack = frame->locals + co->co_nlocalsplus;
     frame->stack_pointer = frame->stack + curr_stackentries;
-    ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize);
+    ctx->n_consumed = ctx->n_consumed + (co->co_nlocalsplus + co->co_stacksize + frame->oparg);
     if (ctx->n_consumed >= ctx->limit) {
         ctx->done = true;
         ctx->out_of_space = true;
@@ -292,6 +295,14 @@ _Py_uop_pe_frame_new(
     for (int i = 0; i < curr_stackentries; i++) {
         _Py_UopsPESlot stackvar = _Py_uop_pe_sym_new_unknown(ctx);
         frame->stack[i] = stackvar;
+    }
+
+    // Args are statically known, so they might be virtual. In that case,
+    // we must store them to re-materialize them later.
+    if (args != NULL) {
+        for (int i = 0; i < frame->oparg; i++) {
+            frame->original_args[i] = ctx->frame->stack_pointer[-i-1];
+        }
     }
 
     return frame;

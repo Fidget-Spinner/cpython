@@ -118,8 +118,8 @@ dummy_func(void) {
     }
 
     op(_INIT_CALL_PY_EXACT_ARGS, (callable[1], self_or_null[1], args[oparg] -- new_frame)) {
-        MATERIALIZE_INST();
-        MATERIALIZE_INPUTS();
+//        MATERIALIZE_INST();
+//        MATERIALIZE_INPUTS();
 
         int argcount = oparg;
 
@@ -143,11 +143,14 @@ dummy_func(void) {
         _Py_UopsPESlot temp;
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
              temp = (_Py_UopsPESlot){
-                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount), NULL
+                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg), this_instr
             };
         } else {
+            // Not statically known --- materialize everything.
+            MATERIALIZE_INST();
+            MATERIALIZE_INPUTS();
             temp = (_Py_UopsPESlot){
-                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0), NULL
+                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg), this_instr
             };
         }
         new_frame = temp;
@@ -164,7 +167,7 @@ dummy_func(void) {
             break;
         }
 
-        _Py_UopsPESlot temp = (_Py_UopsPESlot){(_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0), NULL};
+        _Py_UopsPESlot temp = (_Py_UopsPESlot){(_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg), NULL};
         new_frame = temp;
     }
 
@@ -205,6 +208,7 @@ dummy_func(void) {
     }
 
     op(_PUSH_FRAME, (new_frame --)) {
+        materialize(&new_frame);
         MATERIALIZE_INST();
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;

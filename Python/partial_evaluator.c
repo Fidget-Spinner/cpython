@@ -134,7 +134,16 @@ static void
 materialize(_Py_UopsPESlot *slot)
 {
     assert(slot != NULL);
-    if (slot->origin_inst) {
+    if (slot->origin_inst && slot->origin_inst->is_virtual) {
+        // Frame reconstruction; restore all the frame args as well.
+        if (slot->origin_inst->opcode == _INIT_CALL_PY_EXACT_ARGS) {
+            assert(slot->sym != NULL);
+            _Py_UOpsPEAbstractFrame *frame = (_Py_UOpsPEAbstractFrame *)slot->sym;
+            for (int i = 0; i < frame->oparg; i++) {
+                materialize(&frame->original_args[i]);
+            }
+        }
+        DPRINTF(3, "Materialize: op[%s] arg[%d]", _PyUOpName(slot->origin_inst->opcode), slot->origin_inst->oparg);
         slot->origin_inst->is_virtual = false;
     }
 }
@@ -182,7 +191,7 @@ partial_evaluate_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_pe_abstractcontext_init(ctx);
-    _Py_UOpsPEAbstractFrame *frame = _Py_uop_pe_frame_new(ctx, co, curr_stacklen, NULL, 0);
+    _Py_UOpsPEAbstractFrame *frame = _Py_uop_pe_frame_new(ctx, co, curr_stacklen, NULL, 0, 0);
     if (frame == NULL) {
         return -1;
     }
