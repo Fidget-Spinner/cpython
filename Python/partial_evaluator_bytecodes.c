@@ -343,10 +343,7 @@ dummy_func(void) {
     }
 
     op(_CHECK_FUNCTION, ( -- )) {
-        // TODO hoist this out, or burn value into operand.
-        if (!ctx->frame->init_frame_inst) {
-            MATERIALIZE_INST();
-        }
+        materialize_ctx(ctx);
     }
 
     op(_JUMP_TO_TOP, (--)) {

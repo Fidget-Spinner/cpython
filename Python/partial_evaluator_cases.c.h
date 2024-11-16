@@ -3568,10 +3568,12 @@
 
         case _CHECK_FUNCTION: {
             uint32_t func_version = (uint32_t)this_instr->operand0;
-            // TODO hoist this out, or burn value into operand.
-            if (!ctx->frame->init_frame_inst) {
-                MATERIALIZE_INST();
-            }
+            materialize_ctx(ctx);
+            break;
+        }
+
+        case _CHECK_FUNCTION_INLINE: {
+            MATERIALIZE_INST();
             break;
         }
 
