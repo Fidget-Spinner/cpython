@@ -300,7 +300,7 @@ _Py_uop_pe_frame_new(
 
     // Args are statically known, so they might be virtual. In that case,
     // we must store them to re-materialize them later.
-    if (args != NULL) {
+    if (init_frame_inst) {
         for (int i = 0; i < frame->oparg; i++) {
             frame->original_args[i] = ctx->frame->stack_pointer[-i-1];
         }
@@ -354,6 +354,12 @@ _Py_uop_pe_frame_pop(_Py_UOpsPEContext *ctx)
 
     return 0;
 }
+
+bool _Py_uop_pe_frame_is_virtual(_Py_UOpsPEContext *ctx)
+{
+    return ctx->frame->init_frame_inst != NULL && ctx->frame->init_frame_inst->is_virtual;
+}
+
 
 
 #define TEST_PREDICATE(PRED, MSG) \

@@ -124,6 +124,7 @@ get_code_with_logging(_PyUOpInstruction *op)
 #define sym_is_bottom _Py_uop_pe_sym_is_bottom
 #define frame_new _Py_uop_pe_frame_new
 #define frame_pop _Py_uop_pe_frame_pop
+#define frame_is_virtual _Py_uop_pe_frame_is_virtual
 
 #define MATERIALIZE_INST() (this_instr->is_virtual = false)
 #define sym_set_origin_inst_override _Py_uop_sym_set_origin_inst_override
@@ -158,12 +159,13 @@ materialize(_Py_UopsPESlot *slot)
     assert(slot != NULL);
     if (slot->origin_inst && slot->origin_inst->is_virtual) {
         // Frame reconstruction; restore all the frame args as well.
+        // TODO we actually don't need to reconstruct the frame here.
         if (slot->origin_inst->opcode == _INIT_CALL_PY_EXACT_ARGS) {
             assert(slot->sym != NULL);
             _Py_UOpsPEAbstractFrame *frame = (_Py_UOpsPEAbstractFrame *)slot->sym;
             materialize_frame_push(frame);
         }
-        DPRINTF(3, "Materialize: op[%s] arg[%d]", _PyUOpName(slot->origin_inst->opcode), slot->origin_inst->oparg);
+        DPRINTF(3, "[M]: op[%s] arg[%d]\n", _PyUOpName(slot->origin_inst->opcode), slot->origin_inst->oparg);
         slot->origin_inst->is_virtual = false;
     }
 }

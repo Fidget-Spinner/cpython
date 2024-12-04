@@ -356,6 +356,7 @@ _PyFrame_PushUnchecked(PyThreadState *tstate, _PyStackRef func, int null_locals_
 {
     CALL_STAT_INC(frames_pushed);
     PyFunctionObject *func_obj = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(func);
+    assert(PyFunction_Check(func_obj));
     PyCodeObject *code = (PyCodeObject *)func_obj->func_code;
     _PyInterpreterFrame *new_frame = (_PyInterpreterFrame *)tstate->datastack_top;
     tstate->datastack_top += code->co_framesize;

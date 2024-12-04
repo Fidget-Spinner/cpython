@@ -326,6 +326,9 @@ struct _Py_UOpsPEAbstractFrame {
     int oparg;
     _Py_UopsPESlot *original_args;
 
+    // The frame initialization instruction.
+    // Usually _INIT_CALL_PY_EXACT_ARGS
+    // If it's not NULL that indicates it's virtual.
     _PyUOpInstruction *init_frame_inst;
 };
 
@@ -388,6 +391,8 @@ int _Py_uop_pe_frame_pop(_Py_UOpsPEContext *ctx);
 
 extern void _Py_uop_pe_abstractcontext_init(_Py_UOpsPEContext *ctx);
 extern void _Py_uop_pe_abstractcontext_fini(_Py_UOpsPEContext *ctx);
+
+bool _Py_uop_pe_frame_is_virtual(_Py_UOpsPEContext *ctx);
 
 
 #ifdef __cplusplus

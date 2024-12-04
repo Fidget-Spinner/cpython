@@ -169,16 +169,28 @@ dummy_func(void) {
                 }
             }
             if (is_virtual == NULL) {
+                DPRINTF(2, "[Inline fail]: Reason-not all virtual\n");
                 MATERIALIZE_INST();
-                MATERIALIZE_INPUTS();
+                // Do it manually because we fiddled above.
+                materialize(self_or_null);
+                materialize(callable);
+                for (int x = 0; x < argcount; x++) {
+                    materialize(&args[x]);
+                }
             }
              temp = (_Py_UopsPESlot){
                 (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg, is_virtual), is_virtual
             };
         } else {
+            DPRINTF(2, "[Inline fail]: Reason-not statically known\n");
             // Not statically known --- materialize everything.
             MATERIALIZE_INST();
-            MATERIALIZE_INPUTS();
+            // Do it manually because we fiddled above.
+            materialize(self_or_null);
+            materialize(callable);
+            for (int x = 0; x < argcount; x++) {
+                materialize(&args[x]);
+            }
             temp = (_Py_UopsPESlot){
                 (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL), NULL
             };
@@ -283,14 +295,18 @@ dummy_func(void) {
 
     op(_RESUME_CHECK, (--)) {
         // Is NOT virtual
-        if (!ctx->frame->init_frame_inst) {
+        bool is_virtual = frame_is_virtual(ctx);
+        if (!is_virtual) {
             MATERIALIZE_INST();
         }
     }
 
     op(_RETURN_VALUE, (retval -- res)) {
-        if (!ctx->frame->init_frame_inst) {
+        // Is NOT virtual.
+        bool is_virtual = frame_is_virtual(ctx);
+        if (!is_virtual) {
             MATERIALIZE_INST();
+            materialize(&retval);
         }
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;

@@ -25,7 +25,8 @@
 
         case _RESUME_CHECK: {
             // Is NOT virtual
-            if (!ctx->frame->init_frame_inst) {
+            bool is_virtual = frame_is_virtual(ctx);
+            if (!is_virtual) {
                 MATERIALIZE_INST();
             }
             break;
@@ -762,11 +763,14 @@
             _Py_UopsPESlot res;
             retval = stack_pointer[-1];
             retval = stack_pointer[-1];
-            if (!ctx->frame->init_frame_inst) {
-                MATERIALIZE_INST();
-            }
+            // Is NOT virtual.
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            bool is_virtual = frame_is_virtual(ctx);
+            if (!is_virtual) {
+                MATERIALIZE_INST();
+                materialize(&retval);
+            }
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
@@ -2541,23 +2545,27 @@
                     }
                 }
                 if (is_virtual == NULL) {
+                    DPRINTF(2, "[Inline fail]: Reason-not all virtual\n");
                     MATERIALIZE_INST();
-                    materialize(&callable[0]);
-                    materialize(&self_or_null[0]);
-                    for (int _i = oparg; --_i >= 0;) {
-                        materialize(&args[_i]);
+                    // Do it manually because we fiddled above.
+                    materialize(self_or_null);
+                    materialize(callable);
+                    for (int x = 0; x < argcount; x++) {
+                        materialize(&args[x]);
                     }
                 }
                 temp = (_Py_UopsPESlot){
                     (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg, is_virtual), is_virtual
                 };
             } else {
+                DPRINTF(2, "[Inline fail]: Reason-not statically known\n");
                 // Not statically known --- materialize everything.
                 MATERIALIZE_INST();
-                materialize(&callable[0]);
-                materialize(&self_or_null[0]);
-                for (int _i = oparg; --_i >= 0;) {
-                    materialize(&args[_i]);
+                // Do it manually because we fiddled above.
+                materialize(self_or_null);
+                materialize(callable);
+                for (int x = 0; x < argcount; x++) {
+                    materialize(&args[x]);
                 }
                 temp = (_Py_UopsPESlot){
                     (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL), NULL
