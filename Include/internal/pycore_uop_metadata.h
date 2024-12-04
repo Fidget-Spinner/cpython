@@ -265,6 +265,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_FORMAT_WITH_SPEC] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_COPY] = HAS_ARG_FLAG | HAS_PURE_FLAG,
     [_BINARY_OP] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_BINARY_OP_NO_ESCAPE] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_SWAP] = HAS_ARG_FLAG | HAS_PURE_FLAG,
     [_GUARD_IS_TRUE_POP] = HAS_EXIT_FLAG,
     [_GUARD_IS_FALSE_POP] = HAS_EXIT_FLAG,
@@ -311,6 +312,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_BINARY_OP_INPLACE_ADD_UNICODE] = "_BINARY_OP_INPLACE_ADD_UNICODE",
     [_BINARY_OP_MULTIPLY_FLOAT] = "_BINARY_OP_MULTIPLY_FLOAT",
     [_BINARY_OP_MULTIPLY_INT] = "_BINARY_OP_MULTIPLY_INT",
+    [_BINARY_OP_NO_ESCAPE] = "_BINARY_OP_NO_ESCAPE",
     [_BINARY_OP_SUBTRACT_FLOAT] = "_BINARY_OP_SUBTRACT_FLOAT",
     [_BINARY_OP_SUBTRACT_INT] = "_BINARY_OP_SUBTRACT_INT",
     [_BINARY_SLICE] = "_BINARY_SLICE",
@@ -1074,6 +1076,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _COPY:
             return 0;
         case _BINARY_OP:
+            return 2;
+        case _BINARY_OP_NO_ESCAPE:
             return 2;
         case _SWAP:
             return 2 + (oparg-2);

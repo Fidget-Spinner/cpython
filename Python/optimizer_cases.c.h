@@ -2306,6 +2306,19 @@
             else {
                 res = sym_new_unknown(ctx);
             }
+            if ((ltype == &PyFloat_Type || ltype == &PyLong_Type || ltype == &PyUnicode_Type) &&
+                (rtype == &PyFloat_Type || rtype == &PyLong_Type || rtype == &PyUnicode_Type)) {
+                REPLACE_OP(this_instr, _BINARY_OP_NO_ESCAPE, oparg, 0);
+            }
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_NO_ESCAPE: {
+            _Py_UopsSymbol *res;
+            res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());

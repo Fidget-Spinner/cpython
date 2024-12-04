@@ -4678,6 +4678,18 @@ dummy_func(
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
 
+        // Inferred to be non-escaping. Feed information to the PE.
+        op(_BINARY_OP_NO_ESCAPE, (lhs, rhs -- res)) {
+            PyObject *lhs_o = PyStackRef_AsPyObjectBorrow(lhs);
+            PyObject *rhs_o = PyStackRef_AsPyObjectBorrow(rhs);
+
+            assert(_PyEval_BinaryOps[oparg]);
+            PyObject *res_o = _PyEval_BinaryOps[oparg](lhs_o, rhs_o);
+            DECREF_INPUTS();
+            ERROR_IF(res_o == NULL, error);
+            res = PyStackRef_FromPyObjectSteal(res_o);
+        }
+
         macro(BINARY_OP) = _SPECIALIZE_BINARY_OP + _BINARY_OP;
 
         pure inst(SWAP, (bottom_in, unused[oparg-2], top_in --

@@ -5648,6 +5648,29 @@
             break;
         }
 
+        case _BINARY_OP_NO_ESCAPE: {
+            _PyStackRef rhs;
+            _PyStackRef lhs;
+            _PyStackRef res;
+            oparg = CURRENT_OPARG();
+            rhs = stack_pointer[-1];
+            lhs = stack_pointer[-2];
+            PyObject *lhs_o = PyStackRef_AsPyObjectBorrow(lhs);
+            PyObject *rhs_o = PyStackRef_AsPyObjectBorrow(rhs);
+            assert(_PyEval_BinaryOps[oparg]);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyObject *res_o = _PyEval_BinaryOps[oparg](lhs_o, rhs_o);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            PyStackRef_CLOSE(lhs);
+            PyStackRef_CLOSE(rhs);
+            if (res_o == NULL) JUMP_TO_ERROR();
+            res = PyStackRef_FromPyObjectSteal(res_o);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _SWAP: {
             _PyStackRef top_in;
             _PyStackRef bottom_in;

@@ -766,6 +766,9 @@
                 MATERIALIZE_INST();
                 materialize(&retval);
             }
+            else {
+                DPRINTF(2, "Virtualizing function\n");
+            }
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
@@ -3369,6 +3372,20 @@
             materialize(&lhs);
             res = sym_new_not_null(ctx);
             materialize_ctx(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_NO_ESCAPE: {
+            _Py_UopsPESlot rhs;
+            _Py_UopsPESlot lhs;
+            _Py_UopsPESlot res;
+            MATERIALIZE_INST();
+            materialize(&lhs);
+            materialize(&rhs);
+            res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());

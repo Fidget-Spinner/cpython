@@ -117,6 +117,12 @@ dummy_func(void) {
         MATERIALIZE_INST();
     }
 
+    op(_BINARY_OP_NO_ESCAPE, (lhs, rhs -- res)) {
+        MATERIALIZE_INST();
+        MATERIALIZE_INPUTS();
+        res = sym_new_not_null(ctx);
+    }
+
     op(_BINARY_SUBSCR_INIT_CALL, (container, sub -- new_frame)) {
         MATERIALIZE_INST();
         MATERIALIZE_INPUTS();
@@ -307,6 +313,9 @@ dummy_func(void) {
         if (!is_virtual) {
             MATERIALIZE_INST();
             materialize(&retval);
+        }
+        else {
+            DPRINTF(2, "Virtualizing function\n");
         }
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
