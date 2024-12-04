@@ -21,6 +21,8 @@
 
         /* _QUICKEN_RESUME is not a viable micro-op for tier 2 */
 
+        /* _LOAD_BYTECODE is not a viable micro-op for tier 2 */
+
         case _RESUME_CHECK: {
             // Is NOT virtual
             if (!ctx->frame->init_frame_inst) {
@@ -538,6 +540,7 @@
             list_st = stack_pointer[-2];
             materialize(&list_st);
             res = sym_new_not_null(ctx);
+            materialize_ctx(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -1092,7 +1095,7 @@
             _Py_UopsPESlot globals_keys;
             _Py_UopsPESlot res;
             _Py_UopsPESlot null = (_Py_UopsPESlot){NULL, 0};
-            uint16_t index = (uint16_t)this_instr->operand;
+            uint16_t index = (uint16_t)this_instr->operand0;
             globals_keys = stack_pointer[-1];
             (void)index;
             MATERIALIZE_INST();
@@ -1110,7 +1113,7 @@
             _Py_UopsPESlot builtins_keys;
             _Py_UopsPESlot res;
             _Py_UopsPESlot null = (_Py_UopsPESlot){NULL, 0};
-            uint16_t index = (uint16_t)this_instr->operand;
+            uint16_t index = (uint16_t)this_instr->operand0;
             builtins_keys = stack_pointer[-1];
             (void)index;
             MATERIALIZE_INST();
@@ -1563,7 +1566,7 @@
         case _LOAD_ATTR_PROPERTY_FRAME: {
             _Py_UopsPESlot owner;
             _Py_UopsPESlot new_frame;
-            PyObject *fget = (PyObject *)this_instr->operand;
+            PyObject *fget = (PyObject *)this_instr->operand0;
             owner = stack_pointer[-1];
             MATERIALIZE_INST();
             materialize(&owner);
@@ -2677,7 +2680,7 @@
             args = &stack_pointer[-oparg];
             init = &stack_pointer[-2 - oparg];
             self = &stack_pointer[-1 - oparg];
-            uint32_t type_version = (uint32_t)this_instr->operand;
+            uint32_t type_version = (uint32_t)this_instr->operand0;
             args = &stack_pointer[-2 - oparg];
             null = &stack_pointer[-2];
             callable = &stack_pointer[-1];
@@ -3470,7 +3473,7 @@
         }
 
         case _CHECK_STACK_SPACE_OPERAND: {
-            uint32_t framesize = (uint32_t)this_instr->operand;
+            uint32_t framesize = (uint32_t)this_instr->operand0;
             MATERIALIZE_INST();
             break;
         }
@@ -3485,7 +3488,7 @@
         }
 
         case _EXIT_TRACE: {
-            PyObject *exit_p = (PyObject *)this_instr->operand;
+            PyObject *exit_p = (PyObject *)this_instr->operand0;
             MATERIALIZE_INST();
             materialize_ctx(ctx);
             (void)exit_p;
@@ -3500,7 +3503,7 @@
 
         case _LOAD_CONST_INLINE: {
             _Py_UopsPESlot value;
-            PyObject *ptr = (PyObject *)this_instr->operand;
+            PyObject *ptr = (PyObject *)this_instr->operand0;
             MATERIALIZE_INST();
             value = sym_new_const(ctx, ptr);
             sym_set_origin_inst_override(&value, this_instr);
@@ -3512,7 +3515,7 @@
 
         case _LOAD_CONST_INLINE_BORROW: {
             _Py_UopsPESlot value;
-            PyObject *ptr = (PyObject *)this_instr->operand;
+            PyObject *ptr = (PyObject *)this_instr->operand0;
             MATERIALIZE_INST();
             value = sym_new_const(ctx, ptr);
             sym_set_origin_inst_override(&value, this_instr);
@@ -3536,7 +3539,7 @@
         case _LOAD_CONST_INLINE_WITH_NULL: {
             _Py_UopsPESlot value;
             _Py_UopsPESlot null;
-            PyObject *ptr = (PyObject *)this_instr->operand;
+            PyObject *ptr = (PyObject *)this_instr->operand0;
             value = sym_new_const(ctx, ptr);
             null = sym_new_null(ctx);
             sym_set_origin_inst_override(&value, this_instr);
@@ -3551,7 +3554,7 @@
         case _LOAD_CONST_INLINE_BORROW_WITH_NULL: {
             _Py_UopsPESlot value;
             _Py_UopsPESlot null;
-            PyObject *ptr = (PyObject *)this_instr->operand;
+            PyObject *ptr = (PyObject *)this_instr->operand0;
             value = sym_new_const(ctx, ptr);
             null = sym_new_null(ctx);
             sym_set_origin_inst_override(&value, this_instr);
@@ -3564,7 +3567,8 @@
         }
 
         case _CHECK_FUNCTION: {
-            uint32_t func_version = (uint32_t)this_instr->operand;
+            uint32_t func_version = (uint32_t)this_instr->operand0;
+            // TODO hoist this out, or burn value into operand.
             if (!ctx->frame->init_frame_inst) {
                 MATERIALIZE_INST();
             }
@@ -3645,6 +3649,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 materialize(&unused_0[_i]);
             }
+            materialize_ctx(ctx);
             stack_pointer += -oparg;
             assert(WITHIN_STACK_BOUNDS());
             break;
