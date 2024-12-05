@@ -1558,33 +1558,11 @@ class TestUopsOptimization(unittest.TestCase):
         # Only 1 outer guard
         self.assertLessEqual(opnames.count("_CHECK_FUNCTION"), 1)
 
-    def test_trace_through_simple_init(self):
-        def testfunc(n):
-            for i in range(n):
-                Initer(i)
-
-        opt = _testinternalcapi.new_uop_optimizer()
-        with temporary_optimizer(opt):
-            testfunc(TIER2_THRESHOLD)
-
-        ex = get_first_executor(testfunc)
-        self.assertIsNotNone(ex)
-        uops = get_opnames(ex)
-        self.assertIn("_PUSH_FRAME", uops)
-        # One return value for __init__, the other for the shim/cleanup frame.
-        self.assertEqual(list(iter_opnames(ex)).count("_RETURN_VALUE"), 2)
-        # Strength reduced version
-        self.assertIn("_CHECK_INIT_MATCHES_VERSIONS", uops)
-
 def global_identity(x):
     return x
 
 def global_foo(x):
     return global_identity(x)
-
-class Initer:
-    def __init__(self, x):
-        self.x = x
 
 
 if __name__ == "__main__":

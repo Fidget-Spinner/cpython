@@ -2658,26 +2658,6 @@
             break;
         }
 
-        case _CHECK_INIT_MATCHES_VERSIONS: {
-            _Py_UopsPESlot *args;
-            _Py_UopsPESlot *null;
-            _Py_UopsPESlot *callable;
-            MATERIALIZE_INST();
-            args = &stack_pointer[-oparg];
-            for (int _i = oparg; --_i >= 0;) {
-                materialize(&args[_i]);
-            }
-            null = &stack_pointer[-1 - oparg];
-            for (int _i = 1; --_i >= 0;) {
-                materialize(&null[_i]);
-            }
-            callable = &stack_pointer[-2 - oparg];
-            for (int _i = 1; --_i >= 0;) {
-                materialize(&callable[_i]);
-            }
-            break;
-        }
-
         case _CHECK_AND_ALLOCATE_OBJECT: {
             _Py_UopsPESlot *args;
             _Py_UopsPESlot *null;
