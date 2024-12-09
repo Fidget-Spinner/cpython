@@ -54,7 +54,7 @@
 do {  \
     OPT_STAT_INC(traces_executed);                \
     __attribute__((musttail))                     \
-    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(frame, stack_pointer, tstate); \
+    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(frame, stack_pointer, tstate, frame->localsplus); \
 } while (0)
 
 #undef GOTO_TIER_ONE
@@ -77,7 +77,7 @@ do {  \
 do {                                                         \
     PyAPI_DATA(void) ALIAS;                                  \
     __attribute__((musttail))                                \
-    return ((jit_func_preserve_none)&ALIAS)(frame, stack_pointer, tstate); \
+    return ((jit_func_preserve_none)&ALIAS)(frame, stack_pointer, tstate, localsplus); \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
@@ -91,8 +91,14 @@ do {                                                         \
 
 #define TIER_TWO 2
 
+#undef PEEKLOCAL
+#define PEEKLOCAL(i) (localsplus[i])
+
+#undef SET_LOCALSPLUS
+#define SET_LOCALSPLUS(f) (localsplus = f->localsplus)
+
 __attribute__((preserve_none)) _Py_CODEUNIT *
-_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
+_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _PyStackRef *localsplus)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)

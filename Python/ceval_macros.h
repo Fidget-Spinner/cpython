@@ -248,6 +248,7 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 
 #define LOCALS_ARRAY    (frame->localsplus)
 #define GETLOCAL(i)     (frame->localsplus[i])
+#define PEEKLOCAL(i)    (frame->localsplus[i])
 
 /* The SETLOCAL() macro must not DECREF the local variable in-place and
    then store the new value; it must copy the old value to a temporary
@@ -406,7 +407,7 @@ _PyFrame_SetStackPointer(frame, stack_pointer)
 do {                                                   \
     OPT_STAT_INC(traces_executed);                     \
     jit_func jitted = (EXECUTOR)->jit_code;            \
-    next_instr = jitted(frame, stack_pointer, tstate); \
+    next_instr = jitted(frame, stack_pointer, tstate, frame->localsplus); \
     Py_DECREF(tstate->previous_executor);              \
     tstate->previous_executor = NULL;                  \
     frame = tstate->current_frame;                     \
@@ -475,3 +476,5 @@ do { \
 #else
 #define CONVERSION_FAILED(NAME) (0)
 #endif
+
+#define SET_LOCALSPLUS(f) ((void)(f))

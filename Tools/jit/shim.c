@@ -18,7 +18,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     Py_INCREF(executor);
     // Note that this is *not* a tail call:
     PyAPI_DATA(void) _JIT_CONTINUE;
-    _Py_CODEUNIT *target = ((jit_func_preserve_none)&_JIT_CONTINUE)(frame, stack_pointer, tstate);
+    _Py_CODEUNIT *target = ((jit_func_preserve_none)&_JIT_CONTINUE)(frame, stack_pointer, tstate, frame->localsplus);
     Py_SETREF(tstate->previous_executor, executor);
     return target;
 }

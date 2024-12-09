@@ -637,6 +637,7 @@ NON_ESCAPING_FUNCTIONS = (
     "initial_temperature_backoff_counter",
     "maybe_lltrace_resume_frame",
     "restart_backoff_counter",
+    "PEEKLOCAL",
 )
 
 def find_stmt_start(node: parser.InstDef, idx: int) -> lexer.Token:
@@ -825,7 +826,7 @@ def compute_properties(op: parser.InstDef) -> Properties:
         stores_sp=variable_used(op, "SYNC_SP"),
         uses_co_consts=variable_used(op, "FRAME_CO_CONSTS"),
         uses_co_names=variable_used(op, "FRAME_CO_NAMES"),
-        uses_locals=(variable_used(op, "GETLOCAL") or variable_used(op, "SETLOCAL"))
+        uses_locals=(variable_used(op, "GETLOCAL") or variable_used(op, "SETLOCAL") or variable_used(op, "PEEKLOCAL"))
         and not has_free,
         has_free=has_free,
         pure="pure" in op.annotations,

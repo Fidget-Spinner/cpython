@@ -554,6 +554,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -942,6 +943,7 @@
                         goto error;
                     }
                     frame->return_offset = 4 ;
+                    SET_LOCALSPLUS(new_frame);
                     DISPATCH_INLINED(new_frame);
                 }
                 /* Callable is not a normal Python function */
@@ -1108,6 +1110,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -1211,6 +1214,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -1310,6 +1314,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -1744,6 +1749,7 @@
                         }
                         assert( 1 == 1);
                         frame->return_offset = 1;
+                        SET_LOCALSPLUS(new_frame);
                         DISPATCH_INLINED(new_frame);
                     }
                     stack_pointer[-1 - (oparg & 1)] = callargs_st;
@@ -1965,6 +1971,7 @@
                     }
                     assert( 4 == 1 + INLINE_CACHE_ENTRIES_CALL_KW);
                     frame->return_offset = 4 ;
+                    SET_LOCALSPLUS(new_frame);
                     DISPATCH_INLINED(new_frame);
                 }
                 /* Callable is not a normal Python function */
@@ -2132,6 +2139,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -2310,6 +2318,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -2879,6 +2888,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -2957,6 +2967,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -4009,6 +4020,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -4457,6 +4469,7 @@
                         goto error;
                     }
                     frame->return_offset = 4 ;
+                    SET_LOCALSPLUS(new_frame);
                     DISPATCH_INLINED(new_frame);
                 }
                 /* Callable is not a normal Python function */
@@ -4942,6 +4955,7 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 LOAD_IP(frame->return_offset);
                 res = temp;
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             stack_pointer[0] = res;
@@ -5011,6 +5025,7 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
                 value = temp;
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             stack_pointer[0] = value;
@@ -5376,6 +5391,7 @@
             new_frame->localsplus[0] = owner;
             new_frame->localsplus[1] = PyStackRef_FromPyObjectNew(name);
             frame->return_offset = 10 ;
+            SET_LOCALSPLUS(new_frame);
             DISPATCH_INLINED(new_frame);
         }
 
@@ -5727,6 +5743,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -5920,8 +5937,8 @@
             next_instr += 1;
             INSTRUCTION_STATS(LOAD_FAST);
             _PyStackRef value;
-            assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
-            value = PyStackRef_DUP(GETLOCAL(oparg));
+            assert(!PyStackRef_IsNull(PEEKLOCAL(oparg)));
+            value = PyStackRef_DUP(PEEKLOCAL(oparg));
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -5933,7 +5950,7 @@
             next_instr += 1;
             INSTRUCTION_STATS(LOAD_FAST_AND_CLEAR);
             _PyStackRef value;
-            value = GETLOCAL(oparg);
+            value = PEEKLOCAL(oparg);
             // do not use SETLOCAL here, it decrefs the old value
             GETLOCAL(oparg) = PyStackRef_NULL;
             stack_pointer[0] = value;
@@ -5947,7 +5964,7 @@
             next_instr += 1;
             INSTRUCTION_STATS(LOAD_FAST_CHECK);
             _PyStackRef value;
-            _PyStackRef value_s = GETLOCAL(oparg);
+            _PyStackRef value_s = PEEKLOCAL(oparg);
             if (PyStackRef_IsNull(value_s)) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 _PyEval_FormatExcCheckArg(tstate, PyExc_UnboundLocalError,
@@ -5972,8 +5989,8 @@
             _PyStackRef value2;
             uint32_t oparg1 = oparg >> 4;
             uint32_t oparg2 = oparg & 15;
-            value1 = PyStackRef_DUP(GETLOCAL(oparg1));
-            value2 = PyStackRef_DUP(GETLOCAL(oparg2));
+            value1 = PyStackRef_DUP(PEEKLOCAL(oparg1));
+            value2 = PyStackRef_DUP(PEEKLOCAL(oparg2));
             stack_pointer[0] = value1;
             stack_pointer[1] = value2;
             stack_pointer += 2;
@@ -7014,6 +7031,7 @@
             LOAD_IP(frame->return_offset);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectSteal((PyObject *)gen);
+            SET_LOCALSPLUS(frame);
             LLTRACE_RESUME_FRAME();
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -7044,6 +7062,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             LOAD_IP(frame->return_offset);
             res = temp;
+            SET_LOCALSPLUS(frame);
             LLTRACE_RESUME_FRAME();
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -7099,6 +7118,7 @@
                     frame->return_offset = (uint16_t)( 2 + oparg);
                     assert(gen_frame->previous == NULL);
                     gen_frame->previous = frame;
+                    SET_LOCALSPLUS(gen_frame);
                     DISPATCH_INLINED(gen_frame);
                 }
                 if (PyStackRef_IsNone(v) && PyIter_Check(receiver_o)) {
@@ -7188,6 +7208,7 @@
                 tstate->py_recursion_remaining--;
                 LOAD_SP();
                 LOAD_IP(0);
+                SET_LOCALSPLUS(frame);
                 LLTRACE_RESUME_FRAME();
             }
             DISPATCH();
@@ -8198,6 +8219,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = temp;
+            SET_LOCALSPLUS(frame);
             LLTRACE_RESUME_FRAME();
             stack_pointer[0] = value;
             stack_pointer += 1;
