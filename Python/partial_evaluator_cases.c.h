@@ -3563,7 +3563,7 @@
             break;
         }
 
-        case _CHECK_FUNCTION_INLINE: {
+        case _CHECK_FUNCTION_UNMODIFIED: {
             MATERIALIZE_INST();
             break;
         }
