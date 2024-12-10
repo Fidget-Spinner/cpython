@@ -315,6 +315,7 @@ dummy_func(void) {
         }
         else {
             DPRINTF(2, "Virtualizing function\n");
+            materialize(&retval);
             // The amount to shrink is the number of locals + 2 (callable and null/self).
             REPLACE_OP(this_instr, _SHRINK_STACK, 0, this_instr->operand0);
             this_instr->operand1 = ctx->frame->locals_len + 2;
