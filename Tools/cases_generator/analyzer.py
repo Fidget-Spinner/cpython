@@ -812,7 +812,7 @@ def compute_properties(op: parser.InstDef) -> Properties:
     error_with_pop = has_error_with_pop(op)
     error_without_pop = has_error_without_pop(op)
     return Properties(
-        escaping_calls=escaping_calls,
+        escaping_calls=([] if "_NO_ESCAPE" in op.name else escaping_calls),
         error_with_pop=error_with_pop,
         error_without_pop=error_without_pop,
         deopts=deopts_if,

@@ -2508,11 +2508,12 @@
                 argcount++;
             }
             _Py_UopsPESlot temp;
-            if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
+            if ((sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) &&
+                sym_frame_body_is_inlineable(this_instr)) {
                 _PyUOpInstruction *is_virtual = NULL;
                 // Check if the frame can be virtualized.
                 // Temporarily for simplicity, we require all inputs to be virtual
-                if ((sym_is_virtual(callable)) && sym_is_virtual(self_or_null)) {
+                if (sym_is_virtual(callable) && sym_is_virtual(self_or_null)) {
                     int x = 0;
                     for (; x < argcount; x++) {
                         if (!sym_is_virtual(&args[x])) {
@@ -2538,7 +2539,14 @@
                     (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg, is_virtual), is_virtual
                 };
             } else {
-                DPRINTF(2, "[Inline fail]: Reason-not statically known\n");
+                #ifdef Py_DEBUG
+                if (!((sym_is_null(self_or_null) || sym_is_not_null(self_or_null)))) {
+                    DPRINTF(2, "[Inline fail]: Reason-not statically known\n");
+                }
+                else {
+                    DPRINTF(2, "[Inline fail]: Reason-escaping\n");
+                }
+                #endif
                 // Not statically known --- materialize everything.
                 MATERIALIZE_INST();
                 // Do it manually because we fiddled above.

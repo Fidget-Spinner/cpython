@@ -110,6 +110,29 @@ get_code_with_logging(_PyUOpInstruction *op)
     return co;
 }
 
+static bool
+sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
+{
+    int pushes = 0;
+    while (!is_terminator(this_instr)) {
+        int opcode = this_instr->opcode;
+        if (opcode == _PUSH_FRAME) {
+            pushes++;
+        }
+        else if (opcode == _RETURN_VALUE || opcode == _YIELD_VALUE || opcode == _RETURN_GENERATOR) {
+            pushes--;
+            if (pushes == 0) {
+                return true;
+            }
+        }
+        if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
+            return false;
+        }
+        this_instr++;
+    }
+    Py_UNREACHABLE();
+}
+
 #define sym_is_not_null _Py_uop_pe_sym_is_not_null
 #define sym_is_const _Py_uop_pe_sym_is_const
 #define sym_get_const _Py_uop_pe_sym_get_const
