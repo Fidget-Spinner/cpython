@@ -1255,6 +1255,7 @@ uop_optimize(
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
+    bool side_exits_by_pe = false;
     char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
     if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
         length = _Py_uop_analyze_and_optimize(frame, buffer,
@@ -1263,7 +1264,7 @@ uop_optimize(
         if (length <= 0) {
             return length;
         }
-        length = _Py_uop_partial_evaluate(frame, buffer, length, curr_stackentries, &dependencies);
+        length = _Py_uop_partial_evaluate(frame, buffer, length, curr_stackentries, &dependencies, &side_exits_by_pe);
         if (length <= 0) {
             return length;
         }
@@ -1287,7 +1288,9 @@ uop_optimize(
         assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
     }
     OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
-    length = prepare_for_execution(buffer, length);
+    if (!side_exits_by_pe) {
+        length = prepare_for_execution(buffer, length);
+    }
     assert(length <= UOP_MAX_TRACE_LENGTH);
     _PyExecutorObject *executor = make_executor_from_uops(buffer, length,  &dependencies);
     if (executor == NULL) {

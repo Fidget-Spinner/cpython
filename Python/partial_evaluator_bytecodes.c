@@ -388,6 +388,11 @@ dummy_func(void) {
         ctx->done = true;
     }
 
+    op(_SET_IP, (instr_ptr/4 --)) {
+        MATERIALIZE_INST();
+        ctx->frame->instr_ptr = instr_ptr;
+    }
+
     op(_UNPACK_SEQUENCE, (seq -- output[oparg])) {
         /* This has to be done manually */
         MATERIALIZE_INST();

@@ -154,7 +154,8 @@ _Py_uop_partial_evaluate(
     _PyUOpInstruction *buffer,
     int length,
     int curr_stacklen,
-    _PyBloomFilter *dependencies
+    _PyBloomFilter *dependencies,
+    bool *
 );
 
 extern PyTypeObject _PyCounterExecutor_Type;
@@ -322,6 +323,8 @@ struct _Py_UOpsPEAbstractFrame {
     _Py_UopsPESlot *stack_pointer;
     _Py_UopsPESlot *stack;
     _Py_UopsPESlot *locals;
+
+    _PyUOpInstruction *instr_ptr;
 
     int oparg;
     _Py_UopsPESlot *original_args;
