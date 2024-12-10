@@ -637,6 +637,7 @@ NON_ESCAPING_FUNCTIONS = (
     "initial_temperature_backoff_counter",
     "maybe_lltrace_resume_frame",
     "restart_backoff_counter",
+    "_PyEvalFramePushAndInitInlinee",
 )
 
 def find_stmt_start(node: parser.InstDef, idx: int) -> lexer.Token:

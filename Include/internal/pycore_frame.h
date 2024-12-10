@@ -410,6 +410,10 @@ _PyEvalFramePushAndInit(PyThreadState *tstate, _PyStackRef func,
                         size_t argcount, PyObject *kwnames,
                         _PyInterpreterFrame *previous);
 
+PyAPI_FUNC(_PyInterpreterFrame *)
+_PyEvalFramePushAndInitInlinee(PyThreadState *tstate,
+                               PyCodeObject *co, _PyStackRef const* stack_start, _PyStackRef const* stack_end,
+                               _PyInterpreterFrame *previous);
 #ifdef __cplusplus
 }
 #endif

@@ -2603,6 +2603,34 @@
             break;
         }
 
+        case _SET_DATASTACK_TOP: {
+            break;
+        }
+
+        case _SET_TOS_TO_FRAME: {
+            _PyInterpreterFrame *new_frame;
+            new_frame = sym_new_not_null(ctx);
+            stack_pointer[0] = (_Py_UopsSymbol *)new_frame;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _RECONSTRUCT_FRAME: {
+            _PyInterpreterFrame *new_frame;
+            new_frame = sym_new_not_null(ctx);
+            stack_pointer[-1] = (_Py_UopsSymbol *)new_frame;
+            break;
+        }
+
+        case _REHYDRATE_FRAME: {
+            break;
+        }
+
+        case _SET_FRAME_RETURN_OFFSET: {
+            break;
+        }
+
         case _TIER2_RESUME_CHECK: {
             break;
         }

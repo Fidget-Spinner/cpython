@@ -295,6 +295,11 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_ERROR_POP_N] = HAS_ARG_FLAG | HAS_ESCAPES_FLAG,
     [_GROW_STACK] = 0,
     [_SHRINK_STACK] = HAS_ESCAPES_FLAG,
+    [_SET_DATASTACK_TOP] = 0,
+    [_SET_TOS_TO_FRAME] = 0,
+    [_RECONSTRUCT_FRAME] = HAS_ARG_FLAG,
+    [_REHYDRATE_FRAME] = 0,
+    [_SET_FRAME_RETURN_OFFSET] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
 };
 
@@ -530,6 +535,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_PUSH_NULL] = "_PUSH_NULL",
     [_PY_FRAME_GENERAL] = "_PY_FRAME_GENERAL",
     [_PY_FRAME_KW] = "_PY_FRAME_KW",
+    [_RECONSTRUCT_FRAME] = "_RECONSTRUCT_FRAME",
+    [_REHYDRATE_FRAME] = "_REHYDRATE_FRAME",
     [_REPLACE_WITH_TRUE] = "_REPLACE_WITH_TRUE",
     [_RESUME_CHECK] = "_RESUME_CHECK",
     [_RETURN_GENERATOR] = "_RETURN_GENERATOR",
@@ -538,8 +545,11 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SEND_GEN_FRAME] = "_SEND_GEN_FRAME",
     [_SETUP_ANNOTATIONS] = "_SETUP_ANNOTATIONS",
     [_SET_ADD] = "_SET_ADD",
+    [_SET_DATASTACK_TOP] = "_SET_DATASTACK_TOP",
+    [_SET_FRAME_RETURN_OFFSET] = "_SET_FRAME_RETURN_OFFSET",
     [_SET_FUNCTION_ATTRIBUTE] = "_SET_FUNCTION_ATTRIBUTE",
     [_SET_IP] = "_SET_IP",
+    [_SET_TOS_TO_FRAME] = "_SET_TOS_TO_FRAME",
     [_SET_UPDATE] = "_SET_UPDATE",
     [_SHRINK_STACK] = "_SHRINK_STACK",
     [_START_EXECUTOR] = "_START_EXECUTOR",
@@ -1138,6 +1148,16 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _GROW_STACK:
             return 0;
         case _SHRINK_STACK:
+            return 0;
+        case _SET_DATASTACK_TOP:
+            return 0;
+        case _SET_TOS_TO_FRAME:
+            return 0;
+        case _RECONSTRUCT_FRAME:
+            return 1;
+        case _REHYDRATE_FRAME:
+            return 0;
+        case _SET_FRAME_RETURN_OFFSET:
             return 0;
         case _TIER2_RESUME_CHECK:
             return 0;

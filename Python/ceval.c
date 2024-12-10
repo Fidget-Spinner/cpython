@@ -1808,6 +1808,34 @@ fail:
     return NULL;
 }
 
+// DOES NOT STEAL REFERENCES
+_PyInterpreterFrame *
+_PyEvalFramePushAndInitInlinee(PyThreadState *tstate,
+                        PyCodeObject *co, _PyStackRef const* stack_start, _PyStackRef const* stack_end,
+                        _PyInterpreterFrame *previous)
+{
+    PyCodeObject *code = (PyCodeObject *)co;
+    CALL_STAT_INC(frames_pushed);
+    _PyInterpreterFrame *frame = _PyThreadState_PushFrame(tstate, code->co_framesize);
+    if (frame == NULL) {
+        goto fail;
+    }
+    _PyFrame_Initialize(tstate, frame, PyStackRef_NULL, NULL, code, code->co_nlocalsplus, previous);
+    // Initialize locals manually from the stack.
+    int i = 0;
+    _PyStackRef const* start = stack_start;
+    while (start < stack_end) {
+        frame->localsplus[i] = *start;
+        i++;
+        start++;
+    }
+
+    return frame;
+fail:
+    Py_FatalError("No more memory for inlining");
+    return NULL;
+}
+
 /* Same as _PyEvalFramePushAndInit but takes an args tuple and kwargs dict.
    Steals references to func, callargs and kwargs.
 */

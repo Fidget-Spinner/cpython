@@ -6090,6 +6090,55 @@
             break;
         }
 
+        case _SET_DATASTACK_TOP: {
+            tstate->datastack_top = &stack_pointer[0];
+            assert(tstate->datastack_top < tstate->datastack_limit);
+            break;
+        }
+
+        case _SET_TOS_TO_FRAME: {
+            _PyInterpreterFrame *new_frame;
+            new_frame = frame;
+            stack_pointer[0].bits = (uintptr_t)new_frame;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _RECONSTRUCT_FRAME: {
+            _PyInterpreterFrame *prev_frame;
+            _PyInterpreterFrame *new_frame;
+            oparg = CURRENT_OPARG();
+            prev_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
+            uint32_t frame_end_offset_in_localsplus = (uint32_t)CURRENT_OPERAND0();
+            PyObject *f_executable = (PyObject *)CURRENT_OPERAND1();
+            int frame_start_offset_in_localsplus = oparg;
+            _PyStackRef *start_of_copy = &prev_frame->localsplus[frame_start_offset_in_localsplus];
+            _PyStackRef *end_of_copy = &prev_frame->localsplus[frame_end_offset_in_localsplus];
+            new_frame = _PyEvalFramePushAndInitInlinee(tstate, f_executable, start_of_copy, end_of_copy, prev_frame);
+            // Guaranteed to be safe by the scratch space property in compile.c
+            stack_pointer[-1].bits = (uintptr_t)new_frame;
+            break;
+        }
+
+        case _REHYDRATE_FRAME: {
+            _PyInterpreterFrame *new_frame;
+            new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
+            PyObject *f_funcobj = (PyObject *)CURRENT_OPERAND0();
+            PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND1();
+            new_frame->f_funcobj = PyStackRef_FromPyObjectNew((PyObject *)f_funcobj);
+            new_frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+            break;
+        }
+
+        case _SET_FRAME_RETURN_OFFSET: {
+            _PyInterpreterFrame *new_frame;
+            oparg = CURRENT_OPARG();
+            new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
+            new_frame->return_offset = oparg;
+            break;
+        }
+
         case _TIER2_RESUME_CHECK: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {

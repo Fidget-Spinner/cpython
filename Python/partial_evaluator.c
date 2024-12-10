@@ -110,6 +110,24 @@ get_code_with_logging(_PyUOpInstruction *op)
     return co;
 }
 
+static PyFunctionObject *
+get_func(_PyUOpInstruction *op)
+{
+    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR || op->opcode == _SHRINK_STACK || op->opcode == _GROW_STACK);
+    uint64_t operand = op->operand0;
+    if (operand == 0) {
+        return NULL;
+    }
+    if (operand & 1) {
+        return NULL;
+    }
+    else {
+        PyFunctionObject *func = (PyFunctionObject *)operand;
+        assert(PyFunction_Check(func));
+        return func;
+    }
+}
+
 static bool
 sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
 {

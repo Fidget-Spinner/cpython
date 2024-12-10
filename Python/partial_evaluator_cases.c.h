@@ -3462,7 +3462,9 @@
         }
 
         case _SET_IP: {
+            PyObject *instr_ptr = (PyObject *)this_instr->operand0;
             MATERIALIZE_INST();
+            ctx->frame->instr_ptr = instr_ptr;
             break;
         }
 
@@ -3659,6 +3661,45 @@
         case _SHRINK_STACK: {
             MATERIALIZE_INST();
             materialize_ctx(ctx);
+            break;
+        }
+
+        case _SET_DATASTACK_TOP: {
+            MATERIALIZE_INST();
+            break;
+        }
+
+        case _SET_TOS_TO_FRAME: {
+            _Py_UopsPESlot new_frame;
+            MATERIALIZE_INST();
+            new_frame = sym_new_not_null(ctx);
+            stack_pointer[0] = new_frame;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _RECONSTRUCT_FRAME: {
+            _Py_UopsPESlot prev_frame;
+            _Py_UopsPESlot new_frame;
+            uint32_t frame_end_offset_in_localsplus = (uint32_t)this_instr->operand0;
+            PyObject *f_executable = (PyObject *)this_instr->operand0;
+            new_frame = sym_new_not_null(ctx);
+            Py_UNREACHABLE();
+            stack_pointer[-1] = new_frame;
+            break;
+        }
+
+        case _REHYDRATE_FRAME: {
+            _Py_UopsPESlot new_frame;
+            PyObject *f_funcobj = (PyObject *)this_instr->operand0;
+            PyObject *instr_ptr = (PyObject *)this_instr->operand0;
+            Py_UNREACHABLE();
+            break;
+        }
+
+        case _SET_FRAME_RETURN_OFFSET: {
+            _Py_UopsPESlot new_frame;
             break;
         }
 

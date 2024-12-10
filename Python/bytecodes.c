@@ -5080,6 +5080,34 @@ dummy_func(
             stack_pointer[-1] = tos;
         }
 
+        tier2 op(_SET_DATASTACK_TOP, (--)) {
+            tstate->datastack_top = &stack_pointer[0];
+            assert(tstate->datastack_top < tstate->datastack_limit);
+        }
+
+        tier2 op(_SET_TOS_TO_FRAME, (-- new_frame: _PyInterpreterFrame*)) {
+            new_frame = frame;
+        }
+
+        tier2 op(_RECONSTRUCT_FRAME, (frame_end_offset_in_localsplus/2, f_executable/4, prev_frame: _PyInterpreterFrame* -- new_frame: _PyInterpreterFrame*)) {
+            int frame_start_offset_in_localsplus = oparg;
+            _PyStackRef *start_of_copy = &prev_frame->localsplus[frame_start_offset_in_localsplus];
+            _PyStackRef *end_of_copy = &prev_frame->localsplus[frame_end_offset_in_localsplus];
+            new_frame = _PyEvalFramePushAndInitInlinee(tstate, f_executable, start_of_copy, end_of_copy, prev_frame);
+            DEAD(prev_frame);
+            // Guaranteed to be safe by the scratch space property in compile.c
+        }
+
+        tier2 op(_REHYDRATE_FRAME, (f_funcobj/4, instr_ptr/4, new_frame: _PyInterpreterFrame* -- new_frame: _PyInterpreterFrame*)) {
+            new_frame->f_funcobj = PyStackRef_FromPyObjectNew((PyObject *)f_funcobj);
+            new_frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+        }
+
+        tier2 op(_SET_FRAME_RETURN_OFFSET, (new_frame: _PyInterpreterFrame* -- new_frame: _PyInterpreterFrame*)) {
+            new_frame->return_offset = oparg;
+        }
+
+
         /* Progress is guaranteed if we DEOPT on the eval breaker, because
          * ENTER_EXECUTOR will not re-enter tier 2 with the eval breaker set. */
         tier2 op(_TIER2_RESUME_CHECK, (--)) {

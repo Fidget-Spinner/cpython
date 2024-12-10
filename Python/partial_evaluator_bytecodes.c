@@ -435,6 +435,19 @@ dummy_func(void) {
         res = sym_new_not_null(ctx);
         null = sym_new_null(ctx);
     }
+
+    op(_RECONSTRUCT_FRAME, (frame_end_offset_in_localsplus/2, f_executable/4, prev_frame -- new_frame)) {
+        new_frame = sym_new_not_null(ctx);
+        Py_UNREACHABLE();
+    }
+
+    op(_REHYDRATE_FRAME, (f_funcobj/4, instr_ptr/4, new_frame -- new_frame)) {
+        Py_UNREACHABLE();
+    }
+
+    op(_SET_FRAME_RETURN_OFFSET, (new_frame -- new_frame)) {
+    }
+
 // END BYTECODES //
 
 }
