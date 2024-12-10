@@ -293,6 +293,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_CHECK_VALIDITY_AND_SET_IP] = HAS_DEOPT_FLAG,
     [_DEOPT] = 0,
     [_ERROR_POP_N] = HAS_ARG_FLAG | HAS_ESCAPES_FLAG,
+    [_GROW_STACK] = 0,
+    [_SHRINK_STACK] = HAS_ESCAPES_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
 };
 
@@ -410,6 +412,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GET_ITER] = "_GET_ITER",
     [_GET_LEN] = "_GET_LEN",
     [_GET_YIELD_FROM_ITER] = "_GET_YIELD_FROM_ITER",
+    [_GROW_STACK] = "_GROW_STACK",
     [_GUARD_BOTH_FLOAT] = "_GUARD_BOTH_FLOAT",
     [_GUARD_BOTH_INT] = "_GUARD_BOTH_INT",
     [_GUARD_BOTH_UNICODE] = "_GUARD_BOTH_UNICODE",
@@ -538,6 +541,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SET_FUNCTION_ATTRIBUTE] = "_SET_FUNCTION_ATTRIBUTE",
     [_SET_IP] = "_SET_IP",
     [_SET_UPDATE] = "_SET_UPDATE",
+    [_SHRINK_STACK] = "_SHRINK_STACK",
     [_START_EXECUTOR] = "_START_EXECUTOR",
     [_STORE_ATTR] = "_STORE_ATTR",
     [_STORE_ATTR_INSTANCE_VALUE] = "_STORE_ATTR_INSTANCE_VALUE",
@@ -1131,6 +1135,10 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 0;
         case _ERROR_POP_N:
             return oparg;
+        case _GROW_STACK:
+            return 0;
+        case _SHRINK_STACK:
+            return 0;
         case _TIER2_RESUME_CHECK:
             return 0;
         default:

@@ -5065,6 +5065,22 @@ dummy_func(
             GOTO_UNWIND();
         }
 
+        tier2 op(_GROW_STACK, (unused/4, null_out_count/2 --)) {
+            for (int i = 0; i < null_out_count; i++) {
+                stack_pointer[i] = PyStackRef_NULL;
+            }
+            stack_pointer += null_out_count;
+        }
+
+        tier2 op(_SHRINK_STACK, (unused/4, shrink_count/2 --)) {
+            _PyStackRef tos = stack_pointer[-1];
+            stack_pointer--;
+            _PyEval_InlinedFrameClear(stack_pointer, shrink_count);
+            stack_pointer -= shrink_count;
+            stack_pointer++;
+            stack_pointer[-1] = tos;
+        }
+
         /* Progress is guaranteed if we DEOPT on the eval breaker, because
          * ENTER_EXECUTOR will not re-enter tier 2 with the eval breaker set. */
         tier2 op(_TIER2_RESUME_CHECK, (--)) {

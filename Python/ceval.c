@@ -1762,6 +1762,14 @@ _PyEval_FrameClearAndPop(PyThreadState *tstate, _PyInterpreterFrame * frame)
         clear_gen_frame(tstate, frame);
     }
 }
+void
+_PyEval_InlinedFrameClear(_PyStackRef *start, int to_pop)
+{
+    _PyStackRef *sp = start;
+    for (int i = 0; i < to_pop; i++) {
+        PyStackRef_XCLOSE(sp[-i-1]);
+    }
+}
 
 /* Consumes references to func, locals and all the args */
 _PyInterpreterFrame *

@@ -6069,6 +6069,28 @@
             break;
         }
 
+        case _GROW_STACK: {
+            uint32_t null_out_count = (uint32_t)CURRENT_OPERAND1();
+            for (int i = 0; i < null_out_count; i++) {
+                stack_pointer[i] = PyStackRef_NULL;
+            }
+            stack_pointer += null_out_count;
+            break;
+        }
+
+        case _SHRINK_STACK: {
+            uint32_t shrink_count = (uint32_t)CURRENT_OPERAND1();
+            _PyStackRef tos = stack_pointer[-1];
+            stack_pointer--;
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            _PyEval_InlinedFrameClear(stack_pointer, shrink_count);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            stack_pointer -= shrink_count;
+            stack_pointer++;
+            stack_pointer[-1] = tos;
+            break;
+        }
+
         case _TIER2_RESUME_CHECK: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {

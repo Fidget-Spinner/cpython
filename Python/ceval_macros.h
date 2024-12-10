@@ -237,8 +237,14 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #define STACK_SHRINK(n)        BASIC_STACKADJ(-(n))
 #endif
 
+#ifdef _Py_TIER2
+// In tier 2, stack can grow due to inlining.
+#define WITHIN_STACK_BOUNDS() \
+   (frame == &entry_frame || (STACK_LEVEL() >= 0))
+#else
 #define WITHIN_STACK_BOUNDS() \
    (frame == &entry_frame || (STACK_LEVEL() >= 0 && STACK_LEVEL() <= STACK_SIZE()))
+#endif
 
 /* Data access macros */
 #define FRAME_CO_CONSTS (_PyFrame_GetCode(frame)->co_consts)

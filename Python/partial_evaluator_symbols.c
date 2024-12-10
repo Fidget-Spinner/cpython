@@ -283,7 +283,7 @@ _Py_uop_pe_frame_new(
 
     // Initialize with the initial state of all local variables
     for (int i = 0; i < arg_len; i++) {
-        frame->locals[i] = args[i];
+        frame->locals[i] = _Py_uop_pe_sym_new_not_null(ctx);
     }
 
     for (int i = arg_len; i < co->co_nlocalsplus; i++) {
@@ -301,12 +301,18 @@ _Py_uop_pe_frame_new(
     // Args are statically known, so they might be virtual. In that case,
     // we must store them to re-materialize them later.
     if (init_frame_inst) {
+        assert(args != NULL);
         for (int i = 0; i < frame->oparg; i++) {
             frame->original_args[i] = ctx->frame->stack_pointer[-i-1];
         }
+        frame->inline_localsplus_offset_from_caller = (int)(args - ctx->frame->locals);
+    }
+    else {
+        frame->inline_localsplus_offset_from_caller = 0;
     }
 
     frame->init_frame_inst = init_frame_inst;
+
 
     return frame;
 }
@@ -357,7 +363,7 @@ _Py_uop_pe_frame_pop(_Py_UOpsPEContext *ctx)
 
 bool _Py_uop_pe_frame_is_virtual(_Py_UOpsPEContext *ctx)
 {
-    return ctx->frame->init_frame_inst != NULL && ctx->frame->init_frame_inst->is_virtual;
+    return ctx->frame->init_frame_inst != NULL;
 }
 
 

@@ -42,6 +42,7 @@
             if (sym_is_null(&value)) {
                 ctx->done = true;
             }
+            this_instr->oparg = oparg + ctx->frame->inline_localsplus_offset_from_caller;
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -52,6 +53,7 @@
             _Py_UopsPESlot value;
             value = GETLOCAL(oparg);
             sym_set_origin_inst_override(&value, this_instr);
+            this_instr->oparg = oparg + ctx->frame->inline_localsplus_offset_from_caller;
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -64,6 +66,7 @@
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = sym_new_null(ctx);
             sym_set_origin_inst_override(&value, this_instr);
+            this_instr->oparg = oparg + ctx->frame->inline_localsplus_offset_from_caller;
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -122,6 +125,7 @@
                 stack_pointer += 1;
                 assert(WITHIN_STACK_BOUNDS());
             }
+            this_instr->oparg = oparg + ctx->frame->inline_localsplus_offset_from_caller;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -768,6 +772,10 @@
             }
             else {
                 DPRINTF(2, "Virtualizing function\n");
+                // The amount to shrink is the number of locals + 2 (callable and null/self).
+                REPLACE_OP(this_instr, _SHRINK_STACK, 0, this_instr->operand0);
+                this_instr->operand1 = ctx->frame->locals_len + 2;
+                MATERIALIZE_INST();
             }
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
@@ -2508,55 +2516,22 @@
                 argcount++;
             }
             _Py_UopsPESlot temp;
-            if ((sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) &&
-                sym_frame_body_is_inlineable(this_instr)) {
-                _PyUOpInstruction *is_virtual = NULL;
-                // Check if the frame can be virtualized.
-                // Temporarily for simplicity, we require all inputs to be virtual
-                if (sym_is_virtual(callable) && sym_is_virtual(self_or_null)) {
-                    int x = 0;
-                    for (; x < argcount; x++) {
-                        if (!sym_is_virtual(&args[x])) {
-                            break;
-                        }
-                    }
-                    if (x == argcount) {
-                        DPRINTF(3, "Virtualizing frame\n");
-                        is_virtual = this_instr;
-                    }
-                }
-                if (is_virtual == NULL) {
-                    DPRINTF(2, "[Inline fail]: Reason-not all virtual\n");
-                    MATERIALIZE_INST();
-                    // Do it manually because we fiddled above.
-                    materialize(self_or_null);
-                    materialize(callable);
-                    for (int x = 0; x < argcount; x++) {
-                        materialize(&args[x]);
-                    }
-                }
-                temp = (_Py_UopsPESlot){
-                    (_Py_UopsPESymbol *)frame_new(ctx, co, 0, args, argcount, oparg, is_virtual), is_virtual
+            // Materialize inputs, but not the frame creation instruction!
+            materialize(self_or_null);
+            materialize(callable);
+            for (int x = 0; x < argcount; x++) {
+                materialize(&args[x]);
+            }
+            if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
+                temp = (_Py_UopsPESlot) {
+                    (_Py_UopsPESymbol *) frame_new(ctx, co, 0, args, argcount,
+                        oparg, this_instr), this_instr
                 };
-            } else {
-                #ifdef Py_DEBUG
-                if (!((sym_is_null(self_or_null) || sym_is_not_null(self_or_null)))) {
-                    DPRINTF(2, "[Inline fail]: Reason-not statically known\n");
-                }
-                else {
-                    DPRINTF(2, "[Inline fail]: Reason-escaping\n");
-                }
-                #endif
-                // Not statically known --- materialize everything.
-                MATERIALIZE_INST();
-                // Do it manually because we fiddled above.
-                materialize(self_or_null);
-                materialize(callable);
-                for (int x = 0; x < argcount; x++) {
-                    materialize(&args[x]);
-                }
-                temp = (_Py_UopsPESlot){
-                    (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL), NULL
+            }
+            else {
+                temp = (_Py_UopsPESlot) {
+                    (_Py_UopsPESymbol *) frame_new(ctx, co, 0, NULL, argcount,
+                        oparg, NULL), NULL
                 };
             }
             new_frame = temp;
@@ -2569,12 +2544,10 @@
         case _PUSH_FRAME: {
             _Py_UopsPESlot new_frame;
             new_frame = stack_pointer[-1];
-            if (!sym_is_virtual(&new_frame)) {
-                MATERIALIZE_INST();
-            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
+            _Py_UOpsPEAbstractFrame *old_frame = ctx->frame;
             ctx->frame = (_Py_UOpsPEAbstractFrame *)new_frame.sym;
             ctx->curr_frame_depth++;
             stack_pointer = ((_Py_UOpsPEAbstractFrame *)new_frame.sym)->stack_pointer;
@@ -2584,6 +2557,27 @@
                 ctx->done = true;
                 break;
             }
+            if (ctx->frame->init_frame_inst != NULL && sym_frame_body_is_inlineable(this_instr)) {
+                DPRINTF(2, "Inlineable\n");
+                // Shrink but don't decref --- the new "function" has stolen the
+                // values.
+                assert(ctx->frame->init_frame_inst != NULL);
+                _PyUOpInstruction *initing_inst = ctx->frame->init_frame_inst;
+                if (initing_inst->opcode == _INIT_CALL_PY_EXACT_ARGS) {
+                    // Grow the stack by the number of locals to NULL out
+                    // Locals to NULL out = frame->locals - locals already on stack.
+                    REPLACE_OP(initing_inst, _GROW_STACK, 0, initing_inst->operand0);
+                    initing_inst->operand1 = ctx->frame->locals_len - (ctx->frame->oparg - 2);
+                    initing_inst->is_virtual = false;
+                }
+            }
+            else {
+                DPRINTF(2, "Inline fail: escaping\n");
+                MATERIALIZE_INST();
+                materialize_ctx(ctx);
+                ctx->frame->init_frame_inst = NULL;
+                ctx->frame->inline_localsplus_offset_from_caller = 0;
+            };
             /* Stack space handling */
             int framesize = co->co_framesize;
             assert(framesize > 0);
@@ -3653,6 +3647,17 @@
             materialize_ctx(ctx);
             stack_pointer += -oparg;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _GROW_STACK: {
+            MATERIALIZE_INST();
+            break;
+        }
+
+        case _SHRINK_STACK: {
+            MATERIALIZE_INST();
+            materialize_ctx(ctx);
             break;
         }
 

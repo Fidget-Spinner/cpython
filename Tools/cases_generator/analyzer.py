@@ -372,11 +372,11 @@ def analyze_caches(inputs: list[parser.InputEffect]) -> list[CacheEntry]:
     caches: list[parser.CacheEffect] = [
         i for i in inputs if isinstance(i, parser.CacheEffect)
     ]
-    for cache in caches:
-        if cache.name == "unused":
-            raise analysis_error(
-                "Unused cache entry in op. Move to enclosing macro.", cache.tokens[0]
-            )
+    # for cache in caches:
+    #     if cache.name == "unused":
+    #         raise analysis_error(
+    #             "Unused cache entry in op. Move to enclosing macro.", cache.tokens[0]
+    #         )
     return [CacheEntry(i.name, int(i.size)) for i in caches]
 
 

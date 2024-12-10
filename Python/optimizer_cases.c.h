@@ -2595,6 +2595,14 @@
             break;
         }
 
+        case _GROW_STACK: {
+            break;
+        }
+
+        case _SHRINK_STACK: {
+            break;
+        }
+
         case _TIER2_RESUME_CHECK: {
             break;
         }

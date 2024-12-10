@@ -68,7 +68,7 @@
 static PyCodeObject *
 get_code(_PyUOpInstruction *op)
 {
-    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR);
+    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR || op->opcode == _SHRINK_STACK || op->opcode == _GROW_STACK);
     PyCodeObject *co = NULL;
     uint64_t operand = op->operand0;
     if (operand == 0) {
@@ -126,12 +126,14 @@ sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
             }
         }
         if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
+            DPRINTF(2, "Fail reason: %s\n", _PyOpcode_uop_name[opcode]);
             return false;
         }
         this_instr++;
     }
     Py_UNREACHABLE();
 }
+
 
 #define sym_is_not_null _Py_uop_pe_sym_is_not_null
 #define sym_is_const _Py_uop_pe_sym_is_const
@@ -153,6 +155,11 @@ sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
 #define sym_set_origin_inst_override _Py_uop_sym_set_origin_inst_override
 #define sym_is_virtual _Py_uop_sym_is_virtual
 #define sym_get_origin _Py_uop_sym_get_origin
+
+#define REPLACE_OP(INST, OP, ARG, OPERAND)    \
+    INST->opcode = OP;            \
+    INST->oparg = ARG;            \
+    INST->operand0 = OPERAND;
 
 static void materialize(_Py_UopsPESlot *slot);
 

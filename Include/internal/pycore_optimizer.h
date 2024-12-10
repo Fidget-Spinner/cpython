@@ -330,6 +330,9 @@ struct _Py_UOpsPEAbstractFrame {
     // Usually _INIT_CALL_PY_EXACT_ARGS
     // If it's not NULL that indicates it's virtual.
     _PyUOpInstruction *init_frame_inst;
+
+    // If inlined, where the localsplus starts relative to caller's localsplus.
+    int inline_localsplus_offset_from_caller;
 };
 
 typedef struct _Py_UOpsPEAbstractFrame _Py_UOpsPEAbstractFrame;
