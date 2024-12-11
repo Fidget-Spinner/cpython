@@ -143,7 +143,7 @@ sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
                 return true;
             }
         }
-        if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
+        if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG || opcode == _CHECK_FUNCTION) {
             DPRINTF(2, "Fail reason: %s\n", _PyOpcode_uop_name[opcode]);
             return false;
         }
@@ -289,7 +289,7 @@ partial_evaluate_uops(
 
 
     _Py_uop_pe_abstractcontext_init(ctx);
-    _Py_UOpsPEAbstractFrame *frame = _Py_uop_pe_frame_new(ctx, co, curr_stacklen, NULL, 0, 0, NULL);
+    _Py_UOpsPEAbstractFrame *frame = _Py_uop_pe_frame_new(ctx, co, curr_stacklen, NULL, 0, 0, NULL, false);
     if (frame == NULL) {
         return -1;
     }

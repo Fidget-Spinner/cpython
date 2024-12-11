@@ -144,8 +144,8 @@
 
         case _PUSH_NULL: {
             _Py_UopsPESlot res;
-            MATERIALIZE_INST();
-            res = sym_new_not_null(ctx);
+            res = sym_new_null(ctx);
+            sym_set_origin_inst_override(&res, this_instr);
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -775,7 +775,7 @@
                 materialize(&retval);
                 // The amount to shrink is the number of locals + 2 (callable and null/self).
                 REPLACE_OP(this_instr, _SHRINK_STACK, 0, this_instr->operand0);
-                this_instr->operand1 = ctx->frame->locals_len + 2;
+                this_instr->operand1 = ctx->frame->locals_len + (ctx->frame->consumed_self ? 2 : 3);
                 MATERIALIZE_INST();
             }
             ctx->frame->stack_pointer = stack_pointer;
@@ -2266,7 +2266,7 @@
                 break;
             }
             _Py_UopsPESlot temp = (_Py_UopsPESlot){
-                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL), NULL};
+                (_Py_UopsPESymbol *)frame_new(ctx, co, 0, NULL, 0, oparg, NULL, 0), NULL};
             new_frame = temp;
             stack_pointer[0] = new_frame;
             stack_pointer += 1;
@@ -2525,14 +2525,14 @@
             }
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
                 temp = (_Py_UopsPESlot) {
-                    (_Py_UopsPESymbol *) frame_new(ctx, co, 0, args, argcount,
-                        oparg, this_instr), this_instr
+                    (_Py_UopsPESymbol *) frame_new(ctx, co, 0, args, oparg,
+                        oparg, this_instr, sym_is_not_null(self_or_null)), this_instr,
                 };
             }
             else {
                 temp = (_Py_UopsPESlot) {
-                    (_Py_UopsPESymbol *) frame_new(ctx, co, 0, NULL, argcount,
-                        oparg, NULL), NULL
+                    (_Py_UopsPESymbol *) frame_new(ctx, co, 0, NULL, oparg,
+                        oparg, NULL, 0), NULL
                 };
             }
             new_frame = temp;
@@ -2573,9 +2573,13 @@
                 if (initing_inst->opcode == _INIT_CALL_PY_EXACT_ARGS) {
                     // Grow the stack by the number of locals to NULL out
                     // Locals to NULL out = frame->locals - locals already on stack.
-                    REPLACE_OP(initing_inst, _GROW_STACK, 0, initing_inst->operand0);
-                    initing_inst->operand1 = ctx->frame->locals_len - (ctx->frame->oparg - 2);
+                    REPLACE_OP(initing_inst, _GROW_STACK, initing_inst->oparg, initing_inst->operand0);
+                    initing_inst->operand1 = ctx->frame->locals_len -
+                    (ctx->frame->oparg - (ctx->frame->consumed_self ? 0 : 1));
                     initing_inst->is_virtual = false;
+                }
+                else {
+                    Py_UNREACHABLE(); // For now.
                 }
             }
             else {

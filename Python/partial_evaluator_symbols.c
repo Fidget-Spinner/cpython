@@ -261,14 +261,16 @@ _Py_uop_pe_frame_new(
     _Py_UopsPESlot *args,
     int arg_len,
     int oparg,
-    _PyUOpInstruction *init_frame_inst)
+    _PyUOpInstruction *init_frame_inst,
+    bool consumed_self)
 {
     assert(ctx->curr_frame_depth < MAX_ABSTRACT_FRAME_DEPTH);
     _Py_UOpsPEAbstractFrame *frame = &ctx->frames[ctx->curr_frame_depth];
 
     frame->stack_len = co->co_stacksize;
     frame->locals_len = co->co_nlocalsplus;
-    frame->oparg = 2 + oparg;
+    frame->oparg = oparg;
+    frame->consumed_self = consumed_self;
 
     frame->original_args = ctx->n_consumed;
     frame->locals = ctx->n_consumed + (frame->oparg);
@@ -305,7 +307,14 @@ _Py_uop_pe_frame_new(
         for (int i = 0; i < frame->oparg; i++) {
             frame->original_args[i] = ctx->frame->stack_pointer[-i-1];
         }
-        frame->inline_localsplus_offset_from_caller = (int)(args - ctx->frame->locals);
+        DPRINTF(2, "CONS SELF %d\n", consumed_self);
+        int offset_of_args_from_localsplus = (int)(args - ctx->frame->locals) + consumed_self;
+        int offset_of_localsplus_from_other_localsplus = 0;
+        for (int i = 0; i < ctx->curr_frame_depth; i++) {
+            _Py_UOpsPEAbstractFrame *f = &ctx->frames[i];
+            offset_of_localsplus_from_other_localsplus += f->init_frame_inst != NULL ? f->inline_localsplus_offset_from_caller : 0;
+        }
+        frame->inline_localsplus_offset_from_caller = offset_of_localsplus_from_other_localsplus + offset_of_args_from_localsplus;
     }
     else {
         frame->inline_localsplus_offset_from_caller = 0;

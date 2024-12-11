@@ -638,6 +638,9 @@ NON_ESCAPING_FUNCTIONS = (
     "maybe_lltrace_resume_frame",
     "restart_backoff_counter",
     "_PyEvalFramePushAndInitInlinee",
+    "dump_stack",
+    "_PyUOpPrint",
+    "printf",
 )
 
 def find_stmt_start(node: parser.InstDef, idx: int) -> lexer.Token:

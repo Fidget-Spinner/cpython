@@ -331,6 +331,7 @@ struct _Py_UOpsPEAbstractFrame {
     int return_offset;
 
     int oparg;
+    bool consumed_self;
     _Py_UopsPESlot *original_args;
 
     // The frame initialization instruction.
@@ -395,7 +396,8 @@ _Py_uop_pe_frame_new(
     _Py_UopsPESlot *args,
     int arg_len,
     int oparg,
-    _PyUOpInstruction *init_frame_inst);
+    _PyUOpInstruction *init_frame_inst,
+    bool consumed_self);
 
 int _Py_uop_pe_frame_pop(_Py_UOpsPEContext *ctx);
 

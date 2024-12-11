@@ -94,6 +94,17 @@
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -106,6 +117,17 @@
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -118,6 +140,17 @@
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -130,6 +163,17 @@
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -142,6 +186,17 @@
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -154,6 +209,17 @@
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -166,6 +232,17 @@
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -178,6 +255,17 @@
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -189,6 +277,17 @@
         case _LOAD_FAST: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
             stack_pointer[0] = value;
@@ -5775,9 +5874,9 @@
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (lltrace >= 2) {
-                _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf(", exit %ld, temp %d, target %d -> %s]\n",
                        exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
@@ -5976,9 +6075,9 @@
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (lltrace >= 2) {
-                _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("DYNAMIC EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf(", exit %ld, temp %d, target %d -> %s]\n",
                        exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
