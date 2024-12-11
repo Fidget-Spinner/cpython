@@ -1266,11 +1266,18 @@ uop_optimize(
         if (length <= 0) {
             return length;
         }
-        length = _Py_uop_partial_evaluate(frame, buffer, length, curr_stackentries, &dependencies, &side_exits_by_pe);
+    }
+
+    env_var = Py_GETENV("PYTHON_UOPS_PE");
+    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
+        length = _Py_uop_partial_evaluate(frame, buffer, length,
+                                          curr_stackentries, &dependencies,
+                                          &side_exits_by_pe);
         if (length <= 0) {
             return length;
         }
     }
+    
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
     /* Fix up */
