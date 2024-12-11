@@ -316,6 +316,9 @@ typedef struct _Py_UopsPESlot {
 } _Py_UopsPESlot;
 
 struct _Py_UOpsPEAbstractFrame {
+    PyFunctionObject *f_funcobj;
+    PyCodeObject *f_executable;
+
     // Max stacklen
     int stack_len;
     int locals_len;
@@ -324,7 +327,8 @@ struct _Py_UOpsPEAbstractFrame {
     _Py_UopsPESlot *stack;
     _Py_UopsPESlot *locals;
 
-    _PyUOpInstruction *instr_ptr;
+    _Py_CODEUNIT *instr_ptr;
+    int return_offset;
 
     int oparg;
     _Py_UopsPESlot *original_args;

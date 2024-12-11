@@ -2627,7 +2627,7 @@
             break;
         }
 
-        case _SET_FRAME_RETURN_OFFSET: {
+        case _SET_TOPMOST_FRAME_AND_SHRINK_STACK: {
             break;
         }
 

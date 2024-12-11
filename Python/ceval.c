@@ -1815,12 +1815,26 @@ _PyEvalFramePushAndInitInlinee(PyThreadState *tstate,
                         _PyInterpreterFrame *previous)
 {
     PyCodeObject *code = (PyCodeObject *)co;
+    assert(PyCode_Check(code));
     CALL_STAT_INC(frames_pushed);
     _PyInterpreterFrame *frame = _PyThreadState_PushFrame(tstate, code->co_framesize);
     if (frame == NULL) {
         goto fail;
     }
-    _PyFrame_Initialize(tstate, frame, PyStackRef_NULL, NULL, code, code->co_nlocalsplus, previous);
+    // Partially Initialize everything without func yet
+    frame->previous = previous;
+//    frame->f_funcobj = func;
+    frame->f_executable = PyStackRef_FromPyObjectNew(code);
+//    PyFunctionObject *func_obj = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(func);
+//    frame->f_builtins = func_obj->func_builtins;
+//    frame->f_globals = func_obj->func_globals;
+    frame->f_locals = NULL;
+//    frame->stackpointer = frame->localsplus + code->co_nlocalsplus;
+    frame->frame_obj = NULL;
+//    frame->instr_ptr = _PyCode_CODE(code);
+//    frame->return_offset = 0;
+    frame->owner = FRAME_OWNED_BY_THREAD;
+    frame->visited = 0;
     // Initialize locals manually from the stack.
     int i = 0;
     _PyStackRef const* start = stack_start;
@@ -1829,6 +1843,8 @@ _PyEvalFramePushAndInitInlinee(PyThreadState *tstate,
         i++;
         start++;
     }
+
+    frame->stackpointer = &frame->localsplus[i];
 
     return frame;
 fail:

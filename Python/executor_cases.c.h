@@ -6091,7 +6091,7 @@
         }
 
         case _SET_DATASTACK_TOP: {
-            tstate->datastack_top = &stack_pointer[0];
+            tstate->datastack_top = &stack_pointer[1];
             assert(tstate->datastack_top < tstate->datastack_limit);
             break;
         }
@@ -6113,8 +6113,9 @@
             uint32_t frame_end_offset_in_localsplus = (uint32_t)CURRENT_OPERAND0();
             PyObject *f_executable = (PyObject *)CURRENT_OPERAND1();
             int frame_start_offset_in_localsplus = oparg;
-            _PyStackRef *start_of_copy = &prev_frame->localsplus[frame_start_offset_in_localsplus];
-            _PyStackRef *end_of_copy = &prev_frame->localsplus[frame_end_offset_in_localsplus];
+            assert(f_executable != 0);
+            _PyStackRef *start_of_copy = &frame->localsplus[frame_start_offset_in_localsplus];
+            _PyStackRef *end_of_copy = &frame->localsplus[frame_end_offset_in_localsplus];
             new_frame = _PyEvalFramePushAndInitInlinee(tstate, f_executable, start_of_copy, end_of_copy, prev_frame);
             // Guaranteed to be safe by the scratch space property in compile.c
             stack_pointer[-1].bits = (uintptr_t)new_frame;
@@ -6123,19 +6124,33 @@
 
         case _REHYDRATE_FRAME: {
             _PyInterpreterFrame *new_frame;
+            oparg = CURRENT_OPARG();
             new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
             PyObject *f_funcobj = (PyObject *)CURRENT_OPERAND0();
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND1();
-            new_frame->f_funcobj = PyStackRef_FromPyObjectNew((PyObject *)f_funcobj);
+            // Stolen.
+            assert(f_funcobj != 0);
+            new_frame->f_funcobj = PyStackRef_FromPyObjectSteal((PyObject *)f_funcobj);
+            PyFunctionObject *func = (PyFunctionObject *)f_funcobj;
+            new_frame->f_builtins = func->func_builtins;
+            new_frame->f_globals = func->func_globals;
             new_frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
+            new_frame->return_offset = oparg;
             break;
         }
 
-        case _SET_FRAME_RETURN_OFFSET: {
-            _PyInterpreterFrame *new_frame;
+        case _SET_TOPMOST_FRAME_AND_SHRINK_STACK: {
+            _PyInterpreterFrame *prev_frame;
             oparg = CURRENT_OPARG();
-            new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
-            new_frame->return_offset = oparg;
+            prev_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
+            // No need to decref, all args have been stolen by the new frames.
+            stack_pointer = &frame->localsplus[oparg];
+            // Set topmost caller stackpointer.
+            frame->stackpointer = stack_pointer;
+            frame = prev_frame;
+            stack_pointer = frame->stackpointer;
+            // WIll be set by _EXIT_TRACE or DEOPT later.
+            frame->stackpointer = NULL;
             break;
         }
 

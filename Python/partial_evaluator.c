@@ -349,11 +349,59 @@ partial_evaluate_uops(
                 jump_target = next_inst + this_instr->oparg + 1;
             }
             if (jump_target != current_jump_target || current_exit_op != exit_op) {
-                make_exit(&trace_dest[start_of_side_exits], exit_op, jump_target);
-                current_exit_op = exit_op;
-                current_jump_target = jump_target;
-                current_jump = start_of_side_exits;
-                start_of_side_exits++;
+                // Reconstruct frames if needed.
+                bool has_virtual_frame = false;
+                int caller_frame_n = 0;
+                for (int y = 0; y < ctx->curr_frame_depth; y++) {
+                    _Py_UOpsPEAbstractFrame *f = &ctx->frames[y];
+                    if (f->init_frame_inst) {
+                        has_virtual_frame = true;
+                        caller_frame_n = y - 1;
+                        break;
+                    }
+                }
+                if (has_virtual_frame) {
+                    make_exit(&trace_dest[start_of_side_exits], _SET_DATASTACK_TOP, jump_target);
+                    current_exit_op = _SET_DATASTACK_TOP;
+                    current_jump_target = jump_target;
+                    current_jump = start_of_side_exits;
+                    start_of_side_exits++;
+                    make_exit(&trace_dest[start_of_side_exits], _SET_TOS_TO_FRAME, jump_target);
+                    start_of_side_exits++;
+                    int y = 0;
+                    for (; y < ctx->curr_frame_depth; y++) {
+                        _Py_UOpsPEAbstractFrame *f = &ctx->frames[y];
+                        // Frame is virtual, needs reconstruction.
+                        if (f->init_frame_inst) {
+                            make_exit(&trace_dest[start_of_side_exits], _RECONSTRUCT_FRAME, jump_target);
+                            trace_dest[start_of_side_exits].oparg = f->inline_localsplus_offset_from_caller;
+                            trace_dest[start_of_side_exits].operand0 = f->inline_localsplus_offset_from_caller + (f->stack_pointer - f->locals);
+                            assert(f->f_executable);
+                            trace_dest[start_of_side_exits].operand1 = (uintptr_t)f->f_executable;
+                            start_of_side_exits++;
+                            make_exit(&trace_dest[start_of_side_exits], _REHYDRATE_FRAME, jump_target);
+                            trace_dest[start_of_side_exits].oparg = f->return_offset;
+                            trace_dest[start_of_side_exits].operand0 = (uintptr_t)f->f_funcobj;
+                            trace_dest[start_of_side_exits].operand1 = (uintptr_t)f->instr_ptr;
+                            start_of_side_exits++;
+                        }
+                    }
+                    assert(y >= 1);
+                    _Py_UOpsPEAbstractFrame *f = &ctx->frames[caller_frame_n];
+                    make_exit(&trace_dest[start_of_side_exits], _SET_TOPMOST_FRAME_AND_SHRINK_STACK, jump_target);
+                    trace_dest[start_of_side_exits].oparg = (int)(f->stack_pointer - f->locals);
+                    start_of_side_exits++;
+
+                    make_exit(&trace_dest[start_of_side_exits], exit_op, jump_target);
+                    start_of_side_exits++;
+                }
+                else {
+                    make_exit(&trace_dest[start_of_side_exits], exit_op, jump_target);
+                    current_exit_op = exit_op;
+                    current_jump_target = jump_target;
+                    current_jump = start_of_side_exits;
+                    start_of_side_exits++;
+                }
             }
             this_instr->jump_target = current_jump;
             this_instr->format = UOP_FORMAT_JUMP;

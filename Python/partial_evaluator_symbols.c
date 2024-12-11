@@ -313,6 +313,9 @@ _Py_uop_pe_frame_new(
 
     frame->init_frame_inst = init_frame_inst;
 
+    frame->f_funcobj = NULL;
+    frame->f_executable = NULL;
+
 
     return frame;
 }

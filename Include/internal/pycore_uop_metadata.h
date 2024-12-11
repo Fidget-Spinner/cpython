@@ -298,8 +298,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_SET_DATASTACK_TOP] = 0,
     [_SET_TOS_TO_FRAME] = 0,
     [_RECONSTRUCT_FRAME] = HAS_ARG_FLAG,
-    [_REHYDRATE_FRAME] = 0,
-    [_SET_FRAME_RETURN_OFFSET] = HAS_ARG_FLAG,
+    [_REHYDRATE_FRAME] = HAS_ARG_FLAG,
+    [_SET_TOPMOST_FRAME_AND_SHRINK_STACK] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
 };
 
@@ -546,9 +546,9 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SETUP_ANNOTATIONS] = "_SETUP_ANNOTATIONS",
     [_SET_ADD] = "_SET_ADD",
     [_SET_DATASTACK_TOP] = "_SET_DATASTACK_TOP",
-    [_SET_FRAME_RETURN_OFFSET] = "_SET_FRAME_RETURN_OFFSET",
     [_SET_FUNCTION_ATTRIBUTE] = "_SET_FUNCTION_ATTRIBUTE",
     [_SET_IP] = "_SET_IP",
+    [_SET_TOPMOST_FRAME_AND_SHRINK_STACK] = "_SET_TOPMOST_FRAME_AND_SHRINK_STACK",
     [_SET_TOS_TO_FRAME] = "_SET_TOS_TO_FRAME",
     [_SET_UPDATE] = "_SET_UPDATE",
     [_SHRINK_STACK] = "_SHRINK_STACK",
@@ -1157,7 +1157,7 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _REHYDRATE_FRAME:
             return 0;
-        case _SET_FRAME_RETURN_OFFSET:
+        case _SET_TOPMOST_FRAME_AND_SHRINK_STACK:
             return 0;
         case _TIER2_RESUME_CHECK:
             return 0;

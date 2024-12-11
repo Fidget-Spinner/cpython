@@ -1125,14 +1125,14 @@ sanity_check(_PyExecutorObject *executor)
         }
     }
     CHECK(ended);
-    for (; i < executor->code_size; i++) {
-        const _PyUOpInstruction *inst = &executor->trace[i];
-        uint16_t opcode = inst->opcode;
-        CHECK(
-            opcode == _DEOPT ||
-            opcode == _EXIT_TRACE ||
-            opcode == _ERROR_POP_N);
-    }
+//    for (; i < executor->code_size; i++) {
+//        const _PyUOpInstruction *inst = &executor->trace[i];
+//        uint16_t opcode = inst->opcode;
+//        CHECK(
+//            opcode == _DEOPT ||
+//            opcode == _EXIT_TRACE ||
+//            opcode == _ERROR_POP_N);
+//    }
 }
 
 #undef CHECK

@@ -188,6 +188,7 @@ dummy_func(void) {
         if (!sym_is_virtual(&frame)) {
             MATERIALIZE_INST();
         }
+        ctx->frame->return_offset = oparg;
         // Else, it's a virtual frame on top.
     }
 
@@ -255,8 +256,14 @@ dummy_func(void) {
             ctx->done = true;
             break;
         }
+        ctx->frame->f_funcobj = get_func(this_instr);
+        if (ctx->frame->f_funcobj != NULL) {
+            ctx->frame->f_executable = ctx->frame->f_funcobj->func_code;
+        }
 
-        if (ctx->frame->init_frame_inst != NULL && sym_frame_body_is_inlineable(this_instr)) {
+        if (ctx->frame->init_frame_inst != NULL &&
+            (ctx->frame->f_funcobj != NULL) &&
+            sym_frame_body_is_inlineable(this_instr)) {
             DPRINTF(2, "Inlineable\n");
             // Shrink but don't decref --- the new "function" has stolen the
             // values.
@@ -271,7 +278,14 @@ dummy_func(void) {
             }
         }
         else {
-            DPRINTF(2, "Inline fail: escaping\n");
+#ifdef Py_DEBUG
+            if ((ctx->frame->f_funcobj == NULL)) {
+                DPRINTF(2, "Inline fail: no executable/func\n");
+            }
+            else {
+                 DPRINTF(2, "Inline fail: escaping\n");
+            }
+#endif
             MATERIALIZE_INST();
             materialize_ctx(ctx);
             ctx->frame->init_frame_inst = NULL;
@@ -445,7 +459,9 @@ dummy_func(void) {
         Py_UNREACHABLE();
     }
 
-    op(_SET_FRAME_RETURN_OFFSET, (new_frame -- new_frame)) {
+    op (_SET_TOPMOST_FRAME_AND_SHRINK_STACK, (prev_frame -- prev_frame)) {
+        (void)(prev_frame);
+        Py_UNREACHABLE();
     }
 
 // END BYTECODES //
