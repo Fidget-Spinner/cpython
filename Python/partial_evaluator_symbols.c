@@ -307,7 +307,6 @@ _Py_uop_pe_frame_new(
         for (int i = 0; i < frame->oparg; i++) {
             frame->original_args[i] = ctx->frame->stack_pointer[-i-1];
         }
-        DPRINTF(2, "CONS SELF %d\n", consumed_self);
         int offset_of_args_from_localsplus = (int)(args - ctx->frame->locals) + consumed_self;
         int offset_of_localsplus_from_other_localsplus = 0;
         for (int i = 0; i < ctx->curr_frame_depth; i++) {

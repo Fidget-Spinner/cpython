@@ -262,6 +262,17 @@ dummy_func(
         }
 
         replicate(8) pure inst(LOAD_FAST, (-- value)) {
+//            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+//                dump_stack(frame, stack_pointer);
+//                if (next_uop->opcode == _START_EXECUTOR) {
+//                    printf("%4d uop: ", 0);
+//                }
+//                else {
+//                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+//                }
+//                _PyUOpPrint(&next_uop[-1]);
+//                printf("\n");
+//            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
         }
@@ -5069,6 +5080,15 @@ dummy_func(
                 stack_pointer[i] = PyStackRef_NULL;
             }
             stack_pointer += null_out_count;
+//            dump_stack(frame, stack_pointer);
+//            if (next_uop->opcode == _START_EXECUTOR) {
+//                printf("%4d uop: ", 0);
+//            }
+//            else {
+//                printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+//            }
+//            _PyUOpPrint(&next_uop[-1]);
+//            printf("\n");
         }
 
         tier2 op(_SHRINK_STACK, (unused/4, shrink_count/2 --)) {
@@ -5076,8 +5096,16 @@ dummy_func(
             stack_pointer--;
             _PyEval_InlinedFrameClear(stack_pointer, shrink_count);
             stack_pointer -= shrink_count;
-            stack_pointer++;
             stack_pointer[-1] = tos;
+//            dump_stack(frame, stack_pointer);
+//            if (next_uop->opcode == _START_EXECUTOR) {
+//                printf("%4d uop: ", 0);
+//            }
+//            else {
+//                printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+//            }
+//            _PyUOpPrint(&next_uop[-1]);
+//            printf("\n");
         }
 
         tier2 op(_SET_DATASTACK_TOP, (--)) {
@@ -5111,6 +5139,7 @@ dummy_func(
         }
 
         tier2 op (_SET_TOPMOST_FRAME_AND_SHRINK_STACK, (prev_frame: _PyInterpreterFrame* -- prev_frame: _PyInterpreterFrame*)) {
+            dump_stack(frame, stack_pointer);
             // No need to decref, all args have been stolen by the new frames.
             stack_pointer = &frame->localsplus[oparg];
             // Set topmost caller stackpointer.
@@ -5119,6 +5148,8 @@ dummy_func(
             stack_pointer = frame->stackpointer;
             // WIll be set by _EXIT_TRACE or DEOPT later.
             frame->stackpointer = NULL;
+            stack_pointer--; // Get rid of the frame on top of the stack.
+            dump_stack(frame, stack_pointer);
         }
 
         /* Progress is guaranteed if we DEOPT on the eval breaker, because

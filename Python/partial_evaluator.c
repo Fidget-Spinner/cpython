@@ -143,7 +143,8 @@ sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
                 return true;
             }
         }
-        if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG || opcode == _CHECK_FUNCTION) {
+        if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG || opcode == _CHECK_FUNCTION ||
+            is_terminator(this_instr)) {
             DPRINTF(2, "Fail reason: %s\n", _PyOpcode_uop_name[opcode]);
             return false;
         }
@@ -374,7 +375,7 @@ partial_evaluate_uops(
                         // Frame is virtual, needs reconstruction.
                         if (f->init_frame_inst) {
                             make_exit(&trace_dest[start_of_side_exits], _RECONSTRUCT_FRAME, jump_target);
-                            trace_dest[start_of_side_exits].oparg = f->inline_localsplus_offset_from_caller;
+                            trace_dest[start_of_side_exits].oparg = f->inline_localsplus_offset_from_caller - 1;
                             trace_dest[start_of_side_exits].operand0 = f->inline_localsplus_offset_from_caller + (f->stack_pointer - f->locals);
                             assert(f->f_executable);
                             trace_dest[start_of_side_exits].operand1 = (uintptr_t)f->f_executable;

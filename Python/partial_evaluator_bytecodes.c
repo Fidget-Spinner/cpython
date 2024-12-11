@@ -180,10 +180,12 @@ dummy_func(void) {
             };
         }
         else {
+            // Not statically known, cannot inline.
             temp = (_Py_UopsPESlot) {
                 (_Py_UopsPESymbol *) frame_new(ctx, co, 0, NULL, oparg,
                                                oparg, NULL, 0), NULL
             };
+            MATERIALIZE_INST();
          }
         new_frame = temp;
     }
@@ -279,7 +281,7 @@ dummy_func(void) {
                 // Locals to NULL out = frame->locals - locals already on stack.
                 REPLACE_OP(initing_inst, _GROW_STACK, initing_inst->oparg, initing_inst->operand0);
                 initing_inst->operand1 = ctx->frame->locals_len -
-                    (ctx->frame->oparg - (ctx->frame->consumed_self ? 0 : 1));
+                    (ctx->frame->oparg - (ctx->frame->consumed_self ? -1 : 0));
                 initing_inst->is_virtual = false;
             }
             else {
@@ -341,7 +343,7 @@ dummy_func(void) {
             materialize(&retval);
             // The amount to shrink is the number of locals + 2 (callable and null/self).
             REPLACE_OP(this_instr, _SHRINK_STACK, 0, this_instr->operand0);
-            this_instr->operand1 = ctx->frame->locals_len + (ctx->frame->consumed_self ? 2 : 3);
+            this_instr->operand1 = ctx->frame->locals_len + (ctx->frame->consumed_self ? 0 : 1);
             MATERIALIZE_INST();
         }
         SYNC_SP();
