@@ -295,16 +295,18 @@ _PyUOpPrint(const _PyUOpInstruction *uop)
     }
     switch(uop->format) {
         case UOP_FORMAT_TARGET:
-            printf(" (%d, target=%d, operand=%#" PRIx64,
+            printf(" (%d, target=%d, operand=%#" PRIx64 ", operand2=%#" PRIx64,
                 uop->oparg,
                 uop->target,
-                (uint64_t)uop->operand0);
+                (uint64_t)uop->operand0,
+                   (uint64_t)uop->operand1);
             break;
         case UOP_FORMAT_JUMP:
-            printf(" (%d, jump_target=%d, operand=%#" PRIx64,
+            printf(" (%d, jump_target=%d, operand=%#" PRIx64 ", operand2=%#" PRIx64,
                 uop->oparg,
                 uop->jump_target,
-                (uint64_t)uop->operand0);
+                (uint64_t)uop->operand0,
+                   (uint64_t)uop->operand0);
             break;
         default:
             printf(" (%d, Unknown format)", uop->oparg);

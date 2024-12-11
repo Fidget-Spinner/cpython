@@ -270,7 +270,8 @@ dummy_func(void) {
 
         if (ctx->frame->init_frame_inst != NULL &&
             (ctx->frame->f_funcobj != NULL) &&
-            sym_frame_body_is_inlineable(this_instr)) {
+            sym_frame_body_is_inlineable(this_instr) &&
+            ctx->frame->init_frame_inst->opcode == _INIT_CALL_PY_EXACT_ARGS) {
             DPRINTF(2, "Inlineable\n");
             // Shrink but don't decref --- the new "function" has stolen the
             // values.
@@ -398,6 +399,7 @@ dummy_func(void) {
 
     op(_CHECK_FUNCTION, ( -- )) {
         materialize_ctx(ctx);
+        MATERIALIZE_INST();
     }
 
     op(_JUMP_TO_TOP, (--)) {

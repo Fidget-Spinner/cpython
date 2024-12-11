@@ -68,7 +68,7 @@
 static PyCodeObject *
 get_code(_PyUOpInstruction *op)
 {
-    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR || op->opcode == _SHRINK_STACK || op->opcode == _GROW_STACK);
+    assert(op->opcode == _PUSH_FRAME || op->opcode == _RETURN_VALUE || op->opcode == _RETURN_GENERATOR || op->opcode == _SHRINK_STACK);
     PyCodeObject *co = NULL;
     uint64_t operand = op->operand0;
     if (operand == 0) {
@@ -131,6 +131,7 @@ get_func(_PyUOpInstruction *op)
 static bool
 sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
 {
+    return false;
     int pushes = 0;
     while (!is_terminator(this_instr)) {
         int opcode = this_instr->opcode;
@@ -355,7 +356,7 @@ partial_evaluate_uops(
                 int caller_frame_n = 0;
                 for (int y = 0; y < ctx->curr_frame_depth; y++) {
                     _Py_UOpsPEAbstractFrame *f = &ctx->frames[y];
-                    if (f->init_frame_inst) {
+                    if (f->init_frame_inst != NULL) {
                         has_virtual_frame = true;
                         caller_frame_n = y - 1;
                         break;
@@ -363,6 +364,7 @@ partial_evaluate_uops(
                 }
                 if (has_virtual_frame) {
                     make_exit(&trace_dest[start_of_side_exits], _SET_DATASTACK_TOP, jump_target);
+                    trace_dest[start_of_side_exits].oparg = frame->locals_len + frame->stack_len;
                     current_exit_op = _SET_DATASTACK_TOP;
                     current_jump_target = jump_target;
                     current_jump = start_of_side_exits;
