@@ -258,6 +258,7 @@ static void make_exit(_PyUOpInstruction *inst, int opcode, int target)
     inst->operand0 = 0;
     inst->format = UOP_FORMAT_TARGET;
     inst->target = target;
+    inst->is_virtual = false;
 }
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */
