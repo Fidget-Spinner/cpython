@@ -177,8 +177,8 @@ def write_uop(
         out.start_line()
         if override:
             code_list, storage = Storage.for_uop(stack, prototype, extract_bits=False)
-            for code in code_list:
-                out.emit(code)
+            # for code in code_list:
+            #     out.emit(code)
         if debug:
             args = []
             for input in prototype.stack.inputs:
@@ -200,7 +200,7 @@ def write_uop(
             for var in storage.inputs:  # type: ignore[possibly-undefined]
                 var.defined = False
             base_offset = stack.base_offset.copy()
-            for input in reversed(uop.stack.inputs):
+            for input in (uop.stack.inputs):
                 c_offset = base_offset.to_c()
                 if input.is_array():
                     out.emit(f"{input.name} = &stack_pointer[{c_offset}];\n")

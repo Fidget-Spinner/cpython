@@ -262,17 +262,17 @@ dummy_func(
         }
 
         replicate(8) pure inst(LOAD_FAST, (-- value)) {
-//            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
-//                dump_stack(frame, stack_pointer);
-//                if (next_uop->opcode == _START_EXECUTOR) {
-//                    printf("%4d uop: ", 0);
-//                }
-//                else {
-//                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
-//                }
-//                _PyUOpPrint(&next_uop[-1]);
-//                printf("\n");
-//            }
+            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+                dump_stack(frame, stack_pointer);
+                if (next_uop->opcode == _START_EXECUTOR) {
+                    printf("%4d uop: ", 0);
+                }
+                else {
+                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+                }
+                _PyUOpPrint(&next_uop[-1]);
+                printf("\n");
+            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
         }

@@ -282,7 +282,7 @@ dummy_func(void) {
                 // Locals to NULL out = frame->locals - locals already on stack.
                 REPLACE_OP(initing_inst, _GROW_STACK, initing_inst->oparg, initing_inst->operand0);
                 initing_inst->operand1 = ctx->frame->locals_len -
-                    (ctx->frame->oparg - (ctx->frame->consumed_self ? -1 : 0));
+                    (ctx->frame->oparg - (ctx->frame->consumed_self ? 1 : 0));
                 initing_inst->is_virtual = false;
             }
             else {

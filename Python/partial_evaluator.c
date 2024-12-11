@@ -131,7 +131,6 @@ get_func(_PyUOpInstruction *op)
 static bool
 sym_frame_body_is_inlineable(_PyUOpInstruction *this_instr)
 {
-    return false;
     int pushes = 0;
     while (!is_terminator(this_instr)) {
         int opcode = this_instr->opcode;

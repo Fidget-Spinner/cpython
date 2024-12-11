@@ -108,7 +108,6 @@
         case _STORE_FAST: {
             _Py_UopsPESlot value;
             value = stack_pointer[-1];
-            value = stack_pointer[-1];
             _PyUOpInstruction *origin = sym_get_origin(&value);
             // Gets rid of things like x = x.
             if (sym_is_virtual(&value) &&
@@ -134,7 +133,6 @@
 
         case _POP_TOP: {
             _Py_UopsPESlot value;
-            value = stack_pointer[-1];
             value = stack_pointer[-1];
             if (!sym_is_virtual(&value)) {
                 MATERIALIZE_INST();
@@ -617,8 +615,8 @@
             _Py_UopsPESlot sub;
             _Py_UopsPESlot container;
             _Py_UopsPESlot new_frame;
-            sub = stack_pointer[-2];
-            container = stack_pointer[-1];
+            container = stack_pointer[-2];
+            sub = stack_pointer[-1];
             MATERIALIZE_INST();
             materialize(&container);
             materialize(&sub);
@@ -766,7 +764,6 @@
             _Py_UopsPESlot retval;
             _Py_UopsPESlot res;
             retval = stack_pointer[-1];
-            retval = stack_pointer[-1];
             // Is NOT virtual.
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -849,8 +846,8 @@
             _Py_UopsPESlot v;
             _Py_UopsPESlot receiver;
             _Py_UopsPESlot gen_frame;
-            v = stack_pointer[-2];
-            receiver = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            v = stack_pointer[-1];
             gen_frame = (_Py_UopsPESlot){NULL, NULL};
             MATERIALIZE_INST();
             // We are about to hit the end of the trace:
@@ -922,7 +919,6 @@
         case _UNPACK_SEQUENCE: {
             _Py_UopsPESlot seq;
             _Py_UopsPESlot *output;
-            output = &stack_pointer[-1];
             seq = stack_pointer[-1];
             /* This has to be done manually */
             MATERIALIZE_INST();
@@ -986,8 +982,6 @@
             _Py_UopsPESlot *left;
             _Py_UopsPESlot unused_0;
             _Py_UopsPESlot *right;
-            left = &stack_pointer[-1];
-            right = &stack_pointer[(oparg & 0xFF)];
             seq = stack_pointer[-1];
             /* This has to be done manually */
             MATERIALIZE_INST();
@@ -2241,12 +2235,9 @@
             _Py_UopsPESlot *callable;
             _Py_UopsPESlot *func;
             _Py_UopsPESlot *maybe_self;
+            callable = &stack_pointer[-2 - oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
             args = &stack_pointer[-oparg];
-            func = &stack_pointer[-2 - oparg];
-            maybe_self = &stack_pointer[-1 - oparg];
-            args = &stack_pointer[-2 - oparg];
-            self_or_null = &stack_pointer[-2];
-            callable = &stack_pointer[-1];
             MATERIALIZE_INST();
             materialize(&callable[0]);
             materialize(&self_or_null[0]);
@@ -2267,9 +2258,9 @@
             _Py_UopsPESlot *self_or_null;
             _Py_UopsPESlot *callable;
             _Py_UopsPESlot new_frame;
-            args = &stack_pointer[-2 - oparg];
-            self_or_null = &stack_pointer[-2];
-            callable = &stack_pointer[-1];
+            callable = &stack_pointer[-2 - oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            args = &stack_pointer[-oparg];
             MATERIALIZE_INST();
             materialize(&callable[0]);
             materialize(&self_or_null[0]);
@@ -2516,12 +2507,9 @@
             _Py_UopsPESlot *self_or_null;
             _Py_UopsPESlot *callable;
             _Py_UopsPESlot new_frame;
-            args = &stack_pointer[-oparg];
-            self_or_null = &stack_pointer[-1 - oparg];
             callable = &stack_pointer[-2 - oparg];
-            args = &stack_pointer[-2 - oparg];
-            self_or_null = &stack_pointer[-2];
-            callable = &stack_pointer[-1];
+            self_or_null = &stack_pointer[-1 - oparg];
+            args = &stack_pointer[-oparg];
             int argcount = oparg;
             PyCodeObject *co = NULL;
             assert((this_instr + 2)->opcode == _PUSH_FRAME);
@@ -2570,7 +2558,6 @@
         case _PUSH_FRAME: {
             _Py_UopsPESlot new_frame;
             new_frame = stack_pointer[-1];
-            new_frame = stack_pointer[-1];
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
@@ -2602,7 +2589,7 @@
                     // Locals to NULL out = frame->locals - locals already on stack.
                     REPLACE_OP(initing_inst, _GROW_STACK, initing_inst->oparg, initing_inst->operand0);
                     initing_inst->operand1 = ctx->frame->locals_len -
-                    (ctx->frame->oparg - (ctx->frame->consumed_self ? -1 : 0));
+                    (ctx->frame->oparg - (ctx->frame->consumed_self ? 1 : 0));
                     initing_inst->is_virtual = false;
                 }
                 else {
@@ -2711,13 +2698,10 @@
             _Py_UopsPESlot *callable;
             _Py_UopsPESlot *init;
             _Py_UopsPESlot *self;
-            args = &stack_pointer[-oparg];
-            init = &stack_pointer[-2 - oparg];
-            self = &stack_pointer[-1 - oparg];
             uint32_t type_version = (uint32_t)this_instr->operand0;
-            args = &stack_pointer[-2 - oparg];
-            null = &stack_pointer[-2];
-            callable = &stack_pointer[-1];
+            callable = &stack_pointer[-2 - oparg];
+            null = &stack_pointer[-1 - oparg];
+            args = &stack_pointer[-oparg];
             (void)type_version;
             MATERIALIZE_INST();
             materialize(&callable[0]);
@@ -2735,9 +2719,9 @@
             _Py_UopsPESlot *self;
             _Py_UopsPESlot *init;
             _Py_UopsPESlot init_frame;
-            args = &stack_pointer[-2 - oparg];
-            self = &stack_pointer[-2];
-            init = &stack_pointer[-1];
+            init = &stack_pointer[-2 - oparg];
+            self = &stack_pointer[-1 - oparg];
+            args = &stack_pointer[-oparg];
             MATERIALIZE_INST();
             materialize(&init[0]);
             materialize(&self[0]);
@@ -3085,10 +3069,10 @@
             _Py_UopsPESlot *self_or_null;
             _Py_UopsPESlot *callable;
             _Py_UopsPESlot new_frame;
-            kwnames = stack_pointer[-3 - oparg];
-            args = &stack_pointer[-2 - oparg];
-            self_or_null = &stack_pointer[-2];
-            callable = &stack_pointer[-1];
+            callable = &stack_pointer[-3 - oparg];
+            self_or_null = &stack_pointer[-2 - oparg];
+            args = &stack_pointer[-1 - oparg];
+            kwnames = stack_pointer[-1];
             MATERIALIZE_INST();
             materialize(&callable[0]);
             materialize(&self_or_null[0]);
@@ -3419,8 +3403,8 @@
             _Py_UopsPESlot rhs;
             _Py_UopsPESlot lhs;
             _Py_UopsPESlot res;
-            rhs = stack_pointer[-2];
-            lhs = stack_pointer[-1];
+            lhs = stack_pointer[-2];
+            rhs = stack_pointer[-1];
             MATERIALIZE_INST();
             materialize(&lhs);
             materialize(&rhs);
@@ -3760,7 +3744,6 @@
 
         case _SET_TOPMOST_FRAME_AND_SHRINK_STACK: {
             _Py_UopsPESlot prev_frame;
-            prev_frame = stack_pointer[-1];
             prev_frame = stack_pointer[-1];
             (void)(prev_frame);
             Py_UNREACHABLE();
