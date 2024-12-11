@@ -262,17 +262,17 @@ dummy_func(
         }
 
         replicate(8) pure inst(LOAD_FAST, (-- value)) {
-            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
-                dump_stack(frame, stack_pointer);
-                if (next_uop->opcode == _START_EXECUTOR) {
-                    printf("%4d uop: ", 0);
-                }
-                else {
-                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
-                }
-                _PyUOpPrint(&next_uop[-1]);
-                printf("\n");
-            }
+//            if (PyStackRef_IsNull(GETLOCAL(oparg))) {
+//                dump_stack(frame, stack_pointer);
+//                if (next_uop->opcode == _START_EXECUTOR) {
+//                    printf("%4d uop: ", 0);
+//                }
+//                else {
+//                    printf("%4d uop: ", (int)(&next_uop[-1] - current_executor->trace));
+//                }
+//                _PyUOpPrint(&next_uop[-1]);
+//                printf("\n");
+//            }
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
         }
@@ -5146,8 +5146,8 @@ dummy_func(
         }
 
         tier2 op (_SET_TOPMOST_FRAME_AND_SHRINK_STACK, (prev_frame: _PyInterpreterFrame* -- prev_frame: _PyInterpreterFrame*)) {
-            dump_stack(frame, stack_pointer);
-            fprintf(stderr, "HI %d\n", _PyFrame_GetCode(prev_frame)->co_nlocalsplus);
+//            dump_stack(frame, stack_pointer);
+//            fprintf(stderr, "HI %d\n", _PyFrame_GetCode(prev_frame)->co_nlocalsplus);
             // No need to decref, all args have been stolen by the new frames.
             stack_pointer = &frame->localsplus[oparg];
             // Set topmost caller stackpointer.
@@ -5157,8 +5157,8 @@ dummy_func(
             // WIll be set by _EXIT_TRACE or DEOPT later.
             frame->stackpointer = NULL;
             stack_pointer--; // Get rid of the frame on top of the stack.
-            dump_stack(frame, stack_pointer);
-            dump_stack(frame->previous, frame->previous->stackpointer);
+//            dump_stack(frame, stack_pointer);
+//            dump_stack(frame->previous, frame->previous->stackpointer);
         }
 
         /* Progress is guaranteed if we DEOPT on the eval breaker, because
