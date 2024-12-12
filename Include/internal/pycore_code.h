@@ -547,7 +547,7 @@ write_location_entry_start(uint8_t *ptr, int code, int length)
 // deoptimization. This isn't strictly necessary, but it is bit easier to reason
 // about when thinking about the opcode transitions as a state machine:
 #define ADAPTIVE_COOLDOWN_VALUE 52
-#define ADAPTIVE_COOLDOWN_VALUE_JIT 1
+#define ADAPTIVE_COOLDOWN_VALUE_JIT 3
 #define ADAPTIVE_COOLDOWN_BACKOFF 0
 
 // Can't assert this in pycore_backoff.h because of header order dependencies
