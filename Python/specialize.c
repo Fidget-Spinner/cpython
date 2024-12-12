@@ -2255,8 +2255,12 @@ _Py_Specialize_CallKw(
     }
     else {
         specialize(f_executable, instr, CALL_KW_NON_PY);
-    if (fail) {
+        fail = 0;
     }
+    if (fail) {
+        unspecialize(instr);
+    }
+
 }
 
 #ifdef Py_STATS
