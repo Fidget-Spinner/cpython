@@ -29,7 +29,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_BinaryOp(lhs, rhs, next_instr, oparg, LOCALS_ARRAY);
+                    _Py_Specialize_BinaryOp(PyStackRef_AsPyObjectBorrow(frame->f_executable), lhs, rhs, next_instr, oparg, LOCALS_ARRAY);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -438,7 +438,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_BinarySubscr(container, sub, next_instr);
+                    _Py_Specialize_BinarySubscr(PyStackRef_AsPyObjectBorrow(frame->f_executable), container, sub, next_instr);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -884,7 +884,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_Call(callable[0], next_instr, oparg + !PyStackRef_IsNull(self_or_null[0]));
+                    _Py_Specialize_Call(PyStackRef_AsPyObjectBorrow(frame->f_executable), callable[0], next_instr, oparg + !PyStackRef_IsNull(self_or_null[0]));
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -1899,7 +1899,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_CallKw(callable[0], next_instr, oparg + !PyStackRef_IsNull(self_or_null[0]));
+                    _Py_Specialize_CallKw(PyStackRef_AsPyObjectBorrow(frame->f_executable), callable[0], next_instr, oparg + !PyStackRef_IsNull(self_or_null[0]));
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -3223,7 +3223,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_CompareOp(left, right, next_instr, oparg);
+                    _Py_Specialize_CompareOp(PyStackRef_AsPyObjectBorrow(frame->f_executable), left, right, next_instr, oparg);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -3402,7 +3402,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_ContainsOp(right, next_instr);
+                    _Py_Specialize_ContainsOp(PyStackRef_AsPyObjectBorrow(frame->f_executable), right, next_instr);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -3916,7 +3916,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_ForIter(iter, next_instr, oparg);
+                    _Py_Specialize_ForIter(PyStackRef_AsPyObjectBorrow(frame->f_executable), iter, next_instr, oparg);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -5205,7 +5205,7 @@
                     PyObject *name = GETITEM(FRAME_CO_NAMES, oparg>>1);
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_LoadAttr(owner, next_instr, name);
+                    _Py_Specialize_LoadAttr(PyStackRef_AsPyObjectBorrow(frame->f_executable), owner, next_instr, name);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -6100,7 +6100,7 @@
                     PyObject *name = GETITEM(FRAME_CO_NAMES, oparg>>1);
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_LoadGlobal(GLOBALS(), BUILTINS(), next_instr, name);
+                    _Py_Specialize_LoadGlobal(PyStackRef_AsPyObjectBorrow(frame->f_executable), GLOBALS(), BUILTINS(), next_instr, name);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -6332,7 +6332,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_LoadSuperAttr(global_super_st, class_st, next_instr, load_method);
+                    _Py_Specialize_LoadSuperAttr(PyStackRef_AsPyObjectBorrow(frame->f_executable), global_super_st, class_st, next_instr, load_method);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -7066,7 +7066,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_Send(receiver, next_instr);
+                    _Py_Specialize_Send(PyStackRef_AsPyObjectBorrow(frame->f_executable), receiver, next_instr);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -7305,7 +7305,7 @@
                     PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_StoreAttr(owner, next_instr, name);
+                    _Py_Specialize_StoreAttr(PyStackRef_AsPyObjectBorrow(frame->f_executable), owner, next_instr, name);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -7638,7 +7638,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_StoreSubscr(container, sub, next_instr);
+                    _Py_Specialize_StoreSubscr(PyStackRef_AsPyObjectBorrow(frame->f_executable), container, sub, next_instr);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -7764,7 +7764,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_ToBool(value, next_instr);
+                    _Py_Specialize_ToBool(PyStackRef_AsPyObjectBorrow(frame->f_executable), value, next_instr);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }
@@ -8000,7 +8000,7 @@
                 if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
                     next_instr = this_instr;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    _Py_Specialize_UnpackSequence(seq, next_instr, oparg);
+                    _Py_Specialize_UnpackSequence(PyStackRef_AsPyObjectBorrow(frame->f_executable), seq, next_instr, oparg);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     DISPATCH_SAME_OPARG();
                 }

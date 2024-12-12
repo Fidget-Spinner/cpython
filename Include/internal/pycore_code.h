@@ -329,32 +329,32 @@ extern void _PyCode_Clear_Executors(PyCodeObject *code);
 
 /* Specialization functions */
 
-extern void _Py_Specialize_LoadSuperAttr(_PyStackRef global_super, _PyStackRef cls,
+extern void _Py_Specialize_LoadSuperAttr(PyCodeObject *f_executable, _PyStackRef global_super, _PyStackRef cls,
                                          _Py_CODEUNIT *instr, int load_method);
-extern void _Py_Specialize_LoadAttr(_PyStackRef owner, _Py_CODEUNIT *instr,
+extern void _Py_Specialize_LoadAttr(PyCodeObject *f_executable, _PyStackRef owner, _Py_CODEUNIT *instr,
                                     PyObject *name);
-extern void _Py_Specialize_StoreAttr(_PyStackRef owner, _Py_CODEUNIT *instr,
+extern void _Py_Specialize_StoreAttr(PyCodeObject *f_executable, _PyStackRef owner, _Py_CODEUNIT *instr,
                                      PyObject *name);
-extern void _Py_Specialize_LoadGlobal(PyObject *globals, PyObject *builtins,
+extern void _Py_Specialize_LoadGlobal(PyCodeObject *f_executable, PyObject *globals, PyObject *builtins,
                                       _Py_CODEUNIT *instr, PyObject *name);
-extern void _Py_Specialize_BinarySubscr(_PyStackRef sub, _PyStackRef container,
+extern void _Py_Specialize_BinarySubscr(PyCodeObject *f_executable, _PyStackRef sub, _PyStackRef container,
                                         _Py_CODEUNIT *instr);
-extern void _Py_Specialize_StoreSubscr(_PyStackRef container, _PyStackRef sub,
+extern void _Py_Specialize_StoreSubscr(PyCodeObject *f_executable, _PyStackRef container, _PyStackRef sub,
                                        _Py_CODEUNIT *instr);
-extern void _Py_Specialize_Call(_PyStackRef callable, _Py_CODEUNIT *instr,
+extern void _Py_Specialize_Call(PyCodeObject *f_executable, _PyStackRef callable, _Py_CODEUNIT *instr,
                                 int nargs);
-extern void _Py_Specialize_CallKw(_PyStackRef callable, _Py_CODEUNIT *instr,
+extern void _Py_Specialize_CallKw(PyCodeObject *f_executable, _PyStackRef callable, _Py_CODEUNIT *instr,
                                   int nargs);
-extern void _Py_Specialize_BinaryOp(_PyStackRef lhs, _PyStackRef rhs, _Py_CODEUNIT *instr,
+extern void _Py_Specialize_BinaryOp(PyCodeObject *f_executable, _PyStackRef lhs, _PyStackRef rhs, _Py_CODEUNIT *instr,
                                     int oparg, _PyStackRef *locals);
-extern void _Py_Specialize_CompareOp(_PyStackRef lhs, _PyStackRef rhs,
+extern void _Py_Specialize_CompareOp(PyCodeObject *f_executable, _PyStackRef lhs, _PyStackRef rhs,
                                      _Py_CODEUNIT *instr, int oparg);
-extern void _Py_Specialize_UnpackSequence(_PyStackRef seq, _Py_CODEUNIT *instr,
+extern void _Py_Specialize_UnpackSequence(PyCodeObject *f_executable, _PyStackRef seq, _Py_CODEUNIT *instr,
                                           int oparg);
-extern void _Py_Specialize_ForIter(_PyStackRef iter, _Py_CODEUNIT *instr, int oparg);
-extern void _Py_Specialize_Send(_PyStackRef receiver, _Py_CODEUNIT *instr);
-extern void _Py_Specialize_ToBool(_PyStackRef value, _Py_CODEUNIT *instr);
-extern void _Py_Specialize_ContainsOp(_PyStackRef value, _Py_CODEUNIT *instr);
+extern void _Py_Specialize_ForIter(PyCodeObject *f_executable, _PyStackRef iter, _Py_CODEUNIT *instr, int oparg);
+extern void _Py_Specialize_Send(PyCodeObject *f_executable, _PyStackRef receiver, _Py_CODEUNIT *instr);
+extern void _Py_Specialize_ToBool(PyCodeObject *f_executable, _PyStackRef value, _Py_CODEUNIT *instr);
+extern void _Py_Specialize_ContainsOp(PyCodeObject *f_executable, _PyStackRef value, _Py_CODEUNIT *instr);
 
 #ifdef Py_STATS
 
@@ -547,6 +547,7 @@ write_location_entry_start(uint8_t *ptr, int code, int length)
 // deoptimization. This isn't strictly necessary, but it is bit easier to reason
 // about when thinking about the opcode transitions as a state machine:
 #define ADAPTIVE_COOLDOWN_VALUE 52
+#define ADAPTIVE_COOLDOWN_VALUE_JIT 1
 #define ADAPTIVE_COOLDOWN_BACKOFF 0
 
 // Can't assert this in pycore_backoff.h because of header order dependencies
@@ -570,6 +571,14 @@ adaptive_counter_cooldown(void) {
     return adaptive_counter_bits(ADAPTIVE_COOLDOWN_VALUE,
                                  ADAPTIVE_COOLDOWN_BACKOFF);
 }
+
+#ifdef _Py_TIER2
+static inline _Py_BackoffCounter
+adaptive_counter_cooldown_jit(void) {
+    return adaptive_counter_bits(ADAPTIVE_COOLDOWN_VALUE_JIT,
+                                 ADAPTIVE_COOLDOWN_BACKOFF);
+}
+#endif
 
 static inline _Py_BackoffCounter
 adaptive_counter_backoff(_Py_BackoffCounter counter) {
