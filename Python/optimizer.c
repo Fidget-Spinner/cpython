@@ -937,7 +937,7 @@ done:
     }
     assert(code == initial_code);
     // Skip short traces where we can't even translate a single instruction:
-    if (first) {
+    if (first || trace_length <= 3) {
         OPT_STAT_INC(trace_too_short);
         DPRINTF(2,
                 "No trace for %s (%s:%d) at byte offset %d (no progress)\n",
