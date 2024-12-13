@@ -544,8 +544,6 @@ optimize_uops(
 
             default:
                 DPRINTF(1, "\nUnknown opcode in abstract interpreter\n");
-                _PyUOpPrint(this_instr);
-                fflush(stdout);
                 Py_UNREACHABLE();
         }
         assert(ctx->frame != NULL);
