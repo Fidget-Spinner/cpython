@@ -646,7 +646,44 @@ translate_bytecode_to_trace(
             RESERVE_RAW(2, "_ERROR_POP_N");
             max_length--;
         }
-        switch (opcode) {
+        // We don't want to trace through polymorphic (low hit rate)
+        // of some instructions because that leads to unproductive branches.
+        bool is_unstable = instr[1].counter.value_and_backoff != adaptive_counter_cooldown().value_and_backoff;
+        switch (_PyOpcode_Deopt[opcode]) {
+            case STORE_ATTR:
+            {
+                if (is_unstable) {
+                    RESERVE(1);
+                    ADD_TO_TRACE(_STORE_ATTR, oparg, 0, target);
+                    break;
+                }
+                goto translate_default;
+            }
+            case LOAD_ATTR:
+            {
+                if (is_unstable) {
+                    RESERVE(1);
+                    ADD_TO_TRACE(_LOAD_ATTR, oparg, 0, target);
+                    break;
+                }
+                goto translate_default;
+            }
+            case CALL:
+            {
+                if (is_unstable) {
+                    goto done;
+                }
+                goto translate_default;
+            }
+            case BINARY_OP:
+            {
+                if (is_unstable) {
+                    RESERVE(1);
+                    ADD_TO_TRACE(_BINARY_OP, oparg, 0, target);
+                    break;
+                }
+                goto translate_default;
+            }
             case POP_JUMP_IF_NONE:
             case POP_JUMP_IF_NOT_NONE:
             case POP_JUMP_IF_FALSE:
@@ -715,6 +752,7 @@ translate_bytecode_to_trace(
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 break;
 
+translate_default:
             default:
             {
                 const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
@@ -939,7 +977,7 @@ done:
                 2 * INSTR_IP(initial_instr, code));
         return 0;
     }
-    if (!is_terminator(&trace[trace_length-1])) {
+    if (!is_terminator(&trace[trace_length-1]) && trace[trace_length-1].opcode != _DYNAMIC_EXIT) {
         /* Allow space for _EXIT_TRACE */
         max_length += 2;
         ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
