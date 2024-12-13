@@ -1282,9 +1282,7 @@ uop_optimize(
         }
     }
     length = (int)(copy_to - buffer);
-    int og_length = length;
-    _PyUOpInstruction og_buffer[UOP_MAX_TRACE_LENGTH];
-    memcpy(og_buffer, buffer, og_length * sizeof(_PyUOpInstruction));
+
     /* Fix up */
     for (int pc = 0; pc < length; pc++) {
         int opcode = buffer[pc].opcode;
@@ -1308,26 +1306,7 @@ uop_optimize(
     if (executor == NULL) {
         return -1;
     }
-    executor->og_trace = PyMem_New(_PyUOpInstruction, og_length);
-    memcpy(executor->og_trace, og_buffer, (og_length) * sizeof(_PyUOpInstruction));
-    executor->og_code_size = og_length;
 
-#ifdef Py_DEBUG
-    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
-    int lltrace = 0;
-    if (python_lltrace != NULL && *python_lltrace >= '0') {
-        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
-    }
-    if (lltrace >= 2) {
-        printf("Optimized trace (length %d):\n", length);
-        for (int i = 0; i < length; i++) {
-            printf("%4d OPTIMIZED: ", i);
-            _PyUOpPrint(&executor->trace[i]);
-            printf("\n");
-        }
-    }
-    sanity_check(executor);
-#endif
     assert(length <= UOP_MAX_TRACE_LENGTH);
     *exec_ptr = executor;
     return 1;
