@@ -448,6 +448,48 @@ get_code_with_logging(_PyUOpInstruction *op)
     }
     return co;
 }
+//const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
+//    [_LOAD_FAST] = 8,
+//    [_LOAD_SMALL_INT] = 4,
+//    [_STORE_FAST] = 8,
+//    [_INIT_CALL_PY_EXACT_ARGS] = 5,
+//};
+
+int _PyUop_UnReplicate(int uopcode) {
+    switch(uopcode) {
+        case _LOAD_FAST_0:
+        case _LOAD_FAST_1:
+        case _LOAD_FAST_2:
+        case _LOAD_FAST_3:
+        case _LOAD_FAST_4:
+        case _LOAD_FAST_5:
+        case _LOAD_FAST_6:
+        case _LOAD_FAST_7:
+            return _LOAD_FAST;
+        case _LOAD_SMALL_INT_0:
+        case _LOAD_SMALL_INT_1:
+        case _LOAD_SMALL_INT_2:
+        case _LOAD_SMALL_INT_3:
+            return _LOAD_SMALL_INT;
+        case _STORE_FAST_0:
+        case _STORE_FAST_1:
+        case _STORE_FAST_2:
+        case _STORE_FAST_3:
+        case _STORE_FAST_4:
+        case _STORE_FAST_5:
+        case _STORE_FAST_6:
+        case _STORE_FAST_7:
+            return _STORE_FAST;
+        case _INIT_CALL_PY_EXACT_ARGS_0:
+        case _INIT_CALL_PY_EXACT_ARGS_1:
+        case _INIT_CALL_PY_EXACT_ARGS_2:
+        case _INIT_CALL_PY_EXACT_ARGS_3:
+        case _INIT_CALL_PY_EXACT_ARGS_4:
+            return _INIT_CALL_PY_EXACT_ARGS;
+        default:
+            return uopcode;
+    }
+}
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */
 static int
@@ -485,7 +527,7 @@ optimize_uops(
         this_instr = &trace[i];
 
         int oparg = this_instr->oparg;
-        opcode = this_instr->opcode;
+        opcode = _PyUop_UnReplicate(this_instr->opcode);
         _Py_UopsSymbol **stack_pointer = ctx->frame->stack_pointer;
 
 #ifdef Py_DEBUG
@@ -502,6 +544,8 @@ optimize_uops(
 
             default:
                 DPRINTF(1, "\nUnknown opcode in abstract interpreter\n");
+                _PyUOpPrint(this_instr);
+                fflush(stdout);
                 Py_UNREACHABLE();
         }
         assert(ctx->frame != NULL);

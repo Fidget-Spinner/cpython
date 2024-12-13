@@ -608,22 +608,29 @@ translate_bytecode_to_trace(
                 goto done;
             }
         }
-        if (opcode == ENTER_EXECUTOR) {
-            // We have a couple of options here. We *could* peek "underneath"
-            // this executor and continue tracing, which could give us a longer,
-            // more optimizeable trace (at the expense of lots of duplicated
-            // tier two code). Instead, we choose to just end here and stitch to
-            // the other trace, which allows a side-exit traces to rejoin the
-            // "main" trace periodically (and also helps protect us against
-            // pathological behavior where the amount of tier two code explodes
-            // for a medium-length, branchy code path). This seems to work
-            // better in practice, but in the future we could be smarter about
-            // what we do here:
-            goto done;
+
+        if (opcode == JUMP_BACKWARD && oparg == 0) {
+            instr += 1 + _PyOpcode_Caches[JUMP_BACKWARD];
+            goto top;
         }
-        assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
+
+        if (opcode == ENTER_EXECUTOR) {
+            // Entering a function executor. Trace into it.
+            if (trace[trace_length - 1].opcode == _PUSH_FRAME) {
+                instr++;
+                instr += _PyOpcode_Caches[JUMP_BACKWARD];
+                goto top;
+            }
+            else {
+                goto done;
+            }
+        }
+
+        assert(opcode != EXTENDED_ARG);
         RESERVE_RAW(2, "_CHECK_VALIDITY_AND_SET_IP");
         ADD_TO_TRACE(_CHECK_VALIDITY_AND_SET_IP, 0, (uintptr_t)instr, target);
+
+
 
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
@@ -687,6 +694,7 @@ translate_bytecode_to_trace(
             }
 
             case JUMP_BACKWARD:
+                assert(oparg);
                 ADD_TO_TRACE(_CHECK_PERIODIC, 0, 0, target);
                 _Py_FALLTHROUGH;
             case JUMP_BACKWARD_NO_INTERRUPT:
@@ -1003,18 +1011,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
     int32_t current_error_target = -1;
     int32_t current_popped = -1;
     int32_t current_exit_op = -1;
-    /* Leaving in NOPs slows down the interpreter and messes up the stats */
-    _PyUOpInstruction *copy_to = &buffer[0];
-    for (int i = 0; i < length; i++) {
-        _PyUOpInstruction *inst = &buffer[i];
-        if (inst->opcode != _NOP) {
-            if (copy_to != inst) {
-                *copy_to = *inst;
-            }
-            copy_to++;
-        }
-    }
-    length = (int)(copy_to - buffer);
+
     int next_spare = length;
     for (int i = 0; i < length; i++) {
         _PyUOpInstruction *inst = &buffer[i];
@@ -1273,6 +1270,21 @@ uop_optimize(
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
+    /* Leaving in NOPs slows down the interpreter and messes up the stats */
+    _PyUOpInstruction *copy_to = &buffer[0];
+    for (int i = 0; i < length; i++) {
+        _PyUOpInstruction *inst = &buffer[i];
+        if (inst->opcode != _NOP) {
+            if (copy_to != inst) {
+                *copy_to = *inst;
+            }
+            copy_to++;
+        }
+    }
+    length = (int)(copy_to - buffer);
+    int og_length = length;
+    _PyUOpInstruction og_buffer[UOP_MAX_TRACE_LENGTH];
+    memcpy(og_buffer, buffer, og_length * sizeof(_PyUOpInstruction));
     /* Fix up */
     for (int pc = 0; pc < length; pc++) {
         int opcode = buffer[pc].opcode;
@@ -1296,6 +1308,26 @@ uop_optimize(
     if (executor == NULL) {
         return -1;
     }
+    executor->og_trace = PyMem_New(_PyUOpInstruction, og_length);
+    memcpy(executor->og_trace, og_buffer, (og_length) * sizeof(_PyUOpInstruction));
+    executor->og_code_size = og_length;
+
+#ifdef Py_DEBUG
+    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
+    int lltrace = 0;
+    if (python_lltrace != NULL && *python_lltrace >= '0') {
+        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
+    }
+    if (lltrace >= 2) {
+        printf("Optimized trace (length %d):\n", length);
+        for (int i = 0; i < length; i++) {
+            printf("%4d OPTIMIZED: ", i);
+            _PyUOpPrint(&executor->trace[i]);
+            printf("\n");
+        }
+    }
+    sanity_check(executor);
+#endif
     assert(length <= UOP_MAX_TRACE_LENGTH);
     *exec_ptr = executor;
     return 1;

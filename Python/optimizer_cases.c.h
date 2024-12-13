@@ -11,6 +11,10 @@
             break;
         }
 
+        case _CHECK_PERIODIC_IF_OPARG: {
+            break;
+        }
+
         case _CHECK_PERIODIC_IF_NOT_YIELD_FROM: {
             break;
         }
@@ -1444,6 +1448,11 @@
         /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
 
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
+
+        case _STOP_OPTIMIZING: {
+            ctx->done = true;
+            break;
+        }
 
         case _IS_NONE: {
             _Py_UopsSymbol *b;

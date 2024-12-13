@@ -51,7 +51,7 @@ static inline _Py_BackoffCounter
 make_backoff_counter(uint16_t value, uint16_t backoff)
 {
     assert(backoff <= 15);
-    assert(value <= 0xFFF);
+    assert(value <= 0x1fff);
     _Py_BackoffCounter result;
     result.value_and_backoff = (value << BACKOFF_BITS) | backoff;
     return result;
@@ -111,6 +111,16 @@ initial_jump_backoff_counter(void)
     return make_backoff_counter(JUMP_BACKWARD_INITIAL_VALUE,
                                 JUMP_BACKWARD_INITIAL_BACKOFF);
 }
+
+#define JUMP_BACKWARD_0_INITIAL_VALUE (4095 * 2 + 1)
+#define JUMP_BACKWARD_0_INITIAL_BACKOFF 12
+static inline _Py_BackoffCounter
+initial_jump_0_backoff_counter(void)
+{
+    return make_backoff_counter(JUMP_BACKWARD_0_INITIAL_VALUE,
+                                JUMP_BACKWARD_0_INITIAL_BACKOFF);
+}
+
 
 /* Initial exit temperature.
  * Must be larger than ADAPTIVE_COOLDOWN_VALUE,

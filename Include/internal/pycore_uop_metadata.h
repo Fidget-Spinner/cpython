@@ -21,6 +21,7 @@ extern int _PyUop_num_popped(int opcode, int oparg);
 const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_NOP] = HAS_PURE_FLAG,
     [_CHECK_PERIODIC] = HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_CHECK_PERIODIC_IF_OPARG] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_RESUME_CHECK] = HAS_DEOPT_FLAG,
     [_LOAD_FAST_CHECK] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -180,6 +181,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_CHECK_EXC_MATCH] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_IMPORT_NAME] = HAS_ARG_FLAG | HAS_NAME_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_IMPORT_FROM] = HAS_ARG_FLAG | HAS_NAME_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_STOP_OPTIMIZING] = 0,
     [_IS_NONE] = 0,
     [_GET_LEN] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_MATCH_CLASS] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -364,6 +366,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_CHECK_PEP_523] = "_CHECK_PEP_523",
     [_CHECK_PERIODIC] = "_CHECK_PERIODIC",
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = "_CHECK_PERIODIC_IF_NOT_YIELD_FROM",
+    [_CHECK_PERIODIC_IF_OPARG] = "_CHECK_PERIODIC_IF_OPARG",
     [_CHECK_STACK_SPACE] = "_CHECK_STACK_SPACE",
     [_CHECK_STACK_SPACE_OPERAND] = "_CHECK_STACK_SPACE_OPERAND",
     [_CHECK_VALIDITY] = "_CHECK_VALIDITY",
@@ -535,6 +538,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SET_IP] = "_SET_IP",
     [_SET_UPDATE] = "_SET_UPDATE",
     [_START_EXECUTOR] = "_START_EXECUTOR",
+    [_STOP_OPTIMIZING] = "_STOP_OPTIMIZING",
     [_STORE_ATTR] = "_STORE_ATTR",
     [_STORE_ATTR_INSTANCE_VALUE] = "_STORE_ATTR_INSTANCE_VALUE",
     [_STORE_ATTR_SLOT] = "_STORE_ATTR_SLOT",
@@ -582,6 +586,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _NOP:
             return 0;
         case _CHECK_PERIODIC:
+            return 0;
+        case _CHECK_PERIODIC_IF_OPARG:
             return 0;
         case _CHECK_PERIODIC_IF_NOT_YIELD_FROM:
             return 0;
@@ -900,6 +906,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _IMPORT_NAME:
             return 2;
         case _IMPORT_FROM:
+            return 0;
+        case _STOP_OPTIMIZING:
             return 0;
         case _IS_NONE:
             return 1;

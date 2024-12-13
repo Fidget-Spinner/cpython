@@ -73,6 +73,8 @@ typedef struct {
 
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
+    const _PyUOpInstruction *og_trace;
+    uint32_t og_code_size;
     const _PyUOpInstruction *trace;
     _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
     uint32_t exit_count;
