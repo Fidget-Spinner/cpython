@@ -609,9 +609,11 @@ translate_bytecode_to_trace(
             }
         }
         if (opcode == ENTER_EXECUTOR) {
-            // Previous instruction being _PUSH_FRAME indicates that this executor
-            // is a RESUME. Trace into it.
-            if (trace_length >= 1 && trace[trace_length - 1].opcode == _PUSH_FRAME) {
+            // Trace into executors that come from RESUME
+            assert(code->co_executors);
+            assert(code->co_executors->executors);
+            _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
+            if (_PyOpcode_Deopt[executor->vm_data.opcode] == RESUME) {
                 instr++;
                 instr += _PyOpcode_Caches[RESUME];
                 goto top;
