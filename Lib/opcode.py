@@ -98,6 +98,10 @@ _cache_format = {
     "JUMP_BACKWARD": {
         "counter": 1,
     },
+    # Keep in sync with JUMP_BACKWARD
+    "RESUME": {
+        "counter": 1,
+    },
     "TO_BOOL": {
         "counter": 1,
         "version": 2,

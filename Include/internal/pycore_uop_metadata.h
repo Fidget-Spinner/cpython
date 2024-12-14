@@ -22,7 +22,6 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_NOP] = HAS_PURE_FLAG,
     [_CHECK_PERIODIC] = HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
-    [_RESUME_CHECK] = HAS_DEOPT_FLAG,
     [_LOAD_FAST_CHECK] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_LOAD_FAST_0] = HAS_LOCAL_FLAG | HAS_PURE_FLAG,
     [_LOAD_FAST_1] = HAS_LOCAL_FLAG | HAS_PURE_FLAG,
@@ -526,7 +525,6 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_PY_FRAME_GENERAL] = "_PY_FRAME_GENERAL",
     [_PY_FRAME_KW] = "_PY_FRAME_KW",
     [_REPLACE_WITH_TRUE] = "_REPLACE_WITH_TRUE",
-    [_RESUME_CHECK] = "_RESUME_CHECK",
     [_RETURN_GENERATOR] = "_RETURN_GENERATOR",
     [_RETURN_VALUE] = "_RETURN_VALUE",
     [_SAVE_RETURN_OFFSET] = "_SAVE_RETURN_OFFSET",
@@ -586,8 +584,6 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _CHECK_PERIODIC:
             return 0;
         case _CHECK_PERIODIC_IF_NOT_YIELD_FROM:
-            return 0;
-        case _RESUME_CHECK:
             return 0;
         case _LOAD_FAST_CHECK:
             return 0;

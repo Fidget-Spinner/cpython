@@ -1109,6 +1109,8 @@ class ClassPropertiesAndMethods(unittest.TestCase):
         with self.assertRaises(TypeError):
             frozenset().__class__ = MyFrozenSet
 
+    # JIT allocates optimizer object midway, which breaks the test.
+    @support.without_optimizer
     def test_slots(self):
         # Testing __slots__...
         class C0(object):

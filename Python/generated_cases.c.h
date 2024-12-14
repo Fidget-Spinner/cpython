@@ -4832,8 +4832,9 @@
         TARGET(INSTRUMENTED_RESUME) {
             _Py_CODEUNIT* const this_instr = frame->instr_ptr = next_instr;
             (void)this_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(INSTRUMENTED_RESUME);
+            /* Skip 1 cache entry */
             // _LOAD_BYTECODE
             {
                 #ifdef Py_GIL_DISABLED
@@ -6905,11 +6906,12 @@
 
         TARGET(RESUME) {
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(RESUME);
             PREDICTED(RESUME);
-            _Py_CODEUNIT* const this_instr = next_instr - 1;
+            _Py_CODEUNIT* const this_instr = next_instr - 2;
             (void)this_instr;
+            /* Skip 1 cache entry */
             // _LOAD_BYTECODE
             {
                 #ifdef Py_GIL_DISABLED
@@ -6974,10 +6976,11 @@
         }
 
         TARGET(RESUME_CHECK) {
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
+            _Py_CODEUNIT* const this_instr = frame->instr_ptr = next_instr;
+            next_instr += 2;
             INSTRUCTION_STATS(RESUME_CHECK);
-            static_assert(0 == 0, "incorrect cache size");
+            static_assert(1 == 1, "incorrect cache size");
+            uint16_t the_counter = read_u16(&this_instr[1].cache);
             #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0, RESUME);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -6990,6 +6993,33 @@
             DEOPT_IF(frame->tlbc_index !=
                     ((_PyThreadStateImpl *)tstate)->tlbc_index, RESUME);
             #endif
+            #ifdef _Py_TIER2
+            #if ENABLE_SPECIALIZATION
+            _Py_BackoffCounter counter = this_instr[1].counter;
+            if (backoff_counter_triggers(counter)) {
+                _Py_CODEUNIT *start = this_instr;
+                _PyExecutorObject *executor;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                int optimized = _PyOptimizer_Optimize(frame, start, stack_pointer, &executor, 0);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                if (optimized <= 0) {
+                    this_instr[1].counter = restart_backoff_counter(counter);
+                    if (optimized < 0) goto error;
+                }
+                else {
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    this_instr[1].counter = initial_resume_counter();
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    assert(tstate->previous_executor == NULL);
+                    tstate->previous_executor = Py_None;
+                    GOTO_TIER_TWO(executor);
+                }
+            }
+            else {
+                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+            }
+            #endif  /* ENABLE_SPECIALIZATION */
+            #endif /* _Py_TIER2 */
             DISPATCH();
         }
 

@@ -609,6 +609,13 @@ translate_bytecode_to_trace(
             }
         }
         if (opcode == ENTER_EXECUTOR) {
+            // Previous instruction being _PUSH_FRAME indicates that this executor
+            // is a RESUME. Trace into it.
+            if (trace_length >= 1 && trace[trace_length - 1].opcode == _PUSH_FRAME) {
+                instr++;
+                instr += _PyOpcode_Caches[RESUME];
+                goto top;
+            }
             // We have a couple of options here. We *could* peek "underneath"
             // this executor and continue tracing, which could give us a longer,
             // more optimizeable trace (at the expense of lots of duplicated
@@ -709,6 +716,7 @@ translate_bytecode_to_trace(
                 break;
             }
 
+            case RESUME_CHECK:
             case RESUME:
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
                  *  start with RESUME_CHECK */
