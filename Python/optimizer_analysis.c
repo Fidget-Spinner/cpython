@@ -471,7 +471,8 @@ optimize_uops(
     _Py_uop_abstractcontext_init(ctx);
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0);
     if (frame == NULL) {
-        return -1;
+        _Py_uop_abstractcontext_fini(ctx);
+        return trace_len;
     }
     ctx->curr_frame_depth++;
     ctx->frame = frame;

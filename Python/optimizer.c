@@ -1266,7 +1266,7 @@ uop_optimize(
     int length = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_PROJECT_LENGTH, &dependencies, progress_needed);
     if (length <= 0) {
         // Error or nothing translated
-        return length;
+        return 0;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
