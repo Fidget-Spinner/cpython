@@ -51,7 +51,7 @@ static inline _Py_BackoffCounter
 make_backoff_counter(uint16_t value, uint16_t backoff)
 {
     assert(backoff <= 15);
-    assert(value <= 0x1fff);
+    assert(value <= 0xffff);
     _Py_BackoffCounter result;
     result.value_and_backoff = (value << BACKOFF_BITS) | backoff;
     return result;
@@ -114,7 +114,7 @@ initial_jump_backoff_counter(void)
 
 /* Initial RESUME counter.
  * This determines when we create a trace for a function. */
-#define RESUME_INITIAL_VALUE (JUMP_BACKWARD_INITIAL_VALUE * 2 + 1)
+#define RESUME_INITIAL_VALUE (JUMP_BACKWARD_INITIAL_VALUE * 4)
 #define RESUME_INITIAL_BACKOFF 14
 static inline _Py_BackoffCounter
 initial_resume_counter(void)
