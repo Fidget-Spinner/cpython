@@ -6911,7 +6911,6 @@
             PREDICTED(RESUME);
             _Py_CODEUNIT* const this_instr = next_instr - 2;
             (void)this_instr;
-            /* Skip 1 cache entry */
             // _LOAD_BYTECODE
             {
                 #ifdef Py_GIL_DISABLED
@@ -6953,9 +6952,40 @@
             }
             // _QUICKEN_RESUME
             {
+                uint16_t the_counter = read_u16(&this_instr[1].cache);
+                (void)the_counter;
                 #if ENABLE_SPECIALIZATION_FT
                 if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
                     FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                }
+                else {
+                    #ifdef _Py_TIER2
+                    #if ENABLE_SPECIALIZATION
+                    _Py_BackoffCounter counter = this_instr[1].counter;
+                    if (backoff_counter_triggers(counter)) {
+                        _Py_CODEUNIT *start = this_instr;
+                        _PyExecutorObject *executor;
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        int optimized = _PyOptimizer_Optimize(frame, start, stack_pointer, &executor, 0);
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        if (optimized <= 0) {
+                            this_instr[1].counter = restart_backoff_counter(counter);
+                            if (optimized < 0) goto error;
+                        }
+                        else {
+                            _PyFrame_SetStackPointer(frame, stack_pointer);
+                            this_instr[1].counter = initial_resume_counter();
+                            stack_pointer = _PyFrame_GetStackPointer(frame);
+                            assert(tstate->previous_executor == NULL);
+                            tstate->previous_executor = Py_None;
+                            GOTO_TIER_TWO(executor);
+                        }
+                    }
+                    else {
+                        ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                    }
+                    #endif  /* ENABLE_SPECIALIZATION */
+                    #endif /* _Py_TIER2 */
                 }
                 #endif  /* ENABLE_SPECIALIZATION_FT */
             }

@@ -613,9 +613,7 @@ translate_bytecode_to_trace(
             assert(code->co_executors);
             assert(code->co_executors->executors);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
-            if (_PyOpcode_Deopt[executor->vm_data.opcode] == RESUME ||
-                // If previous was a _PUSH_FRAME, trace into it as well.
-                (trace_length >= 1 && trace[trace_length - 1].opcode == _PUSH_FRAME)) {
+            if (_PyOpcode_Deopt[executor->vm_data.opcode] == RESUME) {
                 instr++;
                 instr += _PyOpcode_Caches[RESUME];
                 goto top;
@@ -725,7 +723,8 @@ translate_bytecode_to_trace(
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
-                break;
+                instr += 1 + _PyOpcode_Caches[RESUME];
+                goto top;
 
             default:
             {
