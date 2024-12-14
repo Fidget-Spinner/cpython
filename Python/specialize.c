@@ -444,13 +444,15 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, PyObject *consts,
                 int enable_counters)
 {
     #if ENABLE_SPECIALIZATION_FT
-    _Py_BackoffCounter jump_counter, adaptive_counter;
+    _Py_BackoffCounter jump_counter, adaptive_counter, resume_counter;
     if (enable_counters) {
         jump_counter = initial_jump_backoff_counter();
+        resume_counter = initial_resume_counter();
         adaptive_counter = adaptive_counter_warmup();
     }
     else {
         jump_counter = initial_unreachable_backoff_counter();
+        resume_counter = initial_unreachable_backoff_counter();
         adaptive_counter = initial_unreachable_backoff_counter();
     }
     int opcode = 0;
@@ -465,6 +467,9 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, PyObject *consts,
             switch (opcode) {
                 case JUMP_BACKWARD:
                     instructions[i + 1].counter = jump_counter;
+                    break;
+                case RESUME:
+                    instructions[i + 1].counter = resume_counter;
                     break;
                 case POP_JUMP_IF_FALSE:
                 case POP_JUMP_IF_TRUE:

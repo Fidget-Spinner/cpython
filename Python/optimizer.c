@@ -613,7 +613,9 @@ translate_bytecode_to_trace(
             assert(code->co_executors);
             assert(code->co_executors->executors);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
-            if (_PyOpcode_Deopt[executor->vm_data.opcode] == RESUME) {
+            if (_PyOpcode_Deopt[executor->vm_data.opcode] == RESUME ||
+                // If previous was a _PUSH_FRAME, trace into it as well.
+                (trace_length >= 1 && trace[trace_length - 1].opcode == _PUSH_FRAME)) {
                 instr++;
                 instr += _PyOpcode_Caches[RESUME];
                 goto top;
