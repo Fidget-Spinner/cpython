@@ -51,7 +51,7 @@ static inline _Py_BackoffCounter
 make_backoff_counter(uint16_t value, uint16_t backoff)
 {
     assert(backoff <= 15);
-    assert(value <= 0xffff);
+    assert(value <= 0xcfff);
     _Py_BackoffCounter result;
     result.value_and_backoff = (value << BACKOFF_BITS) | backoff;
     return result;
