@@ -455,7 +455,6 @@ class Stats:
         trace_too_long = self._data["Optimization trace too long"]
         trace_too_short = self._data["Optimization trace too short"]
         inner_loop = self._data["Optimization inner loop"]
-        recursive_call = self._data["Optimization recursive call"]
         low_confidence = self._data["Optimization low confidence"]
         executors_invalidated = self._data["Executors invalidated"]
 
@@ -488,10 +487,6 @@ class Stats:
             Doc(
                 "Inner loop found", "A trace is truncated because it has an inner loop"
             ): (inner_loop, attempts),
-            Doc(
-                "Recursive call",
-                "A trace is truncated because it has a recursive call.",
-            ): (recursive_call, attempts),
             Doc(
                 "Low confidence",
                 "A trace is abandoned because the likelihood of the jump to top being taken "
