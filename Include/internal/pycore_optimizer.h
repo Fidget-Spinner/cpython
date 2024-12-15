@@ -143,7 +143,7 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 
 // This is the length of the trace we project initially.
 #define UOP_MAX_TRACE_LENGTH 800
-// This is the minimum length for a function trace we will accept.
+// This is the minimum length for a non-loop trace we will accept.
 // We don't want too short executors.
 // The exception to this is if they form a complete loop.
 // The intuition is that executors staying in JIT-tted code is good (regardless of their length),
