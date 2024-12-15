@@ -114,7 +114,7 @@ initial_jump_backoff_counter(void)
 
 /* Initial RESUME counter.
  * This determines when we create a trace for a function. */
-#define RESUME_INITIAL_VALUE (JUMP_BACKWARD_INITIAL_VALUE * 4)
+#define RESUME_INITIAL_VALUE (JUMP_BACKWARD_INITIAL_VALUE * 2)
 #define RESUME_INITIAL_BACKOFF 14
 static inline _Py_BackoffCounter
 initial_resume_counter(void)
