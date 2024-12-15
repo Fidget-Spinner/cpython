@@ -7033,7 +7033,15 @@
                 int optimized = _PyOptimizer_Optimize(frame, start, stack_pointer, &executor, 0);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (optimized <= 0) {
-                    this_instr[1].counter = restart_backoff_counter(counter);
+                    // NB(Ken Jin): We don't want to bother with optimizing a function if it fails even once.
+                    // It's almost never worth it to try again.
+                    // Experiments indicate that the cost of an optimizing attempt
+                    // for a function is significant. Enough to show up as a 6% slowdown in bm_coroutines.
+                    // We need a *more exponential* backoff than the maximum allowed by our current
+                    // architecture.
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    this_instr[1].counter = initial_unreachable_backoff_counter();
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized < 0) goto error;
                 }
                 else {
