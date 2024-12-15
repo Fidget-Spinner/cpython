@@ -7039,9 +7039,7 @@
                     // for a function is significant. Enough to show up as a 6% slowdown in bm_coroutines.
                     // We need a *more exponential* backoff than the maximum allowed by our current
                     // architecture.
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
                     this_instr[1].counter = initial_unreachable_backoff_counter();
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized < 0) goto error;
                 }
                 else {

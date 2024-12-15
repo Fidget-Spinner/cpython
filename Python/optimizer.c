@@ -933,7 +933,7 @@ done:
     if (first || (progress_needed && trace_length <= UOP_MIN_TRACE_LENGTH &&
             trace[trace_length-1].opcode != _JUMP_TO_TOP)) {
         OPT_STAT_INC(trace_too_short);
-        DPRINTF(2,
+        DPRINTF(1,
                 "No trace for %s (%s:%d) at byte offset %d (no progress)\n",
                 PyUnicode_AsUTF8(code->co_qualname),
                 PyUnicode_AsUTF8(code->co_filename),
