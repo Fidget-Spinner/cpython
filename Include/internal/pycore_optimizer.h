@@ -148,7 +148,8 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 // The exception to this is if they form a complete loop.
 // The intuition is that executors staying in JIT-tted code is good (regardless of their length),
 // but short executors jumping in and out of JIT-tted code is bad.
-#define UOP_MIN_TRACE_LENGTH 90
+// TODO: investigate if a higher number yields better results.
+#define UOP_MIN_TRACE_LENGTH 100
 
 #define TRACE_STACK_SIZE 5
 
