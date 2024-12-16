@@ -563,7 +563,6 @@ translate_bytecode_to_trace(
     int trace_stack_depth = 0;
     int confidence = CONFIDENCE_RANGE;  // Adjusted by branch instructions
     bool jump_seen = false;
-    bool is_resume_trace = _PyOpcode_Deopt[initial_instr->op.code] == RESUME;
 
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
@@ -931,9 +930,7 @@ done:
     assert(code == initial_code);
     // Skip short traces where we can't even translate a single instruction:
     // SKip trunk traces where they are too short, and don't end in a _JUMP_TO_TOP.
-    if (first || (progress_needed &&
-            is_resume_trace &&
-            trace_length <= UOP_MIN_TRACE_LENGTH &&
+    if (first || (progress_needed && trace_length <= UOP_MIN_TRACE_LENGTH &&
             trace[trace_length-1].opcode != _JUMP_TO_TOP)) {
         OPT_STAT_INC(trace_too_short);
         DPRINTF(1,
