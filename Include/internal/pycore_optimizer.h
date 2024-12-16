@@ -153,7 +153,10 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 // Interpreter -> JITted code happens (which is expensive).
 // TODO: investigate if a higher number yields better results.
 // TODO: investigate a different threshold for _DYNAMIC_EXIT, as that is a possible JITted -> JITted transition as well.
-#define UOP_MIN_TRACE_LENGTH 80
+// Experimental results show that a shorter trace length for loops is acceptable
+// vs for functions.
+#define UOP_MIN_TRACE_LENGTH 30
+#define UOP_MIN_TRACE_LENGTH_RESUME 100
 
 #define TRACE_STACK_SIZE 5
 
