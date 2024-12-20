@@ -434,7 +434,7 @@ do { \
     DISPATCH(); \
 } while (0)
 
-#define CURRENT_OPARG() (next_uop[-1].oparg)
+#define CURRENT_OPARG(INST_N) (next_uop[INST_N-1].oparg)
 
 #define CURRENT_OPERAND0(INST_N) (next_uop[INST_N-1].operand0)
 #define CURRENT_OPERAND1(INST_N) (next_uop[INST_N-1].operand1)

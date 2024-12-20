@@ -68,6 +68,7 @@ class Tier2Emitter(Emitter):
     def __init__(self, out: CWriter):
         super().__init__(out)
         self._replacers["oparg"] = self.oparg
+        self.index = 0
 
     def error_if(
         self,
@@ -87,7 +88,7 @@ class Tier2Emitter(Emitter):
         label = next(tkn_iter).text
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
-        self.emit(") JUMP_TO_ERROR(0);\n")
+        self.emit(f") JUMP_TO_ERROR({self.index});\n")
         return not always_true(first_tkn)
 
 
@@ -102,7 +103,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # LPAREN
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
-        self.out.emit_at("JUMP_TO_ERROR(0);", tkn)
+        self.out.emit_at(f"JUMP_TO_ERROR({self.index});", tkn)
         return False
 
     def deopt_if(
@@ -122,7 +123,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
-        self.emit("JUMP_TO_JUMP_TARGET(0);\n")
+        self.emit(f"JUMP_TO_JUMP_TARGET({self.index});\n")
         self.emit("}\n")
         return not always_true(first_tkn)
 
@@ -142,7 +143,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
-        self.emit("JUMP_TO_JUMP_TARGET(0);\n")
+        self.emit(f"JUMP_TO_JUMP_TARGET({self.index});\n")
         self.emit("}\n")
         return not always_true(first_tkn)
 
@@ -167,17 +168,39 @@ class Tier2Emitter(Emitter):
         self.out.emit_at(uop.name[-1], tkn)
         return True
 
+    def kill(
+        self,
+        tkn: Token,
+        tkn_iter: TokenIterator,
+        uop: Uop,
+        storage: Storage,
+        inst: Instruction | None,
+    ) -> bool:
+        next(tkn_iter)
+        name_tkn = next(tkn_iter)
+        name = name_tkn.text
+        next(tkn_iter)
+        next(tkn_iter)
+        for var in storage.inputs:
+            if var.name == name:
+                var.defined = False
+                self.emit(f"(void){name};\n")
+                break
+        else:
+            raise analysis_error(f"'{name}' is not a live input-only variable", name_tkn)
+        return True
 
-def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
+
+def write_uop(uop: Uop, emitter: Tier2Emitter, stack: Stack) -> Stack:
     locals: dict[str, Local] = {}
     try:
         emitter.out.start_line()
         if uop.properties.oparg:
-            emitter.emit("oparg = CURRENT_OPARG();\n")
+            emitter.emit(f"oparg = CURRENT_OPARG({emitter.index});\n")
             assert uop.properties.const_oparg < 0
         elif uop.properties.const_oparg >= 0:
             emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
-            emitter.emit(f"assert(oparg == CURRENT_OPARG());\n")
+            emitter.emit(f"assert(oparg == CURRENT_OPARG({emitter.index}));\n")
         code_list, storage = Storage.for_uop(stack, uop)
         for code in code_list:
             emitter.emit(code)
@@ -188,7 +211,7 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
                 else:
                     type = f"uint{cache.size*16}_t "
                     cast = f"uint{cache.size*16}_t"
-                emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}();\n")
+                emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}({emitter.index});\n")
         storage = emitter.emit_tokens(uop, storage, None)
     except StackError as ex:
         raise analysis_error(ex.args[0], uop.body[0]) from None
@@ -237,6 +260,26 @@ def generate_tier2(
         out.start_line()
         out.emit("}")
         out.emit("\n\n")
+    # Create super uops.
+    for sup_name, super_uop in analysis.super_uops.items():
+        out.emit(f"case {sup_name}: {{\n")
+        for idx, uop in enumerate(super_uop):
+            out.emit(f"// {uop.name}\n")
+            out.emit("{\n")
+            declare_variables(uop, out)
+            stack = Stack()
+            emitter.index = idx
+            stack = write_uop(uop, emitter, stack)
+            out.start_line()
+            if not uop.properties.always_exits:
+                stack.flush(out)
+            out.emit("}\n")
+            out.start_line()
+        out.emit("break;\n")
+        out.start_line()
+        out.emit("}")
+        out.emit("\n\n")
+
     outfile.write("#undef TIER_TWO\n")
 
 

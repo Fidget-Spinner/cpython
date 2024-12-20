@@ -48,6 +48,11 @@ def generate_uop_ids(
                 out.emit(f"#define {name} {next_id}\n")
                 next_id += 1
 
+        super_uops = list(analysis.super_uops.items())
+        for name, uop in sorted(super_uops):
+            out.emit(f"#define {name} {next_id}\n")
+            next_id += 1
+
         out.emit(f"#define MAX_UOP_ID {next_id-1}\n")
 
 

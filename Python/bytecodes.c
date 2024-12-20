@@ -3649,7 +3649,7 @@ dummy_func(
             DEOPT_IF(tstate->py_recursion_remaining <= 1);
         }
 
-        replicate(5) pure op(_INIT_CALL_PY_EXACT_ARGS, (callable[1], self_or_null[1], args[oparg] -- new_frame: _PyInterpreterFrame*)) {
+        pure op(_INIT_CALL_PY_EXACT_ARGS, (callable[1], self_or_null[1], args[oparg] -- new_frame: _PyInterpreterFrame*)) {
             int has_self = !PyStackRef_IsNull(self_or_null[0]);
             STAT_INC(CALL, hit);
             new_frame = _PyFrame_PushUnchecked(tstate, callable[0], oparg + has_self, frame);
@@ -3761,6 +3761,7 @@ dummy_func(
 
         op(_CHECK_AND_ALLOCATE_OBJECT, (type_version/2, callable[1], null[1], args[oparg] -- init[1], self[1], args[oparg])) {
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+            (void)args;
             DEOPT_IF(!PyStackRef_IsNull(null[0]));
             DEOPT_IF(!PyType_Check(callable_o));
             PyTypeObject *tp = (PyTypeObject *)callable_o;

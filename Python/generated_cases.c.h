@@ -1042,8 +1042,10 @@
                 callable = &stack_pointer[-2 - oparg];
                 init = &stack_pointer[-2 - oparg];
                 self = &stack_pointer[-1 - oparg];
+                args = &stack_pointer[-oparg];
                 uint32_t type_version = read_u32(&this_instr[2].cache);
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                (void)args;
                 DEOPT_IF(!PyStackRef_IsNull(null[0]), CALL);
                 DEOPT_IF(!PyType_Check(callable_o), CALL);
                 PyTypeObject *tp = (PyTypeObject *)callable_o;

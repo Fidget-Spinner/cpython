@@ -173,6 +173,7 @@ class Uop:
     implicitly_created: bool = False
     replicated = 0
     replicates: "Uop | None" = None
+    replicates_children: list["Uop"] | None = None
     # Size of the instruction(s), only set for uops containing the INSTRUCTION_SIZE macro
     instruction_size: int | None = None
 
@@ -215,6 +216,8 @@ class Uop:
                 return True
         return False
 
+    def __repr__(self):
+        return self.name
 
 Part = Uop | Skip | Flush
 
@@ -292,6 +295,7 @@ class Analysis:
     opmap: dict[str, int]
     have_arg: int
     min_instrumented: int
+    super_uops: dict[str, list[Uop]]
 
 
 def analysis_error(message: str, tkn: lexer.Token) -> SyntaxError:
@@ -880,6 +884,7 @@ def make_uop(
             break
     else:
         return result
+    children = []
     for oparg in range(result.replicated):
         name_x = name + "_" + str(oparg)
         properties = compute_properties(op)
@@ -898,6 +903,9 @@ def make_uop(
         )
         rep.replicates = result
         uops[name_x] = rep
+        children.append(rep)
+
+    result.replicates_children = children
 
     return result
 
@@ -1115,12 +1123,30 @@ def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop)
         raise analysis_error(f"No instruction containing the uop '{uop.name}' was found", tkn)
     return size
 
+def form_uop_valid_permutations(constituents: list[Uop]) -> list[list[Uop]]:
+    # For a Uop, of A, B, C, the order must be preserved,
+    # So ABC, BC are fine, but CB etc are not.
+    if not constituents:
+        return [[]]
+    pick: Uop = constituents[0]
+    # Either we pick it to add to the permutations
+    added = []
+    if pick.replicates_children:
+        for replicate in pick.replicates_children:
+            added += [[replicate] + rest for rest in form_uop_valid_permutations(constituents[1:])]
+    else:
+        added += [[pick] + rest for rest in form_uop_valid_permutations(constituents[1:])]
+    # Or we don't.
+    not_added = form_uop_valid_permutations(constituents[1:])
+    return added + not_added
+
 
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}
     uops: dict[str, Uop] = {}
     families: dict[str, Family] = {}
     pseudos: dict[str, PseudoInstruction] = {}
+    super_uops: dict[str, list[Uop]] = {}
     for node in forest:
         match node:
             case parser.InstDef(name):
@@ -1169,9 +1195,27 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         inst = instructions["BINARY_OP_INPLACE_ADD_UNICODE"]
         inst.family = families["BINARY_OP"]
         families["BINARY_OP"].members.append(inst)
+
+    # Create supers from macros:
+    for _, inst in instructions.items():
+        super_constituents: list[Uop] = []
+        for part in inst.parts:
+            if isinstance(part, Uop):
+                if part.properties.tier == 1:
+                    continue
+                if part.properties.needs_this:
+                    continue
+                super_constituents.append(part)
+        if len(super_constituents) == 0:
+            continue
+        permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if len(sup) > 1]
+        for permutation in permutations:
+            sup_name = '___'.join([uop.name for uop in permutation])
+            super_uops[sup_name] = permutation
+
     opmap, first_arg, min_instrumented = assign_opcodes(instructions, families, pseudos)
     return Analysis(
-        instructions, uops, families, pseudos, opmap, first_arg, min_instrumented
+        instructions, uops, families, pseudos, opmap, first_arg, min_instrumented, super_uops
     )
 
 
