@@ -12,6 +12,10 @@
             break;
         }
 
+        case _PART_OF_A_SUPER: {
+            break;
+        }
+
         case _CHECK_PERIODIC: {
             _Py_CHECK_EMSCRIPTEN_SIGNALS_PERIODICALLY();
             QSBR_QUIESCENT_STATE(tstate);

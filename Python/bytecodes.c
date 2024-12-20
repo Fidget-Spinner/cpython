@@ -144,6 +144,9 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
+        tier2 op(_PART_OF_A_SUPER, (--)) {
+        }
+
         family(RESUME, 0) = {
             RESUME_CHECK,
         };
