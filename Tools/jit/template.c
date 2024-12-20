@@ -24,13 +24,13 @@
 #include "jit.h"
 
 #undef CURRENT_OPARG
-#define CURRENT_OPARG() (_oparg)
+#define CURRENT_OPARG(INST_N) (_oparg ## INST_N)
 
 #undef CURRENT_OPERAND0
-#define CURRENT_OPERAND0() (_operand0)
+#define CURRENT_OPERAND0(INST_N) (_operand0_ ## INST_N)
 
 #undef CURRENT_OPERAND1
-#define CURRENT_OPERAND1() (_operand1)
+#define CURRENT_OPERAND1(INST_N) (_operand1_ ## INST_N)
 
 #undef DEOPT_IF
 #define DEOPT_IF(COND, INSTNAME) \
@@ -150,30 +150,6 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint64_t, _operand0_8, _JIT_OPERAND0_8)
     PATCH_VALUE(uint64_t, _operand1_8, _JIT_OPERAND1_8)
 
-
-    uint16_t super_operand0s[] = {
-        _operand0_0,
-        _operand0_1,
-        _operand0_2,
-        _operand0_3,
-        _operand0_4,
-        _operand0_5,
-        _operand0_6,
-        _operand0_7,
-        _operand0_8,
-    };
-
-    uint16_t super_operand1s[] = {
-        _operand1_0,
-        _operand1_1,
-        _operand1_2,
-        _operand1_3,
-        _operand1_4,
-        _operand1_5,
-        _operand1_6,
-        _operand1_7,
-        _operand1_8,
-    };
 #else
     // Super instructions not supported on 32-bit for now.
     assert(SIZEOF_VOID_P == 4);
@@ -211,13 +187,10 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     OPT_STAT_INC(uops_executed);
 
     for (int _JIT_I = 0; _JIT_I < sizeof(super_uopcodes) / sizeof(int); _JIT_I++) {
-        int uopcode = super_uopcodes[_JIT_I];
-        uint16_t oparg = super_opargs[_JIT_I];
-        uint16_t CURRENT_OPARG() = oparg;
-        uint64_t CURRENT_OPERAND0() = super_operand0s[_JIT_I];
-        uint64_t CURRENT_OPERAND1() = super_operand1s[_JIT_I];
-        UOP_STAT_INC(uopcode, execution_count);
-        switch (uopcode) {
+        int opcode = super_uopcodes[_JIT_I];
+        int oparg = super_opargs[_JIT_I];
+        UOP_STAT_INC(opcode, execution_count);
+        switch (opcode) {
             // The actual instruction definition gets inserted here:
             CASE
             default:

@@ -190,7 +190,7 @@
                 assert(next_instr->op.code == STORE_FAST);
                 next_oparg = next_instr->op.arg;
                 #else
-                next_oparg = CURRENT_OPERAND0();
+                next_oparg = CURRENT_OPERAND0(0);
                 #endif
                 _PyStackRef *target_local = &GETLOCAL(next_oparg);
                 DEOPT_IF(PyStackRef_AsPyObjectBorrow(*target_local) != left_o, BINARY_OP);

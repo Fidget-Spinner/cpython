@@ -830,7 +830,7 @@
             assert(next_instr->op.code == STORE_FAST);
             next_oparg = next_instr->op.arg;
             #else
-            next_oparg = CURRENT_OPERAND0();
+            next_oparg = CURRENT_OPERAND0(0);
             #endif
             _PyStackRef *target_local = &GETLOCAL(next_oparg);
             if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
@@ -6388,7 +6388,7 @@
                 assert(next_instr->op.code == STORE_FAST);
                 next_oparg = next_instr->op.arg;
                 #else
-                next_oparg = CURRENT_OPERAND0();
+                next_oparg = CURRENT_OPERAND0(0);
                 #endif
                 _PyStackRef *target_local = &GETLOCAL(next_oparg);
                 if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
@@ -7434,58 +7434,7 @@
             break;
         }
 
-        case _GUARD_TYPE_VERSION____CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE: {
-            // _GUARD_TYPE_VERSION
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(0);
-                PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
-                assert(type_version != 0);
-                if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _CHECK_MANAGED_OBJECT_HAS_VALUES
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                assert(Py_TYPE(owner_o)->tp_dictoffset < 0);
-                assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_INLINE_VALUES);
-                if (!_PyObject_InlineValues(owner_o)->valid) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-            }
-            // _LOAD_ATTR_INSTANCE_VALUE
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(2);
-                owner = stack_pointer[-1];
-                uint16_t offset = (uint16_t)CURRENT_OPERAND0(2);
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                PyObject **value_ptr = (PyObject**)(((char *)owner_o) + offset);
-                PyObject *attr_o = *value_ptr;
-                if (attr_o == NULL) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(2);
-                }
-                STAT_INC(LOAD_ATTR, hit);
-                Py_INCREF(attr_o);
-                null = PyStackRef_NULL;
-                attr = PyStackRef_FromPyObjectSteal(attr_o);
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_INSTANCE_VALUE is split on (oparg & 1) */
 
         case _GUARD_TYPE_VERSION____CHECK_MANAGED_OBJECT_HAS_VALUES: {
             // _GUARD_TYPE_VERSION
@@ -7515,87 +7464,9 @@
             break;
         }
 
-        case _GUARD_TYPE_VERSION____LOAD_ATTR_INSTANCE_VALUE: {
-            // _GUARD_TYPE_VERSION
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(0);
-                PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
-                assert(type_version != 0);
-                if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _LOAD_ATTR_INSTANCE_VALUE
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(1);
-                owner = stack_pointer[-1];
-                uint16_t offset = (uint16_t)CURRENT_OPERAND0(1);
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                PyObject **value_ptr = (PyObject**)(((char *)owner_o) + offset);
-                PyObject *attr_o = *value_ptr;
-                if (attr_o == NULL) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-                STAT_INC(LOAD_ATTR, hit);
-                Py_INCREF(attr_o);
-                null = PyStackRef_NULL;
-                attr = PyStackRef_FromPyObjectSteal(attr_o);
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_INSTANCE_VALUE is split on (oparg & 1) */
 
-        case _CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE: {
-            // _CHECK_MANAGED_OBJECT_HAS_VALUES
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                assert(Py_TYPE(owner_o)->tp_dictoffset < 0);
-                assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_INLINE_VALUES);
-                if (!_PyObject_InlineValues(owner_o)->valid) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _LOAD_ATTR_INSTANCE_VALUE
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(1);
-                owner = stack_pointer[-1];
-                uint16_t offset = (uint16_t)CURRENT_OPERAND0(1);
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                PyObject **value_ptr = (PyObject**)(((char *)owner_o) + offset);
-                PyObject *attr_o = *value_ptr;
-                if (attr_o == NULL) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-                STAT_INC(LOAD_ATTR, hit);
-                Py_INCREF(attr_o);
-                null = PyStackRef_NULL;
-                attr = PyStackRef_FromPyObjectSteal(attr_o);
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_INSTANCE_VALUE is split on (oparg & 1) */
 
         case _CHECK_ATTR_MODULE_PUSH_KEYS____LOAD_ATTR_MODULE_FROM_KEYS: {
             // _CHECK_ATTR_MODULE_PUSH_KEYS
@@ -7876,133 +7747,11 @@
             break;
         }
 
-        case _GUARD_TYPE_VERSION____LOAD_ATTR_SLOT: {
-            // _GUARD_TYPE_VERSION
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(0);
-                PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
-                assert(type_version != 0);
-                if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _LOAD_ATTR_SLOT
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(1);
-                owner = stack_pointer[-1];
-                uint16_t index = (uint16_t)CURRENT_OPERAND0(1);
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                char *addr = (char *)owner_o + index;
-                PyObject *attr_o = *(PyObject **)addr;
-                if (attr_o == NULL) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-                STAT_INC(LOAD_ATTR, hit);
-                null = PyStackRef_NULL;
-                attr = PyStackRef_FromPyObjectNew(attr_o);
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_SLOT is split on (oparg & 1) */
 
-        case _CHECK_ATTR_CLASS____LOAD_ATTR_CLASS: {
-            // _CHECK_ATTR_CLASS
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(0);
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                if (!PyType_Check(owner_o)) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-                assert(type_version != 0);
-                if (((PyTypeObject *)owner_o)->tp_version_tag != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _LOAD_ATTR_CLASS
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(1);
-                owner = stack_pointer[-1];
-                PyObject *descr = (PyObject *)CURRENT_OPERAND0(1);
-                STAT_INC(LOAD_ATTR, hit);
-                assert(descr != NULL);
-                attr = PyStackRef_FromPyObjectNew(descr);
-                null = PyStackRef_NULL;
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_CLASS is split on (oparg & 1) */
 
-        case _CHECK_ATTR_CLASS____GUARD_TYPE_VERSION____LOAD_ATTR_CLASS: {
-            // _CHECK_ATTR_CLASS
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(0);
-                PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-                if (!PyType_Check(owner_o)) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-                assert(type_version != 0);
-                if (((PyTypeObject *)owner_o)->tp_version_tag != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _GUARD_TYPE_VERSION
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(1);
-                PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
-                assert(type_version != 0);
-                if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-            }
-            // _LOAD_ATTR_CLASS
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(2);
-                owner = stack_pointer[-1];
-                PyObject *descr = (PyObject *)CURRENT_OPERAND0(2);
-                STAT_INC(LOAD_ATTR, hit);
-                assert(descr != NULL);
-                attr = PyStackRef_FromPyObjectNew(descr);
-                null = PyStackRef_NULL;
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_CLASS is split on (oparg & 1) */
 
         case _CHECK_ATTR_CLASS____GUARD_TYPE_VERSION: {
             // _CHECK_ATTR_CLASS
@@ -8036,39 +7785,7 @@
             break;
         }
 
-        case _GUARD_TYPE_VERSION____LOAD_ATTR_CLASS: {
-            // _GUARD_TYPE_VERSION
-            {
-                _PyStackRef owner;
-                owner = stack_pointer[-1];
-                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(0);
-                PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
-                assert(type_version != 0);
-                if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _LOAD_ATTR_CLASS
-            {
-                _PyStackRef owner;
-                _PyStackRef attr;
-                _PyStackRef null = PyStackRef_NULL;
-                oparg = CURRENT_OPARG(1);
-                owner = stack_pointer[-1];
-                PyObject *descr = (PyObject *)CURRENT_OPERAND0(1);
-                STAT_INC(LOAD_ATTR, hit);
-                assert(descr != NULL);
-                attr = PyStackRef_FromPyObjectNew(descr);
-                null = PyStackRef_NULL;
-                PyStackRef_CLOSE(owner);
-                stack_pointer[-1] = attr;
-                if (oparg & 1) stack_pointer[0] = null;
-                stack_pointer += (oparg & 1);
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _LOAD_ATTR_CLASS is split on (oparg & 1) */
 
         case _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME: {
             // _CHECK_PEP_523
@@ -9034,97 +8751,9 @@
             break;
         }
 
-        case _ITER_CHECK_LIST____ITER_JUMP_LIST____ITER_NEXT_LIST: {
-            // _ITER_CHECK_LIST
-            {
-                _PyStackRef iter;
-                iter = stack_pointer[-1];
-                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _ITER_JUMP_LIST
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyListIterObject *it = (_PyListIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyListIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                PyListObject *seq = it->it_seq;
-                if (seq == NULL || (size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
-                    it->it_index = -1;
-                    #ifndef Py_GIL_DISABLED
-                    if (seq != NULL) {
-                        it->it_seq = NULL;
-                        Py_DECREF(seq);
-                    }
-                    #endif
-                    PyStackRef_CLOSE(iter);
-                    STACK_SHRINK(1);
-                    /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            // _ITER_NEXT_LIST
-            {
-                _PyStackRef iter;
-                _PyStackRef next;
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyListIterObject *it = (_PyListIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyListIter_Type);
-                PyListObject *seq = it->it_seq;
-                assert(seq);
-                assert(it->it_index < PyList_GET_SIZE(seq));
-                next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
-                stack_pointer[0] = next;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _ITER_CHECK_LIST____ITER_JUMP_LIST____ITER_NEXT_LIST is not a viable micro-op for tier 2 because it is replaced */
 
-        case _ITER_CHECK_LIST____ITER_JUMP_LIST: {
-            // _ITER_CHECK_LIST
-            {
-                _PyStackRef iter;
-                iter = stack_pointer[-1];
-                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _ITER_JUMP_LIST
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyListIterObject *it = (_PyListIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyListIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                PyListObject *seq = it->it_seq;
-                if (seq == NULL || (size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
-                    it->it_index = -1;
-                    #ifndef Py_GIL_DISABLED
-                    if (seq != NULL) {
-                        it->it_seq = NULL;
-                        Py_DECREF(seq);
-                    }
-                    #endif
-                    PyStackRef_CLOSE(iter);
-                    STACK_SHRINK(1);
-                    /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            break;
-        }
+        /* _ITER_CHECK_LIST____ITER_JUMP_LIST is not a viable micro-op for tier 2 because it is replaced */
 
         case _ITER_CHECK_LIST____ITER_NEXT_LIST: {
             // _ITER_CHECK_LIST
@@ -9155,136 +8784,11 @@
             break;
         }
 
-        case _ITER_JUMP_LIST____ITER_NEXT_LIST: {
-            // _ITER_JUMP_LIST
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(0);
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyListIterObject *it = (_PyListIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyListIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                PyListObject *seq = it->it_seq;
-                if (seq == NULL || (size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
-                    it->it_index = -1;
-                    #ifndef Py_GIL_DISABLED
-                    if (seq != NULL) {
-                        it->it_seq = NULL;
-                        Py_DECREF(seq);
-                    }
-                    #endif
-                    PyStackRef_CLOSE(iter);
-                    STACK_SHRINK(1);
-                    /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            // _ITER_NEXT_LIST
-            {
-                _PyStackRef iter;
-                _PyStackRef next;
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyListIterObject *it = (_PyListIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyListIter_Type);
-                PyListObject *seq = it->it_seq;
-                assert(seq);
-                assert(it->it_index < PyList_GET_SIZE(seq));
-                next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
-                stack_pointer[0] = next;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _ITER_JUMP_LIST____ITER_NEXT_LIST is not a viable micro-op for tier 2 because it is replaced */
 
-        case _ITER_CHECK_TUPLE____ITER_JUMP_TUPLE____ITER_NEXT_TUPLE: {
-            // _ITER_CHECK_TUPLE
-            {
-                _PyStackRef iter;
-                iter = stack_pointer[-1];
-                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _ITER_JUMP_TUPLE
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                PyTupleObject *seq = it->it_seq;
-                if (seq == NULL || it->it_index >= PyTuple_GET_SIZE(seq)) {
-                    if (seq != NULL) {
-                        it->it_seq = NULL;
-                        Py_DECREF(seq);
-                    }
-                    PyStackRef_CLOSE(iter);
-                    STACK_SHRINK(1);
-                    /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            // _ITER_NEXT_TUPLE
-            {
-                _PyStackRef iter;
-                _PyStackRef next;
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
-                PyTupleObject *seq = it->it_seq;
-                assert(seq);
-                assert(it->it_index < PyTuple_GET_SIZE(seq));
-                next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-                stack_pointer[0] = next;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _ITER_CHECK_TUPLE____ITER_JUMP_TUPLE____ITER_NEXT_TUPLE is not a viable micro-op for tier 2 because it is replaced */
 
-        case _ITER_CHECK_TUPLE____ITER_JUMP_TUPLE: {
-            // _ITER_CHECK_TUPLE
-            {
-                _PyStackRef iter;
-                iter = stack_pointer[-1];
-                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _ITER_JUMP_TUPLE
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                PyTupleObject *seq = it->it_seq;
-                if (seq == NULL || it->it_index >= PyTuple_GET_SIZE(seq)) {
-                    if (seq != NULL) {
-                        it->it_seq = NULL;
-                        Py_DECREF(seq);
-                    }
-                    PyStackRef_CLOSE(iter);
-                    STACK_SHRINK(1);
-                    /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            break;
-        }
+        /* _ITER_CHECK_TUPLE____ITER_JUMP_TUPLE is not a viable micro-op for tier 2 because it is replaced */
 
         case _ITER_CHECK_TUPLE____ITER_NEXT_TUPLE: {
             // _ITER_CHECK_TUPLE
@@ -9315,125 +8819,11 @@
             break;
         }
 
-        case _ITER_JUMP_TUPLE____ITER_NEXT_TUPLE: {
-            // _ITER_JUMP_TUPLE
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(0);
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                PyTupleObject *seq = it->it_seq;
-                if (seq == NULL || it->it_index >= PyTuple_GET_SIZE(seq)) {
-                    if (seq != NULL) {
-                        it->it_seq = NULL;
-                        Py_DECREF(seq);
-                    }
-                    PyStackRef_CLOSE(iter);
-                    STACK_SHRINK(1);
-                    /* Jump forward oparg, then skip following END_FOR and POP_TOP instructions */
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            // _ITER_NEXT_TUPLE
-            {
-                _PyStackRef iter;
-                _PyStackRef next;
-                iter = stack_pointer[-1];
-                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
-                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
-                PyTupleObject *seq = it->it_seq;
-                assert(seq);
-                assert(it->it_index < PyTuple_GET_SIZE(seq));
-                next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-                stack_pointer[0] = next;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _ITER_JUMP_TUPLE____ITER_NEXT_TUPLE is not a viable micro-op for tier 2 because it is replaced */
 
-        case _ITER_CHECK_RANGE____ITER_JUMP_RANGE____ITER_NEXT_RANGE: {
-            // _ITER_CHECK_RANGE
-            {
-                _PyStackRef iter;
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                if (Py_TYPE(r) != &PyRangeIter_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _ITER_JUMP_RANGE
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                assert(Py_TYPE(r) == &PyRangeIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                if (r->len <= 0) {
-                    STACK_SHRINK(1);
-                    PyStackRef_CLOSE(iter);
-                    // Jump over END_FOR and POP_TOP instructions.
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            // _ITER_NEXT_RANGE
-            {
-                _PyStackRef iter;
-                _PyStackRef next;
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                assert(Py_TYPE(r) == &PyRangeIter_Type);
-                assert(r->len > 0);
-                long value = r->start;
-                r->start = value + r->step;
-                r->len--;
-                PyObject *res = PyLong_FromLong(value);
-                if (res == NULL) JUMP_TO_ERROR(2);
-                next = PyStackRef_FromPyObjectSteal(res);
-                stack_pointer[0] = next;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _ITER_CHECK_RANGE____ITER_JUMP_RANGE____ITER_NEXT_RANGE is not a viable micro-op for tier 2 because it is replaced */
 
-        case _ITER_CHECK_RANGE____ITER_JUMP_RANGE: {
-            // _ITER_CHECK_RANGE
-            {
-                _PyStackRef iter;
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                if (Py_TYPE(r) != &PyRangeIter_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _ITER_JUMP_RANGE
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                assert(Py_TYPE(r) == &PyRangeIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                if (r->len <= 0) {
-                    STACK_SHRINK(1);
-                    PyStackRef_CLOSE(iter);
-                    // Jump over END_FOR and POP_TOP instructions.
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            break;
-        }
+        /* _ITER_CHECK_RANGE____ITER_JUMP_RANGE is not a viable micro-op for tier 2 because it is replaced */
 
         case _ITER_CHECK_RANGE____ITER_NEXT_RANGE: {
             // _ITER_CHECK_RANGE
@@ -9467,43 +8857,7 @@
             break;
         }
 
-        case _ITER_JUMP_RANGE____ITER_NEXT_RANGE: {
-            // _ITER_JUMP_RANGE
-            {
-                _PyStackRef iter;
-                oparg = CURRENT_OPARG(0);
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                assert(Py_TYPE(r) == &PyRangeIter_Type);
-                STAT_INC(FOR_ITER, hit);
-                if (r->len <= 0) {
-                    STACK_SHRINK(1);
-                    PyStackRef_CLOSE(iter);
-                    // Jump over END_FOR and POP_TOP instructions.
-                    JUMPBY(oparg + 2);
-                    DISPATCH();
-                }
-            }
-            // _ITER_NEXT_RANGE
-            {
-                _PyStackRef iter;
-                _PyStackRef next;
-                iter = stack_pointer[-1];
-                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-                assert(Py_TYPE(r) == &PyRangeIter_Type);
-                assert(r->len > 0);
-                long value = r->start;
-                r->start = value + r->step;
-                r->len--;
-                PyObject *res = PyLong_FromLong(value);
-                if (res == NULL) JUMP_TO_ERROR(1);
-                next = PyStackRef_FromPyObjectSteal(res);
-                stack_pointer[0] = next;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            break;
-        }
+        /* _ITER_JUMP_RANGE____ITER_NEXT_RANGE is not a viable micro-op for tier 2 because it is replaced */
 
         case _CHECK_PEP_523____FOR_ITER_GEN_FRAME____PUSH_FRAME: {
             // _CHECK_PEP_523

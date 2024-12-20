@@ -262,6 +262,31 @@ def generate_tier2(
         out.emit("\n\n")
     # Create super uops.
     for sup_name, super_uop in analysis.super_uops.items():
+        not_viable = False
+        for uop in super_uop:
+            if not_viable:
+                break
+            if uop.properties.tier == 1:
+                not_viable = True
+                break
+            if uop.properties.oparg_and_1:
+                out.emit(f"/* {uop.name} is split on (oparg & 1) */\n\n")
+                not_viable = True
+                break
+            if uop.is_super():
+                not_viable = True
+                break
+            why_not_viable = uop.why_not_viable()
+            if why_not_viable is not None:
+                out.emit(
+                    f"/* {sup_name} is not a viable micro-op for tier 2 because it {why_not_viable} */\n\n"
+                )
+                not_viable = True
+                break
+
+        if not_viable:
+            continue
+
         out.emit(f"case {sup_name}: {{\n")
         for idx, uop in enumerate(super_uop):
             out.emit(f"// {uop.name}\n")
