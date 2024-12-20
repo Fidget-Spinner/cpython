@@ -41,10 +41,12 @@ def _dump_footer(
 
 
 def _dump_stencil(opname: str, group: _stencils.StencilGroup) -> typing.Iterator[str]:
+    constituent_uops = opname.split("___")
+    constituent_insts = ', '.join([f"const _PyUOpInstruction *instruction{i}" for i in range(len(constituent_uops))])
     yield "void"
     yield f"emit_{opname}("
     yield "    unsigned char *code, unsigned char *data, _PyExecutorObject *executor,"
-    yield "    const _PyUOpInstruction *instruction, jit_state *state)"
+    yield f"    {constituent_insts}, jit_state *state)"
     yield "{"
     for part, stencil in [("code", group.code), ("data", group.data)]:
         for line in stencil.disassembly:

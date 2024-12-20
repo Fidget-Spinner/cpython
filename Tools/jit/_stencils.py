@@ -27,24 +27,84 @@ class HoleValue(enum.Enum):
     # Shouldn't be present in the final stencils, since these are all replaced with
     # equivalent DATA values:
     GOT = enum.auto()
-    # The current uop's oparg (exposed as _JIT_OPARG):
-    OPARG = enum.auto()
+    # The current uop's oparg (exposed as _JIT_OPARG{N}):
+    OPARG0 = enum.auto()
+    OPARG1 = enum.auto()
+    OPARG2 = enum.auto()
+    OPARG3 = enum.auto()
+    OPARG4 = enum.auto()
+    OPARG5 = enum.auto()
+    OPARG6 = enum.auto()
+    OPARG7 = enum.auto()
+    OPARG8 = enum.auto()
+
     # The current uop's operand0 on 64-bit platforms (exposed as _JIT_OPERAND0):
-    OPERAND0 = enum.auto()
+    OPERAND0_0 = enum.auto()
+    OPERAND0_1 = enum.auto()
+    OPERAND0_2 = enum.auto()
+    OPERAND0_3 = enum.auto()
+    OPERAND0_4 = enum.auto()
+    OPERAND0_5 = enum.auto()
+    OPERAND0_6 = enum.auto()
+    OPERAND0_7 = enum.auto()
+    OPERAND0_8 = enum.auto()
+
+    # The current uop's operand1 on 64-bit platforms (exposed as _JIT_OPERAND1):
+    OPERAND1_0 = enum.auto()
+    OPERAND1_1 = enum.auto()
+    OPERAND1_2 = enum.auto()
+    OPERAND1_3 = enum.auto()
+    OPERAND1_4 = enum.auto()
+    OPERAND1_5 = enum.auto()
+    OPERAND1_6 = enum.auto()
+    OPERAND1_7 = enum.auto()
+    OPERAND1_8 = enum.auto()
+
     # The current uop's operand0 on 32-bit platforms (exposed as _JIT_OPERAND0_HI/LO):
     OPERAND0_HI = enum.auto()
     OPERAND0_LO = enum.auto()
-    # The current uop's operand1 on 64-bit platforms (exposed as _JIT_OPERAND1):
-    OPERAND1 = enum.auto()
     # The current uop's operand1 on 32-bit platforms (exposed as _JIT_OPERAND1_HI/LO):
     OPERAND1_HI = enum.auto()
     OPERAND1_LO = enum.auto()
     # The current uop's target (exposed as _JIT_TARGET):
-    TARGET = enum.auto()
+    TARGET0 = enum.auto()
     # The base address of the machine code for the jump target (exposed as _JIT_JUMP_TARGET):
-    JUMP_TARGET = enum.auto()
+    JUMP_TARGET0 = enum.auto()
     # The base address of the machine code for the error jump target (exposed as _JIT_ERROR_TARGET):
-    ERROR_TARGET = enum.auto()
+    ERROR_TARGET0 = enum.auto()
+
+    TARGET1 = enum.auto()
+    JUMP_TARGET1 = enum.auto()
+    ERROR_TARGET1 = enum.auto()
+
+    TARGET2 = enum.auto()
+    JUMP_TARGET2 = enum.auto()
+    ERROR_TARGET2 = enum.auto()
+
+    TARGET3 = enum.auto()
+    JUMP_TARGET3 = enum.auto()
+    ERROR_TARGET3 = enum.auto()
+
+    TARGET4 = enum.auto()
+    JUMP_TARGET4 = enum.auto()
+    ERROR_TARGET4 = enum.auto()
+
+    TARGET5 = enum.auto()
+    JUMP_TARGET5 = enum.auto()
+    ERROR_TARGET5 = enum.auto()
+
+    TARGET6 = enum.auto()
+    JUMP_TARGET6 = enum.auto()
+    ERROR_TARGET6 = enum.auto()
+
+    TARGET7 = enum.auto()
+    JUMP_TARGET7 = enum.auto()
+    ERROR_TARGET7 = enum.auto()
+
+    TARGET8 = enum.auto()
+    JUMP_TARGET8 = enum.auto()
+    ERROR_TARGET8 = enum.auto()
+
     # A hardcoded value of zero (used for symbol lookups):
     ZERO = enum.auto()
 
@@ -103,16 +163,83 @@ _HOLE_EXPRS = {
     HoleValue.EXECUTOR: "(uintptr_t)executor",
     # These should all have been turned into DATA values by process_relocations:
     # HoleValue.GOT: "",
-    HoleValue.OPARG: "instruction->oparg",
-    HoleValue.OPERAND0: "instruction->operand0",
+    HoleValue.OPARG0: "instruction0->oparg",
+    HoleValue.OPERAND0_0: "instruction0->operand0",
+    HoleValue.OPERAND1_0: "instruction0->operand1",
+
+    HoleValue.OPARG1: "instruction1->oparg",
+    HoleValue.OPERAND0_1: "instruction1->operand0",
+    HoleValue.OPERAND1_1: "instruction1->operand1",
+
+    HoleValue.OPARG2: "instruction2->oparg",
+    HoleValue.OPERAND0_2: "instruction2->operand0",
+    HoleValue.OPERAND1_2: "instruction2->operand1",
+
+    HoleValue.OPARG3: "instruction3->oparg",
+    HoleValue.OPERAND0_3: "instruction3->operand0",
+    HoleValue.OPERAND1_3: "instruction3->operand1",
+
+    HoleValue.OPARG4: "instruction4->oparg",
+    HoleValue.OPERAND0_4: "instruction4->operand0",
+    HoleValue.OPERAND1_4: "instruction4->operand1",
+
+    HoleValue.OPARG5: "instruction5->oparg",
+    HoleValue.OPERAND0_5: "instruction5->operand0",
+    HoleValue.OPERAND1_5: "instruction5->operand1",
+
+    HoleValue.OPARG6: "instruction6->oparg",
+    HoleValue.OPERAND0_6: "instruction6->operand0",
+    HoleValue.OPERAND1_6: "instruction6->operand1",
+
+    HoleValue.OPARG7: "instruction7->oparg",
+    HoleValue.OPERAND0_7: "instruction7->operand0",
+    HoleValue.OPERAND1_7: "instruction7->operand1",
+
+    HoleValue.OPARG8: "instruction8->oparg",
+    HoleValue.OPERAND0_8: "instruction8->operand0",
+    HoleValue.OPERAND1_8: "instruction8->operand1",
+
     HoleValue.OPERAND0_HI: "(instruction->operand0 >> 32)",
     HoleValue.OPERAND0_LO: "(instruction->operand0 & UINT32_MAX)",
-    HoleValue.OPERAND1: "instruction->operand1",
     HoleValue.OPERAND1_HI: "(instruction->operand1 >> 32)",
     HoleValue.OPERAND1_LO: "(instruction->operand1 & UINT32_MAX)",
-    HoleValue.TARGET: "instruction->target",
-    HoleValue.JUMP_TARGET: "state->instruction_starts[instruction->jump_target]",
-    HoleValue.ERROR_TARGET: "state->instruction_starts[instruction->error_target]",
+
+    HoleValue.TARGET0: "instruction0->target",
+    HoleValue.JUMP_TARGET0: "state->instruction_starts[instruction0->jump_target]",
+    HoleValue.ERROR_TARGET0: "state->instruction_starts[instruction0->error_target]",
+
+    HoleValue.TARGET1: "instruction1->target",
+    HoleValue.JUMP_TARGET1: "state->instruction_starts[instruction1->jump_target]",
+    HoleValue.ERROR_TARGET1: "state->instruction_starts[instruction1->error_target]",
+
+    HoleValue.TARGET2: "instruction2->target",
+    HoleValue.JUMP_TARGET2: "state->instruction_starts[instruction2->jump_target]",
+    HoleValue.ERROR_TARGET2: "state->instruction_starts[instruction2->error_target]",
+
+    HoleValue.TARGET3: "instruction3->target",
+    HoleValue.JUMP_TARGET3: "state->instruction_starts[instruction3->jump_target]",
+    HoleValue.ERROR_TARGET3: "state->instruction_starts[instruction3->error_target]",
+
+    HoleValue.TARGET4: "instruction4->target",
+    HoleValue.JUMP_TARGET4: "state->instruction_starts[instruction4->jump_target]",
+    HoleValue.ERROR_TARGET4: "state->instruction_starts[instruction4->error_target]",
+
+    HoleValue.TARGET5: "instruction5->target",
+    HoleValue.JUMP_TARGET5: "state->instruction_starts[instruction5->jump_target]",
+    HoleValue.ERROR_TARGET5: "state->instruction_starts[instruction5->error_target]",
+
+    HoleValue.TARGET6: "instruction6->target",
+    HoleValue.JUMP_TARGET6: "state->instruction_starts[instruction6->jump_target]",
+    HoleValue.ERROR_TARGET6: "state->instruction_starts[instruction6->error_target]",
+
+    HoleValue.TARGET7: "instruction7->target",
+    HoleValue.JUMP_TARGET7: "state->instruction_starts[instruction7->jump_target]",
+    HoleValue.ERROR_TARGET7: "state->instruction_starts[instruction7->error_target]",
+
+    HoleValue.TARGET8: "instruction8->target",
+    HoleValue.JUMP_TARGET8: "state->instruction_starts[instruction8->jump_target]",
+    HoleValue.ERROR_TARGET8: "state->instruction_starts[instruction8->error_target]",
+
     HoleValue.ZERO: "",
 }
 

@@ -4872,7 +4872,7 @@ dummy_func(
         }
 
         op(_JUMP_TO_TOP, (--)) {
-            JUMP_TO_JUMP_TARGET();
+            JUMP_TO_JUMP_TARGET(0);
         }
 
         tier2 op(_SET_IP, (instr_ptr/4 --)) {

@@ -87,7 +87,7 @@ class Tier2Emitter(Emitter):
         label = next(tkn_iter).text
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
-        self.emit(") JUMP_TO_ERROR();\n")
+        self.emit(") JUMP_TO_ERROR(0);\n")
         return not always_true(first_tkn)
 
 
@@ -102,7 +102,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # LPAREN
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
-        self.out.emit_at("JUMP_TO_ERROR();", tkn)
+        self.out.emit_at("JUMP_TO_ERROR(0);", tkn)
         return False
 
     def deopt_if(
@@ -122,7 +122,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
-        self.emit("JUMP_TO_JUMP_TARGET();\n")
+        self.emit("JUMP_TO_JUMP_TARGET(0);\n")
         self.emit("}\n")
         return not always_true(first_tkn)
 
@@ -142,7 +142,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
-        self.emit("JUMP_TO_JUMP_TARGET();\n")
+        self.emit("JUMP_TO_JUMP_TARGET(0);\n")
         self.emit("}\n")
         return not always_true(first_tkn)
 
