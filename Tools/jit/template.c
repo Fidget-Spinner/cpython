@@ -96,7 +96,8 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
-    int super_uopcodes[] = _JIT_OPCODES;
+    int opcode = _JIT_OPCODE;
+    int oparg;
     _Py_CODEUNIT *next_instr;
 
     // Other stuff we need handy:
@@ -186,28 +187,23 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
 
     OPT_STAT_INC(uops_executed);
 
-    for (int _JIT_I = 0; _JIT_I < sizeof(super_uopcodes) / sizeof(int); _JIT_I++) {
-        int opcode = super_uopcodes[_JIT_I];
-        int oparg = super_opargs[_JIT_I];
-        UOP_STAT_INC(opcode, execution_count);
-        switch (opcode) {
-            // The actual instruction definition gets inserted here:
-            CASE
-            default:
-                Py_UNREACHABLE();
-        }
+    UOP_STAT_INC(opcode, execution_count);
+    switch (opcode) {
+        // The actual instruction definition gets inserted here:
+        CASE
+        default:
+            Py_UNREACHABLE();
+    }
 
-        int _target = super_targets[_JIT_I];
     error_tier_two:
         tstate->previous_executor = (PyObject *)current_executor;
         GOTO_TIER_ONE(NULL);
     exit_to_tier1:
         tstate->previous_executor = (PyObject *)current_executor;
-        GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target);
+        GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target0);
     exit_to_tier1_dynamic:
         tstate->previous_executor = (PyObject *)current_executor;
         GOTO_TIER_ONE(frame->instr_ptr);
-    }
     PATCH_JUMP(_JIT_CONTINUE);
     // Labels that the instruction implementations expect to exist:
 

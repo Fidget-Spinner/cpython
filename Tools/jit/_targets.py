@@ -105,12 +105,11 @@ class _Target(typing.Generic[_S, _R]):
         self, opname: str, c: pathlib.Path, tempdir: pathlib.Path
     ) -> _stencils.StencilGroup:
         o = tempdir / f"{opname}.o"
-        super_constituents = ', '.join(opname.split("___"))
         args = [
             f"--target={self.triple}",
             "-DPy_BUILD_CORE_MODULE",
             "-D_DEBUG" if self.debug else "-DNDEBUG",
-            f"-D_JIT_OPCODES={{ {super_constituents} }}",
+            f"-D_JIT_OPCODE={opname}",
             "-D_PyJIT_ACTIVE",
             "-D_Py_JIT",
             "-I.",
