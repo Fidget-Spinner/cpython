@@ -1293,30 +1293,30 @@ uop_optimize(
     length = prepare_for_execution(buffer, length);
     assert(length <= UOP_MAX_TRACE_LENGTH);
     // Replace with supers.
-//    for (int pc = 0; pc < length;) {
-//        if (is_terminator(&buffer[pc])) {
-//            break;
-//        }
-//        int skip_next_insts_by = 1;
-//        int maybe_super = _PyUOp_superuop_matcher(&buffer[pc], &skip_next_insts_by);
-//        if (maybe_super != -1) {
-//            assert(maybe_super > 0);
-//            assert(skip_next_insts_by >= 2);
-//            buffer[pc].opcode = maybe_super;
-//            for (int i = 1; i < skip_next_insts_by; i++) {
-////                if (buffer[pc + i].opcode & HAS_ERROR_FLAG) {
-////                    error_target = buffer[pc + i].error_target;
-////                }
-//                buffer[pc + i].opcode = _PART_OF_A_SUPER;
-////                if (buffer[pc + i].format & UOP_FORMAT_JUMP) {
-////                    jump_target = buffer[pc + i].jump_target;
-////                }
-//            }
-//        }
-//        pc += skip_next_insts_by;
-//        assert(_PyOpcode_uop_name[buffer[pc].opcode]);
-//        assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[buffer[pc].opcode], strlen(_PyOpcode_uop_name[buffer[pc].opcode])) == 0);
-//    }
+    for (int pc = 0; pc < length;) {
+        if (is_terminator(&buffer[pc])) {
+            break;
+        }
+        int skip_next_insts_by = 1;
+        int maybe_super = _PyUOp_superuop_matcher(&buffer[pc], &skip_next_insts_by);
+        if (maybe_super != -1) {
+            assert(maybe_super > 0);
+            assert(skip_next_insts_by >= 2);
+            buffer[pc].opcode = maybe_super;
+            for (int i = 1; i < skip_next_insts_by; i++) {
+//                if (buffer[pc + i].opcode & HAS_ERROR_FLAG) {
+//                    error_target = buffer[pc + i].error_target;
+//                }
+                buffer[pc + i].opcode = _PART_OF_A_SUPER;
+//                if (buffer[pc + i].format & UOP_FORMAT_JUMP) {
+//                    jump_target = buffer[pc + i].jump_target;
+//                }
+            }
+        }
+        pc += skip_next_insts_by;
+        assert(_PyOpcode_uop_name[buffer[pc].opcode]);
+        assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[buffer[pc].opcode], strlen(_PyOpcode_uop_name[buffer[pc].opcode])) == 0);
+    }
     _PyExecutorObject *executor = make_executor_from_uops(buffer, length,  &dependencies);
     if (executor == NULL) {
         return -1;

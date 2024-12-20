@@ -195,16 +195,15 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
             Py_UNREACHABLE();
     }
 
-    error_tier_two:
-        tstate->previous_executor = (PyObject *)current_executor;
-        GOTO_TIER_ONE(NULL);
-    exit_to_tier1:
-        tstate->previous_executor = (PyObject *)current_executor;
-        GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target0);
-    exit_to_tier1_dynamic:
-        tstate->previous_executor = (PyObject *)current_executor;
-        GOTO_TIER_ONE(frame->instr_ptr);
     PATCH_JUMP(_JIT_CONTINUE);
     // Labels that the instruction implementations expect to exist:
-
+error_tier_two:
+    tstate->previous_executor = (PyObject *)current_executor;
+    GOTO_TIER_ONE(NULL);
+exit_to_tier1:
+    tstate->previous_executor = (PyObject *)current_executor;
+    GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target0);
+exit_to_tier1_dynamic:
+    tstate->previous_executor = (PyObject *)current_executor;
+    GOTO_TIER_ONE(frame->instr_ptr);
 }
