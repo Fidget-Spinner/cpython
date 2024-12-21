@@ -305,12 +305,12 @@ def declare_variables_tier2(uop: Uop, out: CWriter) -> None:
 def tier2_not_viable(inst: Instruction) -> str:
     if inst.properties.needs_prev:
         return "/* Not viable for tier 2 (needs prev_instr) */\n"
-    if inst.properties.needs_this:
-        return f"/* Not viable for tier 2 (needs this_instr) */\n"
     for part in inst.parts:
         if isinstance(part, Uop):
             if len(part.caches) > 2:
                 return f"/* Not viable for tier 2 (more than 2 cache entries) */\n"
+            if part.properties.needs_this and not "specializing" in part.annotations:
+                return f"/* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */\n"
     return ""
 
 
@@ -336,6 +336,7 @@ def generate_tier2(
         is_not_viable = tier2_not_viable(inst)
         if is_not_viable:
             out.emit(is_not_viable)
+            out.emit(f'fprintf(stderr, "Executing {inst.name}\\n");\n')
             out.emit(f"Py_UNREACHABLE();\n")
             out.emit("break;\n")
             out.emit("}\n")
@@ -344,14 +345,19 @@ def generate_tier2(
 
         out.emit("#ifndef _Py_JIT\n")
         out.emit(f"frame->instr_ptr = next_instr;\n")
-        out.emit(f"next_instr += {len(inst.parts)};\n")
+        out.emit(f"next_instr += {len([part for part in inst.parts if isinstance(part, Uop) and 'specializing' not in part.annotations])};\n")
         out.emit("#endif\n")
         # out.emit(f"INSTRUCTION_STATS({name});\n")
         declare_variables(inst, out)
         offset = 1  # The instruction itself
         stack = Stack()
-        for idx, part in enumerate(inst.parts):
+        idx = 0
+        for part in inst.parts:
             emitter.index = idx
+            if isinstance(part, Uop) and "specializing" not in part.annotations:
+                idx += 1
+            if isinstance(part, Uop) and "specializing" in part.annotations:
+                continue
             # Only emit braces if more than one uop
             insert_braces = len([p for p in inst.parts if isinstance(p, Uop)]) > 1
             offset, stack = write_uop(part, emitter, offset, stack, inst, insert_braces)

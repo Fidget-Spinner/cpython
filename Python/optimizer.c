@@ -817,7 +817,9 @@ translate_bytecode_to_trace_baseline(
                                 opcode == SEND_GEN)
                             {
                                 DPRINTF(2, "Bailing due to dynamic target\n");
-                                ADD_TO_TRACE(uop, oparg, 0, target);
+                                if (!_PyOpcode_is_viable_for_tier2[opcode]) {
+                                    ADD_TO_TRACE(uop, oparg, 0, target);
+                                }
                                 ADD_TO_TRACE(_DYNAMIC_EXIT, 0, 0, 0);
                                 goto done;
                             }
@@ -840,7 +842,9 @@ translate_bytecode_to_trace_baseline(
                                             PyUnicode_AsUTF8(new_code->co_filename),
                                             new_code->co_firstlineno);
                                     OPT_STAT_INC(recursive_call);
-                                    ADD_TO_TRACE(uop, oparg, 0, target);
+                                    if (!_PyOpcode_is_viable_for_tier2[opcode]) {
+                                        ADD_TO_TRACE(uop, oparg, 0, target);
+                                    }
                                     ADD_TO_TRACE(_EXIT_TRACE, 0, 0, 0);
                                     goto done;
                                 }
@@ -849,7 +853,9 @@ translate_bytecode_to_trace_baseline(
                                     // Perhaps it may happen again, so don't bother tracing.
                                     // TODO: Reason about this -- is it better to bail or not?
                                     DPRINTF(2, "Bailing because co_version != func_version\n");
-                                    ADD_TO_TRACE(uop, oparg, 0, target);
+                                    if (!_PyOpcode_is_viable_for_tier2[opcode]) {
+                                        ADD_TO_TRACE(uop, oparg, 0, target);
+                                    }
                                     ADD_TO_TRACE(_EXIT_TRACE, 0, 0, 0);
                                     goto done;
                                 }
@@ -872,7 +878,9 @@ translate_bytecode_to_trace_baseline(
                                 else {
                                     operand = 0;
                                 }
-                                ADD_TO_TRACE(uop, oparg, operand, target);
+                                if (!_PyOpcode_is_viable_for_tier2[opcode]) {
+                                    ADD_TO_TRACE(uop, oparg, operand, target);
+                                }
                                 code = new_code;
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
@@ -885,7 +893,9 @@ translate_bytecode_to_trace_baseline(
                                 goto top;
                             }
                             DPRINTF(2, "Bail, new_code == NULL\n");
-                            ADD_TO_TRACE(uop, oparg, 0, target);
+                            if (!_PyOpcode_is_viable_for_tier2[opcode]) {
+                                ADD_TO_TRACE(uop, oparg, 0, target);
+                            }
                             ADD_TO_TRACE(_DYNAMIC_EXIT, 0, 0, 0);
                             goto done;
                         }
@@ -899,8 +909,28 @@ translate_bytecode_to_trace_baseline(
                             instr++;
                         }
 
-                        // All other instructions
-                        ADD_TO_TRACE(uop, oparg, operand, target);
+
+                        switch(opcode) {
+                            case FOR_ITER_RANGE:
+                            case FOR_ITER_LIST:
+                            case FOR_ITER_TUPLE:
+                                ADD_TO_TRACE(uop, oparg, operand, target);
+                                break;
+                            default:
+                                // Tier 1 opcode can exist in tier 2
+                                if (_PyOpcode_is_viable_for_tier2[opcode]) {
+                                    if (i == 0) {
+                                        ADD_TO_TRACE(opcode, oparg, operand, target);
+                                    }
+                                    else {
+                                        ADD_TO_TRACE(_PART_OF_A_SUPER, oparg, operand, target);
+                                    }
+                                }
+                                // Fall back to tier 2 representation
+                                else {
+                                    ADD_TO_TRACE(uop, oparg, operand, target);
+                                }
+                        }
                     }
                     break;
                 }

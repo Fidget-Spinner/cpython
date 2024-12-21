@@ -375,6 +375,33 @@ def generate_expansion_table(analysis: Analysis, out: CWriter) -> None:
     out.emit("#endif // NEED_OPCODE_METADATA\n\n")
 
 
+def tier2_not_viable(inst: Instruction) -> str:
+    if inst.properties.needs_prev:
+        return "/* Not viable for tier 2 (needs prev_instr) */\n"
+    for part in inst.parts:
+        if isinstance(part, Uop):
+            if len(part.caches) > 2:
+                return f"/* Not viable for tier 2 (more than 2 cache entries) */\n"
+            if part.properties.needs_this and not "specializing" in part.annotations:
+                return f"/* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */\n"
+    return ""
+
+def generate_is_tier2_able(analysis: Analysis, out: CWriter) -> None:
+    out.emit(
+        "extern const int _PyOpcode_is_viable_for_tier2[256];\n\n"
+    )
+    out.emit("#ifdef NEED_OPCODE_METADATA\n")
+    out.emit("const int\n")
+    out.emit("_PyOpcode_is_viable_for_tier2[256] = {\n")
+    for inst_name, inst in analysis.instructions.items():
+        if tier2_not_viable(inst):
+            out.emit(f"[{inst_name}] = 0,\n")
+        else:
+            out.emit(f"[{inst_name}] = 1,\n")
+    out.emit("};\n")
+    out.emit("#endif // NEED_OPCODE_METADATA\n\n")
+
+
 def is_viable_expansion(inst: Instruction) -> bool:
     "An instruction can be expanded if all its parts are viable for tier 2"
     for part in inst.parts:
@@ -464,7 +491,7 @@ def generate_opcode_metadata(
         generate_deopt_table(analysis, out)
         generate_extra_cases(analysis, out)
         generate_pseudo_targets(analysis, out)
-
+        generate_is_tier2_able(analysis, out)
 
 arg_parser = argparse.ArgumentParser(
     description="Generate the header file with opcode metadata.",

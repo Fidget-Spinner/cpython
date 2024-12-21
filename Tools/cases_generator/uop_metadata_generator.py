@@ -42,6 +42,8 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
 
     out.emit("};\n\n")
     out.emit("const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {\n")
+    for inst in sorted(analysis.instructions.values(), key=lambda t: t.name):
+        out.emit(f'[{inst.name}] = "{inst.name}",\n')
     for uop in sorted(analysis.uops.values(), key=lambda t: t.name):
         if uop.is_viable() and uop.properties.tier != 1:
             out.emit(f'[{uop.name}] = "{uop.name}",\n')
