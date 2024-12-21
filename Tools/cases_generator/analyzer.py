@@ -5,6 +5,8 @@ import parser
 import re
 from typing import Optional
 
+MAX_SUPER_LEN = 7
+
 @dataclass
 class Properties:
     escaping_calls: dict[lexer.Token, tuple[lexer.Token, lexer.Token]]
@@ -1209,7 +1211,7 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
                 super_constituents.append(part)
         if len(super_constituents) == 0:
             continue
-        permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if len(sup) > 1]
+        permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if MAX_SUPER_LEN >= len(sup) > 1]
         for permutation in permutations:
             sup_name = '___'.join([uop.name for uop in permutation])
             super_uops[sup_name] = permutation

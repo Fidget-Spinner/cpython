@@ -35,8 +35,6 @@ class HoleValue(enum.Enum):
     OPARG4 = enum.auto()
     OPARG5 = enum.auto()
     OPARG6 = enum.auto()
-    OPARG7 = enum.auto()
-    OPARG8 = enum.auto()
 
     # The current uop's operand0 on 64-bit platforms (exposed as _JIT_OPERAND0):
     OPERAND0_0 = enum.auto()
@@ -46,8 +44,6 @@ class HoleValue(enum.Enum):
     OPERAND0_4 = enum.auto()
     OPERAND0_5 = enum.auto()
     OPERAND0_6 = enum.auto()
-    OPERAND0_7 = enum.auto()
-    OPERAND0_8 = enum.auto()
 
     # The current uop's operand1 on 64-bit platforms (exposed as _JIT_OPERAND1):
     OPERAND1_0 = enum.auto()
@@ -57,8 +53,6 @@ class HoleValue(enum.Enum):
     OPERAND1_4 = enum.auto()
     OPERAND1_5 = enum.auto()
     OPERAND1_6 = enum.auto()
-    OPERAND1_7 = enum.auto()
-    OPERAND1_8 = enum.auto()
 
     # The current uop's operand0 on 32-bit platforms (exposed as _JIT_OPERAND0_HI/LO):
     OPERAND0_HI = enum.auto()
@@ -96,14 +90,6 @@ class HoleValue(enum.Enum):
     TARGET6 = enum.auto()
     JUMP_TARGET6 = enum.auto()
     ERROR_TARGET6 = enum.auto()
-
-    TARGET7 = enum.auto()
-    JUMP_TARGET7 = enum.auto()
-    ERROR_TARGET7 = enum.auto()
-
-    TARGET8 = enum.auto()
-    JUMP_TARGET8 = enum.auto()
-    ERROR_TARGET8 = enum.auto()
 
     # A hardcoded value of zero (used for symbol lookups):
     ZERO = enum.auto()
@@ -191,14 +177,6 @@ _HOLE_EXPRS = {
     HoleValue.OPERAND0_6: "instruction[6].operand0",
     HoleValue.OPERAND1_6: "instruction[6].operand1",
 
-    HoleValue.OPARG7: "instruction[7].oparg",
-    HoleValue.OPERAND0_7: "instruction[7].operand0",
-    HoleValue.OPERAND1_7: "instruction[7].operand1",
-
-    HoleValue.OPARG8: "instruction[8].oparg",
-    HoleValue.OPERAND0_8: "instruction[8].operand0",
-    HoleValue.OPERAND1_8: "instruction[8].operand1",
-
     HoleValue.OPERAND0_HI: "(instruction->operand0 >> 32)",
     HoleValue.OPERAND0_LO: "(instruction->operand0 & UINT32_MAX)",
     HoleValue.OPERAND1_HI: "(instruction->operand1 >> 32)",
@@ -231,14 +209,6 @@ _HOLE_EXPRS = {
     HoleValue.TARGET6: "instruction[6].target",
     HoleValue.JUMP_TARGET6: "state->instruction_starts[instruction[6].jump_target]",
     HoleValue.ERROR_TARGET6: "state->instruction_starts[instruction[6].error_target]",
-
-    HoleValue.TARGET7: "instruction[7].target",
-    HoleValue.JUMP_TARGET7: "state->instruction_starts[instruction[7].jump_target]",
-    HoleValue.ERROR_TARGET7: "state->instruction_starts[instruction[7].error_target]",
-
-    HoleValue.TARGET8: "instruction[8].target",
-    HoleValue.JUMP_TARGET8: "state->instruction_starts[instruction[8].jump_target]",
-    HoleValue.ERROR_TARGET8: "state->instruction_starts[instruction[8].error_target]",
 
     HoleValue.ZERO: "",
 }
