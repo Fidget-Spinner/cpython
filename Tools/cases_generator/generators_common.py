@@ -16,6 +16,16 @@ from stack import Storage, StackError
 # Set this to true for voluminous output showing state of stack and locals
 PRINT_STACKS = False
 
+OPS_NOT_VIABLE_FOR_TIER2 = {
+    "FOR_ITER_LIST",
+    "FOR_ITER_RANGE",
+    "FOR_ITER_TUPLE",
+    "FOR_ITER_GEN",
+    "EXTENDED_ARG",
+    "INTERPRETER_EXIT",
+    "INSTRUMENTED_CALL_FUNCTION_EX",
+}
+
 class TokenIterator:
 
     look_ahead: Token | None

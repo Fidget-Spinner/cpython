@@ -17,6 +17,7 @@ from analyzer import (
     analysis_error,
 )
 from generators_common import (
+    OPS_NOT_VIABLE_FOR_TIER2,
     DEFAULT_INPUT,
     ROOT,
     emit_to,
@@ -36,14 +37,6 @@ DEFAULT_OUTPUT = ROOT / "Python/executor_cases.c.h"
 
 MAX_UOP_LEN = 9
 
-OPS_NOT_VIABLE_FOR_TIER2 = {
-    "FOR_ITER_LIST",
-    "FOR_ITER_RANGE",
-    "FOR_ITER_TUPLE",
-    "EXTENDED_ARG",
-    "INTERPRETER_EXIT",
-    "INSTRUMENTED_CALL_FUNCTION_EX",
-}
 
 def declare_variable(var: StackItem, out: CWriter) -> None:
     type, null = type_and_null(var)

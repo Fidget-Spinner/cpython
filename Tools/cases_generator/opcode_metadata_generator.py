@@ -13,6 +13,7 @@ from analyzer import (
     Uop,
 )
 from generators_common import (
+    OPS_NOT_VIABLE_FOR_TIER2,
     DEFAULT_INPUT,
     ROOT,
     write_header,
@@ -376,6 +377,8 @@ def generate_expansion_table(analysis: Analysis, out: CWriter) -> None:
 
 
 def tier2_not_viable(inst: Instruction) -> str:
+    if inst.name in OPS_NOT_VIABLE_FOR_TIER2:
+        return "Bad"
     if inst.properties.needs_prev:
         return "/* Not viable for tier 2 (needs prev_instr) */\n"
     for part in inst.parts:

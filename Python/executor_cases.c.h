@@ -3383,57 +3383,9 @@
         }
 
         case FOR_ITER_GEN: {
-            _PyStackRef iter;
-            _PyInterpreterFrame *gen_frame;
-            _PyInterpreterFrame *new_frame;
-            /* Skip 1 cache entry */
-            // _CHECK_PEP_523
-            {
-                if (tstate->interp->eval_frame) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(0);
-                }
-            }
-            // _FOR_ITER_GEN_FRAME
-            {
-                oparg = CURRENT_OPARG(1);
-                iter = stack_pointer[-1];
-                PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
-                if (Py_TYPE(gen) != &PyGen_Type) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-                if (gen->gi_frame_state >= FRAME_EXECUTING) {
-                    UOP_STAT_INC(uopcode, miss);
-                    JUMP_TO_JUMP_TARGET(1);
-                }
-                STAT_INC(FOR_ITER, hit);
-                gen_frame = &gen->gi_iframe;
-                _PyFrame_StackPush(gen_frame, PyStackRef_None);
-                gen->gi_frame_state = FRAME_EXECUTING;
-                gen->gi_exc_state.previous_item = tstate->exc_info;
-                tstate->exc_info = &gen->gi_exc_state;
-                gen_frame->previous = frame;
-                // oparg is the return offset from the next instruction.
-                frame->return_offset = (uint16_t)( 2 + oparg);
-            }
-            // _PUSH_FRAME
-            {
-                oparg = CURRENT_OPARG(2);
-                new_frame = gen_frame;
-                // Write it out explicitly because it's subtly different.
-                // Eventually this should be the only occurrence of this code.
-                assert(tstate->interp->eval_frame == NULL);
-                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
-                _PyFrame_SetStackPointer(frame, stack_pointer);
-                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
-                CALL_STAT_INC(inlined_py_calls);
-                frame = tstate->current_frame = temp;
-                tstate->py_recursion_remaining--;
-                LOAD_SP();
-                LOAD_IP(0);
-                LLTRACE_RESUME_FRAME();
-            }
+            /* Not viable for tier 2 (manual) */
+            fprintf(stderr, "Executing FOR_ITER_GEN\n");
+            Py_UNREACHABLE();
             break;
         }
 
