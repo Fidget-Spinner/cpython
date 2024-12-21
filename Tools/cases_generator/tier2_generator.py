@@ -245,6 +245,62 @@ def write_uop(
 
 SKIPS = ("_EXTENDED_ARG",)
 
+def write_uop_tier2(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
+    locals: dict[str, Local] = {}
+    try:
+        emitter.out.start_line()
+        if uop.properties.oparg:
+            emitter.emit("oparg = CURRENT_OPARG();\n")
+            assert uop.properties.const_oparg < 0
+        elif uop.properties.const_oparg >= 0:
+            emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
+            emitter.emit(f"assert(oparg == CURRENT_OPARG());\n")
+        code_list, storage = Storage.for_uop(stack, uop)
+        for code in code_list:
+            emitter.emit(code)
+        for idx, cache in enumerate(uop.caches):
+            if cache.name != "unused":
+                if cache.size == 4:
+                    type = cast = "PyObject *"
+                else:
+                    type = f"uint{cache.size*16}_t "
+                    cast = f"uint{cache.size*16}_t"
+                emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}();\n")
+        storage = emitter.emit_tokens(uop, storage, None)
+    except StackError as ex:
+        raise analysis_error(ex.args[0], uop.body[0]) from None
+    return storage.stack
+
+def declare_variable_tier2(
+    var: StackItem, uop: Uop, required: set[str], out: CWriter
+) -> None:
+    if not var.used or var.name not in required:
+        return
+    required.remove(var.name)
+    type, null = type_and_null(var)
+    space = " " if type[-1].isalnum() else ""
+    if var.condition:
+        out.emit(f"{type}{space}{var.name} = {null};\n")
+        if uop.replicates:
+            # Replicas may not use all their conditional variables
+            # So avoid a compiler warning with a fake use
+            out.emit(f"(void){var.name};\n")
+    else:
+        out.emit(f"{type}{space}{var.name};\n")
+
+
+def declare_variables_tier2(uop: Uop, out: CWriter) -> None:
+    stack = Stack()
+    for var in reversed(uop.stack.inputs):
+        stack.pop(var)
+    for var in uop.stack.outputs:
+        stack.push(Local.undefined(var))
+    required = set(stack.defined)
+    required.discard("unused")
+    for var in reversed(uop.stack.inputs):
+        declare_variable_tier2(var, uop, required, out)
+    for var in uop.stack.outputs:
+        declare_variable_tier2(var, uop, required, out)
 
 def tier2_not_viable(inst: Instruction) -> str:
     if inst.properties.needs_prev:
@@ -285,9 +341,11 @@ def generate_tier2(
             out.emit("}\n")
             out.start_line()
             continue
-        else:
-            out.emit(f"frame->instr_ptr = next_instr;\n")
+
+        out.emit("#ifndef _Py_JIT\n")
+        out.emit(f"frame->instr_ptr = next_instr;\n")
         out.emit(f"next_instr += {len(inst.parts)};\n")
+        out.emit("#endif\n")
         # out.emit(f"INSTRUCTION_STATS({name});\n")
         declare_variables(inst, out)
         offset = 1  # The instruction itself
@@ -305,6 +363,41 @@ def generate_tier2(
         out.start_line()
         out.emit("}")
         out.emit("\n")
+
+
+    # Generate normal uops
+
+    for name, uop in analysis.uops.items():
+        if uop.properties.tier == 1:
+            continue
+        if uop.implicitly_created:
+            continue
+        if uop.properties.oparg_and_1:
+            out.emit(f"/* {uop.name} is split on (oparg & 1) */\n\n")
+            continue
+        if uop.is_super():
+            continue
+        why_not_viable = uop.why_not_viable()
+        if why_not_viable is not None:
+            out.emit(
+                f"/* {uop.name} is not a viable micro-op for tier 2 because it {why_not_viable} */\n\n"
+            )
+            continue
+        out.emit(f"case {uop.name}: {{\n")
+        out.emit("#ifndef _Py_JIT\n")
+        out.emit(f"frame->instr_ptr = next_instr;\n")
+        out.emit(f"next_instr += {1};\n")
+        out.emit("#endif\n")
+        declare_variables_tier2(uop, out)
+        stack = Stack()
+        stack = write_uop_tier2(uop, emitter, stack)
+        out.start_line()
+        if not uop.properties.always_exits:
+            stack.flush(out)
+            out.emit("break;\n")
+        out.start_line()
+        out.emit("}")
+        out.emit("\n\n")
     outfile.write("#undef TIER_TWO\n")
 
 
