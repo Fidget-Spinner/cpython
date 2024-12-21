@@ -99,6 +99,7 @@ def traverse_and_write_trie(out: CWriter, trie: Trie, depth: int) -> None:
             assert isinstance(values, dict)
             out.emit(f"case {prefix}: {{\n")
             traverse_and_write_trie(out, values, depth+1)
+            out.emit(f"break;\n")
             out.emit("}\n")
     out.emit("}\n")
 

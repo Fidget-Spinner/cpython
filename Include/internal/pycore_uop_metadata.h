@@ -570,15 +570,22 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_UNPACK_SEQUENCE_TWO_TUPLE] = "_UNPACK_SEQUENCE_TWO_TUPLE",
     [_WITH_EXCEPT_START] = "_WITH_EXCEPT_START",
     [_YIELD_VALUE] = "_YIELD_VALUE",
+    [_BINARY_OP_ADD_INT____SET_IP] = "_BINARY_OP_ADD_INT____SET_IP",
+    [_BINARY_OP_ADD_INT____STORE_FAST_1] = "_BINARY_OP_ADD_INT____STORE_FAST_1",
+    [_BINARY_OP_SUBTRACT_INT____GUARD_NOS_INT] = "_BINARY_OP_SUBTRACT_INT____GUARD_NOS_INT",
+    [_BINARY_OP____CHECK_VALIDITY] = "_BINARY_OP____CHECK_VALIDITY",
     [_BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL] = "_BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL",
     [_BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME] = "_BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME",
     [_BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME] = "_BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME",
     [_BINARY_SUBSCR_INIT_CALL____PUSH_FRAME] = "_BINARY_SUBSCR_INIT_CALL____PUSH_FRAME",
+    [_BINARY_SUBSCR_STR_INT____STORE_FAST_7] = "_BINARY_SUBSCR_STR_INT____STORE_FAST_7",
+    [_BINARY_SUBSCR____CHECK_VALIDITY] = "_BINARY_SUBSCR____CHECK_VALIDITY",
     [_CALL_BUILTIN_CLASS____CHECK_PERIODIC] = "_CALL_BUILTIN_CLASS____CHECK_PERIODIC",
     [_CALL_BUILTIN_FAST_WITH_KEYWORDS____CHECK_PERIODIC] = "_CALL_BUILTIN_FAST_WITH_KEYWORDS____CHECK_PERIODIC",
     [_CALL_BUILTIN_FAST____CHECK_PERIODIC] = "_CALL_BUILTIN_FAST____CHECK_PERIODIC",
     [_CALL_BUILTIN_O____CHECK_PERIODIC] = "_CALL_BUILTIN_O____CHECK_PERIODIC",
     [_CALL_KW_NON_PY____CHECK_PERIODIC] = "_CALL_KW_NON_PY____CHECK_PERIODIC",
+    [_CALL_LEN____CHECK_VALIDITY] = "_CALL_LEN____CHECK_VALIDITY",
     [_CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS____CHECK_PERIODIC] = "_CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS____CHECK_PERIODIC",
     [_CALL_METHOD_DESCRIPTOR_FAST____CHECK_PERIODIC] = "_CALL_METHOD_DESCRIPTOR_FAST____CHECK_PERIODIC",
     [_CALL_METHOD_DESCRIPTOR_NOARGS____CHECK_PERIODIC] = "_CALL_METHOD_DESCRIPTOR_NOARGS____CHECK_PERIODIC",
@@ -685,6 +692,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_CHECK_FUNCTION_VERSION____PUSH_FRAME] = "_CHECK_FUNCTION_VERSION____PUSH_FRAME",
     [_CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL] = "_CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL",
     [_CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME] = "_CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME",
+    [_CHECK_FUNCTION____LOAD_CONST_INLINE_BORROW_WITH_NULL] = "_CHECK_FUNCTION____LOAD_CONST_INLINE_BORROW_WITH_NULL",
+    [_CHECK_FUNCTION____LOAD_CONST_INLINE_WITH_NULL] = "_CHECK_FUNCTION____LOAD_CONST_INLINE_WITH_NULL",
     [_CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY] = "_CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY",
     [_CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY____CHECK_PERIODIC] = "_CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY____CHECK_PERIODIC",
     [_CHECK_IS_NOT_PY_CALLABLE_KW____CHECK_PERIODIC] = "_CHECK_IS_NOT_PY_CALLABLE_KW____CHECK_PERIODIC",
@@ -692,6 +701,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL____CHECK_PERIODIC] = "_CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL____CHECK_PERIODIC",
     [_CHECK_IS_NOT_PY_CALLABLE____CHECK_PERIODIC] = "_CHECK_IS_NOT_PY_CALLABLE____CHECK_PERIODIC",
     [_CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE] = "_CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE",
+    [_CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE_0] = "_CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE_0",
+    [_CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE_1] = "_CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE_1",
     [_CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW] = "_CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW",
     [_CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME] = "_CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME",
     [_CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW] = "_CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW",
@@ -888,9 +899,27 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_CHECK_PEP_523____PY_FRAME_KW____PUSH_FRAME] = "_CHECK_PEP_523____PY_FRAME_KW____PUSH_FRAME",
     [_CHECK_PEP_523____SEND_GEN_FRAME] = "_CHECK_PEP_523____SEND_GEN_FRAME",
     [_CHECK_PEP_523____SEND_GEN_FRAME____PUSH_FRAME] = "_CHECK_PEP_523____SEND_GEN_FRAME____PUSH_FRAME",
+    [_CHECK_PERIODIC____CHECK_VALIDITY] = "_CHECK_PERIODIC____CHECK_VALIDITY",
+    [_CHECK_PERIODIC____CHECK_VALIDITY_AND_SET_IP] = "_CHECK_PERIODIC____CHECK_VALIDITY_AND_SET_IP",
     [_CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS] = "_CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS",
     [_CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME] = "_CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME",
     [_CHECK_STACK_SPACE____PUSH_FRAME] = "_CHECK_STACK_SPACE____PUSH_FRAME",
+    [_CHECK_VALIDITY_AND_SET_IP____FOR_ITER_TIER_TWO] = "_CHECK_VALIDITY_AND_SET_IP____FOR_ITER_TIER_TWO",
+    [_CHECK_VALIDITY____CALL_LIST_APPEND] = "_CHECK_VALIDITY____CALL_LIST_APPEND",
+    [_CHECK_VALIDITY____GUARD_IS_FALSE_POP] = "_CHECK_VALIDITY____GUARD_IS_FALSE_POP",
+    [_CHECK_VALIDITY____GUARD_IS_TRUE_POP] = "_CHECK_VALIDITY____GUARD_IS_TRUE_POP",
+    [_CHECK_VALIDITY____ITER_CHECK_LIST] = "_CHECK_VALIDITY____ITER_CHECK_LIST",
+    [_CHECK_VALIDITY____LOAD_FAST] = "_CHECK_VALIDITY____LOAD_FAST",
+    [_CHECK_VALIDITY____LOAD_FAST_0] = "_CHECK_VALIDITY____LOAD_FAST_0",
+    [_CHECK_VALIDITY____LOAD_FAST_1] = "_CHECK_VALIDITY____LOAD_FAST_1",
+    [_CHECK_VALIDITY____LOAD_SMALL_INT_1] = "_CHECK_VALIDITY____LOAD_SMALL_INT_1",
+    [_CHECK_VALIDITY____STORE_FAST] = "_CHECK_VALIDITY____STORE_FAST",
+    [_CHECK_VALIDITY____TO_BOOL_BOOL] = "_CHECK_VALIDITY____TO_BOOL_BOOL",
+    [_COMPARE_OP_INT____GUARD_IS_TRUE_POP] = "_COMPARE_OP_INT____GUARD_IS_TRUE_POP",
+    [_COMPARE_OP_STR____GUARD_IS_FALSE_POP] = "_COMPARE_OP_STR____GUARD_IS_FALSE_POP",
+    [_CONTAINS_OP_SET____CHECK_VALIDITY] = "_CONTAINS_OP_SET____CHECK_VALIDITY",
+    [_COPY____COPY] = "_COPY____COPY",
+    [_COPY____SET_IP] = "_COPY____SET_IP",
     [_CREATE_INIT_FRAME____PUSH_FRAME] = "_CREATE_INIT_FRAME____PUSH_FRAME",
     [_EXPAND_METHOD_KW____PUSH_FRAME] = "_EXPAND_METHOD_KW____PUSH_FRAME",
     [_EXPAND_METHOD_KW____PY_FRAME_KW] = "_EXPAND_METHOD_KW____PY_FRAME_KW",
@@ -899,6 +928,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_EXPAND_METHOD____PY_FRAME_GENERAL] = "_EXPAND_METHOD____PY_FRAME_GENERAL",
     [_EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME] = "_EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME",
     [_FOR_ITER_GEN_FRAME____PUSH_FRAME] = "_FOR_ITER_GEN_FRAME____PUSH_FRAME",
+    [_FOR_ITER_TIER_TWO____CHECK_VALIDITY] = "_FOR_ITER_TIER_TWO____CHECK_VALIDITY",
     [_GUARD_BOTH_FLOAT____BINARY_OP_ADD_FLOAT] = "_GUARD_BOTH_FLOAT____BINARY_OP_ADD_FLOAT",
     [_GUARD_BOTH_FLOAT____BINARY_OP_MULTIPLY_FLOAT] = "_GUARD_BOTH_FLOAT____BINARY_OP_MULTIPLY_FLOAT",
     [_GUARD_BOTH_FLOAT____BINARY_OP_SUBTRACT_FLOAT] = "_GUARD_BOTH_FLOAT____BINARY_OP_SUBTRACT_FLOAT",
@@ -921,8 +951,15 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS] = "_GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS",
     [_GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS] = "_GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS",
     [_GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS] = "_GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS",
+    [_GUARD_IS_FALSE_POP____LOAD_FAST_1] = "_GUARD_IS_FALSE_POP____LOAD_FAST_1",
+    [_GUARD_IS_FALSE_POP____LOAD_FAST_7] = "_GUARD_IS_FALSE_POP____LOAD_FAST_7",
+    [_GUARD_IS_TRUE_POP____EXIT_TRACE] = "_GUARD_IS_TRUE_POP____EXIT_TRACE",
     [_GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES] = "_GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES",
     [_GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES] = "_GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES",
+    [_GUARD_NOS_INT____BINARY_OP_ADD_INT] = "_GUARD_NOS_INT____BINARY_OP_ADD_INT",
+    [_GUARD_NOS_INT____BINARY_OP_SUBTRACT_INT] = "_GUARD_NOS_INT____BINARY_OP_SUBTRACT_INT",
+    [_GUARD_NOS_INT____COMPARE_OP_INT] = "_GUARD_NOS_INT____COMPARE_OP_INT",
+    [_GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST] = "_GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST",
     [_GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT] = "_GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT",
     [_GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE] = "_GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE",
     [_GUARD_TYPE_VERSION_AND_LOCK____STORE_ATTR_INSTANCE_VALUE] = "_GUARD_TYPE_VERSION_AND_LOCK____STORE_ATTR_INSTANCE_VALUE",
@@ -988,6 +1025,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME] = "_INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME",
     [_INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME] = "_INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME",
     [_INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME] = "_INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME",
+    [_ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST] = "_ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST",
     [_ITER_CHECK_LIST____ITER_JUMP_LIST] = "_ITER_CHECK_LIST____ITER_JUMP_LIST",
     [_ITER_CHECK_LIST____ITER_JUMP_LIST____ITER_NEXT_LIST] = "_ITER_CHECK_LIST____ITER_JUMP_LIST____ITER_NEXT_LIST",
     [_ITER_CHECK_LIST____ITER_NEXT_LIST] = "_ITER_CHECK_LIST____ITER_NEXT_LIST",
@@ -1000,12 +1038,59 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_ITER_JUMP_LIST____ITER_NEXT_LIST] = "_ITER_JUMP_LIST____ITER_NEXT_LIST",
     [_ITER_JUMP_RANGE____ITER_NEXT_RANGE] = "_ITER_JUMP_RANGE____ITER_NEXT_RANGE",
     [_ITER_JUMP_TUPLE____ITER_NEXT_TUPLE] = "_ITER_JUMP_TUPLE____ITER_NEXT_TUPLE",
+    [_LOAD_ATTR_METHOD_NO_DICT____LOAD_FAST_5] = "_LOAD_ATTR_METHOD_NO_DICT____LOAD_FAST_5",
     [_LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME] = "_LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME",
+    [_LOAD_CONST_INLINE_BORROW____COMPARE_OP_STR] = "_LOAD_CONST_INLINE_BORROW____COMPARE_OP_STR",
+    [_LOAD_CONST_INLINE_BORROW____GUARD_BOTH_UNICODE] = "_LOAD_CONST_INLINE_BORROW____GUARD_BOTH_UNICODE",
+    [_LOAD_CONST_INLINE_BORROW____SET_IP] = "_LOAD_CONST_INLINE_BORROW____SET_IP",
+    [_LOAD_CONST_INLINE_WITH_NULL____LOAD_FAST_5] = "_LOAD_CONST_INLINE_WITH_NULL____LOAD_FAST_5",
+    [_LOAD_CONST_INLINE____SET_IP] = "_LOAD_CONST_INLINE____SET_IP",
+    [_LOAD_DEREF____CHECK_VALIDITY] = "_LOAD_DEREF____CHECK_VALIDITY",
+    [_LOAD_FAST_0____CHECK_MANAGED_OBJECT_HAS_VALUES] = "_LOAD_FAST_0____CHECK_MANAGED_OBJECT_HAS_VALUES",
+    [_LOAD_FAST_0____LOAD_FAST_1] = "_LOAD_FAST_0____LOAD_FAST_1",
+    [_LOAD_FAST_1____BINARY_SUBSCR_STR_INT] = "_LOAD_FAST_1____BINARY_SUBSCR_STR_INT",
+    [_LOAD_FAST_1____LOAD_SMALL_INT_1] = "_LOAD_FAST_1____LOAD_SMALL_INT_1",
+    [_LOAD_FAST_1____SET_IP] = "_LOAD_FAST_1____SET_IP",
+    [_LOAD_FAST_2____SET_IP] = "_LOAD_FAST_2____SET_IP",
+    [_LOAD_FAST_3____SET_IP] = "_LOAD_FAST_3____SET_IP",
+    [_LOAD_FAST_4____CHECK_FUNCTION] = "_LOAD_FAST_4____CHECK_FUNCTION",
+    [_LOAD_FAST_4____LOAD_SMALL_INT_1] = "_LOAD_FAST_4____LOAD_SMALL_INT_1",
+    [_LOAD_FAST_4____SET_IP] = "_LOAD_FAST_4____SET_IP",
+    [_LOAD_FAST_5____LOAD_CONST_INLINE_BORROW] = "_LOAD_FAST_5____LOAD_CONST_INLINE_BORROW",
+    [_LOAD_FAST_5____LOAD_FAST_4] = "_LOAD_FAST_5____LOAD_FAST_4",
+    [_LOAD_FAST_5____SET_IP] = "_LOAD_FAST_5____SET_IP",
+    [_LOAD_FAST_7____LOAD_CONST_INLINE_BORROW] = "_LOAD_FAST_7____LOAD_CONST_INLINE_BORROW",
+    [_LOAD_FAST_7____LOAD_FAST_3] = "_LOAD_FAST_7____LOAD_FAST_3",
+    [_LOAD_FAST____GUARD_TYPE_VERSION] = "_LOAD_FAST____GUARD_TYPE_VERSION",
+    [_LOAD_FAST____LOAD_CONST_INLINE] = "_LOAD_FAST____LOAD_CONST_INLINE",
+    [_LOAD_FAST____LOAD_FAST] = "_LOAD_FAST____LOAD_FAST",
+    [_LOAD_FAST____SET_IP] = "_LOAD_FAST____SET_IP",
+    [_LOAD_SMALL_INT_1____BINARY_OP_ADD_INT] = "_LOAD_SMALL_INT_1____BINARY_OP_ADD_INT",
+    [_LOAD_SMALL_INT_1____GUARD_NOS_INT] = "_LOAD_SMALL_INT_1____GUARD_NOS_INT",
     [_MAKE_CALLARGS_A_TUPLE____CHECK_PERIODIC] = "_MAKE_CALLARGS_A_TUPLE____CHECK_PERIODIC",
+    [_MAKE_WARM____POP_TOP] = "_MAKE_WARM____POP_TOP",
+    [_MAKE_WARM____SET_IP] = "_MAKE_WARM____SET_IP",
+    [_MAKE_WARM____TIER2_RESUME_CHECK] = "_MAKE_WARM____TIER2_RESUME_CHECK",
     [_MAYBE_EXPAND_METHOD____CHECK_PERIODIC] = "_MAYBE_EXPAND_METHOD____CHECK_PERIODIC",
+    [_PUSH_FRAME____DYNAMIC_EXIT] = "_PUSH_FRAME____DYNAMIC_EXIT",
+    [_PUSH_FRAME____RESUME_CHECK] = "_PUSH_FRAME____RESUME_CHECK",
     [_PY_FRAME_GENERAL____PUSH_FRAME] = "_PY_FRAME_GENERAL____PUSH_FRAME",
     [_PY_FRAME_KW____PUSH_FRAME] = "_PY_FRAME_KW____PUSH_FRAME",
+    [_RESUME_CHECK____LOAD_FAST_0] = "_RESUME_CHECK____LOAD_FAST_0",
+    [_SAVE_RETURN_OFFSET____PUSH_FRAME] = "_SAVE_RETURN_OFFSET____PUSH_FRAME",
     [_SEND_GEN_FRAME____PUSH_FRAME] = "_SEND_GEN_FRAME____PUSH_FRAME",
+    [_SET_IP____BINARY_SUBSCR] = "_SET_IP____BINARY_SUBSCR",
+    [_SET_IP____BINARY_SUBSCR_DICT] = "_SET_IP____BINARY_SUBSCR_DICT",
+    [_SET_IP____CALL_BUILTIN_FAST] = "_SET_IP____CALL_BUILTIN_FAST",
+    [_SET_IP____CALL_LEN] = "_SET_IP____CALL_LEN",
+    [_SET_IP____CHECK_FUNCTION_VERSION] = "_SET_IP____CHECK_FUNCTION_VERSION",
+    [_SET_IP____CONTAINS_OP_SET] = "_SET_IP____CONTAINS_OP_SET",
+    [_SET_IP____LOAD_DEREF] = "_SET_IP____LOAD_DEREF",
+    [_STORE_FAST_7____LOAD_FAST_7] = "_STORE_FAST_7____LOAD_FAST_7",
+    [_STORE_FAST____LOAD_FAST] = "_STORE_FAST____LOAD_FAST",
+    [_SWAP____SWAP] = "_SWAP____SWAP",
+    [_TO_BOOL_BOOL____GUARD_IS_FALSE_POP] = "_TO_BOOL_BOOL____GUARD_IS_FALSE_POP",
+    [_TO_BOOL_BOOL____GUARD_IS_TRUE_POP] = "_TO_BOOL_BOOL____GUARD_IS_TRUE_POP",
 };
 int _PyUop_num_popped(int opcode, int oparg)
 {
@@ -1564,14 +1649,300 @@ extern int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forw
 #ifdef NEED_OPCODE_METADATA
 int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by) {
     switch (this_instr[0].opcode) {
-        case _GUARD_TYPE_VERSION: {
+        case _MAKE_WARM: {
             switch (this_instr[1].opcode) {
-                case _REPLACE_WITH_TRUE: {
+                case _SET_IP: {
                     switch (this_instr[2].opcode) {
                         default:
                         *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____REPLACE_WITH_TRUE;
+                        return _MAKE_WARM____SET_IP;
                     }
+                    break;
+                }
+                case _TIER2_RESUME_CHECK: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _MAKE_WARM____TIER2_RESUME_CHECK;
+                    }
+                    break;
+                }
+                case _POP_TOP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _MAKE_WARM____POP_TOP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CHECK_PERIODIC: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PERIODIC____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+                case _CHECK_VALIDITY_AND_SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PERIODIC____CHECK_VALIDITY_AND_SET_IP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_SMALL_INT_1: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_NOS_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_SMALL_INT_1____GUARD_NOS_INT;
+                    }
+                    break;
+                }
+                case _BINARY_OP_ADD_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_SMALL_INT_1____BINARY_OP_ADD_INT;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_INSTANCE_VALUE_0: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE_0;
+                    }
+                    break;
+                }
+                case _LOAD_ATTR_INSTANCE_VALUE_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_MANAGED_OBJECT_HAS_VALUES____LOAD_ATTR_INSTANCE_VALUE_1;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CHECK_VALIDITY: {
+            switch (this_instr[1].opcode) {
+                case _ITER_CHECK_LIST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____ITER_CHECK_LIST;
+                    }
+                    break;
+                }
+                case _GUARD_IS_FALSE_POP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____GUARD_IS_FALSE_POP;
+                    }
+                    break;
+                }
+                case _LOAD_SMALL_INT_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____LOAD_SMALL_INT_1;
+                    }
+                    break;
+                }
+                case _LOAD_FAST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____LOAD_FAST;
+                    }
+                    break;
+                }
+                case _STORE_FAST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____STORE_FAST;
+                    }
+                    break;
+                }
+                case _LOAD_FAST_0: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____LOAD_FAST_0;
+                    }
+                    break;
+                }
+                case _TO_BOOL_BOOL: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____TO_BOOL_BOOL;
+                    }
+                    break;
+                }
+                case _CALL_LIST_APPEND: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____CALL_LIST_APPEND;
+                    }
+                    break;
+                }
+                case _GUARD_IS_TRUE_POP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____GUARD_IS_TRUE_POP;
+                    }
+                    break;
+                }
+                case _LOAD_FAST_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY____LOAD_FAST_1;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _ITER_CHECK_LIST: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_NOT_EXHAUSTED_LIST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST;
+                    }
+                    break;
+                }
+                case _ITER_NEXT_LIST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_LIST____ITER_NEXT_LIST;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_4: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_4____SET_IP;
+                    }
+                    break;
+                }
+                case _CHECK_FUNCTION: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_4____CHECK_FUNCTION;
+                    }
+                    break;
+                }
+                case _LOAD_SMALL_INT_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_4____LOAD_SMALL_INT_1;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CHECK_FUNCTION: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_CONST_INLINE_WITH_NULL: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION____LOAD_CONST_INLINE_WITH_NULL;
+                    }
+                    break;
+                }
+                case _LOAD_CONST_INLINE_BORROW_WITH_NULL: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION____LOAD_CONST_INLINE_BORROW_WITH_NULL;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST____SET_IP;
+                    }
+                    break;
+                }
+                case _LOAD_FAST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST____LOAD_FAST;
+                    }
+                    break;
+                }
+                case _GUARD_TYPE_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST____GUARD_TYPE_VERSION;
+                    }
+                    break;
+                }
+                case _LOAD_CONST_INLINE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST____LOAD_CONST_INLINE;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_TYPE_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_METHOD_NO_DICT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_NO_DICT;
+                    }
+                    break;
                 }
                 case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
                     switch (this_instr[2].opcode) {
@@ -1579,65 +1950,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION____CHECK_MANAGED_OBJECT_HAS_VALUES;
                     }
-                }
-                case _CHECK_ATTR_WITH_HINT: {
-                    switch (this_instr[2].opcode) {
-                        case _LOAD_ATTR_WITH_HINT: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT;
-                    }
-                }
-                case _LOAD_ATTR_WITH_HINT: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____LOAD_ATTR_WITH_HINT;
-                    }
-                }
-                case _LOAD_ATTR_PROPERTY_FRAME: {
-                    switch (this_instr[2].opcode) {
-                        case _PUSH_FRAME: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
-                    }
-                }
-                case _PUSH_FRAME: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____PUSH_FRAME;
-                    }
-                }
-                case _STORE_ATTR_WITH_HINT: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____STORE_ATTR_WITH_HINT;
-                    }
-                }
-                case _STORE_ATTR_SLOT: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____STORE_ATTR_SLOT;
-                    }
+                    break;
                 }
                 case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
                     switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT;
                         case _GUARD_KEYS_VERSION: {
                             switch (this_instr[3].opcode) {
                                 case _LOAD_ATTR_METHOD_WITH_VALUES: {
@@ -1646,6 +1965,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
@@ -1656,8 +1976,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                                     }
+                                    break;
                                 }
                             }
+                            break;
                         }
                         case _LOAD_ATTR_METHOD_WITH_VALUES: {
                             switch (this_instr[3].opcode) {
@@ -1665,18 +1987,90 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
                             }
+                            break;
                         }
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT;
                         case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
                             switch (this_instr[3].opcode) {
                                 default:
                                 *move_forward_by = 3;
                                 return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                             }
+                            break;
                         }
                     }
+                    break;
+                }
+                case _REPLACE_WITH_TRUE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____REPLACE_WITH_TRUE;
+                    }
+                    break;
+                }
+                case _CHECK_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_ATTR_WITH_HINT: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
+                            }
+                            break;
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT;
+                    }
+                    break;
+                }
+                case _LOAD_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_WITH_HINT;
+                    }
+                    break;
+                }
+                case _LOAD_ATTR_PROPERTY_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
+                            }
+                            break;
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
+                    }
+                    break;
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____PUSH_FRAME;
+                    }
+                    break;
+                }
+                case _STORE_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____STORE_ATTR_WITH_HINT;
+                    }
+                    break;
+                }
+                case _STORE_ATTR_SLOT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____STORE_ATTR_SLOT;
+                    }
+                    break;
                 }
                 case _GUARD_KEYS_VERSION: {
                     switch (this_instr[2].opcode) {
@@ -1686,6 +2080,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
@@ -1696,8 +2091,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                             }
+                            break;
                         }
                     }
+                    break;
                 }
                 case _LOAD_ATTR_METHOD_WITH_VALUES: {
                     switch (this_instr[2].opcode) {
@@ -1705,13 +2102,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
                     }
-                }
-                case _LOAD_ATTR_METHOD_NO_DICT: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_NO_DICT;
-                    }
+                    break;
                 }
                 case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
                     switch (this_instr[2].opcode) {
@@ -1719,6 +2110,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                     }
+                    break;
                 }
                 case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
                     switch (this_instr[2].opcode) {
@@ -1726,6 +2118,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION____LOAD_ATTR_NONDESCRIPTOR_NO_DICT;
                     }
+                    break;
                 }
                 case _CHECK_ATTR_METHOD_LAZY_DICT: {
                     switch (this_instr[2].opcode) {
@@ -1735,11 +2128,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _GUARD_TYPE_VERSION____CHECK_ATTR_METHOD_LAZY_DICT____LOAD_ATTR_METHOD_LAZY_DICT;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION____CHECK_ATTR_METHOD_LAZY_DICT;
                     }
+                    break;
                 }
                 case _LOAD_ATTR_METHOD_LAZY_DICT: {
                     switch (this_instr[2].opcode) {
@@ -1747,8 +2142,895 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_LAZY_DICT;
                     }
+                    break;
                 }
             }
+            break;
+        }
+        case _SET_IP: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_SUBSCR: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____BINARY_SUBSCR;
+                    }
+                    break;
+                }
+                case _CONTAINS_OP_SET: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____CONTAINS_OP_SET;
+                    }
+                    break;
+                }
+                case _CHECK_FUNCTION_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____CHECK_FUNCTION_VERSION;
+                    }
+                    break;
+                }
+                case _CALL_LEN: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____CALL_LEN;
+                    }
+                    break;
+                }
+                case _CALL_BUILTIN_FAST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____CALL_BUILTIN_FAST;
+                    }
+                    break;
+                }
+                case _BINARY_SUBSCR_DICT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____BINARY_SUBSCR_DICT;
+                    }
+                    break;
+                }
+                case _LOAD_DEREF: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SET_IP____LOAD_DEREF;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_NOT_EXHAUSTED_LIST: {
+            switch (this_instr[1].opcode) {
+                case _ITER_NEXT_LIST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_CONST_INLINE_WITH_NULL: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_5: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_CONST_INLINE_WITH_NULL____LOAD_FAST_5;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _SAVE_RETURN_OFFSET: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SAVE_RETURN_OFFSET____PUSH_FRAME;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _COMPARE_OP_INT: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_IS_TRUE_POP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _COMPARE_OP_INT____GUARD_IS_TRUE_POP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CONTAINS_OP_SET: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CONTAINS_OP_SET____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_NOS_INT: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_OP_ADD_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_NOS_INT____BINARY_OP_ADD_INT;
+                    }
+                    break;
+                }
+                case _BINARY_OP_SUBTRACT_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_NOS_INT____BINARY_OP_SUBTRACT_INT;
+                    }
+                    break;
+                }
+                case _COMPARE_OP_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_NOS_INT____COMPARE_OP_INT;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_1: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_1____SET_IP;
+                    }
+                    break;
+                }
+                case _BINARY_SUBSCR_STR_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_1____BINARY_SUBSCR_STR_INT;
+                    }
+                    break;
+                }
+                case _LOAD_SMALL_INT_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_1____LOAD_SMALL_INT_1;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_CONST_INLINE: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_CONST_INLINE____SET_IP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _BINARY_SUBSCR: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_SUBSCR____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_5: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_4: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_5____LOAD_FAST_4;
+                    }
+                    break;
+                }
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_5____SET_IP;
+                    }
+                    break;
+                }
+                case _LOAD_CONST_INLINE_BORROW: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_5____LOAD_CONST_INLINE_BORROW;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CHECK_FUNCTION_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_FUNCTION_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                            break;
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                    break;
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                    break;
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                            break;
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                    break;
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                            break;
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case _PY_FRAME_GENERAL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
+                            }
+                            break;
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
+                    }
+                    break;
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                    }
+                    break;
+                }
+                case _CHECK_STACK_SPACE: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                    break;
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                            break;
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                            }
+                            break;
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                    }
+                    break;
+                }
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
+                            break;
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CHECK_VALIDITY_AND_SET_IP: {
+            switch (this_instr[1].opcode) {
+                case _FOR_ITER_TIER_TWO: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_VALIDITY_AND_SET_IP____FOR_ITER_TIER_TWO;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _COMPARE_OP_STR: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_IS_FALSE_POP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _COMPARE_OP_STR____GUARD_IS_FALSE_POP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_7: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_CONST_INLINE_BORROW: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_7____LOAD_CONST_INLINE_BORROW;
+                    }
+                    break;
+                }
+                case _LOAD_FAST_3: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_7____LOAD_FAST_3;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_IS_FALSE_POP: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_7: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_IS_FALSE_POP____LOAD_FAST_7;
+                    }
+                    break;
+                }
+                case _LOAD_FAST_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_IS_FALSE_POP____LOAD_FAST_1;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_KEYS_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION;
+                        case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                            }
+                            break;
+                        }
+                        case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
+                    }
+                    break;
+                }
+                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CALL_LEN: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_LEN____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_KEYS_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                    }
+                    break;
+                }
+                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_CONST_INLINE_BORROW: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_CONST_INLINE_BORROW____SET_IP;
+                    }
+                    break;
+                }
+                case _GUARD_BOTH_UNICODE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_CONST_INLINE_BORROW____GUARD_BOTH_UNICODE;
+                    }
+                    break;
+                }
+                case _COMPARE_OP_STR: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_CONST_INLINE_BORROW____COMPARE_OP_STR;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _STORE_FAST: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _STORE_FAST____LOAD_FAST;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_3: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_3____SET_IP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _TO_BOOL_BOOL: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_IS_FALSE_POP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _TO_BOOL_BOOL____GUARD_IS_FALSE_POP;
+                    }
+                    break;
+                }
+                case _GUARD_IS_TRUE_POP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _TO_BOOL_BOOL____GUARD_IS_TRUE_POP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _PUSH_FRAME: {
+            switch (this_instr[1].opcode) {
+                case _RESUME_CHECK: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _PUSH_FRAME____RESUME_CHECK;
+                    }
+                    break;
+                }
+                case _DYNAMIC_EXIT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _PUSH_FRAME____DYNAMIC_EXIT;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_0: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_0____LOAD_FAST_1;
+                    }
+                    break;
+                }
+                case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_0____CHECK_MANAGED_OBJECT_HAS_VALUES;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _FOR_ITER_TIER_TWO: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _FOR_ITER_TIER_TWO____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _BINARY_OP_ADD_INT: {
+            switch (this_instr[1].opcode) {
+                case _STORE_FAST_1: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_OP_ADD_INT____STORE_FAST_1;
+                    }
+                    break;
+                }
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_OP_ADD_INT____SET_IP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CALL_BUILTIN_FAST: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_BUILTIN_FAST____CHECK_PERIODIC;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_IS_TRUE_POP: {
+            switch (this_instr[1].opcode) {
+                case _EXIT_TRACE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_IS_TRUE_POP____EXIT_TRACE;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _COPY: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _COPY____SET_IP;
+                    }
+                    break;
+                }
+                case _COPY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _COPY____COPY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _SWAP: {
+            switch (this_instr[1].opcode) {
+                case _SWAP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SWAP____SWAP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _STORE_FAST_7: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_7: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _STORE_FAST_7____LOAD_FAST_7;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_DEREF: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_DEREF____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _GUARD_BOTH_UNICODE: {
+            switch (this_instr[1].opcode) {
+                case _COMPARE_OP_STR: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_UNICODE____COMPARE_OP_STR;
+                    }
+                    break;
+                }
+                case _BINARY_OP_ADD_UNICODE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_UNICODE____BINARY_OP_ADD_UNICODE;
+                    }
+                    break;
+                }
+                case _BINARY_OP_INPLACE_ADD_UNICODE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_UNICODE____BINARY_OP_INPLACE_ADD_UNICODE;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_FAST_2: {
+            switch (this_instr[1].opcode) {
+                case _SET_IP: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_FAST_2____SET_IP;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _LOAD_ATTR_METHOD_NO_DICT: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_5: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_ATTR_METHOD_NO_DICT____LOAD_FAST_5;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _BINARY_SUBSCR_STR_INT: {
+            switch (this_instr[1].opcode) {
+                case _STORE_FAST_7: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_SUBSCR_STR_INT____STORE_FAST_7;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _BINARY_OP_SUBTRACT_INT: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_NOS_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_OP_SUBTRACT_INT____GUARD_NOS_INT;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _RESUME_CHECK: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_FAST_0: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _RESUME_CHECK____LOAD_FAST_0;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _BINARY_OP: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_VALIDITY: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_OP____CHECK_VALIDITY;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _CALL_BUILTIN_O: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_BUILTIN_O____CHECK_PERIODIC;
+                    }
+                    break;
+                }
+            }
+            break;
         }
         case _GUARD_BOTH_INT: {
             switch (this_instr[1].opcode) {
@@ -1758,6 +3040,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_INT____BINARY_OP_MULTIPLY_INT;
                     }
+                    break;
                 }
                 case _BINARY_OP_ADD_INT: {
                     switch (this_instr[2].opcode) {
@@ -1765,6 +3048,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_INT____BINARY_OP_ADD_INT;
                     }
+                    break;
                 }
                 case _BINARY_OP_SUBTRACT_INT: {
                     switch (this_instr[2].opcode) {
@@ -1772,6 +3056,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_INT____BINARY_OP_SUBTRACT_INT;
                     }
+                    break;
                 }
                 case _COMPARE_OP_INT: {
                     switch (this_instr[2].opcode) {
@@ -1779,8 +3064,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_INT____COMPARE_OP_INT;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _GUARD_BOTH_FLOAT: {
             switch (this_instr[1].opcode) {
@@ -1790,6 +3077,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_FLOAT____BINARY_OP_MULTIPLY_FLOAT;
                     }
+                    break;
                 }
                 case _BINARY_OP_ADD_FLOAT: {
                     switch (this_instr[2].opcode) {
@@ -1797,6 +3085,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_FLOAT____BINARY_OP_ADD_FLOAT;
                     }
+                    break;
                 }
                 case _BINARY_OP_SUBTRACT_FLOAT: {
                     switch (this_instr[2].opcode) {
@@ -1804,6 +3093,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_FLOAT____BINARY_OP_SUBTRACT_FLOAT;
                     }
+                    break;
                 }
                 case _COMPARE_OP_FLOAT: {
                     switch (this_instr[2].opcode) {
@@ -1811,33 +3101,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BOTH_FLOAT____COMPARE_OP_FLOAT;
                     }
+                    break;
                 }
             }
-        }
-        case _GUARD_BOTH_UNICODE: {
-            switch (this_instr[1].opcode) {
-                case _BINARY_OP_ADD_UNICODE: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_BOTH_UNICODE____BINARY_OP_ADD_UNICODE;
-                    }
-                }
-                case _BINARY_OP_INPLACE_ADD_UNICODE: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_BOTH_UNICODE____BINARY_OP_INPLACE_ADD_UNICODE;
-                    }
-                }
-                case _COMPARE_OP_STR: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_BOTH_UNICODE____COMPARE_OP_STR;
-                    }
-                }
-            }
+            break;
         }
         case _CHECK_PEP_523: {
             switch (this_instr[1].opcode) {
@@ -1851,11 +3118,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -1863,11 +3132,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC;
                     }
+                    break;
                 }
                 case _BINARY_SUBSCR_INIT_CALL: {
                     switch (this_instr[2].opcode) {
@@ -1877,11 +3148,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____BINARY_SUBSCR_INIT_CALL;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -1889,6 +3162,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____PUSH_FRAME;
                     }
+                    break;
                 }
                 case _SEND_GEN_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -1898,11 +3172,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____SEND_GEN_FRAME____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____SEND_GEN_FRAME;
                     }
+                    break;
                 }
                 case _GUARD_TYPE_VERSION: {
                     switch (this_instr[2].opcode) {
@@ -1914,11 +3190,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -1926,11 +3204,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____GUARD_TYPE_VERSION____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____GUARD_TYPE_VERSION;
                     }
+                    break;
                 }
                 case _LOAD_ATTR_PROPERTY_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -1940,11 +3220,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____LOAD_ATTR_PROPERTY_FRAME;
                     }
+                    break;
                 }
                 case _FOR_ITER_GEN_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -1954,11 +3236,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____FOR_ITER_GEN_FRAME____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____FOR_ITER_GEN_FRAME;
                     }
+                    break;
                 }
                 case _CHECK_FUNCTION_VERSION: {
                     switch (this_instr[2].opcode) {
@@ -1970,11 +3254,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -1982,6 +3268,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
@@ -1998,11 +3285,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2010,11 +3299,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2024,11 +3315,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2036,11 +3329,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_STACK_SPACE: {
                             switch (this_instr[3].opcode) {
@@ -2052,11 +3347,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2064,11 +3361,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -2078,13 +3377,16 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                     }
+                    break;
                 }
                 case _PY_FRAME_GENERAL: {
                     switch (this_instr[2].opcode) {
@@ -2094,11 +3396,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____PY_FRAME_GENERAL____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____PY_FRAME_GENERAL;
                     }
+                    break;
                 }
                 case _CHECK_METHOD_VERSION: {
                     switch (this_instr[2].opcode) {
@@ -2112,11 +3416,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2124,11 +3430,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD;
                             }
+                            break;
                         }
                         case _PY_FRAME_GENERAL: {
                             switch (this_instr[3].opcode) {
@@ -2138,11 +3446,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_METHOD_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION____PY_FRAME_GENERAL;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2150,11 +3460,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_METHOD_VERSION;
                     }
+                    break;
                 }
                 case _EXPAND_METHOD: {
                     switch (this_instr[2].opcode) {
@@ -2166,11 +3478,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____EXPAND_METHOD____PY_FRAME_GENERAL;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2178,11 +3492,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____EXPAND_METHOD____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____EXPAND_METHOD;
                     }
+                    break;
                 }
                 case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -2200,6 +3516,7 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                                             }
+                                                            break;
                                                         }
                                                         case _PUSH_FRAME: {
                                                             switch (this_instr[7].opcode) {
@@ -2207,11 +3524,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                                     }
+                                                    break;
                                                 }
                                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                                     switch (this_instr[6].opcode) {
@@ -2221,11 +3540,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                                     }
+                                                    break;
                                                 }
                                                 case _PUSH_FRAME: {
                                                     switch (this_instr[6].opcode) {
@@ -2233,11 +3554,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _CHECK_STACK_SPACE: {
                                             switch (this_instr[5].opcode) {
@@ -2249,11 +3572,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                                     }
+                                                    break;
                                                 }
                                                 case _PUSH_FRAME: {
                                                     switch (this_instr[6].opcode) {
@@ -2261,11 +3586,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                                             }
+                                            break;
                                         }
                                         case _INIT_CALL_PY_EXACT_ARGS: {
                                             switch (this_instr[5].opcode) {
@@ -2275,11 +3602,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2287,11 +3616,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
                                     }
+                                    break;
                                 }
                                 case _CHECK_FUNCTION_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2305,11 +3636,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                                     }
+                                                    break;
                                                 }
                                                 case _PUSH_FRAME: {
                                                     switch (this_instr[6].opcode) {
@@ -2317,11 +3650,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                             }
+                                            break;
                                         }
                                         case _INIT_CALL_PY_EXACT_ARGS: {
                                             switch (this_instr[5].opcode) {
@@ -2331,11 +3666,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2343,11 +3680,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _CHECK_STACK_SPACE: {
                                     switch (this_instr[4].opcode) {
@@ -2359,11 +3698,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2371,11 +3712,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2385,11 +3728,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2397,11 +3742,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_FUNCTION_VERSION: {
                             switch (this_instr[3].opcode) {
@@ -2417,11 +3764,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                                     }
+                                                    break;
                                                 }
                                                 case _PUSH_FRAME: {
                                                     switch (this_instr[6].opcode) {
@@ -2429,11 +3778,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                             }
+                                            break;
                                         }
                                         case _INIT_CALL_PY_EXACT_ARGS: {
                                             switch (this_instr[5].opcode) {
@@ -2443,11 +3794,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2455,11 +3808,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _CHECK_STACK_SPACE: {
                                     switch (this_instr[4].opcode) {
@@ -2471,11 +3826,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2483,11 +3840,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2497,11 +3856,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2509,11 +3870,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
                             }
+                            break;
                         }
                         case _CHECK_FUNCTION_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -2527,11 +3890,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2539,11 +3904,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2553,11 +3920,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2565,11 +3934,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_STACK_SPACE: {
                             switch (this_instr[3].opcode) {
@@ -2581,11 +3952,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2593,11 +3966,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -2607,11 +3982,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2619,11 +3996,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -2641,11 +4020,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                                     }
+                                                    break;
                                                 }
                                                 case _PUSH_FRAME: {
                                                     switch (this_instr[6].opcode) {
@@ -2653,11 +4034,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                             }
+                                            break;
                                         }
                                         case _INIT_CALL_PY_EXACT_ARGS: {
                                             switch (this_instr[5].opcode) {
@@ -2667,11 +4050,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2679,11 +4064,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _CHECK_STACK_SPACE: {
                                     switch (this_instr[4].opcode) {
@@ -2695,11 +4082,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2707,11 +4096,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2721,11 +4112,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2733,11 +4126,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
                             }
+                            break;
                         }
                         case _CHECK_FUNCTION_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -2751,11 +4146,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -2763,11 +4160,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -2777,11 +4176,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2789,11 +4190,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_STACK_SPACE: {
                             switch (this_instr[3].opcode) {
@@ -2805,11 +4208,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2817,11 +4222,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -2831,11 +4238,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2843,11 +4252,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _CHECK_FUNCTION_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -2861,11 +4272,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -2873,11 +4286,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -2887,11 +4302,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2899,11 +4316,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _CHECK_STACK_SPACE: {
                     switch (this_instr[2].opcode) {
@@ -2915,11 +4334,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2927,11 +4348,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_STACK_SPACE____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_STACK_SPACE;
                     }
+                    break;
                 }
                 case _INIT_CALL_PY_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -2941,11 +4364,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____INIT_CALL_PY_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _CHECK_AND_ALLOCATE_OBJECT: {
                     switch (this_instr[2].opcode) {
@@ -2957,11 +4382,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -2969,11 +4396,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT;
                     }
+                    break;
                 }
                 case _CREATE_INIT_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -2983,11 +4412,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CREATE_INIT_FRAME____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CREATE_INIT_FRAME;
                     }
+                    break;
                 }
                 case _CHECK_FUNCTION_VERSION_KW: {
                     switch (this_instr[2].opcode) {
@@ -2999,11 +4430,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -3011,11 +4444,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW;
                     }
+                    break;
                 }
                 case _PY_FRAME_KW: {
                     switch (this_instr[2].opcode) {
@@ -3025,11 +4460,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____PY_FRAME_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____PY_FRAME_KW;
                     }
+                    break;
                 }
                 case _CHECK_METHOD_VERSION_KW: {
                     switch (this_instr[2].opcode) {
@@ -3043,11 +4480,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -3055,11 +4494,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW;
                             }
+                            break;
                         }
                         case _PY_FRAME_KW: {
                             switch (this_instr[3].opcode) {
@@ -3069,11 +4510,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PY_FRAME_KW;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -3081,11 +4524,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW;
                     }
+                    break;
                 }
                 case _EXPAND_METHOD_KW: {
                     switch (this_instr[2].opcode) {
@@ -3097,11 +4542,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_PEP_523____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____EXPAND_METHOD_KW____PY_FRAME_KW;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -3109,13 +4556,16 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_PEP_523____EXPAND_METHOD_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_PEP_523____EXPAND_METHOD_KW;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _BINARY_SUBSCR_CHECK_FUNC: {
             switch (this_instr[1].opcode) {
@@ -3127,11 +4577,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -3139,8 +4591,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _BINARY_SUBSCR_INIT_CALL: {
             switch (this_instr[1].opcode) {
@@ -3150,8 +4604,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _SEND_GEN_FRAME: {
             switch (this_instr[1].opcode) {
@@ -3161,8 +4617,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _SEND_GEN_FRAME____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _GUARD_GLOBALS_VERSION_PUSH_KEYS: {
             switch (this_instr[1].opcode) {
@@ -3172,8 +4630,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_GLOBALS_VERSION_PUSH_KEYS____LOAD_GLOBAL_MODULE_FROM_KEYS;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _GUARD_GLOBALS_VERSION: {
             switch (this_instr[1].opcode) {
@@ -3185,11 +4645,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS;
                     }
+                    break;
                 }
                 case _LOAD_GLOBAL_BUILTINS_FROM_KEYS: {
                     switch (this_instr[2].opcode) {
@@ -3197,8 +4659,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _GUARD_BUILTINS_VERSION_PUSH_KEYS: {
             switch (this_instr[1].opcode) {
@@ -3208,8 +4672,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_ATTR_MODULE_PUSH_KEYS: {
             switch (this_instr[1].opcode) {
@@ -3219,8 +4685,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_ATTR_MODULE_PUSH_KEYS____LOAD_ATTR_MODULE_FROM_KEYS;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_ATTR_WITH_HINT: {
             switch (this_instr[1].opcode) {
@@ -3230,8 +4698,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_ATTR_CLASS: {
             switch (this_instr[1].opcode) {
@@ -3241,8 +4711,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_ATTR_CLASS____GUARD_TYPE_VERSION;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _LOAD_ATTR_PROPERTY_FRAME: {
             switch (this_instr[1].opcode) {
@@ -3252,8 +4724,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _GUARD_TYPE_VERSION_AND_LOCK: {
             switch (this_instr[1].opcode) {
@@ -3265,11 +4739,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT;
                     }
+                    break;
                 }
                 case _STORE_ATTR_INSTANCE_VALUE: {
                     switch (this_instr[2].opcode) {
@@ -3277,8 +4753,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_TYPE_VERSION_AND_LOCK____STORE_ATTR_INSTANCE_VALUE;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _GUARD_DORV_NO_DICT: {
             switch (this_instr[1].opcode) {
@@ -3288,19 +4766,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
                     }
+                    break;
                 }
             }
-        }
-        case _ITER_CHECK_LIST: {
-            switch (this_instr[1].opcode) {
-                case _ITER_NEXT_LIST: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _ITER_CHECK_LIST____ITER_NEXT_LIST;
-                    }
-                }
-            }
+            break;
         }
         case _ITER_CHECK_TUPLE: {
             switch (this_instr[1].opcode) {
@@ -3310,8 +4779,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _ITER_CHECK_TUPLE____ITER_NEXT_TUPLE;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _ITER_CHECK_RANGE: {
             switch (this_instr[1].opcode) {
@@ -3321,8 +4792,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _ITER_CHECK_RANGE____ITER_NEXT_RANGE;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _FOR_ITER_GEN_FRAME: {
             switch (this_instr[1].opcode) {
@@ -3332,65 +4805,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _FOR_ITER_GEN_FRAME____PUSH_FRAME;
                     }
+                    break;
                 }
             }
-        }
-        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
-            switch (this_instr[1].opcode) {
-                case _GUARD_KEYS_VERSION: {
-                    switch (this_instr[2].opcode) {
-                        case _LOAD_ATTR_METHOD_WITH_VALUES: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION;
-                        case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-                            }
-                        }
-                    }
-                }
-                case _LOAD_ATTR_METHOD_WITH_VALUES: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
-                    }
-                }
-                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-                    }
-                }
-            }
-        }
-        case _GUARD_KEYS_VERSION: {
-            switch (this_instr[1].opcode) {
-                case _LOAD_ATTR_METHOD_WITH_VALUES: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-                    }
-                }
-                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-                    }
-                }
-            }
+            break;
         }
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
             switch (this_instr[1].opcode) {
@@ -3400,8 +4818,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_ATTR_METHOD_LAZY_DICT____LOAD_ATTR_METHOD_LAZY_DICT;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _MAYBE_EXPAND_METHOD: {
             switch (this_instr[1].opcode) {
@@ -3411,131 +4831,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _MAYBE_EXPAND_METHOD____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
-        }
-        case _CHECK_FUNCTION_VERSION: {
-            switch (this_instr[1].opcode) {
-                case _PY_FRAME_GENERAL: {
-                    switch (this_instr[2].opcode) {
-                        case _PUSH_FRAME: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
-                    }
-                }
-                case _PUSH_FRAME: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _CHECK_FUNCTION_VERSION____PUSH_FRAME;
-                    }
-                }
-                case _CHECK_FUNCTION_EXACT_ARGS: {
-                    switch (this_instr[2].opcode) {
-                        case _CHECK_STACK_SPACE: {
-                            switch (this_instr[3].opcode) {
-                                case _INIT_CALL_PY_EXACT_ARGS: {
-                                    switch (this_instr[4].opcode) {
-                                        case _PUSH_FRAME: {
-                                            switch (this_instr[5].opcode) {
-                                                default:
-                                                *move_forward_by = 5;
-                                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                                            }
-                                        }
-                                        default:
-                                        *move_forward_by = 4;
-                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                                    }
-                                }
-                                case _PUSH_FRAME: {
-                                    switch (this_instr[4].opcode) {
-                                        default:
-                                        *move_forward_by = 4;
-                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                                    }
-                                }
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                            }
-                        }
-                        case _INIT_CALL_PY_EXACT_ARGS: {
-                            switch (this_instr[3].opcode) {
-                                case _PUSH_FRAME: {
-                                    switch (this_instr[4].opcode) {
-                                        default:
-                                        *move_forward_by = 4;
-                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                                    }
-                                }
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                            }
-                        }
-                        case _PUSH_FRAME: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-                    }
-                }
-                case _CHECK_STACK_SPACE: {
-                    switch (this_instr[2].opcode) {
-                        case _INIT_CALL_PY_EXACT_ARGS: {
-                            switch (this_instr[3].opcode) {
-                                case _PUSH_FRAME: {
-                                    switch (this_instr[4].opcode) {
-                                        default:
-                                        *move_forward_by = 4;
-                                        return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                                    }
-                                }
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                            }
-                        }
-                        case _PUSH_FRAME: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-                    }
-                }
-                case _INIT_CALL_PY_EXACT_ARGS: {
-                    switch (this_instr[2].opcode) {
-                        case _PUSH_FRAME: {
-                            switch (this_instr[3].opcode) {
-                                default:
-                                *move_forward_by = 3;
-                                return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                            }
-                        }
-                        default:
-                        *move_forward_by = 2;
-                        return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
+            break;
         }
         case _PY_FRAME_GENERAL: {
             switch (this_instr[1].opcode) {
@@ -3545,8 +4844,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _PY_FRAME_GENERAL____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_METHOD_VERSION: {
             switch (this_instr[1].opcode) {
@@ -3560,11 +4861,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -3572,11 +4875,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_METHOD_VERSION____EXPAND_METHOD____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_METHOD_VERSION____EXPAND_METHOD;
                     }
+                    break;
                 }
                 case _PY_FRAME_GENERAL: {
                     switch (this_instr[2].opcode) {
@@ -3586,11 +4891,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_METHOD_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_METHOD_VERSION____PY_FRAME_GENERAL;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -3598,8 +4905,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_METHOD_VERSION____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _EXPAND_METHOD: {
             switch (this_instr[1].opcode) {
@@ -3611,11 +4920,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _EXPAND_METHOD____PY_FRAME_GENERAL;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -3623,8 +4934,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _EXPAND_METHOD____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_IS_NOT_PY_CALLABLE: {
             switch (this_instr[1].opcode) {
@@ -3636,11 +4949,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL____CHECK_PERIODIC;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL;
                     }
+                    break;
                 }
                 case _CHECK_PERIODIC: {
                     switch (this_instr[2].opcode) {
@@ -3648,8 +4963,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_IS_NOT_PY_CALLABLE____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_NON_PY_GENERAL: {
             switch (this_instr[1].opcode) {
@@ -3659,8 +4976,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_NON_PY_GENERAL____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
             switch (this_instr[1].opcode) {
@@ -3680,11 +4999,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                                 *move_forward_by = 7;
                                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                             }
+                                                            break;
                                                         }
                                                         default:
                                                         *move_forward_by = 6;
                                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                                     }
+                                                    break;
                                                 }
                                                 case _PUSH_FRAME: {
                                                     switch (this_instr[6].opcode) {
@@ -3692,11 +5013,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                             }
+                                            break;
                                         }
                                         case _INIT_CALL_PY_EXACT_ARGS: {
                                             switch (this_instr[5].opcode) {
@@ -3706,11 +5029,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -3718,11 +5043,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _CHECK_STACK_SPACE: {
                                     switch (this_instr[4].opcode) {
@@ -3734,11 +5061,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -3746,11 +5075,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -3760,11 +5091,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -3772,11 +5105,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
                             }
+                            break;
                         }
                         case _CHECK_FUNCTION_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -3790,11 +5125,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -3802,11 +5139,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -3816,11 +5155,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -3828,11 +5169,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_STACK_SPACE: {
                             switch (this_instr[3].opcode) {
@@ -3844,11 +5187,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -3856,11 +5201,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -3870,11 +5217,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -3882,11 +5231,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _CHECK_FUNCTION_VERSION: {
                     switch (this_instr[2].opcode) {
@@ -3902,11 +5253,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -3914,11 +5267,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -3928,11 +5283,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -3940,11 +5297,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_STACK_SPACE: {
                             switch (this_instr[3].opcode) {
@@ -3956,11 +5315,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -3968,11 +5329,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -3982,11 +5345,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -3994,11 +5359,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
                     }
+                    break;
                 }
                 case _CHECK_FUNCTION_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -4012,11 +5379,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -4024,11 +5393,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -4038,11 +5409,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4050,11 +5423,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _CHECK_STACK_SPACE: {
                     switch (this_instr[2].opcode) {
@@ -4066,11 +5441,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4078,11 +5455,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
                     }
+                    break;
                 }
                 case _INIT_CALL_PY_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -4092,11 +5471,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4104,8 +5485,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
             switch (this_instr[1].opcode) {
@@ -4123,11 +5506,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                         *move_forward_by = 6;
                                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                                     }
+                                                    break;
                                                 }
                                                 default:
                                                 *move_forward_by = 5;
                                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                             }
+                                            break;
                                         }
                                         case _PUSH_FRAME: {
                                             switch (this_instr[5].opcode) {
@@ -4135,11 +5520,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                                     }
+                                    break;
                                 }
                                 case _INIT_CALL_PY_EXACT_ARGS: {
                                     switch (this_instr[4].opcode) {
@@ -4149,11 +5536,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -4161,11 +5550,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _CHECK_STACK_SPACE: {
                             switch (this_instr[3].opcode) {
@@ -4177,11 +5568,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -4189,11 +5582,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -4203,11 +5598,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4215,11 +5612,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
                     }
+                    break;
                 }
                 case _CHECK_FUNCTION_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -4233,11 +5632,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                                 *move_forward_by = 5;
                                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                             }
+                                            break;
                                         }
                                         default:
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                                     }
+                                    break;
                                 }
                                 case _PUSH_FRAME: {
                                     switch (this_instr[4].opcode) {
@@ -4245,11 +5646,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
+                            break;
                         }
                         case _INIT_CALL_PY_EXACT_ARGS: {
                             switch (this_instr[3].opcode) {
@@ -4259,11 +5662,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4271,11 +5676,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _CHECK_STACK_SPACE: {
                     switch (this_instr[2].opcode) {
@@ -4287,11 +5694,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4299,11 +5708,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
                     }
+                    break;
                 }
                 case _INIT_CALL_PY_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -4313,11 +5724,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4325,8 +5738,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_FUNCTION_EXACT_ARGS: {
             switch (this_instr[1].opcode) {
@@ -4340,11 +5755,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4352,11 +5769,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                     }
+                    break;
                 }
                 case _INIT_CALL_PY_EXACT_ARGS: {
                     switch (this_instr[2].opcode) {
@@ -4366,11 +5785,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4378,8 +5799,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_STACK_SPACE: {
             switch (this_instr[1].opcode) {
@@ -4391,11 +5814,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4403,8 +5828,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_STACK_SPACE____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _INIT_CALL_PY_EXACT_ARGS: {
             switch (this_instr[1].opcode) {
@@ -4414,8 +5841,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_STR_1: {
             switch (this_instr[1].opcode) {
@@ -4425,8 +5854,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_STR_1____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_TUPLE_1: {
             switch (this_instr[1].opcode) {
@@ -4436,8 +5867,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_TUPLE_1____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_AND_ALLOCATE_OBJECT: {
             switch (this_instr[1].opcode) {
@@ -4449,11 +5882,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4461,8 +5896,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_AND_ALLOCATE_OBJECT____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CREATE_INIT_FRAME: {
             switch (this_instr[1].opcode) {
@@ -4472,8 +5909,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CREATE_INIT_FRAME____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_BUILTIN_CLASS: {
             switch (this_instr[1].opcode) {
@@ -4483,30 +5922,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_BUILTIN_CLASS____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
-        }
-        case _CALL_BUILTIN_O: {
-            switch (this_instr[1].opcode) {
-                case _CHECK_PERIODIC: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _CALL_BUILTIN_O____CHECK_PERIODIC;
-                    }
-                }
-            }
-        }
-        case _CALL_BUILTIN_FAST: {
-            switch (this_instr[1].opcode) {
-                case _CHECK_PERIODIC: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _CALL_BUILTIN_FAST____CHECK_PERIODIC;
-                    }
-                }
-            }
+            break;
         }
         case _CALL_BUILTIN_FAST_WITH_KEYWORDS: {
             switch (this_instr[1].opcode) {
@@ -4516,8 +5935,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_BUILTIN_FAST_WITH_KEYWORDS____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_METHOD_DESCRIPTOR_O: {
             switch (this_instr[1].opcode) {
@@ -4527,8 +5948,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_METHOD_DESCRIPTOR_O____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
             switch (this_instr[1].opcode) {
@@ -4538,8 +5961,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_METHOD_DESCRIPTOR_NOARGS: {
             switch (this_instr[1].opcode) {
@@ -4549,8 +5974,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_METHOD_DESCRIPTOR_NOARGS____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_METHOD_DESCRIPTOR_FAST: {
             switch (this_instr[1].opcode) {
@@ -4560,8 +5987,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_METHOD_DESCRIPTOR_FAST____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_FUNCTION_VERSION_KW: {
             switch (this_instr[1].opcode) {
@@ -4573,11 +6002,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4585,8 +6016,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_FUNCTION_VERSION_KW____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _PY_FRAME_KW: {
             switch (this_instr[1].opcode) {
@@ -4596,8 +6029,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _PY_FRAME_KW____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_METHOD_VERSION_KW: {
             switch (this_instr[1].opcode) {
@@ -4611,11 +6046,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                         *move_forward_by = 4;
                                         return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
                                     }
+                                    break;
                                 }
                                 default:
                                 *move_forward_by = 3;
                                 return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW;
                             }
+                            break;
                         }
                         case _PUSH_FRAME: {
                             switch (this_instr[3].opcode) {
@@ -4623,11 +6060,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW;
                     }
+                    break;
                 }
                 case _PY_FRAME_KW: {
                     switch (this_instr[2].opcode) {
@@ -4637,11 +6076,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_METHOD_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_METHOD_VERSION_KW____PY_FRAME_KW;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4649,8 +6090,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_METHOD_VERSION_KW____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _EXPAND_METHOD_KW: {
             switch (this_instr[1].opcode) {
@@ -4662,11 +6105,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _EXPAND_METHOD_KW____PY_FRAME_KW;
                     }
+                    break;
                 }
                 case _PUSH_FRAME: {
                     switch (this_instr[2].opcode) {
@@ -4674,8 +6119,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _EXPAND_METHOD_KW____PUSH_FRAME;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CHECK_IS_NOT_PY_CALLABLE_KW: {
             switch (this_instr[1].opcode) {
@@ -4687,11 +6134,13 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                                 *move_forward_by = 3;
                                 return _CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY____CHECK_PERIODIC;
                             }
+                            break;
                         }
                         default:
                         *move_forward_by = 2;
                         return _CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY;
                     }
+                    break;
                 }
                 case _CHECK_PERIODIC: {
                     switch (this_instr[2].opcode) {
@@ -4699,8 +6148,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CHECK_IS_NOT_PY_CALLABLE_KW____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _CALL_KW_NON_PY: {
             switch (this_instr[1].opcode) {
@@ -4710,8 +6161,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _CALL_KW_NON_PY____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
         case _MAKE_CALLARGS_A_TUPLE: {
             switch (this_instr[1].opcode) {
@@ -4721,8 +6174,10 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         *move_forward_by = 2;
                         return _MAKE_CALLARGS_A_TUPLE____CHECK_PERIODIC;
                     }
+                    break;
                 }
             }
+            break;
         }
     }
     return -1;
