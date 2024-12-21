@@ -45,8 +45,6 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     for uop in sorted(analysis.uops.values(), key=lambda t: t.name):
         if uop.is_viable() and uop.properties.tier != 1:
             out.emit(f'[{uop.name}] = "{uop.name}",\n')
-    for super_name, super_uop in sorted(analysis.super_uops.items(), key=lambda t: t[0]):
-        out.emit(f'[{super_name}] = "{super_name}",\n')
     out.emit("};\n")
     out.emit("int _PyUop_num_popped(int opcode, int oparg)\n{\n")
     out.emit("switch(opcode) {\n")
@@ -67,41 +65,6 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     out.emit("#endif // NEED_OPCODE_METADATA\n\n")
 
 
-def generate_super_uop_matcher(analysis: Analysis, out: CWriter) -> None:
-    out.emit("extern int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by);\n\n")
-    out.emit("#ifdef NEED_OPCODE_METADATA\n")
-    out.emit("int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by) {\n")
-    for super_name, super_uop in analysis.super_uops.items():
-        not_viable = False
-        for uop in super_uop:
-            if not_viable:
-                break
-            if uop.properties.tier == 1:
-                not_viable = True
-                break
-            if uop.properties.oparg_and_1:
-                not_viable = True
-                break
-            if uop.is_super():
-                not_viable = True
-                break
-            why_not_viable = uop.why_not_viable()
-            if why_not_viable is not None:
-                not_viable = True
-                break
-        if not_viable:
-            continue
-        for idx, uop in enumerate(super_uop):
-            out.emit(f"if (this_instr[{idx}].opcode == {uop.name}) {{ \n")
-        out.emit(f"*move_forward_by = {len(super_uop)};\n")
-        out.emit(f"return {super_name};\n")
-        for _ in super_uop:
-            out.emit("}\n")
-    out.emit(f"return -1;\n")
-    out.emit("}\n")
-
-    out.emit("#endif // NEED_OPCODE_METADATA\n\n")
-
 def generate_uop_metadata(
     filenames: list[str], analysis: Analysis, outfile: TextIO
 ) -> None:
@@ -111,7 +74,6 @@ def generate_uop_metadata(
         out.emit("#include <stdint.h>\n")
         out.emit('#include "pycore_uop_ids.h"\n')
         generate_names_and_flags(analysis, out)
-        generate_super_uop_matcher(analysis, out)
 
 
 arg_parser = argparse.ArgumentParser(

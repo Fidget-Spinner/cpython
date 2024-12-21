@@ -29,7 +29,6 @@ class Properties:
     oparg_and_1: bool = False
     const_oparg: int = -1
     needs_prev: bool = False
-    super_uop: bool = False
 
     def dump(self, indent: str) -> None:
         simple_properties = self.__dict__.copy()
@@ -298,8 +297,6 @@ class Analysis:
     opmap: dict[str, int]
     have_arg: int
     min_instrumented: int
-    super_uops: dict[str, list[Uop]]
-
 
 def analysis_error(message: str, tkn: lexer.Token) -> SyntaxError:
     # To do -- support file and line output
@@ -1126,30 +1123,11 @@ def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop)
         raise analysis_error(f"No instruction containing the uop '{uop.name}' was found", tkn)
     return size
 
-def form_uop_valid_permutations(constituents: list[Uop]) -> list[list[Uop]]:
-    # For a Uop, of A, B, C, the order must be preserved,
-    # So ABC, BC are fine, but CB etc are not.
-    if not constituents:
-        return [[]]
-    pick: Uop = constituents[0]
-    # Either we pick it to add to the permutations
-    added = []
-    if pick.replicates_children:
-        for replicate in pick.replicates_children:
-            added += [[replicate] + rest for rest in form_uop_valid_permutations(constituents[1:])]
-    else:
-        added += [[pick] + rest for rest in form_uop_valid_permutations(constituents[1:])]
-    # Or we don't.
-    not_added = form_uop_valid_permutations(constituents[1:])
-    return added + not_added
-
-
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}
     uops: dict[str, Uop] = {}
     families: dict[str, Family] = {}
     pseudos: dict[str, PseudoInstruction] = {}
-    super_uops: dict[str, list[Uop]] = {}
     for node in forest:
         match node:
             case parser.InstDef(name):
@@ -1199,26 +1177,9 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         inst.family = families["BINARY_OP"]
         families["BINARY_OP"].members.append(inst)
 
-    # Create supers from macros:
-    for _, inst in instructions.items():
-        super_constituents: list[Uop] = []
-        for part in inst.parts:
-            if isinstance(part, Uop):
-                if part.properties.tier == 1:
-                    continue
-                if part.properties.needs_this:
-                    continue
-                super_constituents.append(part)
-        if len(super_constituents) == 0:
-            continue
-        permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if MAX_SUPER_LEN >= len(sup) > 1]
-        for permutation in permutations:
-            sup_name = '___'.join([uop.name for uop in permutation])
-            super_uops[sup_name] = permutation
-
     opmap, first_arg, min_instrumented = assign_opcodes(instructions, families, pseudos)
     return Analysis(
-        instructions, uops, families, pseudos, opmap, first_arg, min_instrumented, super_uops
+        instructions, uops, families, pseudos, opmap, first_arg, min_instrumented
     )
 
 
