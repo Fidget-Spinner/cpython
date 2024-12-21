@@ -4,8 +4,12 @@ import lexer
 import parser
 import re
 from typing import Optional
+from pathlib import Path
 
 MAX_SUPER_LEN = 7
+
+ROOT = Path(__file__).parent.parent.parent.resolve()
+SUPERS_INPUT = ROOT / "Tools/cases_generator/superinstructions.csv"
 
 @dataclass
 class Properties:
@@ -1126,134 +1130,36 @@ def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop)
         raise analysis_error(f"No instruction containing the uop '{uop.name}' was found", tkn)
     return size
 
-def form_uop_valid_permutations(constituents: list[Uop]) -> list[list[Uop]]:
-    # For a Uop, of A, B, C, the order must be preserved,
-    # So ABC, BC are fine, but CB etc are not.
-    if not constituents:
-        return [[]]
-    pick: Uop = constituents[0]
-    # Either we pick it to add to the permutations
-    added = []
-    if pick.replicates_children:
-        for replicate in pick.replicates_children:
-            added += [[replicate] + rest for rest in form_uop_valid_permutations(constituents[1:])]
-    else:
-        added += [[pick] + rest for rest in form_uop_valid_permutations(constituents[1:])]
-    # Or we don't.
-    not_added = form_uop_valid_permutations(constituents[1:])
-    return added + not_added
-
-MANUAL_SUPER_UOPS = (
-    "_ITER_CHECK_RANGE _GUARD_NOT_EXHAUSTED_RANGE _ITER_NEXT_RANGE",
-    "_ITER_CHECK_LIST _GUARD_NOT_EXHAUSTED_LIST _ITER_NEXT_LIST",
-    "_ITER_CHECK_TUPLE _GUARD_NOT_EXHAUSTED_TUPLE _ITER_NEXT_TUPLE",
-    "_MAKE_WARM _SET_IP",
-    "_CHECK_PERIODIC _CHECK_VALIDITY",
-    "_LOAD_SMALL_INT_1 _GUARD_NOS_INT",
-    "_CHECK_MANAGED_OBJECT_HAS_VALUES _LOAD_ATTR_INSTANCE_VALUE_0",
-    "_CHECK_MANAGED_OBJECT_HAS_VALUES _LOAD_ATTR_INSTANCE_VALUE_1",
-    "_CHECK_VALIDITY _ITER_CHECK_LIST",
-    "_ITER_CHECK_LIST _GUARD_NOT_EXHAUSTED_LIST",
-    "_LOAD_FAST_4 _SET_IP",
-    "_CHECK_VALIDITY _GUARD_IS_FALSE_POP",
-    "_CHECK_FUNCTION _LOAD_CONST_INLINE_WITH_NULL",
-    "_LOAD_FAST _SET_IP",
-    "_GUARD_TYPE_VERSION _LOAD_ATTR_METHOD_NO_DICT",
-    "_SET_IP _BINARY_SUBSCR",
-    "_CHECK_PERIODIC _CHECK_VALIDITY_AND_SET_IP",
-    "_GUARD_NOT_EXHAUSTED_LIST _ITER_NEXT_LIST",
-    "_LOAD_CONST_INLINE_WITH_NULL _LOAD_FAST_5",
-    "_SAVE_RETURN_OFFSET _PUSH_FRAME",
-    "_CHECK_VALIDITY _LOAD_SMALL_INT_1",
-    "_CHECK_VALIDITY _LOAD_FAST",
-    "_COMPARE_OP_INT _GUARD_IS_TRUE_POP",
-    "_CONTAINS_OP_SET _CHECK_VALIDITY",
-    "_GUARD_NOS_INT _BINARY_OP_ADD_INT",
-    "_SET_IP _CONTAINS_OP_SET",
-    "_GUARD_TYPE_VERSION _CHECK_MANAGED_OBJECT_HAS_VALUES",
-    "_LOAD_FAST_1 _SET_IP",
-    "_LOAD_CONST_INLINE _SET_IP",
-    "_BINARY_SUBSCR _CHECK_VALIDITY",
-    "_LOAD_FAST_5 _LOAD_FAST_4",
-    "_SET_IP _CHECK_FUNCTION_VERSION",
-    "_CHECK_FUNCTION_VERSION _CHECK_FUNCTION_EXACT_ARGS",
-    "_CHECK_VALIDITY_AND_SET_IP _FOR_ITER_TIER_TWO",
-    "_COMPARE_OP_STR _GUARD_IS_FALSE_POP",
-    "_LOAD_FAST_7 _LOAD_CONST_INLINE_BORROW",
-    "_GUARD_IS_FALSE_POP _LOAD_FAST_7",
-    "_CHECK_VALIDITY _STORE_FAST",
-    "_LOAD_FAST _LOAD_FAST",
-    "_GUARD_NOS_INT _BINARY_OP_SUBTRACT_INT",
-    "_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT _GUARD_KEYS_VERSION",
-    "_CALL_LEN _CHECK_VALIDITY",
-    "_CHECK_VALIDITY _LOAD_FAST_0",
-    "_MAKE_WARM _TIER2_RESUME_CHECK",
-    "_SET_IP _CALL_LEN",
-    "_GUARD_KEYS_VERSION _LOAD_ATTR_METHOD_WITH_VALUES",
-    "_LOAD_CONST_INLINE_BORROW _SET_IP",
-    "_LOAD_SMALL_INT_1 _BINARY_OP_ADD_INT",
-    "_STORE_FAST _LOAD_FAST",
-    "_LOAD_FAST _GUARD_TYPE_VERSION",
-    "_LOAD_FAST_5 _SET_IP",
-    "_LOAD_FAST_3 _SET_IP",
-    "_TO_BOOL_BOOL _GUARD_IS_FALSE_POP",
-    "_PUSH_FRAME _RESUME_CHECK",
-    "_LOAD_FAST_0 _LOAD_FAST_1",
-    "_GUARD_NOS_INT _COMPARE_OP_INT",
-    "_PUSH_FRAME _DYNAMIC_EXIT",
-    "_LOAD_FAST_4 _CHECK_FUNCTION",
-    "_FOR_ITER_TIER_TWO _CHECK_VALIDITY",
-    "_LOAD_FAST_1 _BINARY_SUBSCR_STR_INT",
-    "_GUARD_TYPE_VERSION _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT",
-    "_LOAD_FAST_1 _LOAD_SMALL_INT_1",
-    "_LOAD_FAST_4 _LOAD_SMALL_INT_1",
-    "_BINARY_OP_ADD_INT _STORE_FAST_1",
-    "_MAKE_WARM _POP_TOP",
-    "_CALL_BUILTIN_FAST _CHECK_PERIODIC",
-    "_CHECK_VALIDITY _TO_BOOL_BOOL",
-    "_COPY _SET_IP",
-    "_SWAP _SWAP",
-    "_COPY _COPY",
-    "_SET_IP _CALL_BUILTIN_FAST",
-    "_GUARD_IS_FALSE_POP _LOAD_FAST_1",
-    "_STORE_FAST_7 _LOAD_FAST_7",
-    "_LOAD_FAST_0 _CHECK_MANAGED_OBJECT_HAS_VALUES",
-    "_SET_IP _BINARY_SUBSCR_DICT",
-    "_LOAD_FAST_5 _LOAD_CONST_INLINE_BORROW",
-    "_SET_IP _LOAD_DEREF",
-    "_CHECK_FUNCTION _LOAD_CONST_INLINE_BORROW_WITH_NULL",
-    "_LOAD_FAST _LOAD_CONST_INLINE",
-    "_CHECK_VALIDITY _CALL_LIST_APPEND",
-    "_LOAD_DEREF _CHECK_VALIDITY",
-    "_BINARY_OP_ADD_INT _SET_IP",
-    "_GUARD_BOTH_UNICODE _COMPARE_OP_STR",
-    "_LOAD_FAST_2 _SET_IP",
-    "_LOAD_CONST_INLINE_BORROW _GUARD_BOTH_UNICODE",
-    "_CHECK_VALIDITY _GUARD_IS_TRUE_POP",
-    "_LOAD_ATTR_METHOD_NO_DICT _LOAD_FAST_5",
-    "_BINARY_SUBSCR_STR_INT _STORE_FAST_7",
-    "_LOAD_FAST_7 _LOAD_FAST_3",
-    "_TO_BOOL_BOOL _GUARD_IS_TRUE_POP",
-    "_BINARY_OP_SUBTRACT_INT _GUARD_NOS_INT",
-    "_LOAD_CONST_INLINE_BORROW _COMPARE_OP_STR",
-    "_RESUME_CHECK _LOAD_FAST_0",
-    "_BINARY_OP _CHECK_VALIDITY",
-    "_CALL_BUILTIN_O _CHECK_PERIODIC",
-    "_CHECK_VALIDITY _LOAD_FAST_1",
-)
+# def form_uop_valid_permutations(constituents: list[Uop]) -> list[list[Uop]]:
+#     # For a Uop, of A, B, C, the order must be preserved,
+#     # So ABC, BC are fine, but CB etc are not.
+#     if not constituents:
+#         return [[]]
+#     pick: Uop = constituents[0]
+#     # Either we pick it to add to the permutations
+#     added = []
+#     if pick.replicates_children:
+#         for replicate in pick.replicates_children:
+#             added += [[replicate] + rest for rest in form_uop_valid_permutations(constituents[1:])]
+#     else:
+#         added += [[pick] + rest for rest in form_uop_valid_permutations(constituents[1:])]
+#     # Or we don't.
+#     not_added = form_uop_valid_permutations(constituents[1:])
+#     return added + not_added
 
 def additional_superuops(uops: dict[str, Uop]):
     permutations = []
-    for line in MANUAL_SUPER_UOPS:
-        uop_names = line.split(" ")
-        uops_mapped = []
-        for name in uop_names:
-            try:
-                uops_mapped.append(uops[name])
-            except KeyError:
-                uops_mapped.append(uops[name[1:]])
-        permutations.append(uops_mapped)
-    return permutations
+    with open(SUPERS_INPUT) as fp:
+        for line in fp.readlines():
+            uop_names = line.strip().split(",")
+            uops_mapped = []
+            for name in uop_names:
+                try:
+                    uops_mapped.append(uops[name])
+                except KeyError:
+                    uops_mapped.append(uops[name[1:]])
+            permutations.append(uops_mapped)
+        return permutations
 
 
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
@@ -1323,8 +1229,8 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
                 super_constituents.append(part)
         if len(super_constituents) == 0:
             continue
-        permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if MAX_SUPER_LEN >= len(sup) > 1]
-        permutations += additional_superuops(uops)
+        # permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if MAX_SUPER_LEN >= len(sup) > 1]
+        permutations = additional_superuops(uops)
         for permutation in permutations:
             sup_name = '___'.join([uop.name for uop in permutation])
             super_uops[sup_name] = permutation
