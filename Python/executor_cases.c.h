@@ -513,6 +513,7 @@
             }
             // _PUSH_FRAME
             {
+                oparg = CURRENT_OPARG(3);
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.
                 assert(tstate->interp->eval_frame == NULL);
@@ -813,7 +814,7 @@
         }
 
         case CALL: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _DO_CALL, and can't ignore specializing) */
             fprintf(stderr, "Executing CALL\n");
             Py_UNREACHABLE();
             break;
@@ -912,6 +913,7 @@
             }
             // _PUSH_FRAME
             {
+                oparg = CURRENT_OPARG(3);
                 new_frame = init_frame;
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.
@@ -930,16 +932,249 @@
         }
 
         case CALL_BOUND_METHOD_EXACT_ARGS: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing CALL_BOUND_METHOD_EXACT_ARGS\n");
-            Py_UNREACHABLE();
+            _PyStackRef *callable;
+            _PyStackRef *null;
+            _PyStackRef *func;
+            _PyStackRef *self;
+            _PyStackRef *self_or_null;
+            _PyStackRef *args;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _CHECK_CALL_BOUND_METHOD_EXACT_ARGS
+            {
+                oparg = CURRENT_OPARG(1);
+                null = &stack_pointer[-1 - oparg];
+                callable = &stack_pointer[-2 - oparg];
+                if (!PyStackRef_IsNull(null[0])) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(callable[0])) != &PyMethod_Type) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _INIT_CALL_BOUND_METHOD_EXACT_ARGS
+            {
+                oparg = CURRENT_OPARG(2);
+                func = &stack_pointer[-2 - oparg];
+                self = &stack_pointer[-1 - oparg];
+                (void)null;
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                STAT_INC(CALL, hit);
+                self[0] = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_self);
+                _PyStackRef temp = callable[0];
+                func[0] = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_func);
+                PyStackRef_CLOSE(temp);
+            }
+            // flush
+            // _CHECK_FUNCTION_VERSION
+            {
+                oparg = CURRENT_OPARG(3);
+                callable = &stack_pointer[-2 - oparg];
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND0(3);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                if (!PyFunction_Check(callable_o)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(3);
+                }
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                if (func->func_version != func_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(3);
+                }
+            }
+            // _CHECK_FUNCTION_EXACT_ARGS
+            {
+                oparg = CURRENT_OPARG(4);
+                self_or_null = &stack_pointer[-1 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                assert(PyFunction_Check(callable_o));
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                PyCodeObject *code = (PyCodeObject *)func->func_code;
+                if (code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0]))) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(4);
+                }
+            }
+            // _CHECK_STACK_SPACE
+            {
+                oparg = CURRENT_OPARG(5);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                PyCodeObject *code = (PyCodeObject *)func->func_code;
+                if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(5);
+                }
+                if (tstate->py_recursion_remaining <= 1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(5);
+                }
+            }
+            // _INIT_CALL_PY_EXACT_ARGS
+            {
+                oparg = CURRENT_OPARG(6);
+                args = &stack_pointer[-oparg];
+                int has_self = !PyStackRef_IsNull(self_or_null[0]);
+                STAT_INC(CALL, hit);
+                new_frame = _PyFrame_PushUnchecked(tstate, callable[0], oparg + has_self, frame);
+                _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
+                new_frame->localsplus[0] = self_or_null[0];
+                for (int i = 0; i < oparg; i++) {
+                    first_non_self_local[i] = args[i];
+                }
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(7);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(8);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                stack_pointer += -2 - oparg;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
         case CALL_BOUND_METHOD_GENERAL: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing CALL_BOUND_METHOD_GENERAL\n");
-            Py_UNREACHABLE();
+            _PyStackRef *callable;
+            _PyStackRef *null;
+            _PyStackRef *method;
+            _PyStackRef *self;
+            _PyStackRef *self_or_null;
+            _PyStackRef *args;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _CHECK_METHOD_VERSION
+            {
+                oparg = CURRENT_OPARG(1);
+                null = &stack_pointer[-1 - oparg];
+                callable = &stack_pointer[-2 - oparg];
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND0(1);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                if (Py_TYPE(callable_o) != &PyMethod_Type) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                PyObject *func = ((PyMethodObject *)callable_o)->im_func;
+                if (!PyFunction_Check(func)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if (((PyFunctionObject *)func)->func_version != func_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if (!PyStackRef_IsNull(null[0])) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _EXPAND_METHOD
+            {
+                oparg = CURRENT_OPARG(2);
+                method = &stack_pointer[-2 - oparg];
+                self = &stack_pointer[-1 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                assert(PyStackRef_IsNull(null[0]));(void)null;
+                assert(Py_TYPE(callable_o) == &PyMethod_Type);
+                self[0] = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_self);
+                _PyStackRef temp = callable[0];
+                method[0] = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_func);
+                assert(PyStackRef_FunctionCheck(method[0]));
+                PyStackRef_CLOSE(temp);
+            }
+            // flush
+            // _PY_FRAME_GENERAL
+            {
+                oparg = CURRENT_OPARG(3);
+                args = &stack_pointer[-oparg];
+                self_or_null = &stack_pointer[-1 - oparg];
+                callable = &stack_pointer[-2 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                // oparg counts all of the args, but *not* self:
+                int total_args = oparg;
+                if (!PyStackRef_IsNull(self_or_null[0])) {
+                    args--;
+                    total_args++;
+                }
+                assert(Py_TYPE(callable_o) == &PyFunction_Type);
+                int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
+                PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _PyInterpreterFrame *temp = _PyEvalFramePushAndInit(
+                    tstate, callable[0], locals,
+                    args, total_args, NULL, frame
+                );
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                // The frame has stolen all the arguments from the stack.
+                stack_pointer += -2 - oparg;
+                assert(WITHIN_STACK_BOUNDS());
+                if (temp == NULL) {
+                    JUMP_TO_ERROR(3);
+                }
+                new_frame = temp;
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(4);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(5);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
@@ -1247,7 +1482,7 @@
         }
 
         case CALL_FUNCTION_EX: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _DO_CALL_FUNCTION_EX, and can't ignore specializing) */
             fprintf(stderr, "Executing CALL_FUNCTION_EX\n");
             Py_UNREACHABLE();
             break;
@@ -1340,16 +1575,130 @@
         }
 
         case CALL_KW: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _DO_CALL_KW, and can't ignore specializing) */
             fprintf(stderr, "Executing CALL_KW\n");
             Py_UNREACHABLE();
             break;
         }
 
         case CALL_KW_BOUND_METHOD: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing CALL_KW_BOUND_METHOD\n");
-            Py_UNREACHABLE();
+            _PyStackRef *callable;
+            _PyStackRef *null;
+            _PyStackRef kwnames;
+            _PyStackRef *method;
+            _PyStackRef *self;
+            _PyStackRef *self_or_null;
+            _PyStackRef *args;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _CHECK_METHOD_VERSION_KW
+            {
+                oparg = CURRENT_OPARG(1);
+                null = &stack_pointer[-2 - oparg];
+                callable = &stack_pointer[-3 - oparg];
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND0(1);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                if (Py_TYPE(callable_o) != &PyMethod_Type) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                PyObject *func = ((PyMethodObject *)callable_o)->im_func;
+                if (!PyFunction_Check(func)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if (((PyFunctionObject *)func)->func_version != func_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if (!PyStackRef_IsNull(null[0])) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _EXPAND_METHOD_KW
+            {
+                oparg = CURRENT_OPARG(2);
+                method = &stack_pointer[-3 - oparg];
+                self = &stack_pointer[-2 - oparg];
+                _PyStackRef callable_s = callable[0];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable_s);
+                assert(PyStackRef_IsNull(null[0]));
+                assert(Py_TYPE(callable_o) == &PyMethod_Type);
+                self[0] = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_self);
+                method[0] = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_func);
+                assert(PyStackRef_FunctionCheck(method[0]));
+                PyStackRef_CLOSE(callable_s);
+            }
+            // flush
+            // _PY_FRAME_KW
+            {
+                oparg = CURRENT_OPARG(3);
+                kwnames = stack_pointer[-1];
+                args = &stack_pointer[-1 - oparg];
+                self_or_null = &stack_pointer[-2 - oparg];
+                callable = &stack_pointer[-3 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                // oparg counts all of the args, but *not* self:
+                int total_args = oparg;
+                if (!PyStackRef_IsNull(self_or_null[0])) {
+                    args--;
+                    total_args++;
+                }
+                PyObject *kwnames_o = PyStackRef_AsPyObjectBorrow(kwnames);
+                int positional_args = total_args - (int)PyTuple_GET_SIZE(kwnames_o);
+                assert(Py_TYPE(callable_o) == &PyFunction_Type);
+                int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
+                PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _PyInterpreterFrame *temp = _PyEvalFramePushAndInit(
+                    tstate, callable[0], locals,
+                    args, positional_args, kwnames_o, frame
+                );
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                PyStackRef_CLOSE(kwnames);
+                // The frame has stolen all the arguments from the stack,
+                // so there is no need to clean them up.
+                stack_pointer += -3 - oparg;
+                assert(WITHIN_STACK_BOUNDS());
+                if (temp == NULL) {
+                    JUMP_TO_ERROR(3);
+                }
+                new_frame = temp;
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(4);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(5);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
@@ -1442,9 +1791,95 @@
         }
 
         case CALL_KW_PY: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing CALL_KW_PY\n");
-            Py_UNREACHABLE();
+            _PyStackRef *callable;
+            _PyStackRef *self_or_null;
+            _PyStackRef kwnames;
+            _PyStackRef *args;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _CHECK_FUNCTION_VERSION_KW
+            {
+                oparg = CURRENT_OPARG(1);
+                callable = &stack_pointer[-3 - oparg];
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND0(1);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                if (!PyFunction_Check(callable_o)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                if (func->func_version != func_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _PY_FRAME_KW
+            {
+                oparg = CURRENT_OPARG(2);
+                kwnames = stack_pointer[-1];
+                args = &stack_pointer[-1 - oparg];
+                self_or_null = &stack_pointer[-2 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                // oparg counts all of the args, but *not* self:
+                int total_args = oparg;
+                if (!PyStackRef_IsNull(self_or_null[0])) {
+                    args--;
+                    total_args++;
+                }
+                PyObject *kwnames_o = PyStackRef_AsPyObjectBorrow(kwnames);
+                int positional_args = total_args - (int)PyTuple_GET_SIZE(kwnames_o);
+                assert(Py_TYPE(callable_o) == &PyFunction_Type);
+                int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
+                PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _PyInterpreterFrame *temp = _PyEvalFramePushAndInit(
+                    tstate, callable[0], locals,
+                    args, positional_args, kwnames_o, frame
+                );
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                PyStackRef_CLOSE(kwnames);
+                // The frame has stolen all the arguments from the stack,
+                // so there is no need to clean them up.
+                stack_pointer += -3 - oparg;
+                assert(WITHIN_STACK_BOUNDS());
+                if (temp == NULL) {
+                    JUMP_TO_ERROR(2);
+                }
+                new_frame = temp;
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(3);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(4);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
@@ -1956,16 +2391,190 @@
         }
 
         case CALL_PY_EXACT_ARGS: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing CALL_PY_EXACT_ARGS\n");
-            Py_UNREACHABLE();
+            _PyStackRef *callable;
+            _PyStackRef *self_or_null;
+            _PyStackRef *args;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _CHECK_FUNCTION_VERSION
+            {
+                oparg = CURRENT_OPARG(1);
+                callable = &stack_pointer[-2 - oparg];
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND0(1);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                if (!PyFunction_Check(callable_o)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                if (func->func_version != func_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _CHECK_FUNCTION_EXACT_ARGS
+            {
+                oparg = CURRENT_OPARG(2);
+                self_or_null = &stack_pointer[-1 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                assert(PyFunction_Check(callable_o));
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                PyCodeObject *code = (PyCodeObject *)func->func_code;
+                if (code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0]))) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(2);
+                }
+            }
+            // _CHECK_STACK_SPACE
+            {
+                oparg = CURRENT_OPARG(3);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                PyCodeObject *code = (PyCodeObject *)func->func_code;
+                if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(3);
+                }
+                if (tstate->py_recursion_remaining <= 1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(3);
+                }
+            }
+            // _INIT_CALL_PY_EXACT_ARGS
+            {
+                oparg = CURRENT_OPARG(4);
+                args = &stack_pointer[-oparg];
+                int has_self = !PyStackRef_IsNull(self_or_null[0]);
+                STAT_INC(CALL, hit);
+                new_frame = _PyFrame_PushUnchecked(tstate, callable[0], oparg + has_self, frame);
+                _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
+                new_frame->localsplus[0] = self_or_null[0];
+                for (int i = 0; i < oparg; i++) {
+                    first_non_self_local[i] = args[i];
+                }
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(5);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(6);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                stack_pointer += -2 - oparg;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
         case CALL_PY_GENERAL: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing CALL_PY_GENERAL\n");
-            Py_UNREACHABLE();
+            _PyStackRef *callable;
+            _PyStackRef *self_or_null;
+            _PyStackRef *args;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _CHECK_FUNCTION_VERSION
+            {
+                oparg = CURRENT_OPARG(1);
+                callable = &stack_pointer[-2 - oparg];
+                uint32_t func_version = (uint32_t)CURRENT_OPERAND0(1);
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                if (!PyFunction_Check(callable_o)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                PyFunctionObject *func = (PyFunctionObject *)callable_o;
+                if (func->func_version != func_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _PY_FRAME_GENERAL
+            {
+                oparg = CURRENT_OPARG(2);
+                args = &stack_pointer[-oparg];
+                self_or_null = &stack_pointer[-1 - oparg];
+                PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
+                // oparg counts all of the args, but *not* self:
+                int total_args = oparg;
+                if (!PyStackRef_IsNull(self_or_null[0])) {
+                    args--;
+                    total_args++;
+                }
+                assert(Py_TYPE(callable_o) == &PyFunction_Type);
+                int code_flags = ((PyCodeObject*)PyFunction_GET_CODE(callable_o))->co_flags;
+                PyObject *locals = code_flags & CO_OPTIMIZED ? NULL : Py_NewRef(PyFunction_GET_GLOBALS(callable_o));
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _PyInterpreterFrame *temp = _PyEvalFramePushAndInit(
+                    tstate, callable[0], locals,
+                    args, total_args, NULL, frame
+                );
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                // The frame has stolen all the arguments from the stack.
+                stack_pointer += -2 - oparg;
+                assert(WITHIN_STACK_BOUNDS());
+                if (temp == NULL) {
+                    JUMP_TO_ERROR(2);
+                }
+                new_frame = temp;
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(3);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(4);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
@@ -2184,7 +2793,7 @@
         }
 
         case CLEANUP_THROW: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _CLEANUP_THROW, and can't ignore specializing) */
             fprintf(stderr, "Executing CLEANUP_THROW\n");
             Py_UNREACHABLE();
             break;
@@ -2664,7 +3273,7 @@
         }
 
         case END_ASYNC_FOR: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _END_ASYNC_FOR, and can't ignore specializing) */
             fprintf(stderr, "Executing END_ASYNC_FOR\n");
             Py_UNREACHABLE();
             break;
@@ -2695,7 +3304,7 @@
         }
 
         case ENTER_EXECUTOR: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _ENTER_EXECUTOR, and can't ignore specializing) */
             fprintf(stderr, "Executing ENTER_EXECUTOR\n");
             Py_UNREACHABLE();
             break;
@@ -2769,7 +3378,7 @@
         }
 
         case FOR_ITER: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _FOR_ITER, and can't ignore specializing) */
             fprintf(stderr, "Executing FOR_ITER\n");
             Py_UNREACHABLE();
             break;
@@ -2812,6 +3421,7 @@
             }
             // _PUSH_FRAME
             {
+                oparg = CURRENT_OPARG(2);
                 new_frame = gen_frame;
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.
@@ -3164,7 +3774,7 @@
         }
 
         case INSTRUMENTED_CALL: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _MONITOR_CALL, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_CALL\n");
             Py_UNREACHABLE();
             break;
@@ -3175,49 +3785,49 @@
         }
 
         case INSTRUMENTED_CALL_KW: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_CALL_KW, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_CALL_KW\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_END_FOR: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_END_FOR, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_END_FOR\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_END_SEND: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_END_SEND, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_END_SEND\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_FOR_ITER: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_FOR_ITER, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_FOR_ITER\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_INSTRUCTION: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_INSTRUCTION, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_INSTRUCTION\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_JUMP_BACKWARD: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _MONITOR_JUMP_BACKWARD, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_JUMP_BACKWARD\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_JUMP_FORWARD: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_JUMP_FORWARD, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_JUMP_FORWARD\n");
             Py_UNREACHABLE();
             break;
@@ -3231,63 +3841,63 @@
         }
 
         case INSTRUMENTED_LOAD_SUPER_ATTR: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_LOAD_SUPER_ATTR, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_LOAD_SUPER_ATTR\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_NOT_TAKEN: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_NOT_TAKEN, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_NOT_TAKEN\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_POP_JUMP_IF_FALSE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_POP_JUMP_IF_FALSE, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_POP_JUMP_IF_FALSE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NONE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_POP_JUMP_IF_NONE, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_POP_JUMP_IF_NONE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NOT_NONE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_POP_JUMP_IF_NOT_NONE, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_POP_JUMP_IF_NOT_NONE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_POP_JUMP_IF_TRUE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _INSTRUMENTED_POP_JUMP_IF_TRUE, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_POP_JUMP_IF_TRUE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_RESUME: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _LOAD_BYTECODE, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_RESUME\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_RETURN_VALUE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _RETURN_VALUE_EVENT, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_RETURN_VALUE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case INSTRUMENTED_YIELD_VALUE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _YIELD_VALUE_EVENT, and can't ignore specializing) */
             fprintf(stderr, "Executing INSTRUMENTED_YIELD_VALUE\n");
             Py_UNREACHABLE();
             break;
@@ -3327,7 +3937,7 @@
         }
 
         case JUMP_BACKWARD: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _JUMP_BACKWARD, and can't ignore specializing) */
             fprintf(stderr, "Executing JUMP_BACKWARD\n");
             Py_UNREACHABLE();
             break;
@@ -3875,9 +4485,84 @@
         }
 
         case LOAD_ATTR_PROPERTY: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
-            fprintf(stderr, "Executing LOAD_ATTR_PROPERTY\n");
-            Py_UNREACHABLE();
+            _PyStackRef owner;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 1 cache entry */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _GUARD_TYPE_VERSION
+            {
+                owner = stack_pointer[-1];
+                uint32_t type_version = (uint32_t)CURRENT_OPERAND0(1);
+                PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
+                assert(type_version != 0);
+                if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            /* Skip 2 cache entries */
+            // _LOAD_ATTR_PROPERTY_FRAME
+            {
+                oparg = CURRENT_OPARG(2);
+                PyObject *fget = (PyObject *)CURRENT_OPERAND0(2);
+                assert((oparg & 1) == 0);
+                assert(Py_IS_TYPE(fget, &PyFunction_Type));
+                PyFunctionObject *f = (PyFunctionObject *)fget;
+                PyCodeObject *code = (PyCodeObject *)f->func_code;
+                if ((code->co_flags & (CO_VARKEYWORDS | CO_VARARGS | CO_OPTIMIZED)) != CO_OPTIMIZED) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(2);
+                }
+                if (code->co_kwonlyargcount) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(2);
+                }
+                if (code->co_argcount != 1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(2);
+                }
+                if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(2);
+                }
+                STAT_INC(LOAD_ATTR, hit);
+                new_frame = _PyFrame_PushUnchecked(tstate, PyStackRef_FromPyObjectNew(fget), 1, frame);
+                new_frame->localsplus[0] = owner;(void)owner;
+            }
+            // _SAVE_RETURN_OFFSET
+            {
+                oparg = CURRENT_OPARG(3);
+                #if TIER_ONE
+                frame->return_offset = (uint16_t)(next_instr - this_instr);
+                #endif
+                #if TIER_TWO
+                frame->return_offset = oparg;
+                #endif
+            }
+            // _PUSH_FRAME
+            {
+                oparg = CURRENT_OPARG(4);
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;(void)new_frame;
+                stack_pointer += -1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
             break;
         }
 
@@ -4449,7 +5134,7 @@
         }
 
         case LOAD_SUPER_ATTR: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _LOAD_SUPER_ATTR, and can't ignore specializing) */
             fprintf(stderr, "Executing LOAD_SUPER_ATTR\n");
             Py_UNREACHABLE();
             break;
@@ -4702,28 +5387,28 @@
         }
 
         case POP_JUMP_IF_FALSE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _POP_JUMP_IF_FALSE, and can't ignore specializing) */
             fprintf(stderr, "Executing POP_JUMP_IF_FALSE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case POP_JUMP_IF_NONE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _POP_JUMP_IF_TRUE, and can't ignore specializing) */
             fprintf(stderr, "Executing POP_JUMP_IF_NONE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case POP_JUMP_IF_NOT_NONE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _POP_JUMP_IF_FALSE, and can't ignore specializing) */
             fprintf(stderr, "Executing POP_JUMP_IF_NOT_NONE\n");
             Py_UNREACHABLE();
             break;
         }
 
         case POP_JUMP_IF_TRUE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _POP_JUMP_IF_TRUE, and can't ignore specializing) */
             fprintf(stderr, "Executing POP_JUMP_IF_TRUE\n");
             Py_UNREACHABLE();
             break;
@@ -4770,14 +5455,14 @@
         }
 
         case RAISE_VARARGS: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _RAISE_VARARGS, and can't ignore specializing) */
             fprintf(stderr, "Executing RAISE_VARARGS\n");
             Py_UNREACHABLE();
             break;
         }
 
         case RERAISE: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _RERAISE, and can't ignore specializing) */
             fprintf(stderr, "Executing RERAISE\n");
             Py_UNREACHABLE();
             break;
@@ -4790,7 +5475,7 @@
         }
 
         case RESUME: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _LOAD_BYTECODE, and can't ignore specializing) */
             fprintf(stderr, "Executing RESUME\n");
             Py_UNREACHABLE();
             break;
@@ -4879,7 +5564,7 @@
         }
 
         case SEND: {
-            /* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */
+            /* Not viable for tier 2 (needs this_instr in _SEND, and can't ignore specializing) */
             fprintf(stderr, "Executing SEND\n");
             Py_UNREACHABLE();
             break;
@@ -4924,6 +5609,7 @@
             }
             // _PUSH_FRAME
             {
+                oparg = CURRENT_OPARG(2);
                 new_frame = gen_frame;
                 // Write it out explicitly because it's subtly different.
                 // Eventually this should be the only occurrence of this code.

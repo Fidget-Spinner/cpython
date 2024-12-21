@@ -382,7 +382,7 @@ def tier2_not_viable(inst: Instruction) -> str:
         if isinstance(part, Uop):
             if len(part.caches) > 2:
                 return f"/* Not viable for tier 2 (more than 2 cache entries) */\n"
-            if part.properties.needs_this and not "specializing" in part.annotations:
+            if part.properties.needs_this and not "specializing" in part.annotations and part.name not in {"_SAVE_RETURN_OFFSET"}:
                 return f"/* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */\n"
     return ""
 

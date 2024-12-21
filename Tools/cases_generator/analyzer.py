@@ -5,8 +5,6 @@ import parser
 import re
 from typing import Optional
 
-MAX_SUPER_LEN = 7
-
 @dataclass
 class Properties:
     escaping_calls: dict[lexer.Token, tuple[lexer.Token, lexer.Token]]

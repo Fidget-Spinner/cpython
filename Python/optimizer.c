@@ -820,6 +820,9 @@ translate_bytecode_to_trace_baseline(
                                 if (!_PyOpcode_is_viable_for_tier2[opcode]) {
                                     ADD_TO_TRACE(uop, oparg, 0, target);
                                 }
+                                else {
+                                    ADD_TO_TRACE(_PART_OF_A_SUPER, oparg, operand, target);
+                                }
                                 ADD_TO_TRACE(_DYNAMIC_EXIT, 0, 0, 0);
                                 goto done;
                             }
@@ -845,6 +848,9 @@ translate_bytecode_to_trace_baseline(
                                     if (!_PyOpcode_is_viable_for_tier2[opcode]) {
                                         ADD_TO_TRACE(uop, oparg, 0, target);
                                     }
+                                    else {
+                                        ADD_TO_TRACE(_PART_OF_A_SUPER, oparg, 0, target);
+                                    }
                                     ADD_TO_TRACE(_EXIT_TRACE, 0, 0, 0);
                                     goto done;
                                 }
@@ -855,6 +861,9 @@ translate_bytecode_to_trace_baseline(
                                     DPRINTF(2, "Bailing because co_version != func_version\n");
                                     if (!_PyOpcode_is_viable_for_tier2[opcode]) {
                                         ADD_TO_TRACE(uop, oparg, 0, target);
+                                    }
+                                    else {
+                                        ADD_TO_TRACE(_PART_OF_A_SUPER, oparg, 0, target);
                                     }
                                     ADD_TO_TRACE(_EXIT_TRACE, 0, 0, 0);
                                     goto done;
@@ -881,6 +890,9 @@ translate_bytecode_to_trace_baseline(
                                 if (!_PyOpcode_is_viable_for_tier2[opcode]) {
                                     ADD_TO_TRACE(uop, oparg, operand, target);
                                 }
+                                else {
+                                    ADD_TO_TRACE(_PART_OF_A_SUPER, oparg, operand, target);
+                                }
                                 code = new_code;
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
@@ -895,6 +907,9 @@ translate_bytecode_to_trace_baseline(
                             DPRINTF(2, "Bail, new_code == NULL\n");
                             if (!_PyOpcode_is_viable_for_tier2[opcode]) {
                                 ADD_TO_TRACE(uop, oparg, 0, target);
+                            }
+                            else {
+                                ADD_TO_TRACE(_PART_OF_A_SUPER, oparg, 0, target);
                             }
                             ADD_TO_TRACE(_DYNAMIC_EXIT, 0, 0, 0);
                             goto done;

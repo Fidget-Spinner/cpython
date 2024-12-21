@@ -214,7 +214,7 @@ def write_uop(
         if braces:
             emitter.out.emit(f"// {uop.name}\n")
             emitter.emit("{\n")
-        if uop.properties.oparg:
+        if uop.properties.oparg or uop.name == "_PUSH_FRAME":
             emitter.emit(f"oparg = CURRENT_OPARG({emitter.index});\n")
             assert uop.properties.const_oparg < 0
         elif uop.properties.const_oparg >= 0:
@@ -309,8 +309,8 @@ def tier2_not_viable(inst: Instruction) -> str:
         if isinstance(part, Uop):
             if len(part.caches) > 2:
                 return f"/* Not viable for tier 2 (more than 2 cache entries) */\n"
-            if part.properties.needs_this and not "specializing" in part.annotations:
-                return f"/* Not viable for tier 2 (needs this_instr, and can't ignore specializing) */\n"
+            if part.properties.needs_this and not "specializing" in part.annotations and part.name not in {"_SAVE_RETURN_OFFSET"}:
+                return f"/* Not viable for tier 2 (needs this_instr in {part.name}, and can't ignore specializing) */\n"
     return ""
 
 
