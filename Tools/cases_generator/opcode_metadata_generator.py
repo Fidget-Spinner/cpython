@@ -394,6 +394,9 @@ def generate_is_tier2_able(analysis: Analysis, out: CWriter) -> None:
     out.emit("const int\n")
     out.emit("_PyOpcode_is_viable_for_tier2[256] = {\n")
     for inst_name, inst in analysis.instructions.items():
+        if inst_name in {"LOAD_FAST_LOAD_FAST", "STORE_FAST_LOAD_FAST", "STORE_FAST_STORE_FAST"}:
+            out.emit(f"[{inst_name}] = 0,\n")
+            continue
         if tier2_not_viable(inst):
             out.emit(f"[{inst_name}] = 0,\n")
         else:

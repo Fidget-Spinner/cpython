@@ -1286,7 +1286,7 @@ uop_baseline(
     _Py_BloomFilter_Init(&dependencies);
     _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
     OPT_STAT_INC(attempts);
-    int length = translate_bytecode_to_trace_baseline(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
+    int length = translate_bytecode_to_trace_baseline(frame, instr, buffer, UOP_MAX_TRACE_LENGTH_PROJECT, &dependencies, progress_needed);
     if (length <= 0) {
         // Error or nothing translated
         return length;
@@ -1308,6 +1308,7 @@ uop_baseline(
             break;
         }
         assert(_PyOpcode_uop_name[buffer[pc].opcode]);
+        // fprintf(stderr, "OP: %s OTHER: %s\n", _PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode]);
         assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
     }
     OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);

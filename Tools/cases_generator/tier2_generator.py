@@ -343,10 +343,6 @@ def generate_tier2(
             out.start_line()
             continue
 
-        out.emit("#ifndef _Py_JIT\n")
-        out.emit(f"frame->instr_ptr = next_instr;\n")
-        out.emit(f"next_instr += {len([part for part in inst.parts if isinstance(part, Uop) and 'specializing' not in part.annotations])};\n")
-        out.emit("#endif\n")
         # out.emit(f"INSTRUCTION_STATS({name});\n")
         declare_variables(inst, out)
         offset = 1  # The instruction itself
@@ -390,10 +386,6 @@ def generate_tier2(
             )
             continue
         out.emit(f"case {uop.name}: {{\n")
-        out.emit("#ifndef _Py_JIT\n")
-        out.emit(f"frame->instr_ptr = next_instr;\n")
-        out.emit(f"next_instr += {1};\n")
-        out.emit("#endif\n")
         declare_variables_tier2(uop, out)
         stack = Stack()
         stack = write_uop_tier2(uop, emitter, stack)

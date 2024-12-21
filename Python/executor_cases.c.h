@@ -10,10 +10,6 @@
 
 
         case BINARY_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef lhs;
             _PyStackRef rhs;
             _PyStackRef res;
@@ -40,10 +36,6 @@
         }
 
         case BINARY_OP_ADD_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -82,10 +74,6 @@
         }
 
         case BINARY_OP_ADD_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -123,10 +111,6 @@
         }
 
         case BINARY_OP_ADD_UNICODE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -164,10 +148,6 @@
         }
 
         case BINARY_OP_INPLACE_ADD_UNICODE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             // _GUARD_BOTH_UNICODE
@@ -234,10 +214,6 @@
         }
 
         case BINARY_OP_MULTIPLY_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -276,10 +252,6 @@
         }
 
         case BINARY_OP_MULTIPLY_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -317,10 +289,6 @@
         }
 
         case BINARY_OP_SUBTRACT_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -359,10 +327,6 @@
         }
 
         case BINARY_OP_SUBTRACT_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -400,10 +364,6 @@
         }
 
         case BINARY_SLICE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef container;
             _PyStackRef start;
             _PyStackRef stop;
@@ -444,10 +404,6 @@
         }
 
         case BINARY_SUBSCR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef container;
             _PyStackRef sub;
             _PyStackRef res;
@@ -472,10 +428,6 @@
         }
 
         case BINARY_SUBSCR_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef dict_st;
             _PyStackRef sub_st;
             _PyStackRef res;
@@ -510,10 +462,6 @@
         }
 
         case BINARY_SUBSCR_GETITEM: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 4;
-            #endif
             _PyStackRef container;
             _PyStackRef getitem;
             _PyStackRef sub;
@@ -584,10 +532,6 @@
         }
 
         case BINARY_SUBSCR_LIST_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef list_st;
             _PyStackRef sub_st;
             _PyStackRef res;
@@ -639,10 +583,6 @@
         }
 
         case BINARY_SUBSCR_STR_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef str_st;
             _PyStackRef sub_st;
             _PyStackRef res;
@@ -686,10 +626,6 @@
         }
 
         case BINARY_SUBSCR_TUPLE_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef tuple_st;
             _PyStackRef sub_st;
             _PyStackRef res;
@@ -730,10 +666,6 @@
         }
 
         case BUILD_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *values;
             _PyStackRef list;
             oparg = CURRENT_OPARG(0);
@@ -748,10 +680,6 @@
         }
 
         case BUILD_MAP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *values;
             _PyStackRef map;
             oparg = CURRENT_OPARG(0);
@@ -782,10 +710,6 @@
         }
 
         case BUILD_SET: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *values;
             _PyStackRef set;
             oparg = CURRENT_OPARG(0);
@@ -820,10 +744,6 @@
         }
 
         case BUILD_SLICE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef start;
             _PyStackRef stop;
             _PyStackRef step = PyStackRef_NULL;
@@ -848,10 +768,6 @@
         }
 
         case BUILD_STRING: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *pieces;
             _PyStackRef str;
             oparg = CURRENT_OPARG(0);
@@ -877,10 +793,6 @@
         }
 
         case BUILD_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *values;
             _PyStackRef tup;
             oparg = CURRENT_OPARG(0);
@@ -895,10 +807,6 @@
         }
 
         case CACHE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             assert(0 && "Executing a cache.");
             Py_FatalError("Executing a cache.");
             break;
@@ -912,10 +820,6 @@
         }
 
         case CALL_ALLOC_AND_ENTER_INIT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 4;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *null;
             _PyStackRef *args;
@@ -1040,10 +944,6 @@
         }
 
         case CALL_BUILTIN_CLASS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1116,10 +1016,6 @@
         }
 
         case CALL_BUILTIN_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1198,10 +1094,6 @@
         }
 
         case CALL_BUILTIN_FAST_WITH_KEYWORDS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1281,10 +1173,6 @@
         }
 
         case CALL_BUILTIN_O: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1366,10 +1254,6 @@
         }
 
         case CALL_INTRINSIC_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG(0);
@@ -1386,10 +1270,6 @@
         }
 
         case CALL_INTRINSIC_2: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value2_st;
             _PyStackRef value1_st;
             _PyStackRef res;
@@ -1413,10 +1293,6 @@
         }
 
         case CALL_ISINSTANCE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1478,10 +1354,6 @@
         }
 
         case CALL_KW_NON_PY: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef *callable;
             _PyStackRef kwnames;
             _PyStackRef *self_or_null;
@@ -1577,10 +1449,6 @@
         }
 
         case CALL_LEN: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1631,10 +1499,6 @@
         }
 
         case CALL_LIST_APPEND: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef callable;
             _PyStackRef self;
             _PyStackRef arg;
@@ -1679,10 +1543,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1766,10 +1626,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1853,10 +1709,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_NOARGS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -1938,10 +1790,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_O: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -2026,10 +1874,6 @@
         }
 
         case CALL_NON_PY_GENERAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef *callable;
             _PyStackRef *self_or_null;
             _PyStackRef *args;
@@ -2126,10 +1970,6 @@
         }
 
         case CALL_STR_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef callable;
             _PyStackRef null;
             _PyStackRef arg;
@@ -2186,10 +2026,6 @@
         }
 
         case CALL_TUPLE_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef callable;
             _PyStackRef null;
             _PyStackRef arg;
@@ -2246,10 +2082,6 @@
         }
 
         case CALL_TYPE_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef callable;
             _PyStackRef null;
             _PyStackRef arg;
@@ -2283,10 +2115,6 @@
         }
 
         case CHECK_EG_MATCH: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef exc_value_st;
             _PyStackRef match_type_st;
             _PyStackRef rest;
@@ -2331,10 +2159,6 @@
         }
 
         case CHECK_EXC_MATCH: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef b;
@@ -2367,10 +2191,6 @@
         }
 
         case COMPARE_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -2411,10 +2231,6 @@
         }
 
         case COMPARE_OP_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -2456,10 +2272,6 @@
         }
 
         case COMPARE_OP_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -2511,10 +2323,6 @@
         }
 
         case COMPARE_OP_STR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef res;
@@ -2557,10 +2365,6 @@
         }
 
         case CONTAINS_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef b;
@@ -2586,10 +2390,6 @@
         }
 
         case CONTAINS_OP_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef b;
@@ -2618,10 +2418,6 @@
         }
 
         case CONTAINS_OP_SET: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef b;
@@ -2651,10 +2447,6 @@
         }
 
         case CONVERT_VALUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG(0);
@@ -2673,10 +2465,6 @@
         }
 
         case COPY: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef bottom;
             _PyStackRef top;
             oparg = CURRENT_OPARG(0);
@@ -2690,10 +2478,6 @@
         }
 
         case COPY_FREE_VARS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             /* Copy closure variables to free variables */
             PyCodeObject *co = _PyFrame_GetCode(frame);
@@ -2710,10 +2494,6 @@
         }
 
         case DELETE_ATTR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             oparg = CURRENT_OPARG(0);
             owner = stack_pointer[-1];
@@ -2729,10 +2509,6 @@
         }
 
         case DELETE_DEREF: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             // Can't use ERROR_IF here.
@@ -2749,10 +2525,6 @@
         }
 
         case DELETE_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -2769,10 +2541,6 @@
         }
 
         case DELETE_GLOBAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -2793,10 +2561,6 @@
         }
 
         case DELETE_NAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -2824,10 +2588,6 @@
         }
 
         case DELETE_SUBSCR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef container;
             _PyStackRef sub;
             sub = stack_pointer[-1];
@@ -2846,10 +2606,6 @@
         }
 
         case DICT_MERGE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef callable;
             _PyStackRef dict;
             _PyStackRef update;
@@ -2877,10 +2633,6 @@
         }
 
         case DICT_UPDATE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef dict;
             _PyStackRef update;
             oparg = CURRENT_OPARG(0);
@@ -2919,10 +2671,6 @@
         }
 
         case END_FOR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             value = stack_pointer[-1];
             PyStackRef_CLOSE(value);
@@ -2932,10 +2680,6 @@
         }
 
         case END_SEND: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef receiver;
             _PyStackRef value;
             _PyStackRef val;
@@ -2958,10 +2702,6 @@
         }
 
         case EXIT_INIT_CHECK: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef should_be_none;
             should_be_none = stack_pointer[-1];
             assert(STACK_LEVEL() == 2);
@@ -2979,10 +2719,6 @@
         }
 
         case EXTENDED_ARG: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             assert(oparg);
             opcode = next_instr->op.code;
@@ -2992,10 +2728,6 @@
         }
 
         case FORMAT_SIMPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             value = stack_pointer[-1];
@@ -3018,10 +2750,6 @@
         }
 
         case FORMAT_WITH_SPEC: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef fmt_spec;
             _PyStackRef res;
@@ -3048,10 +2776,6 @@
         }
 
         case FOR_ITER_GEN: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef iter;
             _PyInterpreterFrame *gen_frame;
             _PyInterpreterFrame *new_frame;
@@ -3106,10 +2830,6 @@
         }
 
         case FOR_ITER_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             /* Skip 1 cache entry */
@@ -3161,10 +2881,6 @@
         }
 
         case FOR_ITER_RANGE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             /* Skip 1 cache entry */
@@ -3210,10 +2926,6 @@
         }
 
         case FOR_ITER_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             /* Skip 1 cache entry */
@@ -3262,10 +2974,6 @@
         }
 
         case GET_AITER: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef obj;
             _PyStackRef iter;
             obj = stack_pointer[-1];
@@ -3310,10 +3018,6 @@
         }
 
         case GET_ANEXT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = stack_pointer[-1];
@@ -3331,10 +3035,6 @@
         }
 
         case GET_AWAITABLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG(0);
@@ -3350,10 +3050,6 @@
         }
 
         case GET_ITER: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = stack_pointer[-1];
@@ -3369,10 +3065,6 @@
         }
 
         case GET_LEN: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef obj;
             _PyStackRef len;
             obj = stack_pointer[-1];
@@ -3391,10 +3083,6 @@
         }
 
         case GET_YIELD_FROM_ITER: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = stack_pointer[-1];
@@ -3436,10 +3124,6 @@
         }
 
         case IMPORT_FROM: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG(0);
@@ -3457,10 +3141,6 @@
         }
 
         case IMPORT_NAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef level;
             _PyStackRef fromlist;
             _PyStackRef res;
@@ -3491,10 +3171,6 @@
         }
 
         case INSTRUMENTED_CALL_FUNCTION_EX: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             GO_TO_INSTRUCTION(CALL_FUNCTION_EX);
         }
 
@@ -3618,10 +3294,6 @@
         }
 
         case INTERPRETER_EXIT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef retval;
             retval = stack_pointer[-1];
             assert(frame == &entry_frame);
@@ -3638,10 +3310,6 @@
         }
 
         case IS_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             _PyStackRef right;
             _PyStackRef b;
@@ -3666,10 +3334,6 @@
         }
 
         case JUMP_BACKWARD_NO_INTERRUPT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             /* This bytecode is used in the `yield from` or `await` loop.
              * If there is an interrupt, we want it handled in the innermost
@@ -3681,20 +3345,12 @@
         }
 
         case JUMP_FORWARD: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             JUMPBY(oparg);
             break;
         }
 
         case LIST_APPEND: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef list;
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
@@ -3709,10 +3365,6 @@
         }
 
         case LIST_EXTEND: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef list_st;
             _PyStackRef iterable_st;
             oparg = CURRENT_OPARG(0);
@@ -3748,10 +3400,6 @@
         }
 
         case LOAD_ATTR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self_or_null = PyStackRef_NULL;
@@ -3808,10 +3456,6 @@
         }
 
         case LOAD_ATTR_CLASS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -3850,10 +3494,6 @@
         }
 
         case LOAD_ATTR_CLASS_WITH_METACLASS_CHECK: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -3908,10 +3548,6 @@
         }
 
         case LOAD_ATTR_INSTANCE_VALUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -3963,10 +3599,6 @@
         }
 
         case LOAD_ATTR_METHOD_LAZY_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self = PyStackRef_NULL;
@@ -4013,10 +3645,6 @@
         }
 
         case LOAD_ATTR_METHOD_NO_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self = PyStackRef_NULL;
@@ -4053,10 +3681,6 @@
         }
 
         case LOAD_ATTR_METHOD_WITH_VALUES: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 4;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self = PyStackRef_NULL;
@@ -4111,10 +3735,6 @@
         }
 
         case LOAD_ATTR_MODULE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             PyDictKeysObject *mod_keys;
             _PyStackRef attr;
@@ -4176,10 +3796,6 @@
         }
 
         case LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             /* Skip 1 cache entry */
@@ -4211,10 +3827,6 @@
         }
 
         case LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 4;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             /* Skip 1 cache entry */
@@ -4270,10 +3882,6 @@
         }
 
         case LOAD_ATTR_SLOT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -4314,10 +3922,6 @@
         }
 
         case LOAD_ATTR_WITH_HINT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -4385,10 +3989,6 @@
         }
 
         case LOAD_BUILD_CLASS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -4410,10 +4010,6 @@
         }
 
         case LOAD_COMMON_CONSTANT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             // Keep in sync with _common_constants in opcode.py
@@ -4434,10 +4030,6 @@
         }
 
         case LOAD_CONST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             value = PyStackRef_FromPyObjectNew(GETITEM(FRAME_CO_CONSTS, oparg));
@@ -4448,10 +4040,6 @@
         }
 
         case LOAD_CONST_IMMORTAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -4464,10 +4052,6 @@
         }
 
         case LOAD_DEREF: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -4486,10 +4070,6 @@
         }
 
         case LOAD_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -4501,10 +4081,6 @@
         }
 
         case LOAD_FAST_AND_CLEAR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             value = GETLOCAL(oparg);
@@ -4517,10 +4093,6 @@
         }
 
         case LOAD_FAST_CHECK: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -4541,10 +4113,6 @@
         }
 
         case LOAD_FAST_LOAD_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value1;
             _PyStackRef value2;
             oparg = CURRENT_OPARG(0);
@@ -4560,10 +4128,6 @@
         }
 
         case LOAD_FROM_DICT_OR_DEREF: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
@@ -4597,10 +4161,6 @@
         }
 
         case LOAD_FROM_DICT_OR_GLOBALS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef mod_or_class_dict;
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
@@ -4669,10 +4229,6 @@
         }
 
         case LOAD_GLOBAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *res;
             _PyStackRef null = PyStackRef_NULL;
             /* Skip 1 cache entry */
@@ -4696,10 +4252,6 @@
         }
 
         case LOAD_GLOBAL_BUILTIN: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             PyDictKeysObject *builtins_keys;
             _PyStackRef res;
             _PyStackRef null = PyStackRef_NULL;
@@ -4766,10 +4318,6 @@
         }
 
         case LOAD_GLOBAL_MODULE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             PyDictKeysObject *globals_keys;
             _PyStackRef res;
             _PyStackRef null = PyStackRef_NULL;
@@ -4822,10 +4370,6 @@
         }
 
         case LOAD_LOCALS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -4843,10 +4387,6 @@
         }
 
         case LOAD_NAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -4862,10 +4402,6 @@
         }
 
         case LOAD_SMALL_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -4878,10 +4414,6 @@
         }
 
         case LOAD_SPECIAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self_or_null;
@@ -4924,10 +4456,6 @@
         }
 
         case LOAD_SUPER_ATTR_ATTR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef global_super_st;
             _PyStackRef class_st;
             _PyStackRef self_st;
@@ -4966,10 +4494,6 @@
         }
 
         case LOAD_SUPER_ATTR_METHOD: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef global_super_st;
             _PyStackRef class_st;
             _PyStackRef self_st;
@@ -5021,10 +4545,6 @@
         }
 
         case MAKE_CELL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG(0);
             // "initial" is probably NULL but not if it's an arg (or set
             // via the f_locals proxy before MAKE_CELL has run).
@@ -5038,10 +4558,6 @@
         }
 
         case MAKE_FUNCTION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = stack_pointer[-1];
@@ -5060,10 +4576,6 @@
         }
 
         case MAP_ADD: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef dict_st;
             _PyStackRef key;
             _PyStackRef value;
@@ -5089,10 +4601,6 @@
         }
 
         case MATCH_CLASS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef subject;
             _PyStackRef type;
             _PyStackRef names;
@@ -5129,10 +4637,6 @@
         }
 
         case MATCH_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef subject;
             _PyStackRef keys;
             _PyStackRef values_or_none;
@@ -5152,10 +4656,6 @@
         }
 
         case MATCH_MAPPING: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef subject;
             _PyStackRef res;
             subject = stack_pointer[-1];
@@ -5168,10 +4668,6 @@
         }
 
         case MATCH_SEQUENCE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef subject;
             _PyStackRef res;
             subject = stack_pointer[-1];
@@ -5184,26 +4680,14 @@
         }
 
         case NOP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             break;
         }
 
         case NOT_TAKEN: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             break;
         }
 
         case POP_EXCEPT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef exc_value;
             exc_value = stack_pointer[-1];
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -5246,10 +4730,6 @@
         }
 
         case POP_TOP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             value = stack_pointer[-1];
             PyStackRef_CLOSE(value);
@@ -5259,10 +4739,6 @@
         }
 
         case PUSH_EXC_INFO: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -5285,10 +4761,6 @@
         }
 
         case PUSH_NULL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef res;
             res = PyStackRef_NULL;
             stack_pointer[0] = res;
@@ -5312,10 +4784,6 @@
         }
 
         case RESERVED: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             assert(0 && "Executing RESERVED instruction.");
             Py_FatalError("Executing RESERVED instruction.");
             break;
@@ -5329,10 +4797,6 @@
         }
 
         case RESUME_CHECK: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -5358,10 +4822,6 @@
         }
 
         case RETURN_GENERATOR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -5392,10 +4852,6 @@
         }
 
         case RETURN_VALUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef retval;
             _PyStackRef res;
             retval = stack_pointer[-1];
@@ -5430,10 +4886,6 @@
         }
 
         case SEND_GEN: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef receiver;
             _PyStackRef v;
             _PyInterpreterFrame *gen_frame;
@@ -5492,10 +4944,6 @@
         }
 
         case SETUP_ANNOTATIONS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -5528,10 +4976,6 @@
         }
 
         case SET_ADD: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef set;
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
@@ -5549,10 +4993,6 @@
         }
 
         case SET_FUNCTION_ATTRIBUTE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef attr_st;
             _PyStackRef func_in;
             _PyStackRef func_out;
@@ -5575,10 +5015,6 @@
         }
 
         case SET_UPDATE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef set;
             _PyStackRef iterable;
             oparg = CURRENT_OPARG(0);
@@ -5596,10 +5032,6 @@
         }
 
         case STORE_ATTR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef v;
             /* Skip 3 cache entries */
@@ -5623,10 +5055,6 @@
         }
 
         case STORE_ATTR_INSTANCE_VALUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 3;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             /* Skip 1 cache entry */
@@ -5688,10 +5116,6 @@
         }
 
         case STORE_ATTR_SLOT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             /* Skip 1 cache entry */
@@ -5729,10 +5153,6 @@
         }
 
         case STORE_ATTR_WITH_HINT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             /* Skip 1 cache entry */
@@ -5815,10 +5235,6 @@
         }
 
         case STORE_DEREF: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
             v = stack_pointer[-1];
@@ -5832,10 +5248,6 @@
         }
 
         case STORE_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
             value = stack_pointer[-1];
@@ -5846,10 +5258,6 @@
         }
 
         case STORE_FAST_LOAD_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value1;
             _PyStackRef value2;
             oparg = CURRENT_OPARG(0);
@@ -5863,10 +5271,6 @@
         }
 
         case STORE_FAST_STORE_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value2;
             _PyStackRef value1;
             oparg = CURRENT_OPARG(0);
@@ -5882,10 +5286,6 @@
         }
 
         case STORE_GLOBAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
             v = stack_pointer[-1];
@@ -5901,10 +5301,6 @@
         }
 
         case STORE_NAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef v;
             oparg = CURRENT_OPARG(0);
             v = stack_pointer[-1];
@@ -5937,10 +5333,6 @@
         }
 
         case STORE_SLICE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef v;
             _PyStackRef container;
             _PyStackRef start;
@@ -5979,10 +5371,6 @@
         }
 
         case STORE_SUBSCR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef container;
             _PyStackRef sub;
             _PyStackRef v;
@@ -6006,10 +5394,6 @@
         }
 
         case STORE_SUBSCR_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef dict_st;
             _PyStackRef sub;
@@ -6036,10 +5420,6 @@
         }
 
         case STORE_SUBSCR_LIST_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef list_st;
             _PyStackRef sub_st;
@@ -6089,10 +5469,6 @@
         }
 
         case SWAP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef bottom_in;
             _PyStackRef top_in;
             _PyStackRef top_out;
@@ -6109,10 +5485,6 @@
         }
 
         case TO_BOOL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             /* Skip 2 cache entries */
@@ -6131,10 +5503,6 @@
         }
 
         case TO_BOOL_ALWAYS_TRUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 2;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             _PyStackRef res;
@@ -6161,10 +5529,6 @@
         }
 
         case TO_BOOL_BOOL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             /* Skip 1 cache entry */
             /* Skip 2 cache entries */
@@ -6178,10 +5542,6 @@
         }
 
         case TO_BOOL_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             /* Skip 1 cache entry */
@@ -6206,10 +5566,6 @@
         }
 
         case TO_BOOL_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             /* Skip 1 cache entry */
@@ -6228,10 +5584,6 @@
         }
 
         case TO_BOOL_NONE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             /* Skip 1 cache entry */
@@ -6250,10 +5602,6 @@
         }
 
         case TO_BOOL_STR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             /* Skip 1 cache entry */
@@ -6279,10 +5627,6 @@
         }
 
         case UNARY_INVERT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             value = stack_pointer[-1];
@@ -6297,10 +5641,6 @@
         }
 
         case UNARY_NEGATIVE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             value = stack_pointer[-1];
@@ -6315,10 +5655,6 @@
         }
 
         case UNARY_NOT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             value = stack_pointer[-1];
@@ -6330,10 +5666,6 @@
         }
 
         case UNPACK_EX: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef seq;
             _PyStackRef *right;
             oparg = CURRENT_OPARG(0);
@@ -6351,10 +5683,6 @@
         }
 
         case UNPACK_SEQUENCE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef seq;
             _PyStackRef *output;
             // _UNPACK_SEQUENCE
@@ -6375,10 +5703,6 @@
         }
 
         case UNPACK_SEQUENCE_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef seq;
             _PyStackRef *values;
             /* Skip 1 cache entry */
@@ -6414,10 +5738,6 @@
         }
 
         case UNPACK_SEQUENCE_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef seq;
             _PyStackRef *values;
             /* Skip 1 cache entry */
@@ -6445,10 +5765,6 @@
         }
 
         case UNPACK_SEQUENCE_TWO_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef seq;
             _PyStackRef val1;
             _PyStackRef val0;
@@ -6477,10 +5793,6 @@
         }
 
         case WITH_EXCEPT_START: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef exit_func;
             _PyStackRef exit_self;
             _PyStackRef lasti;
@@ -6528,10 +5840,6 @@
         }
 
         case YIELD_VALUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG(0);
@@ -6577,18 +5885,10 @@
             break;
         }
         case _PART_OF_A_SUPER: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             break;
         }
 
         case _CHECK_PERIODIC: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _Py_CHECK_EMSCRIPTEN_SIGNALS_PERIODICALLY();
             QSBR_QUIESCENT_STATE(tstate);
             if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
@@ -6601,10 +5901,6 @@
         }
 
         case _CHECK_PERIODIC_IF_NOT_YIELD_FROM: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG();
             if ((oparg & RESUME_OPARG_LOCATION_MASK) < RESUME_AFTER_YIELD_FROM) {
                 _Py_CHECK_EMSCRIPTEN_SIGNALS_PERIODICALLY();
@@ -6626,10 +5922,6 @@
         /* _MONITOR_RESUME is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _LOAD_FAST_0: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -6642,10 +5934,6 @@
         }
 
         case _LOAD_FAST_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -6658,10 +5946,6 @@
         }
 
         case _LOAD_FAST_2: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -6674,10 +5958,6 @@
         }
 
         case _LOAD_FAST_3: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -6690,10 +5970,6 @@
         }
 
         case _LOAD_FAST_4: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -6706,10 +5982,6 @@
         }
 
         case _LOAD_FAST_5: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -6722,10 +5994,6 @@
         }
 
         case _LOAD_FAST_6: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -6738,10 +6006,6 @@
         }
 
         case _LOAD_FAST_7: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -6754,10 +6018,6 @@
         }
 
         case _LOAD_SMALL_INT_0: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -6771,10 +6031,6 @@
         }
 
         case _LOAD_SMALL_INT_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -6788,10 +6044,6 @@
         }
 
         case _LOAD_SMALL_INT_2: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -6805,10 +6057,6 @@
         }
 
         case _LOAD_SMALL_INT_3: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -6822,10 +6070,6 @@
         }
 
         case _STORE_FAST_0: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -6837,10 +6081,6 @@
         }
 
         case _STORE_FAST_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -6852,10 +6092,6 @@
         }
 
         case _STORE_FAST_2: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -6867,10 +6103,6 @@
         }
 
         case _STORE_FAST_3: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -6882,10 +6114,6 @@
         }
 
         case _STORE_FAST_4: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -6897,10 +6125,6 @@
         }
 
         case _STORE_FAST_5: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -6912,10 +6136,6 @@
         }
 
         case _STORE_FAST_6: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -6927,10 +6147,6 @@
         }
 
         case _STORE_FAST_7: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -6942,10 +6158,6 @@
         }
 
         case _TO_BOOL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             value = stack_pointer[-1];
@@ -6960,10 +6172,6 @@
         }
 
         case _REPLACE_WITH_TRUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef res;
             value = stack_pointer[-1];
@@ -6974,10 +6182,6 @@
         }
 
         case _GUARD_BOTH_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             right = stack_pointer[-1];
@@ -6996,10 +6200,6 @@
         }
 
         case _GUARD_NOS_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
@@ -7011,10 +6211,6 @@
         }
 
         case _GUARD_TOS_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
@@ -7026,10 +6222,6 @@
         }
 
         case _BINARY_OP_MULTIPLY_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7050,10 +6242,6 @@
         }
 
         case _BINARY_OP_ADD_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7074,10 +6262,6 @@
         }
 
         case _BINARY_OP_SUBTRACT_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7098,10 +6282,6 @@
         }
 
         case _GUARD_BOTH_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             right = stack_pointer[-1];
@@ -7120,10 +6300,6 @@
         }
 
         case _GUARD_NOS_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef left;
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
@@ -7135,10 +6311,6 @@
         }
 
         case _GUARD_TOS_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
@@ -7150,10 +6322,6 @@
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7175,10 +6343,6 @@
         }
 
         case _BINARY_OP_ADD_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7200,10 +6364,6 @@
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7225,10 +6385,6 @@
         }
 
         case _GUARD_BOTH_UNICODE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             right = stack_pointer[-1];
@@ -7247,10 +6403,6 @@
         }
 
         case _BINARY_OP_ADD_UNICODE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -7271,10 +6423,6 @@
         }
 
         case _BINARY_OP_INPLACE_ADD_UNICODE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             right = stack_pointer[-1];
@@ -7324,10 +6472,6 @@
         }
 
         case _BINARY_SUBSCR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef sub;
             _PyStackRef container;
             _PyStackRef res;
@@ -7349,10 +6493,6 @@
         }
 
         case _BINARY_SLICE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef stop;
             _PyStackRef start;
             _PyStackRef container;
@@ -7390,10 +6530,6 @@
         }
 
         case _STORE_SLICE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef stop;
             _PyStackRef start;
             _PyStackRef container;
@@ -7429,10 +6565,6 @@
         }
 
         case _BINARY_SUBSCR_CHECK_FUNC: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef container;
             _PyStackRef getitem;
             container = stack_pointer[-2];
@@ -7468,10 +6600,6 @@
         }
 
         case _BINARY_SUBSCR_INIT_CALL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef getitem;
             _PyStackRef sub;
             _PyStackRef container;
@@ -7490,10 +6618,6 @@
         }
 
         case _STORE_SUBSCR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef sub;
             _PyStackRef container;
             _PyStackRef v;
@@ -7516,10 +6640,6 @@
         /* _SEND is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _SEND_GEN_FRAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef v;
             _PyStackRef receiver;
             _PyInterpreterFrame *gen_frame;
@@ -7549,10 +6669,6 @@
         }
 
         case _UNPACK_SEQUENCE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef seq;
             _PyStackRef *output;
             oparg = CURRENT_OPARG();
@@ -7570,10 +6686,6 @@
         }
 
         case _STORE_ATTR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef v;
             oparg = CURRENT_OPARG();
@@ -7593,10 +6705,6 @@
         }
 
         case _LOAD_GLOBAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *res;
             _PyStackRef null = PyStackRef_NULL;
             oparg = CURRENT_OPARG();
@@ -7614,10 +6722,6 @@
         }
 
         case _GUARD_GLOBALS_VERSION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             uint16_t version = (uint16_t)CURRENT_OPERAND0();
             PyDictObject *dict = (PyDictObject *)GLOBALS();
             if (!PyDict_CheckExact(dict)) {
@@ -7634,10 +6738,6 @@
         }
 
         case _GUARD_GLOBALS_VERSION_PUSH_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyDictKeysObject *globals_keys;
             uint16_t version = (uint16_t)CURRENT_OPERAND0();
             PyDictObject *dict = (PyDictObject *)GLOBALS();
@@ -7659,10 +6759,6 @@
         }
 
         case _GUARD_BUILTINS_VERSION_PUSH_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyDictKeysObject *builtins_keys;
             uint16_t version = (uint16_t)CURRENT_OPERAND0();
             PyDictObject *dict = (PyDictObject *)BUILTINS();
@@ -7684,10 +6780,6 @@
         }
 
         case _LOAD_GLOBAL_MODULE_FROM_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyDictKeysObject *globals_keys;
             _PyStackRef res;
             _PyStackRef null = PyStackRef_NULL;
@@ -7722,10 +6814,6 @@
         }
 
         case _LOAD_GLOBAL_BUILTINS_FROM_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyDictKeysObject *builtins_keys;
             _PyStackRef res;
             _PyStackRef null = PyStackRef_NULL;
@@ -7760,10 +6848,6 @@
         }
 
         case _LOAD_ATTR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self_or_null = PyStackRef_NULL;
@@ -7816,10 +6900,6 @@
         }
 
         case _GUARD_TYPE_VERSION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
@@ -7833,10 +6913,6 @@
         }
 
         case _GUARD_TYPE_VERSION_AND_LOCK: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
@@ -7858,10 +6934,6 @@
         }
 
         case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
@@ -7875,10 +6947,6 @@
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE_0: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -7902,10 +6970,6 @@
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -7934,10 +6998,6 @@
         /* _LOAD_ATTR_INSTANCE_VALUE is split on (oparg & 1) */
 
         case _CHECK_ATTR_MODULE_PUSH_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             PyDictKeysObject *mod_keys;
             owner = stack_pointer[-1];
@@ -7962,10 +7022,6 @@
         }
 
         case _LOAD_ATTR_MODULE_FROM_KEYS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyDictKeysObject *mod_keys;
             _PyStackRef owner;
             _PyStackRef attr;
@@ -8008,10 +7064,6 @@
         }
 
         case _CHECK_ATTR_WITH_HINT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
@@ -8026,10 +7078,6 @@
         }
 
         case _LOAD_ATTR_WITH_HINT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -8071,10 +7119,6 @@
         }
 
         case _LOAD_ATTR_SLOT_0: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -8097,10 +7141,6 @@
         }
 
         case _LOAD_ATTR_SLOT_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -8128,10 +7168,6 @@
         /* _LOAD_ATTR_SLOT is split on (oparg & 1) */
 
         case _CHECK_ATTR_CLASS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
@@ -8149,10 +7185,6 @@
         }
 
         case _LOAD_ATTR_CLASS_0: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -8169,10 +7201,6 @@
         }
 
         case _LOAD_ATTR_CLASS_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -8194,10 +7222,6 @@
         /* _LOAD_ATTR_CLASS is split on (oparg & 1) */
 
         case _LOAD_ATTR_PROPERTY_FRAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyInterpreterFrame *new_frame;
             oparg = CURRENT_OPARG();
@@ -8231,10 +7255,6 @@
         }
 
         case _GUARD_DORV_NO_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
@@ -8252,10 +7272,6 @@
         }
 
         case _STORE_ATTR_INSTANCE_VALUE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             owner = stack_pointer[-1];
@@ -8281,10 +7297,6 @@
         }
 
         case _STORE_ATTR_WITH_HINT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -8353,10 +7365,6 @@
         }
 
         case _STORE_ATTR_SLOT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef value;
             owner = stack_pointer[-1];
@@ -8380,10 +7388,6 @@
         }
 
         case _COMPARE_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -8421,10 +7425,6 @@
         }
 
         case _COMPARE_OP_FLOAT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -8449,10 +7449,6 @@
         }
 
         case _COMPARE_OP_INT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -8487,10 +7483,6 @@
         }
 
         case _COMPARE_OP_STR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef res;
@@ -8516,10 +7508,6 @@
         }
 
         case _CONTAINS_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -8546,10 +7534,6 @@
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is replaced */
 
         case _IS_NONE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef b;
             value = stack_pointer[-1];
@@ -8567,10 +7551,6 @@
         /* _FOR_ITER is not a viable micro-op for tier 2 because it is replaced */
 
         case _FOR_ITER_TIER_TWO: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             iter = stack_pointer[-1];
@@ -8608,10 +7588,6 @@
         }
 
         case _ITER_CHECK_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             iter = stack_pointer[-1];
             if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type) {
@@ -8624,10 +7600,6 @@
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 because it is replaced */
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             iter = stack_pointer[-1];
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
@@ -8649,10 +7621,6 @@
         }
 
         case _ITER_NEXT_LIST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             iter = stack_pointer[-1];
@@ -8670,10 +7638,6 @@
         }
 
         case _ITER_CHECK_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             iter = stack_pointer[-1];
             if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type) {
@@ -8686,10 +7650,6 @@
         /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 because it is replaced */
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             iter = stack_pointer[-1];
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
@@ -8708,10 +7668,6 @@
         }
 
         case _ITER_NEXT_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             iter = stack_pointer[-1];
@@ -8729,10 +7685,6 @@
         }
 
         case _ITER_CHECK_RANGE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             iter = stack_pointer[-1];
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
@@ -8746,10 +7698,6 @@
         /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 because it is replaced */
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             iter = stack_pointer[-1];
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
@@ -8762,10 +7710,6 @@
         }
 
         case _ITER_NEXT_RANGE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             _PyStackRef next;
             iter = stack_pointer[-1];
@@ -8785,10 +7729,6 @@
         }
 
         case _FOR_ITER_GEN_FRAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef iter;
             _PyInterpreterFrame *gen_frame;
             oparg = CURRENT_OPARG();
@@ -8818,10 +7758,6 @@
         }
 
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
@@ -8834,10 +7770,6 @@
         }
 
         case _GUARD_KEYS_VERSION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             uint32_t keys_version = (uint32_t)CURRENT_OPERAND0();
@@ -8851,10 +7783,6 @@
         }
 
         case _LOAD_ATTR_METHOD_WITH_VALUES: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self = PyStackRef_NULL;
@@ -8876,10 +7804,6 @@
         }
 
         case _LOAD_ATTR_METHOD_NO_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self = PyStackRef_NULL;
@@ -8901,10 +7825,6 @@
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             oparg = CURRENT_OPARG();
@@ -8920,10 +7840,6 @@
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             oparg = CURRENT_OPARG();
@@ -8940,10 +7856,6 @@
         }
 
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             owner = stack_pointer[-1];
             uint16_t dictoffset = (uint16_t)CURRENT_OPERAND0();
@@ -8958,10 +7870,6 @@
         }
 
         case _LOAD_ATTR_METHOD_LAZY_DICT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef self = PyStackRef_NULL;
@@ -8982,10 +7890,6 @@
         }
 
         case _MAYBE_EXPAND_METHOD: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9014,10 +7918,6 @@
         /* _MONITOR_CALL is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _PY_FRAME_GENERAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9056,10 +7956,6 @@
         }
 
         case _CHECK_FUNCTION_VERSION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-2 - oparg];
@@ -9078,10 +7974,6 @@
         }
 
         case _CHECK_FUNCTION_VERSION_INLINE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *callable_o = (PyObject *)CURRENT_OPERAND1();
             assert(PyFunction_Check(callable_o));
@@ -9094,10 +7986,6 @@
         }
 
         case _CHECK_METHOD_VERSION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *null;
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
@@ -9126,10 +8014,6 @@
         }
 
         case _EXPAND_METHOD: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *null;
             _PyStackRef *callable;
             _PyStackRef *method;
@@ -9151,10 +8035,6 @@
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-2 - oparg];
@@ -9171,10 +8051,6 @@
         }
 
         case _CALL_NON_PY_GENERAL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9223,10 +8099,6 @@
         }
 
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *null;
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
@@ -9244,10 +8116,6 @@
         }
 
         case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *null;
             _PyStackRef *callable;
             _PyStackRef *func;
@@ -9268,10 +8136,6 @@
         }
 
         case _CHECK_PEP_523: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET(0);
@@ -9280,10 +8144,6 @@
         }
 
         case _CHECK_FUNCTION_EXACT_ARGS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
@@ -9301,10 +8161,6 @@
         }
 
         case _CHECK_STACK_SPACE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-2 - oparg];
@@ -9323,10 +8179,6 @@
         }
 
         case _INIT_CALL_PY_EXACT_ARGS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9350,10 +8202,6 @@
         }
 
         case _PUSH_FRAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyInterpreterFrame *new_frame;
             new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
             // Write it out explicitly because it's subtly different.
@@ -9374,10 +8222,6 @@
         }
 
         case _CALL_STR_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef arg;
             _PyStackRef null;
             _PyStackRef callable;
@@ -9413,10 +8257,6 @@
         }
 
         case _CALL_TUPLE_1: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef arg;
             _PyStackRef null;
             _PyStackRef callable;
@@ -9452,10 +8292,6 @@
         }
 
         case _CHECK_AND_ALLOCATE_OBJECT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *null;
             _PyStackRef *callable;
@@ -9505,10 +8341,6 @@
         }
 
         case _CREATE_INIT_FRAME: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self;
             _PyStackRef *init;
@@ -9549,10 +8381,6 @@
         }
 
         case _CALL_BUILTIN_CLASS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9604,10 +8432,6 @@
         }
 
         case _CALL_BUILTIN_O: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9661,10 +8485,6 @@
         }
 
         case _CALL_BUILTIN_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9722,10 +8542,6 @@
         }
 
         case _CALL_BUILTIN_FAST_WITH_KEYWORDS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9784,10 +8600,6 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_O: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9851,10 +8663,6 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9917,10 +8725,6 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_NOARGS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -9981,10 +8785,6 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_FAST: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *args;
             _PyStackRef *self_or_null;
             _PyStackRef *callable;
@@ -10047,10 +8847,6 @@
         }
 
         case _MAYBE_EXPAND_METHOD_KW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef kwnames_in;
             _PyStackRef *args;
             _PyStackRef *self_or_null;
@@ -10082,10 +8878,6 @@
         /* _DO_CALL_KW is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _PY_FRAME_KW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef kwnames;
             _PyStackRef *args;
             _PyStackRef *self_or_null;
@@ -10130,10 +8922,6 @@
         }
 
         case _CHECK_FUNCTION_VERSION_KW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-3 - oparg];
@@ -10152,10 +8940,6 @@
         }
 
         case _CHECK_METHOD_VERSION_KW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *null;
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
@@ -10184,10 +8968,6 @@
         }
 
         case _EXPAND_METHOD_KW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *null;
             _PyStackRef *callable;
             _PyStackRef *method;
@@ -10209,10 +8989,6 @@
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE_KW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef *callable;
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-3 - oparg];
@@ -10229,10 +9005,6 @@
         }
 
         case _CALL_KW_NON_PY: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef kwnames;
             _PyStackRef *args;
             _PyStackRef *self_or_null;
@@ -10287,10 +9059,6 @@
         }
 
         case _MAKE_CALLARGS_A_TUPLE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef kwargs_in = PyStackRef_NULL;
             _PyStackRef callargs;
             _PyStackRef func;
@@ -10329,10 +9097,6 @@
         /* _DO_CALL_FUNCTION_EX is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _BINARY_OP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef rhs;
             _PyStackRef lhs;
             _PyStackRef res;
@@ -10358,10 +9122,6 @@
         /* _MONITOR_JUMP_BACKWARD is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _GUARD_IS_TRUE_POP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef flag;
             flag = stack_pointer[-1];
             int is_true = PyStackRef_IsTrue(flag);(void)flag;
@@ -10375,10 +9135,6 @@
         }
 
         case _GUARD_IS_FALSE_POP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef flag;
             flag = stack_pointer[-1];
             int is_false = PyStackRef_IsFalse(flag);(void)flag;
@@ -10392,10 +9148,6 @@
         }
 
         case _GUARD_IS_NONE_POP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef val;
             val = stack_pointer[-1];
             int is_none = PyStackRef_IsNone(val);
@@ -10414,10 +9166,6 @@
         }
 
         case _GUARD_IS_NOT_NONE_POP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef val;
             val = stack_pointer[-1];
             int is_none = PyStackRef_IsNone(val);
@@ -10432,29 +9180,17 @@
         }
 
         case _JUMP_TO_TOP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             JUMP_TO_JUMP_TARGET(0);
             break;
         }
 
         case _SET_IP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
             break;
         }
 
         case _CHECK_STACK_SPACE_OPERAND: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             uint32_t framesize = (uint32_t)CURRENT_OPERAND0();
             assert(framesize <= INT_MAX);
             if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
@@ -10469,10 +9205,6 @@
         }
 
         case _SAVE_RETURN_OFFSET: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG();
             #if TIER_ONE
             frame->return_offset = (uint16_t)(next_instr - this_instr);
@@ -10484,10 +9216,6 @@
         }
 
         case _EXIT_TRACE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
@@ -10549,10 +9277,6 @@
         }
 
         case _CHECK_VALIDITY: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET(0);
@@ -10561,10 +9285,6 @@
         }
 
         case _LOAD_CONST_INLINE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
@@ -10575,10 +9295,6 @@
         }
 
         case _LOAD_CONST_INLINE_BORROW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
@@ -10589,10 +9305,6 @@
         }
 
         case _POP_TOP_LOAD_CONST_INLINE_BORROW: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef pop;
             _PyStackRef value;
             pop = stack_pointer[-1];
@@ -10604,10 +9316,6 @@
         }
 
         case _LOAD_CONST_INLINE_WITH_NULL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef null;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
@@ -10621,10 +9329,6 @@
         }
 
         case _LOAD_CONST_INLINE_BORROW_WITH_NULL: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef value;
             _PyStackRef null;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
@@ -10638,10 +9342,6 @@
         }
 
         case _CHECK_FUNCTION: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -10653,10 +9353,6 @@
         }
 
         case _LOAD_GLOBAL_MODULE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef res;
             _PyStackRef null = PyStackRef_NULL;
             oparg = CURRENT_OPARG();
@@ -10679,10 +9375,6 @@
         }
 
         case _LOAD_GLOBAL_BUILTINS: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef res;
             _PyStackRef null = PyStackRef_NULL;
             oparg = CURRENT_OPARG();
@@ -10705,10 +9397,6 @@
         }
 
         case _LOAD_ATTR_MODULE: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef owner;
             _PyStackRef attr;
             _PyStackRef null = PyStackRef_NULL;
@@ -10738,10 +9426,6 @@
         }
 
         case _INTERNAL_INCREMENT_OPT_COUNTER: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             _PyStackRef opt;
             opt = stack_pointer[-1];
             _PyCounterOptimizerObject *exe = (_PyCounterOptimizerObject *)PyStackRef_AsPyObjectBorrow(opt);
@@ -10752,10 +9436,6 @@
         }
 
         case _DYNAMIC_EXIT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
             tstate->previous_executor = (PyObject *)current_executor;
             _PyExitData *exit = (_PyExitData *)exit_p;
@@ -10803,10 +9483,6 @@
         }
 
         case _START_EXECUTOR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyObject *executor = (PyObject *)CURRENT_OPERAND0();
             Py_DECREF(tstate->previous_executor);
             tstate->previous_executor = NULL;
@@ -10818,10 +9494,6 @@
         }
 
         case _MAKE_WARM: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             current_executor->vm_data.warm = true;
             // It's okay if this ends up going negative.
             if (--tstate->interp->trace_run_counter == 0) {
@@ -10831,20 +9503,12 @@
         }
 
         case _FATAL_ERROR: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             assert(0);
             Py_FatalError("Fatal error uop executed.");
             break;
         }
 
         case _CHECK_VALIDITY_AND_SET_IP: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
@@ -10855,19 +9519,11 @@
         }
 
         case _DEOPT: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             EXIT_TO_TIER1();
             break;
         }
 
         case _ERROR_POP_N: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             oparg = CURRENT_OPARG();
             uint32_t target = (uint32_t)CURRENT_OPERAND0();
             stack_pointer += -oparg;
@@ -10880,10 +9536,6 @@
         }
 
         case _TIER2_RESUME_CHECK: {
-            #ifndef _Py_JIT
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            #endif
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);

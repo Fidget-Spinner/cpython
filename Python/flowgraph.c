@@ -2598,7 +2598,7 @@ _PyCfg_OptimizeCodeUnit(cfg_builder *g, PyObject *consts, PyObject *const_cache,
     RETURN_IF_ERROR(
         add_checks_for_loads_of_uninitialized_variables(
             g->g_entryblock, nlocals, nparams));
-    RETURN_IF_ERROR(insert_superinstructions(g));
+    // RETURN_IF_ERROR(insert_superinstructions(g));
 
     RETURN_IF_ERROR(push_cold_blocks_to_end(g));
     RETURN_IF_ERROR(resolve_line_numbers(g, firstlineno));

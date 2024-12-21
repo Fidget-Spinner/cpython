@@ -9,6 +9,7 @@ import itertools
 from analyzer import (
     Analysis,
     analyze_files,
+    Uop,
 )
 from generators_common import (
     DEFAULT_INPUT,
@@ -16,7 +17,7 @@ from generators_common import (
     write_header,
     cflags,
 )
-from stack import Stack
+from stack import Stack, get_stack_effect
 from cwriter import CWriter
 from typing import TextIO
 
@@ -31,8 +32,12 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     out.emit("#ifdef NEED_OPCODE_METADATA\n")
     out.emit("const uint64_t _PyUop_Flags[MAX_UOP_ID+1] = {\n")
     for uop in analysis.uops.values():
-        if uop.is_viable() and uop.properties.tier != 1:
+        if uop.is_viable() and uop.properties.tier != 1 and not uop.implicitly_created and not uop.replicates_children:
             out.emit(f"[{uop.name}] = {cflags(uop.properties)},\n")
+
+    for inst in analysis.instructions.values():
+        # if len([p for p in inst.parts if isinstance(p, Uop) and "specializing" not in p.annotations]) > 1:
+        out.emit(f"[{inst.name}] = {cflags(inst.properties)},\n")
 
     out.emit("};\n\n")
     out.emit("const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {\n")
@@ -51,6 +56,8 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     out.emit("int _PyUop_num_popped(int opcode, int oparg)\n{\n")
     out.emit("switch(opcode) {\n")
     for uop in analysis.uops.values():
+        if uop.implicitly_created:
+            continue
         if uop.is_viable() and uop.properties.tier != 1:
             stack = Stack()
             for var in reversed(uop.stack.inputs):
@@ -60,6 +67,11 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
             popped = (-stack.base_offset).to_c()
             out.emit(f"case {uop.name}:\n")
             out.emit(f"    return {popped};\n")
+    for inst in analysis.instructions.values():
+        stack = get_stack_effect(inst)
+        popped = (-stack.base_offset).to_c()
+        out.emit(f"case {inst.name}:\n")
+        out.emit(f"    return {popped};\n")
     out.emit("default:\n")
     out.emit("    return -1;\n")
     out.emit("}\n")
