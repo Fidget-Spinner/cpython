@@ -953,7 +953,6 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS] = "_GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS",
     [_GUARD_IS_FALSE_POP____LOAD_FAST_1] = "_GUARD_IS_FALSE_POP____LOAD_FAST_1",
     [_GUARD_IS_FALSE_POP____LOAD_FAST_7] = "_GUARD_IS_FALSE_POP____LOAD_FAST_7",
-    [_GUARD_IS_TRUE_POP____EXIT_TRACE] = "_GUARD_IS_TRUE_POP____EXIT_TRACE",
     [_GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES] = "_GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES",
     [_GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES] = "_GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES",
     [_GUARD_NOS_INT____BINARY_OP_ADD_INT] = "_GUARD_NOS_INT____BINARY_OP_ADD_INT",
@@ -2833,19 +2832,6 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         default:
                         *move_forward_by = 2;
                         return _CALL_BUILTIN_FAST____CHECK_PERIODIC;
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-        case _GUARD_IS_TRUE_POP: {
-            switch (this_instr[1].opcode) {
-                case _EXIT_TRACE: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _GUARD_IS_TRUE_POP____EXIT_TRACE;
                     }
                     break;
                 }
