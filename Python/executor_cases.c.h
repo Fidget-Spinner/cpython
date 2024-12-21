@@ -6053,6 +6053,144 @@
             break;
         }
 
+        case _ITER_CHECK_RANGE____GUARD_NOT_EXHAUSTED_RANGE____ITER_NEXT_RANGE: {
+            // _ITER_CHECK_RANGE
+            {
+                _PyStackRef iter;
+                iter = stack_pointer[-1];
+                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
+                if (Py_TYPE(r) != &PyRangeIter_Type) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _GUARD_NOT_EXHAUSTED_RANGE
+            {
+                _PyStackRef iter;
+                iter = stack_pointer[-1];
+                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
+                assert(Py_TYPE(r) == &PyRangeIter_Type);
+                if (r->len <= 0) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _ITER_NEXT_RANGE
+            {
+                _PyStackRef iter;
+                _PyStackRef next;
+                iter = stack_pointer[-1];
+                _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
+                assert(Py_TYPE(r) == &PyRangeIter_Type);
+                assert(r->len > 0);
+                long value = r->start;
+                r->start = value + r->step;
+                r->len--;
+                PyObject *res = PyLong_FromLong(value);
+                if (res == NULL) JUMP_TO_ERROR(2);
+                next = PyStackRef_FromPyObjectSteal(res);
+                stack_pointer[0] = next;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+            }
+            break;
+        }
+
+        case _ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST: {
+            // _ITER_CHECK_LIST
+            {
+                _PyStackRef iter;
+                iter = stack_pointer[-1];
+                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _GUARD_NOT_EXHAUSTED_LIST
+            {
+                _PyStackRef iter;
+                iter = stack_pointer[-1];
+                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+                _PyListIterObject *it = (_PyListIterObject *)iter_o;
+                assert(Py_TYPE(iter_o) == &PyListIter_Type);
+                PyListObject *seq = it->it_seq;
+                if (seq == NULL) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
+                    it->it_index = -1;
+                    if (1) {
+                        UOP_STAT_INC(uopcode, miss);
+                        JUMP_TO_JUMP_TARGET(1);
+                    }
+                }
+            }
+            // _ITER_NEXT_LIST
+            {
+                _PyStackRef iter;
+                _PyStackRef next;
+                iter = stack_pointer[-1];
+                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+                _PyListIterObject *it = (_PyListIterObject *)iter_o;
+                assert(Py_TYPE(iter_o) == &PyListIter_Type);
+                PyListObject *seq = it->it_seq;
+                assert(seq);
+                assert(it->it_index < PyList_GET_SIZE(seq));
+                next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
+                stack_pointer[0] = next;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+            }
+            break;
+        }
+
+        case _ITER_CHECK_TUPLE____GUARD_NOT_EXHAUSTED_TUPLE____ITER_NEXT_TUPLE: {
+            // _ITER_CHECK_TUPLE
+            {
+                _PyStackRef iter;
+                iter = stack_pointer[-1];
+                if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(0);
+                }
+            }
+            // _GUARD_NOT_EXHAUSTED_TUPLE
+            {
+                _PyStackRef iter;
+                iter = stack_pointer[-1];
+                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
+                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
+                PyTupleObject *seq = it->it_seq;
+                if (seq == NULL) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+                if (it->it_index >= PyTuple_GET_SIZE(seq)) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET(1);
+                }
+            }
+            // _ITER_NEXT_TUPLE
+            {
+                _PyStackRef iter;
+                _PyStackRef next;
+                iter = stack_pointer[-1];
+                PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+                _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
+                assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
+                PyTupleObject *seq = it->it_seq;
+                assert(seq);
+                assert(it->it_index < PyTuple_GET_SIZE(seq));
+                next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
+                stack_pointer[0] = next;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+            }
+            break;
+        }
+
         case _MAKE_WARM____SET_IP: {
             // _MAKE_WARM
             {

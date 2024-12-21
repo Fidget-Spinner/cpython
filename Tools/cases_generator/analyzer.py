@@ -1144,6 +1144,9 @@ def form_uop_valid_permutations(constituents: list[Uop]) -> list[list[Uop]]:
     return added + not_added
 
 MANUAL_SUPER_UOPS = (
+    "_ITER_CHECK_RANGE _GUARD_NOT_EXHAUSTED_RANGE _ITER_NEXT_RANGE",
+    "_ITER_CHECK_LIST _GUARD_NOT_EXHAUSTED_LIST _ITER_NEXT_LIST",
+    "_ITER_CHECK_TUPLE _GUARD_NOT_EXHAUSTED_TUPLE _ITER_NEXT_TUPLE",
     "_MAKE_WARM _SET_IP",
     "_CHECK_PERIODIC _CHECK_VALIDITY",
     "_LOAD_SMALL_INT_1 _GUARD_NOS_INT",

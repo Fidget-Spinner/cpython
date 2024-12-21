@@ -1025,12 +1025,15 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME] = "_INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME",
     [_INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME] = "_INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME",
     [_ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST] = "_ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST",
+    [_ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST] = "_ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST",
     [_ITER_CHECK_LIST____ITER_JUMP_LIST] = "_ITER_CHECK_LIST____ITER_JUMP_LIST",
     [_ITER_CHECK_LIST____ITER_JUMP_LIST____ITER_NEXT_LIST] = "_ITER_CHECK_LIST____ITER_JUMP_LIST____ITER_NEXT_LIST",
     [_ITER_CHECK_LIST____ITER_NEXT_LIST] = "_ITER_CHECK_LIST____ITER_NEXT_LIST",
+    [_ITER_CHECK_RANGE____GUARD_NOT_EXHAUSTED_RANGE____ITER_NEXT_RANGE] = "_ITER_CHECK_RANGE____GUARD_NOT_EXHAUSTED_RANGE____ITER_NEXT_RANGE",
     [_ITER_CHECK_RANGE____ITER_JUMP_RANGE] = "_ITER_CHECK_RANGE____ITER_JUMP_RANGE",
     [_ITER_CHECK_RANGE____ITER_JUMP_RANGE____ITER_NEXT_RANGE] = "_ITER_CHECK_RANGE____ITER_JUMP_RANGE____ITER_NEXT_RANGE",
     [_ITER_CHECK_RANGE____ITER_NEXT_RANGE] = "_ITER_CHECK_RANGE____ITER_NEXT_RANGE",
+    [_ITER_CHECK_TUPLE____GUARD_NOT_EXHAUSTED_TUPLE____ITER_NEXT_TUPLE] = "_ITER_CHECK_TUPLE____GUARD_NOT_EXHAUSTED_TUPLE____ITER_NEXT_TUPLE",
     [_ITER_CHECK_TUPLE____ITER_JUMP_TUPLE] = "_ITER_CHECK_TUPLE____ITER_JUMP_TUPLE",
     [_ITER_CHECK_TUPLE____ITER_JUMP_TUPLE____ITER_NEXT_TUPLE] = "_ITER_CHECK_TUPLE____ITER_JUMP_TUPLE____ITER_NEXT_TUPLE",
     [_ITER_CHECK_TUPLE____ITER_NEXT_TUPLE] = "_ITER_CHECK_TUPLE____ITER_NEXT_TUPLE",
@@ -1648,6 +1651,87 @@ extern int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forw
 #ifdef NEED_OPCODE_METADATA
 int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by) {
     switch (this_instr[0].opcode) {
+        case _ITER_CHECK_RANGE: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_NOT_EXHAUSTED_RANGE: {
+                    switch (this_instr[2].opcode) {
+                        case _ITER_NEXT_RANGE: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _ITER_CHECK_RANGE____GUARD_NOT_EXHAUSTED_RANGE____ITER_NEXT_RANGE;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case _ITER_NEXT_RANGE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_RANGE____ITER_NEXT_RANGE;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _ITER_CHECK_LIST: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_NOT_EXHAUSTED_LIST: {
+                    switch (this_instr[2].opcode) {
+                        case _ITER_NEXT_LIST: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST____ITER_NEXT_LIST;
+                            }
+                            break;
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST;
+                    }
+                    break;
+                }
+                case _ITER_NEXT_LIST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_LIST____ITER_NEXT_LIST;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case _ITER_CHECK_TUPLE: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_NOT_EXHAUSTED_TUPLE: {
+                    switch (this_instr[2].opcode) {
+                        case _ITER_NEXT_TUPLE: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _ITER_CHECK_TUPLE____GUARD_NOT_EXHAUSTED_TUPLE____ITER_NEXT_TUPLE;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case _ITER_NEXT_TUPLE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_TUPLE____ITER_NEXT_TUPLE;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
         case _MAKE_WARM: {
             switch (this_instr[1].opcode) {
                 case _SET_IP: {
@@ -1819,27 +1903,6 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         default:
                         *move_forward_by = 2;
                         return _CHECK_VALIDITY____LOAD_FAST_1;
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-        case _ITER_CHECK_LIST: {
-            switch (this_instr[1].opcode) {
-                case _GUARD_NOT_EXHAUSTED_LIST: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _ITER_CHECK_LIST____GUARD_NOT_EXHAUSTED_LIST;
-                    }
-                    break;
-                }
-                case _ITER_NEXT_LIST: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _ITER_CHECK_LIST____ITER_NEXT_LIST;
                     }
                     break;
                 }
@@ -4751,32 +4814,6 @@ int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by)
                         default:
                         *move_forward_by = 2;
                         return _GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-        case _ITER_CHECK_TUPLE: {
-            switch (this_instr[1].opcode) {
-                case _ITER_NEXT_TUPLE: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _ITER_CHECK_TUPLE____ITER_NEXT_TUPLE;
-                    }
-                    break;
-                }
-            }
-            break;
-        }
-        case _ITER_CHECK_RANGE: {
-            switch (this_instr[1].opcode) {
-                case _ITER_NEXT_RANGE: {
-                    switch (this_instr[2].opcode) {
-                        default:
-                        *move_forward_by = 2;
-                        return _ITER_CHECK_RANGE____ITER_NEXT_RANGE;
                     }
                     break;
                 }
