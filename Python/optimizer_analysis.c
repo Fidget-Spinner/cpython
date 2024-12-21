@@ -550,8 +550,8 @@ error:
 }
 
 
-static int
-remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
+int
+_Pyuop_remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
 {
     /* Remove _SET_IP and _CHECK_VALIDITY where possible.
      * _SET_IP is needed if the following instruction escapes or
@@ -615,6 +615,14 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
                 /* _PUSH_FRAME doesn't escape or error, but it
                  * does need the IP for the return address */
                 bool needs_ip = opcode == _PUSH_FRAME;
+                int deopt = _PyOpcode_Deopt[opcode];
+                if (deopt == CALL || deopt == CALL_KW ||
+                    opcode == BINARY_SUBSCR_GETITEM ||
+                    opcode == SEND_GEN ||
+                    opcode == LOAD_ATTR_PROPERTY ||
+                    opcode == FOR_ITER_GEN) {
+                    needs_ip = true;
+                }
                 if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
                     needs_ip = true;
                     may_have_escaped = true;
@@ -662,7 +670,7 @@ _Py_uop_analyze_and_optimize(
         return length;
     }
 
-    length = remove_unneeded_uops(buffer, length);
+    length = _Pyuop_remove_unneeded_uops(buffer, length);
     assert(length > 0);
 
     OPT_STAT_INC(optimizer_successes);

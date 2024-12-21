@@ -1291,6 +1291,7 @@ uop_baseline(
         // Error or nothing translated
         return length;
     }
+    _Pyuop_remove_unneeded_uops(buffer, length);
     OPT_STAT_INC(traces_created);
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
