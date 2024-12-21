@@ -533,12 +533,13 @@ add_to_trace(
     assert(func == NULL || func->func_code == (PyObject *)code); \
     instr = trace_stack[trace_stack_depth].instr;
 
+
 /* Returns the length of the trace on success,
  * 0 if it failed to produce a worthwhile trace,
  * and -1 on an error.
  */
 static int
-translate_bytecode_to_trace(
+translate_bytecode_to_trace_baseline(
     _PyInterpreterFrame *frame,
     _Py_CODEUNIT *instr,
     _PyUOpInstruction *trace,
@@ -1243,7 +1244,7 @@ int effective_trace_length(_PyUOpInstruction *buffer, int length)
 #endif
 
 static int
-uop_optimize(
+uop_baseline(
     _PyOptimizerObject *self,
     _PyInterpreterFrame *frame,
     _Py_CODEUNIT *instr,
@@ -1255,22 +1256,12 @@ uop_optimize(
     _Py_BloomFilter_Init(&dependencies);
     _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
     OPT_STAT_INC(attempts);
-    int length = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
+    int length = translate_bytecode_to_trace_baseline(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
     if (length <= 0) {
         // Error or nothing translated
         return length;
     }
-    assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
-    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
-    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
-        length = _Py_uop_analyze_and_optimize(frame, buffer,
-                                           length,
-                                           curr_stackentries, &dependencies);
-        if (length <= 0) {
-            return length;
-        }
-    }
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
     /* Fix up */
@@ -1301,6 +1292,7 @@ uop_optimize(
     return 1;
 }
 
+
 static void
 uop_opt_dealloc(PyObject *self) {
     PyObject_Free(self);
@@ -1322,7 +1314,7 @@ _PyOptimizer_NewUOpOptimizer(void)
     if (opt == NULL) {
         return NULL;
     }
-    opt->optimize = uop_optimize;
+    opt->optimize = uop_baseline;
     return (PyObject *)opt;
 }
 

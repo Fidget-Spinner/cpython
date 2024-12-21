@@ -9,6 +9,9 @@ from analyzer import (
     Analysis,
     Instruction,
     Uop,
+    Part,
+    Flush,
+    Skip,
     analyze_files,
     StackItem,
     analysis_error,
@@ -26,41 +29,38 @@ from generators_common import (
 from cwriter import CWriter
 from typing import TextIO, Iterator
 from lexer import Token
-from stack import Local, Stack, StackError, Storage
+from stack import Local, Stack, StackError, Storage, get_stack_effect
+from tier1_generator import uses_this
 
 DEFAULT_OUTPUT = ROOT / "Python/executor_cases.c.h"
 
-
-def declare_variable(
-    var: StackItem, uop: Uop, required: set[str], out: CWriter
-) -> None:
-    if not var.used or var.name not in required:
-        return
-    required.remove(var.name)
+def declare_variable(var: StackItem, out: CWriter) -> None:
     type, null = type_and_null(var)
     space = " " if type[-1].isalnum() else ""
     if var.condition:
         out.emit(f"{type}{space}{var.name} = {null};\n")
-        if uop.replicates:
-            # Replicas may not use all their conditional variables
-            # So avoid a compiler warning with a fake use
-            out.emit(f"(void){var.name};\n")
     else:
         out.emit(f"{type}{space}{var.name};\n")
 
 
-def declare_variables(uop: Uop, out: CWriter) -> None:
-    stack = Stack()
-    for var in reversed(uop.stack.inputs):
-        stack.pop(var)
-    for var in uop.stack.outputs:
-        stack.push(Local.undefined(var))
+def declare_variables(inst: Instruction, out: CWriter) -> None:
+    try:
+        stack = get_stack_effect(inst)
+    except StackError as ex:
+        raise analysis_error(ex.args[0], inst.where) from None
     required = set(stack.defined)
     required.discard("unused")
-    for var in reversed(uop.stack.inputs):
-        declare_variable(var, uop, required, out)
-    for var in uop.stack.outputs:
-        declare_variable(var, uop, required, out)
+    for part in inst.parts:
+        if not isinstance(part, Uop):
+            continue
+        for var in part.stack.inputs:
+            if var.name in required:
+                required.remove(var.name)
+                declare_variable(var, out)
+        for var in part.stack.outputs:
+            if var.name in required:
+                required.remove(var.name)
+                declare_variable(var, out)
 
 
 class Tier2Emitter(Emitter):
@@ -191,10 +191,29 @@ class Tier2Emitter(Emitter):
         return True
 
 
-def write_uop(uop: Uop, emitter: Tier2Emitter, stack: Stack) -> Stack:
-    locals: dict[str, Local] = {}
+def write_uop(
+    uop: Part,
+    emitter: Tier2Emitter,
+    offset: int,
+    stack: Stack,
+    inst: Instruction,
+    braces: bool,
+) -> tuple[int, Stack]:
+    # out.emit(stack.as_comment() + "\n")
+    if isinstance(uop, Skip):
+        entries = "entries" if uop.size > 1 else "entry"
+        emitter.emit(f"/* Skip {uop.size} cache {entries} */\n")
+        return (offset + uop.size), stack
+    if isinstance(uop, Flush):
+        emitter.emit(f"// flush\n")
+        stack.flush(emitter.out)
+        return offset, stack
     try:
+        locals: dict[str, Local] = {}
         emitter.out.start_line()
+        if braces:
+            emitter.out.emit(f"// {uop.name}\n")
+            emitter.emit("{\n")
         if uop.properties.oparg:
             emitter.emit(f"oparg = CURRENT_OPARG({emitter.index});\n")
             assert uop.properties.const_oparg < 0
@@ -202,8 +221,10 @@ def write_uop(uop: Uop, emitter: Tier2Emitter, stack: Stack) -> Stack:
             emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
             emitter.emit(f"assert(oparg == CURRENT_OPARG({emitter.index}));\n")
         code_list, storage = Storage.for_uop(stack, uop)
+        emitter._print_storage(storage)
         for code in code_list:
             emitter.emit(code)
+
         for idx, cache in enumerate(uop.caches):
             if cache.name != "unused":
                 if cache.size == 4:
@@ -212,12 +233,29 @@ def write_uop(uop: Uop, emitter: Tier2Emitter, stack: Stack) -> Stack:
                     type = f"uint{cache.size*16}_t "
                     cast = f"uint{cache.size*16}_t"
                 emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}({emitter.index});\n")
-        storage = emitter.emit_tokens(uop, storage, None)
+
+        storage = emitter.emit_tokens(uop, storage, inst)
+        if braces:
+            emitter.out.start_line()
+            emitter.emit("}\n")
+        # emitter.emit(stack.as_comment() + "\n")
+        return offset, storage.stack
     except StackError as ex:
-        raise analysis_error(ex.args[0], uop.body[0]) from None
-    return storage.stack
+        raise analysis_error(ex.args[0], uop.body[0])
 
 SKIPS = ("_EXTENDED_ARG",)
+
+
+def tier2_not_viable(inst: Instruction) -> str:
+    if inst.properties.needs_prev:
+        return "/* Not viable for tier 2 (needs prev_instr) */\n"
+    if inst.properties.needs_this:
+        return f"/* Not viable for tier 2 (needs this_instr) */\n"
+    for part in inst.parts:
+        if isinstance(part, Uop):
+            if len(part.caches) > 2:
+                return f"/* Not viable for tier 2 (more than 2 cache entries) */\n"
+    return ""
 
 
 def generate_tier2(
@@ -235,31 +273,38 @@ def generate_tier2(
     out = CWriter(outfile, 2, lines)
     emitter = Tier2Emitter(out)
     out.emit("\n")
-    for name, uop in analysis.uops.items():
-        if uop.properties.tier == 1:
+    for name, inst in sorted(analysis.instructions.items()):
+        needs_this = uses_this(inst)
+        out.emit("\n")
+        out.emit(f"case {name}: {{\n")
+        is_not_viable = tier2_not_viable(inst)
+        if is_not_viable:
+            out.emit(is_not_viable)
+            out.emit(f"Py_UNREACHABLE();\n")
+            out.emit("break;\n")
+            out.emit("}\n")
+            out.start_line()
             continue
-        if uop.properties.oparg_and_1:
-            out.emit(f"/* {uop.name} is split on (oparg & 1) */\n\n")
-            continue
-        if uop.is_super():
-            continue
-        why_not_viable = uop.why_not_viable()
-        if why_not_viable is not None:
-            out.emit(
-                f"/* {uop.name} is not a viable micro-op for tier 2 because it {why_not_viable} */\n\n"
-            )
-            continue
-        out.emit(f"case {uop.name}: {{\n")
-        declare_variables(uop, out)
+        else:
+            out.emit(f"frame->instr_ptr = next_instr;\n")
+        out.emit(f"next_instr += {len(inst.parts)};\n")
+        # out.emit(f"INSTRUCTION_STATS({name});\n")
+        declare_variables(inst, out)
+        offset = 1  # The instruction itself
         stack = Stack()
-        stack = write_uop(uop, emitter, stack)
+        for idx, part in enumerate(inst.parts):
+            emitter.index = idx
+            # Only emit braces if more than one uop
+            insert_braces = len([p for p in inst.parts if isinstance(p, Uop)]) > 1
+            offset, stack = write_uop(part, emitter, offset, stack, inst, insert_braces)
         out.start_line()
-        if not uop.properties.always_exits:
-            stack.flush(out)
+
+        stack.flush(out)
+        if not inst.parts[-1].properties.always_exits:
             out.emit("break;\n")
         out.start_line()
         out.emit("}")
-        out.emit("\n\n")
+        out.emit("\n")
     outfile.write("#undef TIER_TWO\n")
 
 
