@@ -34,6 +34,8 @@ from tier1_generator import uses_this
 
 DEFAULT_OUTPUT = ROOT / "Python/executor_cases.c.h"
 
+MAX_UOP_LEN = 9
+
 def declare_variable(var: StackItem, out: CWriter) -> None:
     type, null = type_and_null(var)
     space = " " if type[-1].isalnum() else ""
@@ -305,12 +307,16 @@ def declare_variables_tier2(uop: Uop, out: CWriter) -> None:
 def tier2_not_viable(inst: Instruction) -> str:
     if inst.properties.needs_prev:
         return "/* Not viable for tier 2 (needs prev_instr) */\n"
+    count = 0
     for part in inst.parts:
         if isinstance(part, Uop):
             if len(part.caches) > 2:
                 return f"/* Not viable for tier 2 (more than 2 cache entries) */\n"
             if part.properties.needs_this and not "specializing" in part.annotations and part.name not in {"_SAVE_RETURN_OFFSET"}:
                 return f"/* Not viable for tier 2 (needs this_instr in {part.name}, and can't ignore specializing) */\n"
+            if "specializing" not in part.annotations:
+                count += 1
+    assert count <= MAX_UOP_LEN, inst.name
     return ""
 
 
