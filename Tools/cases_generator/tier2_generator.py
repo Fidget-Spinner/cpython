@@ -36,6 +36,15 @@ DEFAULT_OUTPUT = ROOT / "Python/executor_cases.c.h"
 
 MAX_UOP_LEN = 9
 
+OPS_NOT_VIABLE_FOR_TIER2 = {
+    "FOR_ITER_LIST",
+    "FOR_ITER_RANGE",
+    "FOR_ITER_TUPLE",
+    "EXTENDED_ARG",
+    "INTERPRETER_EXIT",
+    "INSTRUMENTED_CALL_FUNCTION_EX",
+}
+
 def declare_variable(var: StackItem, out: CWriter) -> None:
     type, null = type_and_null(var)
     space = " " if type[-1].isalnum() else ""
@@ -252,11 +261,11 @@ def write_uop_tier2(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
     try:
         emitter.out.start_line()
         if uop.properties.oparg:
-            emitter.emit("oparg = CURRENT_OPARG();\n")
+            emitter.emit("oparg = CURRENT_OPARG(0);\n")
             assert uop.properties.const_oparg < 0
         elif uop.properties.const_oparg >= 0:
             emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
-            emitter.emit(f"assert(oparg == CURRENT_OPARG());\n")
+            emitter.emit(f"assert(oparg == CURRENT_OPARG(0));\n")
         code_list, storage = Storage.for_uop(stack, uop)
         for code in code_list:
             emitter.emit(code)
@@ -267,7 +276,7 @@ def write_uop_tier2(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
                 else:
                     type = f"uint{cache.size*16}_t "
                     cast = f"uint{cache.size*16}_t"
-                emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}();\n")
+                emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}(0);\n")
         storage = emitter.emit_tokens(uop, storage, None)
     except StackError as ex:
         raise analysis_error(ex.args[0], uop.body[0]) from None
@@ -305,6 +314,8 @@ def declare_variables_tier2(uop: Uop, out: CWriter) -> None:
         declare_variable_tier2(var, uop, required, out)
 
 def tier2_not_viable(inst: Instruction) -> str:
+    if inst.name in OPS_NOT_VIABLE_FOR_TIER2:
+        return "/* Not viable for tier 2 (manual) */\n"
     if inst.properties.needs_prev:
         return "/* Not viable for tier 2 (needs prev_instr) */\n"
     count = 0

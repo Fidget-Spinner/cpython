@@ -108,6 +108,8 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint16_t, _oparg4, _JIT_OPARG4)
     PATCH_VALUE(uint16_t, _oparg5, _JIT_OPARG5)
     PATCH_VALUE(uint16_t, _oparg6, _JIT_OPARG6)
+    PATCH_VALUE(uint16_t, _oparg7, _JIT_OPARG6)
+    PATCH_VALUE(uint16_t, _oparg8, _JIT_OPARG6)
 
 #if SIZEOF_VOID_P == 8
     PATCH_VALUE(uint64_t, _operand0_0, _JIT_OPERAND0_0)
@@ -150,6 +152,8 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint32_t, _target4, _JIT_TARGET4)
     PATCH_VALUE(uint32_t, _target5, _JIT_TARGET5)
     PATCH_VALUE(uint32_t, _target6, _JIT_TARGET6)
+    PATCH_VALUE(uint32_t, _target7, _JIT_TARGET6)
+    PATCH_VALUE(uint32_t, _target8, _JIT_TARGET6)
 
     OPT_STAT_INC(uops_executed);
 
