@@ -9,6 +9,7 @@ import itertools
 from analyzer import (
     Analysis,
     analyze_files,
+    Uop,
 )
 from generators_common import (
     DEFAULT_INPUT,
@@ -67,10 +68,45 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     out.emit("#endif // NEED_OPCODE_METADATA\n\n")
 
 
+Trie = dict[str, "str | Trie"]
+
+def insert_trie(trie: Trie, items: list[str], leaf: str) -> None:
+    if not items:
+        return
+    pointer = trie
+    for item in items:
+        if item not in pointer:
+            pointer[item] = {}
+        # Advance the pointer
+        pointer = pointer[item]
+    pointer["self"] = leaf
+
+def create_superuop_trie(super_uops: dict[str, list[str]]) -> Trie:
+    trie = {}
+    for super_name, super_uop in super_uops.items():
+        insert_trie(trie, super_uop, super_name)
+    return trie
+
+def traverse_and_write_trie(out: CWriter, trie: Trie, depth: int) -> None:
+    out.emit(f"switch (this_instr[{depth}].opcode) {{\n")
+    for prefix, values in trie.items():
+        if prefix == "self":
+            assert isinstance(values, str)
+            out.emit("default:\n")
+            out.emit(f"*move_forward_by = {depth};\n")
+            out.emit(f"return {values};\n")
+        else:
+            assert isinstance(values, dict)
+            out.emit(f"case {prefix}: {{\n")
+            traverse_and_write_trie(out, values, depth+1)
+            out.emit("}\n")
+    out.emit("}\n")
+
 def generate_super_uop_matcher(analysis: Analysis, out: CWriter) -> None:
     out.emit("extern int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by);\n\n")
     out.emit("#ifdef NEED_OPCODE_METADATA\n")
     out.emit("int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by) {\n")
+    supers = {}
     for super_name, super_uop in analysis.super_uops.items():
         not_viable = False
         for uop in super_uop:
@@ -91,12 +127,8 @@ def generate_super_uop_matcher(analysis: Analysis, out: CWriter) -> None:
                 break
         if not_viable:
             continue
-        for idx, uop in enumerate(super_uop):
-            out.emit(f"if (this_instr[{idx}].opcode == {uop.name}) {{ \n")
-        out.emit(f"*move_forward_by = {len(super_uop)};\n")
-        out.emit(f"return {super_name};\n")
-        for _ in super_uop:
-            out.emit("}\n")
+        supers[super_name] = [s.name for s in super_uop]
+    traverse_and_write_trie(out, create_superuop_trie(supers), depth=0)
     out.emit(f"return -1;\n")
     out.emit("}\n")
 

@@ -1563,3740 +1563,3166 @@ extern int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forw
 
 #ifdef NEED_OPCODE_METADATA
 int _PyUOp_superuop_matcher(_PyUOpInstruction *this_instr, int *move_forward_by) {
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _REPLACE_WITH_TRUE) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____REPLACE_WITH_TRUE;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_INT) { 
-        if (this_instr[1].opcode == _BINARY_OP_MULTIPLY_INT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_INT____BINARY_OP_MULTIPLY_INT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_INT) { 
-        if (this_instr[1].opcode == _BINARY_OP_ADD_INT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_INT____BINARY_OP_ADD_INT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_INT) { 
-        if (this_instr[1].opcode == _BINARY_OP_SUBTRACT_INT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_INT____BINARY_OP_SUBTRACT_INT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_FLOAT) { 
-        if (this_instr[1].opcode == _BINARY_OP_MULTIPLY_FLOAT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_FLOAT____BINARY_OP_MULTIPLY_FLOAT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_FLOAT) { 
-        if (this_instr[1].opcode == _BINARY_OP_ADD_FLOAT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_FLOAT____BINARY_OP_ADD_FLOAT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_FLOAT) { 
-        if (this_instr[1].opcode == _BINARY_OP_SUBTRACT_FLOAT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_FLOAT____BINARY_OP_SUBTRACT_FLOAT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_UNICODE) { 
-        if (this_instr[1].opcode == _BINARY_OP_ADD_UNICODE) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_UNICODE____BINARY_OP_ADD_UNICODE;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_UNICODE) { 
-        if (this_instr[1].opcode == _BINARY_OP_INPLACE_ADD_UNICODE) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_UNICODE____BINARY_OP_INPLACE_ADD_UNICODE;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-            if (this_instr[2].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-            if (this_instr[2].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____BINARY_SUBSCR_INIT_CALL;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-        if (this_instr[1].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-            *move_forward_by = 2;
-            return _BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL;
-        }
-    }
-    if (this_instr[0].opcode == _BINARY_SUBSCR_CHECK_FUNC) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _BINARY_SUBSCR_INIT_CALL) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _SEND_GEN_FRAME) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____SEND_GEN_FRAME____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _SEND_GEN_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____SEND_GEN_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _SEND_GEN_FRAME) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _SEND_GEN_FRAME____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_GLOBALS_VERSION_PUSH_KEYS) { 
-        if (this_instr[1].opcode == _LOAD_GLOBAL_MODULE_FROM_KEYS) { 
-            *move_forward_by = 2;
-            return _GUARD_GLOBALS_VERSION_PUSH_KEYS____LOAD_GLOBAL_MODULE_FROM_KEYS;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_GLOBALS_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_BUILTINS_VERSION_PUSH_KEYS) { 
-            if (this_instr[2].opcode == _LOAD_GLOBAL_BUILTINS_FROM_KEYS) { 
-                *move_forward_by = 3;
-                return _GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_GLOBALS_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_BUILTINS_VERSION_PUSH_KEYS) { 
-            *move_forward_by = 2;
-            return _GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_GLOBALS_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_GLOBAL_BUILTINS_FROM_KEYS) { 
-            *move_forward_by = 2;
-            return _GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BUILTINS_VERSION_PUSH_KEYS) { 
-        if (this_instr[1].opcode == _LOAD_GLOBAL_BUILTINS_FROM_KEYS) { 
-            *move_forward_by = 2;
-            return _GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_MANAGED_OBJECT_HAS_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____CHECK_MANAGED_OBJECT_HAS_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_ATTR_MODULE_PUSH_KEYS) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_MODULE_FROM_KEYS) { 
-            *move_forward_by = 2;
-            return _CHECK_ATTR_MODULE_PUSH_KEYS____LOAD_ATTR_MODULE_FROM_KEYS;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_ATTR_WITH_HINT) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_WITH_HINT) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_ATTR_WITH_HINT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_WITH_HINT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_WITH_HINT;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_ATTR_WITH_HINT) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_WITH_HINT) { 
-            *move_forward_by = 2;
-            return _CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_ATTR_CLASS) { 
-        if (this_instr[1].opcode == _GUARD_TYPE_VERSION) { 
-            *move_forward_by = 2;
-            return _CHECK_ATTR_CLASS____GUARD_TYPE_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _GUARD_TYPE_VERSION) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _GUARD_TYPE_VERSION) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _GUARD_TYPE_VERSION) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____GUARD_TYPE_VERSION____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _GUARD_TYPE_VERSION) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____GUARD_TYPE_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____LOAD_ATTR_PROPERTY_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _LOAD_ATTR_PROPERTY_FRAME) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION_AND_LOCK) { 
-        if (this_instr[1].opcode == _GUARD_DORV_NO_DICT) { 
-            if (this_instr[2].opcode == _STORE_ATTR_INSTANCE_VALUE) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION_AND_LOCK) { 
-        if (this_instr[1].opcode == _GUARD_DORV_NO_DICT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION_AND_LOCK) { 
-        if (this_instr[1].opcode == _STORE_ATTR_INSTANCE_VALUE) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION_AND_LOCK____STORE_ATTR_INSTANCE_VALUE;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_DORV_NO_DICT) { 
-        if (this_instr[1].opcode == _STORE_ATTR_INSTANCE_VALUE) { 
-            *move_forward_by = 2;
-            return _GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _STORE_ATTR_WITH_HINT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____STORE_ATTR_WITH_HINT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _STORE_ATTR_SLOT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____STORE_ATTR_SLOT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_FLOAT) { 
-        if (this_instr[1].opcode == _COMPARE_OP_FLOAT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_FLOAT____COMPARE_OP_FLOAT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_INT) { 
-        if (this_instr[1].opcode == _COMPARE_OP_INT) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_INT____COMPARE_OP_INT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_BOTH_UNICODE) { 
-        if (this_instr[1].opcode == _COMPARE_OP_STR) { 
-            *move_forward_by = 2;
-            return _GUARD_BOTH_UNICODE____COMPARE_OP_STR;
-        }
-    }
-    if (this_instr[0].opcode == _ITER_CHECK_LIST) { 
-        if (this_instr[1].opcode == _ITER_NEXT_LIST) { 
-            *move_forward_by = 2;
-            return _ITER_CHECK_LIST____ITER_NEXT_LIST;
-        }
-    }
-    if (this_instr[0].opcode == _ITER_CHECK_TUPLE) { 
-        if (this_instr[1].opcode == _ITER_NEXT_TUPLE) { 
-            *move_forward_by = 2;
-            return _ITER_CHECK_TUPLE____ITER_NEXT_TUPLE;
-        }
-    }
-    if (this_instr[0].opcode == _ITER_CHECK_RANGE) { 
-        if (this_instr[1].opcode == _ITER_NEXT_RANGE) { 
-            *move_forward_by = 2;
-            return _ITER_CHECK_RANGE____ITER_NEXT_RANGE;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _FOR_ITER_GEN_FRAME) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____FOR_ITER_GEN_FRAME____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _FOR_ITER_GEN_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____FOR_ITER_GEN_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _FOR_ITER_GEN_FRAME) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _FOR_ITER_GEN_FRAME____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-            if (this_instr[2].opcode == _GUARD_KEYS_VERSION) { 
-                if (this_instr[3].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-                    *move_forward_by = 4;
-                    return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-            if (this_instr[2].opcode == _GUARD_KEYS_VERSION) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_KEYS_VERSION) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_KEYS_VERSION) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-        if (this_instr[1].opcode == _GUARD_KEYS_VERSION) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-                *move_forward_by = 3;
-                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-        if (this_instr[1].opcode == _GUARD_KEYS_VERSION) { 
-            *move_forward_by = 2;
-            return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_KEYS_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_METHOD_WITH_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_METHOD_NO_DICT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_NO_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-            if (this_instr[2].opcode == _GUARD_KEYS_VERSION) { 
-                if (this_instr[3].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-                    *move_forward_by = 4;
-                    return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _GUARD_KEYS_VERSION) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-        if (this_instr[1].opcode == _GUARD_KEYS_VERSION) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-                *move_forward_by = 3;
-                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_KEYS_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) { 
-            *move_forward_by = 2;
-            return _GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_NONDESCRIPTOR_NO_DICT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_NONDESCRIPTOR_NO_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_ATTR_METHOD_LAZY_DICT) { 
-            if (this_instr[2].opcode == _LOAD_ATTR_METHOD_LAZY_DICT) { 
-                *move_forward_by = 3;
-                return _GUARD_TYPE_VERSION____CHECK_ATTR_METHOD_LAZY_DICT____LOAD_ATTR_METHOD_LAZY_DICT;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_ATTR_METHOD_LAZY_DICT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____CHECK_ATTR_METHOD_LAZY_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _GUARD_TYPE_VERSION) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_METHOD_LAZY_DICT) { 
-            *move_forward_by = 2;
-            return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_LAZY_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_ATTR_METHOD_LAZY_DICT) { 
-        if (this_instr[1].opcode == _LOAD_ATTR_METHOD_LAZY_DICT) { 
-            *move_forward_by = 2;
-            return _CHECK_ATTR_METHOD_LAZY_DICT____LOAD_ATTR_METHOD_LAZY_DICT;
-        }
-    }
-    if (this_instr[0].opcode == _MAYBE_EXPAND_METHOD) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _MAYBE_EXPAND_METHOD____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_FUNCTION_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____PY_FRAME_GENERAL____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____PY_FRAME_GENERAL;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _PY_FRAME_GENERAL) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _PY_FRAME_GENERAL____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD) { 
-                if (this_instr[3].opcode == _PY_FRAME_GENERAL) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+    switch (this_instr[0].opcode) {
+        case _GUARD_TYPE_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _REPLACE_WITH_TRUE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____REPLACE_WITH_TRUE;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD) { 
-                if (this_instr[3].opcode == _PY_FRAME_GENERAL) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL;
+                case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____CHECK_MANAGED_OBJECT_HAS_VALUES;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PUSH_FRAME;
+                case _CHECK_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_ATTR_WITH_HINT: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____CHECK_ATTR_WITH_HINT;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_METHOD_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
+                case _LOAD_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_WITH_HINT;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_METHOD_VERSION____PY_FRAME_GENERAL;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_METHOD_VERSION____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_METHOD_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+                case _LOAD_ATTR_PROPERTY_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____EXPAND_METHOD____PY_FRAME_GENERAL;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____EXPAND_METHOD____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____EXPAND_METHOD;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____PUSH_FRAME;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            if (this_instr[2].opcode == _PY_FRAME_GENERAL) { 
-                *move_forward_by = 3;
-                return _CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_METHOD_VERSION____EXPAND_METHOD____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD) { 
-            *move_forward_by = 2;
-            return _CHECK_METHOD_VERSION____EXPAND_METHOD;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_METHOD_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            *move_forward_by = 2;
-            return _CHECK_METHOD_VERSION____PY_FRAME_GENERAL;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_METHOD_VERSION____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _EXPAND_METHOD) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _EXPAND_METHOD) { 
-        if (this_instr[1].opcode == _PY_FRAME_GENERAL) { 
-            *move_forward_by = 2;
-            return _EXPAND_METHOD____PY_FRAME_GENERAL;
-        }
-    }
-    if (this_instr[0].opcode == _EXPAND_METHOD) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _EXPAND_METHOD____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_IS_NOT_PY_CALLABLE) { 
-        if (this_instr[1].opcode == _CALL_NON_PY_GENERAL) { 
-            if (this_instr[2].opcode == _CHECK_PERIODIC) { 
-                *move_forward_by = 3;
-                return _CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL____CHECK_PERIODIC;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_IS_NOT_PY_CALLABLE) { 
-        if (this_instr[1].opcode == _CALL_NON_PY_GENERAL) { 
-            *move_forward_by = 2;
-            return _CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_IS_NOT_PY_CALLABLE) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CHECK_IS_NOT_PY_CALLABLE____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_NON_PY_GENERAL) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_NON_PY_GENERAL____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _CHECK_STACK_SPACE) { 
-                            if (this_instr[6].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                case _STORE_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____STORE_ATTR_WITH_HINT;
+                    }
+                }
+                case _STORE_ATTR_SLOT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____STORE_ATTR_SLOT;
+                    }
+                }
+                case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+                    switch (this_instr[2].opcode) {
+                        case _GUARD_KEYS_VERSION: {
+                            switch (this_instr[3].opcode) {
+                                case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION;
+                                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
+                                    }
+                                }
+                            }
+                        }
+                        case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT;
+                        case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _CHECK_STACK_SPACE) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                case _GUARD_KEYS_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION;
+                        case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _CHECK_STACK_SPACE) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                    }
+                }
+                case _LOAD_ATTR_METHOD_NO_DICT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_NO_DICT;
+                    }
+                }
+                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
+                    }
+                }
+                case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_NONDESCRIPTOR_NO_DICT;
+                    }
+                }
+                case _CHECK_ATTR_METHOD_LAZY_DICT: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_ATTR_METHOD_LAZY_DICT: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION____CHECK_ATTR_METHOD_LAZY_DICT____LOAD_ATTR_METHOD_LAZY_DICT;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____CHECK_ATTR_METHOD_LAZY_DICT;
+                    }
+                }
+                case _LOAD_ATTR_METHOD_LAZY_DICT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION____LOAD_ATTR_METHOD_LAZY_DICT;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+        case _GUARD_BOTH_INT: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_OP_MULTIPLY_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_INT____BINARY_OP_MULTIPLY_INT;
+                    }
+                }
+                case _BINARY_OP_ADD_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_INT____BINARY_OP_ADD_INT;
+                    }
+                }
+                case _BINARY_OP_SUBTRACT_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_INT____BINARY_OP_SUBTRACT_INT;
+                    }
+                }
+                case _COMPARE_OP_INT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_INT____COMPARE_OP_INT;
+                    }
+                }
+            }
+        }
+        case _GUARD_BOTH_FLOAT: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_OP_MULTIPLY_FLOAT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_FLOAT____BINARY_OP_MULTIPLY_FLOAT;
+                    }
+                }
+                case _BINARY_OP_ADD_FLOAT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_FLOAT____BINARY_OP_ADD_FLOAT;
+                    }
+                }
+                case _BINARY_OP_SUBTRACT_FLOAT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_FLOAT____BINARY_OP_SUBTRACT_FLOAT;
+                    }
+                }
+                case _COMPARE_OP_FLOAT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_FLOAT____COMPARE_OP_FLOAT;
+                    }
+                }
+            }
+        }
+        case _GUARD_BOTH_UNICODE: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_OP_ADD_UNICODE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_UNICODE____BINARY_OP_ADD_UNICODE;
+                    }
+                }
+                case _BINARY_OP_INPLACE_ADD_UNICODE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_UNICODE____BINARY_OP_INPLACE_ADD_UNICODE;
+                    }
+                }
+                case _COMPARE_OP_STR: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BOTH_UNICODE____COMPARE_OP_STR;
+                    }
+                }
+            }
+        }
+        case _CHECK_PEP_523: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_SUBSCR_CHECK_FUNC: {
+                    switch (this_instr[2].opcode) {
+                        case _BINARY_SUBSCR_INIT_CALL: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____BINARY_SUBSCR_CHECK_FUNC;
+                    }
+                }
+                case _BINARY_SUBSCR_INIT_CALL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____BINARY_SUBSCR_INIT_CALL;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____PUSH_FRAME;
+                    }
+                }
+                case _SEND_GEN_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____SEND_GEN_FRAME____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____SEND_GEN_FRAME;
+                    }
+                }
+                case _GUARD_TYPE_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_ATTR_PROPERTY_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____GUARD_TYPE_VERSION____LOAD_ATTR_PROPERTY_FRAME;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____GUARD_TYPE_VERSION____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____GUARD_TYPE_VERSION;
+                    }
+                }
+                case _LOAD_ATTR_PROPERTY_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____LOAD_ATTR_PROPERTY_FRAME;
+                    }
+                }
+                case _FOR_ITER_GEN_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____FOR_ITER_GEN_FRAME____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____FOR_ITER_GEN_FRAME;
+                    }
+                }
+                case _CHECK_FUNCTION_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _PY_FRAME_GENERAL: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION;
+                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                case _PY_FRAME_GENERAL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____PY_FRAME_GENERAL____PUSH_FRAME;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____PY_FRAME_GENERAL;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                case _CHECK_METHOD_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _EXPAND_METHOD: {
+                            switch (this_instr[3].opcode) {
+                                case _PY_FRAME_GENERAL: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_METHOD_VERSION____EXPAND_METHOD;
+                            }
                         }
+                        case _PY_FRAME_GENERAL: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_METHOD_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_METHOD_VERSION____PY_FRAME_GENERAL;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_METHOD_VERSION____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_METHOD_VERSION;
+                    }
+                }
+                case _EXPAND_METHOD: {
+                    switch (this_instr[2].opcode) {
+                        case _PY_FRAME_GENERAL: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____EXPAND_METHOD____PY_FRAME_GENERAL;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____EXPAND_METHOD____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____EXPAND_METHOD;
+                    }
+                }
+                case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_FUNCTION_VERSION: {
+                                    switch (this_instr[4].opcode) {
+                                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _CHECK_STACK_SPACE: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                                            }
+                                                        }
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                                    }
+                                                }
+                                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                                    }
+                                                }
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _CHECK_STACK_SPACE: {
+                                            switch (this_instr[5].opcode) {
+                                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                                    }
+                                                }
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                                            }
+                                        }
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
+                                    }
+                                }
+                                case _CHECK_FUNCTION_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _CHECK_STACK_SPACE: {
+                                            switch (this_instr[5].opcode) {
+                                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                                    }
+                                                }
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                            }
+                                        }
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
+                                    }
+                                }
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_FUNCTION_VERSION: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_FUNCTION_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _CHECK_STACK_SPACE: {
+                                            switch (this_instr[5].opcode) {
+                                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                                    }
+                                                }
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                            }
+                                        }
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                                    }
+                                }
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
+                            }
+                        }
+                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS;
+                    }
+                }
+                case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_FUNCTION_VERSION: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_FUNCTION_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _CHECK_STACK_SPACE: {
+                                            switch (this_instr[5].opcode) {
+                                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                                    }
+                                                }
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                            }
+                                        }
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                                    }
+                                }
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
+                            }
+                        }
+                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
+                    }
+                }
+                case _CHECK_FUNCTION_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS;
+                    }
+                }
+                case _CHECK_STACK_SPACE: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_STACK_SPACE____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_STACK_SPACE;
+                    }
+                }
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____INIT_CALL_PY_EXACT_ARGS;
+                    }
+                }
+                case _CHECK_AND_ALLOCATE_OBJECT: {
+                    switch (this_instr[2].opcode) {
+                        case _CREATE_INIT_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT;
+                    }
+                }
+                case _CREATE_INIT_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CREATE_INIT_FRAME____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CREATE_INIT_FRAME;
+                    }
+                }
+                case _CHECK_FUNCTION_VERSION_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PY_FRAME_KW: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW;
+                    }
+                }
+                case _PY_FRAME_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____PY_FRAME_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____PY_FRAME_KW;
+                    }
+                }
+                case _CHECK_METHOD_VERSION_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _EXPAND_METHOD_KW: {
+                            switch (this_instr[3].opcode) {
+                                case _PY_FRAME_KW: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW;
+                            }
+                        }
+                        case _PY_FRAME_KW: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PY_FRAME_KW;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW;
+                    }
+                }
+                case _EXPAND_METHOD_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PY_FRAME_KW: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_PEP_523____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____EXPAND_METHOD_KW____PY_FRAME_KW;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_PEP_523____EXPAND_METHOD_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_PEP_523____EXPAND_METHOD_KW;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+        case _BINARY_SUBSCR_CHECK_FUNC: {
+            switch (this_instr[1].opcode) {
+                case _BINARY_SUBSCR_INIT_CALL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_SUBSCR_CHECK_FUNC____BINARY_SUBSCR_INIT_CALL;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_SUBSCR_CHECK_FUNC____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+        case _BINARY_SUBSCR_INIT_CALL: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _BINARY_SUBSCR_INIT_CALL____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _SEND_GEN_FRAME: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _SEND_GEN_FRAME____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _GUARD_GLOBALS_VERSION_PUSH_KEYS: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_GLOBAL_MODULE_FROM_KEYS: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_GLOBALS_VERSION_PUSH_KEYS____LOAD_GLOBAL_MODULE_FROM_KEYS;
+                    }
+                }
+            }
+        }
+        case _GUARD_GLOBALS_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_BUILTINS_VERSION_PUSH_KEYS: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_GLOBAL_BUILTINS_FROM_KEYS: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_GLOBALS_VERSION____GUARD_BUILTINS_VERSION_PUSH_KEYS;
+                    }
+                }
+                case _LOAD_GLOBAL_BUILTINS_FROM_KEYS: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_GLOBALS_VERSION____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
+                    }
+                }
+            }
+        }
+        case _GUARD_BUILTINS_VERSION_PUSH_KEYS: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_GLOBAL_BUILTINS_FROM_KEYS: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_BUILTINS_VERSION_PUSH_KEYS____LOAD_GLOBAL_BUILTINS_FROM_KEYS;
+                    }
+                }
+            }
+        }
+        case _CHECK_ATTR_MODULE_PUSH_KEYS: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_MODULE_FROM_KEYS: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_ATTR_MODULE_PUSH_KEYS____LOAD_ATTR_MODULE_FROM_KEYS;
+                    }
+                }
+            }
+        }
+        case _CHECK_ATTR_WITH_HINT: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_WITH_HINT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_ATTR_WITH_HINT____LOAD_ATTR_WITH_HINT;
+                    }
+                }
+            }
+        }
+        case _CHECK_ATTR_CLASS: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_TYPE_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_ATTR_CLASS____GUARD_TYPE_VERSION;
+                    }
+                }
+            }
+        }
+        case _LOAD_ATTR_PROPERTY_FRAME: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _LOAD_ATTR_PROPERTY_FRAME____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _GUARD_TYPE_VERSION_AND_LOCK: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_DORV_NO_DICT: {
+                    switch (this_instr[2].opcode) {
+                        case _STORE_ATTR_INSTANCE_VALUE: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION_AND_LOCK____GUARD_DORV_NO_DICT;
+                    }
+                }
+                case _STORE_ATTR_INSTANCE_VALUE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_TYPE_VERSION_AND_LOCK____STORE_ATTR_INSTANCE_VALUE;
+                    }
+                }
+            }
+        }
+        case _GUARD_DORV_NO_DICT: {
+            switch (this_instr[1].opcode) {
+                case _STORE_ATTR_INSTANCE_VALUE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_NO_DICT____STORE_ATTR_INSTANCE_VALUE;
+                    }
+                }
+            }
+        }
+        case _ITER_CHECK_LIST: {
+            switch (this_instr[1].opcode) {
+                case _ITER_NEXT_LIST: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_LIST____ITER_NEXT_LIST;
+                    }
+                }
+            }
+        }
+        case _ITER_CHECK_TUPLE: {
+            switch (this_instr[1].opcode) {
+                case _ITER_NEXT_TUPLE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_TUPLE____ITER_NEXT_TUPLE;
+                    }
+                }
+            }
+        }
+        case _ITER_CHECK_RANGE: {
+            switch (this_instr[1].opcode) {
+                case _ITER_NEXT_RANGE: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _ITER_CHECK_RANGE____ITER_NEXT_RANGE;
+                    }
+                }
+            }
+        }
+        case _FOR_ITER_GEN_FRAME: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _FOR_ITER_GEN_FRAME____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+            switch (this_instr[1].opcode) {
+                case _GUARD_KEYS_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION;
+                        case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                        }
+                case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_METHOD_WITH_VALUES;
+                    }
+                }
+                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                        }
+        case _GUARD_KEYS_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_METHOD_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_KEYS_VERSION____LOAD_ATTR_METHOD_WITH_VALUES;
+                    }
+                }
+                case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _GUARD_KEYS_VERSION____LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+        case _CHECK_ATTR_METHOD_LAZY_DICT: {
+            switch (this_instr[1].opcode) {
+                case _LOAD_ATTR_METHOD_LAZY_DICT: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_ATTR_METHOD_LAZY_DICT____LOAD_ATTR_METHOD_LAZY_DICT;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
+        case _MAYBE_EXPAND_METHOD: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _MAYBE_EXPAND_METHOD____CHECK_PERIODIC;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_VERSION) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+        case _CHECK_FUNCTION_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _PY_FRAME_GENERAL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
                             }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____PY_FRAME_GENERAL;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                        }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____PUSH_FRAME;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _CHECK_FUNCTION_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_CALL_BOUND_METHOD_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_FUNCTION_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_STACK_SPACE____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_STACK_SPACE;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____INIT_CALL_PY_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            if (this_instr[6].opcode == _PUSH_FRAME) { 
-                                *move_forward_by = 7;
-                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                             }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                            *move_forward_by = 6;
-                            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                case _CHECK_STACK_SPACE: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                            }
                         }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _CHECK_STACK_SPACE) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+        case _PY_FRAME_GENERAL: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _PY_FRAME_GENERAL____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+        case _CHECK_METHOD_VERSION: {
+            switch (this_instr[1].opcode) {
+                case _EXPAND_METHOD: {
+                    switch (this_instr[2].opcode) {
+                        case _PY_FRAME_GENERAL: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_METHOD_VERSION____EXPAND_METHOD____PY_FRAME_GENERAL;
+                            }
                         }
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_VERSION) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_METHOD_VERSION____EXPAND_METHOD____PUSH_FRAME;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_METHOD_VERSION____EXPAND_METHOD;
                     }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _PY_FRAME_GENERAL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_METHOD_VERSION____PY_FRAME_GENERAL____PUSH_FRAME;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_METHOD_VERSION____PY_FRAME_GENERAL;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_METHOD_VERSION____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            *move_forward_by = 2;
-            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                    }
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            *move_forward_by = 2;
-            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        if (this_instr[5].opcode == _PUSH_FRAME) { 
-                            *move_forward_by = 6;
-                            return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+        case _EXPAND_METHOD: {
+            switch (this_instr[1].opcode) {
+                case _PY_FRAME_GENERAL: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _EXPAND_METHOD____PY_FRAME_GENERAL____PUSH_FRAME;
+                            }
                         }
+                        default:
+                        *move_forward_by = 2;
+                        return _EXPAND_METHOD____PY_FRAME_GENERAL;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _EXPAND_METHOD____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                        *move_forward_by = 5;
-                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+        case _CHECK_IS_NOT_PY_CALLABLE: {
+            switch (this_instr[1].opcode) {
+                case _CALL_NON_PY_GENERAL: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_PERIODIC: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL____CHECK_PERIODIC;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_IS_NOT_PY_CALLABLE____CALL_NON_PY_GENERAL;
+                    }
+                }
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_IS_NOT_PY_CALLABLE____CHECK_PERIODIC;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+        case _CALL_NON_PY_GENERAL: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_NON_PY_GENERAL____CHECK_PERIODIC;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _CHECK_STACK_SPACE) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+        case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
+            switch (this_instr[1].opcode) {
+                case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_FUNCTION_VERSION: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_FUNCTION_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _CHECK_STACK_SPACE: {
+                                            switch (this_instr[5].opcode) {
+                                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                                    switch (this_instr[6].opcode) {
+                                                        case _PUSH_FRAME: {
+                                                            switch (this_instr[7].opcode) {
+                                                                default:
+                                                                *move_forward_by = 7;
+                                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                            }
+                                                        }
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                                    }
+                                                }
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                            }
+                                        }
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                                    }
+                                }
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
+                            }
+                        }
+                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_BOUND_METHOD_EXACT_ARGS;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _CHECK_FUNCTION_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
+                    }
+                }
+                case _CHECK_FUNCTION_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
+                    }
+                }
+                case _CHECK_STACK_SPACE: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
+                    }
+                }
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+        case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_FUNCTION_VERSION: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_FUNCTION_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _CHECK_STACK_SPACE: {
+                                    switch (this_instr[4].opcode) {
+                                        case _INIT_CALL_PY_EXACT_ARGS: {
+                                            switch (this_instr[5].opcode) {
+                                                case _PUSH_FRAME: {
+                                                    switch (this_instr[6].opcode) {
+                                                        default:
+                                                        *move_forward_by = 6;
+                                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                                    }
+                                                }
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                            }
+                                        }
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                                    }
+                                }
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
+                            }
+                        }
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                case _CHECK_FUNCTION_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_STACK_SPACE: {
+                            switch (this_instr[3].opcode) {
+                                case _INIT_CALL_PY_EXACT_ARGS: {
+                                    switch (this_instr[4].opcode) {
+                                        case _PUSH_FRAME: {
+                                            switch (this_instr[5].opcode) {
+                                                default:
+                                                *move_forward_by = 5;
+                                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                            }
+                                        }
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                                    }
+                                }
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                            }
+                        }
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _CHECK_STACK_SPACE: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
+                    }
+                }
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+        case _CHECK_FUNCTION_EXACT_ARGS: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_STACK_SPACE: {
+                    switch (this_instr[2].opcode) {
+                        case _INIT_CALL_PY_EXACT_ARGS: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION) { 
-            *move_forward_by = 2;
-            return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_VERSION;
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+        case _CHECK_STACK_SPACE: {
+            switch (this_instr[1].opcode) {
+                case _INIT_CALL_PY_EXACT_ARGS: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
+                    }
                 }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_FUNCTION_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            *move_forward_by = 2;
-            return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____CHECK_STACK_SPACE;
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_BOUND_METHOD_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _INIT_CALL_BOUND_METHOD_EXACT_ARGS____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_STACK_SPACE____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                    *move_forward_by = 4;
-                    return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _CHECK_STACK_SPACE) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION____CHECK_FUNCTION_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION____CHECK_STACK_SPACE;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION____INIT_CALL_PY_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _CHECK_STACK_SPACE) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_EXACT_ARGS____CHECK_STACK_SPACE;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_EXACT_ARGS____INIT_CALL_PY_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_EXACT_ARGS____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_STACK_SPACE) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_STACK_SPACE) { 
-        if (this_instr[1].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-            *move_forward_by = 2;
-            return _CHECK_STACK_SPACE____INIT_CALL_PY_EXACT_ARGS;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_STACK_SPACE) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_STACK_SPACE____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _INIT_CALL_PY_EXACT_ARGS) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_STR_1) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_STR_1____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_TUPLE_1) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_TUPLE_1____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-            if (this_instr[2].opcode == _CREATE_INIT_FRAME) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-            if (this_instr[2].opcode == _CREATE_INIT_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_AND_ALLOCATE_OBJECT;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CREATE_INIT_FRAME) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CREATE_INIT_FRAME____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CREATE_INIT_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CREATE_INIT_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-        if (this_instr[1].opcode == _CREATE_INIT_FRAME) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-        if (this_instr[1].opcode == _CREATE_INIT_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_AND_ALLOCATE_OBJECT) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_AND_ALLOCATE_OBJECT____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CREATE_INIT_FRAME) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CREATE_INIT_FRAME____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_BUILTIN_CLASS) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_BUILTIN_CLASS____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_BUILTIN_O) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_BUILTIN_O____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_BUILTIN_FAST) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_BUILTIN_FAST____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_BUILTIN_FAST_WITH_KEYWORDS) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_BUILTIN_FAST_WITH_KEYWORDS____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_METHOD_DESCRIPTOR_O) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_METHOD_DESCRIPTOR_O____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_METHOD_DESCRIPTOR_NOARGS) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_METHOD_DESCRIPTOR_NOARGS____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CALL_METHOD_DESCRIPTOR_FAST) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_METHOD_DESCRIPTOR_FAST____CHECK_PERIODIC;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
-                }
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_FUNCTION_VERSION_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____PY_FRAME_KW____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____PY_FRAME_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_FUNCTION_VERSION_KW) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_FUNCTION_VERSION_KW____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _PY_FRAME_KW) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _PY_FRAME_KW____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD_KW) { 
-                if (this_instr[3].opcode == _PY_FRAME_KW) { 
-                    if (this_instr[4].opcode == _PUSH_FRAME) { 
-                        *move_forward_by = 5;
-                        return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+        case _INIT_CALL_PY_EXACT_ARGS: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _INIT_CALL_PY_EXACT_ARGS____PUSH_FRAME;
                     }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD_KW) { 
-                if (this_instr[3].opcode == _PY_FRAME_KW) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW;
+        case _CALL_STR_1: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_STR_1____CHECK_PERIODIC;
+                    }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD_KW) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME;
+        case _CALL_TUPLE_1: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_TUPLE_1____CHECK_PERIODIC;
+                    }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _EXPAND_METHOD_KW) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
+        case _CHECK_AND_ALLOCATE_OBJECT: {
+            switch (this_instr[1].opcode) {
+                case _CREATE_INIT_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_AND_ALLOCATE_OBJECT____CREATE_INIT_FRAME;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_AND_ALLOCATE_OBJECT____PUSH_FRAME;
+                    }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PY_FRAME_KW;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _CHECK_METHOD_VERSION_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____CHECK_METHOD_VERSION_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_PEP_523____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+        case _CREATE_INIT_FRAME: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CREATE_INIT_FRAME____PUSH_FRAME;
+                    }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____EXPAND_METHOD_KW____PY_FRAME_KW;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_PEP_523____EXPAND_METHOD_KW____PUSH_FRAME;
-            }
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_PEP_523) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_PEP_523____EXPAND_METHOD_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                if (this_instr[3].opcode == _PUSH_FRAME) { 
-                    *move_forward_by = 4;
-                    return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+        case _CALL_BUILTIN_CLASS: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_BUILTIN_CLASS____CHECK_PERIODIC;
+                    }
                 }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            if (this_instr[2].opcode == _PY_FRAME_KW) { 
-                *move_forward_by = 3;
-                return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW;
+        case _CALL_BUILTIN_O: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_BUILTIN_O____CHECK_PERIODIC;
+                    }
+                }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME;
+        case _CALL_BUILTIN_FAST: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_BUILTIN_FAST____CHECK_PERIODIC;
+                    }
+                }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _EXPAND_METHOD_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _CHECK_METHOD_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
+        case _CALL_BUILTIN_FAST_WITH_KEYWORDS: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_BUILTIN_FAST_WITH_KEYWORDS____CHECK_PERIODIC;
+                    }
+                }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            *move_forward_by = 2;
-            return _CHECK_METHOD_VERSION_KW____PY_FRAME_KW;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_METHOD_VERSION_KW) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _CHECK_METHOD_VERSION_KW____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _EXPAND_METHOD_KW) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            if (this_instr[2].opcode == _PUSH_FRAME) { 
-                *move_forward_by = 3;
-                return _EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+        case _CALL_METHOD_DESCRIPTOR_O: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_METHOD_DESCRIPTOR_O____CHECK_PERIODIC;
+                    }
+                }
             }
         }
-    }
-    if (this_instr[0].opcode == _EXPAND_METHOD_KW) { 
-        if (this_instr[1].opcode == _PY_FRAME_KW) { 
-            *move_forward_by = 2;
-            return _EXPAND_METHOD_KW____PY_FRAME_KW;
-        }
-    }
-    if (this_instr[0].opcode == _EXPAND_METHOD_KW) { 
-        if (this_instr[1].opcode == _PUSH_FRAME) { 
-            *move_forward_by = 2;
-            return _EXPAND_METHOD_KW____PUSH_FRAME;
-        }
-    }
-    if (this_instr[0].opcode == _CHECK_IS_NOT_PY_CALLABLE_KW) { 
-        if (this_instr[1].opcode == _CALL_KW_NON_PY) { 
-            if (this_instr[2].opcode == _CHECK_PERIODIC) { 
-                *move_forward_by = 3;
-                return _CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY____CHECK_PERIODIC;
+        case _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS____CHECK_PERIODIC;
+                    }
+                }
             }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_IS_NOT_PY_CALLABLE_KW) { 
-        if (this_instr[1].opcode == _CALL_KW_NON_PY) { 
-            *move_forward_by = 2;
-            return _CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY;
+        case _CALL_METHOD_DESCRIPTOR_NOARGS: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_METHOD_DESCRIPTOR_NOARGS____CHECK_PERIODIC;
+                    }
+                }
+            }
         }
-    }
-    if (this_instr[0].opcode == _CHECK_IS_NOT_PY_CALLABLE_KW) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CHECK_IS_NOT_PY_CALLABLE_KW____CHECK_PERIODIC;
+        case _CALL_METHOD_DESCRIPTOR_FAST: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_METHOD_DESCRIPTOR_FAST____CHECK_PERIODIC;
+                    }
+                }
+            }
         }
-    }
-    if (this_instr[0].opcode == _CALL_KW_NON_PY) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _CALL_KW_NON_PY____CHECK_PERIODIC;
+        case _CHECK_FUNCTION_VERSION_KW: {
+            switch (this_instr[1].opcode) {
+                case _PY_FRAME_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION_KW____PY_FRAME_KW;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_FUNCTION_VERSION_KW____PUSH_FRAME;
+                    }
+                }
+            }
         }
-    }
-    if (this_instr[0].opcode == _MAKE_CALLARGS_A_TUPLE) { 
-        if (this_instr[1].opcode == _CHECK_PERIODIC) { 
-            *move_forward_by = 2;
-            return _MAKE_CALLARGS_A_TUPLE____CHECK_PERIODIC;
+        case _PY_FRAME_KW: {
+            switch (this_instr[1].opcode) {
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _PY_FRAME_KW____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _CHECK_METHOD_VERSION_KW: {
+            switch (this_instr[1].opcode) {
+                case _EXPAND_METHOD_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PY_FRAME_KW: {
+                            switch (this_instr[3].opcode) {
+                                case _PUSH_FRAME: {
+                                    switch (this_instr[4].opcode) {
+                                        default:
+                                        *move_forward_by = 4;
+                                        return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+                                    }
+                                }
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PY_FRAME_KW;
+                            }
+                        }
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_METHOD_VERSION_KW____EXPAND_METHOD_KW;
+                    }
+                }
+                case _PY_FRAME_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_METHOD_VERSION_KW____PY_FRAME_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_METHOD_VERSION_KW____PY_FRAME_KW;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_METHOD_VERSION_KW____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _EXPAND_METHOD_KW: {
+            switch (this_instr[1].opcode) {
+                case _PY_FRAME_KW: {
+                    switch (this_instr[2].opcode) {
+                        case _PUSH_FRAME: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _EXPAND_METHOD_KW____PY_FRAME_KW____PUSH_FRAME;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _EXPAND_METHOD_KW____PY_FRAME_KW;
+                    }
+                }
+                case _PUSH_FRAME: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _EXPAND_METHOD_KW____PUSH_FRAME;
+                    }
+                }
+            }
+        }
+        case _CHECK_IS_NOT_PY_CALLABLE_KW: {
+            switch (this_instr[1].opcode) {
+                case _CALL_KW_NON_PY: {
+                    switch (this_instr[2].opcode) {
+                        case _CHECK_PERIODIC: {
+                            switch (this_instr[3].opcode) {
+                                default:
+                                *move_forward_by = 3;
+                                return _CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY____CHECK_PERIODIC;
+                            }
+                        }
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_IS_NOT_PY_CALLABLE_KW____CALL_KW_NON_PY;
+                    }
+                }
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CHECK_IS_NOT_PY_CALLABLE_KW____CHECK_PERIODIC;
+                    }
+                }
+            }
+        }
+        case _CALL_KW_NON_PY: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _CALL_KW_NON_PY____CHECK_PERIODIC;
+                    }
+                }
+            }
+        }
+        case _MAKE_CALLARGS_A_TUPLE: {
+            switch (this_instr[1].opcode) {
+                case _CHECK_PERIODIC: {
+                    switch (this_instr[2].opcode) {
+                        default:
+                        *move_forward_by = 2;
+                        return _MAKE_CALLARGS_A_TUPLE____CHECK_PERIODIC;
+                    }
+                }
+            }
         }
     }
     return -1;
