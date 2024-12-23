@@ -737,17 +737,17 @@ translate_bytecode_to_trace(
                     // Reserve space for nuops (+ _SET_IP + _EXIT_TRACE)
                     int nuops = expansion->nuops;
                     RESERVE(nuops + 1); /* One extra for exit */
-//                    int16_t last_op = expansion->uops[nuops-1].uop;
-//                    if (last_op == _RETURN_VALUE) {
-//                        // Check for trace stack underflow now:
-//                        // We can't bail e.g. in the middle of
-//                        // LOAD_CONST + _RETURN_VALUE.
-//                        if (trace_stack_depth == 0) {
-//                            DPRINTF(2, "Trace stack underflow\n");
-//                            OPT_STAT_INC(trace_stack_underflow);
-//                            goto done;
-//                        }
-//                    }
+                    int16_t last_op = expansion->uops[nuops-1].uop;
+                    if (last_op == _RETURN_VALUE) {
+                        // Check for trace stack underflow now:
+                        // We can't bail e.g. in the middle of
+                        // LOAD_CONST + _RETURN_VALUE.
+                        if (trace_stack_depth == 0) {
+                            DPRINTF(2, "Trace stack underflow\n");
+                            OPT_STAT_INC(trace_stack_underflow);
+                            goto done;
+                        }
+                    }
                     uint32_t orig_oparg = oparg;  // For OPARG_TOP/BOTTOM
                     for (int i = 0; i < nuops; i++) {
                         oparg = orig_oparg;

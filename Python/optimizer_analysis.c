@@ -617,7 +617,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
             {
                 /* _PUSH_FRAME doesn't escape or error, but it
                  * does need the IP for the return address */
-                bool needs_ip = opcode == _PUSH_FRAME;
+                bool needs_ip = (opcode == _PUSH_FRAME) || (opcode == _RETURN_OFFSET) || (opcode == _YIELD_OFFSET);
                 if (_PyUop_Flags[opcode] & HAS_ESCAPES_FLAG) {
                     needs_ip = true;
                     may_have_escaped = true;
