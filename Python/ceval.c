@@ -717,13 +717,8 @@ extern void _PyUOpPrint(const _PyUOpInstruction *uop);
 static int
 base_opcode(PyCodeObject *code, int offset)
 {
-    int opcode = _Py_GetBaseOpcode(code, offset);
-    if (opcode == ENTER_EXECUTOR) {
-        int oparg = _PyCode_CODE(code)[offset].op.arg;
-        _PyExecutorObject *ex = code->co_executors->executors[oparg];
-        return ex->vm_data.opcode;
-    }
-    return opcode;
+    _Py_CODEUNIT inst = _Py_GetBaseCodeUnit(code, offset);
+    return inst.op.code;
 }
 #endif
 

@@ -702,8 +702,10 @@ dummy_func(void) {
     op(_RETURN_VALUE, (retval -- res)) {
         SAVE_STACK();
         ctx->frame->stack_pointer = stack_pointer;
-        if (frame_pop(ctx)) {
-            goto done;
+        int err = frame_pop(ctx);
+        if (err) {
+            ctx->done = true;
+            break;
         }
         stack_pointer = ctx->frame->stack_pointer;
 
@@ -727,8 +729,10 @@ dummy_func(void) {
     op(_RETURN_GENERATOR, ( -- res)) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
-        if (frame_pop(ctx)) {
-            goto done;
+        int err = frame_pop(ctx);
+        if (err) {
+            ctx->done = true;
+            break;
         }
         stack_pointer = ctx->frame->stack_pointer;
         res = sym_new_unknown(ctx);
@@ -888,6 +892,11 @@ dummy_func(void) {
     }
 
     op(_EXIT_TRACE, (exit_p/4 --)) {
+        (void)exit_p;
+        ctx->done = true;
+    }
+
+    op(_DYNAMIC_EXIT, (exit_p/4 --)) {
         (void)exit_p;
         ctx->done = true;
     }

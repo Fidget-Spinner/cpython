@@ -804,7 +804,7 @@ translate_bytecode_to_trace(
                                 DPRINTF(2, "Trace stack underflow\n");
                                 OPT_STAT_INC(trace_stack_underflow);
                                 ADD_TO_TRACE(uop, oparg, 0, target);
-                                if (uop == _RETURN_GENERATOR) {
+                                if (uop == _RETURN_GENERATOR || uop == _RETURN_VALUE) {
                                     ADD_TO_TRACE(_RETURN_OFFSET, 0, 0, 0);
                                 }
                                 else {
@@ -949,6 +949,7 @@ done:
     // SKip trunk traces where they are too short, and don't end in a _JUMP_TO_TOP.
     if (first || (progress_needed &&
         trace[trace_length-1].opcode != _JUMP_TO_TOP &&
+        trace[trace_length-1].opcode != _DYNAMIC_EXIT &&
         (trace_length <= UOP_MIN_TRACE_LENGTH ||
         (is_resume_trace && trace_length <= UOP_MIN_TRACE_LENGTH_RESUME)) )) {
         OPT_STAT_INC(trace_too_short);

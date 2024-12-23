@@ -292,6 +292,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_DEOPT] = 0,
     [_ERROR_POP_N] = HAS_ARG_FLAG | HAS_ESCAPES_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
+    [_RETURN_OFFSET] = 0,
+    [_YIELD_OFFSET] = 0,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -526,6 +528,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_PY_FRAME_KW] = "_PY_FRAME_KW",
     [_REPLACE_WITH_TRUE] = "_REPLACE_WITH_TRUE",
     [_RETURN_GENERATOR] = "_RETURN_GENERATOR",
+    [_RETURN_OFFSET] = "_RETURN_OFFSET",
     [_RETURN_VALUE] = "_RETURN_VALUE",
     [_SAVE_RETURN_OFFSET] = "_SAVE_RETURN_OFFSET",
     [_SEND_GEN_FRAME] = "_SEND_GEN_FRAME",
@@ -574,6 +577,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_UNPACK_SEQUENCE_TUPLE] = "_UNPACK_SEQUENCE_TUPLE",
     [_UNPACK_SEQUENCE_TWO_TUPLE] = "_UNPACK_SEQUENCE_TWO_TUPLE",
     [_WITH_EXCEPT_START] = "_WITH_EXCEPT_START",
+    [_YIELD_OFFSET] = "_YIELD_OFFSET",
     [_YIELD_VALUE] = "_YIELD_VALUE",
 };
 int _PyUop_num_popped(int opcode, int oparg)
@@ -1124,6 +1128,10 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _ERROR_POP_N:
             return oparg;
         case _TIER2_RESUME_CHECK:
+            return 0;
+        case _RETURN_OFFSET:
+            return 0;
+        case _YIELD_OFFSET:
             return 0;
         default:
             return -1;

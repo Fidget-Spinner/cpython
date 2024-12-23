@@ -668,7 +668,11 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
-            frame_pop(ctx);
+            int err = frame_pop(ctx);
+            if (err) {
+                ctx->done = true;
+                break;
+            }
             stack_pointer = ctx->frame->stack_pointer;
             /* Stack space handling */
             assert(corresponding_check_stack == NULL);
@@ -2216,7 +2220,11 @@
         case _RETURN_GENERATOR: {
             _Py_UopsSymbol *res;
             ctx->frame->stack_pointer = stack_pointer;
-            frame_pop(ctx);
+            int err = frame_pop(ctx);
+            if (err) {
+                ctx->done = true;
+                break;
+            }
             stack_pointer = ctx->frame->stack_pointer;
             res = sym_new_unknown(ctx);
             /* Stack space handling */
@@ -2558,6 +2566,9 @@
         }
 
         case _DYNAMIC_EXIT: {
+            PyObject *exit_p = (PyObject *)this_instr->operand0;
+            (void)exit_p;
+            ctx->done = true;
             break;
         }
 
@@ -2588,6 +2599,14 @@
         }
 
         case _TIER2_RESUME_CHECK: {
+            break;
+        }
+
+        case _RETURN_OFFSET: {
+            break;
+        }
+
+        case _YIELD_OFFSET: {
             break;
         }
 
