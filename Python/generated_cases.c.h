@@ -3945,8 +3945,9 @@
                         stack_pointer = _PyFrame_GetStackPointer(frame);
                     }
                     /* iterator ended normally */
-                    assert(next_instr[oparg].op.code == END_FOR ||
-                       next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    assert(base_opcode(_PyFrame_GetCode(frame), INSTR_OFFSET() + oparg) == END_FOR);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
                     PyStackRef_CLOSE(iter);
                     STACK_SHRINK(1);
                     /* Jump forward oparg, then skip following END_FOR and POP_TOP instruction */
@@ -4643,8 +4644,9 @@
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                 }
                 /* iterator ended normally */
-                assert(next_instr[oparg].op.code == END_FOR ||
-                       next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(base_opcode(_PyFrame_GetCode(frame), INSTR_OFFSET() + oparg) == END_FOR);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
                 STACK_SHRINK(1);
                 PyStackRef_CLOSE(iter_stackref);
                 /* Skip END_FOR and POP_TOP */

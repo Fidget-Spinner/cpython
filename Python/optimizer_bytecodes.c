@@ -702,7 +702,9 @@ dummy_func(void) {
     op(_RETURN_VALUE, (retval -- res)) {
         SAVE_STACK();
         ctx->frame->stack_pointer = stack_pointer;
-        frame_pop(ctx);
+        if (frame_pop(ctx)) {
+            goto done;
+        }
         stack_pointer = ctx->frame->stack_pointer;
 
         /* Stack space handling */
@@ -725,7 +727,9 @@ dummy_func(void) {
     op(_RETURN_GENERATOR, ( -- res)) {
         SYNC_SP();
         ctx->frame->stack_pointer = stack_pointer;
-        frame_pop(ctx);
+        if (frame_pop(ctx)) {
+            goto done;
+        }
         stack_pointer = ctx->frame->stack_pointer;
         res = sym_new_unknown(ctx);
 

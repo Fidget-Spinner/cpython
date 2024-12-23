@@ -713,6 +713,18 @@ static const _Py_CODEUNIT _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS[] = {
 
 #ifdef Py_DEBUG
 extern void _PyUOpPrint(const _PyUOpInstruction *uop);
+
+static int
+base_opcode(PyCodeObject *code, int offset)
+{
+    int opcode = _Py_GetBaseOpcode(code, offset);
+    if (opcode == ENTER_EXECUTOR) {
+        int oparg = _PyCode_CODE(code)[offset].op.arg;
+        _PyExecutorObject *ex = code->co_executors->executors[oparg];
+        return ex->vm_data.opcode;
+    }
+    return opcode;
+}
 #endif
 
 
