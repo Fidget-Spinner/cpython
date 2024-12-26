@@ -271,6 +271,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GUARD_IS_NONE_POP] = HAS_EXIT_FLAG,
     [_GUARD_IS_NOT_NONE_POP] = HAS_EXIT_FLAG,
     [_JUMP_TO_TOP] = 0,
+    [_TIER2_JUMP_ABSOLUTE] = 0,
     [_SET_IP] = 0,
     [_CHECK_STACK_SPACE_OPERAND] = HAS_DEOPT_FLAG,
     [_SAVE_RETURN_OFFSET] = HAS_ARG_FLAG,
@@ -562,6 +563,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_STORE_SUBSCR_DICT] = "_STORE_SUBSCR_DICT",
     [_STORE_SUBSCR_LIST_INT] = "_STORE_SUBSCR_LIST_INT",
     [_SWAP] = "_SWAP",
+    [_TIER2_JUMP_ABSOLUTE] = "_TIER2_JUMP_ABSOLUTE",
     [_TIER2_RESUME_CHECK] = "_TIER2_RESUME_CHECK",
     [_TO_BOOL] = "_TO_BOOL",
     [_TO_BOOL_BOOL] = "_TO_BOOL_BOOL",
@@ -1086,6 +1088,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _GUARD_IS_NOT_NONE_POP:
             return 1;
         case _JUMP_TO_TOP:
+            return 0;
+        case _TIER2_JUMP_ABSOLUTE:
             return 0;
         case _SET_IP:
             return 0;

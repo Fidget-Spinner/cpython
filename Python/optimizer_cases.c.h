@@ -2446,6 +2446,12 @@
             break;
         }
 
+        case _TIER2_JUMP_ABSOLUTE: {
+            // TODO: could use this to unroll loops later!
+            ctx->done = true;
+            break;
+        }
+
         case _SET_IP: {
             break;
         }

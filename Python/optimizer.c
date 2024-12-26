@@ -437,6 +437,14 @@ is_for_iter_test[MAX_UOP_ID + 1] = {
     [_FOR_ITER_TIER_TWO] = 1,
 };
 
+static const uint8_t
+is_for_iter_first_inst[MAX_UOP_ID + 1] = {
+    [_ITER_CHECK_RANGE] = 1,
+    [_ITER_CHECK_LIST] = 1,
+    [_ITER_CHECK_TUPLE] = 1,
+    [_FOR_ITER_TIER_TWO] = 1,
+};
+
 static const uint16_t
 BRANCH_TO_GUARD[4][2] = {
     [POP_JUMP_IF_FALSE - POP_JUMP_IF_FALSE][0] = _GUARD_IS_TRUE_POP,
@@ -609,17 +617,36 @@ translate_bytecode_to_trace(
             }
         }
         if (opcode == ENTER_EXECUTOR) {
-            // We have a couple of options here. We *could* peek "underneath"
-            // this executor and continue tracing, which could give us a longer,
-            // more optimizeable trace (at the expense of lots of duplicated
-            // tier two code). Instead, we choose to just end here and stitch to
-            // the other trace, which allows a side-exit traces to rejoin the
-            // "main" trace periodically (and also helps protect us against
-            // pathological behavior where the amount of tier two code explodes
-            // for a medium-length, branchy code path). This seems to work
-            // better in practice, but in the future we could be smarter about
-            // what we do here:
-            goto done;
+            // We want to merge the executors.
+            // Consider the following outer and inner loops:
+            // for _ in range(4096):    // L1
+            //     for _ in range(20):  // L2
+            // L2 warms up first and forms a trace.
+            // L1 warms up later and for efficiency reasons, we want it
+            // to end with a _JUMP_TO_TOP, but it's now blocked by the executor
+            // in L2. Thus, we should just trace over it.
+            // L2's trace will become cold and automatically freed.
+            // Thus this doesn't waste space.
+            uint32_t jump_target = trace_length-1;
+            // Search backwards --- set the operand to the jump target
+            // for optimizations later.
+            for (int for_iter_seen = -1; for_iter_seen != 0 && jump_target > 0;) {
+                int possible_jump_opcode = trace[jump_target].opcode;
+                if (is_for_iter_first_inst[possible_jump_opcode]) {
+                    for_iter_seen++;
+                }
+                else if (possible_jump_opcode == _TIER2_JUMP_ABSOLUTE) {
+                    for_iter_seen--;
+                }
+                jump_target--;
+            }
+            if (!is_for_iter_first_inst[trace[jump_target+1].opcode]) {
+                // Failed to find target.
+                goto done;
+            }
+            ADD_TO_TRACE(_TIER2_JUMP_ABSOLUTE, 0, jump_target+1, 0);
+            instr += 1 + _PyOpcode_Caches[JUMP_BACKWARD];
+            goto top;
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
         RESERVE_RAW(2, "_CHECK_VALIDITY_AND_SET_IP");
@@ -1063,6 +1090,23 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             assert(buffer[0].opcode == _START_EXECUTOR);
             buffer[i].format = UOP_FORMAT_JUMP;
             buffer[i].jump_target = 1;
+        }
+        if (opcode == _TIER2_JUMP_ABSOLUTE) {
+            uint32_t jump_target = i - 1;
+            // Search backwards --- set jump target.
+            for (int for_iter_seen = -1; for_iter_seen != 0 && jump_target > 0;) {
+                int possible_jump_opcode = buffer[jump_target].opcode;
+                if (is_for_iter_first_inst[possible_jump_opcode]) {
+                    for_iter_seen++;
+                }
+                else if (possible_jump_opcode == _TIER2_JUMP_ABSOLUTE) {
+                    for_iter_seen--;
+                }
+                jump_target--;
+            }
+            assert(is_for_iter_first_inst[buffer[jump_target+1].opcode]);
+            buffer[i].format = UOP_FORMAT_JUMP;
+            buffer[i].jump_target = jump_target;
         }
     }
     return next_spare;

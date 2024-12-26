@@ -4882,6 +4882,10 @@ dummy_func(
             JUMP_TO_JUMP_TARGET();
         }
 
+        tier2 op(_TIER2_JUMP_ABSOLUTE, (--)) {
+            JUMP_TO_JUMP_TARGET();
+        }
+
         tier2 op(_SET_IP, (instr_ptr/4 --)) {
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
