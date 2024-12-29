@@ -9,6 +9,9 @@ from analyzer import (
     Analysis,
     Instruction,
     Uop,
+    Skip,
+    Part,
+    Flush,
     analyze_files,
     StackItem,
     analysis_error,
@@ -26,7 +29,7 @@ from generators_common import (
 from cwriter import CWriter
 from typing import TextIO, Iterator
 from lexer import Token
-from stack import Local, Stack, StackError, Storage
+from stack import Local, Stack, StackError, Storage, apply_stack_effect
 
 DEFAULT_OUTPUT = ROOT / "Python/executor_cases.c.h"
 
@@ -219,6 +222,88 @@ def write_uop(uop: Uop, emitter: Tier2Emitter, stack: Stack) -> Stack:
 
 SKIPS = ("_EXTENDED_ARG",)
 
+def write_super_uop_constituent(
+    uop: Part,
+    emitter: Tier2Emitter,
+    offset: int,
+    stack: Stack,
+    braces: bool,
+) -> tuple[int, Stack]:
+    # out.emit(stack.as_comment() + "\n")
+    if isinstance(uop, Skip):
+        assert False
+    if isinstance(uop, Flush):
+        emitter.emit(f"// flush\n")
+        stack.flush(emitter.out)
+        return offset, stack
+    try:
+        locals: dict[str, Local] = {}
+        emitter.out.start_line()
+        if braces:
+            emitter.out.emit(f"// {uop.name}\n")
+            emitter.emit("{\n")
+        if uop.properties.oparg:
+            emitter.emit(f"oparg = CURRENT_OPARG({emitter.index});\n")
+            assert uop.properties.const_oparg < 0
+        elif uop.properties.const_oparg >= 0:
+            emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
+            emitter.emit(f"assert(oparg == CURRENT_OPARG({emitter.index}));\n")
+
+        try:
+            code_list, storage = Storage.for_uop(stack, uop)
+            emitter._print_storage(storage)
+            for code in code_list:
+                emitter.emit(code)
+        except StackError:
+            stack.flush(emitter.out)
+            stack = Stack()
+            code_list, storage = Storage.for_uop(stack, uop)
+            emitter._print_storage(storage)
+            for code in code_list:
+                emitter.emit(code)
+
+        for idx, cache in enumerate(uop.caches):
+            if cache.name != "unused":
+                if cache.size == 4:
+                    type = cast = "PyObject *"
+                else:
+                    type = f"uint{cache.size*16}_t "
+                    cast = f"uint{cache.size*16}_t"
+                emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}({emitter.index});\n")
+
+        storage = emitter.emit_tokens(uop, storage, None)
+        if braces:
+            emitter.out.start_line()
+            emitter.emit("}\n")
+        # emitter.emit(stack.as_comment() + "\n")
+        return offset, storage.stack
+    except StackError as ex:
+        raise analysis_error(ex.args[0], uop.body[0])
+
+def super_declare_variable(var: StackItem, out: CWriter) -> None:
+    type, null = type_and_null(var)
+    space = " " if type[-1].isalnum() else ""
+    if var.condition:
+        out.emit(f"{type}{space}{var.name} = {null};\n")
+    else:
+        out.emit(f"{type}{space}{var.name};\n")
+
+
+def super_declare_variables(inst: list[Uop], out: CWriter) -> None:
+    required = set()
+    for uop in inst:
+        for item in [*uop.stack.inputs, *uop.stack.outputs]:
+            required.add(item.name)
+    stack = Stack()
+    for part in inst:
+        for var in part.stack.inputs:
+            if var.name in required:
+                required.remove(var.name)
+                super_declare_variable(var, out)
+        for var in part.stack.outputs:
+            if var.name in required:
+                required.remove(var.name)
+                super_declare_variable(var, out)
 
 def generate_tier2(
     filenames: list[str], analysis: Analysis, outfile: TextIO, lines: bool
@@ -288,18 +373,15 @@ def generate_tier2(
             continue
 
         out.emit(f"case {sup_name}: {{\n")
+        super_declare_variables(super_uop, out)
+        offset = 1
+        stack = Stack()
         for idx, uop in enumerate(super_uop):
-            out.emit(f"// {uop.name}\n")
-            out.emit("{\n")
-            declare_variables(uop, out)
-            stack = Stack()
             emitter.index = idx
-            stack = write_uop(uop, emitter, stack)
+            offset, stack = write_super_uop_constituent(uop, emitter, offset, stack, True)
             out.start_line()
             if not uop.properties.always_exits:
                 stack.flush(out)
-            out.emit("}\n")
-            out.start_line()
         out.emit("break;\n")
         out.start_line()
         out.emit("}")

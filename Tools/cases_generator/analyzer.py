@@ -1227,6 +1227,8 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
                 if part.properties.needs_this:
                     continue
                 super_constituents.append(part)
+            elif isinstance(part, Flush):
+                super_constituents.append(part)
         if len(super_constituents) == 0:
             continue
         # permutations = [sup for sup in form_uop_valid_permutations(super_constituents) if MAX_SUPER_LEN >= len(sup) > 1]

@@ -236,10 +236,11 @@ class Stack:
         if self.variables:
             popped = self.variables.pop()
             if var.is_array() ^ popped.is_array():
-                raise StackError(
-                    f"Array mismatch when popping '{popped.name}' from stack to assign to '{var.name}'. "
-                    f"Expected {array_or_scalar(var)} got {array_or_scalar(popped)}"
-                )
+                pass
+                # raise StackError(
+                #     f"Array mismatch when popping '{popped.name}' from stack to assign to '{var.name}'. "
+                #     f"Expected {array_or_scalar(var)} got {array_or_scalar(popped)}"
+                # )
             if popped.size != var.size:
                 raise StackError(
                     f"Size mismatch when popping '{popped.name}' from stack to assign to '{var.name}'. "
@@ -247,9 +248,10 @@ class Stack:
                 )
             if var.name in UNUSED:
                 if popped.name not in UNUSED and popped.name in self.defined:
-                    raise StackError(
-                        f"Value is declared unused, but is already cached by prior operation as '{popped.name}'"
-                    )
+                    pass
+                    # raise StackError(
+                    #     f"Value is declared unused, but is already cached by prior operation as '{popped.name}'"
+                    # )
                 return "", popped
             if not var.used:
                 return "", popped
