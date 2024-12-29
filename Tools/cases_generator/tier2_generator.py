@@ -80,6 +80,7 @@ class Tier2Emitter(Emitter):
         self.out.emit_at("if ", tkn)
         lparen = next(tkn_iter)
         self.emit(lparen)
+        self.emit("_Py_UNLIKELY(")
         assert lparen.kind == "LPAREN"
         first_tkn = next(tkn_iter)
         self.out.emit(first_tkn)
@@ -87,6 +88,7 @@ class Tier2Emitter(Emitter):
         label = next(tkn_iter).text
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
+        self.emit(")")
         self.emit(") JUMP_TO_ERROR();\n")
         return not always_true(first_tkn)
 
