@@ -45,7 +45,7 @@
 
         case _RESUME_CHECK: {
             #if defined(__EMSCRIPTEN__)
-            if (_Py_emscripten_signal_clock == 0) {
+            if (_Py_UNLIKELY(_Py_emscripten_signal_clock == 0)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -54,13 +54,13 @@
             uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
             uintptr_t version = FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version);
             assert((version & _PY_EVAL_EVENTS_MASK) == 0);
-            if (eval_breaker != version) {
+            if (_Py_UNLIKELY(eval_breaker != version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
-            if (frame->tlbc_index !=
-                    ((_PyThreadStateImpl *)tstate)->tlbc_index) {
+            if (_Py_UNLIKELY(frame->tlbc_index !=
+                        ((_PyThreadStateImpl *)tstate)->tlbc_index)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -468,7 +468,7 @@
         case _TO_BOOL_BOOL: {
             _PyStackRef value;
             value = stack_pointer[-1];
-            if (!PyStackRef_BoolCheck(value)) {
+            if (_Py_UNLIKELY(!PyStackRef_BoolCheck(value))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -481,7 +481,7 @@
             _PyStackRef res;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
-            if (!PyLong_CheckExact(value_o)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(value_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -503,7 +503,7 @@
             _PyStackRef res;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
-            if (!PyList_CheckExact(value_o)) {
+            if (_Py_UNLIKELY(!PyList_CheckExact(value_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -519,7 +519,7 @@
             _PyStackRef res;
             value = stack_pointer[-1];
             // This one is a bit weird, because we expect *some* failures:
-            if (!PyStackRef_IsNone(value)) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNone(value))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -534,7 +534,7 @@
             _PyStackRef res;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
-            if (!PyUnicode_CheckExact(value_o)) {
+            if (_Py_UNLIKELY(!PyUnicode_CheckExact(value_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -583,11 +583,11 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            if (!PyLong_CheckExact(left_o)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(left_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyLong_CheckExact(right_o)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(right_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -598,7 +598,7 @@
             _PyStackRef left;
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            if (!PyLong_CheckExact(left_o)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(left_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -609,7 +609,7 @@
             _PyStackRef value;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
-            if (!PyLong_CheckExact(value_o)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(value_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -683,11 +683,11 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            if (!PyFloat_CheckExact(left_o)) {
+            if (_Py_UNLIKELY(!PyFloat_CheckExact(left_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyFloat_CheckExact(right_o)) {
+            if (_Py_UNLIKELY(!PyFloat_CheckExact(right_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -698,7 +698,7 @@
             _PyStackRef left;
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            if (!PyFloat_CheckExact(left_o)) {
+            if (_Py_UNLIKELY(!PyFloat_CheckExact(left_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -709,7 +709,7 @@
             _PyStackRef value;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
-            if (!PyFloat_CheckExact(value_o)) {
+            if (_Py_UNLIKELY(!PyFloat_CheckExact(value_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -786,11 +786,11 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            if (!PyUnicode_CheckExact(left_o)) {
+            if (_Py_UNLIKELY(!PyUnicode_CheckExact(left_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyUnicode_CheckExact(right_o)) {
+            if (_Py_UNLIKELY(!PyUnicode_CheckExact(right_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -832,7 +832,7 @@
             next_oparg = CURRENT_OPERAND0();
             #endif
             _PyStackRef *target_local = &GETLOCAL(next_oparg);
-            if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
+            if (_Py_UNLIKELY(PyStackRef_AsPyObjectBorrow(*target_local) != left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -967,16 +967,16 @@
             list_st = stack_pointer[-2];
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
-            if (!PyLong_CheckExact(sub)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyList_CheckExact(list)) {
+            if (_Py_UNLIKELY(!PyList_CheckExact(list))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // Deopt unless 0 <= sub < PyList_Size(list)
-            if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+            if (_Py_UNLIKELY(!_PyLong_IsNonNegativeCompact((PyLongObject *)sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -985,13 +985,13 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyObject *res_o = _PyList_GetItemRef((PyListObject*)list, index);
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            if (res_o == NULL) {
+            if (_Py_UNLIKELY(res_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_SUBSCR, hit);
             #else
-            if (index >= PyList_GET_SIZE(list)) {
+            if (_Py_UNLIKELY(index >= PyList_GET_SIZE(list))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1017,26 +1017,26 @@
             str_st = stack_pointer[-2];
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *str = PyStackRef_AsPyObjectBorrow(str_st);
-            if (!PyLong_CheckExact(sub)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyUnicode_CheckExact(str)) {
+            if (_Py_UNLIKELY(!PyUnicode_CheckExact(str))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+            if (_Py_UNLIKELY(!_PyLong_IsNonNegativeCompact((PyLongObject *)sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
-            if (PyUnicode_GET_LENGTH(str) <= index) {
+            if (_Py_UNLIKELY(PyUnicode_GET_LENGTH(str) <= index)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // Specialize for reading an ASCII character from any string:
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
-            if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
+            if (_Py_UNLIKELY(Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1059,21 +1059,21 @@
             tuple_st = stack_pointer[-2];
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *tuple = PyStackRef_AsPyObjectBorrow(tuple_st);
-            if (!PyLong_CheckExact(sub)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyTuple_CheckExact(tuple)) {
+            if (_Py_UNLIKELY(!PyTuple_CheckExact(tuple))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // Deopt unless 0 <= sub < PyTuple_Size(list)
-            if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+            if (_Py_UNLIKELY(!_PyLong_IsNonNegativeCompact((PyLongObject *)sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
-            if (index >= PyTuple_GET_SIZE(tuple)) {
+            if (_Py_UNLIKELY(index >= PyTuple_GET_SIZE(tuple))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1098,7 +1098,7 @@
             dict_st = stack_pointer[-2];
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *dict = PyStackRef_AsPyObjectBorrow(dict_st);
-            if (!PyDict_CheckExact(dict)) {
+            if (_Py_UNLIKELY(!PyDict_CheckExact(dict))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1128,25 +1128,25 @@
             _PyStackRef getitem;
             container = stack_pointer[-2];
             PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(container));
-            if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
+            if (_Py_UNLIKELY(!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
             PyObject *getitem_o = FT_ATOMIC_LOAD_PTR_ACQUIRE(ht->_spec_cache.getitem);
-            if (getitem_o == NULL) {
+            if (_Py_UNLIKELY(getitem_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             assert(PyFunction_Check(getitem_o));
             uint32_t cached_version = FT_ATOMIC_LOAD_UINT32_RELAXED(ht->_spec_cache.getitem_version);
-            if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
+            if (_Py_UNLIKELY(((PyFunctionObject *)getitem_o)->func_version != cached_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
             assert(code->co_argcount == 2);
-            if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
+            if (_Py_UNLIKELY(!_PyThreadState_HasStackSpace(tstate, code->co_framesize))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1236,28 +1236,28 @@
             value = stack_pointer[-3];
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
-            if (!PyLong_CheckExact(sub)) {
+            if (_Py_UNLIKELY(!PyLong_CheckExact(sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyList_CheckExact(list)) {
+            if (_Py_UNLIKELY(!PyList_CheckExact(list))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // Ensure nonnegative, zero-or-one-digit ints.
-            if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+            if (_Py_UNLIKELY(!_PyLong_IsNonNegativeCompact((PyLongObject *)sub))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
-            if (!LOCK_OBJECT(list)) {
+            if (_Py_UNLIKELY(!LOCK_OBJECT(list))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // Ensure index < len(list)
             if (index >= PyList_GET_SIZE(list)) {
                 UNLOCK_OBJECT(list);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -1283,7 +1283,7 @@
             dict_st = stack_pointer[-2];
             value = stack_pointer[-3];
             PyObject *dict = PyStackRef_AsPyObjectBorrow(dict_st);
-            if (!PyDict_CheckExact(dict)) {
+            if (_Py_UNLIKELY(!PyDict_CheckExact(dict))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1470,11 +1470,11 @@
             v = stack_pointer[-1];
             receiver = stack_pointer[-2];
             PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(receiver);
-            if (Py_TYPE(gen) != &PyGen_Type && Py_TYPE(gen) != &PyCoro_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(gen) != &PyGen_Type && Py_TYPE(gen) != &PyCoro_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (gen->gi_frame_state >= FRAME_EXECUTING) {
+            if (_Py_UNLIKELY(gen->gi_frame_state >= FRAME_EXECUTING)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1676,11 +1676,11 @@
             seq = stack_pointer[-1];
             assert(oparg == 2);
             PyObject *seq_o = PyStackRef_AsPyObjectBorrow(seq);
-            if (!PyTuple_CheckExact(seq_o)) {
+            if (_Py_UNLIKELY(!PyTuple_CheckExact(seq_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (PyTuple_GET_SIZE(seq_o) != 2) {
+            if (_Py_UNLIKELY(PyTuple_GET_SIZE(seq_o) != 2)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1702,11 +1702,11 @@
             seq = stack_pointer[-1];
             values = &stack_pointer[-1];
             PyObject *seq_o = PyStackRef_AsPyObjectBorrow(seq);
-            if (!PyTuple_CheckExact(seq_o)) {
+            if (_Py_UNLIKELY(!PyTuple_CheckExact(seq_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (PyTuple_GET_SIZE(seq_o) != oparg) {
+            if (_Py_UNLIKELY(PyTuple_GET_SIZE(seq_o) != oparg)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1728,17 +1728,17 @@
             seq = stack_pointer[-1];
             values = &stack_pointer[-1];
             PyObject *seq_o = PyStackRef_AsPyObjectBorrow(seq);
-            if (!PyList_CheckExact(seq_o)) {
+            if (_Py_UNLIKELY(!PyList_CheckExact(seq_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!LOCK_OBJECT(seq_o)) {
+            if (_Py_UNLIKELY(!LOCK_OBJECT(seq_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             if (PyList_GET_SIZE(seq_o) != oparg) {
                 UNLOCK_OBJECT(seq_o);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -1895,12 +1895,12 @@
         case _GUARD_GLOBALS_VERSION: {
             uint16_t version = (uint16_t)CURRENT_OPERAND0();
             PyDictObject *dict = (PyDictObject *)GLOBALS();
-            if (!PyDict_CheckExact(dict)) {
+            if (_Py_UNLIKELY(!PyDict_CheckExact(dict))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
-            if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
+            if (_Py_UNLIKELY(FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1912,12 +1912,12 @@
             PyDictKeysObject *globals_keys;
             uint16_t version = (uint16_t)CURRENT_OPERAND0();
             PyDictObject *dict = (PyDictObject *)GLOBALS();
-            if (!PyDict_CheckExact(dict)) {
+            if (_Py_UNLIKELY(!PyDict_CheckExact(dict))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
-            if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
+            if (_Py_UNLIKELY(FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1933,12 +1933,12 @@
             PyDictKeysObject *builtins_keys;
             uint16_t version = (uint16_t)CURRENT_OPERAND0();
             PyDictObject *dict = (PyDictObject *)BUILTINS();
-            if (!PyDict_CheckExact(dict)) {
+            if (_Py_UNLIKELY(!PyDict_CheckExact(dict))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
-            if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
+            if (_Py_UNLIKELY(FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1961,13 +1961,13 @@
             PyObject *res_o = FT_ATOMIC_LOAD_PTR_RELAXED(entries[index].me_value);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            if (res_o == NULL) {
+            if (_Py_UNLIKELY(res_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
             int increfed = _Py_TryIncrefCompareStackRef(&entries[index].me_value, res_o, &res);
-            if (!increfed) {
+            if (_Py_UNLIKELY(!increfed)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -1995,13 +1995,13 @@
             PyObject *res_o = FT_ATOMIC_LOAD_PTR_RELAXED(entries[index].me_value);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            if (res_o == NULL) {
+            if (_Py_UNLIKELY(res_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
             int increfed = _Py_TryIncrefCompareStackRef(&entries[index].me_value, res_o, &res);
-            if (!increfed) {
+            if (_Py_UNLIKELY(!increfed)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2442,11 +2442,11 @@
             PyObject *class = PyStackRef_AsPyObjectBorrow(class_st);
             PyObject *self = PyStackRef_AsPyObjectBorrow(self_st);
             assert(!(oparg & 1));
-            if (global_super != (PyObject *)&PySuper_Type) {
+            if (_Py_UNLIKELY(global_super != (PyObject *)&PySuper_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyType_Check(class)) {
+            if (_Py_UNLIKELY(!PyType_Check(class))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2480,11 +2480,11 @@
             PyObject *class = PyStackRef_AsPyObjectBorrow(class_st);
             PyObject *self = PyStackRef_AsPyObjectBorrow(self_st);
             assert(oparg & 1);
-            if (global_super != (PyObject *)&PySuper_Type) {
+            if (_Py_UNLIKELY(global_super != (PyObject *)&PySuper_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyType_Check(class)) {
+            if (_Py_UNLIKELY(!PyType_Check(class))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2574,7 +2574,7 @@
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
             PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
             assert(type_version != 0);
-            if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
+            if (_Py_UNLIKELY(FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2587,14 +2587,14 @@
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             assert(type_version != 0);
-            if (!LOCK_OBJECT(owner_o)) {
+            if (_Py_UNLIKELY(!LOCK_OBJECT(owner_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UNLOCK_OBJECT(owner_o);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -2608,7 +2608,7 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             assert(Py_TYPE(owner_o)->tp_dictoffset < 0);
             assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_INLINE_VALUES);
-            if (!_PyObject_InlineValues(owner_o)->valid) {
+            if (_Py_UNLIKELY(!_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2625,7 +2625,7 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             PyObject **value_ptr = (PyObject**)(((char *)owner_o) + offset);
             PyObject *attr_o = *value_ptr;
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2648,7 +2648,7 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             PyObject **value_ptr = (PyObject**)(((char *)owner_o) + offset);
             PyObject *attr_o = *value_ptr;
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2672,14 +2672,14 @@
             owner = stack_pointer[-1];
             uint32_t dict_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-            if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
+            if (_Py_UNLIKELY(Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
             assert(dict != NULL);
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
-            if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
+            if (_Py_UNLIKELY(FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2706,14 +2706,14 @@
             // Clear mod_keys from stack in case we need to deopt
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             int increfed = _Py_TryIncrefCompareStackRef(&ep->me_value, attr_o, &attr);
             if (!increfed) {
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -2738,7 +2738,7 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
             PyDictObject *dict = _PyObject_GetManagedDict(owner_o);
-            if (dict == NULL) {
+            if (_Py_UNLIKELY(dict == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2756,22 +2756,22 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             PyObject *attr_o;
             PyDictObject *dict = _PyObject_GetManagedDict(owner_o);
-            if (hint >= (size_t)dict->ma_keys->dk_nentries) {
+            if (_Py_UNLIKELY(hint >= (size_t)dict->ma_keys->dk_nentries)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg>>1);
-            if (!DK_IS_UNICODE(dict->ma_keys)) {
+            if (_Py_UNLIKELY(!DK_IS_UNICODE(dict->ma_keys))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictUnicodeEntry *ep = DK_UNICODE_ENTRIES(dict->ma_keys) + hint;
-            if (ep->me_key != name) {
+            if (_Py_UNLIKELY(ep->me_key != name)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             attr_o = ep->me_value;
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2797,7 +2797,7 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             char *addr = (char *)owner_o + index;
             PyObject *attr_o = *(PyObject **)addr;
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2819,7 +2819,7 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             char *addr = (char *)owner_o + index;
             PyObject *attr_o = *(PyObject **)addr;
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2841,12 +2841,12 @@
             owner = stack_pointer[-1];
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-            if (!PyType_Check(owner_o)) {
+            if (_Py_UNLIKELY(!PyType_Check(owner_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
-            if (((PyTypeObject *)owner_o)->tp_version_tag != type_version) {
+            if (_Py_UNLIKELY(((PyTypeObject *)owner_o)->tp_version_tag != type_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2900,19 +2900,19 @@
             assert(Py_IS_TYPE(fget, &PyFunction_Type));
             PyFunctionObject *f = (PyFunctionObject *)fget;
             PyCodeObject *code = (PyCodeObject *)f->func_code;
-            if ((code->co_flags & (CO_VARKEYWORDS | CO_VARARGS | CO_OPTIMIZED)) != CO_OPTIMIZED) {
+            if (_Py_UNLIKELY((code->co_flags & (CO_VARKEYWORDS | CO_VARARGS | CO_OPTIMIZED)) != CO_OPTIMIZED)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (code->co_kwonlyargcount) {
+            if (_Py_UNLIKELY(code->co_kwonlyargcount)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (code->co_argcount != 1) {
+            if (_Py_UNLIKELY(code->co_argcount != 1)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
+            if (_Py_UNLIKELY(!_PyThreadState_HasStackSpace(tstate, code->co_framesize))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -2934,7 +2934,7 @@
             if (_PyObject_GetManagedDict(owner_o) ||
                 !FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                 UNLOCK_OBJECT(owner_o);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -2977,18 +2977,18 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_MANAGED_DICT);
             PyDictObject *dict = _PyObject_GetManagedDict(owner_o);
-            if (dict == NULL) {
+            if (_Py_UNLIKELY(dict == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!LOCK_OBJECT(dict)) {
+            if (_Py_UNLIKELY(!LOCK_OBJECT(dict))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (dict != _PyObject_GetManagedDict(owner_o)) {
                 UNLOCK_OBJECT(dict);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -2999,7 +2999,7 @@
             if (hint >= (size_t)dict->ma_keys->dk_nentries ||
                 !DK_IS_UNICODE(dict->ma_keys)) {
                 UNLOCK_OBJECT(dict);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -3007,7 +3007,7 @@
             PyDictUnicodeEntry *ep = DK_UNICODE_ENTRIES(dict->ma_keys) + hint;
             if (ep->me_key != name) {
                 UNLOCK_OBJECT(dict);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -3015,7 +3015,7 @@
             PyObject *old_value = ep->me_value;
             if (old_value == NULL) {
                 UNLOCK_OBJECT(dict);
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -3042,7 +3042,7 @@
             value = stack_pointer[-2];
             uint16_t index = (uint16_t)CURRENT_OPERAND0();
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-            if (!LOCK_OBJECT(owner_o)) {
+            if (_Py_UNLIKELY(!LOCK_OBJECT(owner_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3128,11 +3128,11 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
+            if (_Py_UNLIKELY(!_PyLong_IsCompact((PyLongObject *)left_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
+            if (_Py_UNLIKELY(!_PyLong_IsCompact((PyLongObject *)right_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3226,7 +3226,7 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            if (!(PySet_CheckExact(right_o) || PyFrozenSet_CheckExact(right_o))) {
+            if (_Py_UNLIKELY(!(PySet_CheckExact(right_o) || PyFrozenSet_CheckExact(right_o)))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3254,7 +3254,7 @@
             left = stack_pointer[-2];
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            if (!PyDict_CheckExact(right_o)) {
+            if (_Py_UNLIKELY(!PyDict_CheckExact(right_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3578,7 +3578,7 @@
                 }
                 /* iterator ended normally */
                 /* The translator sets the deopt target just past the matching END_FOR */
-                if (true) {
+                if (_Py_UNLIKELY(true)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -3596,7 +3596,7 @@
         case _ITER_CHECK_LIST: {
             _PyStackRef iter;
             iter = stack_pointer[-1];
-            if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3612,13 +3612,13 @@
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             assert(Py_TYPE(iter_o) == &PyListIter_Type);
             PyListObject *seq = it->it_seq;
-            if (seq == NULL) {
+            if (_Py_UNLIKELY(seq == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
-                if (1) {
+                if (_Py_UNLIKELY(1)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -3646,7 +3646,7 @@
         case _ITER_CHECK_TUPLE: {
             _PyStackRef iter;
             iter = stack_pointer[-1];
-            if (Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3662,11 +3662,11 @@
             _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
             assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
             PyTupleObject *seq = it->it_seq;
-            if (seq == NULL) {
+            if (_Py_UNLIKELY(seq == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (it->it_index >= PyTuple_GET_SIZE(seq)) {
+            if (_Py_UNLIKELY(it->it_index >= PyTuple_GET_SIZE(seq))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3694,7 +3694,7 @@
             _PyStackRef iter;
             iter = stack_pointer[-1];
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
-            if (Py_TYPE(r) != &PyRangeIter_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(r) != &PyRangeIter_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3708,7 +3708,7 @@
             iter = stack_pointer[-1];
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             assert(Py_TYPE(r) == &PyRangeIter_Type);
-            if (r->len <= 0) {
+            if (_Py_UNLIKELY(r->len <= 0)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3740,11 +3740,11 @@
             oparg = CURRENT_OPARG();
             iter = stack_pointer[-1];
             PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
-            if (Py_TYPE(gen) != &PyGen_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(gen) != &PyGen_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (gen->gi_frame_state >= FRAME_EXECUTING) {
+            if (_Py_UNLIKELY(gen->gi_frame_state >= FRAME_EXECUTING)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3872,7 +3872,7 @@
             owner = stack_pointer[-1];
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_INLINE_VALUES);
-            if (!_PyObject_InlineValues(owner_o)->valid) {
+            if (_Py_UNLIKELY(!_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3885,7 +3885,7 @@
             uint32_t keys_version = (uint32_t)CURRENT_OPERAND0();
             PyTypeObject *owner_cls = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
             PyHeapTypeObject *owner_heap_type = (PyHeapTypeObject *)owner_cls;
-            if (owner_heap_type->ht_cached_keys->dk_version != keys_version) {
+            if (_Py_UNLIKELY(owner_heap_type->ht_cached_keys->dk_version != keys_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -3972,7 +3972,7 @@
             char *ptr = ((char *)PyStackRef_AsPyObjectBorrow(owner)) + MANAGED_DICT_OFFSET + dictoffset;
             PyObject *dict = *(PyObject **)ptr;
             /* This object has a __dict__, just not yet created */
-            if (dict != NULL) {
+            if (_Py_UNLIKELY(dict != NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4071,12 +4071,12 @@
             callable = &stack_pointer[-2 - oparg];
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (!PyFunction_Check(callable_o)) {
+            if (_Py_UNLIKELY(!PyFunction_Check(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
-            if (func->func_version != func_version) {
+            if (_Py_UNLIKELY(func->func_version != func_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4088,7 +4088,7 @@
             PyObject *callable_o = (PyObject *)CURRENT_OPERAND1();
             assert(PyFunction_Check(callable_o));
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
-            if (func->func_version != func_version) {
+            if (_Py_UNLIKELY(func->func_version != func_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4103,20 +4103,20 @@
             callable = &stack_pointer[-2 - oparg];
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (Py_TYPE(callable_o) != &PyMethod_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(callable_o) != &PyMethod_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyObject *func = ((PyMethodObject *)callable_o)->im_func;
-            if (!PyFunction_Check(func)) {
+            if (_Py_UNLIKELY(!PyFunction_Check(func))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (((PyFunctionObject *)func)->func_version != func_version) {
+            if (_Py_UNLIKELY(((PyFunctionObject *)func)->func_version != func_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyStackRef_IsNull(null[0])) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null[0]))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4149,11 +4149,11 @@
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-2 - oparg];
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (PyFunction_Check(callable_o)) {
+            if (_Py_UNLIKELY(PyFunction_Check(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (Py_TYPE(callable_o) == &PyMethod_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(callable_o) == &PyMethod_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4214,11 +4214,11 @@
             oparg = CURRENT_OPARG();
             null = &stack_pointer[-1 - oparg];
             callable = &stack_pointer[-2 - oparg];
-            if (!PyStackRef_IsNull(null[0])) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null[0]))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (Py_TYPE(PyStackRef_AsPyObjectBorrow(callable[0])) != &PyMethod_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(PyStackRef_AsPyObjectBorrow(callable[0])) != &PyMethod_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4245,7 +4245,7 @@
         }
 
         case _CHECK_PEP_523: {
-            if (tstate->interp->eval_frame) {
+            if (_Py_UNLIKELY(tstate->interp->eval_frame)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4262,7 +4262,7 @@
             assert(PyFunction_Check(callable_o));
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             PyCodeObject *code = (PyCodeObject *)func->func_code;
-            if (code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0]))) {
+            if (_Py_UNLIKELY(code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0])))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4276,11 +4276,11 @@
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             PyCodeObject *code = (PyCodeObject *)func->func_code;
-            if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
+            if (_Py_UNLIKELY(!_PyThreadState_HasStackSpace(tstate, code->co_framesize))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (tstate->py_recursion_remaining <= 1) {
+            if (_Py_UNLIKELY(tstate->py_recursion_remaining <= 1)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4462,11 +4462,11 @@
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
             PyObject *arg_o = PyStackRef_AsPyObjectBorrow(arg);
             assert(oparg == 1);
-            if (!PyStackRef_IsNull(null)) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (callable_o != (PyObject *)&PyType_Type) {
+            if (_Py_UNLIKELY(callable_o != (PyObject *)&PyType_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4491,11 +4491,11 @@
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
             PyObject *arg_o = PyStackRef_AsPyObjectBorrow(arg);
             assert(oparg == 1);
-            if (!PyStackRef_IsNull(null)) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (callable_o != (PyObject *)&PyUnicode_Type) {
+            if (_Py_UNLIKELY(callable_o != (PyObject *)&PyUnicode_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4524,11 +4524,11 @@
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
             PyObject *arg_o = PyStackRef_AsPyObjectBorrow(arg);
             assert(oparg == 1);
-            if (!PyStackRef_IsNull(null)) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (callable_o != (PyObject *)&PyTuple_Type) {
+            if (_Py_UNLIKELY(callable_o != (PyObject *)&PyTuple_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4559,16 +4559,16 @@
             self = &stack_pointer[-1 - oparg];
             uint32_t type_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (!PyStackRef_IsNull(null[0])) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null[0]))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyType_Check(callable_o)) {
+            if (_Py_UNLIKELY(!PyType_Check(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = (PyTypeObject *)callable_o;
-            if (FT_ATOMIC_LOAD_UINT32_RELAXED(tp->tp_version_tag) != type_version) {
+            if (_Py_UNLIKELY(FT_ATOMIC_LOAD_UINT32_RELAXED(tp->tp_version_tag) != type_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4576,7 +4576,7 @@
             PyHeapTypeObject *cls = (PyHeapTypeObject *)callable_o;
             PyFunctionObject *init_func = (PyFunctionObject *)FT_ATOMIC_LOAD_PTR_ACQUIRE(cls->_spec_cache.init);
             PyCodeObject *code = (PyCodeObject *)init_func->func_code;
-            if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize + _Py_InitCleanup.co_framesize)) {
+            if (_Py_UNLIKELY(!_PyThreadState_HasStackSpace(tstate, code->co_framesize + _Py_InitCleanup.co_framesize))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4663,12 +4663,12 @@
                 args--;
                 total_args++;
             }
-            if (!PyType_Check(callable_o)) {
+            if (_Py_UNLIKELY(!PyType_Check(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = (PyTypeObject *)callable_o;
-            if (tp->tp_vectorcall == NULL) {
+            if (_Py_UNLIKELY(tp->tp_vectorcall == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4715,20 +4715,20 @@
                 args--;
                 total_args++;
             }
-            if (total_args != 1) {
+            if (_Py_UNLIKELY(total_args != 1)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyCFunction_CheckExact(callable_o)) {
+            if (_Py_UNLIKELY(!PyCFunction_CheckExact(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (PyCFunction_GET_FLAGS(callable_o) != METH_O) {
+            if (_Py_UNLIKELY(PyCFunction_GET_FLAGS(callable_o) != METH_O)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // CPython promises to check all non-vectorcall function calls.
-            if (tstate->c_recursion_remaining <= 0) {
+            if (_Py_UNLIKELY(tstate->c_recursion_remaining <= 0)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4767,11 +4767,11 @@
                 args--;
                 total_args++;
             }
-            if (!PyCFunction_CheckExact(callable_o)) {
+            if (_Py_UNLIKELY(!PyCFunction_CheckExact(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (PyCFunction_GET_FLAGS(callable_o) != METH_FASTCALL) {
+            if (_Py_UNLIKELY(PyCFunction_GET_FLAGS(callable_o) != METH_FASTCALL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4824,11 +4824,11 @@
                 args--;
                 total_args++;
             }
-            if (!PyCFunction_CheckExact(callable_o)) {
+            if (_Py_UNLIKELY(!PyCFunction_CheckExact(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (PyCFunction_GET_FLAGS(callable_o) != (METH_FASTCALL | METH_KEYWORDS)) {
+            if (_Py_UNLIKELY(PyCFunction_GET_FLAGS(callable_o) != (METH_FASTCALL | METH_KEYWORDS))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4882,12 +4882,12 @@
                 args--;
                 total_args++;
             }
-            if (total_args != 1) {
+            if (_Py_UNLIKELY(total_args != 1)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyInterpreterState *interp = tstate->interp;
-            if (callable_o != interp->callable_cache.len) {
+            if (_Py_UNLIKELY(callable_o != interp->callable_cache.len)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4930,12 +4930,12 @@
                 args--;
                 total_args++;
             }
-            if (total_args != 2) {
+            if (_Py_UNLIKELY(total_args != 2)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyInterpreterState *interp = tstate->interp;
-            if (callable_o != interp->callable_cache.isinstance) {
+            if (_Py_UNLIKELY(callable_o != interp->callable_cache.isinstance)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -4971,16 +4971,16 @@
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
             PyObject *self_o = PyStackRef_AsPyObjectBorrow(self);
             PyInterpreterState *interp = tstate->interp;
-            if (callable_o != interp->callable_cache.list_append) {
+            if (_Py_UNLIKELY(callable_o != interp->callable_cache.list_append)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             assert(self_o != NULL);
-            if (!PyList_Check(self_o)) {
+            if (_Py_UNLIKELY(!PyList_Check(self_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!LOCK_OBJECT(self_o)) {
+            if (_Py_UNLIKELY(!LOCK_OBJECT(self_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5017,28 +5017,28 @@
                 total_args++;
             }
             PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
-            if (total_args != 2) {
+            if (_Py_UNLIKELY(total_args != 2)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(method, &PyMethodDescr_Type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyMethodDef *meth = method->d_method;
-            if (meth->ml_flags != METH_O) {
+            if (_Py_UNLIKELY(meth->ml_flags != METH_O)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // CPython promises to check all non-vectorcall function calls.
-            if (tstate->c_recursion_remaining <= 0) {
+            if (_Py_UNLIKELY(tstate->c_recursion_remaining <= 0)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             _PyStackRef arg_stackref = args[1];
             _PyStackRef self_stackref = args[0];
-            if (!Py_IS_TYPE(PyStackRef_AsPyObjectBorrow(self_stackref),
-                                method->d_common.d_type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(PyStackRef_AsPyObjectBorrow(self_stackref),
+                                method->d_common.d_type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5079,18 +5079,18 @@
                 total_args++;
             }
             PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
-            if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(method, &PyMethodDescr_Type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyMethodDef *meth = method->d_method;
-            if (meth->ml_flags != (METH_FASTCALL|METH_KEYWORDS)) {
+            if (_Py_UNLIKELY(meth->ml_flags != (METH_FASTCALL|METH_KEYWORDS))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *d_type = method->d_common.d_type;
             PyObject *self = PyStackRef_AsPyObjectBorrow(args[0]);
-            if (!Py_IS_TYPE(self, d_type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(self, d_type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5141,28 +5141,28 @@
                 args--;
                 total_args++;
             }
-            if (total_args != 1) {
+            if (_Py_UNLIKELY(total_args != 1)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
-            if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(method, &PyMethodDescr_Type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyMethodDef *meth = method->d_method;
             _PyStackRef self_stackref = args[0];
             PyObject *self = PyStackRef_AsPyObjectBorrow(self_stackref);
-            if (!Py_IS_TYPE(self, method->d_common.d_type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(self, method->d_common.d_type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (meth->ml_flags != METH_NOARGS) {
+            if (_Py_UNLIKELY(meth->ml_flags != METH_NOARGS)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             // CPython promises to check all non-vectorcall function calls.
-            if (tstate->c_recursion_remaining <= 0) {
+            if (_Py_UNLIKELY(tstate->c_recursion_remaining <= 0)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5201,17 +5201,17 @@
             }
             PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
             /* Builtin METH_FASTCALL methods, without keywords */
-            if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(method, &PyMethodDescr_Type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyMethodDef *meth = method->d_method;
-            if (meth->ml_flags != METH_FASTCALL) {
+            if (_Py_UNLIKELY(meth->ml_flags != METH_FASTCALL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyObject *self = PyStackRef_AsPyObjectBorrow(args[0]);
-            if (!Py_IS_TYPE(self, method->d_common.d_type)) {
+            if (_Py_UNLIKELY(!Py_IS_TYPE(self, method->d_common.d_type))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5329,12 +5329,12 @@
             callable = &stack_pointer[-3 - oparg];
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (!PyFunction_Check(callable_o)) {
+            if (_Py_UNLIKELY(!PyFunction_Check(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
-            if (func->func_version != func_version) {
+            if (_Py_UNLIKELY(func->func_version != func_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5349,20 +5349,20 @@
             callable = &stack_pointer[-3 - oparg];
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (Py_TYPE(callable_o) != &PyMethod_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(callable_o) != &PyMethod_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             PyObject *func = ((PyMethodObject *)callable_o)->im_func;
-            if (!PyFunction_Check(func)) {
+            if (_Py_UNLIKELY(!PyFunction_Check(func))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (((PyFunctionObject *)func)->func_version != func_version) {
+            if (_Py_UNLIKELY(((PyFunctionObject *)func)->func_version != func_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (!PyStackRef_IsNull(null[0])) {
+            if (_Py_UNLIKELY(!PyStackRef_IsNull(null[0]))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5395,11 +5395,11 @@
             oparg = CURRENT_OPARG();
             callable = &stack_pointer[-3 - oparg];
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
-            if (PyFunction_Check(callable_o)) {
+            if (_Py_UNLIKELY(PyFunction_Check(callable_o))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (Py_TYPE(callable_o) == &PyMethod_Type) {
+            if (_Py_UNLIKELY(Py_TYPE(callable_o) == &PyMethod_Type)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5729,7 +5729,7 @@
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            if (!is_true) {
+            if (_Py_UNLIKELY(!is_true)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5742,7 +5742,7 @@
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            if (!is_false) {
+            if (_Py_UNLIKELY(!is_false)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5757,7 +5757,7 @@
                 PyStackRef_CLOSE(val);
                 stack_pointer += -1;
                 assert(WITHIN_STACK_BOUNDS());
-                if (1) {
+                if (_Py_UNLIKELY(1)) {
                     UOP_STAT_INC(uopcode, miss);
                     JUMP_TO_JUMP_TARGET();
                 }
@@ -5774,7 +5774,7 @@
             PyStackRef_CLOSE(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            if (is_none) {
+            if (_Py_UNLIKELY(is_none)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5795,11 +5795,11 @@
         case _CHECK_STACK_SPACE_OPERAND: {
             uint32_t framesize = (uint32_t)CURRENT_OPERAND0();
             assert(framesize <= INT_MAX);
-            if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
+            if (_Py_UNLIKELY(!_PyThreadState_HasStackSpace(tstate, framesize))) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
-            if (tstate->py_recursion_remaining <= 1) {
+            if (_Py_UNLIKELY(tstate->py_recursion_remaining <= 1)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5879,7 +5879,7 @@
         }
 
         case _CHECK_VALIDITY: {
-            if (!current_executor->vm_data.valid) {
+            if (_Py_UNLIKELY(!current_executor->vm_data.valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5947,7 +5947,7 @@
             uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
-            if (func->func_version != func_version) {
+            if (_Py_UNLIKELY(func->func_version != func_version)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5962,7 +5962,7 @@
             PyDictObject *dict = (PyDictObject *)GLOBALS();
             PyDictUnicodeEntry *entries = DK_UNICODE_ENTRIES(dict->ma_keys);
             PyObject *res_o = entries[index].me_value;
-            if (res_o == NULL) {
+            if (_Py_UNLIKELY(res_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -5984,7 +5984,7 @@
             PyDictObject *dict = (PyDictObject *)BUILTINS();
             PyDictUnicodeEntry *entries = DK_UNICODE_ENTRIES(dict->ma_keys);
             PyObject *res_o = entries[index].me_value;
-            if (res_o == NULL) {
+            if (_Py_UNLIKELY(res_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -6011,7 +6011,7 @@
             assert(index < dict->ma_keys->dk_nentries);
             PyDictUnicodeEntry *ep = DK_UNICODE_ENTRIES(dict->ma_keys) + index;
             PyObject *attr_o = ep->me_value;
-            if (attr_o == NULL) {
+            if (_Py_UNLIKELY(attr_o == NULL)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -6112,7 +6112,7 @@
 
         case _CHECK_VALIDITY_AND_SET_IP: {
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
-            if (!current_executor->vm_data.valid) {
+            if (_Py_UNLIKELY(!current_executor->vm_data.valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -6139,14 +6139,14 @@
 
         case _TIER2_RESUME_CHECK: {
             #if defined(__EMSCRIPTEN__)
-            if (_Py_emscripten_signal_clock == 0) {
+            if (_Py_UNLIKELY(_Py_emscripten_signal_clock == 0)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
             #endif
             uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
-            if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
+            if (_Py_UNLIKELY(eval_breaker & _PY_EVAL_EVENTS_MASK)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }

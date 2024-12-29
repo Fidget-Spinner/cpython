@@ -475,3 +475,14 @@ do { \
 #else
 #define CONVERSION_FAILED(NAME) (0)
 #endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#define _Py_UNLIKELY(x)     (__builtin_expect(!!(x),false))
+#define _Py_LIKELY(x)       (__builtin_expect(!!(x),true))
+#elif (defined(__cplusplus) && (__cplusplus >= 202002L)) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#define _Py_UNLIKELY(x)     (x) [[unlikely]]
+#define _Py_LIKELY(x)       (x) [[likely]]
+#else
+#define _Py_UNLIKELY(x)     (x)
+#define _Py_LIKELY(x)       (x)
+#endif
