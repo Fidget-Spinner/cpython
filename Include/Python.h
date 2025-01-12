@@ -14,6 +14,7 @@
 #include "pyconfig.h"
 #include "pymacconfig.h"
 
+#define Py_TAIL_CALL_INTERP 1
 
 // Include standard header files
 #include <assert.h>               // assert()

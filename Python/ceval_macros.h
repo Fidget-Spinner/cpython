@@ -79,8 +79,8 @@
 #endif
 
 #ifdef Py_TAIL_CALL_INTERP
-#   define Py_MUSTTAIL __attribute__((musttail))
-#   define Py_PRESERVE_NONE_CC __attribute__((preserve_none))
+#   define Py_MUSTTAIL [[clang::musttail]]
+#   define Py_PRESERVE_NONE_CC
     Py_PRESERVE_NONE_CC
     typedef PyObject* (*py_tail_call_funcptr)(TAIL_CALL_PARAMS);
 #   define DISPATCH_GOTO() do { \
@@ -328,17 +328,11 @@ GETITEM(PyObject *v, Py_ssize_t i) {
                                      GETLOCAL(i) = value; \
                                      PyStackRef_XCLOSE(tmp); } while (0)
 #ifdef Py_TAIL_CALL_INTERP
-#ifdef LLTRACE
 #define GO_TO_INSTRUCTION(op) do { \
-    Py_MUSTTAIL \
-    return (INSTRUCTION_TABLE[op])(frame, stack_pointer, tstate, next_instr - 1 - _PyOpcode_Caches[_PyOpcode_Deopt[op]], opcode, oparg, lltrace); \
+    next_instr = next_instr - 1 - _PyOpcode_Caches[_PyOpcode_Deopt[op]]; \
+    Py_MUSTTAIL                                   \
+    return (INSTRUCTION_TABLE[op])(TAIL_CALL_ARGS); \
 } while (0)
-#else
-#define GO_TO_INSTRUCTION(op) do { \
-    Py_MUSTTAIL \
-    return (INSTRUCTION_TABLE[op])(frame, stack_pointer, tstate, next_instr - 1 - _PyOpcode_Caches[_PyOpcode_Deopt[op]], opcode, oparg); \
-} while (0)
-#endif
 #else
 #define GO_TO_INSTRUCTION(op) goto PREDICT_ID(op)
 #endif
@@ -357,6 +351,12 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #define UPDATE_MISS_STATS(INSTNAME) ((void)0)
 #endif
 
+#ifdef Py_TAIL_CALL_INTERP
+#define DEOPT_IF(COND, INSTNAME)                            \
+    if ((COND)) {                                           \
+        goto INSTNAME##_deopt;                        \
+    }
+#else
 #define DEOPT_IF(COND, INSTNAME)                            \
     if ((COND)) {                                           \
         /* This is only a single jump on release builds! */ \
@@ -364,7 +364,7 @@ GETITEM(PyObject *v, Py_ssize_t i) {
         assert(_PyOpcode_Deopt[opcode] == (INSTNAME));      \
         GO_TO_INSTRUCTION(INSTNAME);                        \
     }
-
+#endif
 
 // Try to lock an object in the free threading build, if it's not already
 // locked. Use with a DEOPT_IF() to deopt if the object is already locked.

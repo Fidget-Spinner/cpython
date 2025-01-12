@@ -101,9 +101,19 @@ def generate_tier1(
         out.emit("\n")
         out.emit(function_proto(name))
         out.emit("{\n")
+        out.emit("{\n")
         write_single_inst(out, emitter, name, inst)
+        out.emit("}\n")
         if not inst.parts[-1].properties.always_exits:
             out.emit("DISPATCH();\n")
+        for err_label in ("pop_4_error", "pop_3_error", "pop_2_error", "pop_1_error", "error"):
+            out.emit(f"{err_label}: {{\n")
+            out.emit(f"CEVAL_GOTO({err_label});\n")
+            out.emit("}\n")
+        if inst.family:
+            out.emit(f"{inst.family.name}_deopt: {{\n")
+            out.emit(f"GO_TO_INSTRUCTION({inst.family.name});")
+            out.emit("}\n")
         out.start_line()
         out.emit("}\n")
 
