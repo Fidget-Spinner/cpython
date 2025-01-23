@@ -97,6 +97,9 @@ do {                                                         \
 __attribute__((preserve_none)) PyObject *
 _JIT_ENTRY(TAIL_CALL_PARAMS)
 {
+    next_instr = NULL;
+    opcode = 0;
+    oparg = 0;
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
     int uopcode = _JIT_OPCODE;
