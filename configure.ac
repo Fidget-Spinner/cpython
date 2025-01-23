@@ -7065,18 +7065,6 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([[[
  else
    ac_cv_tail_call=no
  fi]))
-# Do not enable tail-calling interpreter if tier 2 is enabled.
-AS_VAR_IF(
-  [tier2_flags],
-  [],
-  [
-    case "$ac_cv_tail_call" in yes*)
-      AC_DEFINE([Py_TAIL_CALL_INTERP], [1],
-      [Define if the C compiler supports efficient proper tail calls.])
-    esac
-  ],
-  []
-)
 
 
 case $ac_sys_system in
