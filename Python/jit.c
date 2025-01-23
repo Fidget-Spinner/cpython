@@ -17,6 +17,8 @@
 #include "pycore_setobject.h"
 #include "pycore_sliceobject.h"
 #include "pycore_jit.h"
+#include "ceval_macros.h"
+#include "pycore_tail_call.h"
 
 // Memory management stuff: ////////////////////////////////////////////////////
 

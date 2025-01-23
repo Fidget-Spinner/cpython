@@ -480,20 +480,15 @@ _PyFrame_SetStackPointer(frame, stack_pointer)
 
 /* Tier-switching macros. */
 
+typedef jit_func __attribute__((preserve_none)) jit_func_preserve_none;
+
 #ifdef _Py_JIT
 #define GOTO_TIER_TWO(EXECUTOR)                        \
 do {                                                   \
     OPT_STAT_INC(traces_executed);                     \
-    jit_func jitted = (EXECUTOR)->jit_code;            \
-    next_instr = jitted(frame, stack_pointer, tstate); \
-    Py_DECREF(tstate->previous_executor);              \
-    tstate->previous_executor = NULL;                  \
-    frame = tstate->current_frame;                     \
-    if (next_instr == NULL) {                          \
-        goto resume_with_error;                        \
-    }                                                  \
-    stack_pointer = _PyFrame_GetStackPointer(frame);   \
-    DISPATCH();                                        \
+    jit_func_preserve_none jitted = (EXECUTOR)->jit_code;            \
+    Py_MUSTTAIL                                                   \
+    return jitted(TAIL_CALL_ARGS); \
 } while (0)
 #else
 #define GOTO_TIER_TWO(EXECUTOR) \

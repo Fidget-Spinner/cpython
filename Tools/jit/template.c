@@ -21,6 +21,8 @@
 
 #include "ceval_macros.h"
 
+#include "pycore_tail_call.h"
+
 #include "jit.h"
 
 #undef CURRENT_OPARG
@@ -54,14 +56,15 @@
 do {  \
     OPT_STAT_INC(traces_executed);                \
     __attribute__((musttail))                     \
-    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(frame, stack_pointer, tstate); \
+    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef GOTO_TIER_ONE
 #define GOTO_TIER_ONE(TARGET) \
 do {  \
     _PyFrame_SetStackPointer(frame, stack_pointer); \
-    return TARGET; \
+    next_instr = TARGET;      \
+    DISPATCH(); \
 } while (0)
 
 #undef LOAD_IP
@@ -77,7 +80,7 @@ do {  \
 do {                                                         \
     PyAPI_DATA(void) ALIAS;                                  \
     __attribute__((musttail))                                \
-    return ((jit_func_preserve_none)&ALIAS)(frame, stack_pointer, tstate); \
+    return ((jit_func_preserve_none)&ALIAS)(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
@@ -91,14 +94,12 @@ do {                                                         \
 
 #define TIER_TWO 2
 
-__attribute__((preserve_none)) _Py_CODEUNIT *
-_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
+__attribute__((preserve_none)) PyObject *
+_JIT_ENTRY(TAIL_CALL_PARAMS)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
-    int oparg;
     int uopcode = _JIT_OPCODE;
-    _Py_CODEUNIT *next_instr;
     // Other stuff we need handy:
     PATCH_VALUE(uint16_t, _oparg, _JIT_OPARG)
 #if SIZEOF_VOID_P == 8

@@ -74,7 +74,7 @@ def generate_label_handlers_from_files(
 
 
 def function_proto(name: str) -> str:
-    return f"Py_PRESERVE_NONE_CC static PyObject *_TAIL_CALL_{name}(TAIL_CALL_PARAMS)"
+    return f"Py_PRESERVE_NONE_CC PyAPI_FUNC(PyObject *)_TAIL_CALL_{name}(TAIL_CALL_PARAMS)"
 
 def generate_tier1(
     filenames: list[str], analysis: Analysis, outfile: TextIO, lines: bool
@@ -92,6 +92,9 @@ def generate_tier1(
     out = CWriter(outfile, 0, lines)
     out.emit("static inline PyObject *_TAIL_CALL_shim(TAIL_CALL_PARAMS);\n")
     out.emit("static py_tail_call_funcptr INSTRUCTION_TABLE[256];\n");
+
+    for name, inst in sorted(analysis.instructions.items()):
+        out.emit(function_proto(name) + ';\n')
 
     with open(DEFAULT_CEVAL_INPUT, "r") as infile:
         err_labels = generate_label_handlers(infile, outfile)
