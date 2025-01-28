@@ -245,8 +245,16 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #define UPDATE_MISS_STATS(INSTNAME) ((void)0)
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define Py_UNLIKELY(x)     (__builtin_expect(!!(x),false))
+#elif (defined(__cplusplus) && (__cplusplus >= 202002L)) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#define Py_UNLIKELY(x)     (x) [[unlikely]]
+#else
+#define Py_UNLIKELY(x)     (x)
+#endif
+
 #define DEOPT_IF(COND, INSTNAME)                            \
-    if ((COND)) {                                           \
+    if (Py_UNLIKELY(COND)) {                                \
         /* This is only a single jump on release builds! */ \
         UPDATE_MISS_STATS((INSTNAME));                      \
         assert(_PyOpcode_Deopt[opcode] == (INSTNAME));      \

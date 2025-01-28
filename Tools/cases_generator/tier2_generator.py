@@ -82,13 +82,18 @@ class Tier2Emitter(Emitter):
         self.emit(lparen)
         assert lparen.kind == "LPAREN"
         first_tkn = next(tkn_iter)
+        unconditional = always_true(first_tkn)
+        if not unconditional:
+            self.emit("Py_UNLIKELY(")
         self.out.emit(first_tkn)
         emit_to(self.out, tkn_iter, "COMMA")
         label = next(tkn_iter).text
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
+        if not unconditional:
+            self.emit(")")
         self.emit(") JUMP_TO_ERROR();\n")
-        return not always_true(first_tkn)
+        return not unconditional
 
 
     def error_no_pop(
@@ -118,13 +123,18 @@ class Tier2Emitter(Emitter):
         self.emit(lparen)
         assert lparen.kind == "LPAREN"
         first_tkn = tkn_iter.peek()
+        always_true_first = always_true(first_tkn)
+        if not always_true_first:
+            self.emit("Py_UNLIKELY(")
         emit_to(self.out, tkn_iter, "RPAREN")
         next(tkn_iter)  # Semi colon
+        if not always_true_first:
+            self.emit(")")
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
-        return not always_true(first_tkn)
+        return not always_true_first
 
     def exit_if(  # type: ignore[override]
         self,
@@ -138,13 +148,18 @@ class Tier2Emitter(Emitter):
         lparen = next(tkn_iter)
         self.emit(lparen)
         first_tkn = tkn_iter.peek()
+        always_true_first = always_true(first_tkn)
+        if not always_true_first:
+            self.emit("Py_UNLIKELY(")
         emit_to(self.out, tkn_iter, "RPAREN")
         next(tkn_iter)  # Semi colon
+        if not always_true_first:
+            self.emit(")")
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
-        return not always_true(first_tkn)
+        return not always_true_first
 
     def oparg(
         self,
