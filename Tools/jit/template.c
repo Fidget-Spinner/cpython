@@ -23,6 +23,9 @@
 
 #include "jit.h"
 
+Py_PRESERVE_NONE_CC extern PyObject *_TAIL_CALL_error(TAIL_CALL_PARAMS);
+extern py_tail_call_funcptr INSTRUCTION_TABLE[256];
+
 #undef CURRENT_OPARG
 #define CURRENT_OPARG() (_oparg)
 
@@ -46,14 +49,19 @@
 do {  \
     OPT_STAT_INC(traces_executed);                \
     __attribute__((musttail))                     \
-    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(frame, stack_pointer, tstate); \
+    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef GOTO_TIER_ONE
 #define GOTO_TIER_ONE(TARGET) \
 do {  \
-    _PyFrame_SetStackPointer(frame, stack_pointer); \
-    return TARGET; \
+    next_instr = TARGET; \
+    if (next_instr == NULL) { \
+        next_instr = frame->instr_ptr; \
+        JUMP_TO_LABEL(error); \
+    }                         \
+    tstate->previous_executor = NULL; \
+    DISPATCH(); \
 } while (0)
 
 #undef LOAD_IP
@@ -69,7 +77,7 @@ do {  \
 do {                                                         \
     PyAPI_DATA(void) ALIAS;                                  \
     __attribute__((musttail))                                \
-    return ((jit_func_preserve_none)&ALIAS)(frame, stack_pointer, tstate); \
+    return ((jit_func_preserve_none)&ALIAS)(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
@@ -83,14 +91,12 @@ do {                                                         \
 
 #define TIER_TWO 2
 
-__attribute__((preserve_none)) _Py_CODEUNIT *
-_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
+__attribute__((preserve_none)) PyObject *
+_JIT_ENTRY(TAIL_CALL_PARAMS)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
-    int oparg;
-    int uopcode = _JIT_OPCODE;
-    _Py_CODEUNIT *next_instr;
+    int opcode = _JIT_OPCODE;
     // Other stuff we need handy:
     PATCH_VALUE(uint16_t, _oparg, _JIT_OPARG)
 #if SIZEOF_VOID_P == 8
@@ -109,9 +115,9 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
 
     OPT_STAT_INC(uops_executed);
-    UOP_STAT_INC(uopcode, execution_count);
+    UOP_STAT_INC(opcode, execution_count);
 
-    switch (uopcode) {
+    switch (opcode) {
         // The actual instruction definition gets inserted here:
         CASE
         default:

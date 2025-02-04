@@ -18,6 +18,10 @@
 #include "pycore_sliceobject.h"
 #include "pycore_jit.h"
 
+#include "ceval_macros.h"
+Py_PRESERVE_NONE_CC extern PyObject *_TAIL_CALL_error(TAIL_CALL_PARAMS);
+extern py_tail_call_funcptr INSTRUCTION_TABLE[256];
+
 // Memory management stuff: ////////////////////////////////////////////////////
 
 #ifndef MS_WINDOWS

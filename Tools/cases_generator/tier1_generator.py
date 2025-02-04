@@ -221,7 +221,7 @@ def generate_tier1_labels(
 
 
 def function_proto(name: str) -> str:
-    return f"Py_PRESERVE_NONE_CC static PyObject *_TAIL_CALL_{name}(TAIL_CALL_PARAMS)"
+    return f"Py_PRESERVE_NONE_CC extern PyObject *_TAIL_CALL_{name}(TAIL_CALL_PARAMS)"
 
 
 def generate_tier1_tailcall_metadata(
@@ -230,7 +230,7 @@ def generate_tier1_tailcall_metadata(
 
     out = CWriter(outfile, 0, lines)
     out.emit("#ifdef Py_TAIL_CALL_INTERP\n")
-    out.emit("static py_tail_call_funcptr INSTRUCTION_TABLE[256];\n")
+    out.emit("extern py_tail_call_funcptr INSTRUCTION_TABLE[256];\n")
     out.emit("\n")
 
     # Emit function prototypes for labels.
@@ -252,7 +252,7 @@ def generate_tier1_tailcall_metadata(
     out.emit("\n")
 
     # Emit the dispatch table.
-    out.emit("static py_tail_call_funcptr INSTRUCTION_TABLE[256] = {\n")
+    out.emit("extern py_tail_call_funcptr INSTRUCTION_TABLE[256] = {\n")
     for name in sorted(analysis.instructions.keys()):
         out.emit(f"[{name}] = _TAIL_CALL_{name},\n")
     named_values = analysis.opmap.values()
