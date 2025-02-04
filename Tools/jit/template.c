@@ -64,6 +64,10 @@ do {  \
 do {  \
     _PyFrame_SetStackPointer(frame, stack_pointer); \
     next_instr = TARGET;      \
+    if (next_instr == NULL) { \
+        Py_MUSTTAIL                      \
+        return _TAIL_CALL_error(TAIL_CALL_ARGS);                          \
+    }                          \
     DISPATCH(); \
 } while (0)
 
