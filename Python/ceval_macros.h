@@ -388,17 +388,7 @@ _PyFrame_SetStackPointer(frame, stack_pointer)
 do {                                                   \
     OPT_STAT_INC(traces_executed);                     \
     jit_func jitted = (EXECUTOR)->jit_code;            \
-    next_instr = jitted(frame, stack_pointer, tstate); \
-    Py_DECREF(tstate->previous_executor);              \
-    tstate->previous_executor = NULL;                  \
-    frame = tstate->current_frame;                     \
-    if (next_instr == NULL) {                          \
-        next_instr = frame->instr_ptr;                 \
-        stack_pointer = _PyFrame_GetStackPointer(frame); \
-        JUMP_TO_LABEL(error);                                    \
-    }                                                  \
-    stack_pointer = _PyFrame_GetStackPointer(frame);   \
-    DISPATCH();                                        \
+    Py_MUSTTAIL return jitted(TAIL_CALL_ARGS); \
 } while (0)
 #else
 #define GOTO_TIER_TWO(EXECUTOR) \
