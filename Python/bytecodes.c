@@ -5213,23 +5213,31 @@ dummy_func(
         }
 
         label(pop_4_error) {
-            STACK_SHRINK(4);
-            JUMP_TO_LABEL(error);
+            {
+                STACK_SHRINK(4);
+            }
+            TAIL_CALL(error);
         }
 
         label(pop_3_error) {
-            STACK_SHRINK(3);
-            JUMP_TO_LABEL(error);
+            {
+                STACK_SHRINK(3);
+            }
+            TAIL_CALL(error);
         }
 
         label(pop_2_error) {
-            STACK_SHRINK(2);
-            JUMP_TO_LABEL(error);
+            {
+                STACK_SHRINK(2);
+            }
+            TAIL_CALL(error);
         }
 
         label(pop_1_error) {
-            STACK_SHRINK(1);
-            JUMP_TO_LABEL(error);
+            {
+                STACK_SHRINK(1);
+            }
+            TAIL_CALL(error);
         }
 
         label(error) {
@@ -5252,61 +5260,65 @@ dummy_func(
                 }
             }
             _PyEval_MonitorRaise(tstate, frame, next_instr-1);
-            JUMP_TO_LABEL(exception_unwind);
+            TAIL_CALL(exception_unwind);
         }
 
-        spilled label(exception_unwind) {
-            /* We can't use frame->instr_ptr here, as RERAISE may have set it */
-            int offset = INSTR_OFFSET()-1;
-            int level, handler, lasti;
-            int handled = get_exception_handler(_PyFrame_GetCode(frame), offset, &level, &handler, &lasti);
-            if (handled == 0) {
-                // No handlers, so exit.
-                assert(_PyErr_Occurred(tstate));
-                /* Pop remaining stack entries. */
-                _PyStackRef *stackbase = _PyFrame_Stackbase(frame);
-                while (frame->stackpointer > stackbase) {
+        spilled label(exception_unwind)
+        {
+            {
+                /* We can't use frame->instr_ptr here, as RERAISE may have set it */
+                int offset = INSTR_OFFSET() - 1;
+                int level, handler, lasti;
+                int handled = get_exception_handler(_PyFrame_GetCode(frame), offset,
+                                                    &level, &handler, &lasti);
+                if (handled == 0) {
+                    // No handlers, so exit.
+                    assert(_PyErr_Occurred(tstate));
+                    /* Pop remaining stack entries. */
+                    _PyStackRef *stackbase = _PyFrame_Stackbase(frame);
+                    while (frame->stackpointer > stackbase) {
+                        _PyStackRef ref = _PyFrame_StackPop(frame);
+                        PyStackRef_XCLOSE(ref);
+                    }
+                    monitor_unwind(tstate, frame, next_instr - 1);
+                    TAIL_CALL(exit_unwind);
+                }
+                assert(STACK_LEVEL() >= level);
+                _PyStackRef *new_top = _PyFrame_Stackbase(frame) + level;
+                assert(frame->stackpointer >= new_top);
+                while (frame->stackpointer > new_top) {
                     _PyStackRef ref = _PyFrame_StackPop(frame);
                     PyStackRef_XCLOSE(ref);
                 }
-                monitor_unwind(tstate, frame, next_instr-1);
-                JUMP_TO_LABEL(exit_unwind);
-            }
-            assert(STACK_LEVEL() >= level);
-            _PyStackRef *new_top = _PyFrame_Stackbase(frame) + level;
-            assert(frame->stackpointer >= new_top);
-            while (frame->stackpointer > new_top) {
-                _PyStackRef ref = _PyFrame_StackPop(frame);
-                PyStackRef_XCLOSE(ref);
-            }
-            if (lasti) {
-                int frame_lasti = _PyInterpreterFrame_LASTI(frame);
-                PyObject *lasti = PyLong_FromLong(frame_lasti);
-                if (lasti == NULL) {
-                    JUMP_TO_LABEL(exception_unwind);
+                if (lasti) {
+                    int frame_lasti = _PyInterpreterFrame_LASTI(frame);
+                    PyObject *lasti = PyLong_FromLong(frame_lasti);
+                    if (lasti == NULL) {
+                        TAIL_CALL(exception_unwind);
+                    }
+                    _PyFrame_StackPush(frame, PyStackRef_FromPyObjectSteal(lasti));
                 }
-                _PyFrame_StackPush(frame, PyStackRef_FromPyObjectSteal(lasti));
-            }
 
-            /* Make the raw exception data
-                available to the handler,
-                so a program can emulate the
-                Python main loop. */
-            PyObject *exc = _PyErr_GetRaisedException(tstate);
-            _PyFrame_StackPush(frame, PyStackRef_FromPyObjectSteal(exc));
-            next_instr = _PyFrame_GetBytecode(frame) + handler;
+                /* Make the raw exception data
+                    available to the handler,
+                    so a program can emulate the
+                    Python main loop. */
+                PyObject *exc = _PyErr_GetRaisedException(tstate);
+                _PyFrame_StackPush(frame, PyStackRef_FromPyObjectSteal(exc));
+                next_instr = _PyFrame_GetBytecode(frame) + handler;
 
-            int err = monitor_handled(tstate, frame, next_instr, exc);
-            if (err < 0) {
-                JUMP_TO_LABEL(exception_unwind);
+                int err = monitor_handled(tstate, frame, next_instr, exc);
+                if (err < 0) {
+                    TAIL_CALL(exception_unwind);
+                }
+                /* Resume normal execution */
+    #ifdef LLTRACE
+                if (frame->lltrace >= 5) {
+                    lltrace_resume_frame(frame);
+                }
+    #endif
+                RELOAD_STACK();
             }
-            /* Resume normal execution */
-#ifdef LLTRACE
-            if (frame->lltrace >= 5) {
-                lltrace_resume_frame(frame);
-            }
-#endif
-            RELOAD_STACK();
 #ifdef Py_TAIL_CALL_INTERP
             int opcode;
 #endif
@@ -5314,6 +5326,7 @@ dummy_func(
         }
 
         spilled label(exit_unwind) {
+            {
             assert(_PyErr_Occurred(tstate));
             _Py_LeaveRecursiveCallPy(tstate);
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
@@ -5330,33 +5343,36 @@ dummy_func(
             }
             next_instr = frame->instr_ptr;
             RELOAD_STACK();
-            JUMP_TO_LABEL(error);
+            }
+            TAIL_CALL(error);
         }
 
         spilled label(start_frame) {
-            int too_deep = _Py_EnterRecursivePy(tstate);
-            if (too_deep) {
-                JUMP_TO_LABEL(exit_unwind);
-            }
-            next_instr = frame->instr_ptr;
-
-        #ifdef LLTRACE
             {
-                int lltrace = maybe_lltrace_resume_frame(frame, GLOBALS());
-                frame->lltrace = lltrace;
-                if (lltrace < 0) {
-                    JUMP_TO_LABEL(exit_unwind);
+                int too_deep = _Py_EnterRecursivePy(tstate);
+                if (too_deep) {
+                    TAIL_CALL(exit_unwind);
                 }
-            }
-        #endif
+                next_instr = frame->instr_ptr;
 
-        #ifdef Py_DEBUG
-            /* _PyEval_EvalFrameDefault() must not be called with an exception set,
-            because it can clear it (directly or indirectly) and so the
-            caller loses its exception */
-            assert(!_PyErr_Occurred(tstate));
-        #endif
-            RELOAD_STACK();
+#ifdef LLTRACE
+                {
+                    int lltrace = maybe_lltrace_resume_frame(frame, GLOBALS());
+                    frame->lltrace = lltrace;
+                    if (lltrace < 0) {
+                        TAIL_CALL(exit_unwind);
+                    }
+                }
+#endif
+
+#ifdef Py_DEBUG
+                /* _PyEval_EvalFrameDefault() must not be called with an exception set,
+                because it can clear it (directly or indirectly) and so the
+                caller loses its exception */
+                assert(!_PyErr_Occurred(tstate));
+#endif
+                RELOAD_STACK();
+            }
 #ifdef Py_TAIL_CALL_INTERP
             int opcode;
 #endif

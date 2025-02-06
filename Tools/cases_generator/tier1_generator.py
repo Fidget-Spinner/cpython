@@ -141,12 +141,14 @@ def uses_this(inst: Instruction) -> tuple[bool, bool]:
 
 
 UNKNOWN_OPCODE_HANDLER ="""\
+{
 _PyErr_Format(tstate, PyExc_SystemError,
               "%U:%d: unknown opcode %d",
               _PyFrame_GetCode(frame)->co_filename,
               PyUnstable_InterpreterFrame_GetLine(frame),
               opcode);
-JUMP_TO_LABEL(error);
+}
+TAIL_CALL(error);
 """
 
 def generate_tier1(
@@ -276,6 +278,7 @@ def generate_tier1_cases(
             out.emit(f"int opcode = next_instr->op.code;\n")
             out.emit(f"(void)(opcode);\n")
             out.emit(f"#endif /* Py_TAIL_CALL_INTERP */\n")
+        out.emit("{\n")
         needs_this, only_for_tail_call = uses_this(inst)
         if not tail_call_mode:
             if only_for_tail_call and needs_this:
@@ -318,8 +321,15 @@ def generate_tier1_cases(
         out.start_line()
 
         stack.flush(out)
+        out.emit("}\n")
         if not inst.parts[-1].properties.always_exits:
             out.emit("DISPATCH();\n")
+        out.emit("#ifdef Py_TAIL_CALL_INTERP\n")
+        for name in analysis.labels:
+            emitter.emit(f"tail_call_{name}:\n")
+            emitter.emit(f"TAIL_CALL({name});\n")
+            emitter.emit("\n")
+        out.emit("#endif\n")
         out.start_line()
         out.emit("}")
         out.emit("\n")

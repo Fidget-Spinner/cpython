@@ -626,7 +626,7 @@ class Emitter:
                         if tkn.text.startswith("DISPATCH"):
                             self._print_storage(storage)
                             reachable = False
-                        if tkn.text.startswith("JUMP_TO_LABEL"):
+                        if tkn.text.startswith("JUMP_TO_LABEL") or tkn.text.startswith("TAIL_CALL"):
                             next(tkn_iter)
                             label_tkn = next(tkn_iter)
                             next(tkn_iter)

@@ -84,7 +84,8 @@
         do { \
             Py_MUSTTAIL return (INSTRUCTION_TABLE[opcode])(TAIL_CALL_ARGS); \
         } while (0)
-#   define JUMP_TO_LABEL(name) \
+#   define JUMP_TO_LABEL(name) goto tail_call_##name;
+#   define TAIL_CALL(name) \
         do { \
             Py_MUSTTAIL return (_TAIL_CALL_##name)(TAIL_CALL_ARGS); \
         } while (0)
