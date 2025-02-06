@@ -100,12 +100,14 @@
 #  define JUMP_TO_LABEL(name) goto name;
 #  define JUMP_TO_PREDICTED(name) goto PREDICTED_##name;
 #  define LABEL(name) name:
+#  define TAIL_CALL(name) goto name;
 #else
 #  define TARGET(op) case op: TARGET_##op:
 #  define DISPATCH_GOTO() goto dispatch_opcode
 #  define JUMP_TO_LABEL(name) goto name;
 #  define JUMP_TO_PREDICTED(name) goto PREDICTED_##name;
 #  define LABEL(name) name:
+#  define TAIL_CALL(name) goto name;
 #endif
 
 /* PRE_DISPATCH_GOTO() does lltrace if enabled. Normally a no-op */
