@@ -23,6 +23,9 @@
 
 #include "jit.h"
 
+Py_PRESERVE_NONE_CC extern PyObject *_TAIL_CALL_error(TAIL_CALL_PARAMS);
+extern py_tail_call_funcptr INSTRUCTION_TABLE[256];
+
 #undef CURRENT_OPARG
 #define CURRENT_OPARG() (_oparg)
 
@@ -36,19 +39,32 @@
 #define CURRENT_TARGET() (_target)
 
 #undef GOTO_TIER_TWO
-#define GOTO_TIER_TWO(EXECUTOR)                                            \
-do {                                                                       \
-    OPT_STAT_INC(traces_executed);                                         \
-    jit_func_preserve_none jitted = (EXECUTOR)->jit_side_entry;            \
-    __attribute__((musttail)) return jitted(frame, stack_pointer, tstate); \
+#define GOTO_TIER_TWO(EXECUTOR) \
+do {  \
+    OPT_STAT_INC(traces_executed);                \
+    Py_MUSTTAIL                                   \
+    return ((jit_func_preserve_none)((EXECUTOR)->jit_side_entry))(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef GOTO_TIER_ONE
+#if Py_TAIL_CALL_INTERP
+#define GOTO_TIER_ONE(TARGET)                       \
+do {                                                \
+    _PyFrame_SetStackPointer(frame, stack_pointer); \
+    next_instr = TARGET;                            \
+    if (next_instr == NULL) {                       \
+        next_instr = frame->instr_ptr;              \
+        JUMP_TO_LABEL(error);                       \
+    }                                               \
+    DISPATCH();                                     \
+} while (0)
+#else
 #define GOTO_TIER_ONE(TARGET)                       \
 do {                                                \
     _PyFrame_SetStackPointer(frame, stack_pointer); \
     return TARGET;                                  \
 } while (0)
+#endif
 
 #undef LOAD_IP
 #define LOAD_IP(UNUSED) \
@@ -63,7 +79,7 @@ do {                                                \
 #define PATCH_JUMP(ALIAS)                                                \
 do {                                                                     \
     PATCH_VALUE(jit_func_preserve_none, jump, ALIAS);                    \
-    __attribute__((musttail)) return jump(frame, stack_pointer, tstate); \
+    Py_MUSTTAIL return jump(TAIL_CALL_ARGS);                             \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
@@ -74,14 +90,12 @@ do {                                                                     \
 
 #define TIER_TWO 2
 
-__attribute__((preserve_none)) _Py_CODEUNIT *
-_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
+Py_PRESERVE_NONE_CC PyObject *
+_JIT_ENTRY(TAIL_CALL_PARAMS)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
-    int oparg;
-    int uopcode = _JIT_OPCODE;
-    _Py_CODEUNIT *next_instr;
+    int opcode = _JIT_OPCODE;
     // Other stuff we need handy:
     PATCH_VALUE(uint16_t, _oparg, _JIT_OPARG)
 #if SIZEOF_VOID_P == 8
@@ -98,8 +112,9 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
 #endif
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
     OPT_STAT_INC(uops_executed);
-    UOP_STAT_INC(uopcode, execution_count);
-    switch (uopcode) {
+    UOP_STAT_INC(opcode, execution_count);
+
+    switch (opcode) {
         // The actual instruction definition gets inserted here:
         CASE
         default:

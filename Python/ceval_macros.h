@@ -383,7 +383,14 @@ _PyFrame_SetStackPointer(frame, stack_pointer)
 /* Tier-switching macros. */
 
 #ifdef _Py_JIT
+#if Py_TAIL_CALL_INTERP
 #define GOTO_TIER_TWO(EXECUTOR)                        \
+do {                                                   \
+    OPT_STAT_INC(traces_executed);                     \
+    jit_func jitted = (EXECUTOR)->jit_code;            \
+    Py_MUSTTAIL return jitted(TAIL_CALL_ARGS);         \
+} while (0)
+#else
 do {                                                   \
     OPT_STAT_INC(traces_executed);                     \
     _PyExecutorObject *_executor = (EXECUTOR);         \
@@ -401,6 +408,7 @@ do {                                                   \
     }                                                  \
     DISPATCH();                                        \
 } while (0)
+#endif
 #else
 #define GOTO_TIER_TWO(EXECUTOR) \
 do { \

@@ -34,11 +34,11 @@ def write_opcode_targets(analysis: Analysis, out: CWriter) -> None:
     out.emit("#else /* Py_TAIL_CALL_INTERP */\n")
 
 def function_proto(name: str) -> str:
-    return f"Py_PRESERVE_NONE_CC static PyObject *_TAIL_CALL_{name}(TAIL_CALL_PARAMS)"
+    return f"Py_PRESERVE_NONE_CC extern PyObject *_TAIL_CALL_{name}(TAIL_CALL_PARAMS)"
 
 
 def write_tailcall_dispatch_table(analysis: Analysis, out: CWriter) -> None:
-    out.emit("static py_tail_call_funcptr INSTRUCTION_TABLE[256];\n")
+    out.emit("extern py_tail_call_funcptr INSTRUCTION_TABLE[256];\n")
     out.emit("\n")
 
     # Emit function prototypes for labels.
@@ -60,7 +60,7 @@ def write_tailcall_dispatch_table(analysis: Analysis, out: CWriter) -> None:
     out.emit("\n")
 
     # Emit the dispatch table.
-    out.emit("static py_tail_call_funcptr INSTRUCTION_TABLE[256] = {\n")
+    out.emit("py_tail_call_funcptr INSTRUCTION_TABLE[256] = {\n")
     for name in sorted(analysis.instructions.keys()):
         out.emit(f"[{name}] = _TAIL_CALL_{name},\n")
     named_values = analysis.opmap.values()
