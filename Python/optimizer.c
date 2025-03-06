@@ -457,7 +457,8 @@ add_to_trace(
     assert(func == NULL || func->func_code == (PyObject *)code); \
     trace_stack[trace_stack_depth].func = func; \
     trace_stack[trace_stack_depth].code = code; \
-    trace_stack[trace_stack_depth].instr = instr; \
+    trace_stack[trace_stack_depth].instr = instr;\
+    trace_stack[trace_stack_depth].entry = NULL; \
     trace_stack_depth++;
 #define TRACE_STACK_POP() \
     if (trace_stack_depth <= 0) { \
@@ -495,6 +496,7 @@ translate_bytecode_to_trace(
         PyFunctionObject *func;
         PyCodeObject *code;
         _Py_CODEUNIT *instr;
+        _PyUOpInstruction *entry;
     } trace_stack[TRACE_STACK_SIZE];
     int trace_stack_depth = 0;
     int confidence = CONFIDENCE_RANGE;  // Adjusted by branch instructions
@@ -553,6 +555,8 @@ translate_bytecode_to_trace(
             if (_PyOpcode_Deopt[executor->vm_data.opcode] == RESUME) {
                 instr++;
                 instr += _PyOpcode_Caches[RESUME];
+                ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
+                trace_stack[trace_stack_depth-1].entry = &trace[trace_length-1];
                 goto top;
             }
             // We have a couple of options here. We *could* peek "underneath"
@@ -801,6 +805,24 @@ translate_bytecode_to_trace(
                             DPRINTF(2, "Function: version=%#x; new_func=%p, new_code=%p\n",
                                     (int)func_version, new_func, new_code);
                             if (new_code != NULL) {
+                                bool is_recursive = false;
+                                _PyUOpInstruction *recursive_start = NULL;
+                                for (int x = 0; x < trace_stack_depth && !is_recursive; x++) {
+                                    is_recursive = (trace_stack[x].code == new_code);
+                                    recursive_start = trace_stack[x].entry;
+                                }
+                                if (is_recursive) {
+                                    // Recursive call, bail (we could be here forever).
+                                    DPRINTF(2, "Bailing on recursive call to %s (%s:%d)\n",
+                                            PyUnicode_AsUTF8(new_code->co_qualname),
+                                            PyUnicode_AsUTF8(new_code->co_filename),
+                                            new_code->co_firstlineno);
+                                    OPT_STAT_INC(recursive_call);
+                                    ADD_TO_TRACE(uop, oparg, 0, target);
+
+                                    ADD_TO_TRACE(_JUMP_TO_ABSOLUTE, 0, 0, recursive_start - trace);
+                                    goto done;
+                                }
                                 if (new_code->co_version != func_version) {
                                     // func.__code__ was updated.
                                     // Perhaps it may happen again, so don't bother tracing.
@@ -964,18 +986,18 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
     int32_t current_error_target = -1;
     int32_t current_popped = -1;
     int32_t current_exit_op = -1;
-    /* Leaving in NOPs slows down the interpreter and messes up the stats */
-    _PyUOpInstruction *copy_to = &buffer[0];
-    for (int i = 0; i < length; i++) {
-        _PyUOpInstruction *inst = &buffer[i];
-        if (inst->opcode != _NOP) {
-            if (copy_to != inst) {
-                *copy_to = *inst;
-            }
-            copy_to++;
-        }
-    }
-    length = (int)(copy_to - buffer);
+//    /* Leaving in NOPs slows down the interpreter and messes up the stats */
+//    _PyUOpInstruction *copy_to = &buffer[0];
+//    for (int i = 0; i < length; i++) {
+//        _PyUOpInstruction *inst = &buffer[i];
+//        if (inst->opcode != _NOP) {
+//            if (copy_to != inst) {
+//                *copy_to = *inst;
+//            }
+//            copy_to++;
+//        }
+//    }
+//    length = (int)(copy_to - buffer);
     int next_spare = length;
     for (int i = 0; i < length; i++) {
         _PyUOpInstruction *inst = &buffer[i];
@@ -1023,6 +1045,11 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             assert(buffer[0].opcode == _START_EXECUTOR);
             buffer[i].format = UOP_FORMAT_JUMP;
             buffer[i].jump_target = 1;
+        }
+        if (opcode == _JUMP_TO_ABSOLUTE) {
+            assert(buffer[target].opcode == _TIER2_RESUME_CHECK);
+            buffer[i].format = UOP_FORMAT_JUMP;
+            buffer[i].jump_target = target;
         }
     }
     return next_spare;
@@ -1622,6 +1649,9 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
          * https://graphviz.readthedocs.io/en/stable/manual.html#node-ports-compass
          */
         _PyUOpInstruction const *inst = &executor->trace[i];
+        if (inst->opcode == _NOP) {
+            continue;
+        }
         const char *opname = _PyOpcode_uop_name[inst->opcode];
 #ifdef Py_STATS
         fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s -- %" PRIu64 "</td></tr>\n", i, opname, inst->execution_count);
