@@ -162,6 +162,7 @@ COMPILER_FLAG_NAMES = {
           256: "ITERABLE_COROUTINE",
           512: "ASYNC_GENERATOR",
     0x4000000: "HAS_DOCSTRING",
+    0x8000000: "METHOD",
 }
 
 def pretty_flags(flags):
@@ -374,6 +375,14 @@ class Instruction(_Instruction):
          cache_info - information about the format and content of the instruction's cache
                         entries (if any)
     """
+
+    @staticmethod
+    def make(
+        opname, arg, argval, argrepr, offset, start_offset, starts_line,
+        line_number, label=None, positions=None, cache_info=None
+    ):
+        return Instruction(opname, _all_opmap[opname], arg, argval, argrepr, offset,
+                           start_offset, starts_line, line_number, label, positions, cache_info)
 
     @property
     def oparg(self):
