@@ -6637,11 +6637,6 @@
             break;
         }
 
-        case _JUMP_TO_ABSOLUTE: {
-            JUMP_TO_JUMP_TARGET();
-            break;
-        }
-
         case _SET_IP: {
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;

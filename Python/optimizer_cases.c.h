@@ -2320,10 +2320,6 @@
             break;
         }
 
-        case _JUMP_TO_ABSOLUTE: {
-            break;
-        }
-
         case _SET_IP: {
             break;
         }

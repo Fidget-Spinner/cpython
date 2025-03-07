@@ -672,6 +672,8 @@ translate_bytecode_to_trace(
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 instr += 1 + _PyOpcode_Caches[RESUME];
+                // Assume the next is the RESUME or something.
+                trace_stack[trace_stack_depth-1].entry = &trace[trace_length-1];
                 goto top;
 
             default:
@@ -819,8 +821,12 @@ translate_bytecode_to_trace(
                                             new_code->co_firstlineno);
                                     OPT_STAT_INC(recursive_call);
                                     ADD_TO_TRACE(uop, oparg, 0, target);
-
-                                    ADD_TO_TRACE(_JUMP_TO_ABSOLUTE, 0, 0, recursive_start - trace);
+                                    if (!(new_code->co_flags & CO_NESTED)) {
+                                        ADD_TO_TRACE(_JUMP_TO_TOP, 0, 0, recursive_start - trace);
+                                    }
+                                    else {
+                                        ADD_TO_TRACE(_EXIT_TRACE, 0, 0, 0);
+                                    }
                                     goto done;
                                 }
                                 if (new_code->co_version != func_version) {
@@ -1032,7 +1038,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 current_error = next_spare;
                 current_error_target = target;
                 make_exit(&buffer[next_spare], _ERROR_POP_N, 0);
-                buffer[next_spare].operand0 = target + 1;
+                buffer[next_spare].operand0 = target;
                 next_spare++;
             }
             buffer[i].error_target = current_error;
@@ -1042,14 +1048,9 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             }
         }
         if (opcode == _JUMP_TO_TOP) {
-            assert(buffer[0].opcode == _START_EXECUTOR);
+            assert(buffer[target].opcode == _START_EXECUTOR || buffer[target].opcode == _TIER2_RESUME_CHECK);
             buffer[i].format = UOP_FORMAT_JUMP;
-            buffer[i].jump_target = 1;
-        }
-        if (opcode == _JUMP_TO_ABSOLUTE) {
-            assert(buffer[target].opcode == _TIER2_RESUME_CHECK);
-            buffer[i].format = UOP_FORMAT_JUMP;
-            buffer[i].jump_target = target;
+            buffer[i].jump_target = target + 1;
         }
     }
     return next_spare;
@@ -1238,7 +1239,7 @@ uop_optimize(
     int length = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
     if (length <= 0) {
         // Error or nothing translated
-        return 0;
+        return length;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
