@@ -297,6 +297,7 @@
             left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _BINARY_OP_MULTIPLY_INT_UNBOXED, 0, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             }
             else {
                 // Uneven unboxing, bail
@@ -304,8 +305,8 @@
                     ctx->contradiction = true;
                     ctx->done = true;
                 }
+                res = sym_new_type(ctx, &PyLong_Type);
             }
-            res = sym_new_type(ctx, &PyLong_Type);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -320,6 +321,7 @@
             left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _BINARY_OP_ADD_INT_UNBOXED, 0, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             }
             else {
                 // Uneven unboxing, bail
@@ -327,8 +329,8 @@
                     ctx->contradiction = true;
                     ctx->done = true;
                 }
+                res = sym_new_type(ctx, &PyLong_Type);
             }
-            res = sym_new_type(ctx, &PyLong_Type);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -343,6 +345,7 @@
             left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _BINARY_OP_SUBTRACT_INT_UNBOXED, 0, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             }
             else {
                 // Uneven unboxing, bail
@@ -350,8 +353,8 @@
                     ctx->contradiction = true;
                     ctx->done = true;
                 }
+                res = sym_new_type(ctx, &PyLong_Type);
             }
-            res = sym_new_type(ctx, &PyLong_Type);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -393,7 +396,7 @@
         case _LOAD_UNBOXED: {
             JitOptSymbol *value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
-            PyObject *val = PyLong_FromLong(_PyUnbox_toLong(this_instr->oparg));
+            PyObject *val = PyLong_FromLong(_PyUnbox_toLong((uintptr_t)ptr));
             value = sym_new_unboxed(ctx, NULL, val);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -631,6 +634,20 @@
         }
 
         case _BINARY_OP_SUBSCR_LIST_INT: {
+            JitOptSymbol *sub_st;
+            JitOptSymbol *res;
+            sub_st = stack_pointer[-1];
+            if (sym_is_unboxed(sub_st)) {
+                REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+            }
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBSCR_LIST_INT_UNBOXED: {
             JitOptSymbol *res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
@@ -704,6 +721,17 @@
         }
 
         case _STORE_SUBSCR_LIST_INT: {
+            JitOptSymbol *sub_st;
+            sub_st = stack_pointer[-1];
+            if (sym_is_unboxed(sub_st)) {
+                REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+            }
+            stack_pointer += -3;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_SUBSCR_LIST_INT_UNBOXED: {
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1308,6 +1336,27 @@
         }
 
         case _COMPARE_OP_INT: {
+            JitOptSymbol *right;
+            JitOptSymbol *left;
+            JitOptSymbol *res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+                REPLACE_OP(this_instr, _COMPARE_OP_INT_UNBOXED, oparg, 0);
+            }
+            // uneven boxing. bail.
+            else if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                ctx->contradiction = true;
+                ctx->done = true;
+            }
+            res = sym_new_type(ctx, &PyBool_Type);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _COMPARE_OP_INT_UNBOXED: {
             JitOptSymbol *res;
             res = sym_new_type(ctx, &PyBool_Type);
             stack_pointer[-2] = res;

@@ -140,6 +140,10 @@ dump_item(_PyStackRef item)
         printf("<NULL>");
         return;
     }
+    if (PyStackRef_IsUnboxedInt(item)) {
+        printf("u:%ld", _PyUnbox_toLong(item.bits));
+        return;
+    }
     PyObject *obj = PyStackRef_AsPyObjectBorrow(item);
     if (obj == NULL) {
         printf("<nil>");

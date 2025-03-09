@@ -238,6 +238,7 @@ dummy_func(void) {
     op(_BINARY_OP_ADD_INT, (left, right -- res)) {
         if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
             REPLACE_OP(this_instr, _BINARY_OP_ADD_INT_UNBOXED, 0, 0);
+            res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
         }
         else {
             // Uneven unboxing, bail
@@ -245,14 +246,15 @@ dummy_func(void) {
                 ctx->contradiction = true;
                 ctx->done = true;
             }
+            res = sym_new_type(ctx, &PyLong_Type);
         }
-        res = sym_new_type(ctx, &PyLong_Type);
 
     }
 
     op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
         if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
             REPLACE_OP(this_instr, _BINARY_OP_SUBTRACT_INT_UNBOXED, 0, 0);
+            res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
         }
         else {
             // Uneven unboxing, bail
@@ -260,14 +262,15 @@ dummy_func(void) {
                 ctx->contradiction = true;
                 ctx->done = true;
             }
+            res = sym_new_type(ctx, &PyLong_Type);
         }
-        res = sym_new_type(ctx, &PyLong_Type);
 
     }
 
     op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
         if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
             REPLACE_OP(this_instr, _BINARY_OP_MULTIPLY_INT_UNBOXED, 0, 0);
+            res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
         }
         else {
             // Uneven unboxing, bail
@@ -275,8 +278,8 @@ dummy_func(void) {
                 ctx->contradiction = true;
                 ctx->done = true;
             }
+            res = sym_new_type(ctx, &PyLong_Type);
         }
-        res = sym_new_type(ctx, &PyLong_Type);
     }
 
     op(_BINARY_OP_ADD_FLOAT, (left, right -- res)) {
@@ -383,6 +386,19 @@ dummy_func(void) {
         ctx->done = true;
     }
 
+    op(_STORE_SUBSCR_LIST_INT, (value, list_st, sub_st -- )) {
+        if (sym_is_unboxed(sub_st)) {
+            REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+        }
+    }
+
+    op(_BINARY_OP_SUBSCR_LIST_INT, (list_st, sub_st -- res)) {
+        if (sym_is_unboxed(sub_st)) {
+            REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+        }
+        res = sym_new_not_null(ctx);
+    }
+
     op(_TO_BOOL, (value -- res)) {
         if (!optimize_to_bool(this_instr, ctx, value, &res)) {
             res = sym_new_truthiness(ctx, value, true);
@@ -439,6 +455,18 @@ dummy_func(void) {
     }
 
     op(_COMPARE_OP_INT, (left, right -- res)) {
+        if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+            REPLACE_OP(this_instr, _COMPARE_OP_INT_UNBOXED, oparg, 0);
+        }
+        // uneven boxing. bail.
+        else if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+            ctx->contradiction = true;
+            ctx->done = true;
+        }
+        res = sym_new_type(ctx, &PyBool_Type);
+    }
+
+    op(_COMPARE_OP_INT_UNBOXED, (left, right -- res)) {
         res = sym_new_type(ctx, &PyBool_Type);
     }
 
@@ -505,8 +533,8 @@ dummy_func(void) {
         value = sym_new_unboxed(ctx, NULL, val);
     }
 
-    op(_LOAD_UNBOXED, (-- value)) {
-        PyObject *val = PyLong_FromLong(_PyUnbox_toLong(this_instr->oparg));
+    op(_LOAD_UNBOXED, (ptr/4 -- value)) {
+        PyObject *val = PyLong_FromLong(_PyUnbox_toLong((uintptr_t)ptr));
         value = sym_new_unboxed(ctx, NULL, val);
     }
 

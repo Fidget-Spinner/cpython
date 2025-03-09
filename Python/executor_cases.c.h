@@ -1584,6 +1584,65 @@
             break;
         }
 
+        case _BINARY_OP_SUBSCR_LIST_INT_UNBOXED: {
+            _PyStackRef sub_st;
+            _PyStackRef list_st;
+            _PyStackRef res;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
+            if (!PyList_CheckExact(list)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            // Deopt unless 0 <= sub < PyList_Size(list)
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (index < 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (index >= PyList_GET_SIZE(list)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            #ifdef Py_GIL_DISABLED
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyObject *res_o = _PyList_GetItemRef((PyListObject*)list, index);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (res_o == NULL) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(BINARY_OP, hit);
+            res = PyStackRef_FromPyObjectSteal(res_o);
+            #else
+            if (index >= PyList_GET_SIZE(list)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = PyList_GET_ITEM(list, index);
+            assert(res_o != NULL);
+            res = PyStackRef_FromPyObjectNew(res_o);
+            #endif
+            STAT_INC(BINARY_SUBSCR, hit);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            _PyStackRef tmp = list_st;
+            list_st = res;
+            stack_pointer[-2] = list_st;
+            PyStackRef_CLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(sub_st);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            stack_pointer[-1] = res;
+            break;
+        }
+
         case _BINARY_OP_SUBSCR_STR_INT: {
             _PyStackRef sub_st;
             _PyStackRef str_st;
@@ -1883,6 +1942,53 @@
             assert(old_value != NULL);
             UNLOCK_OBJECT(list);  // unlock before decrefs!
             PyStackRef_CLOSE_SPECIALIZED(sub_st, _PyLong_ExactDealloc);
+            stack_pointer += -3;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(list_st);
+            Py_DECREF(old_value);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _STORE_SUBSCR_LIST_INT_UNBOXED: {
+            _PyStackRef sub_st;
+            _PyStackRef list_st;
+            _PyStackRef value;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            value = stack_pointer[-3];
+            PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
+            if (!PyList_CheckExact(list)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Ensure nonnegative, zero-or-one-digit ints.
+            if (index < 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (!LOCK_OBJECT(list)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            // Ensure index < len(list)
+            if (index >= PyList_GET_SIZE(list)) {
+                UNLOCK_OBJECT(list);
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            STAT_INC(STORE_SUBSCR, hit);
+            PyObject *old_value = PyList_GET_ITEM(list, index);
+            FT_ATOMIC_STORE_PTR_RELEASE(_PyList_ITEMS(list)[index],
+                                        PyStackRef_AsPyObjectSteal(value));
+            assert(old_value != NULL);
+            UNLOCK_OBJECT(list);  // unlock before decrefs!
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -3899,8 +4005,8 @@
             oparg = CURRENT_OPARG();
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsLong(left);
+            PyObject *right_o = PyStackRef_AsLong(right);
             if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
@@ -3912,6 +4018,40 @@
             STAT_INC(COMPARE_OP, hit);
             assert(_PyLong_DigitCount((PyLongObject *)left_o) <= 1 &&
                    _PyLong_DigitCount((PyLongObject *)right_o) <= 1);
+            Py_ssize_t ileft = _PyLong_CompactValue((PyLongObject *)left_o);
+            Py_ssize_t iright = _PyLong_CompactValue((PyLongObject *)right_o);
+            // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg
+            int sign_ish = COMPARISON_BIT(ileft, iright);
+            PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
+            PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
+            res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            // It's always a bool, so we don't care about oparg & 16.
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _COMPARE_OP_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            oparg = CURRENT_OPARG();
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            PyObject *left_o = PyStackRef_AsLong(left);
+            PyObject *right_o = PyStackRef_AsLong(right);
+            if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(COMPARE_OP, hit);
+            assert(_PyLong_DigitCount((PyLongObject *)left_o) <= 1 &&
+               _PyLong_DigitCount((PyLongObject *)right_o) <= 1);
             Py_ssize_t ileft = _PyLong_CompactValue((PyLongObject *)left_o);
             Py_ssize_t iright = _PyLong_CompactValue((PyLongObject *)right_o);
             // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg

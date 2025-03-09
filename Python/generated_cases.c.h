@@ -4609,8 +4609,8 @@
             /* Skip 1 cache entry */
             // _COMPARE_OP_INT
             {
-                PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-                PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+                PyObject *left_o = PyStackRef_AsLong(left);
+                PyObject *right_o = PyStackRef_AsLong(right);
                 if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                     UPDATE_MISS_STATS(COMPARE_OP);
                     assert(_PyOpcode_Deopt[opcode] == (COMPARE_OP));

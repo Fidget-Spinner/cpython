@@ -437,6 +437,7 @@ static inline long
 _PyUnbox_toLong(uintptr_t val)
 {
     assert(sizeof(uintptr_t) >= sizeof(val));
+    assert((val & Py_TAG_BITS) == Py_TAG_INT);
     long sign = (long)val < 0;
     long without_sign = (long)val << 1 >> 1;
     long res = ((long)without_sign >> Py_TAG_BITS) | (sign << 63);

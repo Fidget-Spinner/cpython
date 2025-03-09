@@ -949,6 +949,31 @@ dummy_func(
             DECREF_INPUTS();
         }
 
+        op(_BINARY_OP_SUBSCR_LIST_INT_UNBOXED, (list_st, sub_st -- res)) {
+            PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
+
+            DEOPT_IF(!PyList_CheckExact(list));
+
+            // Deopt unless 0 <= sub < PyList_Size(list)
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            DEOPT_IF(index < 0);
+            DEOPT_IF(index >= PyList_GET_SIZE(list));
+#ifdef Py_GIL_DISABLED
+            PyObject *res_o = _PyList_GetItemRef((PyListObject*)list, index);
+            DEOPT_IF(res_o == NULL);
+            STAT_INC(BINARY_OP, hit);
+            res = PyStackRef_FromPyObjectSteal(res_o);
+#else
+            DEOPT_IF(index >= PyList_GET_SIZE(list));
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = PyList_GET_ITEM(list, index);
+            assert(res_o != NULL);
+            res = PyStackRef_FromPyObjectNew(res_o);
+#endif
+            STAT_INC(BINARY_SUBSCR, hit);
+            DECREF_INPUTS();
+        }
+
         inst(BINARY_OP_SUBSCR_STR_INT, (unused/5, str_st, sub_st -- res)) {
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *str = PyStackRef_AsPyObjectBorrow(str_st);
@@ -1098,6 +1123,32 @@ dummy_func(
             assert(old_value != NULL);
             UNLOCK_OBJECT(list);  // unlock before decrefs!
             PyStackRef_CLOSE_SPECIALIZED(sub_st, _PyLong_ExactDealloc);
+            DEAD(sub_st);
+            PyStackRef_CLOSE(list_st);
+            Py_DECREF(old_value);
+        }
+
+        op(_STORE_SUBSCR_LIST_INT_UNBOXED, (value, list_st, sub_st -- )) {
+            PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
+
+            DEOPT_IF(!PyList_CheckExact(list));
+
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            // Ensure nonnegative, zero-or-one-digit ints.
+            DEOPT_IF(index < 0);
+            DEOPT_IF(!LOCK_OBJECT(list));
+            // Ensure index < len(list)
+            if (index >= PyList_GET_SIZE(list)) {
+                UNLOCK_OBJECT(list);
+                DEOPT_IF(true);
+            }
+            STAT_INC(STORE_SUBSCR, hit);
+
+            PyObject *old_value = PyList_GET_ITEM(list, index);
+            FT_ATOMIC_STORE_PTR_RELEASE(_PyList_ITEMS(list)[index],
+                                        PyStackRef_AsPyObjectSteal(value));
+            assert(old_value != NULL);
+            UNLOCK_OBJECT(list);  // unlock before decrefs!
             DEAD(sub_st);
             PyStackRef_CLOSE(list_st);
             Py_DECREF(old_value);
@@ -2658,8 +2709,8 @@ dummy_func(
 
         // Similar to COMPARE_OP_FLOAT
         op(_COMPARE_OP_INT, (left, right -- res)) {
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            PyObject *left_o = PyStackRef_AsLong(left);
+            PyObject *right_o = PyStackRef_AsLong(right);
 
             DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)left_o));
             DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)right_o));
@@ -2676,6 +2727,27 @@ dummy_func(
             DEAD(right);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
             // It's always a bool, so we don't care about oparg & 16.
+        }
+
+        op(_COMPARE_OP_INT_UNBOXED, (left, right -- res)) {
+        PyObject *left_o = PyStackRef_AsLong(left);
+        PyObject *right_o = PyStackRef_AsLong(right);
+
+        DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)left_o));
+        DEOPT_IF(!_PyLong_IsCompact((PyLongObject *)right_o));
+        STAT_INC(COMPARE_OP, hit);
+        assert(_PyLong_DigitCount((PyLongObject *)left_o) <= 1 &&
+               _PyLong_DigitCount((PyLongObject *)right_o) <= 1);
+        Py_ssize_t ileft = _PyLong_CompactValue((PyLongObject *)left_o);
+        Py_ssize_t iright = _PyLong_CompactValue((PyLongObject *)right_o);
+        // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg
+        int sign_ish = COMPARISON_BIT(ileft, iright);
+        PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
+        DEAD(left);
+        PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
+        DEAD(right);
+        res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+        // It's always a bool, so we don't care about oparg & 16.
         }
 
         // Similar to COMPARE_OP_FLOAT, but for ==, != only
