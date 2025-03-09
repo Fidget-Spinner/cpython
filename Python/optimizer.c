@@ -1,7 +1,5 @@
 #include "Python.h"
 
-#ifdef _Py_TIER2
-
 #include "opcode.h"
 #include "pycore_interp.h"
 #include "pycore_backoff.h"
@@ -92,7 +90,7 @@ insert_executor(PyCodeObject *code, _Py_CODEUNIT *instr, int index, _PyExecutorO
 }
 
 static _PyExecutorObject *
-make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies);
+make_executor_from_uops(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies);
 
 static int
 uop_optimize(_PyInterpreterFrame *frame, _Py_CODEUNIT *instr,
@@ -514,6 +512,10 @@ translate_bytecode_to_trace(
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
             2 * INSTR_IP(initial_instr, code));
+    DPRINTF(2, "Padding trace prelude with nlocalsplus _NOPs for optimization purposes later.\n");
+    for (int x = 0; x < code->co_nlocalsplus; x++) {
+        ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, code));
+    }
     ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
     uint32_t target = 0;
@@ -951,7 +953,7 @@ static void make_exit(_PyUOpInstruction *inst, int opcode, int target)
 /* Convert implicit exits, errors and deopts
  * into explicit ones. */
 static int
-prepare_for_execution(_PyUOpInstruction *buffer, int length)
+prepare_for_execution(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, int length)
 {
     int32_t current_jump = -1;
     int32_t current_jump_target = -1;
@@ -959,9 +961,10 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
     int32_t current_error_target = -1;
     int32_t current_popped = -1;
     int32_t current_exit_op = -1;
+    int co_nlocalsplus = _PyFrame_GetCode(frame)->co_nlocalsplus;
     /* Leaving in NOPs slows down the interpreter and messes up the stats */
-    _PyUOpInstruction *copy_to = &buffer[0];
-    for (int i = 0; i < length; i++) {
+    _PyUOpInstruction *copy_to = &buffer[co_nlocalsplus];
+    for (int i = co_nlocalsplus; i < length; i++) {
         _PyUOpInstruction *inst = &buffer[i];
         if (inst->opcode != _NOP) {
             if (copy_to != inst) {
@@ -1015,9 +1018,9 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             }
         }
         if (opcode == _JUMP_TO_TOP) {
-            assert(buffer[0].opcode == _START_EXECUTOR);
+            assert(buffer[co_nlocalsplus].opcode == _START_EXECUTOR);
             buffer[i].format = UOP_FORMAT_JUMP;
-            buffer[i].jump_target = 1;
+            buffer[i].jump_target = 1 + co_nlocalsplus;
         }
     }
     return next_spare;
@@ -1062,7 +1065,7 @@ sanity_check(_PyExecutorObject *executor)
     }
     bool ended = false;
     uint32_t i = 0;
-    CHECK(executor->trace[0].opcode == _START_EXECUTOR);
+    // CHECK(executor->trace[0].opcode == _START_EXECUTOR);
     for (; i < executor->code_size; i++) {
         const _PyUOpInstruction *inst = &executor->trace[i];
         uint16_t opcode = inst->opcode;
@@ -1106,14 +1109,14 @@ sanity_check(_PyExecutorObject *executor)
  * and not a NOP.
  */
 static _PyExecutorObject *
-make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies)
+make_executor_from_uops(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies)
 {
     int exit_count = count_exits(buffer, length);
     _PyExecutorObject *executor = allocate_executor(exit_count, length);
     if (executor == NULL) {
         return NULL;
     }
-
+    int co_nlocalsplus = _PyFrame_GetCode(frame)->co_nlocalsplus;
     /* Initialize exits */
     for (int i = 0; i < exit_count; i++) {
         executor->exits[i].executor = NULL;
@@ -1121,8 +1124,8 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
     }
     int next_exit = exit_count-1;
     _PyUOpInstruction *dest = (_PyUOpInstruction *)&executor->trace[length];
-    assert(buffer[0].opcode == _START_EXECUTOR);
-    buffer[0].operand0 = (uint64_t)executor;
+    assert(buffer[co_nlocalsplus].opcode == _START_EXECUTOR);
+    buffer[co_nlocalsplus].operand0 = (uint64_t)executor;
     for (int i = length-1; i >= 0; i--) {
         int opcode = buffer[i].opcode;
         dest--;
@@ -1137,7 +1140,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
     }
     assert(next_exit == -1);
     assert(dest == executor->trace);
-    assert(dest->opcode == _START_EXECUTOR);
+    assert(dest[co_nlocalsplus].opcode == _START_EXECUTOR);
     _Py_ExecutorInit(executor, dependencies);
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
@@ -1239,9 +1242,9 @@ uop_optimize(
         assert(_PyOpcode_uop_name[buffer[pc].opcode]);
     }
     OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
-    length = prepare_for_execution(buffer, length);
+    length = prepare_for_execution(frame, buffer, length);
     assert(length <= UOP_MAX_TRACE_LENGTH);
-    _PyExecutorObject *executor = make_executor_from_uops(buffer, length,  &dependencies);
+    _PyExecutorObject *executor = make_executor_from_uops(frame, buffer, length,  &dependencies);
     if (executor == NULL) {
         return -1;
     }
@@ -1668,13 +1671,5 @@ _PyDumpExecutors(FILE *out)
     return 0;
 }
 
-#else
 
-int
-_PyDumpExecutors(FILE *out)
-{
-    PyErr_SetString(PyExc_NotImplementedError, "No JIT available");
-    return -1;
-}
 
-#endif /* _Py_TIER2 */

@@ -1,4 +1,4 @@
-#ifdef _Py_TIER2
+//#ifdef _Py_TIER2
 
 /*
  * This file contains the support code for CPython's uops optimizer.
@@ -300,7 +300,27 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
     return 0;
 }
 
+// Return value indicates if we should rerun the trace due to hoisted values.
+static inline bool
+sym_unbox_and_hoist_if_possible(_PyUOpInstruction *trace, JitOptContext *ctx, JitOptSymbol *sym)
+{
+    // Note that the unboxing is *speculative*. So we don't need
+    // to check it's actually a long, we deopt at runtime if it's not.
+    if (_Py_uop_sym_is_local(sym) && !_Py_uop_sym_is_unboxed(sym)) {
+        size_t oparg = _Py_uop_sym_get_local_idx(sym);
+        trace[oparg].opcode = _UNBOX_FAST;
+        trace[oparg].oparg = oparg;
+        return true;
+        // Target should be written during projection already.
+    }
+    return false;
+}
 
+static inline bool
+sym_object_is_unboxable(PyObject *obj)
+{
+    return _PyLong_IsCompact61((PyLongObject *)obj);
+}
 
 #define STACK_LEVEL()     ((int)(stack_pointer - ctx->frame->stack))
 #define STACK_SIZE()      ((int)(ctx->frame->stack_len))
@@ -344,6 +364,11 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 #define sym_tuple_length _Py_uop_sym_tuple_length
 #define sym_is_immortal _Py_uop_sym_is_immortal
 #define sym_new_truthiness _Py_uop_sym_new_truthiness
+#define sym_is_local _Py_uop_sym_is_local
+#define sym_set_local _Py_uop_sym_set_local
+#define sym_get_local_idx _Py_uop_sym_get_local_idx
+#define sym_new_unboxed _Py_uop_sym_new_unboxed
+#define sym_is_unboxed _Py_uop_sym_is_unboxed
 
 static int
 optimize_to_bool(
@@ -425,7 +450,7 @@ get_code_with_logging(_PyUOpInstruction *op)
     return co;
 }
 
-/* 1 for success, 0 for not ready, cannot error at the moment. */
+/* 1 for success, 0 for not ready, -1 for retry, cannot error at the moment. */
 static int
 optimize_uops(
     PyCodeObject *co,
@@ -449,11 +474,17 @@ optimize_uops(
     if (frame == NULL) {
         return -1;
     }
+    for (int x = 0; x < frame->locals_len; x++) {
+        if (frame->locals[x]) {
+            sym_set_local(frame->locals[x], x);
+        }
+    }
     ctx->curr_frame_depth++;
     ctx->frame = frame;
     ctx->done = false;
     ctx->out_of_space = false;
     ctx->contradiction = false;
+    ctx->retry = false;
 
     _PyUOpInstruction *this_instr = NULL;
     for (int i = 0; !ctx->done; i++) {
@@ -504,6 +535,10 @@ optimize_uops(
     /* Either reached the end or cannot optimize further, but there
      * would be no benefit in retrying later */
     _Py_uop_abstractcontext_fini(ctx);
+    if (ctx->retry) {
+        DPRINTF(1, "Hit retry in abstract interpreter\n");
+        return -1;
+    }
     if (first_valid_check_stack != NULL) {
         assert(first_valid_check_stack->opcode == _CHECK_STACK_SPACE);
         assert(max_space > 0);
@@ -629,11 +664,12 @@ _Py_uop_analyze_and_optimize(
         return err;
     }
 
-    length = optimize_uops(
+    int old_length = length;
+    while ((length = optimize_uops(
         _PyFrame_GetCode(frame), buffer,
-        length, curr_stacklen, dependencies);
+        old_length, curr_stacklen, dependencies)) == -1);
 
-    if (length <= 0) {
+    if (length == 0) {
         return length;
     }
 
@@ -644,4 +680,4 @@ _Py_uop_analyze_and_optimize(
     return length;
 }
 
-#endif /* _Py_TIER2 */
+//#endif /* _Py_TIER2 */

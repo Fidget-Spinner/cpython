@@ -96,11 +96,23 @@ dummy_func(void) {
         GETLOCAL(oparg) = value;
     }
 
+    op(_UNBOX_FAST, (--)) {
+        GETLOCAL(oparg) = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
     op(_PUSH_NULL, (-- res)) {
         res = sym_new_null(ctx);
     }
 
     op(_GUARD_BOTH_INT, (left, right -- left, right)) {
+        bool should_rerun = (sym_unbox_and_hoist_if_possible(trace, ctx, left) ||
+                             sym_unbox_and_hoist_if_possible(trace, ctx, right));
+        if (should_rerun) {
+            DPRINTF(2, "Rerunning optimizer due to hoisted types.\n");
+            ctx->retry = true;
+            ctx->done = true;
+            break;
+        }
         if (sym_matches_type(left, &PyLong_Type)) {
             if (sym_matches_type(right, &PyLong_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
@@ -224,66 +236,47 @@ dummy_func(void) {
     }
 
     op(_BINARY_OP_ADD_INT, (left, right -- res)) {
-        if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-            sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-        {
-            assert(PyLong_CheckExact(sym_get_const(ctx, left)));
-            assert(PyLong_CheckExact(sym_get_const(ctx, right)));
-            PyObject *temp = _PyLong_Add((PyLongObject *)sym_get_const(ctx, left),
-                                         (PyLongObject *)sym_get_const(ctx, right));
-            if (temp == NULL) {
-                goto error;
-            }
-            res = sym_new_const(ctx, temp);
-            Py_DECREF(temp);
-            // TODO gh-115506:
-            // replace opcode with constant propagated one and add tests!
+        if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+            REPLACE_OP(this_instr, _BINARY_OP_ADD_INT_UNBOXED, 0, 0);
         }
         else {
-            res = sym_new_type(ctx, &PyLong_Type);
+            // Uneven unboxing, bail
+            if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                ctx->contradiction = true;
+                ctx->done = true;
+            }
         }
+        res = sym_new_type(ctx, &PyLong_Type);
+
     }
 
     op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
-        if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-            sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-        {
-            assert(PyLong_CheckExact(sym_get_const(ctx, left)));
-            assert(PyLong_CheckExact(sym_get_const(ctx, right)));
-            PyObject *temp = _PyLong_Subtract((PyLongObject *)sym_get_const(ctx, left),
-                                              (PyLongObject *)sym_get_const(ctx, right));
-            if (temp == NULL) {
-                goto error;
-            }
-            res = sym_new_const(ctx, temp);
-            Py_DECREF(temp);
-            // TODO gh-115506:
-            // replace opcode with constant propagated one and add tests!
+        if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+            REPLACE_OP(this_instr, _BINARY_OP_SUBTRACT_INT_UNBOXED, 0, 0);
         }
         else {
-            res = sym_new_type(ctx, &PyLong_Type);
+            // Uneven unboxing, bail
+            if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                ctx->contradiction = true;
+                ctx->done = true;
+            }
         }
+        res = sym_new_type(ctx, &PyLong_Type);
+
     }
 
     op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
-        if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-            sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-        {
-            assert(PyLong_CheckExact(sym_get_const(ctx, left)));
-            assert(PyLong_CheckExact(sym_get_const(ctx, right)));
-            PyObject *temp = _PyLong_Multiply((PyLongObject *)sym_get_const(ctx, left),
-                                              (PyLongObject *)sym_get_const(ctx, right));
-            if (temp == NULL) {
-                goto error;
-            }
-            res = sym_new_const(ctx, temp);
-            Py_DECREF(temp);
-            // TODO gh-115506:
-            // replace opcode with constant propagated one and add tests!
+        if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+            REPLACE_OP(this_instr, _BINARY_OP_MULTIPLY_INT_UNBOXED, 0, 0);
         }
         else {
-            res = sym_new_type(ctx, &PyLong_Type);
+            // Uneven unboxing, bail
+            if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                ctx->contradiction = true;
+                ctx->done = true;
+            }
         }
+        res = sym_new_type(ctx, &PyLong_Type);
     }
 
     op(_BINARY_OP_ADD_FLOAT, (left, right -- res)) {
@@ -467,35 +460,78 @@ dummy_func(void) {
 
     op(_LOAD_CONST, (-- value)) {
         PyObject *val = PyTuple_GET_ITEM(co->co_consts, this_instr->oparg);
-        int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
-        REPLACE_OP(this_instr, opcode, 0, (uintptr_t)val);
-        value = sym_new_const(ctx, val);
+        if (is_unboxable) {
+            REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+            value = sym_new_unboxed(ctx, NULL, val);
+        }
+        else {
+            int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
+            REPLACE_OP(this_instr, opcode, 0, (uintptr_t)val);
+            value = sym_new_const(ctx, val);
+        }
     }
 
     op(_LOAD_CONST_MORTAL, (-- value)) {
         PyObject *val = PyTuple_GET_ITEM(co->co_consts, this_instr->oparg);
-        int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
-        REPLACE_OP(this_instr, opcode, 0, (uintptr_t)val);
-        value = sym_new_const(ctx, val);
+        bool is_unboxable = sym_object_is_unboxable(val);
+        if (is_unboxable) {
+            REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+            value = sym_new_unboxed(ctx, NULL, val);
+        }
+        else {
+            int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
+            REPLACE_OP(this_instr, opcode, 0, (uintptr_t)val);
+            value = sym_new_const(ctx, val);
+        }
     }
 
     op(_LOAD_CONST_IMMORTAL, (-- value)) {
         PyObject *val = PyTuple_GET_ITEM(co->co_consts, this_instr->oparg);
-        REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
-        value = sym_new_const(ctx, val);
+        bool is_unboxable = sym_object_is_unboxable(val);
+        if (is_unboxable) {
+            REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+            value = sym_new_unboxed(ctx, NULL, val);
+        }
+        else {
+            REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
+            value = sym_new_const(ctx, val);
+        }
     }
 
     op(_LOAD_SMALL_INT, (-- value)) {
         PyObject *val = PyLong_FromLong(this_instr->oparg);
-        value = sym_new_const(ctx, val);
+        uintptr_t unboxed = _PyLong_toUnbox(this_instr->oparg);
+        REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, unboxed);
+        value = sym_new_unboxed(ctx, NULL, val);
+    }
+
+    op(_LOAD_UNBOXED, (-- value)) {
+        PyObject *val = PyLong_FromLong(_PyUnbox_toLong(this_instr->oparg));
+        value = sym_new_unboxed(ctx, NULL, val);
     }
 
     op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
-        value = sym_new_const(ctx, ptr);
+        PyObject *val = ptr;
+        bool is_unboxable = sym_object_is_unboxable(val);
+        if (is_unboxable) {
+            REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+            value = sym_new_unboxed(ctx, NULL, val);
+        }
+        else {
+            value = sym_new_const(ctx, ptr);
+        }
     }
 
     op(_LOAD_CONST_INLINE_BORROW, (ptr/4 -- value)) {
-        value = sym_new_const(ctx, ptr);
+        PyObject *val = ptr;
+        bool is_unboxable = sym_object_is_unboxable(val);
+        if (is_unboxable) {
+            REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+            value = sym_new_unboxed(ctx, NULL, val);
+        }
+        else {
+            value = sym_new_const(ctx, ptr);
+        }
     }
 
     op(_POP_TOP_LOAD_CONST_INLINE, (ptr/4, pop -- value)) {

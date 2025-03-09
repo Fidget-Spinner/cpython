@@ -63,9 +63,16 @@
         case _LOAD_CONST_MORTAL: {
             JitOptSymbol *value;
             PyObject *val = PyTuple_GET_ITEM(co->co_consts, this_instr->oparg);
-            int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
-            REPLACE_OP(this_instr, opcode, 0, (uintptr_t)val);
-            value = sym_new_const(ctx, val);
+            bool is_unboxable = sym_object_is_unboxable(val);
+            if (is_unboxable) {
+                REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+                value = sym_new_unboxed(ctx, NULL, val);
+            }
+            else {
+                int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
+                REPLACE_OP(this_instr, opcode, 0, (uintptr_t)val);
+                value = sym_new_const(ctx, val);
+            }
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -75,8 +82,15 @@
         case _LOAD_CONST_IMMORTAL: {
             JitOptSymbol *value;
             PyObject *val = PyTuple_GET_ITEM(co->co_consts, this_instr->oparg);
-            REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
-            value = sym_new_const(ctx, val);
+            bool is_unboxable = sym_object_is_unboxable(val);
+            if (is_unboxable) {
+                REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+                value = sym_new_unboxed(ctx, NULL, val);
+            }
+            else {
+                REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
+                value = sym_new_const(ctx, val);
+            }
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -86,7 +100,9 @@
         case _LOAD_SMALL_INT: {
             JitOptSymbol *value;
             PyObject *val = PyLong_FromLong(this_instr->oparg);
-            value = sym_new_const(ctx, val);
+            uintptr_t unboxed = _PyLong_toUnbox(this_instr->oparg);
+            REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, unboxed);
+            value = sym_new_unboxed(ctx, NULL, val);
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -239,6 +255,14 @@
             JitOptSymbol *left;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            bool should_rerun = (sym_unbox_and_hoist_if_possible(trace, ctx, left) ||
+                             sym_unbox_and_hoist_if_possible(trace, ctx, right));
+            if (should_rerun) {
+                DPRINTF(2, "Rerunning optimizer due to hoisted types.\n");
+                ctx->retry = true;
+                ctx->done = true;
+                break;
+            }
             if (sym_matches_type(left, &PyLong_Type)) {
                 if (sym_matches_type(right, &PyLong_Type)) {
                     REPLACE_OP(this_instr, _NOP, 0, 0);
@@ -271,32 +295,20 @@
             JitOptSymbol *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-                sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-            {
-                assert(PyLong_CheckExact(sym_get_const(ctx, left)));
-                assert(PyLong_CheckExact(sym_get_const(ctx, right)));
-                stack_pointer += -2;
-                assert(WITHIN_STACK_BOUNDS());
-                PyObject *temp = _PyLong_Multiply((PyLongObject *)sym_get_const(ctx, left),
-                    (PyLongObject *)sym_get_const(ctx, right));
-                if (temp == NULL) {
-                    goto error;
-                }
-                res = sym_new_const(ctx, temp);
-                stack_pointer[0] = res;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-                Py_DECREF(temp);
-                // TODO gh-115506:
-                // replace opcode with constant propagated one and add tests!
+            if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+                REPLACE_OP(this_instr, _BINARY_OP_MULTIPLY_INT_UNBOXED, 0, 0);
             }
             else {
-                res = sym_new_type(ctx, &PyLong_Type);
-                stack_pointer += -1;
-                assert(WITHIN_STACK_BOUNDS());
+                // Uneven unboxing, bail
+                if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                    ctx->contradiction = true;
+                    ctx->done = true;
+                }
             }
-            stack_pointer[-1] = res;
+            res = sym_new_type(ctx, &PyLong_Type);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -306,32 +318,20 @@
             JitOptSymbol *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-                sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-            {
-                assert(PyLong_CheckExact(sym_get_const(ctx, left)));
-                assert(PyLong_CheckExact(sym_get_const(ctx, right)));
-                stack_pointer += -2;
-                assert(WITHIN_STACK_BOUNDS());
-                PyObject *temp = _PyLong_Add((PyLongObject *)sym_get_const(ctx, left),
-                    (PyLongObject *)sym_get_const(ctx, right));
-                if (temp == NULL) {
-                    goto error;
-                }
-                res = sym_new_const(ctx, temp);
-                stack_pointer[0] = res;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-                Py_DECREF(temp);
-                // TODO gh-115506:
-                // replace opcode with constant propagated one and add tests!
+            if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+                REPLACE_OP(this_instr, _BINARY_OP_ADD_INT_UNBOXED, 0, 0);
             }
             else {
-                res = sym_new_type(ctx, &PyLong_Type);
-                stack_pointer += -1;
-                assert(WITHIN_STACK_BOUNDS());
+                // Uneven unboxing, bail
+                if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                    ctx->contradiction = true;
+                    ctx->done = true;
+                }
             }
-            stack_pointer[-1] = res;
+            res = sym_new_type(ctx, &PyLong_Type);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -341,32 +341,63 @@
             JitOptSymbol *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-                sym_matches_type(left, &PyLong_Type) && sym_matches_type(right, &PyLong_Type))
-            {
-                assert(PyLong_CheckExact(sym_get_const(ctx, left)));
-                assert(PyLong_CheckExact(sym_get_const(ctx, right)));
-                stack_pointer += -2;
-                assert(WITHIN_STACK_BOUNDS());
-                PyObject *temp = _PyLong_Subtract((PyLongObject *)sym_get_const(ctx, left),
-                    (PyLongObject *)sym_get_const(ctx, right));
-                if (temp == NULL) {
-                    goto error;
-                }
-                res = sym_new_const(ctx, temp);
-                stack_pointer[0] = res;
-                stack_pointer += 1;
-                assert(WITHIN_STACK_BOUNDS());
-                Py_DECREF(temp);
-                // TODO gh-115506:
-                // replace opcode with constant propagated one and add tests!
+            if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+                REPLACE_OP(this_instr, _BINARY_OP_SUBTRACT_INT_UNBOXED, 0, 0);
             }
             else {
-                res = sym_new_type(ctx, &PyLong_Type);
-                stack_pointer += -1;
-                assert(WITHIN_STACK_BOUNDS());
+                // Uneven unboxing, bail
+                if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                    ctx->contradiction = true;
+                    ctx->done = true;
+                }
             }
-            stack_pointer[-1] = res;
+            res = sym_new_type(ctx, &PyLong_Type);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _UNBOX_FAST: {
+            GETLOCAL(oparg) = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_ADD_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_UNBOXED: {
+            JitOptSymbol *value;
+            PyObject *ptr = (PyObject *)this_instr->operand0;
+            PyObject *val = PyLong_FromLong(_PyUnbox_toLong(this_instr->oparg));
+            value = sym_new_unboxed(ctx, NULL, val);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -2353,7 +2384,15 @@
         case _LOAD_CONST_INLINE: {
             JitOptSymbol *value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
-            value = sym_new_const(ctx, ptr);
+            PyObject *val = ptr;
+            bool is_unboxable = sym_object_is_unboxable(val);
+            if (is_unboxable) {
+                REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+                value = sym_new_unboxed(ctx, NULL, val);
+            }
+            else {
+                value = sym_new_const(ctx, ptr);
+            }
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -2371,7 +2410,15 @@
         case _LOAD_CONST_INLINE_BORROW: {
             JitOptSymbol *value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
-            value = sym_new_const(ctx, ptr);
+            PyObject *val = ptr;
+            bool is_unboxable = sym_object_is_unboxable(val);
+            if (is_unboxable) {
+                REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
+                value = sym_new_unboxed(ctx, NULL, val);
+            }
+            else {
+                value = sym_new_const(ctx, ptr);
+            }
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());

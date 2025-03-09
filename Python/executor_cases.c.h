@@ -845,6 +845,262 @@
             break;
         }
 
+        case _UNBOX_FAST_0: {
+            oparg = 0;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_1: {
+            oparg = 1;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_2: {
+            oparg = 2;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_3: {
+            oparg = 3;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_4: {
+            oparg = 4;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_5: {
+            oparg = 5;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_6: {
+            oparg = 6;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST_7: {
+            oparg = 7;
+            assert(oparg == CURRENT_OPARG());
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _UNBOX_FAST: {
+            oparg = CURRENT_OPARG();
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            if (!is_compact_long) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            long res;
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (ovf) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_ADD_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            long res;
+            // Cannot overflow, as we are only 61 bit ints.
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            assert(!__builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            long res;
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            assert(!__builtin_ssubl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _LOAD_UNBOXED: {
+            _PyStackRef value;
+            PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            value = PyStackRef_FromRaw((uintptr_t)ptr);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _GUARD_BOTH_FLOAT: {
             _PyStackRef right;
             _PyStackRef left;
@@ -6739,6 +6995,12 @@
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (err) {
+                GOTO_TIER_ONE(NULL);
+            }
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 2) {
@@ -6900,6 +7162,12 @@
 
         case _DEOPT: {
             tstate->previous_executor = (PyObject *)current_executor;
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (err) {
+                GOTO_TIER_ONE(NULL);
+            }
             GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET());
             break;
         }

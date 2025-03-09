@@ -624,6 +624,61 @@ dummy_func(
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
 
+        replicate(8) op(_UNBOX_FAST, (--)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            _PyStackRef tmp = GETLOCAL(oparg);
+            PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
+            int is_compact_long = _PyLong_IsCompact61(maybe_long);
+            DEOPT_IF(!is_compact_long);
+            GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
+            PyStackRef_XCLOSE(tmp);
+        }
+
+        pure op(_BINARY_OP_MULTIPLY_INT_UNBOXED, (left, right -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            long res;
+            fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
+            DEOPT_IF(ovf);
+            int is_small = _PyUnbox_isSmall(res);
+            DEOPT_IF(!is_small);
+            INPUTS_DEAD();
+            out = PyStackRef_FromLong(res);
+        }
+
+        pure op(_BINARY_OP_ADD_INT_UNBOXED, (left, right -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            long res;
+            // Cannot overflow, as we are only 61 bit ints.
+            fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            assert(!__builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            int is_small = _PyUnbox_isSmall(res);
+            DEOPT_IF(!is_small);
+            INPUTS_DEAD();
+            out = PyStackRef_FromLong(res);
+        }
+
+        pure op(_BINARY_OP_SUBTRACT_INT_UNBOXED, (left, right -- out)) {
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            long res;
+            fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            assert(!__builtin_ssubl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            int is_small = _PyUnbox_isSmall(res);
+            DEOPT_IF(!is_small);
+            INPUTS_DEAD();
+            out = PyStackRef_FromLong(res);
+        }
+
+        op(_LOAD_UNBOXED, (ptr/4 -- value)) {
+            value = PyStackRef_FromRaw((uintptr_t)ptr);
+        }
+
         macro(BINARY_OP_MULTIPLY_INT) =
             _GUARD_BOTH_INT + unused/5 + _BINARY_OP_MULTIPLY_INT;
         macro(BINARY_OP_ADD_INT) =
@@ -4974,6 +5029,10 @@ dummy_func(
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
+            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            if (err) {
+                GOTO_TIER_ONE(NULL);
+            }
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 2) {
@@ -5072,6 +5131,11 @@ dummy_func(
 
         tier2 op(_DEOPT, (--)) {
             tstate->previous_executor = (PyObject *)current_executor;
+            SYNC_SP();
+            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            if (err) {
+                GOTO_TIER_ONE(NULL);
+            }
             GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET());
         }
 

@@ -1015,7 +1015,6 @@ enter_tier_two:
     uint64_t trace_uop_execution_counter = 0;
 #endif
 
-    assert(next_uop->opcode == _START_EXECUTOR);
 tier2_dispatch:
     for (;;) {
         uopcode = next_uop->opcode;

@@ -406,7 +406,6 @@ do {                                                   \
 do { \
     OPT_STAT_INC(traces_executed); \
     next_uop = (EXECUTOR)->trace; \
-    assert(next_uop->opcode == _START_EXECUTOR); \
     goto enter_tier_two; \
 } while (0)
 #endif

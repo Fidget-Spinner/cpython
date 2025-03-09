@@ -173,45 +173,64 @@ typedef enum _JitSymType {
     JIT_SYM_KNOWN_VALUE_TAG = 7,
     JIT_SYM_TUPLE_TAG = 8,
     JIT_SYM_TRUTHINESS_TAG = 9,
+    JIT_SYM_UNBOXED_TAG = 10,
 } JitSymType;
 
 typedef struct _jit_opt_known_class {
     uint8_t tag;
+    uint8_t is_local;
     uint32_t version;
     PyTypeObject *type;
 } JitOptKnownClass;
 
 typedef struct _jit_opt_known_version {
     uint8_t tag;
+    uint8_t is_local;
     uint32_t version;
 } JitOptKnownVersion;
 
 typedef struct _jit_opt_known_value {
     uint8_t tag;
+    uint8_t is_local;
     PyObject *value;
+    _PyUOpInstruction *source;
 } JitOptKnownValue;
 
 #define MAX_SYMBOLIC_TUPLE_SIZE 7
 
 typedef struct _jit_opt_tuple {
     uint8_t tag;
+    uint8_t is_local;
     uint8_t length;
     uint16_t items[MAX_SYMBOLIC_TUPLE_SIZE];
 } JitOptTuple;
 
 typedef struct {
     uint8_t tag;
+    uint8_t is_local;
     bool not;
     uint16_t value;
 } JitOptTruthiness;
 
-typedef union _jit_opt_symbol {
+typedef struct {
     uint8_t tag;
+    uint8_t is_local;
+    PyTypeObject *type;
+    PyObject *value;
+} JitOptUnboxed;
+
+typedef union _jit_opt_symbol {
+    struct {
+        uint8_t tag;
+        uint8_t is_local;
+        size_t local_idx;
+    };
     JitOptKnownClass cls;
     JitOptKnownValue value;
     JitOptKnownVersion version;
     JitOptTuple tuple;
     JitOptTruthiness truthiness;
+    JitOptUnboxed unboxed;
 } JitOptSymbol;
 
 
@@ -237,6 +256,7 @@ typedef struct ty_arena {
 typedef struct _JitOptContext {
     char done;
     char out_of_space;
+    char retry;
     bool contradiction;
     // The current "executing" frame.
     _Py_UOpsAbstractFrame *frame;
@@ -280,6 +300,12 @@ extern JitOptSymbol *_Py_uop_sym_new_truthiness(JitOptContext *ctx, JitOptSymbol
 
 extern void _Py_uop_abstractcontext_init(JitOptContext *ctx);
 extern void _Py_uop_abstractcontext_fini(JitOptContext *ctx);
+
+extern bool _Py_uop_sym_is_local(JitOptSymbol *sym);
+extern bool _Py_uop_sym_set_local(JitOptSymbol *sym, size_t);
+extern size_t _Py_uop_sym_get_local_idx(JitOptSymbol *sym);
+extern bool _Py_uop_sym_is_unboxed(JitOptSymbol *sym);
+extern JitOptSymbol * _Py_uop_sym_new_unboxed(JitOptContext *ctx, PyTypeObject *type, PyObject *const_val);
 
 extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     JitOptContext *ctx,

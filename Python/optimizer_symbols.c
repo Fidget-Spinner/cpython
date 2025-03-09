@@ -1,5 +1,3 @@
-#ifdef _Py_TIER2
-
 #include "Python.h"
 
 #include "pycore_code.h"
@@ -73,6 +71,7 @@ sym_new(JitOptContext *ctx)
     }
     ctx->t_arena.ty_curr_number++;
     self->tag = JIT_SYM_UNKNOWN_TAG;
+    self->is_local = 0;
     return self;
 }
 
@@ -80,6 +79,7 @@ static void make_const(JitOptSymbol *sym, PyObject *val)
 {
     sym->tag = JIT_SYM_KNOWN_VALUE_TAG;
     sym->value.value = Py_NewRef(val);
+
 }
 
 static inline void
@@ -125,6 +125,32 @@ _Py_uop_sym_is_null(JitOptSymbol *sym)
     return sym->tag == JIT_SYM_NULL_TAG;
 }
 
+bool
+_Py_uop_sym_is_local(JitOptSymbol *sym)
+{
+    return sym->is_local;
+}
+
+bool
+_Py_uop_sym_set_local(JitOptSymbol *sym, size_t local_idx)
+{
+    sym->is_local = 1;
+    sym->local_idx = local_idx;
+}
+
+size_t
+_Py_uop_sym_get_local_idx(JitOptSymbol *sym)
+{
+    assert(_Py_uop_sym_is_local(sym));
+    return sym->local_idx;
+}
+
+bool
+_Py_uop_sym_is_unboxed(JitOptSymbol *sym)
+{
+    return sym->tag == JIT_SYM_UNBOXED_TAG;
+}
+
 
 PyObject *
 _Py_uop_sym_get_const(JitOptContext *ctx, JitOptSymbol *sym)
@@ -155,6 +181,11 @@ _Py_uop_sym_set_type(JitOptContext *ctx, JitOptSymbol *sym, PyTypeObject *typ)
             return;
         case JIT_SYM_KNOWN_CLASS_TAG:
             if (sym->cls.type != typ) {
+                sym_set_bottom(ctx, sym);
+            }
+            return;
+        case JIT_SYM_UNBOXED_TAG:
+            if (sym->unboxed.type != typ) {
                 sym_set_bottom(ctx, sym);
             }
             return;
@@ -212,6 +243,10 @@ _Py_uop_sym_set_type_version(JitOptContext *ctx, JitOptSymbol *sym, unsigned int
                 sym->cls.version = version;
                 return true;
             }
+        case JIT_SYM_UNBOXED_TAG:
+            Py_CLEAR(sym->unboxed.value);
+            sym_set_bottom(ctx, sym);
+            return false;
         case JIT_SYM_KNOWN_VALUE_TAG:
             Py_CLEAR(sym->value.value);
             sym_set_bottom(ctx, sym);
@@ -259,6 +294,12 @@ _Py_uop_sym_set_const(JitOptContext *ctx, JitOptSymbol *sym, PyObject *const_val
             return;
         case JIT_SYM_KNOWN_VALUE_TAG:
             if (sym->value.value != const_val) {
+                Py_CLEAR(sym->value.value);
+                sym_set_bottom(ctx, sym);
+            }
+            return;
+        case JIT_SYM_UNBOXED_TAG:
+            if (sym->unboxed.value != const_val) {
                 Py_CLEAR(sym->value.value);
                 sym_set_bottom(ctx, sym);
             }
@@ -403,6 +444,8 @@ _Py_uop_sym_get_type(JitOptSymbol *sym)
             return NULL;
         case JIT_SYM_KNOWN_CLASS_TAG:
             return sym->cls.type;
+        case JIT_SYM_UNBOXED_TAG:
+            return sym->unboxed.type;
         case JIT_SYM_KNOWN_VALUE_TAG:
             return Py_TYPE(sym->value.value);
         case JIT_SYM_TUPLE_TAG:
@@ -422,6 +465,7 @@ _Py_uop_sym_get_type_version(JitOptSymbol *sym)
         case JIT_SYM_BOTTOM_TAG:
         case JIT_SYM_NON_NULL_TAG:
         case JIT_SYM_UNKNOWN_TAG:
+        case JIT_SYM_UNBOXED_TAG:
             return 0;
         case JIT_SYM_TYPE_VERSION_TAG:
             return sym->version.version;
@@ -452,6 +496,7 @@ _Py_uop_sym_has_type(JitOptSymbol *sym)
         case JIT_SYM_KNOWN_VALUE_TAG:
         case JIT_SYM_TUPLE_TAG:
         case JIT_SYM_TRUTHINESS_TAG:
+        case JIT_SYM_UNBOXED_TAG:
             return true;
     }
     Py_UNREACHABLE();
@@ -479,6 +524,7 @@ _Py_uop_sym_truthiness(JitOptContext *ctx, JitOptSymbol *sym)
         case JIT_SYM_BOTTOM_TAG:
         case JIT_SYM_NON_NULL_TAG:
         case JIT_SYM_UNKNOWN_TAG:
+        case JIT_SYM_UNBOXED_TAG:
             return -1;
         case JIT_SYM_KNOWN_CLASS_TAG:
             /* TODO :
@@ -610,6 +656,27 @@ _Py_uop_sym_new_truthiness(JitOptContext *ctx, JitOptSymbol *value, bool truthy)
     return res;
 }
 
+JitOptSymbol *
+_Py_uop_sym_new_unboxed(JitOptContext *ctx, PyTypeObject *type, PyObject *const_val)
+{
+    // It's clearer to invert this in the signature:
+    JitOptSymbol *res = sym_new(ctx);
+    if (res == NULL) {
+        return out_of_space(ctx);
+    }
+    res->unboxed.value = NULL;
+    if (const_val != NULL) {
+        res->unboxed.value = Py_NewRef(const_val);
+        res->unboxed.type = Py_TYPE(const_val);
+    }
+    else {
+        assert(type != NULL);
+        res->unboxed.type = type;
+    }
+    res->tag = JIT_SYM_UNBOXED_TAG;
+    return res;
+}
+
 // 0 on success, -1 on error.
 _Py_UOpsAbstractFrame *
 _Py_uop_frame_new(
@@ -668,13 +735,16 @@ _Py_uop_abstractcontext_fini(JitOptContext *ctx)
         if (sym->tag == JIT_SYM_KNOWN_VALUE_TAG) {
             Py_CLEAR(sym->value.value);
         }
+        else if (sym->tag == JIT_SYM_UNKNOWN_TAG) {
+            Py_CLEAR(sym->unboxed.value);
+        }
     }
 }
 
 void
 _Py_uop_abstractcontext_init(JitOptContext *ctx)
 {
-    static_assert(sizeof(JitOptSymbol) <= 2 * sizeof(uint64_t), "JitOptSymbol has grown");
+    static_assert(sizeof(JitOptSymbol) <= 3 * sizeof(uint64_t), "JitOptSymbol has grown");
     ctx->limit = ctx->locals_and_stack + MAX_ABSTRACT_INTERP_SIZE;
     ctx->n_consumed = ctx->locals_and_stack;
 #ifdef Py_DEBUG // Aids debugging a little. There should never be NULL in the abstract interpreter.
@@ -867,5 +937,3 @@ fail:
     Py_DECREF(tuple);
     return NULL;
 }
-
-#endif /* _Py_TIER2 */

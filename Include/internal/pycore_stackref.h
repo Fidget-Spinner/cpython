@@ -375,6 +375,7 @@ PyStackRef_AsStrongReference(_PyStackRef stackref)
 
 #define Py_TAG_BITS 3
 #define Py_TAG_REFCNT 1
+#define Py_TAG_INT 3
 #if _Py_IMMORTAL_FLAGS != Py_TAG_REFCNT
 #  error "_Py_IMMORTAL_FLAGS != Py_TAG_REFCNT"
 #endif
@@ -394,6 +395,64 @@ static const _PyStackRef PyStackRef_NULL = { .bits = PyStackRef_NULL_BITS };
 #define PyStackRef_IsTrue(REF) ((REF).bits == (((uintptr_t)&_Py_TrueStruct) | Py_TAG_IMMORTAL))
 #define PyStackRef_IsFalse(REF) ((REF).bits == (((uintptr_t)&_Py_FalseStruct) | Py_TAG_IMMORTAL))
 #define PyStackRef_IsNone(REF) ((REF).bits == (((uintptr_t)&_Py_NoneStruct) | Py_TAG_IMMORTAL))
+
+// Credits Neil Schemenauer
+#define MAX_BITS ((sizeof(long) * 8) - 1)
+
+#define MAX_TAGGED_VALUE (((long)1<<(MAX_BITS-1)) - 1)
+#define MIN_TAGGED_VALUE (- ((long)1 << (MAX_BITS-1)))
+
+
+static inline int
+_PyUnbox_isSmall(long value)
+{
+    return value >= MIN_TAGGED_VALUE && value <= MAX_TAGGED_VALUE;
+}
+
+
+static inline int
+_PyLong_IsCompact61(const PyLongObject* op) {
+    return PyLong_CheckExact(op) && _PyLong_IsCompact(op) && _PyUnbox_isSmall((_PyLong_CompactValue(op)));
+}
+
+static inline uintptr_t
+_PyLong_toUnbox(long val)
+{
+    assert(_PyUnbox_isSmall(val));
+    assert(sizeof(uintptr_t) >= sizeof(val));
+    long sign = val < 0;
+    long without_sign = val << 1 >> 1;
+    return (without_sign << Py_TAG_BITS) | Py_TAG_INT | (sign << 63);
+}
+
+static inline uintptr_t
+_PyLong61_FromLong(const PyLongObject* op) {
+    assert(PyLong_CheckExact(op));
+    assert(_PyLong_IsCompact61(op));
+    return _PyLong_toUnbox(_PyLong_CompactValue(op));
+}
+
+
+static inline long
+_PyUnbox_toLong(uintptr_t val)
+{
+    assert(sizeof(uintptr_t) >= sizeof(val));
+    long sign = (long)val < 0;
+    long without_sign = (long)val << 1 >> 1;
+    long res = ((long)without_sign >> Py_TAG_BITS) | (sign << 63);
+    assert(_PyUnbox_isSmall(res));
+    return res;
+}
+
+static inline int PyStackRef_IsUnboxedInt(_PyStackRef ref) {
+    int check = (ref.bits & Py_TAG_BITS) == Py_TAG_INT;
+#ifdef Py_DEBUG
+    if (check) {
+        _PyUnbox_toLong(ref.bits);
+    }
+#endif
+    return check;
+}
 
 #ifdef Py_DEBUG
 
@@ -646,6 +705,49 @@ static inline bool
 PyStackRef_FunctionCheck(_PyStackRef stackref)
 {
     return PyFunction_Check(PyStackRef_AsPyObjectBorrow(stackref));
+}
+
+static inline int
+PyStackRef_ReboxArray(_PyStackRef *localplus_start, _PyStackRef *sp_top)
+{
+    while (sp_top > localplus_start) {
+        _PyStackRef curr = sp_top[-1];
+        if (PyStackRef_IsUnboxedInt(curr)) {
+            PyObject *res = PyLong_FromLong(_PyUnbox_toLong(curr.bits));
+            if (res == NULL) {
+                return -1;
+            }
+            sp_top[-1] = PyStackRef_FromPyObjectSteal(res);
+        }
+        sp_top--;
+    }
+    return 0;
+}
+
+static inline _PyStackRef
+PyStackRef_FromLong(long unboxed)
+{
+    _PyStackRef res;
+    assert(_PyUnbox_isSmall(unboxed));
+    res.bits = _PyLong_toUnbox(unboxed);
+    return res;
+}
+
+
+static inline PyObject *
+PyStackRef_AsLong(_PyStackRef ref) {
+    if (!PyStackRef_IsUnboxedInt(ref)) {
+        return PyStackRef_AsPyObjectNew(ref);
+    }
+    assert(PyStackRef_IsUnboxedInt(ref));
+    return PyLong_FromLong(_PyUnbox_toLong(ref.bits));
+}
+
+static inline _PyStackRef
+PyStackRef_FromRaw(uintptr_t t) {
+    _PyStackRef res;
+    res.bits = t;
+    return res;
 }
 
 #ifdef __cplusplus
