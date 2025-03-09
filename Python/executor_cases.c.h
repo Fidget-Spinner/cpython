@@ -1070,8 +1070,8 @@
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
             long res;
+            // fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             long left_l = _PyUnbox_toLong(left.bits);
             long right_l = _PyUnbox_toLong(right.bits);
             stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -1101,8 +1101,8 @@
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
+            // fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             long left_l = _PyUnbox_toLong(left.bits);
             long right_l = _PyUnbox_toLong(right.bits);
             stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -1129,8 +1129,8 @@
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
+            // fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             long left_l = _PyUnbox_toLong(left.bits);
             long right_l = _PyUnbox_toLong(right.bits);
             stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -4620,6 +4620,23 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _ITER_NEXT_RANGE_UNBOXED: {
+            _PyStackRef iter;
+            _PyStackRef next;
+            iter = stack_pointer[-1];
+            _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
+            assert(Py_TYPE(r) == &PyRangeIter_Type);
+            assert(r->len > 0);
+            long value = r->start;
+            r->start = value + r->step;
+            r->len--;
+            next = PyStackRef_FromLong(value);
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());

@@ -646,7 +646,7 @@ dummy_func(
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
             long res;
-            fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            // fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             long left_l = _PyUnbox_toLong(left.bits);
             long right_l = _PyUnbox_toLong(right.bits);
             int ovf = __builtin_smull_overflow(left_l, right_l, &res);
@@ -661,7 +661,7 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
-            fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            // fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             long left_l = _PyUnbox_toLong(left.bits);
             long right_l = _PyUnbox_toLong(right.bits);
             // Cannot overflow, as we are only 61 bit ints.
@@ -676,7 +676,7 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
-            fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            // fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
             long left_l = _PyUnbox_toLong(left.bits);
             long right_l = _PyUnbox_toLong(right.bits);
             // Cannot overflow, as we are only 61 bit ints.
@@ -3300,6 +3300,16 @@ dummy_func(
             PyObject *res = PyLong_FromLong(value);
             ERROR_IF(res == NULL, error);
             next = PyStackRef_FromPyObjectSteal(res);
+        }
+
+        op(_ITER_NEXT_RANGE_UNBOXED, (iter -- iter, next)) {
+            _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
+            assert(Py_TYPE(r) == &PyRangeIter_Type);
+            assert(r->len > 0);
+            long value = r->start;
+            r->start = value + r->step;
+            r->len--;
+            next = PyStackRef_FromLong(value);
         }
 
         macro(FOR_ITER_RANGE) =

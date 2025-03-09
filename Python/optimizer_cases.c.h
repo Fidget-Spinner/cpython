@@ -1529,7 +1529,17 @@
 
         case _ITER_NEXT_RANGE: {
             JitOptSymbol *next;
-            next = sym_new_type(ctx, &PyLong_Type);
+            REPLACE_OP(this_instr, _ITER_NEXT_RANGE_UNBOXED, oparg, 0);
+            next = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _ITER_NEXT_RANGE_UNBOXED: {
+            JitOptSymbol *next;
+            next = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
