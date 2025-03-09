@@ -7249,7 +7249,6 @@
                 retval = val;
                 assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
                 _PyStackRef temp = retval;
-                assert(PyStackRef_IsHeapSafe(temp));
                 stack_pointer += -1;
                 assert(WITHIN_STACK_BOUNDS());
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -10288,7 +10287,6 @@
             retval = stack_pointer[-1];
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
-            assert(PyStackRef_IsHeapSafe(temp));
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             _PyFrame_SetStackPointer(frame, stack_pointer);

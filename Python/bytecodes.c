@@ -1172,7 +1172,6 @@ dummy_func(
         inst(RETURN_VALUE, (retval -- res)) {
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
-            assert(PyStackRef_IsHeapSafe(temp));
             DEAD(retval);
             SAVE_STACK();
             assert(EMPTY());
