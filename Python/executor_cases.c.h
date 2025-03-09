@@ -1072,8 +1072,10 @@
             long res;
             _PyFrame_SetStackPointer(frame, stack_pointer);
             fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
-            int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            int ovf = __builtin_smull_overflow(left_l, right_l, &res);
             if (ovf) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
@@ -1099,12 +1101,13 @@
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
-            long res;
-            // Cannot overflow, as we are only 61 bit ints.
             _PyFrame_SetStackPointer(frame, stack_pointer);
             fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
-            assert(!__builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Cannot overflow, as we are only 61 bit ints.
+            long res = left_l + right_l;
             int is_small = _PyUnbox_isSmall(res);
             if (!is_small) {
                 UOP_STAT_INC(uopcode, miss);
@@ -1126,11 +1129,13 @@
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
-            long res;
             _PyFrame_SetStackPointer(frame, stack_pointer);
             fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
-            assert(!__builtin_ssubl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Cannot overflow, as we are only 61 bit ints.
+            long res = left_l - right_l;
             int is_small = _PyUnbox_isSmall(res);
             if (!is_small) {
                 UOP_STAT_INC(uopcode, miss);

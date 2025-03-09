@@ -730,6 +730,7 @@ PyStackRef_FromLong(long unboxed)
     _PyStackRef res;
     assert(_PyUnbox_isSmall(unboxed));
     res.bits = _PyLong_toUnbox(unboxed);
+    assert(unboxed == _PyUnbox_toLong(res.bits));
     return res;
 }
 

@@ -647,7 +647,9 @@ dummy_func(
             assert(_PyUnbox_isSmall(right.bits));
             long res;
             fprintf(stderr, "INTS*: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
-            int ovf = __builtin_smull_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res);
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            int ovf = __builtin_smull_overflow(left_l, right_l, &res);
             DEOPT_IF(ovf);
             int is_small = _PyUnbox_isSmall(res);
             DEOPT_IF(!is_small);
@@ -659,10 +661,11 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
-            long res;
-            // Cannot overflow, as we are only 61 bit ints.
             fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
-            assert(!__builtin_saddl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            // Cannot overflow, as we are only 61 bit ints.
+            long res = left_l + right_l;
             int is_small = _PyUnbox_isSmall(res);
             DEOPT_IF(!is_small);
             INPUTS_DEAD();
@@ -673,9 +676,11 @@ dummy_func(
             assert(sizeof(uintptr_t) >= sizeof(long));
             assert(_PyUnbox_isSmall(left.bits));
             assert(_PyUnbox_isSmall(right.bits));
-            long res;
             fprintf(stderr, "INTS-: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
-            assert(!__builtin_ssubl_overflow(_PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits), &res));
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            // Cannot overflow, as we are only 61 bit ints.
+            long res = left_l - right_l;
             int is_small = _PyUnbox_isSmall(res);
             DEOPT_IF(!is_small);
             INPUTS_DEAD();
