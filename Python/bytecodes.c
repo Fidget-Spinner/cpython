@@ -629,7 +629,14 @@ dummy_func(
             _PyStackRef tmp = GETLOCAL(oparg);
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
-            DEOPT_IF(!is_compact_long);
+            if (!is_compact_long) {
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                DEOPT_IF(true);
+            }
+
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
             PyStackRef_XCLOSE(tmp);
         }
@@ -2896,6 +2903,16 @@ dummy_func(
             assert(executor->vm_data.code == code);
             assert(executor->vm_data.valid);
             assert(tstate->previous_executor == NULL);
+            if (executor->vm_data.bail) {
+                executor->vm_data.bail = false;
+                opcode = executor->vm_data.opcode;
+                oparg = (oparg & ~255) | executor->vm_data.oparg;
+                next_instr = this_instr;
+                if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
+                    PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                DISPATCH_GOTO();
+            }
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */

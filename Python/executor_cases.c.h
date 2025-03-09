@@ -853,8 +853,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -871,8 +877,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -889,8 +901,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -907,8 +925,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -925,8 +949,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -943,8 +973,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -961,8 +997,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -979,8 +1021,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
@@ -996,8 +1044,14 @@
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+                // We can't just normally deopt, because this precedes
+                // all instructions. That would cause it to ENTER_EXECUTOR
+                // again and infinite cycle.
+                current_executor->vm_data.bail = true;
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             GETLOCAL(oparg) = PyStackRef_FromRaw(_PyLong61_FromLong(maybe_long));
