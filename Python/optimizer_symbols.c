@@ -735,7 +735,7 @@ _Py_uop_abstractcontext_fini(JitOptContext *ctx)
         if (sym->tag == JIT_SYM_KNOWN_VALUE_TAG) {
             Py_CLEAR(sym->value.value);
         }
-        else if (sym->tag == JIT_SYM_UNKNOWN_TAG) {
+        else if (sym->tag == JIT_SYM_UNBOXED_TAG) {
             Py_CLEAR(sym->unboxed.value);
         }
     }
