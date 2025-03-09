@@ -4039,25 +4039,12 @@
             oparg = CURRENT_OPARG();
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsLong(left);
-            PyObject *right_o = PyStackRef_AsLong(right);
-            if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
-            }
-            STAT_INC(COMPARE_OP, hit);
-            assert(_PyLong_DigitCount((PyLongObject *)left_o) <= 1 &&
-               _PyLong_DigitCount((PyLongObject *)right_o) <= 1);
-            Py_ssize_t ileft = _PyLong_CompactValue((PyLongObject *)left_o);
-            Py_ssize_t iright = _PyLong_CompactValue((PyLongObject *)right_o);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            Py_ssize_t ileft = _PyUnbox_toLong(left.bits);
+            Py_ssize_t iright = _PyUnbox_toLong(right.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
             // 2 if <, 4 if >, 8 if ==; this matches the low 4 bits of the oparg
             int sign_ish = COMPARISON_BIT(ileft, iright);
-            PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
-            PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
             // It's always a bool, so we don't care about oparg & 16.
             stack_pointer[-2] = res;
