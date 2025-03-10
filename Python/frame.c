@@ -9,6 +9,28 @@
 #include "opcode.h"
 
 int
+PyStackRef_ReboxFrame(_PyInterpreterFrame *frame)
+{
+    while (frame->has_unboxed_values) {
+        _PyStackRef *sp_top = frame->stackpointer;
+        _PyStackRef *localplus_start = frame->localsplus;
+        while (sp_top > localplus_start) {
+            _PyStackRef curr = sp_top[-1];
+            if (PyStackRef_IsUnboxedInt(curr)) {
+                PyObject * res = PyLong_FromLong(_PyUnbox_toLong(curr.bits));
+                if (res == NULL) {
+                    return -1;
+                }
+                sp_top[-1] = PyStackRef_FromPyObjectSteal(res);
+            }
+            sp_top--;
+        }
+        frame = frame->previous;
+    }
+    return 0;
+}
+
+int
 _PyFrame_Traverse(_PyInterpreterFrame *frame, visitproc visit, void *arg)
 {
     Py_VISIT(frame->frame_obj);

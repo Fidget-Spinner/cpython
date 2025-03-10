@@ -300,6 +300,24 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
     return 0;
 }
 
+static inline void
+sym_mark_unboxed(JitOptContext *ctx)
+{
+    if (ctx->frame->frame_starting_inst == NULL) {
+        ctx->done = true;
+        ctx->contradiction = true;
+        return;
+    }
+    int opcode = ctx->frame->frame_starting_inst[2].opcode;
+    if (opcode != _NOP && opcode != _MARK_FRAME_HAS_UNBOXED) {
+        DPRINTF(2, "NOPE %s\n", _PyOpcode_uop_name[opcode]);
+        ctx->done = true;
+        ctx->contradiction = true;
+        return;
+    }
+    ctx->frame->frame_starting_inst[2].opcode = _MARK_FRAME_HAS_UNBOXED;
+}
+
 // Return value indicates if we should rerun the trace due to hoisted values.
 static inline bool
 sym_unbox_and_hoist_if_possible(JitOptContext *ctx, JitOptSymbol *sym)
@@ -312,9 +330,19 @@ sym_unbox_and_hoist_if_possible(JitOptContext *ctx, JitOptSymbol *sym)
         if (ctx->frame->frame_starting_inst == NULL) {
             return false;
         }
-        assert(ctx->frame->frame_starting_inst[oparg].opcode == _NOP_FOR_OPTIMIZER);
-        ctx->frame->frame_starting_inst[oparg].opcode = _UNBOX_FAST;
-        ctx->frame->frame_starting_inst[oparg].oparg = oparg;
+        // Frame not optimizable.
+        if (ctx->frame->frame_starting_inst[2].opcode != _NOP && ctx->frame->frame_starting_inst[2].opcode != _MARK_FRAME_HAS_UNBOXED) {
+            return false;
+        }
+        DPRINTF(2, "Writing unboxed op to frame %d offset %ld\n", ctx->curr_frame_depth, oparg + 3);
+
+        // Frame is not optimizable/unboxable.
+        if (ctx->frame->frame_starting_inst[oparg + 3].opcode != _NOP) {
+            return false;
+        }
+        assert(ctx->frame->frame_starting_inst[oparg + 3].opcode == _NOP);
+        ctx->frame->frame_starting_inst[oparg + 3].opcode = _UNBOX_FAST;
+        ctx->frame->frame_starting_inst[oparg + 3].oparg = oparg;
         return true;
         // Target should be written during projection already.
     }

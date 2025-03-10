@@ -7,10 +7,6 @@
             break;
         }
 
-        case _NOP_FOR_OPTIMIZER: {
-            break;
-        }
-
         case _CHECK_PERIODIC: {
             break;
         }
@@ -48,6 +44,7 @@
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
+            _Py_uop_sym_set_local(value, oparg);
             break;
         }
 
@@ -55,6 +52,7 @@
             JitOptSymbol *value;
             value = GETLOCAL(oparg);
             JitOptSymbol *temp = sym_new_null(ctx);
+            value->is_local = false;
             GETLOCAL(oparg) = temp;
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -71,6 +69,7 @@
             if (is_unboxable) {
                 REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
                 value = sym_new_unboxed(ctx, NULL, val);
+                sym_mark_unboxed(ctx);
             }
             else {
                 int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
@@ -90,6 +89,7 @@
             if (is_unboxable) {
                 REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
                 value = sym_new_unboxed(ctx, NULL, val);
+                sym_mark_unboxed(ctx);
             }
             else {
                 REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
@@ -105,6 +105,7 @@
             JitOptSymbol *value;
             PyObject *val = PyLong_FromLong(this_instr->oparg);
             uintptr_t unboxed = _PyLong_toUnbox(this_instr->oparg);
+            sym_mark_unboxed(ctx);
             REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, unboxed);
             value = sym_new_unboxed(ctx, NULL, val);
             stack_pointer[0] = value;
@@ -116,6 +117,7 @@
         case _STORE_FAST: {
             JitOptSymbol *value;
             value = stack_pointer[-1];
+            GETLOCAL(oparg)->is_local = false;
             GETLOCAL(oparg) = value;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -402,6 +404,9 @@
         }
 
         case _UNBOX_FAST: {
+            if (GETLOCAL(oparg)) {
+                GETLOCAL(oparg)->is_local = false;
+            }
             GETLOCAL(oparg) = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             break;
         }
@@ -412,6 +417,10 @@
             for (int _i = 1; --_i >= 0;) {
                 sym_fail_if_boxed(ctx, boxed[_i]);
             }
+            break;
+        }
+
+        case _MARK_FRAME_HAS_UNBOXED: {
             break;
         }
 
@@ -483,6 +492,7 @@
             PyObject *ptr = (PyObject *)this_instr->operand0;
             PyObject *val = PyLong_FromLong(_PyUnbox_toLong((uintptr_t)ptr));
             value = sym_new_unboxed(ctx, NULL, val);
+            sym_mark_unboxed(ctx);
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -692,6 +702,7 @@
                 assert(WITHIN_STACK_BOUNDS());
             }
             // _STORE_FAST:
+            GETLOCAL(this_instr->operand0)->is_local = false;
             GETLOCAL(this_instr->operand0) = res;
             break;
         }
@@ -1051,6 +1062,7 @@
                 ctx->done = true;
             }
             res = retval;
+            res->is_local = false;
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -2094,6 +2106,7 @@
             JitOptSymbol *iter;
             JitOptSymbol *next;
             REPLACE_OP(this_instr, _ITER_NEXT_RANGE_UNBOXED, oparg, 0);
+            sym_mark_unboxed(ctx);
             next = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -2477,7 +2490,6 @@
                 ctx->done = true;
                 break;
             }
-            frame->frame_starting_inst = &trace[i+1];
             /* Stack space handling */
             int framesize = co->co_framesize;
             assert(framesize > 0);
@@ -3395,6 +3407,7 @@
             if (is_unboxable) {
                 REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
                 value = sym_new_unboxed(ctx, NULL, val);
+                sym_mark_unboxed(ctx);
             }
             else {
                 value = sym_new_const(ctx, ptr);
@@ -3422,6 +3435,7 @@
             if (is_unboxable) {
                 REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
                 value = sym_new_unboxed(ctx, NULL, val);
+                sym_mark_unboxed(ctx);
             }
             else {
                 value = sym_new_const(ctx, ptr);
@@ -3470,6 +3484,7 @@
         }
 
         case _TIER2_RESUME_CHECK: {
+            frame->frame_starting_inst = &trace[i];
             break;
         }
 

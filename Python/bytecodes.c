@@ -145,9 +145,6 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
-        op(_NOP_FOR_OPTIMIZER, (--)) {
-        }
-
         family(RESUME, 0) = {
             RESUME_CHECK,
         };
@@ -670,6 +667,10 @@ dummy_func(
             _PyStackRef res = PyStackRef_FromLong(_PyLong_CompactValue(val));
             PyStackRef_CLOSE(boxed[0]);
             boxed->bits = res.bits;
+        }
+
+        op(_MARK_FRAME_HAS_UNBOXED, (--)) {
+            frame->has_unboxed_values = 1;
         }
 
         pure op(_BINARY_OP_MULTIPLY_INT_UNBOXED, (left, right -- out)) {
@@ -5249,7 +5250,7 @@ dummy_func(
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
-            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            int err = PyStackRef_ReboxFrame(frame);
             if (err) {
                 GOTO_TIER_ONE(NULL);
             }
@@ -5352,7 +5353,7 @@ dummy_func(
         tier2 op(_DEOPT, (--)) {
             tstate->previous_executor = (PyObject *)current_executor;
             SYNC_SP();
-            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            int err = PyStackRef_ReboxFrame(frame);
             if (err) {
                 GOTO_TIER_ONE(NULL);
             }

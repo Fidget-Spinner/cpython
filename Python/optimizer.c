@@ -456,10 +456,7 @@ add_to_trace(
     trace_stack[trace_stack_depth].func = func; \
     trace_stack[trace_stack_depth].code = code; \
     trace_stack[trace_stack_depth].instr = instr; \
-    trace_stack_depth++; \
-    for (int x = 0; x < code->co_nlocalsplus; x++) { \
-        ADD_TO_TRACE(_NOP_FOR_OPTIMIZER, 0, 0, INSTR_IP(instr, code)); \
-    }
+    trace_stack_depth++;
 #define TRACE_STACK_POP() \
     if (trace_stack_depth <= 0) { \
         Py_FatalError("Trace stack underflow\n"); \
@@ -516,11 +513,15 @@ translate_bytecode_to_trace(
             code->co_firstlineno,
             2 * INSTR_IP(initial_instr, code));
     DPRINTF(2, "Padding frame prelude with nlocalsplus _NOPs for optimization purposes later.\n");
-    for (int x = 0; x < code->co_nlocalsplus; x++) {
-        ADD_TO_TRACE(_NOP_FOR_OPTIMIZER, 0, 0, INSTR_IP(instr, code));
-    }
     ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+    ADD_TO_TRACE(_NOP, 0, 0, 0); // To mark if a frame has unboxed values.
+    if (!(code->co_flags & CO_NESTED)) {
+        for (int x = 0; x < code->co_nlocalsplus; x++) {
+            ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, code));
+        }
+    }
+
     uint32_t target = 0;
 
     for (;;) {
@@ -658,9 +659,19 @@ translate_bytecode_to_trace(
             }
 
             case RESUME:
+            case RESUME_CHECK:
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
+                // Mark if a frame has unboxed values.
+                ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, trace_stack[trace_stack_depth-1].code));
+                if (code->co_flags & CO_NESTED) {
+                    break;
+                }
+                ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, trace_stack[trace_stack_depth-1].code));
+                for (int x = 0; x < code->co_nlocalsplus; x++) {
+                    ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, trace_stack[trace_stack_depth-1].code));
+                }
                 break;
 
             default:
@@ -971,8 +982,8 @@ prepare_for_execution(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, int
     int32_t current_exit_op = -1;
     int co_nlocalsplus = _PyFrame_GetCode(frame)->co_nlocalsplus;
     /* Leaving in NOPs slows down the interpreter and messes up the stats */
-    _PyUOpInstruction *copy_to = &buffer[co_nlocalsplus];
-    for (int i = co_nlocalsplus; i < length; i++) {
+    _PyUOpInstruction *copy_to = &buffer[0];
+    for (int i = 0; i < length; i++) {
         _PyUOpInstruction *inst = &buffer[i];
         if (inst->opcode != _NOP) {
             if (copy_to != inst) {
@@ -1026,9 +1037,9 @@ prepare_for_execution(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, int
             }
         }
         if (opcode == _JUMP_TO_TOP) {
-            assert(buffer[co_nlocalsplus].opcode == _START_EXECUTOR);
+            assert(buffer[0].opcode == _START_EXECUTOR);
             buffer[i].format = UOP_FORMAT_JUMP;
-            buffer[i].jump_target = 1 + co_nlocalsplus;
+            buffer[i].jump_target = 1;
         }
     }
     return next_spare;
@@ -1073,7 +1084,7 @@ sanity_check(_PyExecutorObject *executor)
     }
     bool ended = false;
     uint32_t i = 0;
-    // CHECK(executor->trace[0].opcode == _START_EXECUTOR);
+    CHECK(executor->trace[0].opcode == _START_EXECUTOR);
     for (; i < executor->code_size; i++) {
         const _PyUOpInstruction *inst = &executor->trace[i];
         uint16_t opcode = inst->opcode;
@@ -1124,7 +1135,6 @@ make_executor_from_uops(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, i
     if (executor == NULL) {
         return NULL;
     }
-    int co_nlocalsplus = _PyFrame_GetCode(frame)->co_nlocalsplus;
     /* Initialize exits */
     for (int i = 0; i < exit_count; i++) {
         executor->exits[i].executor = NULL;
@@ -1132,8 +1142,8 @@ make_executor_from_uops(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, i
     }
     int next_exit = exit_count-1;
     _PyUOpInstruction *dest = (_PyUOpInstruction *)&executor->trace[length];
-    assert(buffer[co_nlocalsplus].opcode == _START_EXECUTOR);
-    buffer[co_nlocalsplus].operand0 = (uint64_t)executor;
+    assert(buffer[0].opcode == _START_EXECUTOR);
+    buffer[0].operand0 = (uint64_t)executor;
     for (int i = length-1; i >= 0; i--) {
         int opcode = buffer[i].opcode;
         dest--;
@@ -1148,7 +1158,7 @@ make_executor_from_uops(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, i
     }
     assert(next_exit == -1);
     assert(dest == executor->trace);
-    assert(dest[co_nlocalsplus].opcode == _START_EXECUTOR);
+    assert(dest[0].opcode == _START_EXECUTOR);
     _Py_ExecutorInit(executor, dependencies);
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");

@@ -12,10 +12,6 @@
             break;
         }
 
-        case _NOP_FOR_OPTIMIZER: {
-            break;
-        }
-
         case _CHECK_PERIODIC: {
             _Py_CHECK_EMSCRIPTEN_SIGNALS_PERIODICALLY();
             QSBR_QUIESCENT_STATE(tstate);
@@ -1134,6 +1130,11 @@
             PyStackRef_CLOSE(boxed[0]);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             boxed->bits = res.bits;
+            break;
+        }
+
+        case _MARK_FRAME_HAS_UNBOXED: {
+            frame->has_unboxed_values = 1;
             break;
         }
 
@@ -7474,7 +7475,7 @@
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            int err = PyStackRef_ReboxFrame(frame);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (err) {
                 GOTO_TIER_ONE(NULL);
@@ -7641,7 +7642,7 @@
         case _DEOPT: {
             tstate->previous_executor = (PyObject *)current_executor;
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            int err = PyStackRef_ReboxArray(frame->localsplus, frame->stackpointer);
+            int err = PyStackRef_ReboxFrame(frame);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (err) {
                 GOTO_TIER_ONE(NULL);

@@ -20,7 +20,6 @@ extern int _PyUop_num_popped(int opcode, int oparg);
 #ifdef NEED_OPCODE_METADATA
 const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_NOP] = HAS_PURE_FLAG,
-    [_NOP_FOR_OPTIMIZER] = 0,
     [_CHECK_PERIODIC] = HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_RESUME_CHECK] = HAS_DEOPT_FLAG,
@@ -85,6 +84,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_UNBOX_FAST_7] = HAS_LOCAL_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
     [_UNBOX_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
     [_UNBOX] = HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG,
+    [_MARK_FRAME_HAS_UNBOXED] = 0,
     [_BINARY_OP_MULTIPLY_INT_UNBOXED] = HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG | HAS_PURE_FLAG,
     [_BINARY_OP_AND_INT_UNBOXED] = HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG | HAS_PURE_FLAG,
     [_BINARY_OP_ADD_INT_UNBOXED] = HAS_DEOPT_FLAG | HAS_ESCAPES_FLAG | HAS_PURE_FLAG,
@@ -524,6 +524,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_MAKE_FUNCTION] = "_MAKE_FUNCTION",
     [_MAKE_WARM] = "_MAKE_WARM",
     [_MAP_ADD] = "_MAP_ADD",
+    [_MARK_FRAME_HAS_UNBOXED] = "_MARK_FRAME_HAS_UNBOXED",
     [_MATCH_CLASS] = "_MATCH_CLASS",
     [_MATCH_KEYS] = "_MATCH_KEYS",
     [_MATCH_MAPPING] = "_MATCH_MAPPING",
@@ -531,7 +532,6 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_MAYBE_EXPAND_METHOD] = "_MAYBE_EXPAND_METHOD",
     [_MAYBE_EXPAND_METHOD_KW] = "_MAYBE_EXPAND_METHOD_KW",
     [_NOP] = "_NOP",
-    [_NOP_FOR_OPTIMIZER] = "_NOP_FOR_OPTIMIZER",
     [_POP_EXCEPT] = "_POP_EXCEPT",
     [_POP_TOP] = "_POP_TOP",
     [_POP_TOP_LOAD_CONST_INLINE] = "_POP_TOP_LOAD_CONST_INLINE",
@@ -611,8 +611,6 @@ int _PyUop_num_popped(int opcode, int oparg)
 {
     switch(opcode) {
         case _NOP:
-            return 0;
-        case _NOP_FOR_OPTIMIZER:
             return 0;
         case _CHECK_PERIODIC:
             return 0;
@@ -741,6 +739,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _UNBOX_FAST:
             return 0;
         case _UNBOX:
+            return 0;
+        case _MARK_FRAME_HAS_UNBOXED:
             return 0;
         case _BINARY_OP_MULTIPLY_INT_UNBOXED:
             return 2;

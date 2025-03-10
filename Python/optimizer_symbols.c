@@ -712,12 +712,6 @@ _Py_uop_frame_new(
         frame->locals[i] = local;
     }
 
-    for (int x = 0; x < frame->locals_len; x++) {
-        if (frame->locals[x]) {
-            _Py_uop_sym_set_local(frame->locals[x], x);
-        }
-    }
-
     // Initialize the stack as well
     for (int i = 0; i < curr_stackentries; i++) {
         JitOptSymbol *stackvar = _Py_uop_sym_new_unknown(ctx);

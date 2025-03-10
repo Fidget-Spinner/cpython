@@ -433,7 +433,7 @@ _PyLong61_FromLong(PyObject *op) {
 }
 
 
-static inline long
+static __attribute__((noinline)) long
 _PyUnbox_toLong(uintptr_t val)
 {
     assert(sizeof(uintptr_t) >= sizeof(val));
@@ -445,7 +445,7 @@ _PyUnbox_toLong(uintptr_t val)
     return res;
 }
 
-static inline int PyStackRef_IsUnboxedInt(_PyStackRef ref) {
+static __attribute__((noinline)) int PyStackRef_IsUnboxedInt(_PyStackRef ref) {
     int check = (ref.bits & Py_TAG_BITS) == Py_TAG_INT;
 #ifdef Py_DEBUG
     if (check) {
@@ -491,7 +491,7 @@ PyStackRef_IsUncountedMortal(_PyStackRef ref)
     return (ref.bits & Py_TAG_BITS) == 0;
 }
 
-static inline PyObject *
+static __attribute__((noinline)) PyObject *
 PyStackRef_AsPyObjectBorrow(_PyStackRef ref)
 {
     assert(!PyStackRef_IsUnboxedInt(ref));
@@ -708,23 +708,6 @@ static inline bool
 PyStackRef_FunctionCheck(_PyStackRef stackref)
 {
     return PyFunction_Check(PyStackRef_AsPyObjectBorrow(stackref));
-}
-
-static inline int
-PyStackRef_ReboxArray(_PyStackRef *localplus_start, _PyStackRef *sp_top)
-{
-    while (sp_top > localplus_start) {
-        _PyStackRef curr = sp_top[-1];
-        if (PyStackRef_IsUnboxedInt(curr)) {
-            PyObject *res = PyLong_FromLong(_PyUnbox_toLong(curr.bits));
-            if (res == NULL) {
-                return -1;
-            }
-            sp_top[-1] = PyStackRef_FromPyObjectSteal(res);
-        }
-        sp_top--;
-    }
-    return 0;
 }
 
 static inline _PyStackRef

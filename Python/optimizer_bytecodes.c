@@ -84,19 +84,25 @@ dummy_func(void) {
 
     op(_LOAD_FAST, (-- value)) {
         value = GETLOCAL(oparg);
+        _Py_uop_sym_set_local(value, oparg);
     }
 
     op(_LOAD_FAST_AND_CLEAR, (-- value)) {
         value = GETLOCAL(oparg);
         JitOptSymbol *temp = sym_new_null(ctx);
+        value->is_local = false;
         GETLOCAL(oparg) = temp;
     }
 
     op(_STORE_FAST, (value --)) {
+        GETLOCAL(oparg)->is_local = false;
         GETLOCAL(oparg) = value;
     }
 
     op(_UNBOX_FAST, (--)) {
+        if (GETLOCAL(oparg)) {
+            GETLOCAL(oparg)->is_local = false;
+        }
         GETLOCAL(oparg) = sym_new_unboxed(ctx, &PyLong_Type, NULL);
     }
 
@@ -464,6 +470,7 @@ dummy_func(void) {
             res = sym_new_type(ctx, &PyUnicode_Type);
         }
         // _STORE_FAST:
+        GETLOCAL(this_instr->operand0)->is_local = false;
         GETLOCAL(this_instr->operand0) = res;
     }
 
@@ -589,6 +596,7 @@ dummy_func(void) {
         if (is_unboxable) {
             REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
             value = sym_new_unboxed(ctx, NULL, val);
+            sym_mark_unboxed(ctx);
         }
         else {
             int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
@@ -603,6 +611,7 @@ dummy_func(void) {
         if (is_unboxable) {
             REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
             value = sym_new_unboxed(ctx, NULL, val);
+            sym_mark_unboxed(ctx);
         }
         else {
             int opcode = _Py_IsImmortal(val) ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
@@ -617,6 +626,7 @@ dummy_func(void) {
         if (is_unboxable) {
             REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
             value = sym_new_unboxed(ctx, NULL, val);
+            sym_mark_unboxed(ctx);
         }
         else {
             REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
@@ -627,6 +637,7 @@ dummy_func(void) {
     op(_LOAD_SMALL_INT, (-- value)) {
         PyObject *val = PyLong_FromLong(this_instr->oparg);
         uintptr_t unboxed = _PyLong_toUnbox(this_instr->oparg);
+        sym_mark_unboxed(ctx);
         REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, unboxed);
         value = sym_new_unboxed(ctx, NULL, val);
     }
@@ -634,6 +645,7 @@ dummy_func(void) {
     op(_LOAD_UNBOXED, (ptr/4 -- value)) {
         PyObject *val = PyLong_FromLong(_PyUnbox_toLong((uintptr_t)ptr));
         value = sym_new_unboxed(ctx, NULL, val);
+        sym_mark_unboxed(ctx);
     }
 
     op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
@@ -642,6 +654,7 @@ dummy_func(void) {
         if (is_unboxable) {
             REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
             value = sym_new_unboxed(ctx, NULL, val);
+            sym_mark_unboxed(ctx);
         }
         else {
             value = sym_new_const(ctx, ptr);
@@ -654,6 +667,7 @@ dummy_func(void) {
         if (is_unboxable) {
             REPLACE_OP(this_instr, _LOAD_UNBOXED, 0, (uintptr_t)_PyLong61_FromLong(val));
             value = sym_new_unboxed(ctx, NULL, val);
+            sym_mark_unboxed(ctx);
         }
         else {
             value = sym_new_const(ctx, ptr);
@@ -877,6 +891,7 @@ dummy_func(void) {
         }
         RELOAD_STACK();
         res = retval;
+        res->is_local = false;
     }
 
     op(_RETURN_GENERATOR, ( -- res)) {
@@ -940,8 +955,6 @@ dummy_func(void) {
             break;
         }
 
-        frame->frame_starting_inst = &trace[i+1];
-
         /* Stack space handling */
         int framesize = co->co_framesize;
         assert(framesize > 0);
@@ -979,6 +992,7 @@ dummy_func(void) {
 
     op(_ITER_NEXT_RANGE, (iter -- iter, next)) {
         REPLACE_OP(this_instr, _ITER_NEXT_RANGE_UNBOXED, oparg, 0);
+        sym_mark_unboxed(ctx);
         next = sym_new_unboxed(ctx, &PyLong_Type, NULL);
     }
 
@@ -1082,6 +1096,10 @@ dummy_func(void) {
             REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_STR_INT_UNBOXED, oparg, 0);
         }
         res = sym_new_not_null(ctx);
+    }
+
+    op(_TIER2_RESUME_CHECK, (--)) {
+        frame->frame_starting_inst = &trace[i];
     }
 
 // END BYTECODES //

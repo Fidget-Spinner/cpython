@@ -78,9 +78,11 @@ typedef struct _PyInterpreterFrame {
     char owner;
 #ifdef Py_DEBUG
     uint8_t visited:1;
-    uint8_t lltrace:7;
+    uint8_t has_unboxed_values:1;
+    uint8_t lltrace:6;
 #else
-    uint8_t visited;
+    uint8_t has_unboxed_values:1;
+    uint8_t visited:7;
 #endif
     /* Locals and stack */
     _PyStackRef localsplus[1];
@@ -146,6 +148,9 @@ _PyFrame_NumSlotsForCodeObject(PyCodeObject *code)
     return code->co_framesize - FRAME_SPECIALS_SIZE;
 }
 
+PyAPI_FUNC(int) PyStackRef_ReboxFrame(_PyInterpreterFrame *frame);
+
+
 static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *dest)
 {
     dest->f_executable = PyStackRef_MakeHeapSafe(src->f_executable);
@@ -168,9 +173,8 @@ static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *
     for (int i = 0; i < stacktop; i++) {
         dest->localsplus[i] = PyStackRef_MakeHeapSafe(src->localsplus[i]);
     }
-    if (PyStackRef_ReboxArray(dest->localsplus, dest->stackpointer)) {
-        Py_FatalError("Could not rebox/copy a frame.\n");
-    }
+    dest->has_unboxed_values = src->has_unboxed_values;
+    PyStackRef_ReboxFrame(dest);
 }
 
 #ifdef Py_GIL_DISABLED
@@ -223,6 +227,8 @@ _PyFrame_Initialize(
 #ifdef Py_DEBUG
     frame->lltrace = 0;
 #endif
+
+    frame->has_unboxed_values = 0;
 
     for (int i = null_locals_from; i < code->co_nlocalsplus; i++) {
         frame->localsplus[i] = PyStackRef_NULL;
@@ -400,6 +406,7 @@ _PyFrame_PushTrampolineUnchecked(PyThreadState *tstate, PyCodeObject *code, int 
     frame->lltrace = 0;
 #endif
     frame->return_offset = 0;
+    frame->has_unboxed_values = 0;
     return frame;
 }
 
