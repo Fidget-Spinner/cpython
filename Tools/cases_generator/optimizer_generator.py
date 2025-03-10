@@ -34,6 +34,9 @@ def validate_uop(override: Uop, uop: Uop) -> None:
     pass
 
 
+def uop_needs_unboxed_check(uop: Uop) -> bool:
+    return not uop.properties.has_unboxed_variant and not uop.name.endswith("UNBOXED")
+
 def type_name(var: StackItem) -> str:
     if var.is_array():
         return f"JitOptSymbol **"
@@ -45,8 +48,9 @@ def type_name(var: StackItem) -> str:
 def declare_variables(uop: Uop, out: CWriter, skip_inputs: bool) -> None:
     variables = {"unused"}
     if not skip_inputs:
+        needs_unboxed_checks = uop_needs_unboxed_check(uop)
         for var in reversed(uop.stack.inputs):
-            if var.used and var.name not in variables:
+            if (var.used or needs_unboxed_checks) and var.name not in variables:
                 variables.add(var.name)
                 if var.condition:
                     out.emit(f"{type_name(var)}{var.name} = NULL;\n")
@@ -78,17 +82,21 @@ def decref_inputs(
 
 
 def emit_default(out: CWriter, uop: Uop, stack: Stack) -> None:
-    should_emit_unboxed_fails = not uop.properties.has_unboxed_variant and not uop.name.endswith("UNBOXED")
+    should_emit_unboxed_fails = uop_needs_unboxed_check(uop)
     for var in reversed(uop.stack.inputs):
+        var.used = True
         defn, _ = stack.pop(var)
         if should_emit_unboxed_fails:
             out.emit(defn)
     if should_emit_unboxed_fails:
         for var in reversed(uop.stack.inputs):
-            if var.is_array():
-                assert f"Unboxed ops with array stack effects must be manually defined: {var.name}", False
             if var.name != "unused":
-                out.emit(f"sym_fail_if_boxed(ctx, {var.name});\n")
+                if var.is_array():
+                    out.emit(f"for (int _i = {var.size}; --_i >= 0;) {{\n")
+                    out.emit(f"sym_fail_if_boxed(ctx, {var.name}[_i]);\n")
+                    out.emit("}\n")
+                else:
+                    out.emit(f"sym_fail_if_boxed(ctx, {var.name});\n")
 
     top_offset = stack.top_offset.copy()
     for var in uop.stack.outputs:
@@ -162,6 +170,7 @@ def write_uop(
             # No reference management of inputs needed.
             for var in storage.inputs:  # type: ignore[possibly-undefined]
                 var.defined = False
+                var.used = True
             storage = emitter.emit_tokens(override, storage, None)
             out.start_line()
             storage.flush(out)
@@ -210,9 +219,9 @@ def generate_abstract_interpreter(
         if override:
             declare_variables(override, out, skip_inputs=False)
         else:
-            needs_unboxed_checks = not uop.properties.has_unboxed_variant and not uop.name.endswith("UNBOXED")
+            needs_unboxed_checks = uop_needs_unboxed_check(uop)
             declare_variables(uop, out, skip_inputs=not needs_unboxed_checks)
-        stack = Stack(extract_bits=False, cast_type="JitOptSymbol *")
+        stack = Stack(extract_bits=False, cast_type="JitOptSymbol *", check_unboxed=True)
         write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
         out.start_line()
         out.emit("break;\n")

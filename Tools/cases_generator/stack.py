@@ -224,13 +224,14 @@ def array_or_scalar(var: StackItem | Local) -> str:
     return "array" if var.is_array() else "scalar"
 
 class Stack:
-    def __init__(self, extract_bits: bool=True, cast_type: str = "uintptr_t") -> None:
+    def __init__(self, extract_bits: bool=True, cast_type: str = "uintptr_t", check_unboxed: bool = False) -> None:
         self.top_offset = StackOffset.empty()
         self.base_offset = StackOffset.empty()
         self.variables: list[Local] = []
         self.defined: set[str] = set()
         self.extract_bits = extract_bits
         self.cast_type = cast_type
+        self.check_unboxed = check_unboxed
 
     def pop(self, var: StackItem) -> tuple[str, Local]:
         self.top_offset.pop(var)
@@ -266,6 +267,8 @@ class Stack:
                     defn = f"{var.name} = &stack_pointer[{self.top_offset.to_c()}];\n"
                 else:
                     defn = f"{var.name} = stack_pointer[{self.top_offset.to_c()}];\n"
+                    if self.check_unboxed:
+                        defn = f"{var.name} = sym_fail_if_boxed(ctx, stack_pointer[{self.top_offset.to_c()}]);\n"
                     popped.in_memory = True
             return defn, Local.redefinition(var, popped)
 
@@ -276,6 +279,9 @@ class Stack:
         cast = f"({var.type})" if (not indirect and var.type) else ""
         bits = ".bits" if cast and self.extract_bits else ""
         assign = f"{var.name} = {cast}{indirect}stack_pointer[{self.base_offset.to_c()}]{bits};"
+        if self.check_unboxed and not indirect:
+            assign = f"{var.name} = sym_fail_if_boxed(ctx, stack_pointer[{self.base_offset.to_c()}]);"
+
         if var.condition:
             if var.condition == "1":
                 assign = f"{assign}\n"

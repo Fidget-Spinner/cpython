@@ -3899,7 +3899,7 @@ dummy_func(
             INPUTS_DEAD();
         }
 
-        op(_PUSH_FRAME, (new_frame: _PyInterpreterFrame* -- )) {
+        unboxed op(_PUSH_FRAME, (new_frame: _PyInterpreterFrame* -- )) {
             // Write it out explicitly because it's subtly different.
             // Eventually this should be the only occurrence of this code.
             assert(tstate->interp->eval_frame == NULL);

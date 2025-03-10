@@ -322,14 +322,17 @@ sym_object_is_unboxable(PyObject *obj)
     return _PyLong_IsCompact61((PyLongObject *)obj);
 }
 
-static inline void
+static inline JitOptSymbol *
 sym_fail_if_boxed(JitOptContext *ctx, JitOptSymbol *sym)
 {
     if (_Py_uop_sym_is_unboxed(sym)) {
         DPRINTF(2, "Received unboxed value for an operation that only supports boxed.\n");
+        sym->tag = JIT_SYM_BOTTOM_TAG;
         ctx->done = true;
-        ctx->contradiction = true;
+        ctx->contradiction = true;;
+        return sym;
     }
+    return sym;
 }
 
 #define STACK_LEVEL()     ((int)(stack_pointer - ctx->frame->stack))

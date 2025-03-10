@@ -426,10 +426,10 @@ _PyLong_toUnbox(long val)
 }
 
 static inline uintptr_t
-_PyLong61_FromLong(const PyLongObject* op) {
+_PyLong61_FromLong(PyObject *op) {
     assert(PyLong_CheckExact(op));
     assert(_PyLong_IsCompact61(op));
-    return _PyLong_toUnbox(_PyLong_CompactValue(op));
+    return _PyLong_toUnbox(_PyLong_CompactValue((PyLongObject *)op));
 }
 
 
