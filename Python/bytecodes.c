@@ -484,12 +484,25 @@ dummy_func(
             STAT_INC(TO_BOOL, hit);
         }
 
-        inst(TO_BOOL_INT, (unused/1, unused/2, value -- res)) {
+        unboxed inst(TO_BOOL_INT, (unused/1, unused/2, value -- res)) {
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             EXIT_IF(!PyLong_CheckExact(value_o));
             STAT_INC(TO_BOOL, hit);
             if (_PyLong_IsZero((PyLongObject *)value_o)) {
                 assert(_Py_IsImmortal(value_o));
+                DEAD(value);
+                res = PyStackRef_False;
+            }
+            else {
+                PyStackRef_CLOSE(value);
+                res = PyStackRef_True;
+            }
+        }
+
+        unboxed op(_TO_BOOL_INT_UNBOXED, (value -- res)) {
+            long value_l = _PyUnbox_toLong(value.bits);
+            STAT_INC(TO_BOOL, hit);
+            if (value_l == 0) {
                 DEAD(value);
                 res = PyStackRef_False;
             }
@@ -980,7 +993,7 @@ dummy_func(
             DECREF_INPUTS();
         }
 
-        inst(BINARY_OP_SUBSCR_STR_INT, (unused/5, str_st, sub_st -- res)) {
+        unboxed inst(BINARY_OP_SUBSCR_STR_INT, (unused/5, str_st, sub_st -- res)) {
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *str = PyStackRef_AsPyObjectBorrow(str_st);
 
@@ -995,6 +1008,23 @@ dummy_func(
             STAT_INC(BINARY_OP, hit);
             PyObject *res_o = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
             PyStackRef_CLOSE_SPECIALIZED(sub_st, _PyLong_ExactDealloc);
+            DEAD(sub_st);
+            PyStackRef_CLOSE(str_st);
+            res = PyStackRef_FromPyObjectImmortal(res_o);
+        }
+
+        unboxed op(_BINARY_OP_SUBSCR_STR_INT_UNBOXED, (str_st, sub_st -- res)) {
+            PyObject *str = PyStackRef_AsPyObjectBorrow(str_st);
+
+            DEOPT_IF(!PyUnicode_CheckExact(str));
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            DEOPT_IF(index < 0);
+            DEOPT_IF(PyUnicode_GET_LENGTH(str) <= index);
+            // Specialize for reading an ASCII character from any string:
+            Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
+            DEOPT_IF(Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c);
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
             DEAD(sub_st);
             PyStackRef_CLOSE(str_st);
             res = PyStackRef_FromPyObjectImmortal(res_o);
@@ -1015,6 +1045,22 @@ dummy_func(
             PyObject *res_o = PyTuple_GET_ITEM(tuple, index);
             assert(res_o != NULL);
             PyStackRef_CLOSE_SPECIALIZED(sub_st, _PyLong_ExactDealloc);
+            res = PyStackRef_FromPyObjectNew(res_o);
+            DECREF_INPUTS();
+        }
+
+        unboxed op(_BINARY_OP_SUBSCR_TUPLE_INT_UNBOXED, (tuple_st, sub_st -- res)) {
+            PyObject *tuple = PyStackRef_AsPyObjectBorrow(tuple_st);
+
+            DEOPT_IF(!PyTuple_CheckExact(tuple));
+
+            // Deopt unless 0 <= sub < PyTuple_Size(list);
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            DEOPT_IF(index < 0);
+            DEOPT_IF(index >= PyTuple_GET_SIZE(tuple));
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = PyTuple_GET_ITEM(tuple, index);
+            assert(res_o != NULL);
             res = PyStackRef_FromPyObjectNew(res_o);
             DECREF_INPUTS();
         }

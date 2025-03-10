@@ -204,7 +204,24 @@
         case _TO_BOOL_INT: {
             JitOptSymbol *value;
             JitOptSymbol *res;
-            value = sym_fail_if_boxed(ctx, stack_pointer[-1]);
+            value = stack_pointer[-1];
+            if (sym_is_unboxed(value)) {
+                REPLACE_OP(this_instr, _TO_BOOL_INT_UNBOXED, oparg, 0);
+            }
+            else {
+                if (!optimize_to_bool(this_instr, ctx, value, &res)) {
+                    sym_set_type(value, &PyLong_Type);
+                }
+            }
+            res = sym_new_truthiness(ctx, value, true);
+            stack_pointer[-1] = res;
+            break;
+        }
+
+        case _TO_BOOL_INT_UNBOXED: {
+            JitOptSymbol *value;
+            JitOptSymbol *res;
+            value = stack_pointer[-1];
             if (!optimize_to_bool(this_instr, ctx, value, &res)) {
                 sym_set_type(value, &PyLong_Type);
                 res = sym_new_truthiness(ctx, value, true);
@@ -701,7 +718,7 @@
             JitOptSymbol *res;
             sub_st = stack_pointer[-1];
             if (sym_is_unboxed(sub_st)) {
-                REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+                REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, oparg, 0);
             }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
@@ -723,10 +740,19 @@
             JitOptSymbol *sub_st;
             JitOptSymbol *str_st;
             JitOptSymbol *res;
-            sub_st = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            str_st = sym_fail_if_boxed(ctx, stack_pointer[-2]);
-            sym_fail_if_boxed(ctx, sub_st);
-            sym_fail_if_boxed(ctx, str_st);
+            sub_st = stack_pointer[-1];
+            if (sym_is_unboxed(sub_st)) {
+                REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_STR_INT_UNBOXED, oparg, 0);
+            }
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBSCR_STR_INT_UNBOXED: {
+            JitOptSymbol *res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -735,6 +761,21 @@
         }
 
         case _BINARY_OP_SUBSCR_TUPLE_INT: {
+            JitOptSymbol *sub_st;
+            JitOptSymbol *tuple_st;
+            JitOptSymbol *res;
+            sub_st = stack_pointer[-1];
+            if (sym_is_unboxed(sub_st)) {
+                REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_TUPLE_INT_UNBOXED, oparg, 0);
+            }
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBSCR_TUPLE_INT_UNBOXED: {
             JitOptSymbol *res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
@@ -828,7 +869,7 @@
             JitOptSymbol *value;
             sub_st = stack_pointer[-1];
             if (sym_is_unboxed(sub_st)) {
-                REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+                REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, oparg, 0);
             }
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());

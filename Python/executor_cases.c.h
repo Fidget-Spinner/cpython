@@ -622,6 +622,31 @@
             break;
         }
 
+        case _TO_BOOL_INT_UNBOXED: {
+            _PyStackRef value;
+            _PyStackRef res;
+            value = stack_pointer[-1];
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            long value_l = _PyUnbox_toLong(value.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            STAT_INC(TO_BOOL, hit);
+            if (value_l == 0) {
+                res = PyStackRef_False;
+            }
+            else {
+                stack_pointer += -1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyStackRef_CLOSE(value);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                res = PyStackRef_True;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+            }
+            stack_pointer[-1] = res;
+            break;
+        }
+
         case _TO_BOOL_LIST: {
             _PyStackRef value;
             _PyStackRef res;
@@ -1720,6 +1745,48 @@
             break;
         }
 
+        case _BINARY_OP_SUBSCR_STR_INT_UNBOXED: {
+            _PyStackRef sub_st;
+            _PyStackRef str_st;
+            _PyStackRef res;
+            sub_st = stack_pointer[-1];
+            str_st = stack_pointer[-2];
+            PyObject *str = PyStackRef_AsPyObjectBorrow(str_st);
+            if (!PyUnicode_CheckExact(str)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (index < 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (PyUnicode_GET_LENGTH(str) <= index) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            // Specialize for reading an ASCII character from any string:
+            Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
+            if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
+            stack_pointer += -2;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(str_st);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            res = PyStackRef_FromPyObjectImmortal(res_o);
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
         case _BINARY_OP_SUBSCR_TUPLE_INT: {
             _PyStackRef sub_st;
             _PyStackRef tuple_st;
@@ -1758,6 +1825,48 @@
             tuple_st = res;
             stack_pointer[-1] = tuple_st;
             PyStackRef_CLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            stack_pointer[-1] = res;
+            break;
+        }
+
+        case _BINARY_OP_SUBSCR_TUPLE_INT_UNBOXED: {
+            _PyStackRef sub_st;
+            _PyStackRef tuple_st;
+            _PyStackRef res;
+            sub_st = stack_pointer[-1];
+            tuple_st = stack_pointer[-2];
+            PyObject *tuple = PyStackRef_AsPyObjectBorrow(tuple_st);
+            if (!PyTuple_CheckExact(tuple)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            // Deopt unless 0 <= sub < PyTuple_Size(list);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            Py_ssize_t index = _PyUnbox_toLong(sub_st.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (index < 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (index >= PyTuple_GET_SIZE(tuple)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = PyTuple_GET_ITEM(tuple, index);
+            assert(res_o != NULL);
+            res = PyStackRef_FromPyObjectNew(res_o);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            _PyStackRef tmp = tuple_st;
+            tuple_st = res;
+            stack_pointer[-2] = tuple_st;
+            PyStackRef_CLOSE(tmp);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(sub_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             stack_pointer[-1] = res;
             break;

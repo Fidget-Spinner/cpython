@@ -388,13 +388,13 @@ dummy_func(void) {
 
     op(_STORE_SUBSCR_LIST_INT, (value, list_st, sub_st -- )) {
         if (sym_is_unboxed(sub_st)) {
-            REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+            REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, oparg, 0);
         }
     }
 
     op(_BINARY_OP_SUBSCR_LIST_INT, (list_st, sub_st -- res)) {
         if (sym_is_unboxed(sub_st)) {
-            REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, 0, 0);
+            REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, oparg, 0);
         }
         res = sym_new_not_null(ctx);
     }
@@ -413,6 +413,18 @@ dummy_func(void) {
     }
 
     op(_TO_BOOL_INT, (value -- res)) {
+        if (sym_is_unboxed(value)) {
+            REPLACE_OP(this_instr, _TO_BOOL_INT_UNBOXED, oparg, 0);
+        }
+        else {
+            if (!optimize_to_bool(this_instr, ctx, value, &res)) {
+                sym_set_type(value, &PyLong_Type);
+            }
+        }
+        res = sym_new_truthiness(ctx, value, true);
+    }
+
+    op(_TO_BOOL_INT_UNBOXED, (value -- res)) {
         if (!optimize_to_bool(this_instr, ctx, value, &res)) {
             sym_set_type(value, &PyLong_Type);
             res = sym_new_truthiness(ctx, value, true);
@@ -972,6 +984,19 @@ dummy_func(void) {
         }
     }
 
+    op(_BINARY_OP_SUBSCR_TUPLE_INT, (tuple_st, sub_st -- res)) {
+        if (sym_is_unboxed(sub_st)) {
+            REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_TUPLE_INT_UNBOXED, oparg, 0);
+        }
+        res = sym_new_not_null(ctx);
+    }
+
+    op(_BINARY_OP_SUBSCR_STR_INT, (str_st, sub_st -- res)) {
+        if (sym_is_unboxed(sub_st)) {
+            REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_STR_INT_UNBOXED, oparg, 0);
+        }
+        res = sym_new_not_null(ctx);
+    }
 
 // END BYTECODES //
 
