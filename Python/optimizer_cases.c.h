@@ -111,7 +111,7 @@
 
         case _STORE_FAST: {
             JitOptSymbol *value;
-            value = sym_fail_if_boxed(ctx, stack_pointer[-1]);
+            value = stack_pointer[-1];
             GETLOCAL(oparg) = value;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -266,8 +266,8 @@
         case _GUARD_BOTH_INT: {
             JitOptSymbol *right;
             JitOptSymbol *left;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             bool should_rerun = (sym_unbox_and_hoist_if_possible(trace, ctx, left) ||
                              sym_unbox_and_hoist_if_possible(trace, ctx, right));
             if (should_rerun) {
@@ -312,8 +312,8 @@
             JitOptSymbol *right;
             JitOptSymbol *left;
             JitOptSymbol *res;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _BINARY_OP_MULTIPLY_INT_UNBOXED, 0, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
@@ -336,8 +336,8 @@
             JitOptSymbol *right;
             JitOptSymbol *left;
             JitOptSymbol *res;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _BINARY_OP_ADD_INT_UNBOXED, 0, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
@@ -360,8 +360,8 @@
             JitOptSymbol *right;
             JitOptSymbol *left;
             JitOptSymbol *res;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _BINARY_OP_SUBTRACT_INT_UNBOXED, 0, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
@@ -695,7 +695,7 @@
             JitOptSymbol *sub_st;
             JitOptSymbol *list_st;
             JitOptSymbol *res;
-            sub_st = sym_fail_if_boxed(ctx, stack_pointer[-1]);
+            sub_st = stack_pointer[-1];
             if (sym_is_unboxed(sub_st)) {
                 REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT_UNBOXED, 0, 0);
             }
@@ -822,7 +822,7 @@
             JitOptSymbol *sub_st;
             JitOptSymbol *list_st;
             JitOptSymbol *value;
-            sub_st = sym_fail_if_boxed(ctx, stack_pointer[-1]);
+            sub_st = stack_pointer[-1];
             if (sym_is_unboxed(sub_st)) {
                 REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT_UNBOXED, 0, 0);
             }
@@ -1614,8 +1614,8 @@
             JitOptSymbol *right;
             JitOptSymbol *left;
             JitOptSymbol *res;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _COMPARE_OP_INT_UNBOXED, oparg, 0);
             }
@@ -2237,8 +2237,8 @@
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
             JitOptSymbol *null;
             JitOptSymbol *callable;
-            null = sym_fail_if_boxed(ctx, stack_pointer[-1 - oparg]);
-            callable = sym_fail_if_boxed(ctx, stack_pointer[-2 - oparg]);
+            null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
             sym_set_null(null);
             sym_set_type(callable, &PyMethod_Type);
             break;
@@ -2266,8 +2266,8 @@
         case _CHECK_FUNCTION_EXACT_ARGS: {
             JitOptSymbol *self_or_null;
             JitOptSymbol *callable;
-            self_or_null = sym_fail_if_boxed(ctx, stack_pointer[-1 - oparg]);
-            callable = sym_fail_if_boxed(ctx, stack_pointer[-2 - oparg]);
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
             assert(sym_matches_type(callable, &PyFunction_Type));
             if (sym_is_const(ctx, callable)) {
                 if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
@@ -2293,7 +2293,7 @@
             JitOptSymbol *callable;
             _Py_UOpsAbstractFrame *new_frame;
             args = &stack_pointer[-oparg];
-            self_or_null = sym_fail_if_boxed(ctx, stack_pointer[-1 - oparg]);
+            self_or_null = stack_pointer[-1 - oparg];
             int argcount = oparg;
             PyCodeObject *co = NULL;
             assert((this_instr + 2)->opcode == _PUSH_FRAME);
@@ -2324,7 +2324,7 @@
 
         case _PUSH_FRAME: {
             _Py_UOpsAbstractFrame *new_frame;
-            new_frame = sym_fail_if_boxed(ctx, stack_pointer[-1]);
+            new_frame = (_Py_UOpsAbstractFrame *)stack_pointer[-1];
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
@@ -2971,7 +2971,7 @@
         case _COPY: {
             JitOptSymbol *bottom;
             JitOptSymbol *top;
-            bottom = sym_fail_if_boxed(ctx, stack_pointer[-1 - (oparg-1)]);
+            bottom = stack_pointer[-1 - (oparg-1)];
             assert(oparg > 0);
             top = bottom;
             stack_pointer[0] = top;

@@ -216,12 +216,12 @@ def generate_abstract_interpreter(
             out.emit(f"/* {uop.name} is not a viable micro-op for tier 2 */\n\n")
             continue
         out.emit(f"case {uop.name}: {{\n")
+        needs_unboxed_checks = uop_needs_unboxed_check(uop)
         if override:
             declare_variables(override, out, skip_inputs=False)
         else:
-            needs_unboxed_checks = uop_needs_unboxed_check(uop)
             declare_variables(uop, out, skip_inputs=not needs_unboxed_checks)
-        stack = Stack(extract_bits=False, cast_type="JitOptSymbol *", check_unboxed=True)
+        stack = Stack(extract_bits=False, cast_type="JitOptSymbol *", check_unboxed=needs_unboxed_checks)
         write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
         out.start_line()
         out.emit("break;\n")
