@@ -308,7 +308,10 @@ sym_unbox_and_hoist_if_possible(JitOptContext *ctx, JitOptSymbol *sym)
     // to check it's actually a long, we deopt at runtime if it's not.
     if (_Py_uop_sym_is_local(sym) && !_Py_uop_sym_is_unboxed(sym)) {
         size_t oparg = _Py_uop_sym_get_local_idx(sym);
-        assert(ctx->frame->frame_starting_inst != NULL);
+        // Can't write unboxed op.
+        if (ctx->frame->frame_starting_inst == NULL) {
+            return false;
+        }
         assert(ctx->frame->frame_starting_inst[oparg].opcode == _NOP_FOR_OPTIMIZER);
         ctx->frame->frame_starting_inst[oparg].opcode = _UNBOX_FAST;
         ctx->frame->frame_starting_inst[oparg].oparg = oparg;
