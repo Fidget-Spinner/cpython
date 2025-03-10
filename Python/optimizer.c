@@ -456,7 +456,10 @@ add_to_trace(
     trace_stack[trace_stack_depth].func = func; \
     trace_stack[trace_stack_depth].code = code; \
     trace_stack[trace_stack_depth].instr = instr; \
-    trace_stack_depth++;
+    trace_stack_depth++; \
+    for (int x = 0; x < code->co_nlocalsplus; x++) { \
+        ADD_TO_TRACE(_NOP_FOR_OPTIMIZER, 0, 0, INSTR_IP(instr, code)); \
+    }
 #define TRACE_STACK_POP() \
     if (trace_stack_depth <= 0) { \
         Py_FatalError("Trace stack underflow\n"); \
@@ -512,9 +515,9 @@ translate_bytecode_to_trace(
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
             2 * INSTR_IP(initial_instr, code));
-    DPRINTF(2, "Padding trace prelude with nlocalsplus _NOPs for optimization purposes later.\n");
+    DPRINTF(2, "Padding frame prelude with nlocalsplus _NOPs for optimization purposes later.\n");
     for (int x = 0; x < code->co_nlocalsplus; x++) {
-        ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_NOP_FOR_OPTIMIZER, 0, 0, INSTR_IP(instr, code));
     }
     ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
@@ -813,7 +816,6 @@ translate_bytecode_to_trace(
                                 }
                                 // Increment IP to the return address
                                 instr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + 1;
-                                TRACE_STACK_PUSH();
                                 _Py_BloomFilter_Add(dependencies, new_code);
                                 /* Set the operand to the callee's function or code object,
                                  * to assist optimization passes.
@@ -831,6 +833,7 @@ translate_bytecode_to_trace(
                                     operand = 0;
                                 }
                                 ADD_TO_TRACE(uop, oparg, operand, target);
+                                TRACE_STACK_PUSH();
                                 code = new_code;
                                 func = new_func;
                                 instr = _PyCode_CODE(code);

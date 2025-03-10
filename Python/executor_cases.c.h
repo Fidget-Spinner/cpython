@@ -12,6 +12,10 @@
             break;
         }
 
+        case _NOP_FOR_OPTIMIZER: {
+            break;
+        }
+
         case _CHECK_PERIODIC: {
             _Py_CHECK_EMSCRIPTEN_SIGNALS_PERIODICALLY();
             QSBR_QUIESCENT_STATE(tstate);
@@ -850,6 +854,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -874,6 +881,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -898,6 +908,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -922,6 +935,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -946,6 +962,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -970,6 +989,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -994,6 +1016,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -1018,6 +1043,9 @@
             assert(oparg == CURRENT_OPARG());
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -1041,6 +1069,9 @@
             oparg = CURRENT_OPARG();
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {

@@ -302,14 +302,16 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 
 // Return value indicates if we should rerun the trace due to hoisted values.
 static inline bool
-sym_unbox_and_hoist_if_possible(_PyUOpInstruction *trace, JitOptContext *ctx, JitOptSymbol *sym)
+sym_unbox_and_hoist_if_possible(JitOptContext *ctx, JitOptSymbol *sym)
 {
     // Note that the unboxing is *speculative*. So we don't need
     // to check it's actually a long, we deopt at runtime if it's not.
     if (_Py_uop_sym_is_local(sym) && !_Py_uop_sym_is_unboxed(sym)) {
         size_t oparg = _Py_uop_sym_get_local_idx(sym);
-        trace[oparg].opcode = _UNBOX_FAST;
-        trace[oparg].oparg = oparg;
+        assert(ctx->frame->frame_starting_inst != NULL);
+        assert(ctx->frame->frame_starting_inst[oparg].opcode == _NOP_FOR_OPTIMIZER);
+        ctx->frame->frame_starting_inst[oparg].opcode = _UNBOX_FAST;
+        ctx->frame->frame_starting_inst[oparg].oparg = oparg;
         return true;
         // Target should be written during projection already.
     }
@@ -487,11 +489,7 @@ optimize_uops(
     if (frame == NULL) {
         return -1;
     }
-    for (int x = 0; x < frame->locals_len; x++) {
-        if (frame->locals[x]) {
-            sym_set_local(frame->locals[x], x);
-        }
-    }
+    frame->frame_starting_inst = trace;
     ctx->curr_frame_depth++;
     ctx->frame = frame;
     ctx->done = false;

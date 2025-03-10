@@ -7,6 +7,10 @@
             break;
         }
 
+        case _NOP_FOR_OPTIMIZER: {
+            break;
+        }
+
         case _CHECK_PERIODIC: {
             break;
         }
@@ -268,8 +272,8 @@
             JitOptSymbol *left;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            bool should_rerun = (sym_unbox_and_hoist_if_possible(trace, ctx, left) ||
-                             sym_unbox_and_hoist_if_possible(trace, ctx, right));
+            bool should_rerun = (sym_unbox_and_hoist_if_possible(ctx, left) ||
+                             sym_unbox_and_hoist_if_possible(ctx, right));
             if (should_rerun) {
                 DPRINTF(2, "Rerunning optimizer due to hoisted types.\n");
                 ctx->retry = true;
@@ -892,7 +896,7 @@
         case _RETURN_VALUE: {
             JitOptSymbol *retval;
             JitOptSymbol *res;
-            retval = sym_fail_if_boxed(ctx, stack_pointer[-1]);
+            retval = stack_pointer[-1];
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
@@ -2337,6 +2341,7 @@
                 ctx->done = true;
                 break;
             }
+            frame->frame_starting_inst = &trace[i+1];
             /* Stack space handling */
             int framesize = co->co_framesize;
             assert(framesize > 0);

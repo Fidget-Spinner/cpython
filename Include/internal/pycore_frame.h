@@ -168,6 +168,9 @@ static inline void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *
     for (int i = 0; i < stacktop; i++) {
         dest->localsplus[i] = PyStackRef_MakeHeapSafe(src->localsplus[i]);
     }
+    if (PyStackRef_ReboxArray(dest->localsplus, dest->stackpointer)) {
+        Py_FatalError("Could not rebox/copy a frame.\n");
+    }
 }
 
 #ifdef Py_GIL_DISABLED

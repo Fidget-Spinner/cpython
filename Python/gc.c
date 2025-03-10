@@ -553,6 +553,9 @@ _PyGC_VisitFrameStack(_PyInterpreterFrame *frame, visitproc visit, void *arg)
     _PyStackRef *ref = _PyFrame_GetLocalsArray(frame);
     /* locals and stack */
     for (; ref < frame->stackpointer; ref++) {
+        if (PyStackRef_IsUnboxedInt(*ref)) {
+            continue;
+        }
         Py_VISIT(PyStackRef_AsPyObjectBorrow(*ref));
     }
     return 0;
@@ -1488,6 +1491,9 @@ mark_stacks(PyInterpreterState *interp, PyGC_Head *visited, int visited_space, b
             objects_marked += move_to_reachable(func, &reachable, visited_space);
             while (sp > locals) {
                 sp--;
+                if (PyStackRef_IsUnboxedInt(*sp)) {
+                    continue;
+                }
                 PyObject *op = PyStackRef_AsPyObjectBorrow(*sp);
                 if (op == NULL || _Py_IsImmortal(op)) {
                     continue;

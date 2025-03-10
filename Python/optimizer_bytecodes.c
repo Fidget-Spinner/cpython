@@ -105,8 +105,8 @@ dummy_func(void) {
     }
 
     op(_GUARD_BOTH_INT, (left, right -- left, right)) {
-        bool should_rerun = (sym_unbox_and_hoist_if_possible(trace, ctx, left) ||
-                             sym_unbox_and_hoist_if_possible(trace, ctx, right));
+        bool should_rerun = (sym_unbox_and_hoist_if_possible(ctx, left) ||
+                             sym_unbox_and_hoist_if_possible(ctx, right));
         if (should_rerun) {
             DPRINTF(2, "Rerunning optimizer due to hoisted types.\n");
             ctx->retry = true;
@@ -841,6 +841,8 @@ dummy_func(void) {
             ctx->done = true;
             break;
         }
+
+        frame->frame_starting_inst = &trace[i+1];
 
         /* Stack space handling */
         int framesize = co->co_framesize;

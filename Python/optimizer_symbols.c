@@ -131,7 +131,7 @@ _Py_uop_sym_is_local(JitOptSymbol *sym)
     return sym->is_local;
 }
 
-bool
+void
 _Py_uop_sym_set_local(JitOptSymbol *sym, size_t local_idx)
 {
     sym->is_local = 1;
@@ -712,12 +712,19 @@ _Py_uop_frame_new(
         frame->locals[i] = local;
     }
 
+    for (int x = 0; x < frame->locals_len; x++) {
+        if (frame->locals[x]) {
+            _Py_uop_sym_set_local(frame->locals[x], x);
+        }
+    }
 
     // Initialize the stack as well
     for (int i = 0; i < curr_stackentries; i++) {
         JitOptSymbol *stackvar = _Py_uop_sym_new_unknown(ctx);
         frame->stack[i] = stackvar;
     }
+
+    frame->frame_starting_inst = NULL;
 
     return frame;
 }
@@ -744,7 +751,7 @@ _Py_uop_abstractcontext_fini(JitOptContext *ctx)
 void
 _Py_uop_abstractcontext_init(JitOptContext *ctx)
 {
-    static_assert(sizeof(JitOptSymbol) <= 3 * sizeof(uint64_t), "JitOptSymbol has grown");
+    static_assert(sizeof(JitOptSymbol) <= 4 * sizeof(uint64_t), "JitOptSymbol has grown");
     ctx->limit = ctx->locals_and_stack + MAX_ABSTRACT_INTERP_SIZE;
     ctx->n_consumed = ctx->locals_and_stack;
 #ifdef Py_DEBUG // Aids debugging a little. There should never be NULL in the abstract interpreter.

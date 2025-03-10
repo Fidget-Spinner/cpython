@@ -180,6 +180,7 @@ typedef enum _JitSymType {
 typedef struct _jit_opt_known_class {
     uint8_t tag;
     uint8_t is_local;
+    size_t local_idx;
     uint32_t version;
     PyTypeObject *type;
 } JitOptKnownClass;
@@ -187,12 +188,14 @@ typedef struct _jit_opt_known_class {
 typedef struct _jit_opt_known_version {
     uint8_t tag;
     uint8_t is_local;
+    size_t local_idx;
     uint32_t version;
 } JitOptKnownVersion;
 
 typedef struct _jit_opt_known_value {
     uint8_t tag;
     uint8_t is_local;
+    size_t local_idx;
     PyObject *value;
     _PyUOpInstruction *source;
 } JitOptKnownValue;
@@ -202,6 +205,7 @@ typedef struct _jit_opt_known_value {
 typedef struct _jit_opt_tuple {
     uint8_t tag;
     uint8_t is_local;
+    size_t local_idx;
     uint8_t length;
     uint16_t items[MAX_SYMBOLIC_TUPLE_SIZE];
 } JitOptTuple;
@@ -209,6 +213,7 @@ typedef struct _jit_opt_tuple {
 typedef struct {
     uint8_t tag;
     uint8_t is_local;
+    size_t local_idx;
     bool not;
     uint16_t value;
 } JitOptTruthiness;
@@ -216,6 +221,7 @@ typedef struct {
 typedef struct {
     uint8_t tag;
     uint8_t is_local;
+    size_t local_idx;
     PyTypeObject *type;
     PyObject *value;
 } JitOptUnboxed;
@@ -240,6 +246,8 @@ struct _Py_UOpsAbstractFrame {
     // Max stacklen
     int stack_len;
     int locals_len;
+
+    _PyUOpInstruction *frame_starting_inst;
 
     JitOptSymbol **stack_pointer;
     JitOptSymbol **stack;
@@ -303,7 +311,7 @@ extern void _Py_uop_abstractcontext_init(JitOptContext *ctx);
 extern void _Py_uop_abstractcontext_fini(JitOptContext *ctx);
 
 extern bool _Py_uop_sym_is_local(JitOptSymbol *sym);
-extern bool _Py_uop_sym_set_local(JitOptSymbol *sym, size_t);
+extern void _Py_uop_sym_set_local(JitOptSymbol *sym, size_t);
 extern size_t _Py_uop_sym_get_local_idx(JitOptSymbol *sym);
 extern bool _Py_uop_sym_is_unboxed(JitOptSymbol *sym);
 extern JitOptSymbol * _Py_uop_sym_new_unboxed(JitOptContext *ctx, PyTypeObject *type, PyObject *const_val);

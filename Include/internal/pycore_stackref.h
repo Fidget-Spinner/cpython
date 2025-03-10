@@ -411,8 +411,8 @@ _PyUnbox_isSmall(long value)
 
 
 static inline int
-_PyLong_IsCompact61(const PyLongObject* op) {
-    return PyLong_CheckExact(op) && _PyLong_IsCompact(op) && _PyUnbox_isSmall((_PyLong_CompactValue(op)));
+_PyLong_IsCompact61(PyObject* op) {
+    return PyLong_CheckExact(op) && _PyLong_IsCompact((PyLongObject *)op) && _PyUnbox_isSmall((_PyLong_CompactValue((PyLongObject *)op)));
 }
 
 static inline uintptr_t
@@ -494,6 +494,7 @@ PyStackRef_IsUncountedMortal(_PyStackRef ref)
 static inline PyObject *
 PyStackRef_AsPyObjectBorrow(_PyStackRef ref)
 {
+    assert(!PyStackRef_IsUnboxedInt(ref));
     return BITS_TO_PTR_MASKED(ref);
 }
 #endif
@@ -591,7 +592,7 @@ PyStackRef_DUP(_PyStackRef ref)
 static inline bool
 PyStackRef_IsHeapSafe(_PyStackRef ref)
 {
-    return (ref.bits & Py_TAG_BITS) == 0 || ref.bits == PyStackRef_NULL_BITS ||  _Py_IsImmortal(BITS_TO_PTR_MASKED(ref));
+    return (ref.bits & Py_TAG_BITS) == 0 || ((ref.bits & Py_TAG_INT) == Py_TAG_INT) || ref.bits == PyStackRef_NULL_BITS ||  _Py_IsImmortal(BITS_TO_PTR_MASKED(ref));
 }
 
 static inline _PyStackRef
@@ -600,6 +601,7 @@ PyStackRef_MakeHeapSafe(_PyStackRef ref)
     if (PyStackRef_IsHeapSafe(ref)) {
         return ref;
     }
+    assert(!PyStackRef_IsUnboxedInt(ref));
     PyObject *obj = BITS_TO_PTR_MASKED(ref);
     Py_INCREF(obj);
     ref.bits = (uintptr_t)obj;

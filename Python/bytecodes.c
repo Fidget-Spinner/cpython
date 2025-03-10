@@ -145,6 +145,9 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
+        op(_NOP_FOR_OPTIMIZER, (--)) {
+        }
+
         family(RESUME, 0) = {
             RESUME_CHECK,
         };
@@ -627,6 +630,9 @@ dummy_func(
         replicate(8) op(_UNBOX_FAST, (--)) {
             assert(sizeof(uintptr_t) >= sizeof(long));
             _PyStackRef tmp = GETLOCAL(oparg);
+            if (PyStackRef_IsUnboxedInt(tmp)) {
+                break;
+            }
             PyObject *maybe_long = PyStackRef_AsPyObjectBorrow(tmp);
             int is_compact_long = _PyLong_IsCompact61(maybe_long);
             if (!is_compact_long) {
@@ -1220,7 +1226,7 @@ dummy_func(
         // The stack effect here is a bit misleading.
         // retval is popped from the stack, but res
         // is pushed to a different frame, the callers' frame.
-        inst(RETURN_VALUE, (retval -- res)) {
+        unboxed inst(RETURN_VALUE, (retval -- res)) {
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
             DEAD(retval);

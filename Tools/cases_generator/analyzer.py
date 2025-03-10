@@ -586,6 +586,7 @@ NON_ESCAPING_FUNCTIONS = (
     "PyLong_FromSsize_t",
     "PySlice_New",
     "PyStackRef_AsPyObjectBorrow",
+    "PyStackRef_IsUnboxedInt",
     "PyStackRef_AsPyObjectNew",
     "PyStackRef_FromPyObjectNewMortal",
     "PyStackRef_AsPyObjectSteal",
