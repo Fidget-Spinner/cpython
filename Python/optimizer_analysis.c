@@ -322,6 +322,16 @@ sym_object_is_unboxable(PyObject *obj)
     return _PyLong_IsCompact61((PyLongObject *)obj);
 }
 
+static inline void
+sym_fail_if_boxed(JitOptContext *ctx, JitOptSymbol *sym)
+{
+    if (_Py_uop_sym_is_unboxed(sym)) {
+        DPRINTF(2, "Received unboxed value for an operation that only supports boxed.\n");
+        ctx->done = true;
+        ctx->contradiction = true;
+    }
+}
+
 #define STACK_LEVEL()     ((int)(stack_pointer - ctx->frame->stack))
 #define STACK_SIZE()      ((int)(ctx->frame->stack_len))
 

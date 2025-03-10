@@ -78,8 +78,18 @@ def decref_inputs(
 
 
 def emit_default(out: CWriter, uop: Uop, stack: Stack) -> None:
+    should_emit_unboxed_fails = not uop.properties.has_unboxed_variant and not uop.name.endswith("UNBOXED")
     for var in reversed(uop.stack.inputs):
-        stack.pop(var)
+        defn, _ = stack.pop(var)
+        if should_emit_unboxed_fails:
+            out.emit(defn)
+    if should_emit_unboxed_fails:
+        for var in reversed(uop.stack.inputs):
+            if var.is_array():
+                assert f"Unboxed ops with array stack effects must be manually defined: {var.name}", False
+            if var.name != "unused":
+                out.emit(f"sym_fail_if_boxed(ctx, {var.name});\n")
+
     top_offset = stack.top_offset.copy()
     for var in uop.stack.outputs:
         if var.is_array() and not var.peek and not var.name == "unused":
@@ -200,7 +210,8 @@ def generate_abstract_interpreter(
         if override:
             declare_variables(override, out, skip_inputs=False)
         else:
-            declare_variables(uop, out, skip_inputs=True)
+            needs_unboxed_checks = not uop.properties.has_unboxed_variant and not uop.name.endswith("UNBOXED")
+            declare_variables(uop, out, skip_inputs=not needs_unboxed_checks)
         stack = Stack(extract_bits=False, cast_type="JitOptSymbol *")
         write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
         out.start_line()

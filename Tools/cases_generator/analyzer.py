@@ -37,6 +37,7 @@ class Properties:
     const_oparg: int = -1
     needs_prev: bool = False
     no_save_ip: bool = False
+    has_unboxed_variant: bool = False
 
     def dump(self, indent: str) -> None:
         simple_properties = self.__dict__.copy()
@@ -870,6 +871,7 @@ def compute_properties(op: parser.CodeDef) -> Properties:
     escapes = bool(escaping_calls)
     pure = False if isinstance(op, parser.LabelDef) else "pure" in op.annotations
     no_save_ip = False if isinstance(op, parser.LabelDef) else "no_save_ip" in op.annotations
+    has_unboxed_variant = False if isinstance(op, parser.LabelDef) else "unboxed" in op.annotations
     return Properties(
         escaping_calls=escaping_calls,
         escapes=escapes,
@@ -892,6 +894,7 @@ def compute_properties(op: parser.CodeDef) -> Properties:
         no_save_ip=no_save_ip,
         tier=tier_variable(op),
         needs_prev=variable_used(op, "prev_instr"),
+        has_unboxed_variant=has_unboxed_variant,
     )
 
 

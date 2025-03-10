@@ -232,6 +232,7 @@ annotations = {
     "tier1",
     "tier2",
     "no_save_ip",
+    "unboxed",
 }
 
 __all__ = []

@@ -326,7 +326,7 @@ dummy_func(
             value = PyStackRef_FromPyObjectImmortal(obj);
         }
 
-        replicate(8) inst(STORE_FAST, (value --)) {
+        unboxed replicate(8) inst(STORE_FAST, (value --)) {
             assert(
                 ((_PyFrame_GetCode(frame)->co_flags & (CO_COROUTINE | CO_GENERATOR)) == 0) ||
                 PyStackRef_IsHeapSafe(value)
@@ -376,7 +376,7 @@ dummy_func(
             PyStackRef_XCLOSE(tmp);
         }
 
-        pure inst(POP_TOP, (value --)) {
+        unboxed pure inst(POP_TOP, (value --)) {
             PyStackRef_CLOSE(value);
         }
 
@@ -384,7 +384,7 @@ dummy_func(
             res = PyStackRef_NULL;
         }
 
-        no_save_ip inst(END_FOR, (value -- )) {
+        unboxed no_save_ip inst(END_FOR, (value -- )) {
             /* Don't update instr_ptr, so that POP_ITER sees
              * the FOR_ITER as the previous instruction.
              * This has the benign side effect that if value is
@@ -562,7 +562,7 @@ dummy_func(
             BINARY_OP_EXTEND,
         };
 
-        op(_GUARD_BOTH_INT, (left, right -- left, right)) {
+        unboxed op(_GUARD_BOTH_INT, (left, right -- left, right)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             EXIT_IF(!PyLong_CheckExact(left_o));
@@ -579,7 +579,7 @@ dummy_func(
             EXIT_IF(!PyLong_CheckExact(value_o));
         }
 
-        pure op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
+        unboxed pure op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             assert(PyLong_CheckExact(left_o));
@@ -594,7 +594,7 @@ dummy_func(
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
 
-        pure op(_BINARY_OP_ADD_INT, (left, right -- res)) {
+        unboxed pure op(_BINARY_OP_ADD_INT, (left, right -- res)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             assert(PyLong_CheckExact(left_o));
@@ -609,7 +609,7 @@ dummy_func(
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
 
-        pure op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
+        unboxed pure op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             assert(PyLong_CheckExact(left_o));
@@ -923,7 +923,7 @@ dummy_func(
 
         macro(STORE_SLICE) = _SPECIALIZE_STORE_SLICE + _STORE_SLICE;
 
-        inst(BINARY_OP_SUBSCR_LIST_INT, (unused/5, list_st, sub_st -- res)) {
+        unboxed inst(BINARY_OP_SUBSCR_LIST_INT, (unused/5, list_st, sub_st -- res)) {
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
 
@@ -994,7 +994,7 @@ dummy_func(
             res = PyStackRef_FromPyObjectImmortal(res_o);
         }
 
-        inst(BINARY_OP_SUBSCR_TUPLE_INT, (unused/5, tuple_st, sub_st -- res)) {
+        unboxed inst(BINARY_OP_SUBSCR_TUPLE_INT, (unused/5, tuple_st, sub_st -- res)) {
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *tuple = PyStackRef_AsPyObjectBorrow(tuple_st);
 
@@ -1099,7 +1099,7 @@ dummy_func(
 
         macro(STORE_SUBSCR) = _SPECIALIZE_STORE_SUBSCR + _STORE_SUBSCR;
 
-        inst(STORE_SUBSCR_LIST_INT, (unused/1, value, list_st, sub_st -- )) {
+        unboxed inst(STORE_SUBSCR_LIST_INT, (unused/1, value, list_st, sub_st -- )) {
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
 
@@ -2708,7 +2708,7 @@ dummy_func(
         }
 
         // Similar to COMPARE_OP_FLOAT
-        op(_COMPARE_OP_INT, (left, right -- res)) {
+        unboxed op(_COMPARE_OP_INT, (left, right -- res)) {
             PyObject *left_o = PyStackRef_AsLong(left);
             PyObject *right_o = PyStackRef_AsLong(right);
 
@@ -3351,7 +3351,7 @@ dummy_func(
             EXIT_IF(r->len <= 0);
         }
 
-        op(_ITER_NEXT_RANGE, (iter -- iter, next)) {
+        unboxed op(_ITER_NEXT_RANGE, (iter -- iter, next)) {
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             assert(r->len > 0);
@@ -3852,12 +3852,12 @@ dummy_func(
             _CALL_NON_PY_GENERAL +
             _CHECK_PERIODIC;
 
-        op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable[1], null[1], unused[oparg] -- callable[1], null[1], unused[oparg])) {
+        unboxed op(_CHECK_CALL_BOUND_METHOD_EXACT_ARGS, (callable[1], null[1], unused[oparg] -- callable[1], null[1], unused[oparg])) {
             EXIT_IF(!PyStackRef_IsNull(null[0]));
             EXIT_IF(Py_TYPE(PyStackRef_AsPyObjectBorrow(callable[0])) != &PyMethod_Type);
         }
 
-        op(_INIT_CALL_BOUND_METHOD_EXACT_ARGS, (callable[1], self_or_null[1], unused[oparg] -- callable[1], self_or_null[1], unused[oparg])) {
+        unboxed op(_INIT_CALL_BOUND_METHOD_EXACT_ARGS, (callable[1], self_or_null[1], unused[oparg] -- callable[1], self_or_null[1], unused[oparg])) {
             assert(PyStackRef_IsNull(self_or_null[0]));
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
             STAT_INC(CALL, hit);
@@ -3871,7 +3871,7 @@ dummy_func(
             DEOPT_IF(tstate->interp->eval_frame);
         }
 
-        op(_CHECK_FUNCTION_EXACT_ARGS, (callable[1], self_or_null[1], unused[oparg] -- callable[1], self_or_null[1], unused[oparg])) {
+        unboxed op(_CHECK_FUNCTION_EXACT_ARGS, (callable[1], self_or_null[1], unused[oparg] -- callable[1], self_or_null[1], unused[oparg])) {
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
             assert(PyFunction_Check(callable_o));
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
@@ -3879,7 +3879,7 @@ dummy_func(
             EXIT_IF(code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0])));
         }
 
-        op(_CHECK_STACK_SPACE, (callable[1], self_or_null[1], unused[oparg] -- callable[1], self_or_null[1], unused[oparg])) {
+        unboxed op(_CHECK_STACK_SPACE, (callable[1], self_or_null[1], unused[oparg] -- callable[1], self_or_null[1], unused[oparg])) {
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             PyCodeObject *code = (PyCodeObject *)func->func_code;
@@ -3887,7 +3887,7 @@ dummy_func(
             DEOPT_IF(tstate->py_recursion_remaining <= 1);
         }
 
-        replicate(5) pure op(_INIT_CALL_PY_EXACT_ARGS, (callable[1], self_or_null[1], args[oparg] -- new_frame: _PyInterpreterFrame*)) {
+        unboxed replicate(5) pure op(_INIT_CALL_PY_EXACT_ARGS, (callable[1], self_or_null[1], args[oparg] -- new_frame: _PyInterpreterFrame*)) {
             int has_self = !PyStackRef_IsNull(self_or_null[0]);
             STAT_INC(CALL, hit);
             new_frame = _PyFrame_PushUnchecked(tstate, callable[0], oparg + has_self, frame);
@@ -4900,7 +4900,7 @@ dummy_func(
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
 
-        pure inst(COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
+        unboxed pure inst(COPY, (bottom, unused[oparg-1] -- bottom, unused[oparg-1], top)) {
             assert(oparg > 0);
             top = PyStackRef_DUP(bottom);
         }
@@ -4934,7 +4934,7 @@ dummy_func(
 
         macro(BINARY_OP) = _SPECIALIZE_BINARY_OP + unused/4 + _BINARY_OP;
 
-        pure inst(SWAP, (bottom[1], unused[oparg-2], top[1] --
+        unboxed pure inst(SWAP, (bottom[1], unused[oparg-2], top[1] --
                     bottom[1], unused[oparg-2], top[1])) {
             _PyStackRef temp = bottom[0];
             bottom[0] = top[0];

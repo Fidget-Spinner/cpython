@@ -140,7 +140,13 @@
         }
 
         case _END_SEND: {
+            JitOptSymbol *value;
+            JitOptSymbol *receiver;
             JitOptSymbol *val;
+            value = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, value);
+            sym_fail_if_boxed(ctx, receiver);
             val = sym_new_not_null(ctx);
             stack_pointer[-2] = val;
             stack_pointer += -1;
@@ -149,7 +155,10 @@
         }
 
         case _UNARY_NEGATIVE: {
+            JitOptSymbol *value;
             JitOptSymbol *res;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             res = sym_new_not_null(ctx);
             stack_pointer[-1] = res;
             break;
@@ -244,7 +253,10 @@
         }
 
         case _UNARY_INVERT: {
+            JitOptSymbol *value;
             JitOptSymbol *res;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             res = sym_new_not_null(ctx);
             stack_pointer[-1] = res;
             break;
@@ -282,10 +294,16 @@
         }
 
         case _GUARD_NOS_INT: {
+            JitOptSymbol *left;
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, left);
             break;
         }
 
         case _GUARD_TOS_INT: {
+            JitOptSymbol *value;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             break;
         }
 
@@ -428,10 +446,16 @@
         }
 
         case _GUARD_NOS_FLOAT: {
+            JitOptSymbol *left;
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, left);
             break;
         }
 
         case _GUARD_TOS_FLOAT: {
+            JitOptSymbol *value;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             break;
         }
 
@@ -606,11 +630,23 @@
         }
 
         case _GUARD_BINARY_OP_EXTEND: {
+            JitOptSymbol *right;
+            JitOptSymbol *left;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, right);
+            sym_fail_if_boxed(ctx, left);
             break;
         }
 
         case _BINARY_OP_EXTEND: {
+            JitOptSymbol *right;
+            JitOptSymbol *left;
             JitOptSymbol *res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, right);
+            sym_fail_if_boxed(ctx, left);
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -619,7 +655,16 @@
         }
 
         case _BINARY_SLICE: {
+            JitOptSymbol *stop;
+            JitOptSymbol *start;
+            JitOptSymbol *container;
             JitOptSymbol *res;
+            stop = stack_pointer[-1];
+            start = stack_pointer[-2];
+            container = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, stop);
+            sym_fail_if_boxed(ctx, start);
+            sym_fail_if_boxed(ctx, container);
             res = sym_new_not_null(ctx);
             stack_pointer[-3] = res;
             stack_pointer += -2;
@@ -628,6 +673,18 @@
         }
 
         case _STORE_SLICE: {
+            JitOptSymbol *stop;
+            JitOptSymbol *start;
+            JitOptSymbol *container;
+            JitOptSymbol *v;
+            stop = stack_pointer[-1];
+            start = stack_pointer[-2];
+            container = stack_pointer[-3];
+            v = stack_pointer[-4];
+            sym_fail_if_boxed(ctx, stop);
+            sym_fail_if_boxed(ctx, start);
+            sym_fail_if_boxed(ctx, container);
+            sym_fail_if_boxed(ctx, v);
             stack_pointer += -4;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -657,7 +714,13 @@
         }
 
         case _BINARY_OP_SUBSCR_STR_INT: {
+            JitOptSymbol *sub_st;
+            JitOptSymbol *str_st;
             JitOptSymbol *res;
+            sub_st = stack_pointer[-1];
+            str_st = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, sub_st);
+            sym_fail_if_boxed(ctx, str_st);
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -675,7 +738,13 @@
         }
 
         case _BINARY_OP_SUBSCR_DICT: {
+            JitOptSymbol *sub_st;
+            JitOptSymbol *dict_st;
             JitOptSymbol *res;
+            sub_st = stack_pointer[-1];
+            dict_st = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, sub_st);
+            sym_fail_if_boxed(ctx, dict_st);
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -684,7 +753,10 @@
         }
 
         case _BINARY_OP_SUBSCR_CHECK_FUNC: {
+            JitOptSymbol *container;
             JitOptSymbol *getitem;
+            container = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, container);
             getitem = sym_new_not_null(ctx);
             stack_pointer[0] = getitem;
             stack_pointer += 1;
@@ -703,18 +775,39 @@
         }
 
         case _LIST_APPEND: {
+            JitOptSymbol *v;
+            JitOptSymbol *list;
+            v = stack_pointer[-1];
+            list = stack_pointer[-2 - (oparg-1)];
+            sym_fail_if_boxed(ctx, v);
+            sym_fail_if_boxed(ctx, list);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _SET_ADD: {
+            JitOptSymbol *v;
+            JitOptSymbol *set;
+            v = stack_pointer[-1];
+            set = stack_pointer[-2 - (oparg-1)];
+            sym_fail_if_boxed(ctx, v);
+            sym_fail_if_boxed(ctx, set);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_SUBSCR: {
+            JitOptSymbol *sub;
+            JitOptSymbol *container;
+            JitOptSymbol *v;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            v = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, sub);
+            sym_fail_if_boxed(ctx, container);
+            sym_fail_if_boxed(ctx, v);
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -738,26 +831,50 @@
         }
 
         case _STORE_SUBSCR_DICT: {
+            JitOptSymbol *sub;
+            JitOptSymbol *dict_st;
+            JitOptSymbol *value;
+            sub = stack_pointer[-1];
+            dict_st = stack_pointer[-2];
+            value = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, sub);
+            sym_fail_if_boxed(ctx, dict_st);
+            sym_fail_if_boxed(ctx, value);
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _DELETE_SUBSCR: {
+            JitOptSymbol *sub;
+            JitOptSymbol *container;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, sub);
+            sym_fail_if_boxed(ctx, container);
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _CALL_INTRINSIC_1: {
+            JitOptSymbol *value;
             JitOptSymbol *res;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             res = sym_new_not_null(ctx);
             stack_pointer[-1] = res;
             break;
         }
 
         case _CALL_INTRINSIC_2: {
+            JitOptSymbol *value1_st;
+            JitOptSymbol *value2_st;
             JitOptSymbol *res;
+            value1_st = stack_pointer[-1];
+            value2_st = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, value1_st);
+            sym_fail_if_boxed(ctx, value2_st);
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -794,14 +911,20 @@
         }
 
         case _GET_AITER: {
+            JitOptSymbol *obj;
             JitOptSymbol *iter;
+            obj = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, obj);
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
         }
 
         case _GET_ANEXT: {
+            JitOptSymbol *aiter;
             JitOptSymbol *awaitable;
+            aiter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, aiter);
             awaitable = sym_new_not_null(ctx);
             stack_pointer[0] = awaitable;
             stack_pointer += 1;
@@ -810,7 +933,10 @@
         }
 
         case _GET_AWAITABLE: {
+            JitOptSymbol *iterable;
             JitOptSymbol *iter;
+            iterable = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iterable);
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
@@ -832,6 +958,9 @@
         }
 
         case _POP_EXCEPT: {
+            JitOptSymbol *exc_value;
+            exc_value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, exc_value);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -856,6 +985,9 @@
         }
 
         case _STORE_NAME: {
+            JitOptSymbol *v;
+            v = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, v);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -905,7 +1037,10 @@
         }
 
         case _UNPACK_SEQUENCE_LIST: {
+            JitOptSymbol *seq;
             JitOptSymbol **values;
+            seq = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, seq);
             values = &stack_pointer[-1];
             for (int _i = oparg; --_i >= 0;) {
                 values[_i] = sym_new_not_null(ctx);
@@ -929,18 +1064,30 @@
         }
 
         case _STORE_ATTR: {
+            JitOptSymbol *owner;
+            JitOptSymbol *v;
+            owner = stack_pointer[-1];
+            v = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, owner);
+            sym_fail_if_boxed(ctx, v);
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _DELETE_ATTR: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_GLOBAL: {
+            JitOptSymbol *v;
+            v = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, v);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1025,7 +1172,10 @@
         }
 
         case _LOAD_FROM_DICT_OR_DEREF: {
+            JitOptSymbol *class_dict_st;
             JitOptSymbol *value;
+            class_dict_st = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, class_dict_st);
             value = sym_new_not_null(ctx);
             stack_pointer[-1] = value;
             break;
@@ -1041,6 +1191,9 @@
         }
 
         case _STORE_DEREF: {
+            JitOptSymbol *v;
+            v = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, v);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1051,7 +1204,10 @@
         }
 
         case _BUILD_STRING: {
+            JitOptSymbol **pieces;
             JitOptSymbol *str;
+            pieces = &stack_pointer[-oparg];
+            sym_fail_if_boxed(ctx, pieces);
             str = sym_new_not_null(ctx);
             stack_pointer[-oparg] = str;
             stack_pointer += 1 - oparg;
@@ -1071,7 +1227,10 @@
         }
 
         case _BUILD_LIST: {
+            JitOptSymbol **values;
             JitOptSymbol *list;
+            values = &stack_pointer[-oparg];
+            sym_fail_if_boxed(ctx, values);
             list = sym_new_not_null(ctx);
             stack_pointer[-oparg] = list;
             stack_pointer += 1 - oparg;
@@ -1080,19 +1239,34 @@
         }
 
         case _LIST_EXTEND: {
+            JitOptSymbol *iterable_st;
+            JitOptSymbol *list_st;
+            iterable_st = stack_pointer[-1];
+            list_st = stack_pointer[-2 - (oparg-1)];
+            sym_fail_if_boxed(ctx, iterable_st);
+            sym_fail_if_boxed(ctx, list_st);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _SET_UPDATE: {
+            JitOptSymbol *iterable;
+            JitOptSymbol *set;
+            iterable = stack_pointer[-1];
+            set = stack_pointer[-2 - (oparg-1)];
+            sym_fail_if_boxed(ctx, iterable);
+            sym_fail_if_boxed(ctx, set);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _BUILD_SET: {
+            JitOptSymbol **values;
             JitOptSymbol *set;
+            values = &stack_pointer[-oparg];
+            sym_fail_if_boxed(ctx, values);
             set = sym_new_not_null(ctx);
             stack_pointer[-oparg] = set;
             stack_pointer += 1 - oparg;
@@ -1101,7 +1275,10 @@
         }
 
         case _BUILD_MAP: {
+            JitOptSymbol **values;
             JitOptSymbol *map;
+            values = &stack_pointer[-oparg*2];
+            sym_fail_if_boxed(ctx, values);
             map = sym_new_not_null(ctx);
             stack_pointer[-oparg*2] = map;
             stack_pointer += 1 - oparg*2;
@@ -1114,25 +1291,58 @@
         }
 
         case _DICT_UPDATE: {
+            JitOptSymbol *update;
+            JitOptSymbol *dict;
+            update = stack_pointer[-1];
+            dict = stack_pointer[-2 - (oparg - 1)];
+            sym_fail_if_boxed(ctx, update);
+            sym_fail_if_boxed(ctx, dict);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _DICT_MERGE: {
+            JitOptSymbol *update;
+            JitOptSymbol *dict;
+            JitOptSymbol *callable;
+            update = stack_pointer[-1];
+            dict = stack_pointer[-2 - (oparg - 1)];
+            callable = stack_pointer[-5 - (oparg - 1)];
+            sym_fail_if_boxed(ctx, update);
+            sym_fail_if_boxed(ctx, dict);
+            sym_fail_if_boxed(ctx, callable);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _MAP_ADD: {
+            JitOptSymbol *value;
+            JitOptSymbol *key;
+            JitOptSymbol *dict_st;
+            value = stack_pointer[-1];
+            key = stack_pointer[-2];
+            dict_st = stack_pointer[-3 - (oparg - 1)];
+            sym_fail_if_boxed(ctx, value);
+            sym_fail_if_boxed(ctx, key);
+            sym_fail_if_boxed(ctx, dict_st);
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _LOAD_SUPER_ATTR_ATTR: {
+            JitOptSymbol *self_st;
+            JitOptSymbol *class_st;
+            JitOptSymbol *global_super_st;
             JitOptSymbol *attr_st;
+            self_st = stack_pointer[-1];
+            class_st = stack_pointer[-2];
+            global_super_st = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, self_st);
+            sym_fail_if_boxed(ctx, class_st);
+            sym_fail_if_boxed(ctx, global_super_st);
             attr_st = sym_new_not_null(ctx);
             stack_pointer[-3] = attr_st;
             stack_pointer += -2;
@@ -1141,8 +1351,17 @@
         }
 
         case _LOAD_SUPER_ATTR_METHOD: {
+            JitOptSymbol *self_st;
+            JitOptSymbol *class_st;
+            JitOptSymbol *global_super_st;
             JitOptSymbol *attr;
             JitOptSymbol *self_or_null;
+            self_st = stack_pointer[-1];
+            class_st = stack_pointer[-2];
+            global_super_st = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, self_st);
+            sym_fail_if_boxed(ctx, class_st);
+            sym_fail_if_boxed(ctx, global_super_st);
             attr = sym_new_not_null(ctx);
             self_or_null = sym_new_not_null(ctx);
             stack_pointer[-3] = attr;
@@ -1196,10 +1415,16 @@
         }
 
         case _GUARD_TYPE_VERSION_AND_LOCK: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
         case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
@@ -1262,6 +1487,9 @@
         }
 
         case _CHECK_ATTR_CLASS: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
@@ -1287,22 +1515,43 @@
         /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN is not a viable micro-op for tier 2 */
 
         case _GUARD_DORV_NO_DICT: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
         case _STORE_ATTR_INSTANCE_VALUE: {
+            JitOptSymbol *owner;
+            JitOptSymbol *value;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, owner);
+            sym_fail_if_boxed(ctx, value);
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_ATTR_WITH_HINT: {
+            JitOptSymbol *owner;
+            JitOptSymbol *value;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, owner);
+            sym_fail_if_boxed(ctx, value);
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_ATTR_SLOT: {
+            JitOptSymbol *owner;
+            JitOptSymbol *value;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, owner);
+            sym_fail_if_boxed(ctx, value);
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1393,7 +1642,13 @@
         }
 
         case _CONTAINS_OP_SET: {
+            JitOptSymbol *right;
+            JitOptSymbol *left;
             JitOptSymbol *b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, right);
+            sym_fail_if_boxed(ctx, left);
             b = sym_new_not_null(ctx);
             stack_pointer[-2] = b;
             stack_pointer += -1;
@@ -1402,7 +1657,13 @@
         }
 
         case _CONTAINS_OP_DICT: {
+            JitOptSymbol *right;
+            JitOptSymbol *left;
             JitOptSymbol *b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, right);
+            sym_fail_if_boxed(ctx, left);
             b = sym_new_not_null(ctx);
             stack_pointer[-2] = b;
             stack_pointer += -1;
@@ -1411,8 +1672,14 @@
         }
 
         case _CHECK_EG_MATCH: {
+            JitOptSymbol *match_type_st;
+            JitOptSymbol *exc_value_st;
             JitOptSymbol *rest;
             JitOptSymbol *match;
+            match_type_st = stack_pointer[-1];
+            exc_value_st = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, match_type_st);
+            sym_fail_if_boxed(ctx, exc_value_st);
             rest = sym_new_not_null(ctx);
             match = sym_new_not_null(ctx);
             stack_pointer[-2] = rest;
@@ -1421,14 +1688,26 @@
         }
 
         case _CHECK_EXC_MATCH: {
+            JitOptSymbol *right;
+            JitOptSymbol *left;
             JitOptSymbol *b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, right);
+            sym_fail_if_boxed(ctx, left);
             b = sym_new_not_null(ctx);
             stack_pointer[-1] = b;
             break;
         }
 
         case _IMPORT_NAME: {
+            JitOptSymbol *fromlist;
+            JitOptSymbol *level;
             JitOptSymbol *res;
+            fromlist = stack_pointer[-1];
+            level = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, fromlist);
+            sym_fail_if_boxed(ctx, level);
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -1437,7 +1716,10 @@
         }
 
         case _IMPORT_FROM: {
+            JitOptSymbol *from;
             JitOptSymbol *res;
+            from = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, from);
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1450,14 +1732,20 @@
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
 
         case _IS_NONE: {
+            JitOptSymbol *value;
             JitOptSymbol *b;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             b = sym_new_not_null(ctx);
             stack_pointer[-1] = b;
             break;
         }
 
         case _GET_LEN: {
+            JitOptSymbol *obj;
             JitOptSymbol *len;
+            obj = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, obj);
             len = sym_new_not_null(ctx);
             stack_pointer[0] = len;
             stack_pointer += 1;
@@ -1466,7 +1754,16 @@
         }
 
         case _MATCH_CLASS: {
+            JitOptSymbol *names;
+            JitOptSymbol *type;
+            JitOptSymbol *subject;
             JitOptSymbol *attrs;
+            names = stack_pointer[-1];
+            type = stack_pointer[-2];
+            subject = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, names);
+            sym_fail_if_boxed(ctx, type);
+            sym_fail_if_boxed(ctx, subject);
             attrs = sym_new_not_null(ctx);
             stack_pointer[-3] = attrs;
             stack_pointer += -2;
@@ -1475,7 +1772,10 @@
         }
 
         case _MATCH_MAPPING: {
+            JitOptSymbol *subject;
             JitOptSymbol *res;
+            subject = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, subject);
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1484,7 +1784,10 @@
         }
 
         case _MATCH_SEQUENCE: {
+            JitOptSymbol *subject;
             JitOptSymbol *res;
+            subject = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, subject);
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1493,7 +1796,13 @@
         }
 
         case _MATCH_KEYS: {
+            JitOptSymbol *keys;
+            JitOptSymbol *subject;
             JitOptSymbol *values_or_none;
+            keys = stack_pointer[-1];
+            subject = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, keys);
+            sym_fail_if_boxed(ctx, subject);
             values_or_none = sym_new_not_null(ctx);
             stack_pointer[0] = values_or_none;
             stack_pointer += 1;
@@ -1502,14 +1811,20 @@
         }
 
         case _GET_ITER: {
+            JitOptSymbol *iterable;
             JitOptSymbol *iter;
+            iterable = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iterable);
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
         }
 
         case _GET_YIELD_FROM_ITER: {
+            JitOptSymbol *iterable;
             JitOptSymbol *iter;
+            iterable = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iterable);
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
@@ -1518,7 +1833,10 @@
         /* _FOR_ITER is not a viable micro-op for tier 2 */
 
         case _FOR_ITER_TIER_TWO: {
+            JitOptSymbol *iter;
             JitOptSymbol *next;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             next = sym_new_not_null(ctx);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -1529,17 +1847,26 @@
         /* _INSTRUMENTED_FOR_ITER is not a viable micro-op for tier 2 */
 
         case _ITER_CHECK_LIST: {
+            JitOptSymbol *iter;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             break;
         }
 
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
+            JitOptSymbol *iter;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             break;
         }
 
         case _ITER_NEXT_LIST: {
+            JitOptSymbol *iter;
             JitOptSymbol *next;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             next = sym_new_not_null(ctx);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -1548,17 +1875,26 @@
         }
 
         case _ITER_CHECK_TUPLE: {
+            JitOptSymbol *iter;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             break;
         }
 
         /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
+            JitOptSymbol *iter;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             break;
         }
 
         case _ITER_NEXT_TUPLE: {
+            JitOptSymbol *iter;
             JitOptSymbol *next;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             next = sym_new_not_null(ctx);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -1567,12 +1903,18 @@
         }
 
         case _ITER_CHECK_RANGE: {
+            JitOptSymbol *iter;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             break;
         }
 
         /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
+            JitOptSymbol *iter;
+            iter = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, iter);
             break;
         }
 
@@ -1614,7 +1956,19 @@
         }
 
         case _WITH_EXCEPT_START: {
+            JitOptSymbol *val;
+            JitOptSymbol *lasti;
+            JitOptSymbol *exit_self;
+            JitOptSymbol *exit_func;
             JitOptSymbol *res;
+            val = stack_pointer[-1];
+            lasti = stack_pointer[-3];
+            exit_self = stack_pointer[-4];
+            exit_func = stack_pointer[-5];
+            sym_fail_if_boxed(ctx, val);
+            sym_fail_if_boxed(ctx, lasti);
+            sym_fail_if_boxed(ctx, exit_self);
+            sym_fail_if_boxed(ctx, exit_func);
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1623,8 +1977,11 @@
         }
 
         case _PUSH_EXC_INFO: {
+            JitOptSymbol *exc;
             JitOptSymbol *prev_exc;
             JitOptSymbol *new_exc;
+            exc = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, exc);
             prev_exc = sym_new_not_null(ctx);
             new_exc = sym_new_not_null(ctx);
             stack_pointer[-1] = prev_exc;
@@ -1635,10 +1992,16 @@
         }
 
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
         case _GUARD_KEYS_VERSION: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
@@ -1675,20 +2038,29 @@
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
+            JitOptSymbol *owner;
             JitOptSymbol *attr;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             attr = sym_new_not_null(ctx);
             stack_pointer[-1] = attr;
             break;
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
+            JitOptSymbol *owner;
             JitOptSymbol *attr;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             attr = sym_new_not_null(ctx);
             stack_pointer[-1] = attr;
             break;
         }
 
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
+            JitOptSymbol *owner;
+            owner = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, owner);
             break;
         }
 
@@ -1762,19 +2134,43 @@
         }
 
         case _CHECK_METHOD_VERSION: {
+            JitOptSymbol **null;
+            JitOptSymbol **callable;
+            null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, null);
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _EXPAND_METHOD: {
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE: {
+            JitOptSymbol **callable;
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _CALL_NON_PY_GENERAL: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -1908,7 +2304,16 @@
         }
 
         case _CALL_TYPE_1: {
+            JitOptSymbol *arg;
+            JitOptSymbol *null;
+            JitOptSymbol *callable;
             JitOptSymbol *res;
+            arg = stack_pointer[-1];
+            null = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, arg);
+            sym_fail_if_boxed(ctx, null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-3] = res;
             stack_pointer += -2;
@@ -1917,7 +2322,16 @@
         }
 
         case _CALL_STR_1: {
+            JitOptSymbol *arg;
+            JitOptSymbol *null;
+            JitOptSymbol *callable;
             JitOptSymbol *res;
+            arg = stack_pointer[-1];
+            null = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, arg);
+            sym_fail_if_boxed(ctx, null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-3] = res;
             stack_pointer += -2;
@@ -1926,7 +2340,16 @@
         }
 
         case _CALL_TUPLE_1: {
+            JitOptSymbol *arg;
+            JitOptSymbol *null;
+            JitOptSymbol *callable;
             JitOptSymbol *res;
+            arg = stack_pointer[-1];
+            null = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, arg);
+            sym_fail_if_boxed(ctx, null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-3] = res;
             stack_pointer += -2;
@@ -1961,13 +2384,25 @@
         }
 
         case _EXIT_INIT_CHECK: {
+            JitOptSymbol *should_be_none;
+            should_be_none = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, should_be_none);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _CALL_BUILTIN_CLASS: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -1976,7 +2411,16 @@
         }
 
         case _CALL_BUILTIN_O: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -1985,7 +2429,16 @@
         }
 
         case _CALL_BUILTIN_FAST: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -1994,7 +2447,16 @@
         }
 
         case _CALL_BUILTIN_FAST_WITH_KEYWORDS: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2003,7 +2465,16 @@
         }
 
         case _CALL_LEN: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2012,7 +2483,16 @@
         }
 
         case _CALL_ISINSTANCE: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2021,13 +2501,31 @@
         }
 
         case _CALL_LIST_APPEND: {
+            JitOptSymbol *arg;
+            JitOptSymbol *self;
+            JitOptSymbol *callable;
+            arg = stack_pointer[-1];
+            self = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            sym_fail_if_boxed(ctx, arg);
+            sym_fail_if_boxed(ctx, self);
+            sym_fail_if_boxed(ctx, callable);
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _CALL_METHOD_DESCRIPTOR_O: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2036,7 +2534,16 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2045,7 +2552,16 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_NOARGS: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2054,7 +2570,16 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_FAST: {
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            args = &stack_pointer[-oparg];
+            self_or_null = &stack_pointer[-1 - oparg];
+            callable = &stack_pointer[-2 - oparg];
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2065,10 +2590,21 @@
         /* _MONITOR_CALL_KW is not a viable micro-op for tier 2 */
 
         case _MAYBE_EXPAND_METHOD_KW: {
+            JitOptSymbol *kwnames_in;
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol **func;
             JitOptSymbol **maybe_self;
-            JitOptSymbol **args;
             JitOptSymbol *kwnames_out;
+            kwnames_in = stack_pointer[-1];
+            args = &stack_pointer[-1 - oparg];
+            self_or_null = &stack_pointer[-2 - oparg];
+            callable = &stack_pointer[-3 - oparg];
+            sym_fail_if_boxed(ctx, kwnames_in);
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             func = &stack_pointer[-3 - oparg];
             maybe_self = &stack_pointer[-2 - oparg];
             args = &stack_pointer[-1 - oparg];
@@ -2095,23 +2631,57 @@
         }
 
         case _CHECK_FUNCTION_VERSION_KW: {
+            JitOptSymbol **callable;
+            callable = &stack_pointer[-3 - oparg];
+            sym_fail_if_boxed(ctx, kwnames);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _CHECK_METHOD_VERSION_KW: {
+            JitOptSymbol **null;
+            JitOptSymbol **callable;
+            null = &stack_pointer[-2 - oparg];
+            callable = &stack_pointer[-3 - oparg];
+            sym_fail_if_boxed(ctx, kwnames);
+            sym_fail_if_boxed(ctx, null);
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _EXPAND_METHOD_KW: {
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
+            self_or_null = &stack_pointer[-2 - oparg];
+            callable = &stack_pointer[-3 - oparg];
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE_KW: {
+            JitOptSymbol **callable;
+            callable = &stack_pointer[-3 - oparg];
+            sym_fail_if_boxed(ctx, kwnames);
+            sym_fail_if_boxed(ctx, callable);
             break;
         }
 
         case _CALL_KW_NON_PY: {
+            JitOptSymbol *kwnames;
+            JitOptSymbol **args;
+            JitOptSymbol **self_or_null;
+            JitOptSymbol **callable;
             JitOptSymbol *res;
+            kwnames = stack_pointer[-1];
+            args = &stack_pointer[-1 - oparg];
+            self_or_null = &stack_pointer[-2 - oparg];
+            callable = &stack_pointer[-3 - oparg];
+            sym_fail_if_boxed(ctx, kwnames);
+            sym_fail_if_boxed(ctx, args);
+            sym_fail_if_boxed(ctx, self_or_null);
+            sym_fail_if_boxed(ctx, callable);
             res = sym_new_not_null(ctx);
             stack_pointer[-3 - oparg] = res;
             stack_pointer += -2 - oparg;
@@ -2120,8 +2690,17 @@
         }
 
         case _MAKE_CALLARGS_A_TUPLE: {
+            JitOptSymbol *kwargs_in;
+            JitOptSymbol *callargs;
+            JitOptSymbol *func;
             JitOptSymbol *tuple;
             JitOptSymbol *kwargs_out;
+            kwargs_in = stack_pointer[-1];
+            callargs = stack_pointer[-2];
+            func = stack_pointer[-4];
+            sym_fail_if_boxed(ctx, kwargs_in);
+            sym_fail_if_boxed(ctx, callargs);
+            sym_fail_if_boxed(ctx, func);
             tuple = sym_new_not_null(ctx);
             kwargs_out = sym_new_not_null(ctx);
             stack_pointer[-2] = tuple;
@@ -2132,14 +2711,23 @@
         /* _DO_CALL_FUNCTION_EX is not a viable micro-op for tier 2 */
 
         case _MAKE_FUNCTION: {
+            JitOptSymbol *codeobj_st;
             JitOptSymbol *func;
+            codeobj_st = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, codeobj_st);
             func = sym_new_not_null(ctx);
             stack_pointer[-1] = func;
             break;
         }
 
         case _SET_FUNCTION_ATTRIBUTE: {
+            JitOptSymbol *func_in;
+            JitOptSymbol *attr_st;
             JitOptSymbol *func_out;
+            func_in = stack_pointer[-1];
+            attr_st = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, func_in);
+            sym_fail_if_boxed(ctx, attr_st);
             func_out = sym_new_not_null(ctx);
             stack_pointer[-2] = func_out;
             stack_pointer += -1;
@@ -2172,7 +2760,10 @@
         }
 
         case _BUILD_SLICE: {
+            JitOptSymbol **args;
             JitOptSymbol *slice;
+            args = &stack_pointer[-oparg];
+            sym_fail_if_boxed(ctx, args);
             slice = sym_new_not_null(ctx);
             stack_pointer[-oparg] = slice;
             stack_pointer += 1 - oparg;
@@ -2181,21 +2772,33 @@
         }
 
         case _CONVERT_VALUE: {
+            JitOptSymbol *value;
             JitOptSymbol *result;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             result = sym_new_not_null(ctx);
             stack_pointer[-1] = result;
             break;
         }
 
         case _FORMAT_SIMPLE: {
+            JitOptSymbol *value;
             JitOptSymbol *res;
+            value = stack_pointer[-1];
+            sym_fail_if_boxed(ctx, value);
             res = sym_new_not_null(ctx);
             stack_pointer[-1] = res;
             break;
         }
 
         case _FORMAT_WITH_SPEC: {
+            JitOptSymbol *fmt_spec;
+            JitOptSymbol *value;
             JitOptSymbol *res;
+            fmt_spec = stack_pointer[-1];
+            value = stack_pointer[-2];
+            sym_fail_if_boxed(ctx, fmt_spec);
+            sym_fail_if_boxed(ctx, value);
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
