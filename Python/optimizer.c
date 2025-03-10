@@ -880,7 +880,7 @@ translate_bytecode_to_trace(
                             instr++;
                         }
 
-                        if (uop == _BINARY_OP || uop == _BINARY_OP_EXTEND) {
+                        if (uop == _BINARY_OP || uop == _BINARY_OP_EXTEND || uop == _COMPARE_OP_INT) {
                             // For optimization (unboxing) purposes.
                             ADD_TO_TRACE(_NOP, 0, 0, target);
                         }

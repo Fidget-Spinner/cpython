@@ -412,7 +412,6 @@
             if (GETLOCAL(oparg)) {
                 GETLOCAL(oparg)->is_local = false;
             }
-            sym_mark_unboxed(ctx);
             GETLOCAL(oparg) = sym_new_unboxed(ctx, &PyLong_Type, NULL);
             break;
         }
@@ -1779,10 +1778,17 @@
             if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
                 REPLACE_OP(this_instr, _COMPARE_OP_INT_UNBOXED, oparg, 0);
             }
-            // uneven boxing. bail.
-            else if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
-                ctx->contradiction = true;
-                ctx->done = true;
+            else {
+                if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                    assert((this_instr - 1)->opcode == _NOP);
+                    if (!sym_is_unboxed(left)) {
+                        REPLACE_OP((this_instr-1), _UNBOX, 1, 0);
+                    }
+                    if (!sym_is_unboxed(right)) {
+                        REPLACE_OP((this_instr-1), _UNBOX, 0, 0);
+                    }
+                    REPLACE_OP(this_instr, _COMPARE_OP_INT_UNBOXED, oparg, 0);
+                }
             }
             res = sym_new_type(ctx, &PyBool_Type);
             stack_pointer[-2] = res;
@@ -3161,25 +3167,21 @@
                 if (oparg == NB_REMAINDER) {
                     REPLACE_OP(this_instr, _BINARY_OP_REM_INT_UNBOXED, oparg, 0);
                     res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                    break;
                 }
                 else {
                     if (oparg == NB_RSHIFT) {
                         REPLACE_OP(this_instr, _BINARY_OP_RSHIFT_INT_UNBOXED, oparg, 0);
                         res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                        break;
                     }
                     else {
                         if (oparg == NB_XOR) {
                             REPLACE_OP(this_instr, _BINARY_OP_XOR_INT_UNBOXED, oparg, 0);
                             res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                            break;
                         }
                         else {
                             if (oparg == NB_AND) {
                                 REPLACE_OP(this_instr, _BINARY_OP_AND_INT_UNBOXED, oparg, 0);
                                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                                break;
                             }
                             else {
                                 // Can't find an appropiate op for unboxed.
@@ -3191,65 +3193,67 @@
                     }
                 }
             }
-            bool lhs_int = sym_matches_type(left, &PyLong_Type);
-            bool rhs_int = sym_matches_type(right, &PyLong_Type);
-            bool lhs_float = sym_matches_type(left, &PyFloat_Type);
-            bool rhs_float = sym_matches_type(right, &PyFloat_Type);
-            if (!((lhs_int || lhs_float) && (rhs_int || rhs_float))) {
-                // There's something other than an int or float involved:
-                res = sym_new_unknown(ctx);
-            }
             else {
-                if (oparg == NB_POWER || oparg == NB_INPLACE_POWER) {
-                    // This one's fun... the *type* of the result depends on the
-                    // *values* being exponentiated. However, exponents with one
-                    // constant part are reasonably common, so it's probably worth
-                    // trying to infer some simple cases:
-                    // - A: 1 ** 1 -> 1 (int ** int -> int)
-                    // - B: 1 ** -1 -> 1.0 (int ** int -> float)
-                    // - C: 1.0 ** 1 -> 1.0 (float ** int -> float)
-                    // - D: 1 ** 1.0 -> 1.0 (int ** float -> float)
-                    // - E: -1 ** 0.5 ~> 1j (int ** float -> complex)
-                    // - F: 1.0 ** 1.0 -> 1.0 (float ** float -> float)
-                    // - G: -1.0 ** 0.5 ~> 1j (float ** float -> complex)
-                    if (rhs_float) {
-                        // Case D, E, F, or G... can't know without the sign of the LHS
-                        // or whether the RHS is whole, which isn't worth the effort:
-                        res = sym_new_unknown(ctx);
-                    }
-                    else {
-                        if (lhs_float) {
-                            // Case C:
-                            res = sym_new_type(ctx, &PyFloat_Type);
-                        }
-                        else {
-                            if (!sym_is_const(ctx, right)) {
-                                // Case A or B... can't know without the sign of the RHS:
-                                res = sym_new_unknown(ctx);
-                            }
-                            else {
-                                if (_PyLong_IsNegative((PyLongObject *)sym_get_const(ctx, right))) {
-                                    // Case B:
-                                    res = sym_new_type(ctx, &PyFloat_Type);
-                                }
-                                else {
-                                    // Case A:
-                                    res = sym_new_type(ctx, &PyLong_Type);
-                                }
-                            }
-                        }
-                    }
+                bool lhs_int = sym_matches_type(left, &PyLong_Type);
+                bool rhs_int = sym_matches_type(right, &PyLong_Type);
+                bool lhs_float = sym_matches_type(left, &PyFloat_Type);
+                bool rhs_float = sym_matches_type(right, &PyFloat_Type);
+                if (!((lhs_int || lhs_float) && (rhs_int || rhs_float))) {
+                    // There's something other than an int or float involved:
+                    res = sym_new_unknown(ctx);
                 }
                 else {
-                    if (oparg == NB_TRUE_DIVIDE || oparg == NB_INPLACE_TRUE_DIVIDE) {
-                        res = sym_new_type(ctx, &PyFloat_Type);
-                    }
-                    else {
-                        if (lhs_int && rhs_int) {
-                            res = sym_new_type(ctx, &PyLong_Type);
+                    if (oparg == NB_POWER || oparg == NB_INPLACE_POWER) {
+                        // This one's fun... the *type* of the result depends on the
+                        // *values* being exponentiated. However, exponents with one
+                        // constant part are reasonably common, so it's probably worth
+                        // trying to infer some simple cases:
+                        // - A: 1 ** 1 -> 1 (int ** int -> int)
+                        // - B: 1 ** -1 -> 1.0 (int ** int -> float)
+                        // - C: 1.0 ** 1 -> 1.0 (float ** int -> float)
+                        // - D: 1 ** 1.0 -> 1.0 (int ** float -> float)
+                        // - E: -1 ** 0.5 ~> 1j (int ** float -> complex)
+                        // - F: 1.0 ** 1.0 -> 1.0 (float ** float -> float)
+                        // - G: -1.0 ** 0.5 ~> 1j (float ** float -> complex)
+                        if (rhs_float) {
+                            // Case D, E, F, or G... can't know without the sign of the LHS
+                            // or whether the RHS is whole, which isn't worth the effort:
+                            res = sym_new_unknown(ctx);
                         }
                         else {
+                            if (lhs_float) {
+                                // Case C:
+                                res = sym_new_type(ctx, &PyFloat_Type);
+                            }
+                            else {
+                                if (!sym_is_const(ctx, right)) {
+                                    // Case A or B... can't know without the sign of the RHS:
+                                    res = sym_new_unknown(ctx);
+                                }
+                                else {
+                                    if (_PyLong_IsNegative((PyLongObject *)sym_get_const(ctx, right))) {
+                                        // Case B:
+                                        res = sym_new_type(ctx, &PyFloat_Type);
+                                    }
+                                    else {
+                                        // Case A:
+                                        res = sym_new_type(ctx, &PyLong_Type);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        if (oparg == NB_TRUE_DIVIDE || oparg == NB_INPLACE_TRUE_DIVIDE) {
                             res = sym_new_type(ctx, &PyFloat_Type);
+                        }
+                        else {
+                            if (lhs_int && rhs_int) {
+                                res = sym_new_type(ctx, &PyLong_Type);
+                            }
+                            else {
+                                res = sym_new_type(ctx, &PyFloat_Type);
+                            }
                         }
                     }
                 }

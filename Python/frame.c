@@ -11,7 +11,7 @@
 int
 PyStackRef_ReboxFrame(_PyInterpreterFrame *frame)
 {
-    while (frame->has_unboxed_values) {
+    while (frame) {
         _PyStackRef *sp_top = frame->stackpointer;
         _PyStackRef *localplus_start = frame->localsplus;
         while (sp_top > localplus_start) {
