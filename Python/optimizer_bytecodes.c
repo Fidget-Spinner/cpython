@@ -181,7 +181,53 @@ dummy_func(void) {
         sym_set_type(right, &PyUnicode_Type);
     }
 
+    op(_GUARD_BINARY_OP_EXTEND, (left, right -- left, right)) {
+        if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+            REPLACE_OP(this_instr, _NOP, 0 ,0);
+        }
+        else if (sym_is_unboxed(left) || sym_is_unboxed(right)){
+            ctx->contradiction = true;
+            ctx->done = true;
+            break;
+        }
+    }
+
     op(_BINARY_OP, (left, right -- res)) {
+        if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+            assert((this_instr-1)->opcode == _NOP);
+            if (!sym_is_unboxed(left)) {
+                REPLACE_OP((this_instr-1), _UNBOX, 1, 0);
+            }
+            if (!sym_is_unboxed(right)) {
+                REPLACE_OP((this_instr-1), _UNBOX, 0, 0);
+            }
+            if (oparg == NB_REMAINDER) {
+                REPLACE_OP(this_instr, _BINARY_OP_REM_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else if (oparg == NB_RSHIFT) {
+                REPLACE_OP(this_instr, _BINARY_OP_RSHIFT_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else if (oparg == NB_XOR) {
+                REPLACE_OP(this_instr, _BINARY_OP_XOR_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else if (oparg == NB_AND) {
+                REPLACE_OP(this_instr, _BINARY_OP_AND_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else {
+                // Can't find an appropiate op for unboxed.
+                ctx->contradiction = true;
+                ctx->done = true;
+                break;
+            }
+        }
         bool lhs_int = sym_matches_type(left, &PyLong_Type);
         bool rhs_int = sym_matches_type(right, &PyLong_Type);
         bool lhs_float = sym_matches_type(left, &PyFloat_Type);
@@ -233,6 +279,46 @@ dummy_func(void) {
         else {
             res = sym_new_type(ctx, &PyFloat_Type);
         }
+    }
+
+    op(_BINARY_OP_EXTEND, (left, right -- res)) {
+        if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+            assert((this_instr-1)->opcode == _NOP);
+            if (!sym_is_unboxed(left)) {
+                REPLACE_OP((this_instr-1), _UNBOX, 1, 0);
+            }
+            if (!sym_is_unboxed(right)) {
+                REPLACE_OP((this_instr-1), _UNBOX, 0, 0);
+            }
+            if (oparg == NB_REMAINDER) {
+                REPLACE_OP(this_instr, _BINARY_OP_REM_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else if (oparg == NB_RSHIFT) {
+                REPLACE_OP(this_instr, _BINARY_OP_RSHIFT_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else if (oparg == NB_XOR) {
+                REPLACE_OP(this_instr, _BINARY_OP_XOR_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else if (oparg == NB_AND) {
+                REPLACE_OP(this_instr, _BINARY_OP_AND_INT_UNBOXED, oparg, 0);
+                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                break;
+            }
+            else {
+                // Can't find an appropiate op for unboxed.
+                DPRINTF(2, "CANT FIND OP _BINARY_OP_EXTEND %d\n", oparg);
+                ctx->contradiction = true;
+                ctx->done = true;
+                break;
+            }
+        }
+        res = sym_new_not_null(ctx);
     }
 
     op(_BINARY_OP_ADD_INT, (left, right -- res)) {

@@ -859,6 +859,11 @@ translate_bytecode_to_trace(
                             instr++;
                         }
 
+                        if (uop == _BINARY_OP || uop == _BINARY_OP_EXTEND) {
+                            // For optimization (unboxing) purposes.
+                            ADD_TO_TRACE(_NOP, 0, 0, target);
+                        }
+
                         // All other instructions
                         ADD_TO_TRACE(uop, oparg, operand, target);
                     }
@@ -1151,7 +1156,7 @@ make_executor_from_uops(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer, i
     if (python_lltrace != NULL && *python_lltrace >= '0') {
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
-    if (lltrace >= 2) {
+    if (lltrace >= 1) {
         printf("Optimized trace (length %d):\n", length);
         for (int i = 0; i < length; i++) {
             printf("%4d OPTIMIZED: ", i);

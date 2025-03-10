@@ -406,7 +406,25 @@
             break;
         }
 
+        case _UNBOX: {
+            JitOptSymbol **boxed;
+            boxed = &stack_pointer[-1 - oparg];
+            for (int _i = 1; --_i >= 0;) {
+                sym_fail_if_boxed(ctx, boxed[_i]);
+            }
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_AND_INT_UNBOXED: {
             JitOptSymbol *out;
             out = sym_new_not_null(ctx);
             stack_pointer[-2] = out;
@@ -425,6 +443,33 @@
         }
 
         case _BINARY_OP_SUBTRACT_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_REM_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_RSHIFT_INT_UNBOXED: {
+            JitOptSymbol *out;
+            out = sym_new_not_null(ctx);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_XOR_INT_UNBOXED: {
             JitOptSymbol *out;
             out = sym_new_not_null(ctx);
             stack_pointer[-2] = out;
@@ -654,10 +699,19 @@
         case _GUARD_BINARY_OP_EXTEND: {
             JitOptSymbol *right;
             JitOptSymbol *left;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
-            sym_fail_if_boxed(ctx, right);
-            sym_fail_if_boxed(ctx, left);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            PyObject *descr = (PyObject *)this_instr->operand0;
+            if (sym_is_unboxed(left) && sym_is_unboxed(right)) {
+                REPLACE_OP(this_instr, _NOP, 0 ,0);
+            }
+            else {
+                if (sym_is_unboxed(left) || sym_is_unboxed(right)){
+                    ctx->contradiction = true;
+                    ctx->done = true;
+                    break;
+                }
+            }
             break;
         }
 
@@ -665,10 +719,51 @@
             JitOptSymbol *right;
             JitOptSymbol *left;
             JitOptSymbol *res;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
-            sym_fail_if_boxed(ctx, right);
-            sym_fail_if_boxed(ctx, left);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            PyObject *descr = (PyObject *)this_instr->operand0;
+            if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                assert((this_instr-1)->opcode == _NOP);
+                if (!sym_is_unboxed(left)) {
+                    REPLACE_OP((this_instr-1), _UNBOX, 1, 0);
+                }
+                if (!sym_is_unboxed(right)) {
+                    REPLACE_OP((this_instr-1), _UNBOX, 0, 0);
+                }
+                if (oparg == NB_REMAINDER) {
+                    REPLACE_OP(this_instr, _BINARY_OP_REM_INT_UNBOXED, oparg, 0);
+                    res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                    break;
+                }
+                else {
+                    if (oparg == NB_RSHIFT) {
+                        REPLACE_OP(this_instr, _BINARY_OP_RSHIFT_INT_UNBOXED, oparg, 0);
+                        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                        break;
+                    }
+                    else {
+                        if (oparg == NB_XOR) {
+                            REPLACE_OP(this_instr, _BINARY_OP_XOR_INT_UNBOXED, oparg, 0);
+                            res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                            break;
+                        }
+                        else {
+                            if (oparg == NB_AND) {
+                                REPLACE_OP(this_instr, _BINARY_OP_AND_INT_UNBOXED, oparg, 0);
+                                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                                break;
+                            }
+                            else {
+                                // Can't find an appropiate op for unboxed.
+                                DPRINTF(2, "CANT FIND OP _BINARY_OP_EXTEND %d\n", oparg);
+                                ctx->contradiction = true;
+                                ctx->done = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -3030,8 +3125,49 @@
             JitOptSymbol *right;
             JitOptSymbol *left;
             JitOptSymbol *res;
-            right = sym_fail_if_boxed(ctx, stack_pointer[-1]);
-            left = sym_fail_if_boxed(ctx, stack_pointer[-2]);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
+                assert((this_instr-1)->opcode == _NOP);
+                if (!sym_is_unboxed(left)) {
+                    REPLACE_OP((this_instr-1), _UNBOX, 1, 0);
+                }
+                if (!sym_is_unboxed(right)) {
+                    REPLACE_OP((this_instr-1), _UNBOX, 0, 0);
+                }
+                if (oparg == NB_REMAINDER) {
+                    REPLACE_OP(this_instr, _BINARY_OP_REM_INT_UNBOXED, oparg, 0);
+                    res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                    break;
+                }
+                else {
+                    if (oparg == NB_RSHIFT) {
+                        REPLACE_OP(this_instr, _BINARY_OP_RSHIFT_INT_UNBOXED, oparg, 0);
+                        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                        break;
+                    }
+                    else {
+                        if (oparg == NB_XOR) {
+                            REPLACE_OP(this_instr, _BINARY_OP_XOR_INT_UNBOXED, oparg, 0);
+                            res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                            break;
+                        }
+                        else {
+                            if (oparg == NB_AND) {
+                                REPLACE_OP(this_instr, _BINARY_OP_AND_INT_UNBOXED, oparg, 0);
+                                res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+                                break;
+                            }
+                            else {
+                                // Can't find an appropiate op for unboxed.
+                                ctx->contradiction = true;
+                                ctx->done = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             bool lhs_int = sym_matches_type(left, &PyLong_Type);
             bool rhs_int = sym_matches_type(right, &PyLong_Type);
             bool lhs_float = sym_matches_type(left, &PyFloat_Type);

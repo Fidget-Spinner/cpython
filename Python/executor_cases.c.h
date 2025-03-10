@@ -1116,6 +1116,27 @@
             break;
         }
 
+        case _UNBOX: {
+            _PyStackRef *boxed;
+            oparg = CURRENT_OPARG();
+            boxed = &stack_pointer[-1 - oparg];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            if (PyStackRef_IsUnboxedInt(*boxed)) {
+                break;
+            }
+            PyObject *val = PyStackRef_AsPyObjectBorrow(boxed[0]);
+            if (!_PyLong_IsCompact61(val)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            _PyStackRef res = PyStackRef_FromLong(_PyLong_CompactValue(val));
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(boxed[0]);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            boxed->bits = res.bits;
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_INT_UNBOXED: {
             _PyStackRef right;
             _PyStackRef left;
@@ -1136,6 +1157,34 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_AND_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            // fprintf(stderr, "INTS+: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Cannot overflow, as we are only 61 bit ints.
+            long res = left_l & right_l;
             int is_small = _PyUnbox_isSmall(res);
             if (!is_small) {
                 UOP_STAT_INC(uopcode, miss);
@@ -1192,6 +1241,93 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             // Cannot overflow, as we are only 61 bit ints.
             long res = left_l - right_l;
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_REM_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            // fprintf(stderr, "INTS%: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Cannot overflow, as we are only 61 bit ints.
+            // Credits https://stackoverflow.com/questions/1907565/c-and-python-different-behaviour-of-the-modulo-operation
+            long res = ((left_l % right_l) + right_l) % right_l;
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_RSHIFT_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            // fprintf(stderr, "INTS>>: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Cannot overflow, as we are only 61 bit ints.
+            // Credits https://stackoverflow.com/questions/1907565/c-and-python-different-behaviour-of-the-modulo-operation
+            long res = left_l >> right_l;
+            int is_small = _PyUnbox_isSmall(res);
+            if (!is_small) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            out = PyStackRef_FromLong(res);
+            stack_pointer[-2] = out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_XOR_INT_UNBOXED: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef out;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(sizeof(uintptr_t) >= sizeof(long));
+            assert(_PyUnbox_isSmall(left.bits));
+            assert(_PyUnbox_isSmall(right.bits));
+            // fprintf(stderr, "INTS^: %ld %ld\n", _PyUnbox_toLong(left.bits), _PyUnbox_toLong(right.bits));
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            long left_l = _PyUnbox_toLong(left.bits);
+            long right_l = _PyUnbox_toLong(right.bits);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            // Cannot overflow, as we are only 61 bit ints.
+            // Credits https://stackoverflow.com/questions/1907565/c-and-python-different-behaviour-of-the-modulo-operation
+            long res = left_l ^ right_l;
             int is_small = _PyUnbox_isSmall(res);
             if (!is_small) {
                 UOP_STAT_INC(uopcode, miss);
