@@ -121,7 +121,7 @@ dummy_func(void) {
         }
         if (sym_is_unboxed(left) || sym_is_unboxed(right)) {
             // Imbalanced unboxed bail.
-            if (!(sym_is_unboxed(left) || sym_is_unboxed(right))) {
+            if (!(sym_is_unboxed(left) && sym_is_unboxed(right))) {
                 ctx->done = true;
                 ctx->contradiction = true;
                 break;
@@ -305,22 +305,18 @@ dummy_func(void) {
             if (oparg == NB_REMAINDER) {
                 REPLACE_OP(this_instr, _BINARY_OP_REM_INT_UNBOXED, oparg, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                break;
             }
             else if (oparg == NB_RSHIFT) {
                 REPLACE_OP(this_instr, _BINARY_OP_RSHIFT_INT_UNBOXED, oparg, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                break;
             }
             else if (oparg == NB_XOR) {
                 REPLACE_OP(this_instr, _BINARY_OP_XOR_INT_UNBOXED, oparg, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                break;
             }
             else if (oparg == NB_AND) {
                 REPLACE_OP(this_instr, _BINARY_OP_AND_INT_UNBOXED, oparg, 0);
                 res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
-                break;
             }
             else {
                 // Can't find an appropiate op for unboxed.
@@ -346,7 +342,38 @@ dummy_func(void) {
             }
             res = sym_new_type(ctx, &PyLong_Type);
         }
+    }
 
+    op(_BINARY_OP_ADD_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_UNBOX, (in -- out)) {
+        out = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_BINARY_OP_SUBTRACT_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_BINARY_OP_MULTIPLY_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_BINARY_OP_AND_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_BINARY_OP_XOR_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_BINARY_OP_RSHIFT_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
+    }
+
+    op(_BINARY_OP_REM_INT_UNBOXED, (left, right -- res)) {
+        res = sym_new_unboxed(ctx, &PyLong_Type, NULL);
     }
 
     op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {

@@ -335,12 +335,12 @@ sym_unbox_and_hoist_if_possible(JitOptContext *ctx, JitOptSymbol *sym)
         if (ctx->frame->frame_starting_inst[2].opcode != _NOP && ctx->frame->frame_starting_inst[2].opcode != _MARK_FRAME_HAS_UNBOXED) {
             return false;
         }
-        DPRINTF(2, "Writing unboxed op to frame %d offset %ld\n", ctx->curr_frame_depth, oparg + 3);
-
         // Frame is not optimizable/unboxable.
         if (ctx->frame->frame_starting_inst[oparg + 3].opcode != _NOP) {
             return false;
         }
+        DPRINTF(2, "Writing unboxed op to frame %d offset %ld\n", ctx->curr_frame_depth, oparg + 3);
+
         assert(ctx->frame->frame_starting_inst[oparg + 3].opcode == _NOP);
         ctx->frame->frame_starting_inst[oparg + 3].opcode = _UNBOX_FAST;
         ctx->frame->frame_starting_inst[oparg + 3].oparg = oparg;
