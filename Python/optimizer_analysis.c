@@ -303,6 +303,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 static inline void
 sym_mark_unboxed(JitOptContext *ctx)
 {
+    ctx->frame->contains_unboxed_values = true;
     if (ctx->frame->frame_starting_inst == NULL) {
         ctx->done = true;
         ctx->contradiction = true;

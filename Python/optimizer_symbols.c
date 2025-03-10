@@ -674,6 +674,7 @@ _Py_uop_sym_new_unboxed(JitOptContext *ctx, PyTypeObject *type, PyObject *const_
         res->unboxed.type = type;
     }
     res->tag = JIT_SYM_UNBOXED_TAG;
+    ctx->frame->contains_unboxed_values = true;
     return res;
 }
 
@@ -720,6 +721,11 @@ _Py_uop_frame_new(
 
     frame->frame_starting_inst = NULL;
 
+    frame->contains_unboxed_values = false;
+    // Propagate unboxed frame info.
+    if (ctx->curr_frame_depth > 0) {
+        frame->contains_unboxed_values = ctx->frames[ctx->curr_frame_depth - 1].contains_unboxed_values;
+    }
     return frame;
 }
 

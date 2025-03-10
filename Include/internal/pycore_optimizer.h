@@ -247,6 +247,7 @@ struct _Py_UOpsAbstractFrame {
     int stack_len;
     int locals_len;
 
+    bool contains_unboxed_values;
     _PyUOpInstruction *frame_starting_inst;
 
     JitOptSymbol **stack_pointer;

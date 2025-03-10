@@ -456,6 +456,7 @@ add_to_trace(
     trace_stack[trace_stack_depth].func = func; \
     trace_stack[trace_stack_depth].code = code; \
     trace_stack[trace_stack_depth].instr = instr; \
+    trace_stack[trace_stack_depth].unbox_marker = unbox_marker; \
     trace_stack_depth++;
 #define TRACE_STACK_POP() \
     if (trace_stack_depth <= 0) { \
@@ -465,7 +466,8 @@ add_to_trace(
     func = trace_stack[trace_stack_depth].func; \
     code = trace_stack[trace_stack_depth].code; \
     assert(func == NULL || func->func_code == (PyObject *)code); \
-    instr = trace_stack[trace_stack_depth].instr;
+    instr = trace_stack[trace_stack_depth].instr; \
+    unbox_marker = trace_stack[trace_stack_depth].unbox_marker;
 
 /* Returns the length of the trace on success,
  * 0 if it failed to produce a worthwhile trace,
@@ -487,12 +489,15 @@ translate_bytecode_to_trace(
     _Py_BloomFilter_Add(dependencies, initial_code);
     _Py_CODEUNIT *initial_instr = instr;
     int trace_length = 0;
+    bool should_unbox = true;
+    _PyUOpInstruction *unbox_marker = NULL;
     // Leave space for possible trailing _EXIT_TRACE
     int max_length = buffer_size-2;
     struct {
         PyFunctionObject *func;
         PyCodeObject *code;
         _Py_CODEUNIT *instr;
+        _PyUOpInstruction *unbox_marker;
     } trace_stack[TRACE_STACK_SIZE];
     int trace_stack_depth = 0;
     int confidence = CONFIDENCE_RANGE;  // Adjusted by branch instructions
@@ -515,16 +520,20 @@ translate_bytecode_to_trace(
     DPRINTF(2, "Padding frame prelude with nlocalsplus _NOPs for optimization purposes later.\n");
     ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+    unbox_marker = &trace[trace_length];
     ADD_TO_TRACE(_NOP, 0, 0, 0); // To mark if a frame has unboxed values.
-    if (!(code->co_flags & CO_NESTED)) {
+    if (!(code->co_flags & CO_NESTED) || code->co_nlocalsplus > 16) {
         for (int x = 0; x < code->co_nlocalsplus; x++) {
             ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, code));
         }
     }
+    else {
+        should_unbox = false;
+    }
 
     uint32_t target = 0;
 
-    for (;;) {
+    for (;should_unbox;) {
         target = INSTR_IP(instr, code);
         // Need space for _DEOPT
         max_length--;
@@ -665,10 +674,11 @@ translate_bytecode_to_trace(
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 // Mark if a frame has unboxed values.
                 ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, trace_stack[trace_stack_depth-1].code));
-                if (code->co_flags & CO_NESTED) {
+                if (code->co_flags & CO_NESTED || code->co_nlocalsplus > 16) {
+                    should_unbox = false;
                     break;
                 }
-                ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, trace_stack[trace_stack_depth-1].code));
+                RESERVE_RAW(code->co_nlocalsplus, "For unboxing later in the optimizer\n");
                 for (int x = 0; x < code->co_nlocalsplus; x++) {
                     ADD_TO_TRACE(_NOP, 0, 0, INSTR_IP(instr, trace_stack[trace_stack_depth-1].code));
                 }
@@ -914,6 +924,11 @@ done:
                 PyUnicode_AsUTF8(code->co_filename),
                 code->co_firstlineno,
                 2 * INSTR_IP(initial_instr, code));
+        return 0;
+    }
+    if (!should_unbox) {
+        // No point optimizing this trace.
+        DPRINTF(2, "Can't optimize the trace safely.\n");
         return 0;
     }
     if (!is_terminator(&trace[trace_length-1])) {
