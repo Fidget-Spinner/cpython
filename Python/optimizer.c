@@ -867,16 +867,28 @@ translate_cfg_to_uops(
 //    printf("LAST OPCODE WAS:");
 //    _PyUOpPrint(&buffer[*buffer_curr_len-1]);
 //    printf("\n");
-    switch(buffer[*buffer_curr_len-1].opcode) {
+    int opcode = buffer[*buffer_curr_len-1].opcode;
+    switch (opcode) {
         case _POP_JUMP_IF_FALSE:
         case _POP_JUMP_IF_TRUE: {
             _PyUOpInstruction *jump = &buffer[*buffer_curr_len-1];
             int curr_buffer_len = *buffer_curr_len;
-            _Py_CODEUNIT *consequent =
-                curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[terminator_opcode]];
-            _Py_CODEUNIT *alternative = curr + 1 +
-                                        _PyOpcode_Caches[_PyOpcode_Deopt[terminator_opcode]] +
-                                        curr->op.arg;
+            _Py_CODEUNIT *consequent;
+            _Py_CODEUNIT *alternative;
+            if (opcode == _POP_JUMP_IF_FALSE) {
+                consequent =
+                    curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[terminator_opcode]];
+                alternative = curr + 1 +
+                              _PyOpcode_Caches[_PyOpcode_Deopt[terminator_opcode]] +
+                              curr->op.arg;
+            }
+            else {
+                alternative =
+                    curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[terminator_opcode]];
+                consequent = curr + 1 +
+                              _PyOpcode_Caches[_PyOpcode_Deopt[terminator_opcode]] +
+                              curr->op.arg;
+            }
             if (translate_cfg_to_uops(
                 frame, consequent, buffer_curr_len, buffer,
                 buffer_size, trace_stack_depth,
