@@ -7136,8 +7136,9 @@
             _Py_CODEUNIT* const this_instr = next_instr;
             (void)this_instr;
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(INSTRUMENTED_RESUME);
+            /* Skip 1 cache entry */
             // _LOAD_BYTECODE
             {
                 #ifdef Py_GIL_DISABLED
@@ -10118,10 +10119,10 @@
             (void)(opcode);
             #endif
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(RESUME);
             PREDICTED_RESUME:;
-            _Py_CODEUNIT* const this_instr = next_instr - 1;
+            _Py_CODEUNIT* const this_instr = next_instr - 2;
             (void)this_instr;
             // _LOAD_BYTECODE
             {
@@ -10164,6 +10165,8 @@
             }
             // _QUICKEN_RESUME
             {
+                uint16_t the_counter = read_u16(&this_instr[1].cache);
+                (void)the_counter;
                 #if ENABLE_SPECIALIZATION_FT
                 if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
                     FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
@@ -10196,33 +10199,72 @@
             _Py_CODEUNIT* const this_instr = next_instr;
             (void)this_instr;
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(RESUME_CHECK);
-            static_assert(0 == 0, "incorrect cache size");
-            #if defined(__EMSCRIPTEN__)
-            if (_Py_emscripten_signal_clock == 0) {
-                UPDATE_MISS_STATS(RESUME);
-                assert(_PyOpcode_Deopt[opcode] == (RESUME));
-                JUMP_TO_PREDICTED(RESUME);
+            static_assert(1 == 1, "incorrect cache size");
+            // _RESUME_CHECK
+            {
+                uint16_t the_counter = read_u16(&this_instr[1].cache);
+                #if defined(__EMSCRIPTEN__)
+                if (_Py_emscripten_signal_clock == 0) {
+                    UPDATE_MISS_STATS(RESUME);
+                    assert(_PyOpcode_Deopt[opcode] == (RESUME));
+                    JUMP_TO_PREDICTED(RESUME);
+                }
+                _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
+                #endif
+                uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
+                uintptr_t version = FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version);
+                assert((version & _PY_EVAL_EVENTS_MASK) == 0);
+                if (eval_breaker != version) {
+                    UPDATE_MISS_STATS(RESUME);
+                    assert(_PyOpcode_Deopt[opcode] == (RESUME));
+                    JUMP_TO_PREDICTED(RESUME);
+                }
+                #ifdef Py_GIL_DISABLED
+                if (frame->tlbc_index !=
+                    ((_PyThreadStateImpl *)tstate)->tlbc_index) {
+                    UPDATE_MISS_STATS(RESUME);
+                    assert(_PyOpcode_Deopt[opcode] == (RESUME));
+                    JUMP_TO_PREDICTED(RESUME);
+                }
+                #endif
             }
-            _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
-            #endif
-            uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
-            uintptr_t version = FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version);
-            assert((version & _PY_EVAL_EVENTS_MASK) == 0);
-            if (eval_breaker != version) {
-                UPDATE_MISS_STATS(RESUME);
-                assert(_PyOpcode_Deopt[opcode] == (RESUME));
-                JUMP_TO_PREDICTED(RESUME);
+            // _JIT
+            {
+                #ifdef _Py_TIER2
+                _Py_BackoffCounter counter = this_instr[1].counter;
+                if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
+                    _PyExecutorObject *executor;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        this_instr[1].counter = restart_backoff_counter(counter);
+                        if (optimized < 0) {
+                            JUMP_TO_LABEL(error);
+                        }
+                    }
+                    else {
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        this_instr[1].counter = initial_jump_backoff_counter();
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        assert(tstate->previous_executor == NULL);
+                        tstate->previous_executor = Py_None;
+                        GOTO_TIER_TWO(executor);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                #endif
             }
-            #ifdef Py_GIL_DISABLED
-            if (frame->tlbc_index !=
-                ((_PyThreadStateImpl *)tstate)->tlbc_index) {
-                UPDATE_MISS_STATS(RESUME);
-                assert(_PyOpcode_Deopt[opcode] == (RESUME));
-                JUMP_TO_PREDICTED(RESUME);
-            }
-            #endif
             DISPATCH();
         }
 

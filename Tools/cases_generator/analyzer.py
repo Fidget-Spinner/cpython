@@ -678,6 +678,8 @@ NON_ESCAPING_FUNCTIONS = (
     "initial_temperature_backoff_counter",
     "JUMP_TO_LABEL",
     "restart_backoff_counter",
+    "initial_unreachable_backoff_counter",
+    "initial_resume_backoff_counter",
     "_Py_ReachedRecursionLimit",
 )
 

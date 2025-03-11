@@ -257,7 +257,6 @@ print_optimization_stats(FILE *out, OptimizationStats *stats)
     fprintf(out, "Optimization trace too long: %" PRIu64 "\n", stats->trace_too_long);
     fprintf(out, "Optimization trace too short: %" PRIu64 "\n", stats->trace_too_short);
     fprintf(out, "Optimization inner loop: %" PRIu64 "\n", stats->inner_loop);
-    fprintf(out, "Optimization recursive call: %" PRIu64 "\n", stats->recursive_call);
     fprintf(out, "Optimization low confidence: %" PRIu64 "\n", stats->low_confidence);
     fprintf(out, "Optimization unknown callee: %" PRIu64 "\n", stats->unknown_callee);
     fprintf(out, "Executors invalidated: %" PRIu64 "\n", stats->executors_invalidated);
@@ -452,13 +451,15 @@ void
 _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters)
 {
     #if ENABLE_SPECIALIZATION_FT
-    _Py_BackoffCounter jump_counter, adaptive_counter;
+    _Py_BackoffCounter jump_counter, adaptive_counter, resume_counter;
     if (enable_counters) {
         jump_counter = initial_jump_backoff_counter();
+        resume_counter = initial_resume_counter();
         adaptive_counter = adaptive_counter_warmup();
     }
     else {
         jump_counter = initial_unreachable_backoff_counter();
+        resume_counter = initial_unreachable_backoff_counter();
         adaptive_counter = initial_unreachable_backoff_counter();
     }
     int opcode = 0;
@@ -473,6 +474,9 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
             switch (opcode) {
                 case JUMP_BACKWARD:
                     instructions[i + 1].counter = jump_counter;
+                    break;
+                case RESUME:
+                    instructions[i + 1].counter = resume_counter;
                     break;
                 case POP_JUMP_IF_FALSE:
                 case POP_JUMP_IF_TRUE:
@@ -3087,5 +3091,6 @@ const struct _PyCode8 _Py_InitCleanup = {
         EXIT_INIT_CHECK, 0,
         RETURN_VALUE, 0,
         RESUME, RESUME_AT_FUNC_START,
+        CACHE, 0
     }
 };

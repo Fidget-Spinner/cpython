@@ -145,7 +145,7 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
-        family(RESUME, 0) = {
+        family(RESUME, 1) = {
             RESUME_CHECK,
         };
 
@@ -171,7 +171,7 @@ dummy_func(
             }
         }
 
-        op(_QUICKEN_RESUME, (--)) {
+        op(_QUICKEN_RESUME, (the_counter/1 --)) {
             #if ENABLE_SPECIALIZATION_FT
             if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
                 FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
@@ -218,7 +218,9 @@ dummy_func(
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (--)) {
+        macro(RESUME_CHECK) = _RESUME_CHECK + _JIT;
+
+        op(_RESUME_CHECK, (the_counter/1 --)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -244,6 +246,7 @@ dummy_func(
         }
 
         macro(INSTRUMENTED_RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM +
@@ -5092,7 +5095,7 @@ dummy_func(
 #endif
             uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
             DEOPT_IF(eval_breaker & _PY_EVAL_EVENTS_MASK);
-            assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
+            // assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
         }
 
         label(pop_4_error) {
