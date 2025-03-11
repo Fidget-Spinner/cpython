@@ -420,10 +420,25 @@ add_to_trace(
 // Reserve space for N uops, plus 3 for _SET_IP, _CHECK_VALIDITY and _EXIT_TRACE
 #define RESERVE(needed) RESERVE_RAW((needed) + 3, _PyUOpName(opcode))
 
+// Trace stack operations (used by _PUSH_FRAME, _RETURN_VALUE)
+#define TRACE_STACK_PUSH() \
+    assert(func == NULL || func->func_code == (PyObject *)code); \
+    trace_stack[trace_stack_depth].func = func; \
+    trace_stack[trace_stack_depth].code = code; \
+    trace_stack[trace_stack_depth].instr = instr; \
+    trace_stack[trace_stack_depth].entry = NULL;
+
+#define TRACE_STACK_POP() \
+    if (trace_stack_depth <= 0) { \
+        Py_FatalError("Trace stack underflow\n"); \
+    } \
+    trace_stack_depth--; \
+
 typedef struct _PyMethodStack {
     PyFunctionObject *func;
     PyCodeObject *code;
     _Py_CODEUNIT *instr;
+    _PyUOpInstruction *entry;
 } _PyMethodStack;
 
 /* Returns the length of the trace on success,
@@ -449,6 +464,9 @@ translate_bytecode_to_method(
     _Py_BloomFilter_Add(dependencies, code);
     _Py_CODEUNIT *instr = curr;
 
+    if (trace_stack_depth >= TRACE_STACK_SIZE) {
+        goto unsupported;
+    }
     // Leave space for possible trailing _EXIT_TRACE
     int max_length = buffer_size-2;
 #ifdef Py_DEBUG
@@ -551,8 +569,16 @@ translate_bytecode_to_method(
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 instr += 1 + _PyOpcode_Caches[RESUME];
+                trace_stack[trace_stack_depth-1].entry = &trace[*trace_length-1];
                 goto top;
-            case JUMP_BACKWARD_JIT: {
+            case JUMP_FORWARD:
+            case LOAD_DEREF:
+                goto unsupported;
+            case JUMP_BACKWARD_NO_JIT:
+            case JUMP_BACKWARD_JIT:
+            case JUMP_BACKWARD:
+            case JUMP_BACKWARD_NO_INTERRUPT:
+            {
                 ADD_TO_TRACE(_CHECK_PERIODIC, 0, 0, target);
                 _Py_CODEUNIT *jump_target = (instr + 1 + _PyOpcode_Caches[JUMP_BACKWARD]) - oparg ;
                 int jump_target_offset = (int)(jump_target - _PyCode_CODE(code));
@@ -639,7 +665,7 @@ translate_bytecode_to_method(
                         if (uop == _YIELD_VALUE || uop == _RETURN_GENERATOR) {
                             goto unsupported;
                         }
-                        if (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE) {
+                        if (uop == _RETURN_VALUE) {
                             /* Set the operand to the function or code object returned to,
                              * to assist optimization passes. (See _PUSH_FRAME below.)
                              */
@@ -704,7 +730,10 @@ translate_bytecode_to_method(
                             if (new_code != NULL) {
                                 bool is_recursive = false;
                                 _PyUOpInstruction *recursive_start = NULL;
-                                is_recursive = (trace_stack[0].code == new_code);
+                                for (int x = 0; x < trace_stack_depth && !is_recursive; x++) {
+                                    is_recursive = (trace_stack[x].code == new_code);
+                                    recursive_start = trace_stack[x].entry;
+                                }
                                 if (is_recursive) {
                                     // Recursive call, bail (we could be here forever).
                                     DPRINTF(2, "Bailing on recursive call to %s (%s:%d)\n",
@@ -752,6 +781,7 @@ translate_bytecode_to_method(
                                 assert(PyCode_Check(code));
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
+                                TRACE_STACK_PUSH();
                                 DPRINTF(2,
                                     "Continuing in %s (%s:%d) at byte offset %d\n",
                                     PyUnicode_AsUTF8(code->co_qualname),
@@ -762,7 +792,7 @@ translate_bytecode_to_method(
                                 // Inline the function.
                                 int err = translate_bytecode_to_method(
                                     frame, code, func, instr, trace_length,
-                                    trace, buffer_size, trace_stack_depth,
+                                    trace, buffer_size, trace_stack_depth + 1,
                                     trace_stack, dependencies);
                                 if (err <= 0) {
                                     return err;

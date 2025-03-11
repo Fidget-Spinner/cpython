@@ -6836,7 +6836,7 @@
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-            if (frame->lltrace >= 5) {
+            if (frame->lltrace >= 3) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
