@@ -174,6 +174,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_CHECK_EXC_MATCH] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_IMPORT_NAME] = HAS_ARG_FLAG | HAS_NAME_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_IMPORT_FROM] = HAS_ARG_FLAG | HAS_NAME_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_POP_JUMP_IF_FALSE] = HAS_ARG_FLAG | HAS_JUMP_FLAG,
+    [_POP_JUMP_IF_TRUE] = HAS_ARG_FLAG | HAS_JUMP_FLAG,
     [_IS_NONE] = 0,
     [_GET_LEN] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_MATCH_CLASS] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -184,9 +186,11 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GET_YIELD_FROM_ITER] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_FOR_ITER_TIER_TWO] = HAS_EXIT_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_ITER_CHECK_LIST] = HAS_EXIT_FLAG,
+    [_ITER_JUMP_LIST] = HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ESCAPES_FLAG,
     [_GUARD_NOT_EXHAUSTED_LIST] = HAS_EXIT_FLAG,
     [_ITER_NEXT_LIST] = 0,
     [_ITER_CHECK_TUPLE] = HAS_EXIT_FLAG,
+    [_ITER_JUMP_TUPLE] = HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ESCAPES_FLAG,
     [_GUARD_NOT_EXHAUSTED_TUPLE] = HAS_EXIT_FLAG,
     [_ITER_NEXT_TUPLE] = 0,
     [_ITER_CHECK_RANGE] = HAS_EXIT_FLAG,
@@ -428,6 +432,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_ITER_CHECK_LIST] = "_ITER_CHECK_LIST",
     [_ITER_CHECK_RANGE] = "_ITER_CHECK_RANGE",
     [_ITER_CHECK_TUPLE] = "_ITER_CHECK_TUPLE",
+    [_ITER_JUMP_LIST] = "_ITER_JUMP_LIST",
+    [_ITER_JUMP_TUPLE] = "_ITER_JUMP_TUPLE",
     [_ITER_NEXT_LIST] = "_ITER_NEXT_LIST",
     [_ITER_NEXT_RANGE] = "_ITER_NEXT_RANGE",
     [_ITER_NEXT_TUPLE] = "_ITER_NEXT_TUPLE",
@@ -492,6 +498,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_MAYBE_EXPAND_METHOD_KW] = "_MAYBE_EXPAND_METHOD_KW",
     [_NOP] = "_NOP",
     [_POP_EXCEPT] = "_POP_EXCEPT",
+    [_POP_JUMP_IF_FALSE] = "_POP_JUMP_IF_FALSE",
+    [_POP_JUMP_IF_TRUE] = "_POP_JUMP_IF_TRUE",
     [_POP_TOP] = "_POP_TOP",
     [_POP_TOP_LOAD_CONST_INLINE] = "_POP_TOP_LOAD_CONST_INLINE",
     [_POP_TOP_LOAD_CONST_INLINE_BORROW] = "_POP_TOP_LOAD_CONST_INLINE_BORROW",
@@ -867,6 +875,10 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 2;
         case _IMPORT_FROM:
             return 0;
+        case _POP_JUMP_IF_FALSE:
+            return 1;
+        case _POP_JUMP_IF_TRUE:
+            return 1;
         case _IS_NONE:
             return 1;
         case _GET_LEN:
@@ -887,11 +899,15 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 0;
         case _ITER_CHECK_LIST:
             return 0;
+        case _ITER_JUMP_LIST:
+            return 0;
         case _GUARD_NOT_EXHAUSTED_LIST:
             return 0;
         case _ITER_NEXT_LIST:
             return 0;
         case _ITER_CHECK_TUPLE:
+            return 0;
+        case _ITER_JUMP_TUPLE:
             return 0;
         case _GUARD_NOT_EXHAUSTED_TUPLE:
             return 0;

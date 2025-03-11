@@ -147,6 +147,7 @@ dummy_func(
 
         family(RESUME, 1) = {
             RESUME_CHECK,
+            RESUME_JIT,
         };
 
         macro(NOT_TAKEN) = NOP;
@@ -171,10 +172,13 @@ dummy_func(
             }
         }
 
-        op(_QUICKEN_RESUME, (the_counter/1 --)) {
-            #if ENABLE_SPECIALIZATION_FT
+        op(_QUICKEN_RESUME, (--)) {
+            #if ENABLE_SPECIALIZATION
             if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                this_instr->op.code = tstate->interp->jit ? RESUME_JIT : RESUME_CHECK;
+                // Need to re-dispatch so the warmup counter isn't off by one:
+                next_instr = this_instr;
+                DISPATCH_SAME_OPARG();
             }
             #endif  /* ENABLE_SPECIALIZATION_FT */
         }
@@ -216,11 +220,14 @@ dummy_func(
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _QUICKEN_RESUME +
+            unused/1 +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        macro(RESUME_CHECK) = _RESUME_CHECK + _JIT;
+        macro(RESUME_CHECK) = _RESUME_CHECK + unused/1;
 
-        op(_RESUME_CHECK, (the_counter/1 --)) {
+        macro(RESUME_JIT) = _RESUME_CHECK + unused/1 + _JIT;
+
+        op(_RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -2775,15 +2782,10 @@ dummy_func(
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
-            if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
-                _Py_CODEUNIT *start = this_instr;
-                /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                while (oparg > 255) {
-                    oparg >>= 8;
-                    start--;
-                }
+            int this_instr_op_code = this_instr->op.code;
+            if (backoff_counter_triggers(counter) && (this_instr_op_code == JUMP_BACKWARD_JIT || this_instr_op_code == RESUME_JIT)) {
                 _PyExecutorObject *executor;
-                int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                int optimized = _PyOptimizer_Optimize(frame, this_instr, &executor, 0);
                 if (optimized <= 0) {
                     this_instr[1].counter = restart_backoff_counter(counter);
                     ERROR_IF(optimized < 0, error);
@@ -2792,6 +2794,7 @@ dummy_func(
                     this_instr[1].counter = initial_jump_backoff_counter();
                     assert(tstate->previous_executor == NULL);
                     tstate->previous_executor = Py_None;
+                    assert(this_instr->op.code == ENTER_EXECUTOR);
                     GOTO_TIER_TWO(executor);
                 }
             }
@@ -2815,8 +2818,7 @@ dummy_func(
         macro(JUMP_BACKWARD_JIT) =
             unused/1 +
             _CHECK_PERIODIC +
-            JUMP_BACKWARD_NO_INTERRUPT +
-            _JIT;
+            JUMP_BACKWARD_NO_INTERRUPT;
 
         pseudo(JUMP, (--)) = {
             JUMP_FORWARD,
@@ -2864,19 +2866,17 @@ dummy_func(
             #endif /* _Py_TIER2 */
         }
 
-        replaced op(_POP_JUMP_IF_FALSE, (cond -- )) {
+        op(_POP_JUMP_IF_FALSE, (cond -- )) {
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsFalse(cond);
             DEAD(cond);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
-        replaced op(_POP_JUMP_IF_TRUE, (cond -- )) {
+        op(_POP_JUMP_IF_TRUE, (cond -- )) {
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsTrue(cond);
             DEAD(cond);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
@@ -3097,7 +3097,7 @@ dummy_func(
             EXIT_IF(Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyListIter_Type);
         }
 
-        replaced op(_ITER_JUMP_LIST, (iter -- iter)) {
+        op(_ITER_JUMP_LIST, (iter -- iter)) {
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             assert(Py_TYPE(iter_o) == &PyListIter_Type);
@@ -3150,7 +3150,7 @@ dummy_func(
             EXIT_IF(Py_TYPE(PyStackRef_AsPyObjectBorrow(iter)) != &PyTupleIter_Type);
         }
 
-        replaced op(_ITER_JUMP_TUPLE, (iter -- iter)) {
+        op(_ITER_JUMP_TUPLE, (iter -- iter)) {
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
             assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
@@ -4979,7 +4979,7 @@ dummy_func(
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-            if (frame->lltrace >= 2) {
+            if (frame->lltrace >= 3) {
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
                 printf(", exit %lu, temp %d, target %d -> %s]\n",
@@ -4993,30 +4993,31 @@ dummy_func(
                 Py_CLEAR(exit->executor);
             }
             tstate->previous_executor = (PyObject *)current_executor;
-            if (exit->executor == NULL) {
-                _Py_BackoffCounter temperature = exit->temperature;
-                if (!backoff_counter_triggers(temperature)) {
-                    exit->temperature = advance_backoff_counter(temperature);
-                    GOTO_TIER_ONE(target);
-                }
-                _PyExecutorObject *executor;
-                if (target->op.code == ENTER_EXECUTOR) {
-                    executor = code->co_executors->executors[target->op.arg];
-                    Py_INCREF(executor);
-                }
-                else {
-                    int chain_depth = current_executor->vm_data.chain_depth + 1;
-                    int optimized = _PyOptimizer_Optimize(frame, target, &executor, chain_depth);
-                    if (optimized <= 0) {
-                        exit->temperature = restart_backoff_counter(temperature);
-                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
-                    }
-                    exit->temperature = initial_temperature_backoff_counter();
-                }
-                exit->executor = executor;
-            }
-            Py_INCREF(exit->executor);
-            GOTO_TIER_TWO(exit->executor);
+            GOTO_TIER_ONE(target);
+//            if (exit->executor == NULL) {
+//                _Py_BackoffCounter temperature = exit->temperature;
+//                if (!backoff_counter_triggers(temperature)) {
+//                    exit->temperature = advance_backoff_counter(temperature);
+//                    GOTO_TIER_ONE(target);
+//                }
+//                _PyExecutorObject *executor;
+//                if (target->op.code == ENTER_EXECUTOR) {
+//                    executor = code->co_executors->executors[target->op.arg];
+//                    Py_INCREF(executor);
+//                }
+//                else {
+//                    int chain_depth = current_executor->vm_data.chain_depth + 1;
+//                    int optimized = _PyOptimizer_Optimize(frame, &executor, chain_depth);
+//                    if (optimized <= 0) {
+//                        exit->temperature = restart_backoff_counter(temperature);
+//                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
+//                    }
+//                    exit->temperature = initial_temperature_backoff_counter();
+//                }
+//                exit->executor = executor;
+//            }
+//            Py_INCREF(exit->executor);
+//            GOTO_TIER_TWO(exit->executor);
         }
 
         tier2 op(_CHECK_VALIDITY, (--)) {

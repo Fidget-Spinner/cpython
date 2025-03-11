@@ -1365,9 +1365,17 @@
             break;
         }
 
-        /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
+        case _POP_JUMP_IF_FALSE: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
-        /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
+        case _POP_JUMP_IF_TRUE: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         case _IS_NONE: {
             JitOptSymbol *b;
@@ -1452,7 +1460,9 @@
             break;
         }
 
-        /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 */
+        case _ITER_JUMP_LIST: {
+            break;
+        }
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
             break;
@@ -1471,7 +1481,9 @@
             break;
         }
 
-        /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 */
+        case _ITER_JUMP_TUPLE: {
+            break;
+        }
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
             break;

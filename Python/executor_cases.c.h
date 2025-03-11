@@ -48,7 +48,6 @@
         /* _LOAD_BYTECODE is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _RESUME_CHECK: {
-            uint16_t the_counter = (uint16_t)CURRENT_OPERAND0();
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -3918,9 +3917,29 @@
             break;
         }
 
-        /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 because it is replaced */
+        case _POP_JUMP_IF_FALSE: {
+            _PyStackRef cond;
+            oparg = CURRENT_OPARG();
+            cond = stack_pointer[-1];
+            assert(PyStackRef_BoolCheck(cond));
+            int flag = PyStackRef_IsFalse(cond);
+            JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
-        /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is replaced */
+        case _POP_JUMP_IF_TRUE: {
+            _PyStackRef cond;
+            oparg = CURRENT_OPARG();
+            cond = stack_pointer[-1];
+            assert(PyStackRef_BoolCheck(cond));
+            int flag = PyStackRef_IsTrue(cond);
+            JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         case _IS_NONE: {
             _PyStackRef value;
@@ -4179,7 +4198,31 @@
             break;
         }
 
-        /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 because it is replaced */
+        case _ITER_JUMP_LIST: {
+            _PyStackRef iter;
+            oparg = CURRENT_OPARG();
+            iter = stack_pointer[-1];
+            PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+            _PyListIterObject *it = (_PyListIterObject *)iter_o;
+            assert(Py_TYPE(iter_o) == &PyListIter_Type);
+            STAT_INC(FOR_ITER, hit);
+            PyListObject *seq = it->it_seq;
+            if (seq == NULL || (size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
+                it->it_index = -1;
+                #ifndef Py_GIL_DISABLED
+                if (seq != NULL) {
+                    it->it_seq = NULL;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    Py_DECREF(seq);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                }
+                #endif
+                /* Jump forward oparg, then skip following END_FOR instruction */
+                JUMPBY(oparg + 1);
+                DISPATCH();
+            }
+            break;
+        }
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
             _PyStackRef iter;
@@ -4229,7 +4272,28 @@
             break;
         }
 
-        /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 because it is replaced */
+        case _ITER_JUMP_TUPLE: {
+            _PyStackRef iter;
+            oparg = CURRENT_OPARG();
+            iter = stack_pointer[-1];
+            PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+            _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
+            assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
+            STAT_INC(FOR_ITER, hit);
+            PyTupleObject *seq = it->it_seq;
+            if (seq == NULL || it->it_index >= PyTuple_GET_SIZE(seq)) {
+                if (seq != NULL) {
+                    it->it_seq = NULL;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    Py_DECREF(seq);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                }
+                /* Jump forward oparg, then skip following END_FOR instruction */
+                JUMPBY(oparg + 1);
+                DISPATCH();
+            }
+            break;
+        }
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
             _PyStackRef iter;
@@ -6742,7 +6806,7 @@
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-            if (frame->lltrace >= 2) {
+            if (frame->lltrace >= 3) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
@@ -6760,32 +6824,31 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
             tstate->previous_executor = (PyObject *)current_executor;
-            if (exit->executor == NULL) {
-                _Py_BackoffCounter temperature = exit->temperature;
-                if (!backoff_counter_triggers(temperature)) {
-                    exit->temperature = advance_backoff_counter(temperature);
-                    GOTO_TIER_ONE(target);
-                }
-                _PyExecutorObject *executor;
-                if (target->op.code == ENTER_EXECUTOR) {
-                    executor = code->co_executors->executors[target->op.arg];
-                    Py_INCREF(executor);
-                }
-                else {
-                    int chain_depth = current_executor->vm_data.chain_depth + 1;
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
-                    int optimized = _PyOptimizer_Optimize(frame, target, &executor, chain_depth);
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
-                    if (optimized <= 0) {
-                        exit->temperature = restart_backoff_counter(temperature);
-                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
-                    }
-                    exit->temperature = initial_temperature_backoff_counter();
-                }
-                exit->executor = executor;
-            }
-            Py_INCREF(exit->executor);
-            GOTO_TIER_TWO(exit->executor);
+            GOTO_TIER_ONE(target);
+            //            if (exit->executor == NULL) {
+                //                _Py_BackoffCounter temperature = exit->temperature;
+                //                if (!backoff_counter_triggers(temperature)) {
+                    //                    exit->temperature = advance_backoff_counter(temperature);
+                    //                    GOTO_TIER_ONE(target);
+                //                }
+                //                _PyExecutorObject *executor;
+                //                if (target->op.code == ENTER_EXECUTOR) {
+                    //                    executor = code->co_executors->executors[target->op.arg];
+                    //                    Py_INCREF(executor);
+                //                }
+                //                else {
+                    //                    int chain_depth = current_executor->vm_data.chain_depth + 1;
+                    //                    int optimized = _PyOptimizer_Optimize(frame, &executor, chain_depth);
+                    //                    if (optimized <= 0) {
+                        //                        exit->temperature = restart_backoff_counter(temperature);
+                        //                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
+                    //                    }
+                    //                    exit->temperature = initial_temperature_backoff_counter();
+                //                }
+                //                exit->executor = executor;
+            //            }
+            //            Py_INCREF(exit->executor);
+            //            GOTO_TIER_TWO(exit->executor);
             break;
         }
 
