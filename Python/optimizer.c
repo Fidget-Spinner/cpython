@@ -796,21 +796,13 @@ translate_bytecode_to_method(
                             _Py_CODEUNIT *alternative;
                             switch (uop) {
                                 case _POP_JUMP_IF_FALSE:
+                                case _POP_JUMP_IF_TRUE:
                                 {
                                     consequent =
                                         instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_FALSE]];
                                     alternative = instr + 1 +
                                                   _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_FALSE]] +
                                                   instr->op.arg;
-                                    break;
-                                }
-                                case _POP_JUMP_IF_TRUE:
-                                {
-                                    alternative =
-                                        instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_TRUE]];
-                                    consequent = instr + 1 +
-                                                 _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_TRUE]] +
-                                                 instr->op.arg;
                                     break;
                                 }
                                 case _ITER_JUMP_LIST:
