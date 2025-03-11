@@ -541,6 +541,7 @@ translate_bytecode_to_method(
             max_length--;
         }
         switch (opcode) {
+            case RESUME_JIT:
             case RESUME_CHECK:
             case RESUME:
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
@@ -882,8 +883,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
         int opcode = inst->opcode;
         int32_t target = (int32_t)uop_get_target(inst);
         if (_PyUop_Flags[opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG)) {
-            uint16_t exit_op = (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) ?
-                _EXIT_TRACE : _DEOPT;
+            uint16_t exit_op = _DEOPT;
             int32_t jump_target = target;
             if (jump_target != current_jump_target || current_exit_op != exit_op) {
                 make_exit(&buffer[next_spare], exit_op, jump_target);
@@ -1154,9 +1154,6 @@ uop_optimize(
         else if (oparg < _PyUop_Replication[opcode]) {
             buffer[pc].opcode = opcode + oparg + 1;
             assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
-        }
-        else if (is_terminator(&buffer[pc])) {
-            break;
         }
         assert(_PyOpcode_uop_name[buffer[pc].opcode]);
     }
