@@ -359,6 +359,9 @@ PyTypeObject _PyUOpExecutor_Type = {
     .tp_is_gc = executor_is_gc,
 };
 
+static const uint16_t _PyUOp_Replacements[MAX_UOP_ID + 1] = {
+    [_FOR_ITER] = _FOR_ITER_TIER_TWO,
+};
 #ifdef Py_DEBUG
 #define DPRINTF(level, ...) \
     if (lltrace >= (level)) { printf(__VA_ARGS__); }
@@ -549,7 +552,25 @@ translate_bytecode_to_method(
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 instr += 1 + _PyOpcode_Caches[RESUME];
                 goto top;
+            case JUMP_BACKWARD_JIT: {
+                ADD_TO_TRACE(_CHECK_PERIODIC, 0, 0, target);
+                _Py_CODEUNIT *jump_target = (instr + 1 + _PyOpcode_Caches[JUMP_BACKWARD]) - oparg ;
+                int jump_target_offset = (int)(jump_target - _PyCode_CODE(code));
+                assert(jump_target_offset > 0);
 
+                bool found = false;
+                int find = 0;
+                for (; find < *trace_length; find++) {
+                    if (trace[find].target == (uint32_t)jump_target_offset) {
+                        found = true;
+                        break;
+                    }
+                }
+                assert(found);
+                ADD_TO_TRACE(_TIER2_JUMP, find, 0, target);
+                instr += 1 + _PyOpcode_Caches[RESUME];
+                goto top;
+            }
             default:
             {
                 const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
@@ -588,6 +609,7 @@ translate_bytecode_to_method(
                                 assert(uop == _SAVE_RETURN_OFFSET);
                                 break;
                             case OPARG_REPLACED:
+                                uop = _PyUOp_Replacements[uop];
                                 assert(uop != 0);
                                 break;
                             case OPERAND1_1:
@@ -767,23 +789,46 @@ translate_bytecode_to_method(
                         // All other instructions
                         ADD_TO_TRACE(uop, oparg, operand, target);
 
-                        if (uop == _POP_JUMP_IF_TRUE || uop == _POP_JUMP_IF_FALSE) {
+                        if (uop == _POP_JUMP_IF_TRUE || uop == _POP_JUMP_IF_FALSE ||
+                            uop == _ITER_JUMP_LIST || uop == _ITER_JUMP_RANGE || uop == _ITER_JUMP_TUPLE) {
                             _PyUOpInstruction *jump = &trace[*trace_length-1];
                             _Py_CODEUNIT *consequent;
                             _Py_CODEUNIT *alternative;
-                            if (opcode == _POP_JUMP_IF_FALSE) {
-                                consequent =
-                                    instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_FALSE]];
-                                alternative = instr + 1 +
-                                              _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_FALSE]] +
-                                    instr->op.arg;
-                            }
-                            else {
-                                alternative =
-                                    instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_TRUE]];
-                                consequent = instr + 1 +
-                                             _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_TRUE]] +
-                                    instr->op.arg;
+                            switch (uop) {
+                                case _POP_JUMP_IF_FALSE:
+                                {
+                                    consequent =
+                                        instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_FALSE]];
+                                    alternative = instr + 1 +
+                                                  _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_FALSE]] +
+                                                  instr->op.arg;
+                                    break;
+                                }
+                                case _POP_JUMP_IF_TRUE:
+                                {
+                                    alternative =
+                                        instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_TRUE]];
+                                    consequent = instr + 1 +
+                                                 _PyOpcode_Caches[_PyOpcode_Deopt[POP_JUMP_IF_TRUE]] +
+                                                 instr->op.arg;
+                                    break;
+                                }
+                                case _ITER_JUMP_LIST:
+                                case _ITER_JUMP_RANGE:
+                                case _ITER_JUMP_TUPLE:
+                                {
+                                    int uopcode = expansion->uops[i+1].uop;
+                                    // The iter
+                                    ADD_TO_TRACE(uopcode, oparg, 0, target);
+                                    consequent =
+                                        instr + 1 + _PyOpcode_Caches[FOR_ITER];
+                                    alternative = instr + 1 +
+                                                  _PyOpcode_Caches[FOR_ITER] +
+                                                  instr->op.arg;
+                                    break;
+                                }
+                                default:
+                                    Py_UNREACHABLE();
                             }
                             int err = translate_bytecode_to_method(
                                 frame, code, func, consequent, trace_length, trace,
@@ -791,7 +836,13 @@ translate_bytecode_to_method(
                             if (err <= 0) {
                                 return err;
                             }
-                            jump->oparg = *trace_length;
+                            if (uop == _ITER_JUMP_LIST || uop == _ITER_JUMP_TUPLE || uop == _ITER_JUMP_RANGE)
+                            {
+                                jump->oparg = *trace_length + 1;
+                            }
+                            else {
+                                jump->oparg = *trace_length;
+                            }
                             err = translate_bytecode_to_method(
                                 frame, code, func, alternative, trace_length, trace,
                                 buffer_size, trace_stack_depth, trace_stack, dependencies);

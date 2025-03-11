@@ -77,6 +77,21 @@ class Tier2Emitter(Emitter):
             storage.copy().flush(self.out)
         return f"JUMP_TO_ERROR();"
 
+    def dispatch(
+        self,
+        tkn: Token,
+        tkn_iter: TokenIterator,
+        uop: CodeSection,
+        storage: Storage,
+        inst: Instruction | None,
+    ) -> bool:
+        next(tkn_iter)
+        next(tkn_iter)
+        next(tkn_iter)
+        self.out.start_line()
+        self.emit("break;\n")
+
+
     def deopt_if(
         self,
         tkn: Token,

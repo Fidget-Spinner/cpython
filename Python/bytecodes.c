@@ -3187,7 +3187,7 @@ dummy_func(
             EXIT_IF(Py_TYPE(r) != &PyRangeIter_Type);
         }
 
-        replaced op(_ITER_JUMP_RANGE, (iter -- iter)) {
+        op(_ITER_JUMP_RANGE, (iter -- iter)) {
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             STAT_INC(FOR_ITER, hit);

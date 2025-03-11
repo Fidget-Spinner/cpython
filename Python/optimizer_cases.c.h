@@ -1516,7 +1516,9 @@
             break;
         }
 
-        /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 */
+        case _ITER_JUMP_RANGE: {
+            break;
+        }
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
             break;

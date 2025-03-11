@@ -196,6 +196,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GUARD_NOT_EXHAUSTED_TUPLE] = HAS_EXIT_FLAG,
     [_ITER_NEXT_TUPLE] = 0,
     [_ITER_CHECK_RANGE] = HAS_EXIT_FLAG,
+    [_ITER_JUMP_RANGE] = HAS_ARG_FLAG | HAS_JUMP_FLAG,
     [_GUARD_NOT_EXHAUSTED_RANGE] = HAS_EXIT_FLAG,
     [_ITER_NEXT_RANGE] = HAS_ERROR_FLAG,
     [_FOR_ITER_GEN_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
@@ -435,6 +436,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_ITER_CHECK_RANGE] = "_ITER_CHECK_RANGE",
     [_ITER_CHECK_TUPLE] = "_ITER_CHECK_TUPLE",
     [_ITER_JUMP_LIST] = "_ITER_JUMP_LIST",
+    [_ITER_JUMP_RANGE] = "_ITER_JUMP_RANGE",
     [_ITER_JUMP_TUPLE] = "_ITER_JUMP_TUPLE",
     [_ITER_NEXT_LIST] = "_ITER_NEXT_LIST",
     [_ITER_NEXT_RANGE] = "_ITER_NEXT_RANGE",
@@ -922,6 +924,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _ITER_NEXT_TUPLE:
             return 0;
         case _ITER_CHECK_RANGE:
+            return 0;
+        case _ITER_JUMP_RANGE:
             return 0;
         case _GUARD_NOT_EXHAUSTED_RANGE:
             return 0;

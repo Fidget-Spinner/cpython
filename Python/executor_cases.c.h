@@ -4236,7 +4236,7 @@
                 #endif
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
-                DISPATCH();
+                break;
             }
             break;
         }
@@ -4307,7 +4307,7 @@
                 }
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
-                DISPATCH();
+                break;
             }
             break;
         }
@@ -4358,7 +4358,20 @@
             break;
         }
 
-        /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 because it is replaced */
+        case _ITER_JUMP_RANGE: {
+            _PyStackRef iter;
+            oparg = CURRENT_OPARG();
+            iter = stack_pointer[-1];
+            _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
+            assert(Py_TYPE(r) == &PyRangeIter_Type);
+            STAT_INC(FOR_ITER, hit);
+            if (r->len <= 0) {
+                // Jump over END_FOR instruction.
+                JUMPBY(oparg + 1);
+                break;
+            }
+            break;
+        }
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
             _PyStackRef iter;
