@@ -2369,6 +2369,7 @@ _PyOpcode_macro_expansion[256] = {
     [LOAD_ATTR_WITH_HINT] = { .nuops = 3, .uops = { { _GUARD_TYPE_VERSION, 2, 1 }, { _LOAD_ATTR_WITH_HINT, 1, 3 }, { _PUSH_NULL_CONDITIONAL, OPARG_SIMPLE, 9 } } },
     [LOAD_BUILD_CLASS] = { .nuops = 1, .uops = { { _LOAD_BUILD_CLASS, OPARG_SIMPLE, 0 } } },
     [LOAD_COMMON_CONSTANT] = { .nuops = 1, .uops = { { _LOAD_COMMON_CONSTANT, OPARG_SIMPLE, 0 } } },
+    [LOAD_CONST] = { .nuops = 1, .uops = { { _LOAD_CONST, OPARG_SIMPLE, 0 } } },
     [LOAD_CONST_IMMORTAL] = { .nuops = 1, .uops = { { _LOAD_CONST_IMMORTAL, OPARG_SIMPLE, 0 } } },
     [LOAD_CONST_MORTAL] = { .nuops = 1, .uops = { { _LOAD_CONST_MORTAL, OPARG_SIMPLE, 0 } } },
     [LOAD_DEREF] = { .nuops = 1, .uops = { { _LOAD_DEREF, OPARG_SIMPLE, 0 } } },

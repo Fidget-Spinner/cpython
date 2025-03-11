@@ -212,7 +212,18 @@
             break;
         }
 
-        /* _LOAD_CONST is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        case _LOAD_CONST: {
+            _PyStackRef value;
+            oparg = CURRENT_OPARG();
+            /* We can't do this in the bytecode compiler as
+             * marshalling can intern strings and make them immortal. */
+            PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
+            value = PyStackRef_FromPyObjectNew(obj);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         case _LOAD_CONST_MORTAL: {
             _PyStackRef value;
@@ -1712,6 +1723,12 @@
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _TIER2_JUMP: {
+            oparg = CURRENT_OPARG();
+            JUMPBY(oparg);
             break;
         }
 

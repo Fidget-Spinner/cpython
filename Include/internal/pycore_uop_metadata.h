@@ -35,6 +35,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_LOAD_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG | HAS_PURE_FLAG,
     [_LOAD_FAST_AND_CLEAR] = HAS_ARG_FLAG | HAS_LOCAL_FLAG,
     [_LOAD_FAST_LOAD_FAST] = HAS_ARG_FLAG | HAS_LOCAL_FLAG,
+    [_LOAD_CONST] = HAS_ARG_FLAG | HAS_CONST_FLAG,
     [_LOAD_CONST_MORTAL] = HAS_ARG_FLAG | HAS_CONST_FLAG,
     [_LOAD_CONST_IMMORTAL] = HAS_ARG_FLAG | HAS_CONST_FLAG,
     [_LOAD_SMALL_INT_0] = 0,
@@ -101,6 +102,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_CALL_INTRINSIC_1] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CALL_INTRINSIC_2] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_RETURN_VALUE] = HAS_ESCAPES_FLAG,
+    [_TIER2_JUMP] = HAS_ARG_FLAG | HAS_JUMP_FLAG,
     [_GET_AITER] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_GET_ANEXT] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_GET_AWAITABLE] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -454,6 +456,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_LOAD_ATTR_WITH_HINT] = "_LOAD_ATTR_WITH_HINT",
     [_LOAD_BUILD_CLASS] = "_LOAD_BUILD_CLASS",
     [_LOAD_COMMON_CONSTANT] = "_LOAD_COMMON_CONSTANT",
+    [_LOAD_CONST] = "_LOAD_CONST",
     [_LOAD_CONST_IMMORTAL] = "_LOAD_CONST_IMMORTAL",
     [_LOAD_CONST_INLINE] = "_LOAD_CONST_INLINE",
     [_LOAD_CONST_INLINE_BORROW] = "_LOAD_CONST_INLINE_BORROW",
@@ -544,6 +547,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_STORE_SUBSCR_DICT] = "_STORE_SUBSCR_DICT",
     [_STORE_SUBSCR_LIST_INT] = "_STORE_SUBSCR_LIST_INT",
     [_SWAP] = "_SWAP",
+    [_TIER2_JUMP] = "_TIER2_JUMP",
     [_TIER2_RESUME_CHECK] = "_TIER2_RESUME_CHECK",
     [_TO_BOOL] = "_TO_BOOL",
     [_TO_BOOL_BOOL] = "_TO_BOOL_BOOL",
@@ -596,6 +600,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _LOAD_FAST_AND_CLEAR:
             return 0;
         case _LOAD_FAST_LOAD_FAST:
+            return 0;
+        case _LOAD_CONST:
             return 0;
         case _LOAD_CONST_MORTAL:
             return 0;
@@ -729,6 +735,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 2;
         case _RETURN_VALUE:
             return 1;
+        case _TIER2_JUMP:
+            return 0;
         case _GET_AITER:
             return 1;
         case _GET_ANEXT:

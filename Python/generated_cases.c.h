@@ -8650,28 +8650,11 @@
             next_instr += 1;
             INSTRUCTION_STATS(LOAD_CONST);
             PREDICTED_LOAD_CONST:;
-            _Py_CODEUNIT* const this_instr = next_instr - 1;
-            (void)this_instr;
             _PyStackRef value;
             /* We can't do this in the bytecode compiler as
              * marshalling can intern strings and make them immortal. */
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNew(obj);
-            #if ENABLE_SPECIALIZATION_FT
-            #ifdef Py_GIL_DISABLED
-            uint8_t expected = LOAD_CONST;
-            if (!_Py_atomic_compare_exchange_uint8(
-                    &this_instr->op.code, &expected,
-                    _Py_IsImmortal(obj) ? LOAD_CONST_IMMORTAL : LOAD_CONST_MORTAL)) {
-                // We might lose a race with instrumentation, which we don't care about.
-                assert(expected >= MIN_INSTRUMENTED_OPCODE);
-            }
-            #else
-            if (this_instr->op.code == LOAD_CONST) {
-                this_instr->op.code = _Py_IsImmortal(obj) ? LOAD_CONST_IMMORTAL : LOAD_CONST_MORTAL;
-            }
-            #endif
-            #endif
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());

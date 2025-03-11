@@ -113,7 +113,7 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 #define JIT_CLEANUP_THRESHOLD 100000
 
 // This is the length of the trace we project initially.
-#define UOP_MAX_TRACE_LENGTH 800
+#define UOP_MAX_TRACE_LENGTH 2000
 // This is the minimum length for a non-loop trace we will accept.
 // We don't want too short executors.
 // The exception to this is if they form a complete loop.

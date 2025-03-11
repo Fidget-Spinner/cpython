@@ -2522,10 +2522,10 @@ _Py_Specialize_BinaryOp(_PyStackRef lhs_st, _PyStackRef rhs_st, _Py_CODEUNIT *in
             if (PyUnicode_CheckExact(lhs)) {
                 _Py_CODEUNIT next = instr[INLINE_CACHE_ENTRIES_BINARY_OP + 1];
                 bool to_store = (next.op.code == STORE_FAST);
-                if (to_store && PyStackRef_AsPyObjectBorrow(locals[next.op.arg]) == lhs) {
-                    specialize(instr, BINARY_OP_INPLACE_ADD_UNICODE);
-                    return;
-                }
+//                if (to_store && PyStackRef_AsPyObjectBorrow(locals[next.op.arg]) == lhs) {
+//                    specialize(instr, BINARY_OP_INPLACE_ADD_UNICODE);
+//                    return;
+//                }
                 specialize(instr, BINARY_OP_ADD_UNICODE);
                 return;
             }

@@ -995,6 +995,8 @@ enter_tier_two:
 #undef LOAD_IP
 #define LOAD_IP(UNUSED) (void)0
 
+#undef JUMPBY
+#define JUMPBY(x) next_uop = current_executor->trace + (((x) == 0) ? (next_uop - current_executor->trace) : x)
 #ifdef Py_STATS
 // Disable these macros that apply to Tier 1 stats when we are in Tier 2
 #undef STAT_INC
