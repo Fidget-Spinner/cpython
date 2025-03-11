@@ -218,7 +218,9 @@ dummy_func(
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (the_counter/1 --)) {
+        macro(RESUME_CHECK) = _RESUME_CHECK + _JIT;
+
+        op(_RESUME_CHECK, (the_counter/1 --)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -231,35 +233,6 @@ dummy_func(
             DEOPT_IF(frame->tlbc_index !=
                      ((_PyThreadStateImpl *)tstate)->tlbc_index);
             #endif
-            #ifdef _Py_TIER2
-            #if ENABLE_SPECIALIZATION
-            _Py_BackoffCounter counter = this_instr[1].counter;
-            if (backoff_counter_triggers(counter)) {
-                _Py_CODEUNIT *start = this_instr;
-                _PyExecutorObject *executor;
-                int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
-                if (optimized <= 0) {
-                    // NB(Ken Jin): We don't want to bother with optimizing a function if it fails even once.
-                    // It's almost never worth it to try again.
-                    // Experiments indicate that the cost of an optimizing attempt
-                    // for a function is significant. Enough to show up as a 6% slowdown in bm_coroutines.
-                    // We need a *more exponential* backoff than the maximum allowed by our current
-                    // architecture.
-                    this_instr[1].counter = initial_unreachable_backoff_counter();
-                    ERROR_IF(optimized < 0, error);
-                }
-                else {
-                    this_instr[1].counter = initial_resume_counter();
-                    assert(tstate->previous_executor == NULL);
-                    tstate->previous_executor = Py_None;
-                    GOTO_TIER_TWO(executor);
-                }
-            }
-            else {
-                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-            }
-            #endif  /* ENABLE_SPECIALIZATION */
-            #endif /* _Py_TIER2 */
         }
 
         op(_MONITOR_RESUME, (--)) {

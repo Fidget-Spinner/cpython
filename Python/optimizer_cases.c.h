@@ -19,7 +19,9 @@
 
         /* _LOAD_BYTECODE is not a viable micro-op for tier 2 */
 
-        /* _RESUME_CHECK is not a viable micro-op for tier 2 */
+        case _RESUME_CHECK: {
+            break;
+        }
 
         /* _MONITOR_RESUME is not a viable micro-op for tier 2 */
 
