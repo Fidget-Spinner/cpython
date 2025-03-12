@@ -696,6 +696,10 @@ dummy_func(void) {
 
     op(_RETURN_VALUE, (retval -- res)) {
         SAVE_STACK();
+        if (ctx->curr_frame_depth == 1) {
+            ctx->done = true;
+            break;
+        }
         ctx->frame->stack_pointer = stack_pointer;
         frame_pop(ctx);
         stack_pointer = ctx->frame->stack_pointer;
@@ -882,6 +886,10 @@ dummy_func(void) {
         ctx->done = true;
     }
 
+    op(_TIER2_JUMP, (--)) {
+        ctx->done = true;
+    }
+
     op(_REPLACE_WITH_TRUE, (value -- res)) {
         res = sym_new_const(ctx, Py_True);
     }
@@ -899,6 +907,34 @@ dummy_func(void) {
         for (int i = 0; i < oparg; i++) {
             values[i] = sym_tuple_getitem(ctx, seq, i);
         }
+    }
+
+    op(_POP_JUMP_IF_TRUE, (cond -- )) {
+        int slevel = STACK_LEVEL() - 1;
+        int err = optimize_uops(ctx->frame->co, trace, i+1, trace_len, slevel, dependencies);
+        if (err != 1) {
+            return err;
+        }
+        err = optimize_uops(ctx->frame->co, trace, oparg, trace_len, slevel, dependencies);
+        if (err != 1) {
+            return err;
+        }
+        ctx->done = true;
+        break;
+    }
+
+    op(_POP_JUMP_IF_FALSE, (cond -- )) {
+        int slevel = STACK_LEVEL() - 1;
+        int err = optimize_uops(ctx->frame->co, trace, i+1, trace_len, slevel, dependencies);
+        if (err != 1) {
+            return err;
+        }
+        err = optimize_uops(ctx->frame->co, trace, oparg, trace_len, slevel, dependencies);
+        if (err != 1) {
+            return err;
+        }
+        ctx->done = true;
+        break;
     }
 
 

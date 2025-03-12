@@ -722,6 +722,10 @@
             retval = stack_pointer[-1];
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            if (ctx->curr_frame_depth == 1) {
+                ctx->done = true;
+                break;
+            }
             ctx->frame->stack_pointer = stack_pointer;
             frame_pop(ctx);
             stack_pointer = ctx->frame->stack_pointer;
@@ -745,6 +749,7 @@
         }
 
         case _TIER2_JUMP: {
+            ctx->done = true;
             break;
         }
 
@@ -1380,12 +1385,34 @@
         }
 
         case _POP_JUMP_IF_FALSE: {
+            int slevel = STACK_LEVEL() - 1;
+            int err = optimize_uops(ctx->frame->co, trace, i+1, trace_len, slevel, dependencies);
+            if (err != 1) {
+                return err;
+            }
+            err = optimize_uops(ctx->frame->co, trace, oparg, trace_len, slevel, dependencies);
+            if (err != 1) {
+                return err;
+            }
+            ctx->done = true;
+            break;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_JUMP_IF_TRUE: {
+            int slevel = STACK_LEVEL() - 1;
+            int err = optimize_uops(ctx->frame->co, trace, i+1, trace_len, slevel, dependencies);
+            if (err != 1) {
+                return err;
+            }
+            err = optimize_uops(ctx->frame->co, trace, oparg, trace_len, slevel, dependencies);
+            if (err != 1) {
+                return err;
+            }
+            ctx->done = true;
+            break;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;

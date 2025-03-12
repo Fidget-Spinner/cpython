@@ -1,4 +1,3 @@
-#ifdef _Py_TIER2
 
 #include "Python.h"
 
@@ -652,6 +651,8 @@ _Py_uop_frame_new(
         frame->stack[i] = stackvar;
     }
 
+    frame->co = co;
+
     return frame;
 }
 
@@ -867,5 +868,3 @@ fail:
     Py_DECREF(tuple);
     return NULL;
 }
-
-#endif /* _Py_TIER2 */

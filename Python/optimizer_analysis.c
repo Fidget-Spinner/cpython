@@ -443,6 +443,7 @@ static int
 optimize_uops(
     PyCodeObject *co,
     _PyUOpInstruction *trace,
+    int start,
     int trace_len,
     int curr_stacklen,
     _PyBloomFilter *dependencies
@@ -470,7 +471,7 @@ optimize_uops(
     ctx->contradiction = false;
 
     _PyUOpInstruction *this_instr = NULL;
-    for (int i = 0; !ctx->done; i++) {
+    for (int i = start; !ctx->done; i++) {
         assert(i < trace_len);
         this_instr = &trace[i];
 
@@ -659,15 +660,15 @@ _Py_uop_analyze_and_optimize(
     if (err <= 0) {
         return err;
     }
-//
-//    length = optimize_uops(
-//        _PyFrame_GetCode(frame), buffer,
-//        length, curr_stacklen, dependencies);
-//
-//    if (length <= 0) {
-//        return length;
-//    }
-//
+
+    length = optimize_uops(
+        _PyFrame_GetCode(frame), buffer, 0,
+        length, curr_stacklen, dependencies);
+
+    if (length <= 0) {
+        return length;
+    }
+
     length = remove_unneeded_uops(buffer, 0, length);
     assert(length > 0);
 

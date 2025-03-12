@@ -161,9 +161,9 @@ static inline uint16_t uop_get_error_target(const _PyUOpInstruction *inst)
 }
 
 // Holds locals, stack, locals, stack ... co_consts (in that order)
-#define MAX_ABSTRACT_INTERP_SIZE 4096
+#define MAX_ABSTRACT_INTERP_SIZE 256
 
-#define TY_ARENA_SIZE (UOP_MAX_TRACE_LENGTH * 5)
+#define TY_ARENA_SIZE (MAX_ABSTRACT_INTERP_SIZE)
 
 // Need extras for root frame and for overflow frame (see TRACE_STACK_PUSH())
 #define MAX_ABSTRACT_FRAME_DEPTH (TRACE_STACK_SIZE + 2)
@@ -235,6 +235,8 @@ struct _Py_UOpsAbstractFrame {
     // Max stacklen
     int stack_len;
     int locals_len;
+
+    PyCodeObject *co;
 
     JitOptSymbol **stack_pointer;
     JitOptSymbol **stack;
