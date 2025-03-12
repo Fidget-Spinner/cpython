@@ -726,6 +726,7 @@ translate_bytecode_to_method(
                                     recursive_start = trace_stack[x].entry;
                                 }
                                 if (is_recursive) {
+                                    goto unsupported;
                                     // Recursive call, bail (we could be here forever).
                                     DPRINTF(2, "Looping back to recursive call to %s (%s:%d)\n",
                                             PyUnicode_AsUTF8(new_code->co_qualname),
@@ -733,6 +734,7 @@ translate_bytecode_to_method(
                                             new_code->co_firstlineno);
                                     OPT_STAT_INC(recursive_call);
                                     ADD_TO_TRACE(uop, oparg, 0, target);
+                                    assert(recursive_start - trace < *trace_length);
                                     ADD_TO_TRACE(_TIER2_JUMP, recursive_start - trace, 0, 0);
                                     curr = _PyCode_CODE(new_code) + Py_SIZE(new_code);
                                     goto bail_early;

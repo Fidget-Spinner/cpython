@@ -4994,9 +4994,9 @@ dummy_func(
         }
 
         tier2 op(_EXIT_TRACE, (exit_p/4 --)) {
-            _PyExitData *exit = (_PyExitData *)exit_p;
+            // _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
-            _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
+            _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + CURRENT_TARGET();
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 3) {
@@ -5008,11 +5008,11 @@ dummy_func(
                     _PyOpcode_OpName[target->op.code]);
             }
         #endif
-            if (exit->executor && !exit->executor->vm_data.valid) {
-                exit->temperature = initial_temperature_backoff_counter();
-                Py_CLEAR(exit->executor);
-            }
-            tstate->previous_executor = (PyObject *)current_executor;
+//            if (exit->executor && !exit->executor->vm_data.valid) {
+//                exit->temperature = initial_temperature_backoff_counter();
+//                Py_CLEAR(exit->executor);
+//            }
+            // tstate->previous_executor = (PyObject *)current_executor;
             GOTO_TIER_ONE(target);
 //            if (exit->executor == NULL) {
 //                _Py_BackoffCounter temperature = exit->temperature;
