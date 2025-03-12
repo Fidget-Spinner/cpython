@@ -1116,6 +1116,7 @@ dummy_func(
         }
 
         op(_TIER2_JUMP, (--)) {
+            JUMP_TO_JUMP_TARGET();
             TIER2_JUMP(oparg);
         }
 
@@ -2861,6 +2862,10 @@ dummy_func(
             DEAD(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+            if (flag) {
+                SHRINK_STACK_JIT(1);
+                JUMP_TO_JUMP_TARGET();
+            }
         }
 
         op(_POP_JUMP_IF_TRUE, (cond -- )) {
@@ -2869,6 +2874,10 @@ dummy_func(
             DEAD(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+            if (flag) {
+                SHRINK_STACK_JIT(1);
+                JUMP_TO_JUMP_TARGET();
+            }
         }
 
         op(_IS_NONE, (value -- b)) {
@@ -3104,6 +3113,7 @@ dummy_func(
                 #endif
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
+                JUMP_TO_JUMP_TARGET();
                 TIER2_JUMP(oparg);
                 DISPATCH();
             }
@@ -3156,6 +3166,7 @@ dummy_func(
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
                 TIER2_JUMP(oparg);
+                JUMP_TO_JUMP_TARGET();
                 DISPATCH();
             }
         }
@@ -3199,6 +3210,7 @@ dummy_func(
                 // Jump over END_FOR instruction.
                 JUMPBY(oparg + 1);
                 TIER2_JUMP(oparg);
+                JUMP_TO_JUMP_TARGET();
                 DISPATCH();
             }
         }
@@ -4945,6 +4957,7 @@ dummy_func(
         }
 
         op(_JUMP_TO_TOP, (--)) {
+            Py_UNREACHABLE();
             JUMP_TO_JUMP_TARGET();
         }
 

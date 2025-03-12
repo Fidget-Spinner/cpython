@@ -114,21 +114,8 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 #define JIT_CLEANUP_THRESHOLD 100000
 
 // This is the length of the trace we project initially.
-#define UOP_MAX_TRACE_LENGTH 2000
-// This is the minimum length for a non-loop trace we will accept.
-// We don't want too short executors.
-// The exception to this is if they form a complete loop.
-// The intuition is that staying within JITTed code is good.
-// This does not apply to side exit (branch) traces because they would have come
-// from another executor, so the transition from JITted code -> JITted code is cheap.
-// This only applies to trunk (root) traces, where the transition from
-// Interpreter -> JITted code happens (which is expensive).
-// TODO: investigate if a higher number yields better results.
-// TODO: investigate a different threshold for _DYNAMIC_EXIT, as that is a possible JITted -> JITted transition as well.
-// Experimental results show that a shorter trace length for loops is acceptable
-// vs for functions.
-#define UOP_MIN_TRACE_LENGTH 30
-#define UOP_MIN_TRACE_LENGTH_RESUME 100
+#define UOP_MAX_TRACE_LENGTH 4096
+
 
 #define TRACE_STACK_SIZE 5
 

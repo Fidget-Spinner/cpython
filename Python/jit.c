@@ -17,6 +17,7 @@
 #include "pycore_setobject.h"
 #include "pycore_sliceobject.h"
 #include "pycore_jit.h"
+#include "pycore_uop_metadata.h"
 
 // Memory management stuff: ////////////////////////////////////////////////////
 

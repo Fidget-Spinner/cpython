@@ -5590,6 +5590,7 @@
                     #endif
                     /* Jump forward oparg, then skip following END_FOR instruction */
                     JUMPBY(oparg + 1);
+                    JUMP_TO_JUMP_TARGET();
                     TIER2_JUMP(oparg);
                     DISPATCH();
                 }
@@ -5643,6 +5644,7 @@
                     // Jump over END_FOR instruction.
                     JUMPBY(oparg + 1);
                     TIER2_JUMP(oparg);
+                    JUMP_TO_JUMP_TARGET();
                     DISPATCH();
                 }
             }
@@ -5706,6 +5708,7 @@
                     /* Jump forward oparg, then skip following END_FOR instruction */
                     JUMPBY(oparg + 1);
                     TIER2_JUMP(oparg);
+                    JUMP_TO_JUMP_TARGET();
                     DISPATCH();
                 }
             }
@@ -9799,6 +9802,10 @@
             int flag = PyStackRef_IsFalse(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+            if (flag) {
+                SHRINK_STACK_JIT(1);
+                JUMP_TO_JUMP_TARGET();
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
@@ -9840,6 +9847,10 @@
                 int flag = PyStackRef_IsTrue(cond);
                 JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
                 TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+                if (flag) {
+                    SHRINK_STACK_JIT(1);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -9882,6 +9893,10 @@
                 int flag = PyStackRef_IsFalse(cond);
                 JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
                 TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+                if (flag) {
+                    SHRINK_STACK_JIT(1);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -9903,6 +9918,10 @@
             int flag = PyStackRef_IsTrue(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+            if (flag) {
+                SHRINK_STACK_JIT(1);
+                JUMP_TO_JUMP_TARGET();
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             DISPATCH();

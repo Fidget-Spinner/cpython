@@ -18,6 +18,7 @@
 #include "pycore_sliceobject.h"
 #include "pycore_descrobject.h"
 #include "pycore_stackref.h"
+#include "pycore_uop_metadata.h"
 
 #include "ceval_macros.h"
 
@@ -69,6 +70,15 @@ do {                                                                     \
 #undef JUMP_TO_JUMP_TARGET
 #define JUMP_TO_JUMP_TARGET() PATCH_JUMP(_JIT_JUMP_TARGET)
 
+#undef JUMP_TO_JUMP_TARGET2
+#define JUMP_TO_JUMP_TARGET2(oparg) PATCH_JUMP(_JIT_JUMP_TARGET2)
+
+#undef SHRINK_STACK_JIT
+#define SHRINK_STACK_JIT(x) (stack_pointer -= (x))
+
+#undef JUMPBY
+#define JUMPBY(x)
+
 #undef JUMP_TO_ERROR
 #define JUMP_TO_ERROR() PATCH_JUMP(_JIT_ERROR_TARGET)
 
@@ -99,6 +109,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
     OPT_STAT_INC(uops_executed);
     UOP_STAT_INC(uopcode, execution_count);
+    // fprintf(stderr, "%OP: %s\n", _PyOpcode_uop_name[uopcode]);
     switch (uopcode) {
         // The actual instruction definition gets inserted here:
         CASE

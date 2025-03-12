@@ -999,6 +999,15 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             buffer[i].format = UOP_FORMAT_JUMP;
             buffer[i].jump_target = 1;
         }
+        if (opcode == _TIER2_JUMP ||
+            opcode == _POP_JUMP_IF_TRUE ||
+            opcode == _POP_JUMP_IF_FALSE ||
+            opcode == _ITER_JUMP_RANGE ||
+            opcode == _ITER_JUMP_TUPLE ||
+            opcode == _ITER_JUMP_LIST) {
+            buffer[i].format = UOP_FORMAT_JUMP;
+            buffer[i].jump_target = buffer[i].oparg;
+        }
     }
     return next_spare;
 }

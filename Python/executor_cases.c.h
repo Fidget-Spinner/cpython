@@ -1728,6 +1728,7 @@
 
         case _TIER2_JUMP: {
             oparg = CURRENT_OPARG();
+            JUMP_TO_JUMP_TARGET();
             TIER2_JUMP(oparg);
             break;
         }
@@ -3942,6 +3943,10 @@
             int flag = PyStackRef_IsFalse(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+            if (flag) {
+                SHRINK_STACK_JIT(1);
+                JUMP_TO_JUMP_TARGET();
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -3955,6 +3960,10 @@
             int flag = PyStackRef_IsTrue(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
+            if (flag) {
+                SHRINK_STACK_JIT(1);
+                JUMP_TO_JUMP_TARGET();
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -4238,6 +4247,7 @@
                 #endif
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
+                JUMP_TO_JUMP_TARGET();
                 TIER2_JUMP(oparg);
                 break;
             }
@@ -4311,6 +4321,7 @@
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
                 TIER2_JUMP(oparg);
+                JUMP_TO_JUMP_TARGET();
                 break;
             }
             break;
@@ -4373,6 +4384,7 @@
                 // Jump over END_FOR instruction.
                 JUMPBY(oparg + 1);
                 TIER2_JUMP(oparg);
+                JUMP_TO_JUMP_TARGET();
                 break;
             }
             break;
@@ -6799,8 +6811,8 @@
         }
 
         case _JUMP_TO_TOP: {
+            Py_UNREACHABLE();
             JUMP_TO_JUMP_TARGET();
-            break;
         }
 
         case _SET_IP: {
