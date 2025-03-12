@@ -6811,8 +6811,8 @@
         }
 
         case _JUMP_TO_TOP: {
-            Py_UNREACHABLE();
             JUMP_TO_JUMP_TARGET();
+            break;
         }
 
         case _SET_IP: {

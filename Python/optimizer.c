@@ -404,7 +404,7 @@ add_to_trace(
 #else
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
     assert(*trace_length < max_length); \
-    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET));
+    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET), code);
 #endif
 
 #define INSTR_IP(INSTR, CODE) \
