@@ -541,7 +541,7 @@ error:
 
 
 static int
-remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
+remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
 {
     /* Remove _SET_IP and _CHECK_VALIDITY where possible.
      * _SET_IP is needed if the following instruction escapes or
@@ -549,7 +549,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
      * instruction could have escaped. */
     int last_set_ip = -1;
     bool may_have_escaped = true;
-    for (int pc = 0; pc < buffer_size; pc++) {
+    for (int pc = start; pc < buffer_size; pc++) {
         int opcode = buffer[pc].opcode;
         switch (opcode) {
             case _START_EXECUTOR:
@@ -598,7 +598,24 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
             }
             case _JUMP_TO_TOP:
             case _EXIT_TRACE:
-                return pc + 1;
+                return buffer_size;
+            case _TIER2_JUMP:
+                if (buffer[pc].oparg == pc + 1) {
+                    buffer[pc].opcode = _NOP;
+                }
+                else if (buffer[pc].oparg == pc + 2) {
+                    if (buffer[pc + 1].opcode == _CHECK_VALIDITY_AND_SET_IP) {
+                        buffer[pc].opcode = _NOP;
+                    }
+                }
+                return buffer_size;
+            case _POP_JUMP_IF_FALSE:
+            case _POP_JUMP_IF_TRUE:
+                // Consequent
+                remove_unneeded_uops(buffer, pc + 1, buffer_size);
+                // Alternative
+                remove_unneeded_uops(buffer, buffer[pc].oparg, buffer_size);
+                return buffer_size;
             default:
             {
                 /* _PUSH_FRAME doesn't escape or error, but it
@@ -651,10 +668,10 @@ _Py_uop_analyze_and_optimize(
 //        return length;
 //    }
 //
-//    length = remove_unneeded_uops(buffer, length);
-//    assert(length > 0);
-//
-//    OPT_STAT_INC(optimizer_successes);
+    length = remove_unneeded_uops(buffer, 0, length);
+    assert(length > 0);
+
+    OPT_STAT_INC(optimizer_successes);
     return length;
 }
 
