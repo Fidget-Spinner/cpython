@@ -4238,6 +4238,7 @@
                 #endif
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
+                TIER2_JUMP(oparg);
                 break;
             }
             break;
@@ -4309,6 +4310,7 @@
                 }
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
+                TIER2_JUMP(oparg);
                 break;
             }
             break;
@@ -4370,6 +4372,7 @@
             if (r->len <= 0) {
                 // Jump over END_FOR instruction.
                 JUMPBY(oparg + 1);
+                TIER2_JUMP(oparg);
                 break;
             }
             break;

@@ -377,13 +377,15 @@ add_to_trace(
     uint16_t opcode,
     uint16_t oparg,
     uint64_t operand,
-    uint32_t target)
+    uint32_t target,
+    PyCodeObject *code)
 {
     trace[trace_length].opcode = opcode;
     trace[trace_length].format = UOP_FORMAT_TARGET;
     trace[trace_length].target = target;
     trace[trace_length].oparg = oparg;
     trace[trace_length].operand0 = operand;
+    trace[trace_length].code = code;
 #ifdef Py_STATS
     trace[trace_length].execution_count = 0;
 #endif
@@ -393,7 +395,7 @@ add_to_trace(
 #ifdef Py_DEBUG
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
     assert(*trace_length < max_length); \
-    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET)); \
+    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET), code); \
     if (lltrace >= 2) { \
         printf("%4d ADD_TO_TRACE: ", *trace_length); \
         _PyUOpPrint(&trace[*trace_length-1]); \
@@ -464,11 +466,6 @@ translate_bytecode_to_method(
     _Py_BloomFilter_Add(dependencies, code);
     _Py_CODEUNIT *instr = curr;
 
-    if (trace_stack_depth >= TRACE_STACK_SIZE) {
-        goto unsupported;
-    }
-    // Leave space for possible trailing _EXIT_TRACE
-    int max_length = buffer_size-2;
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
     int lltrace = 0;
@@ -477,12 +474,18 @@ translate_bytecode_to_method(
     }
 #endif
 
+    if (trace_stack_depth >= TRACE_STACK_SIZE) {
+        goto unsupported;
+    }
+    // Leave space for possible trailing _EXIT_TRACE
+    int max_length = buffer_size-2;
+
     DPRINTF(2,
-            "Optimizing %s (%s:%d) at byte offset %d\n",
+            "Optimizing %s (%s:%d) at line number %d\n",
             PyUnicode_AsUTF8(code->co_qualname),
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
-            2 * INSTR_IP(instr, code));
+            PyCode_Addr2Line(code, 2 * INSTR_IP(instr, code)));
     uint32_t target = 0;
     _Py_CODEUNIT *end = _PyCode_CODE(code) + Py_SIZE(code);
 
@@ -587,7 +590,7 @@ translate_bytecode_to_method(
                 bool found = false;
                 int find = 0;
                 for (; find < *trace_length; find++) {
-                    if (trace[find].target == (uint32_t)jump_target_offset) {
+                    if (trace[find].target == (uint32_t)jump_target_offset && code == trace[find].code) {
                         found = true;
                         break;
                     }
@@ -680,27 +683,29 @@ translate_bytecode_to_method(
                             }
                             if (trace_stack_depth == 1) {
                                 ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+                                goto done;
                             }
                             else {
                                 ADD_TO_TRACE(uop, oparg, operand, target);
-                                _PyUOpInstruction *jump = &trace[*trace_length];
-                                instr += _PyOpcode_Caches[RETURN_VALUE] + 1;
-                                if (instr < end) {
-                                    ADD_TO_TRACE(_TIER2_JUMP, 0, 0, target);
-                                    DPRINTF(2,
-                                            "Returning to %s (%s:%d)\n",
-                                            PyUnicode_AsUTF8(code->co_qualname),
-                                            PyUnicode_AsUTF8(code->co_filename),
-                                            code->co_firstlineno);
-                                    int err = translate_bytecode_to_method(
-                                        frame, code, func, instr, trace_length,
-                                        trace, buffer_size, trace_stack_depth,
-                                        trace_stack, dependencies);
-                                    if (err < 0) {
-                                        return err;
-                                    }
-                                    jump->oparg = *trace_length - 1;
-                                }
+                                ADD_TO_TRACE(_TIER2_JUMP, 0, 0, 0);
+//                                _PyUOpInstruction *jump = &trace[*trace_length];
+//                                instr += _PyOpcode_Caches[RETURN_VALUE] + 1;
+                                // Translate stuff AFTER the return.
+//                                if (instr < end) {
+//                                    DPRINTF(2,
+//                                            "Returning to %s (%s:%d)\n",
+//                                            PyUnicode_AsUTF8(code->co_qualname),
+//                                            PyUnicode_AsUTF8(code->co_filename),
+//                                            code->co_firstlineno);
+//                                    int err = translate_bytecode_to_method(
+//                                        frame, code, func, instr, trace_length,
+//                                        trace, buffer_size, trace_stack_depth,
+//                                        trace_stack, dependencies);
+//                                    if (err < 0) {
+//                                        return err;
+//                                    }
+//                                    jump->oparg = *trace_length - 1;
+//                                }
                             }
                             return *trace_length;
                         }
@@ -782,12 +787,8 @@ translate_bytecode_to_method(
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
                                 TRACE_STACK_PUSH();
-                                DPRINTF(2,
-                                    "Continuing in %s (%s:%d) at byte offset %d\n",
-                                    PyUnicode_AsUTF8(code->co_qualname),
-                                    PyUnicode_AsUTF8(code->co_filename),
-                                    code->co_firstlineno,
-                                    2 * INSTR_IP(instr, code));
+
+                                int before_len = *trace_length;
 
                                 // Inline the function.
                                 int err = translate_bytecode_to_method(
@@ -797,9 +798,25 @@ translate_bytecode_to_method(
                                 if (err <= 0) {
                                     return err;
                                 }
+                                int after_len = *trace_length;
                                 func = old_func;
                                 code = old_code;
                                 instr = old_instr;
+                                // Fixup _TIER2_JUMPs after RETURN_VALUE
+                                for (int x = before_len-1; x < after_len; x++) {
+                                    if (trace[x].opcode == _RETURN_VALUE) {
+                                        assert(trace[x+1].opcode == _TIER2_JUMP);
+                                        if (trace[x+1].oparg == 0 && trace[x+1].target == 0 && trace[x+1].operand0 == 0) {
+                                            trace[x+1].oparg = after_len;
+                                        }
+                                    }
+                                }
+                                DPRINTF(2,
+                                        "Continuing in %s (%s:%d) at line number %d\n",
+                                        PyUnicode_AsUTF8(code->co_qualname),
+                                        PyUnicode_AsUTF8(code->co_filename),
+                                        code->co_firstlineno,
+                                        PyCode_Addr2Line(code, 2 * INSTR_IP(instr, code)));
                                 goto top;
                             }
                             DPRINTF(2, "Bail, new_code == NULL\n");
@@ -808,6 +825,7 @@ translate_bytecode_to_method(
                         }
 
                         if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
+                            goto unsupported;
                             assert(i + 1 == nuops);
                             _Py_CODEUNIT *next_instr = instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
                             assert(next_instr->op.code == STORE_FAST);
@@ -860,7 +878,8 @@ translate_bytecode_to_method(
                             }
                             if (uop == _ITER_JUMP_LIST || uop == _ITER_JUMP_TUPLE || uop == _ITER_JUMP_RANGE)
                             {
-                                jump->oparg = *trace_length + 1;
+                                // Jump over the END_FOR
+                                jump->oparg = *trace_length + 2;
                             }
                             else {
                                 jump->oparg = *trace_length;
@@ -898,14 +917,9 @@ translate_bytecode_to_method(
     }  // End for (;;)
 
 done:
-    assert(instr != NULL || trace_stack_depth == 0);
-    // End of trace.
-    if (trace_stack_depth == 0) {
-        ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
-        return *trace_length;
-    }
     return *trace_length;
 unsupported:
+    DPRINTF(1, "Unsuported\n");
     return 0;
 }
 
