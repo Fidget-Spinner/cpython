@@ -192,6 +192,7 @@ GETITEM(PyObject *v, Py_ssize_t i) {
  * and skipped instructions.
  */
 #define JUMPBY(x)       (next_instr += (x))
+#define TIER2_JUMP(x)   ((void)(x))
 #define SKIP_OVER(x)    (next_instr += (x))
 
 

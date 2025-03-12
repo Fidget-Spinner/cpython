@@ -1728,7 +1728,7 @@
 
         case _TIER2_JUMP: {
             oparg = CURRENT_OPARG();
-            JUMPBY(oparg);
+            TIER2_JUMP(oparg);
             break;
         }
 
@@ -3941,6 +3941,7 @@
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsFalse(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+            TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -3953,6 +3954,7 @@
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsTrue(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+            TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
