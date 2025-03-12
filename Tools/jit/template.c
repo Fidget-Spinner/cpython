@@ -109,7 +109,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
     OPT_STAT_INC(uops_executed);
     UOP_STAT_INC(uopcode, execution_count);
-    // fprintf(stderr, "%OP: %s\n", _PyOpcode_uop_name[uopcode]);
+//    fprintf(stderr, "%OP: %s\n", _PyOpcode_uop_name[uopcode]);
     switch (uopcode) {
         // The actual instruction definition gets inserted here:
         CASE

@@ -7476,6 +7476,17 @@
                 assert(oparg <= INSTR_OFFSET());
                 JUMPBY(-oparg);
             }
+            // _ADVANCE_COUNTER
+            {
+                #ifdef _Py_TIER2
+                PyCodeObject *co = _PyFrame_GetCode(frame);
+                _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)(&co->hot_counter);
+                _Py_BackoffCounter counter = *counter_p;
+                if (!backoff_counter_triggers(counter)) {
+                    *counter_p = advance_backoff_counter(counter);
+                }
+                #endif
+            }
             DISPATCH();
         }
 
@@ -10234,22 +10245,23 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
+                _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)&(_PyFrame_GetCode(frame)->hot_counter);
+                _Py_BackoffCounter counter = *counter_p;
                 int this_instr_op_code = this_instr->op.code;
-                if (backoff_counter_triggers(counter) && (this_instr_op_code == JUMP_BACKWARD_JIT || this_instr_op_code == RESUME_JIT)) {
+                if (backoff_counter_triggers(counter) && (this_instr_op_code == RESUME_JIT)) {
                     _PyExecutorObject *executor;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     int optimized = _PyOptimizer_Optimize(frame, this_instr, &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
+                        *counter_p = restart_backoff_counter(counter);
                         if (optimized < 0) {
                             JUMP_TO_LABEL(error);
                         }
                     }
                     else {
                         _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
+                        *counter_p = initial_jump_backoff_counter();
                         stack_pointer = _PyFrame_GetStackPointer(frame);
                         assert(tstate->previous_executor == NULL);
                         tstate->previous_executor = Py_None;
@@ -10258,7 +10270,7 @@
                     }
                 }
                 else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                    *counter_p = advance_backoff_counter(counter);
                 }
                 #endif
             }

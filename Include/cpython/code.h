@@ -159,6 +159,7 @@ typedef struct {
        people to go through the proper APIs. */                                \
     void *co_extra;                                                            \
     _PyCode_DEF_THREAD_LOCAL_BYTECODE()                                        \
+    uint16_t hot_counter;                                            \
     char co_code_adaptive[(SIZE)];                                             \
 }
 

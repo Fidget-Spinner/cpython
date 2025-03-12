@@ -752,6 +752,7 @@ _PyCode_New(struct _PyCodeConstructor *con)
     _PyObject_GC_TRACK(co);
 #endif
     Py_XDECREF(replacement_locations);
+    co->hot_counter = initial_resume_counter().value_and_backoff;
     return co;
 }
 

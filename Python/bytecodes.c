@@ -2771,17 +2771,18 @@ dummy_func(
 
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
-            _Py_BackoffCounter counter = this_instr[1].counter;
+            _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)&(_PyFrame_GetCode(frame)->hot_counter);
+            _Py_BackoffCounter counter = *counter_p;
             int this_instr_op_code = this_instr->op.code;
-            if (backoff_counter_triggers(counter) && (this_instr_op_code == JUMP_BACKWARD_JIT || this_instr_op_code == RESUME_JIT)) {
+            if (backoff_counter_triggers(counter) && (this_instr_op_code == RESUME_JIT)) {
                 _PyExecutorObject *executor;
                 int optimized = _PyOptimizer_Optimize(frame, this_instr, &executor, 0);
                 if (optimized <= 0) {
-                    this_instr[1].counter = restart_backoff_counter(counter);
+                    *counter_p = restart_backoff_counter(counter);
                     ERROR_IF(optimized < 0, error);
                 }
                 else {
-                    this_instr[1].counter = initial_jump_backoff_counter();
+                    *counter_p = initial_jump_backoff_counter();
                     assert(tstate->previous_executor == NULL);
                     tstate->previous_executor = Py_None;
                     assert(this_instr->op.code == ENTER_EXECUTOR);
@@ -2789,8 +2790,20 @@ dummy_func(
                 }
             }
             else {
-                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                *counter_p = advance_backoff_counter(counter);
             }
+        #endif
+        }
+
+        tier1 op(_ADVANCE_COUNTER, (--)) {
+        #ifdef _Py_TIER2
+            PyCodeObject *co = _PyFrame_GetCode(frame);
+            _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)(&co->hot_counter);
+            _Py_BackoffCounter counter = *counter_p;
+            if (!backoff_counter_triggers(counter)) {
+                *counter_p = advance_backoff_counter(counter);
+            }
+
         #endif
         }
 
@@ -2808,7 +2821,8 @@ dummy_func(
         macro(JUMP_BACKWARD_JIT) =
             unused/1 +
             _CHECK_PERIODIC +
-            JUMP_BACKWARD_NO_INTERRUPT;
+            JUMP_BACKWARD_NO_INTERRUPT +
+            _ADVANCE_COUNTER;
 
         pseudo(JUMP, (--)) = {
             JUMP_FORWARD,
