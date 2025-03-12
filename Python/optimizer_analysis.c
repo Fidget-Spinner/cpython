@@ -1,5 +1,3 @@
-#ifdef _Py_TIER2
-
 /*
  * This file contains the support code for CPython's uops optimizer.
  * It also performs some simple optimizations.
@@ -141,7 +139,7 @@ incorrect_keys(_PyUOpInstruction *inst, PyObject *obj)
  *        -1 if there was an error. */
 static int
 remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
-               int buffer_size, _PyBloomFilter *dependencies)
+               int start, int buffer_size, _PyBloomFilter *dependencies)
 {
     PyInterpreterState *interp = _PyInterpreterState_GET();
     PyObject *builtins = frame->f_builtins;
@@ -175,7 +173,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
     if (interp->type_watchers[TYPE_WATCHER_ID] == NULL) {
         interp->type_watchers[TYPE_WATCHER_ID] = type_watcher_callback;
     }
-    for (int pc = 0; pc < buffer_size; pc++) {
+    for (int pc = start; pc < buffer_size; pc++) {
         _PyUOpInstruction *inst = &buffer[pc];
         int opcode = inst->opcode;
         switch(opcode) {
@@ -290,14 +288,29 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
             case _CHECK_FUNCTION_EXACT_ARGS:
                 prechecked_function_version = (uint32_t)buffer[pc].operand0;
                 break;
-            default:
-                if (is_terminator(inst)) {
-                    return 1;
+            case _POP_JUMP_IF_TRUE:
+            case _POP_JUMP_IF_FALSE: {
+                // Consequent
+                int err = remove_globals(frame, buffer, pc + 1, buffer_size,
+                                         dependencies);
+                if (err <= 0) {;
+                    return err;
                 }
+                // Alternative
+                err = remove_globals(frame, buffer, buffer[pc].oparg, buffer_size,
+                                         dependencies);
+                if (err <= 0) {
+                    return err;
+                }
+                return 1;
+            }
+            case _TIER2_JUMP:
+                return 1;
+            default:
                 break;
         }
     }
-    return 0;
+    return 1;
 }
 
 
@@ -625,24 +638,23 @@ _Py_uop_analyze_and_optimize(
 {
     OPT_STAT_INC(optimizer_attempts);
 
-    int err = remove_globals(frame, buffer, length, dependencies);
+    int err = remove_globals(frame, buffer, 0, length, dependencies);
     if (err <= 0) {
         return err;
     }
-
-    length = optimize_uops(
-        _PyFrame_GetCode(frame), buffer,
-        length, curr_stacklen, dependencies);
-
-    if (length <= 0) {
-        return length;
-    }
-
-    length = remove_unneeded_uops(buffer, length);
-    assert(length > 0);
-
-    OPT_STAT_INC(optimizer_successes);
+//
+//    length = optimize_uops(
+//        _PyFrame_GetCode(frame), buffer,
+//        length, curr_stacklen, dependencies);
+//
+//    if (length <= 0) {
+//        return length;
+//    }
+//
+//    length = remove_unneeded_uops(buffer, length);
+//    assert(length > 0);
+//
+//    OPT_STAT_INC(optimizer_successes);
     return length;
 }
 
-#endif /* _Py_TIER2 */

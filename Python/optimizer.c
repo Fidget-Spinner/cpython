@@ -458,7 +458,6 @@ translate_bytecode_to_method(
     _PyMethodStack trace_stack[TRACE_STACK_SIZE],
     _PyBloomFilter *dependencies)
 {
-    bool first = true;
     assert(code != NULL);
     assert(PyCode_Check(code));
     _Py_BloomFilter_Add(dependencies, code);
@@ -541,16 +540,6 @@ translate_bytecode_to_method(
             ADD_TO_TRACE(_CHECK_VALIDITY_AND_SET_IP, 0, (uintptr_t)instr, target);
         }
 
-        /* Special case the first instruction,
-         * so that we can guarantee forward progress */
-        if (first) {
-            assert(first);
-            if (OPCODE_HAS_EXIT(opcode) || OPCODE_HAS_DEOPT(opcode)) {
-                opcode = _PyOpcode_Deopt[opcode];
-            }
-            assert(!OPCODE_HAS_EXIT(opcode));
-            assert(!OPCODE_HAS_DEOPT(opcode));
-        }
 
         if (OPCODE_HAS_EXIT(opcode)) {
             // Make space for side exit and final _EXIT_TRACE:
@@ -782,7 +771,6 @@ translate_bytecode_to_method(
                                 assert(PyCode_Check(code));
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
-                                DPRINTF(2, "HI %d\n", trace_stack_depth);
                                 TRACE_STACK_PUSH();
 
                                 int before_len = *trace_length;
@@ -920,8 +908,6 @@ translate_bytecode_to_method(
             instr++;
         }
     top:
-        // Jump here after _PUSH_FRAME or likely branches.
-        first = false;
     }  // End for (;;)
 done:
     return 0;
@@ -1229,15 +1215,15 @@ uop_optimize(
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
-//    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
-//    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
-//        length = _Py_uop_analyze_and_optimize(frame, buffer,
-//                                           length,
-//                                           curr_stackentries, &dependencies);
-//        if (length <= 0) {
-//            return length;
-//        }
-//    }
+    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
+    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
+        length = _Py_uop_analyze_and_optimize(frame, buffer,
+                                           length,
+                                           curr_stackentries, &dependencies);
+        if (length <= 0) {
+            return length;
+        }
+    }
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
     /* Fix up */
