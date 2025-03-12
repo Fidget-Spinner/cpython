@@ -113,12 +113,7 @@ _PyOptimizer_Optimize(
     chain_depth %= MAX_CHAIN_DEPTH;
     bool progress_needed = chain_depth == 0;
     PyCodeObject *code = _PyFrame_GetCode(frame);
-#ifndef Py_DEBUG
-    // Too small.
-    if (Py_SIZE(code) <= 32) {
-        return 0;
-    }
-#endif
+
     assert(PyCode_Check(code));
     if (progress_needed && !has_space_for_executor(code, this_instr)) {
         return 0;
@@ -726,6 +721,7 @@ translate_bytecode_to_method(
                                     recursive_start = trace_stack[x].entry;
                                 }
                                 if (is_recursive) {
+                                    goto unsupported;
                                     // Recursive call, bail (we could be here forever).
                                     DPRINTF(2, "Looping back to recursive call to %s (%s:%d)\n",
                                             PyUnicode_AsUTF8(new_code->co_qualname),
@@ -1220,6 +1216,10 @@ uop_optimize(
                                        1,  method_stack, &dependencies);
     if (err == -1) {
         // Error or nothing translated
+        return 0;
+    }
+    // Too small.
+    if (length < 256) {
         return 0;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
