@@ -443,9 +443,7 @@ typedef struct _PyMethodStack {
     _PyUOpInstruction *entry;
 } _PyMethodStack;
 
-/* Returns the length of the trace on success,
- * 0 if it failed to produce a worthwhile trace,
- * and -1 on an error.
+/* Returns 0 for success, 1 for bail early, and anything else for failure.
  */
 static int
 translate_bytecode_to_method(
@@ -704,10 +702,9 @@ translate_bytecode_to_method(
 //                                    if (err < 0) {
 //                                        return err;
 //                                    }
-//                                    jump->oparg = *trace_length - 1;
 //                                }
                             }
-                            return *trace_length;
+                            goto done;
                         }
 
                         if (uop == _PUSH_FRAME) {
@@ -741,16 +738,15 @@ translate_bytecode_to_method(
                                 }
                                 if (is_recursive) {
                                     // Recursive call, bail (we could be here forever).
-                                    DPRINTF(2, "Bailing on recursive call to %s (%s:%d)\n",
+                                    DPRINTF(2, "Looping back to recursive call to %s (%s:%d)\n",
                                             PyUnicode_AsUTF8(new_code->co_qualname),
                                             PyUnicode_AsUTF8(new_code->co_filename),
                                             new_code->co_firstlineno);
                                     OPT_STAT_INC(recursive_call);
                                     ADD_TO_TRACE(uop, oparg, 0, target);
-                                    ADD_TO_TRACE(_JUMP_TO_TOP, 0, 0, recursive_start - trace);
+                                    ADD_TO_TRACE(_TIER2_JUMP, recursive_start - trace, 0, 0);
                                     curr = _PyCode_CODE(new_code) + Py_SIZE(new_code);
-                                    // TODO recursion
-                                    goto unsupported;
+                                    goto bail_early;
                                 }
                                 if (new_code->co_version != func_version) {
                                     // func.__code__ was updated.
@@ -786,6 +782,7 @@ translate_bytecode_to_method(
                                 assert(PyCode_Check(code));
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
+                                DPRINTF(2, "HI %d\n", trace_stack_depth);
                                 TRACE_STACK_PUSH();
 
                                 int before_len = *trace_length;
@@ -795,8 +792,11 @@ translate_bytecode_to_method(
                                     frame, code, func, instr, trace_length,
                                     trace, buffer_size, trace_stack_depth + 1,
                                     trace_stack, dependencies);
-                                if (err <= 0) {
-                                    return err;
+                                if (err == -1) {
+                                    goto unsupported;
+                                }
+                                if (err == 1) {
+                                    goto bail_early;
                                 }
                                 int after_len = *trace_length;
                                 func = old_func;
@@ -873,9 +873,14 @@ translate_bytecode_to_method(
                             int err = translate_bytecode_to_method(
                                 frame, code, func, consequent, trace_length, trace,
                                 buffer_size, trace_stack_depth, trace_stack, dependencies);
-                            if (err <= 0) {
-                                return err;
+                            if (err == -1) {
+                                goto unsupported;
                             }
+//                            // can't bail early in the middle of a recursive function.
+//                            // This indicates it's a non-tail call.
+//                            if (err == 1) {
+//                                goto bail_early;
+//                            }
                             if (uop == _ITER_JUMP_LIST || uop == _ITER_JUMP_TUPLE || uop == _ITER_JUMP_RANGE)
                             {
                                 // Jump over the END_FOR
@@ -887,8 +892,11 @@ translate_bytecode_to_method(
                             err = translate_bytecode_to_method(
                                 frame, code, func, alternative, trace_length, trace,
                                 buffer_size, trace_stack_depth, trace_stack, dependencies);
-                            if (err <= 0) {
-                                return err;
+                            if (err == -1) {
+                                goto unsupported;
+                            }
+                            if (err == 1) {
+                                goto bail_early;
                             }
                             goto done;
                         }
@@ -915,12 +923,14 @@ translate_bytecode_to_method(
         // Jump here after _PUSH_FRAME or likely branches.
         first = false;
     }  // End for (;;)
-
 done:
-    return *trace_length;
+    return 0;
 unsupported:
     DPRINTF(1, "Unsuported\n");
-    return 0;
+    return -1;
+bail_early:
+    return 1;
+
 }
 
 
@@ -1213,9 +1223,9 @@ uop_optimize(
                                        &length, buffer,
                                        UOP_MAX_TRACE_LENGTH,
                                        1,  method_stack, &dependencies);
-    if (err <= 0) {
+    if (err == -1) {
         // Error or nothing translated
-        return err;
+        return 0;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
