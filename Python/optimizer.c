@@ -11,6 +11,7 @@
 #include "pycore_pystate.h"       // _PyInterpreterState_GET()
 #include "pycore_uop_ids.h"
 #include "pycore_jit.h"
+#include "pycore_dict.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -454,11 +455,6 @@ translate_bytecode_to_method(
     _PyBloomFilter *dependencies,
     int *loop_seen)
 {
-    assert(code != NULL);
-    assert(PyCode_Check(code));
-    _Py_BloomFilter_Add(dependencies, code);
-    _Py_CODEUNIT *instr = curr;
-
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
     int lltrace = 0;
@@ -466,6 +462,11 @@ translate_bytecode_to_method(
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
 #endif
+
+    assert(code != NULL);
+    assert(PyCode_Check(code));
+    _Py_BloomFilter_Add(dependencies, code);
+    _Py_CODEUNIT *instr = curr;
 
     if (trace_stack_depth+1 >= TRACE_STACK_SIZE) {
         goto unsupported;
@@ -503,6 +504,11 @@ translate_bytecode_to_method(
                 goto unsupported;
             }
         }
+        // For some reason, globals are really unstable. It's not worth it to burn
+        // them into the method until we have side exits and polymorphism working properly.
+        if (_PyOpcode_Deopt[opcode] == LOAD_GLOBAL) {
+            opcode = LOAD_GLOBAL;
+        }
         if (opcode == ENTER_EXECUTOR) {
             // Trace into executors that come from RESUME
             assert(code->co_executors);
@@ -514,16 +520,6 @@ translate_bytecode_to_method(
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 goto top;
             }
-            // We have a couple of options here. We *could* peek "underneath"
-            // this executor and continue tracing, which could give us a longer,
-            // more optimizeable trace (at the expense of lots of duplicated
-            // tier two code). Instead, we choose to just end here and stitch to
-            // the other trace, which allows a side-exit traces to rejoin the
-            // "main" trace periodically (and also helps protect us against
-            // pathological behavior where the amount of tier two code explodes
-            // for a medium-length, branchy code path). This seems to work
-            // better in practice, but in the future we could be smarter about
-            // what we do here:
             Py_UNREACHABLE();
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
@@ -672,23 +668,6 @@ translate_bytecode_to_method(
                             else {
                                 ADD_TO_TRACE(uop, oparg, operand, target);
                                 ADD_TO_TRACE(_TIER2_JUMP, 0, 0, 0);
-//                                _PyUOpInstruction *jump = &trace[*trace_length];
-//                                instr += _PyOpcode_Caches[RETURN_VALUE] + 1;
-                                // Translate stuff AFTER the return_RETURN_VALUE.
-//                                if (instr < end) {
-//                                    DPRINTF(2,
-//                                            "Returning to %s (%s:%d)\n",
-//                                            PyUnicode_AsUTF8(code->co_qualname),
-//                                            PyUnicode_AsUTF8(code->co_filename),
-//                                            code->co_firstlineno);
-//                                    int err = translate_bytecode_to_method(
-//                                        frame, code, func, instr, trace_length,
-//                                        trace, buffer_size, trace_stack_depth,
-//                                        trace_stack, dependencies);
-//                                    if (err < 0) {
-//                                        return err;
-//                                    }
-//                                }
                             }
                             goto done;
                         }
