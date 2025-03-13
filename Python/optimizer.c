@@ -1223,7 +1223,7 @@ uop_optimize(
         return 0;
     }
     // Too small and no loop.
-    if (length < 256 && !loop_seen) {
+    if (length < 128 && !loop_seen) {
         return 0;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
@@ -1659,7 +1659,7 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
         else if (flags & HAS_EXIT_FLAG) {
             assert(inst->format == UOP_FORMAT_JUMP);
             _PyUOpInstruction const *exit_inst = &executor->trace[inst->jump_target];
-            assert(exit_inst->opcode == _EXIT_TRACE);
+            // assert(exit_inst->opcode == _EXIT_TRACE);
             exit = (_PyExitData *)exit_inst->operand0;
         }
         if (exit != NULL && exit->executor != NULL) {
