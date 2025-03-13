@@ -301,6 +301,7 @@ struct _is {
     _Py_hashtable_t *closed_stackrefs_table;
 #  endif
 #endif
+    _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
 };
 
 

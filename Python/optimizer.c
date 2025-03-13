@@ -1189,7 +1189,7 @@ uop_optimize(
 {
     _PyBloomFilter dependencies;
     _Py_BloomFilter_Init(&dependencies);
-    _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
+    _PyUOpInstruction *buffer = PyInterpreterState_Get()->buffer;
     OPT_STAT_INC(attempts);
     PyCodeObject *co = _PyFrame_GetCode(frame);
     int length = 2;
