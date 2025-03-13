@@ -476,7 +476,7 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
                     instructions[i + 1].counter = jump_counter;
                     break;
                 case RESUME:
-                    instructions[i + 1].counter = resume_counter;
+                    instructions[i + 1].cache = 0;
                     break;
                 case POP_JUMP_IF_FALSE:
                 case POP_JUMP_IF_TRUE:

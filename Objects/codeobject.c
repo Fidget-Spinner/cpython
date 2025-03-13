@@ -753,6 +753,7 @@ _PyCode_New(struct _PyCodeConstructor *con)
 #endif
     Py_XDECREF(replacement_locations);
     co->hot_counter = initial_resume_counter().value_and_backoff;
+    co->executor = NULL;
     return co;
 }
 
@@ -1951,6 +1952,7 @@ code_dealloc(PyObject *self)
     Py_XDECREF(co->co_qualname);
     Py_XDECREF(co->co_linetable);
     Py_XDECREF(co->co_exceptiontable);
+    Py_XDECREF(co->executor);
 #ifdef Py_GIL_DISABLED
     assert(co->_co_unique_id == _Py_INVALID_UNIQUE_ID);
 #endif

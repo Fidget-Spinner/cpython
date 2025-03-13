@@ -10124,7 +10124,13 @@
             {
                 #if ENABLE_SPECIALIZATION
                 if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                    this_instr->op.code = tstate->interp->jit ? RESUME_JIT : RESUME_CHECK;
+                    // If it's a generator or nested, we don't wan't to JIT it
+                    if (_PyFrame_GetCode(frame)->co_flags & (CO_GENERATOR | CO_COROUTINE | CO_ASYNC_GENERATOR | CO_NESTED)) {
+                        this_instr->op.code = RESUME_CHECK;
+                    }
+                    else {
+                        this_instr->op.code = tstate->interp->jit ? RESUME_JIT : RESUME_CHECK;
+                    }
                     // Need to re-dispatch so the warmup counter isn't off by one:
                     next_instr = this_instr;
                     DISPATCH_SAME_OPARG();
@@ -10233,11 +10239,12 @@
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)&(_PyFrame_GetCode(frame)->hot_counter);
                 _Py_BackoffCounter counter = *counter_p;
-                int this_instr_op_code = this_instr->op.code;
-                if (backoff_counter_triggers(counter) && (this_instr_op_code == RESUME_JIT)) {
+                _Py_CODEUNIT *initial_instr = _PyCode_CODE(_PyFrame_GetCode(frame));
+                if (backoff_counter_triggers(counter) && this_instr == initial_instr) {
                     _PyExecutorObject *executor;
+                    PyCodeObject *code = _PyFrame_GetCode(frame);
                     _PyFrame_SetStackPointer(frame, stack_pointer);
-                    int optimized = _PyOptimizer_Optimize(frame, this_instr, &executor, 0);
+                    int optimized = _PyOptimizer_Optimize(frame, _PyCode_CODE(code), &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized <= 0) {
                         *counter_p = restart_backoff_counter(counter);
@@ -10252,6 +10259,9 @@
                         assert(tstate->previous_executor == NULL);
                         tstate->previous_executor = Py_None;
                         assert(this_instr->op.code == ENTER_EXECUTOR);
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        Py_XSETREF(code->executor, Py_NewRef(executor));
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
                         GOTO_TIER_TWO(executor);
                     }
                 }

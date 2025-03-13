@@ -160,6 +160,7 @@ typedef struct {
     void *co_extra;                                                            \
     _PyCode_DEF_THREAD_LOCAL_BYTECODE()                                        \
     uint16_t hot_counter;                                            \
+    struct _PyExecutorObject *executor;                                                                           \
     char co_code_adaptive[(SIZE)];                                             \
 }
 

@@ -115,6 +115,13 @@ _PyOptimizer_Optimize(
     bool progress_needed = chain_depth == 0;
     PyCodeObject *code = _PyFrame_GetCode(frame);
 
+    _PyExecutorObject *existing_executor = (_PyExecutorObject *)code->executor;
+//    fprintf(stderr, "EXISTING: %p %d\n", existing_executor, existing_executor == NULL ? 0 : existing_executor->vm_data.valid);
+    if (existing_executor != NULL && existing_executor->vm_data.valid) {
+        *executor_ptr = existing_executor;
+        return 1;
+    }
+
     assert(PyCode_Check(code));
     if (progress_needed && !has_space_for_executor(code, this_instr)) {
         return 0;
@@ -1258,6 +1265,7 @@ uop_optimize(
     }
     assert(length <= UOP_MAX_TRACE_LENGTH);
     *exec_ptr = executor;
+//    fprintf(stderr, "HELLO %s\n", PyUnicode_AsUTF8(co->co_qualname));
     return 1;
 }
 
