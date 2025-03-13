@@ -1117,7 +1117,6 @@ dummy_func(
 
         op(_TIER2_JUMP, (--)) {
             JUMP_TO_JUMP_TARGET();
-            TIER2_JUMP(oparg);
         }
 
         tier1 op(_RETURN_VALUE_EVENT, (val -- val)) {
@@ -2875,7 +2874,6 @@ dummy_func(
             int flag = PyStackRef_IsFalse(cond);
             DEAD(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
-            TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
             if (flag) {
                 SHRINK_STACK_JIT(1);
                 JUMP_TO_JUMP_TARGET();
@@ -2887,7 +2885,6 @@ dummy_func(
             int flag = PyStackRef_IsTrue(cond);
             DEAD(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
-            TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
             if (flag) {
                 SHRINK_STACK_JIT(1);
                 JUMP_TO_JUMP_TARGET();
@@ -3128,7 +3125,6 @@ dummy_func(
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
                 JUMP_TO_JUMP_TARGET();
-                TIER2_JUMP(oparg);
                 DISPATCH();
             }
         }
@@ -3179,7 +3175,6 @@ dummy_func(
                 }
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
-                TIER2_JUMP(oparg);
                 JUMP_TO_JUMP_TARGET();
                 DISPATCH();
             }
@@ -3223,7 +3218,6 @@ dummy_func(
             if (r->len <= 0) {
                 // Jump over END_FOR instruction.
                 JUMPBY(oparg + 1);
-                TIER2_JUMP(oparg);
                 JUMP_TO_JUMP_TARGET();
                 DISPATCH();
             }
@@ -5095,8 +5089,18 @@ dummy_func(
         }
 
         tier2 op(_DEOPT, (--)) {
+            _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + CURRENT_TARGET();
+#if defined(Py_DEBUG) && !defined(_Py_JIT)
+            if (frame->lltrace >= 3) {
+                printf("DEOT: [UOp ");
+                _PyUOpPrint(&next_uop[-1]);
+                printf("target %d -> %s]\n",
+                    (int)(target - _PyFrame_GetBytecode(frame)),
+                    _PyOpcode_OpName[target->op.code]);
+            }
+#endif
             tstate->previous_executor = (PyObject *)current_executor;
-            GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET());
+            GOTO_TIER_ONE(target);
         }
 
         tier2 op(_ERROR_POP_N, (target/2 --)) {

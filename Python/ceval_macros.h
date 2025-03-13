@@ -433,7 +433,7 @@ do { \
 #define CURRENT_OPERAND1() (next_uop[-1].operand1)
 #define CURRENT_TARGET()   (next_uop[-1].target)
 
-#define JUMP_TO_JUMP_TARGET()
+#define JUMP_TO_JUMP_TARGET() goto jump_to_jump_target
 #define JUMP_TO_ERROR() goto jump_to_error_target
 
 /* Stackref macros */

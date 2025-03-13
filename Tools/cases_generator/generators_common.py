@@ -127,9 +127,23 @@ class Emitter:
             "DISPATCH": self.dispatch,
             "INSTRUCTION_SIZE": self.instruction_size,
             "stack_pointer": self.stack_pointer,
+            "JUMP_TO_JUMP_TARGET": self.jump_to_jump_target,
         }
         self.out = out
         self.labels = labels
+
+    def jump_to_jump_target(
+        self,
+        tkn: Token,
+        tkn_iter: TokenIterator,
+        uop: CodeSection,
+        storage: Storage,
+        inst: Instruction | None,
+    ) -> bool:
+        next(tkn_iter)
+        next(tkn_iter)
+        next(tkn_iter)
+        return False
 
     def dispatch(
         self,

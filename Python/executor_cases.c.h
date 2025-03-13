@@ -1727,9 +1727,7 @@
         }
 
         case _TIER2_JUMP: {
-            oparg = CURRENT_OPARG();
             JUMP_TO_JUMP_TARGET();
-            TIER2_JUMP(oparg);
             break;
         }
 
@@ -3942,7 +3940,6 @@
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsFalse(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
-            TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
             if (flag) {
                 SHRINK_STACK_JIT(1);
                 JUMP_TO_JUMP_TARGET();
@@ -3959,7 +3956,6 @@
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsTrue(cond);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
-            TIER2_JUMP(flag ? oparg : (next_uop - current_executor->trace));
             if (flag) {
                 SHRINK_STACK_JIT(1);
                 JUMP_TO_JUMP_TARGET();
@@ -4248,7 +4244,6 @@
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
                 JUMP_TO_JUMP_TARGET();
-                TIER2_JUMP(oparg);
                 break;
             }
             break;
@@ -4320,7 +4315,6 @@
                 }
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
-                TIER2_JUMP(oparg);
                 JUMP_TO_JUMP_TARGET();
                 break;
             }
@@ -4383,7 +4377,6 @@
             if (r->len <= 0) {
                 // Jump over END_FOR instruction.
                 JUMPBY(oparg + 1);
-                TIER2_JUMP(oparg);
                 JUMP_TO_JUMP_TARGET();
                 break;
             }
@@ -7010,8 +7003,20 @@
         }
 
         case _DEOPT: {
+            _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + CURRENT_TARGET();
+            #if defined(Py_DEBUG) && !defined(_Py_JIT)
+            if (frame->lltrace >= 3) {
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                printf("DEOT: [UOp ");
+                _PyUOpPrint(&next_uop[-1]);
+                printf("target %d -> %s]\n",
+                       (int)(target - _PyFrame_GetBytecode(frame)),
+                       _PyOpcode_OpName[target->op.code]);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
+            #endif
             tstate->previous_executor = (PyObject *)current_executor;
-            GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET());
+            GOTO_TIER_ONE(target);
             break;
         }
 
