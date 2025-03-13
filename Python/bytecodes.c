@@ -5091,7 +5091,7 @@ dummy_func(
         tier2 op(_DEOPT, (--)) {
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + CURRENT_TARGET();
 #if defined(Py_DEBUG) && !defined(_Py_JIT)
-            if (frame->lltrace >= 3) {
+            if (frame->lltrace >= 2) {
                 printf("DEOT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
                 printf("target %d -> %s]\n",

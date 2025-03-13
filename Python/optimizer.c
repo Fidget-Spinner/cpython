@@ -1223,7 +1223,7 @@ uop_optimize(
         return 0;
     }
     // Too small and no loop.
-    if (length < 128 && !loop_seen) {
+    if (length < 64 && !loop_seen) {
         return 0;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);

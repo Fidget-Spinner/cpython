@@ -139,16 +139,14 @@ incorrect_keys(_PyUOpInstruction *inst, PyObject *obj)
  *        -1 if there was an error. */
 static int
 remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
-               int start, int buffer_size, _PyBloomFilter *dependencies)
+               int start, int buffer_size, _PyBloomFilter *dependencies,
+               PyObject *builtins, PyObject *globals, PyFunctionObject *function)
 {
     PyInterpreterState *interp = _PyInterpreterState_GET();
-    PyObject *builtins = frame->f_builtins;
     if (builtins != interp->builtins) {
         OPT_STAT_INC(remove_globals_builtins_changed);
         return 1;
     }
-    PyObject *globals = frame->f_globals;
-    PyFunctionObject *function = _PyFrame_GetFunction(frame);
     assert(PyFunction_Check(function));
     assert(function->func_builtins == builtins);
     assert(function->func_globals == globals);
@@ -292,13 +290,13 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
             case _POP_JUMP_IF_FALSE: {
                 // Consequent
                 int err = remove_globals(frame, buffer, pc + 1, buffer_size,
-                                         dependencies);
+                                         dependencies, builtins, globals, function);
                 if (err <= 0) {;
                     return err;
                 }
                 // Alternative
                 err = remove_globals(frame, buffer, buffer[pc].oparg, buffer_size,
-                                         dependencies);
+                                         dependencies, builtins, globals, function);
                 if (err <= 0) {
                     return err;
                 }
@@ -656,10 +654,10 @@ _Py_uop_analyze_and_optimize(
 {
     OPT_STAT_INC(optimizer_attempts);
 
-//    int err = remove_globals(frame, buffer, 0, length, dependencies);
-//    if (err <= 0) {
-//        return err;
-//    }
+    PyObject *builtins = frame->f_builtins;
+    PyObject *globals = frame->f_globals;
+    PyFunctionObject *function = _PyFrame_GetFunction(frame);
+    remove_globals(frame, buffer, 0, length, dependencies, builtins, globals, function);
 
     length = optimize_uops(
         _PyFrame_GetCode(frame), buffer, 0,

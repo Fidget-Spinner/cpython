@@ -7005,7 +7005,7 @@
         case _DEOPT: {
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + CURRENT_TARGET();
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
-            if (frame->lltrace >= 3) {
+            if (frame->lltrace >= 2) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("DEOT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
