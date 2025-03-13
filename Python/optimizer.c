@@ -811,9 +811,9 @@ translate_bytecode_to_method(
 
                         // We have a more updated globals version, so update the inline cache
                         // instead of letting it use its potentially stale one.
-//                        if (uop == _GUARD_GLOBALS_VERSION) {
-//                            operand = ((PyDictObject *)(func->func_globals))->ma_keys->dk_version;
-//                        }
+                        if (uop == _GUARD_GLOBALS_VERSION && func != NULL) {
+                            operand = ((PyDictObject *)(func->func_globals))->ma_keys->dk_version;
+                        }
                         // All other instructions
                         ADD_TO_TRACE(uop, oparg, operand, target);
 
