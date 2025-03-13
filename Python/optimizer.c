@@ -451,7 +451,8 @@ translate_bytecode_to_method(
     int buffer_size,
     int trace_stack_depth,
     _PyMethodStack trace_stack[TRACE_STACK_SIZE],
-    _PyBloomFilter *dependencies)
+    _PyBloomFilter *dependencies,
+    int *loop_seen)
 {
     assert(code != NULL);
     assert(PyCode_Check(code));
@@ -466,7 +467,7 @@ translate_bytecode_to_method(
     }
 #endif
 
-    if (trace_stack_depth >= TRACE_STACK_SIZE) {
+    if (trace_stack_depth+1 >= TRACE_STACK_SIZE) {
         goto unsupported;
     }
     // Leave space for possible trailing _EXIT_TRACE
@@ -578,6 +579,7 @@ translate_bytecode_to_method(
                     }
                 }
                 assert(found);
+                *loop_seen = 1;
                 ADD_TO_TRACE(_TIER2_JUMP, find, 0, target);
                 instr += 1 + _PyOpcode_Caches[RESUME];
                 goto top;
@@ -672,7 +674,7 @@ translate_bytecode_to_method(
                                 ADD_TO_TRACE(_TIER2_JUMP, 0, 0, 0);
 //                                _PyUOpInstruction *jump = &trace[*trace_length];
 //                                instr += _PyOpcode_Caches[RETURN_VALUE] + 1;
-                                // Translate stuff AFTER the return.
+                                // Translate stuff AFTER the return_RETURN_VALUE.
 //                                if (instr < end) {
 //                                    DPRINTF(2,
 //                                            "Returning to %s (%s:%d)\n",
@@ -775,7 +777,7 @@ translate_bytecode_to_method(
                                 int err = translate_bytecode_to_method(
                                     frame, code, func, instr, trace_length,
                                     trace, buffer_size, trace_stack_depth + 1,
-                                    trace_stack, dependencies);
+                                    trace_stack, dependencies, loop_seen);
                                 if (err == -1) {
                                     goto unsupported;
                                 }
@@ -856,7 +858,7 @@ translate_bytecode_to_method(
                             }
                             int err = translate_bytecode_to_method(
                                 frame, code, func, consequent, trace_length, trace,
-                                buffer_size, trace_stack_depth, trace_stack, dependencies);
+                                buffer_size, trace_stack_depth, trace_stack, dependencies, loop_seen);
                             if (err == -1) {
                                 goto unsupported;
                             }
@@ -875,7 +877,7 @@ translate_bytecode_to_method(
                             }
                             err = translate_bytecode_to_method(
                                 frame, code, func, alternative, trace_length, trace,
-                                buffer_size, trace_stack_depth, trace_stack, dependencies);
+                                buffer_size, trace_stack_depth, trace_stack, dependencies, loop_seen);
                             if (err == -1) {
                                 goto unsupported;
                             }
@@ -904,6 +906,7 @@ translate_bytecode_to_method(
             instr++;
         }
     top:
+        (void)(1);
     }  // End for (;;)
 done:
     return 0;
@@ -1208,18 +1211,19 @@ uop_optimize(
     buffer[1].target = 0;
     buffer[1].format = UOP_FORMAT_TARGET;
 
+    int loop_seen = 0;
     int err = translate_bytecode_to_method(frame,
                co, _PyFrame_GetFunction(frame),
                _PyCode_CODE(co),
                                        &length, buffer,
                                        UOP_MAX_TRACE_LENGTH,
-                                       1,  method_stack, &dependencies);
+                                       1,  method_stack, &dependencies, &loop_seen);
     if (err == -1) {
         // Error or nothing translated
         return 0;
     }
-    // Too small.
-    if (length < 256) {
+    // Too small and no loop.
+    if (length < 256 && !loop_seen) {
         return 0;
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
