@@ -462,6 +462,12 @@ translate_bytecode_to_method(
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
 #endif
+    // Bad globals
+    if (func != NULL &&
+        (!PyDict_CheckExact(func->func_globals) ||
+        ((PyDictObject *)func->func_globals)->ma_keys->dk_version == 0)) {
+        goto unsupported;
+    }
 
     assert(code != NULL);
     assert(PyCode_Check(code));
@@ -506,9 +512,9 @@ translate_bytecode_to_method(
         }
         // For some reason, globals are really unstable. It's not worth it to burn
         // them into the method until we have side exits and polymorphism working properly.
-        if (_PyOpcode_Deopt[opcode] == LOAD_GLOBAL) {
-            opcode = LOAD_GLOBAL;
-        }
+//        if (_PyOpcode_Deopt[opcode] == LOAD_GLOBAL) {
+//            opcode = LOAD_GLOBAL;
+//        }
         // // Same for attributes.
         // if (_PyOpcode_Deopt[opcode] == LOAD_ATTR) {
         //     opcode = LOAD_ATTR;
@@ -803,6 +809,11 @@ translate_bytecode_to_method(
                             instr++;
                         }
 
+                        // We have a more updated globals version, so update the inline cache
+                        // instead of letting it use its potentially stale one.
+//                        if (uop == _GUARD_GLOBALS_VERSION) {
+//                            operand = ((PyDictObject *)(func->func_globals))->ma_keys->dk_version;
+//                        }
                         // All other instructions
                         ADD_TO_TRACE(uop, oparg, operand, target);
 

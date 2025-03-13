@@ -657,7 +657,7 @@ _Py_uop_analyze_and_optimize(
     PyObject *builtins = frame->f_builtins;
     PyObject *globals = frame->f_globals;
     PyFunctionObject *function = _PyFrame_GetFunction(frame);
-//    remove_globals(frame, buffer, 0, length, dependencies, builtins, globals, function);
+    remove_globals(frame, buffer, 0, length, dependencies, builtins, globals, function);
 
 //    int err = optimize_uops(
 //        _PyFrame_GetCode(frame), buffer, 0,
