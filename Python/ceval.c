@@ -1008,6 +1008,9 @@ enter_tier_two:
 #define STAT_DEC(opname, name) ((void)0)
 #endif
 
+#undef SHRINK_STACK_JIT
+#define SHRINK_STACK_JIT(x) (stack_pointer -= (x))
+
 #undef ENABLE_SPECIALIZATION
 #define ENABLE_SPECIALIZATION 0
 #undef ENABLE_SPECIALIZATION_FT

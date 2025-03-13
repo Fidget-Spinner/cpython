@@ -460,7 +460,7 @@ optimize_uops(
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0);
     if (frame == NULL) {
         _Py_uop_abstractcontext_fini(ctx);
-        return trace_len;
+        return 1;
     }
     ctx->curr_frame_depth++;
     ctx->frame = frame;
@@ -525,7 +525,7 @@ optimize_uops(
         first_valid_check_stack->opcode = _CHECK_STACK_SPACE_OPERAND;
         first_valid_check_stack->operand0 = max_space;
     }
-    return trace_len;
+    return 1;
 
 error:
     DPRINTF(3, "\n");
@@ -659,13 +659,13 @@ _Py_uop_analyze_and_optimize(
     PyFunctionObject *function = _PyFrame_GetFunction(frame);
 //    remove_globals(frame, buffer, 0, length, dependencies, builtins, globals, function);
 
-    length = optimize_uops(
-        _PyFrame_GetCode(frame), buffer, 0,
-        length, curr_stacklen, dependencies);
-
-    if (length <= 0) {
-        return length;
-    }
+//    int err = optimize_uops(
+//        _PyFrame_GetCode(frame), buffer, 0,
+//        length, curr_stacklen, dependencies);
+//
+//    if (err <= 0) {
+//        return err;
+//    }
 
     length = remove_unneeded_uops(buffer, 0, length);
     assert(length > 0);

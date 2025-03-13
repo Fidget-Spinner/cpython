@@ -509,6 +509,10 @@ translate_bytecode_to_method(
         if (_PyOpcode_Deopt[opcode] == LOAD_GLOBAL) {
             opcode = LOAD_GLOBAL;
         }
+        // // Same for attributes.
+        // if (_PyOpcode_Deopt[opcode] == LOAD_ATTR) {
+        //     opcode = LOAD_ATTR;
+        // }
         if (opcode == ENTER_EXECUTOR) {
             // Trace into executors that come from RESUME
             assert(code->co_executors);
@@ -1201,10 +1205,12 @@ uop_optimize(
         // Error or nothing translated
         return 0;
     }
+#ifndef Py_DEBUG
     // Too small and no loop.
     if (length < 64 && !loop_seen) {
         return 0;
     }
+#endif
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
     char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
