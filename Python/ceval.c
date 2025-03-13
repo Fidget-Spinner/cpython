@@ -1025,7 +1025,7 @@ tier2_dispatch:
     for (;;) {
         uopcode = next_uop->opcode;
 #ifdef Py_DEBUG
-//        if (frame->lltrace >= 4) {
+        if (frame->lltrace >= 4) {
             dump_stack(frame, stack_pointer);
             if (next_uop->opcode == _START_EXECUTOR) {
                 printf("%4d uop: ", 0);
@@ -1035,7 +1035,7 @@ tier2_dispatch:
             }
             _PyUOpPrint(next_uop);
             printf("\n");
-//        }
+        }
 #endif
         next_uop++;
         OPT_STAT_INC(uops_executed);
