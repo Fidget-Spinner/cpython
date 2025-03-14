@@ -2852,7 +2852,7 @@ dummy_func(
         tier1 inst(ENTER_EXECUTOR, (--)) {
             #ifdef _Py_TIER2
             PyCodeObject *code = _PyFrame_GetCode(frame);
-            _PyExecutorObject *executor = code->executor;
+            _PyExecutorObject *executor = (_PyExecutorObject *)code->executor;
             assert(executor->vm_data.index == INSTR_OFFSET() - 1);
             assert(executor->vm_data.code == code);
             assert(executor->vm_data.valid);

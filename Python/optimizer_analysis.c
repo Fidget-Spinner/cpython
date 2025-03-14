@@ -257,6 +257,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                 prechecked_function_version = 0;
                 globals = func->func_globals;
                 builtins = func->func_builtins;
+                function = func;
                 if (builtins != interp->builtins) {
                     OPT_STAT_INC(remove_globals_builtins_changed);
                     return 1;
@@ -281,28 +282,45 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
                 function_version = func->func_version;
                 globals = func->func_globals;
                 builtins = func->func_builtins;
+                function = func;
                 break;
             }
             case _CHECK_FUNCTION_EXACT_ARGS:
                 prechecked_function_version = (uint32_t)buffer[pc].operand0;
                 break;
+            case _ITER_JUMP_LIST:
+            case _ITER_JUMP_RANGE:
+            case _ITER_JUMP_TUPLE:
             case _POP_JUMP_IF_TRUE:
             case _POP_JUMP_IF_FALSE: {
-                // Consequent
-                int err = remove_globals(frame, buffer, pc + 1, buffer_size,
-                                         dependencies, builtins, globals, function);
-                if (err <= 0) {;
-                    return err;
-                }
-                // Alternative
-                err = remove_globals(frame, buffer, buffer[pc].oparg, buffer_size,
-                                         dependencies, builtins, globals, function);
-                if (err <= 0) {
-                    return err;
+                if (!buffer[pc].seen) {
+                    buffer[pc].seen = true;
+                    // Consequent
+                    remove_globals(frame, buffer, pc + 1, buffer_size,
+                                             dependencies, builtins, globals,
+                                             function);
+                    // Alternative
+                    remove_globals(frame, buffer, buffer[pc].oparg,
+                                         buffer_size,
+                                         dependencies, builtins, globals,
+                                         function);
                 }
                 return 1;
             }
             case _TIER2_JUMP:
+                if (!buffer[pc].seen) {
+                    buffer[pc].seen = true;
+                    remove_globals(frame, buffer, pc + 1, buffer_size,
+                                   dependencies, builtins, globals,
+                                   function);
+                    // Alternative
+                    if (buffer[pc].oparg > pc) {
+                        remove_globals(frame, buffer, buffer[pc].oparg,
+                                       buffer_size,
+                                       dependencies, builtins, globals,
+                                       function);
+                    }
+                }
                 return 1;
             default:
                 break;
@@ -674,7 +692,10 @@ _Py_uop_analyze_and_optimize(
     PyObject *builtins = frame->f_builtins;
     PyObject *globals = frame->f_globals;
     PyFunctionObject *function = _PyFrame_GetFunction(frame);
-    // remove_globals(frame, buffer, 0, length, dependencies, builtins, globals, function);
+    for (int i = 0; i < length; i++) {
+        buffer[i].seen = false;
+    }
+    remove_globals(frame, buffer, 0, length, dependencies, builtins, globals, function);
 
 //    int err = optimize_uops(
 //        _PyFrame_GetCode(frame), buffer, 0,
