@@ -607,6 +607,12 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
                         buffer[pc].opcode = _NOP;
                     }
                 }
+                // Consequent
+                remove_unneeded_uops(buffer, pc + 1, buffer_size);
+                // Alternative
+                if (buffer[pc].oparg > pc) {
+                    remove_unneeded_uops(buffer, buffer[pc].oparg, buffer_size);
+                }
                 return buffer_size;
             case _POP_JUMP_IF_FALSE:
             case _POP_JUMP_IF_TRUE:
