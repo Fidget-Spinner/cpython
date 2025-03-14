@@ -1227,12 +1227,12 @@ uop_optimize(
         // Error or nothing translated
         return 0;
     }
-#ifndef Py_DEBUG
+
     // Too small and no loop.
     if (length < 64 && !loop_seen) {
         return 0;
     }
-#endif
+
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
     char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
@@ -1649,9 +1649,9 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
 #else
         fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s</td></tr>\n", i, opname);
 #endif
-        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
-            break;
-        }
+//        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+//            break;
+//        }
     }
     fprintf(out, "    </table>>\n");
     fprintf(out, "]\n\n");
@@ -1673,9 +1673,9 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
         if (exit != NULL && exit->executor != NULL) {
             fprintf(out, "executor_%p:i%d -> executor_%p:start\n", executor, i, exit->executor);
         }
-        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
-            break;
-        }
+//        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+//            break;
+//        }
     }
 }
 
