@@ -118,6 +118,19 @@ _PyOptimizer_Optimize(
     bool progress_needed = chain_depth == 0;
     PyCodeObject *code = _PyFrame_GetCode(frame);
 
+    // Facing something weird like a generator.
+    // Just specialize the instruction and tell it to never
+    // bother again.
+    if (_PyOpcode_Deopt[_PyCode_CODE(code)->op.code] != RESUME) {
+        if (this_instr->op.code == JUMP_BACKWARD_JIT) {
+            this_instr->op.code = JUMP_BACKWARD_NO_JIT;
+        }
+        if (this_instr->op.code == RESUME_JIT) {
+            this_instr->op.code = RESUME_CHECK;
+        }
+        return 0;
+    }
+
     _PyExecutorObject *existing_executor = (_PyExecutorObject *)code->executor;
 //    fprintf(stderr, "EXISTING: %p %d\n", existing_executor, existing_executor == NULL ? 0 : existing_executor->vm_data.valid);
     if (existing_executor != NULL && existing_executor->vm_data.valid) {
