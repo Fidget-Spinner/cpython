@@ -609,10 +609,14 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
                         buffer[pc].opcode = _NOP;
                     }
                 }
-                remove_unneeded_uops(buffer, pc + 1, buffer_size);
-                // Alternative
-                if (buffer[pc].oparg > pc) {
-                    remove_unneeded_uops(buffer, buffer[pc].oparg, buffer_size);
+                if (!buffer[pc].seen) {
+                    buffer[pc].seen = true;
+                    remove_unneeded_uops(buffer, pc + 1, buffer_size);
+                    // Alternative
+                    if (buffer[pc].oparg > pc) {
+                        remove_unneeded_uops(buffer, buffer[pc].oparg,
+                                             buffer_size);
+                    }
                 }
                 return buffer_size;
             case _POP_JUMP_IF_FALSE:
@@ -620,10 +624,13 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
             case _ITER_JUMP_LIST:
             case _ITER_JUMP_RANGE:
             case _ITER_JUMP_TUPLE:
-                // Consequent
-                remove_unneeded_uops(buffer, pc + 1, buffer_size);
-                // Alternative
-                remove_unneeded_uops(buffer, buffer[pc].oparg, buffer_size);
+                if (!buffer[pc].seen) {
+                    buffer[pc].seen = true;
+                    // Consequent
+                    remove_unneeded_uops(buffer, pc + 1, buffer_size);
+                    // Alternative: only deal with forward jumps so we make progress
+                    remove_unneeded_uops(buffer, buffer[pc].oparg + 1, buffer_size);
+                }
                 return buffer_size;
             default:
             {
@@ -677,6 +684,9 @@ _Py_uop_analyze_and_optimize(
 //        return err;
 //    }
 
+    for (int i = 0; i < length; i++) {
+        buffer[i].seen = false;
+    }
     length = remove_unneeded_uops(buffer, 0, length);
     assert(length > 0);
 

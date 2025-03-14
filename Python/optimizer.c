@@ -106,6 +106,9 @@ _PyOptimizer_Optimize(
     _PyInterpreterFrame *frame, _Py_CODEUNIT *this_instr, _PyExecutorObject **executor_ptr, int chain_depth)
 {
     _PyStackRef *stack_pointer = frame->stackpointer;
+    if (!_PyInterpreterState_GET()->jit) {
+        return 0;
+    }
     assert(_PyInterpreterState_GET()->jit);
     // The first executor in a chain and the MAX_CHAIN_DEPTH'th executor *must*
     // make progress in order to avoid infinite loops or excessively-long
@@ -380,15 +383,13 @@ add_to_trace(
     uint16_t opcode,
     uint16_t oparg,
     uint64_t operand,
-    uint32_t target,
-    PyCodeObject *code)
+    uint32_t target)
 {
     trace[trace_length].opcode = opcode;
     trace[trace_length].format = UOP_FORMAT_TARGET;
     trace[trace_length].target = target;
     trace[trace_length].oparg = oparg;
     trace[trace_length].operand0 = operand;
-    trace[trace_length].code = code;
 #ifdef Py_STATS
     trace[trace_length].execution_count = 0;
 #endif
@@ -397,8 +398,8 @@ add_to_trace(
 
 #ifdef Py_DEBUG
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
-    assert(*trace_length < max_length); \
-    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET), code); \
+    assert(*trace_length < *max_length); \
+    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET)); \
     if (lltrace >= 2) { \
         printf("%4d ADD_TO_TRACE: ", *trace_length); \
         _PyUOpPrint(&trace[*trace_length-1]); \
@@ -407,7 +408,7 @@ add_to_trace(
 #else
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
     assert(*trace_length < max_length); \
-    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET), code);
+    *trace_length = add_to_trace(trace, *trace_length, (OPCODE), (OPARG), (OPERAND), (TARGET));
 #endif
 
 #define INSTR_IP(INSTR, CODE) \
@@ -415,9 +416,9 @@ add_to_trace(
 
 // Reserve space for n uops
 #define RESERVE_RAW(n, opname) \
-    if (*trace_length + (n) > max_length) { \
+    if (*trace_length + (n) > *max_length) { \
         DPRINTF(2, "No room for %s (need %d, got %d)\n", \
-                (opname), (n), max_length - *trace_length); \
+                (opname), (n), *max_length - *trace_length); \
         OPT_STAT_INC(trace_too_long); \
         goto unsupported; \
     }
@@ -431,13 +432,7 @@ add_to_trace(
     trace_stack[trace_stack_depth].func = func; \
     trace_stack[trace_stack_depth].code = code; \
     trace_stack[trace_stack_depth].instr = instr; \
-    trace_stack[trace_stack_depth].entry = NULL;
-
-#define TRACE_STACK_POP() \
-    if (trace_stack_depth <= 0) { \
-        Py_FatalError("Trace stack underflow\n"); \
-    } \
-    trace_stack_depth--; \
+    trace_stack[trace_stack_depth].entry = &trace[*trace_length];
 
 typedef struct _PyMethodStack {
     PyFunctionObject *func;
@@ -456,7 +451,7 @@ translate_bytecode_to_method(
     _Py_CODEUNIT *curr,
     int *trace_length,
     _PyUOpInstruction *trace,
-    int buffer_size,
+    int *max_length,
     int trace_stack_depth,
     _PyMethodStack trace_stack[TRACE_STACK_SIZE],
     _PyBloomFilter *dependencies,
@@ -469,23 +464,27 @@ translate_bytecode_to_method(
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
 #endif
+    _Py_CODEUNIT *instr = curr;
     // Bad globals
     if (func != NULL &&
         (!PyDict_CheckExact(func->func_globals) ||
         ((PyDictObject *)func->func_globals)->ma_keys->dk_version == 0)) {
+        if (PyDict_CheckExact(func->func_globals) && ((PyDictObject *)func->func_globals)->ma_keys->dk_version == 0) {
+            _PyDictKeys_GetVersionForCurrentState(PyInterpreterState_Get(), ((PyDictObject *)func->func_globals)->ma_keys);
+        }
+        DPRINTF(2, "Bad globals\n");
         goto unsupported;
     }
 
     assert(code != NULL);
     assert(PyCode_Check(code));
     _Py_BloomFilter_Add(dependencies, code);
-    _Py_CODEUNIT *instr = curr;
 
     if (trace_stack_depth+1 >= TRACE_STACK_SIZE) {
         goto unsupported;
     }
     // Leave space for possible trailing _EXIT_TRACE
-    int max_length = buffer_size-2;
+    *max_length = *max_length - 2;
 
     DPRINTF(2,
             "Optimizing %s (%s:%d) at line number %d\n",
@@ -500,7 +499,7 @@ translate_bytecode_to_method(
         assert(instr != NULL);
         target = INSTR_IP(instr, code);
         // Need space for _DEOPT
-        max_length--;
+        *max_length = *max_length - 1;
 
         uint32_t opcode = instr->op.code;
         uint32_t oparg = instr->op.arg;
@@ -553,12 +552,12 @@ translate_bytecode_to_method(
         if (OPCODE_HAS_EXIT(opcode)) {
             // Make space for side exit and final _EXIT_TRACE:
             RESERVE_RAW(2, "_EXIT_TRACE");
-            max_length--;
+            *max_length = *max_length - 2;
         }
         if (OPCODE_HAS_ERROR(opcode)) {
             // Make space for error stub and final _EXIT_TRACE:
             RESERVE_RAW(2, "_ERROR_POP_N");
-            max_length--;
+            *max_length = *max_length - 2;
         }
         switch (opcode) {
             case RESUME_JIT:
@@ -568,7 +567,6 @@ translate_bytecode_to_method(
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 instr += 1 + _PyOpcode_Caches[RESUME];
-                trace_stack[trace_stack_depth-1].entry = &trace[*trace_length-1];
                 goto top;
             case JUMP_FORWARD:
             case LOAD_DEREF:
@@ -584,9 +582,12 @@ translate_bytecode_to_method(
                 assert(jump_target_offset > 0);
 
                 bool found = false;
-                int find = 0;
+                assert(trace_stack_depth-1 >= 0);
+                assert(trace_stack[trace_stack_depth-1].entry != NULL);
+                int find = (int)(trace_stack[trace_stack_depth-1].entry - trace);
+                assert(find < *trace_length);
                 for (; find < *trace_length; find++) {
-                    if (trace[find].target == (uint32_t)jump_target_offset && code == trace[find].code) {
+                    if (trace[find].target == (uint32_t)jump_target_offset) {
                         found = true;
                         break;
                     }
@@ -772,7 +773,7 @@ translate_bytecode_to_method(
                                 // Inline the function.
                                 int err = translate_bytecode_to_method(
                                     frame, code, func, instr, trace_length,
-                                    trace, buffer_size, trace_stack_depth + 1,
+                                    trace, max_length, trace_stack_depth + 1,
                                     trace_stack, dependencies, loop_seen);
                                 if (err == -1) {
                                     goto unsupported;
@@ -859,7 +860,7 @@ translate_bytecode_to_method(
                             }
                             int err = translate_bytecode_to_method(
                                 frame, code, func, consequent, trace_length, trace,
-                                buffer_size, trace_stack_depth, trace_stack, dependencies, loop_seen);
+                                max_length, trace_stack_depth, trace_stack, dependencies, loop_seen);
                             if (err == -1) {
                                 goto unsupported;
                             }
@@ -878,7 +879,7 @@ translate_bytecode_to_method(
                             }
                             err = translate_bytecode_to_method(
                                 frame, code, func, alternative, trace_length, trace,
-                                buffer_size, trace_stack_depth, trace_stack, dependencies, loop_seen);
+                                max_length, trace_stack_depth, trace_stack, dependencies, loop_seen);
                             if (err == -1) {
                                 goto unsupported;
                             }
@@ -1075,7 +1076,8 @@ sanity_check(_PyExecutorObject *executor)
             break;
         }
     }
-    CHECK(ended);
+    // May not end: Imagine a function that is just while True: pass
+    // CHECK(ended);
 //    for (; i < executor->code_size; i++) {
 //        const _PyUOpInstruction *inst = &executor->trace[i];
 //        uint16_t opcode = inst->opcode;
@@ -1198,7 +1200,8 @@ uop_optimize(
     method_stack[0] = (_PyMethodStack) {
         _PyFrame_GetFunction(frame),
         co,
-        NULL
+        NULL,
+        buffer + 1,
     };
     buffer[0].opcode = _START_EXECUTOR;
     buffer[0].oparg = 0;
@@ -1212,12 +1215,13 @@ uop_optimize(
     buffer[1].target = 0;
     buffer[1].format = UOP_FORMAT_TARGET;
 
+    int max_trace_length = UOP_MAX_TRACE_LENGTH;
     int loop_seen = 0;
     int err = translate_bytecode_to_method(frame,
                co, _PyFrame_GetFunction(frame),
                _PyCode_CODE(co),
                                        &length, buffer,
-                                       UOP_MAX_TRACE_LENGTH,
+                                       &max_trace_length,
                                        1,  method_stack, &dependencies, &loop_seen);
     if (err == -1) {
         // Error or nothing translated
