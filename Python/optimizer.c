@@ -471,8 +471,8 @@ translate_bytecode_to_method(
         ((PyDictObject *)func->func_globals)->ma_keys->dk_version == 0)) {
         if (PyDict_CheckExact(func->func_globals) && ((PyDictObject *)func->func_globals)->ma_keys->dk_version == 0) {
             _PyDictKeys_GetVersionForCurrentState(PyInterpreterState_Get(), ((PyDictObject *)func->func_globals)->ma_keys);
+            DPRINTF(2, "Bad globals %d\n", ((PyDictObject *)func->func_globals)->ma_keys->dk_version );
         }
-        DPRINTF(2, "Bad globals\n");
         goto unsupported;
     }
 

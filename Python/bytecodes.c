@@ -2776,10 +2776,10 @@ dummy_func(
 
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
-            _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)&(_PyFrame_GetCode(frame)->hot_counter);
-            _Py_BackoffCounter counter = *counter_p;
+            _Py_BackoffCounter *counter_p = &this_instr[1].counter;
+            _Py_BackoffCounter counter = this_instr[1].counter;
             _Py_CODEUNIT *initial_instr = _PyCode_CODE(_PyFrame_GetCode(frame));
-            if (backoff_counter_triggers(counter) && this_instr == initial_instr) {
+            if (backoff_counter_triggers(counter)) {
                 _PyExecutorObject *executor;
                 PyCodeObject *code = _PyFrame_GetCode(frame);
                 int optimized = _PyOptimizer_Optimize(frame, _PyCode_CODE(code), &executor, 0);
@@ -2788,29 +2788,25 @@ dummy_func(
                     ERROR_IF(optimized < 0, error);
                 }
                 else {
-                    *counter_p = initial_jump_backoff_counter();
-                    assert(tstate->previous_executor == NULL);
-                    tstate->previous_executor = Py_None;
-                    assert(this_instr->op.code == ENTER_EXECUTOR);
                     Py_XSETREF(code->executor, Py_NewRef(executor));
-                    GOTO_TIER_TWO(executor);
+                    if (opcode == RESUME_JIT) {
+                        *counter_p = initial_jump_backoff_counter();
+                        if (this_instr == initial_instr) {
+                            assert(tstate->previous_executor == NULL);
+                            tstate->previous_executor = Py_None;
+                            assert((_PyCode_CODE(code))->op.code == ENTER_EXECUTOR);
+                            GOTO_TIER_TWO(executor);
+                        }
+                    }
+                    else {
+                        assert(opcode == JUMP_BACKWARD_JIT);
+                        *counter_p = initial_jump_backoff_counter();
+                    };
                 }
             }
             else {
-                *counter_p = advance_backoff_counter(counter);
+                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
             }
-        #endif
-        }
-
-        tier1 op(_ADVANCE_COUNTER, (--)) {
-        #ifdef _Py_TIER2
-            PyCodeObject *co = _PyFrame_GetCode(frame);
-            _Py_BackoffCounter *counter_p = (_Py_BackoffCounter *)(&co->hot_counter);
-            _Py_BackoffCounter counter = *counter_p;
-            if (!backoff_counter_triggers(counter)) {
-                *counter_p = advance_backoff_counter(counter);
-            }
-
         #endif
         }
 
@@ -2829,7 +2825,7 @@ dummy_func(
             unused/1 +
             _CHECK_PERIODIC +
             JUMP_BACKWARD_NO_INTERRUPT +
-            _ADVANCE_COUNTER;
+            _JIT;
 
         pseudo(JUMP, (--)) = {
             JUMP_FORWARD,

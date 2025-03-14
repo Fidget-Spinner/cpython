@@ -580,6 +580,7 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
         entry_point++;
     }
     co->_co_firsttraceable = entry_point;
+    co->executor = NULL;
 #ifdef Py_GIL_DISABLED
     _PyCode_Quicken(_PyCode_CODE(co), Py_SIZE(co), interp->config.tlbc_enabled);
 #else
@@ -752,8 +753,6 @@ _PyCode_New(struct _PyCodeConstructor *con)
     _PyObject_GC_TRACK(co);
 #endif
     Py_XDECREF(replacement_locations);
-    co->hot_counter = initial_resume_counter().value_and_backoff;
-    co->executor = NULL;
     return co;
 }
 
