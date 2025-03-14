@@ -596,7 +596,9 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
                 break;
             }
             case _JUMP_TO_TOP:
+                Py_UNREACHABLE();
             case _EXIT_TRACE:
+                remove_unneeded_uops(buffer, pc + 1, buffer_size);
                 return buffer_size;
             case _TIER2_JUMP:
                 if (buffer[pc].oparg == pc + 1) {
@@ -607,7 +609,6 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
                         buffer[pc].opcode = _NOP;
                     }
                 }
-                // Consequent
                 remove_unneeded_uops(buffer, pc + 1, buffer_size);
                 // Alternative
                 if (buffer[pc].oparg > pc) {
@@ -616,6 +617,9 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
                 return buffer_size;
             case _POP_JUMP_IF_FALSE:
             case _POP_JUMP_IF_TRUE:
+            case _ITER_JUMP_LIST:
+            case _ITER_JUMP_RANGE:
+            case _ITER_JUMP_TUPLE:
                 // Consequent
                 remove_unneeded_uops(buffer, pc + 1, buffer_size);
                 // Alternative
@@ -643,7 +647,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int start, int buffer_size)
             }
         }
     }
-    Py_UNREACHABLE();
+    return buffer_size;
 }
 
 //  0 - failure, no error raised, just fall back to Tier 1
