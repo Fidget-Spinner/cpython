@@ -380,6 +380,7 @@ PyTypeObject _PyUOpExecutor_Type = {
 
 static const uint16_t _PyUOp_Replacements[MAX_UOP_ID + 1] = {
     [_FOR_ITER] = _FOR_ITER_TIER_TWO,
+    [_ITER_NEXT_LIST] = _ITER_NEXT_LIST_TIER_TWO,
 };
 #ifdef Py_DEBUG
 #define DPRINTF(level, ...) \
