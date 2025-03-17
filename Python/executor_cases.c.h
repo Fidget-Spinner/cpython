@@ -4240,25 +4240,32 @@
             oparg = CURRENT_OPARG();
             iter = stack_pointer[-1];
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-            _PyListIterObject *it = (_PyListIterObject *)iter_o;
             assert(Py_TYPE(iter_o) == &PyListIter_Type);
+            // For free-threaded Python, the loop exit can happen at any point during
+            // item retrieval, so it doesn't make much sense to check and jump
+            // separately before item retrieval. Any length check we do here can be
+            // invalid by the time we actually try to fetch the item.
+            #ifdef Py_GIL_DISABLED
+            assert(_PyObject_IsUniquelyReferenced(iter_o));
+            (void)iter_o;
+            #else
+            _PyListIterObject *it = (_PyListIterObject *)iter_o;
             STAT_INC(FOR_ITER, hit);
             PyListObject *seq = it->it_seq;
             if (seq == NULL || (size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
-                #ifndef Py_GIL_DISABLED
                 if (seq != NULL) {
                     it->it_seq = NULL;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     Py_DECREF(seq);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                 }
-                #endif
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
                 JUMP_TO_JUMP_TARGET();
                 break;
             }
+            #endif
             break;
         }
 
@@ -4285,7 +4292,46 @@
             break;
         }
 
-        /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 because it is replaced */
+        case _ITER_NEXT_LIST: {
+            _PyStackRef iter;
+            _PyStackRef next;
+            oparg = CURRENT_OPARG();
+            iter = stack_pointer[-1];
+            PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+            _PyListIterObject *it = (_PyListIterObject *)iter_o;
+            assert(Py_TYPE(iter_o) == &PyListIter_Type);
+            PyListObject *seq = it->it_seq;
+            assert(seq);
+            #ifdef Py_GIL_DISABLED
+            assert(_PyObject_IsUniquelyReferenced(iter_o));
+            assert(_Py_IsOwnedByCurrentThread((PyObject *)seq) ||
+                   _PyObject_GC_IS_SHARED(seq));
+            STAT_INC(FOR_ITER, hit);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            int result = _PyList_GetItemRefNoLock(seq, it->it_index, &next);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            // A negative result means we lost a race with another thread
+            // and we need to take the slow path.
+            if (result < 0) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (result == 0) {
+                it->it_index = -1;
+                /* Jump forward oparg, then skip following END_FOR instruction */
+                JUMPBY(oparg + 1);
+                break;
+            }
+            it->it_index++;
+            #else
+            assert(it->it_index < PyList_GET_SIZE(seq));
+            next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
+            #endif
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         case _ITER_NEXT_LIST_TIER_TWO: {
             _PyStackRef iter;
@@ -4350,17 +4396,23 @@
             oparg = CURRENT_OPARG();
             iter = stack_pointer[-1];
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-            _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
+            (void)iter_o;
             assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
+            #ifdef Py_GIL_DISABLED
+            assert(_PyObject_IsUniquelyReferenced(iter_o));
+            #endif
+            _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
             STAT_INC(FOR_ITER, hit);
             PyTupleObject *seq = it->it_seq;
-            if (seq == NULL || it->it_index >= PyTuple_GET_SIZE(seq)) {
+            if (seq == NULL || (size_t)it->it_index >= (size_t)PyTuple_GET_SIZE(seq)) {
+                #ifndef Py_GIL_DISABLED
                 if (seq != NULL) {
                     it->it_seq = NULL;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     Py_DECREF(seq);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                 }
+                #endif
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
                 JUMP_TO_JUMP_TARGET();
@@ -4433,6 +4485,9 @@
             iter = stack_pointer[-1];
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             assert(Py_TYPE(r) == &PyRangeIter_Type);
+            #ifdef Py_GIL_DISABLED
+            assert(_PyObject_IsUniquelyReferenced((PyObject *)r));
+            #endif
             STAT_INC(FOR_ITER, hit);
             if (r->len <= 0) {
                 // Jump over END_FOR instruction.

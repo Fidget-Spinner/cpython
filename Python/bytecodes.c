@@ -3163,7 +3163,7 @@ dummy_func(
 #endif
         }
 
-        replaced op(_ITER_NEXT_LIST, (iter -- iter, next)) {
+        op(_ITER_NEXT_LIST, (iter -- iter, next)) {
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             assert(Py_TYPE(iter_o) == &PyListIter_Type);

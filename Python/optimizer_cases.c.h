@@ -1509,7 +1509,14 @@
             break;
         }
 
-        /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 */
+        case _ITER_NEXT_LIST: {
+            JitOptSymbol *next;
+            next = sym_new_not_null(ctx);
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         case _ITER_NEXT_LIST_TIER_TWO: {
             JitOptSymbol *next;

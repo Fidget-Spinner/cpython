@@ -8,7 +8,7 @@ extern "C" {
 #include "pycore_pymath.h" // _PY_SHORT_FLOAT_REPR
 #include "pycore_llist.h"
 #include "pycore_ast_state.h"     // struct ast_state
-
+#include "pycore_optimizer.h"
 
 /* This file contains the struct definitions for interpreter state
  * and other necessary structs */
@@ -957,6 +957,7 @@ struct _is {
     _Py_hashtable_t *closed_stackrefs_table;
 #  endif
 #endif
+    _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
 };
 
 
