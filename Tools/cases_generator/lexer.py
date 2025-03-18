@@ -231,6 +231,7 @@ annotations = {
     "replicate",
     "tier1",
     "tier2",
+    "tier3",
     "no_save_ip",
 }
 

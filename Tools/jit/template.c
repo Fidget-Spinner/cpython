@@ -40,7 +40,7 @@
 do {                                                                       \
     OPT_STAT_INC(traces_executed);                                         \
     jit_func_preserve_none jitted = (EXECUTOR)->jit_side_entry;            \
-    __attribute__((musttail)) return jitted(frame, stack_pointer, tstate); \
+    __attribute__((musttail)) return jitted(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef GOTO_TIER_ONE
@@ -63,7 +63,7 @@ do {                                                \
 #define PATCH_JUMP(ALIAS)                                                \
 do {                                                                     \
     PATCH_VALUE(jit_func_preserve_none, jump, ALIAS);                    \
-    __attribute__((musttail)) return jump(frame, stack_pointer, tstate); \
+    __attribute__((musttail)) return jump(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
@@ -72,38 +72,48 @@ do {                                                                     \
 #undef JUMP_TO_ERROR
 #define JUMP_TO_ERROR() PATCH_JUMP(_JIT_ERROR_TARGET)
 
+#undef DISPATCH_GOTO
+#define DISPATCH_GOTO() JUMP_TO_JUMP_TARGET()
+
+#undef INSTRUCTION_STATS
+#define INSTRUCTION_STATS(op)
+
+#undef JUMP_TO_LABEL
+#define JUMP_TO_LABEL(label) goto label;
+
+#undef JUMP_TO_PREDICTED
+#define JUMP_TO_PREDICTED(oop) goto deopt_if;
+
 #define TIER_TWO 2
 
 __attribute__((preserve_none)) _Py_CODEUNIT *
-_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
+_JIT_ENTRY(TAIL_CALL_PARAMS)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
-    int oparg;
-    int uopcode = _JIT_OPCODE;
-    _Py_CODEUNIT *next_instr;
-    // Other stuff we need handy:
-    PATCH_VALUE(uint16_t, _oparg, _JIT_OPARG)
-#if SIZEOF_VOID_P == 8
-    PATCH_VALUE(uint64_t, _operand0, _JIT_OPERAND0)
-    PATCH_VALUE(uint64_t, _operand1, _JIT_OPERAND1)
-#else
-    assert(SIZEOF_VOID_P == 4);
-    PATCH_VALUE(uint32_t, _operand0_hi, _JIT_OPERAND0_HI)
-    PATCH_VALUE(uint32_t, _operand0_lo, _JIT_OPERAND0_LO)
-    uint64_t _operand0 = ((uint64_t)_operand0_hi << 32) | _operand0_lo;
-    PATCH_VALUE(uint32_t, _operand1_hi, _JIT_OPERAND1_HI)
-    PATCH_VALUE(uint32_t, _operand1_lo, _JIT_OPERAND1_LO)
-    uint64_t _operand1 = ((uint64_t)_operand1_hi << 32) | _operand1_lo;
-#endif
+    int opcode = _JIT_OPCODE;
+    _Py_CODEUNIT *this_instr;
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
     OPT_STAT_INC(uops_executed);
-    UOP_STAT_INC(uopcode, execution_count);
-    switch (uopcode) {
+    UOP_STAT_INC(opcode, execution_count);
+    switch (opcode) {
         // The actual instruction definition gets inserted here:
         CASE
         default:
             Py_UNREACHABLE();
     }
     PATCH_JUMP(_JIT_CONTINUE);
+
+deopt_if:
+    return this_instr;
+pop_4_error:
+    STACK_SHRINK(1);
+pop_3_error:
+    STACK_SHRINK(1);
+pop_2_error:
+    STACK_SHRINK(1);
+pop_1_error:
+    STACK_SHRINK(1);
+error:
+    return NULL;
 }

@@ -5067,12 +5067,13 @@ dummy_func(
         tier2 op(_EXIT_TRACE, (exit_p/4 --)) {
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
-            _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
+            _Py_CODEUNIT *target = THIS_INSTR();
+
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 2) {
                 printf("SIDE EXIT: [UOp ");
-                _PyUOpPrint(&next_uop[-1]);
+                _PyTraceletInstructionPrint(&next_uop[-1]);
                 printf(", exit %lu, temp %d, target %d -> %s]\n",
                     exit - current_executor->exits, exit->temperature.value_and_backoff,
                     (int)(target - _PyFrame_GetBytecode(frame)),
@@ -5164,12 +5165,12 @@ dummy_func(
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 
-        tier2 op(_DEOPT, (--)) {
+        tier3 op(_DEOPT, (--)) {
             tstate->previous_executor = (PyObject *)current_executor;
             GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET());
         }
 
-        tier2 op(_ERROR_POP_N, (target/2 --)) {
+        tier3 op(_ERROR_POP_N, (target/2 --)) {
             tstate->previous_executor = (PyObject *)current_executor;
             assert(oparg == 0);
             frame->instr_ptr = _PyFrame_GetBytecode(frame) + target;

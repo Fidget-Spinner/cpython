@@ -71,7 +71,8 @@
 #endif
 
 #define TAIL_CALL_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _Py_CODEUNIT *next_instr, int oparg
-#define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr, oparg
+#define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr \
+, oparg
 
 #if Py_TAIL_CALL_INTERP
     // Note: [[clang::musttail]] works for GCC 15, but not __attribute__((musttail)) at the moment.
@@ -194,6 +195,7 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #define JUMPBY(x)       (next_instr += (x))
 #define SKIP_OVER(x)    (next_instr += (x))
 
+#define THIS_INSTR()    (next_uop[-1].this_instr)
 
 /* Stack manipulation macros */
 
@@ -390,7 +392,7 @@ do {                                                   \
     jit_func jitted = _executor->jit_code;             \
     /* Keep the shim frame alive via the executor: */  \
     Py_INCREF(_executor);                              \
-    next_instr = jitted(frame, stack_pointer, tstate); \
+    next_instr = jitted(TAIL_CALL_ARGS);               \
     Py_DECREF(_executor);                              \
     Py_CLEAR(tstate->previous_executor);               \
     frame = tstate->current_frame;                     \

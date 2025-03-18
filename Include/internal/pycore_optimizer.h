@@ -39,6 +39,15 @@ typedef struct {
     PyCodeObject *code;  // Weak (NULL if no corresponding ENTER_EXECUTOR).
 } _PyVMData;
 
+typedef struct {
+    uint16_t opcode;
+    uint16_t oparg;
+    uint16_t jump_target;
+    _Py_CODEUNIT *this_instr;
+    uint64_t operand0;  // A cache entry
+    uint64_t operand1;
+} _PyTraceletInstruction;
+
 /* Depending on the format,
  * the 32 bits between the oparg and operand are:
  * UOP_FORMAT_TARGET:
@@ -66,14 +75,13 @@ typedef struct {
 } _PyUOpInstruction;
 
 typedef struct {
-    uint32_t target;
     _Py_BackoffCounter temperature;
     const struct _PyExecutorObject *executor;
 } _PyExitData;
 
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
-    const _PyUOpInstruction *trace;
+    const _PyTraceletInstruction *trace;
     _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
     uint32_t exit_count;
     uint32_t code_size;
@@ -133,9 +141,8 @@ static inline uint32_t uop_get_target(const _PyUOpInstruction *inst)
     return inst->target;
 }
 
-static inline uint16_t uop_get_jump_target(const _PyUOpInstruction *inst)
+static inline uint16_t tracelet_inst_get_jump_target(const _PyTraceletInstruction *inst)
 {
-    assert(inst->format == UOP_FORMAT_JUMP);
     return inst->jump_target;
 }
 
@@ -293,7 +300,7 @@ PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 
 PyAPI_FUNC(int) _PyOptimizer_Optimize(struct _PyInterpreterFrame *frame, _Py_CODEUNIT *start, _PyExecutorObject **exec_ptr, int chain_depth);
 
-static inline int is_terminator(const _PyUOpInstruction *uop)
+static inline int is_terminator(const _PyTraceletInstruction *uop)
 {
     int opcode = uop->opcode;
     return (

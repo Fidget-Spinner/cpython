@@ -189,6 +189,7 @@ class Uop:
     replicates: "Uop | None" = None
     # Size of the instruction(s), only set for uops containing the INSTRUCTION_SIZE macro
     instruction_size: int | None = None
+    emitted: bool = False
 
     def dump(self, indent: str) -> None:
         print(

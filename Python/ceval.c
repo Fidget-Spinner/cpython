@@ -885,7 +885,7 @@ static const _Py_CODEUNIT _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS[] = {
 };
 
 #ifdef Py_DEBUG
-extern void _PyUOpPrint(const _PyUOpInstruction *uop);
+extern void _PyTraceletInstructionPrint(const _PyTraceletInstruction *uop);
 #endif
 
 
@@ -1037,7 +1037,8 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 #if defined(_Py_TIER2) && !defined(_Py_JIT)
     /* Tier 2 interpreter state */
     _PyExecutorObject *current_executor = NULL;
-    const _PyUOpInstruction *next_uop = NULL;
+    const _PyTraceletInstruction *next_uop = NULL;
+    _Py_CODEUNIT *this_instr = NULL;
 #endif
 
 #if Py_TAIL_CALL_INTERP
@@ -1093,7 +1094,7 @@ tier2_dispatch:
             else {
                 printf("%4d uop: ", (int)(next_uop - current_executor->trace));
             }
-            _PyUOpPrint(next_uop);
+            _PyTraceletInstructionPrint(next_uop);
             printf("\n");
         }
 #endif
@@ -1114,7 +1115,7 @@ tier2_dispatch:
 #ifdef Py_DEBUG
             {
                 printf("Unknown uop: ");
-                _PyUOpPrint(&next_uop[-1]);
+                _PyTraceletInstructionPrint(&next_uop[-1]);
                 printf(" @ %d\n", (int)(next_uop - current_executor->trace - 1));
                 Py_FatalError("Unknown uop");
             }
@@ -1129,20 +1130,16 @@ jump_to_error_target:
 #ifdef Py_DEBUG
     if (frame->lltrace >= 2) {
         printf("Error: [UOp ");
-        _PyUOpPrint(&next_uop[-1]);
+        _PyTraceletInstructionPrint(&next_uop[-1]);
         printf(" @ %d -> %s]\n",
                (int)(next_uop - current_executor->trace - 1),
                _PyOpcode_OpName[frame->instr_ptr->op.code]);
     }
 #endif
-    assert(next_uop[-1].format == UOP_FORMAT_JUMP);
-    uint16_t target = uop_get_error_target(&next_uop[-1]);
-    next_uop = current_executor->trace + target;
-    goto tier2_dispatch;
+    GOTO_TIER_ONE(NULL);
 
 jump_to_jump_target:
-    assert(next_uop[-1].format == UOP_FORMAT_JUMP);
-    target = uop_get_jump_target(&next_uop[-1]);
+    uint16_t target = tracelet_inst_get_jump_target(&next_uop[-1]);
     next_uop = current_executor->trace + target;
     goto tier2_dispatch;
 
