@@ -1135,7 +1135,7 @@ jump_to_error_target:
         _PyTraceletInstructionPrint(&next_uop[-1]);
         printf(" @ %d -> %s]\n",
                (int)(next_uop - current_executor->trace - 1),
-               _PyOpcode_OpName[frame->instr_ptr->op.code]);
+               _PyOpcode_OpName[this_instr->op.code]);
     }
 #endif
     GOTO_TIER_ONE(NULL);

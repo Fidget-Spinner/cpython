@@ -72,6 +72,7 @@ class Properties:
             has_free=any(p.has_free for p in properties),
             side_exit=any(p.side_exit for p in properties),
             pure=all(p.pure for p in properties),
+            tier=1 if any(p.tier == 1 for p in properties) else 2,
             needs_prev=any(p.needs_prev for p in properties),
             no_save_ip=all(p.no_save_ip for p in properties),
         )

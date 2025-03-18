@@ -544,7 +544,13 @@ translate_bytecode_to_trace(
         DPRINTF(2, "%p: %s(%d)\n", target, _PyOpcode_OpName[opcode], oparg);
 
         if (opcode == EXTENDED_ARG) {
-            return 0;
+            instr++;
+            opcode = instr->op.code;
+            oparg = (oparg << 8) | instr->op.arg;
+            if (opcode == EXTENDED_ARG) {
+                instr--;
+                goto done;
+            }
         }
         if (opcode == ENTER_EXECUTOR) {
             // We have a couple of options here. We *could* peek "underneath"
@@ -560,8 +566,8 @@ translate_bytecode_to_trace(
             goto done;
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
-        RESERVE_RAW(2, "_CHECK_VALIDITY");
-        ADD_TO_TRACE(_CHECK_VALIDITY, 0, target);
+//        RESERVE_RAW(2, "_CHECK_VALIDITY");
+//        ADD_TO_TRACE(_CHECK_VALIDITY, 0, target);
 
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
@@ -658,7 +664,7 @@ translate_bytecode_to_trace(
                     if (OPCODE_HAS_TIER1_ONLY(opcode)) {
                         DPRINTF(2, "Unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                         OPT_UNSUPPORTED_OPCODE(opcode);
-                        goto done;
+                        return 0;
                     }
                     if (!ends_with_push_frame) {
                         RESERVE(1);

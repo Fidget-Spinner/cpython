@@ -651,7 +651,7 @@ def cflags(p: Properties) -> str:
     if p.oparg_and_1:
         flags.append("HAS_OPARG_AND_1_FLAG")
     if p.tier == 1:
-        flags.append("IS_TIER1_ONLY")
+        flags.append("HAS_TIER1_ONLY_FLAG")
     if flags:
         return " | ".join(flags)
     else:
