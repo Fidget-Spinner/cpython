@@ -224,9 +224,6 @@ def generate_tier2_cases(
     emitter = Tier2Emitter(out, analysis.labels)
     out.emit("\n")
     for name, inst in sorted(analysis.instructions.items()):
-        if any(isinstance(uop, Uop) and uop.properties.tier == 1 for uop in inst.parts):
-            out.emit(f"/* {name} is not a viable tier2 op as it is tier 1 only() */\n")
-            continue
         out.emit("\n")
         out.emit(f"case {name}: {{\n")
         needs_this = uses_this(inst)

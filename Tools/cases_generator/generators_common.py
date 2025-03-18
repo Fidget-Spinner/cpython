@@ -650,6 +650,8 @@ def cflags(p: Properties) -> str:
         flags.append("HAS_NO_SAVE_IP_FLAG")
     if p.oparg_and_1:
         flags.append("HAS_OPARG_AND_1_FLAG")
+    if p.tier == 1:
+        flags.append("IS_TIER1_ONLY")
     if flags:
         return " | ".join(flags)
     else:

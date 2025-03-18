@@ -432,7 +432,7 @@ do { \
 #define CURRENT_OPARG()    (next_uop[-1].oparg)
 #define CURRENT_OPERAND0() (next_uop[-1].operand0)
 #define CURRENT_OPERAND1() (next_uop[-1].operand1)
-#define CURRENT_TARGET()   (next_uop[-1].target)
+#define CURRENT_TARGET()   (next_uop[-1].this_instr)
 
 #define JUMP_TO_JUMP_TARGET() goto jump_to_jump_target
 #define JUMP_TO_ERROR() goto jump_to_error_target

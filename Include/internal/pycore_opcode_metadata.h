@@ -1974,6 +1974,7 @@ enum InstructionFormat {
 #define HAS_OPARG_AND_1_FLAG (8192)
 #define HAS_ERROR_NO_POP_FLAG (16384)
 #define HAS_NO_SAVE_IP_FLAG (32768)
+#define HAS_TIER1_ONLY_FLAG (65536)
 #define OPCODE_HAS_ARG(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_ARG_FLAG))
 #define OPCODE_HAS_CONST(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_CONST_FLAG))
 #define OPCODE_HAS_NAME(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_NAME_FLAG))
@@ -1990,6 +1991,7 @@ enum InstructionFormat {
 #define OPCODE_HAS_OPARG_AND_1(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_OPARG_AND_1_FLAG))
 #define OPCODE_HAS_ERROR_NO_POP(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_ERROR_NO_POP_FLAG))
 #define OPCODE_HAS_NO_SAVE_IP(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_NO_SAVE_IP_FLAG))
+#define OPCODE_HAS_TIER1_ONLY(OP) (_PyOpcode_opcode_metadata[OP].flags & (HAS_TIER1_ONLY_FLAG))
 
 #define OPARG_SIMPLE 0
 #define OPARG_CACHE_1 1

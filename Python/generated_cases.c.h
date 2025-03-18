@@ -10369,6 +10369,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             _PyFrame_SetStackPointer(frame, stack_pointer);
+            if (!EMPTY()) {
+                dump_stack(frame, stack_pointer);
+                printf("\n");
+            }
             assert(EMPTY());
             _Py_LeaveRecursiveCallPy(tstate);
             // GH-99729: We need to unlink the frame *before* clearing it:

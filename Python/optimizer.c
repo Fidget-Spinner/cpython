@@ -420,18 +420,18 @@ add_to_trace(
 }
 
 #ifdef Py_DEBUG
-#define ADD_TO_TRACE(OPCODE, OPARG) \
+#define ADD_TO_TRACE(OPCODE, OPARG, TARGET) \
     assert(trace_length < max_length); \
-    trace_length = add_to_trace(trace, trace_length, (OPCODE), (OPARG), instr); \
+    trace_length = add_to_trace(trace, trace_length, (OPCODE), (OPARG), (TARGET)); \
     if (lltrace >= 2) { \
         printf("%4d ADD_TO_TRACE: ", trace_length); \
         _PyTraceletInstructionPrint(&trace[trace_length-1]); \
         printf("\n"); \
     }
 #else
-#define ADD_TO_TRACE(OPCODE, OPARG) \
+#define ADD_TO_TRACE(OPCODE, OPARG, TARGET) \
     assert(trace_length < max_length); \
-    trace_length = add_to_trace(trace, trace_length, (OPCODE), (OPARG));
+    trace_length = add_to_trace(trace, trace_length, (OPCODE), (OPARG), (TARGET));
 #endif
 
 #define INSTR_IP(INSTR, CODE) \
@@ -471,6 +471,10 @@ add_to_trace(
     assert(func == NULL || func->func_code == (PyObject *)code); \
     instr = trace_stack[trace_stack_depth].instr;
 
+/* Returns the length of the trace on success,
+ * 0 if it failed to produce a worthwhile trace,
+ * and -1 on an error.
+ */
 /* Returns the length of the trace on success,
  * 0 if it failed to produce a worthwhile trace,
  * and -1 on an error.
@@ -516,12 +520,13 @@ translate_bytecode_to_trace(
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
             2 * INSTR_IP(initial_instr, code));
-    ADD_TO_TRACE(_START_EXECUTOR, 0);
-    ADD_TO_TRACE(_MAKE_WARM, 0);
-    uint32_t target = 0;
+    trace[trace_length].operand0 = (uint64_t)instr;
+    ADD_TO_TRACE(_START_EXECUTOR, 0, instr);
+    ADD_TO_TRACE(_MAKE_WARM, 0, 0);
+    _Py_CODEUNIT *target = NULL;
 
     for (;;) {
-        target = INSTR_IP(instr, code);
+        target = instr;
         // Need space for _DEOPT
         max_length--;
 
@@ -531,11 +536,11 @@ translate_bytecode_to_trace(
         if (!first && instr == initial_instr) {
             // We have looped around to the start:
             RESERVE(1);
-            ADD_TO_TRACE(_JUMP_TO_TOP, 0);
+            ADD_TO_TRACE(_JUMP_TO_TOP, 0, 0);
             goto done;
         }
 
-        DPRINTF(2, "%d: %s(%d)\n", target, _PyOpcode_OpName[opcode], oparg);
+        DPRINTF(2, "%p: %s(%d)\n", target, _PyOpcode_OpName[opcode], oparg);
 
         if (opcode == EXTENDED_ARG) {
             instr++;
@@ -610,16 +615,16 @@ translate_bytecode_to_trace(
                     DPRINTF(2, "Jump likely (%04x = %d bits), continue at byte offset %d\n",
                             instr[1].cache, bitcount, 2 * INSTR_IP(target_instr, code));
                     instr = target_instr;
-                    ADD_TO_TRACE(uopcode, 0);
+                    ADD_TO_TRACE(uopcode, 0, next_instr);
                     goto top;
                 }
-                ADD_TO_TRACE(uopcode, 0);
+                ADD_TO_TRACE(uopcode, 0, target_instr);
                 break;
             }
 
             case JUMP_BACKWARD:
             case JUMP_BACKWARD_JIT:
-            ADD_TO_TRACE(_CHECK_PERIODIC, 0);
+                ADD_TO_TRACE(_CHECK_PERIODIC, 0, target);
                 _Py_FALLTHROUGH;
             case JUMP_BACKWARD_NO_INTERRUPT:
             {
@@ -644,22 +649,30 @@ translate_bytecode_to_trace(
             case RESUME:
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
                  *  start with RESUME_CHECK */
-            ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0);
+                ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, target);
                 break;
 
             default:
             {
                 const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
+                bool added_macro_op = false;
                 bool ends_with_push_frame = (expansion->nuops > 0 && expansion->uops[expansion->nuops-1].uop == _PUSH_FRAME);
                 if (_PyOpcode_Deopt[opcode] != FOR_ITER) {
+                    if (OPCODE_HAS_TIER1_ONLY(opcode)) {
+                        DPRINTF(2, "Unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
+                        OPT_UNSUPPORTED_OPCODE(opcode);
+                        goto done;
+                    }
                     if (!ends_with_push_frame) {
                         RESERVE(1);
-                        ADD_TO_TRACE(opcode, oparg);
+                        ADD_TO_TRACE(opcode, oparg, target);
+                        added_macro_op = true;
                     }
                 }
                 if (expansion->nuops > 0) {
                     // Reserve space for nuops (+ _SET_IP + _EXIT_TRACE)
                     int nuops = expansion->nuops;
+                    RESERVE(nuops + 1); /* One extra for exit */
                     int16_t last_op = expansion->uops[nuops-1].uop;
                     if (last_op == _RETURN_VALUE || last_op == _RETURN_GENERATOR || last_op == _YIELD_VALUE) {
                         // Check for trace stack underflow now:
@@ -675,40 +688,52 @@ translate_bytecode_to_trace(
                     for (int i = 0; i < nuops; i++) {
                         oparg = orig_oparg;
                         uint32_t uop = expansion->uops[i].uop;
+                        uint64_t operand = 0;
                         // Add one to account for the actual opcode/oparg pair:
+                        int offset = expansion->uops[i].offset + 1;
                         switch (expansion->uops[i].size) {
                             case OPARG_SIMPLE:
                                 assert(opcode != JUMP_BACKWARD_NO_INTERRUPT && opcode != JUMP_BACKWARD);
                                 break;
                             case OPARG_CACHE_1:
+                                operand = read_u16(&instr[offset].cache);
                                 break;
                             case OPARG_CACHE_2:
+                                operand = read_u32(&instr[offset].cache);
                                 break;
                             case OPARG_CACHE_4:
+                                operand = read_u64(&instr[offset].cache);
                                 break;
                             case OPARG_TOP:  // First half of super-instr
+                                oparg = orig_oparg >> 4;
                                 break;
                             case OPARG_BOTTOM:  // Second half of super-instr
+                                oparg = orig_oparg & 0xF;
                                 break;
                             case OPARG_SAVE_RETURN_OFFSET:  // op=_SAVE_RETURN_OFFSET; oparg=return_offset
+                                oparg = offset;
+                                assert(uop == _SAVE_RETURN_OFFSET);
                                 break;
                             case OPARG_REPLACED:
                                 uop = _PyUOp_Replacements[uop];
                                 assert(uop != 0);
 #ifdef Py_DEBUG
                                 {
-                                    uint32_t next_inst = target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + (oparg > 255);
-                                    uint32_t jump_target = next_inst + oparg;
-                                    assert(_Py_GetBaseCodeUnit(code, jump_target).op.code == END_FOR);
-                                    assert(_Py_GetBaseCodeUnit(code, jump_target+1).op.code == POP_ITER);
+                                    _Py_CODEUNIT *next_inst = target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + (oparg > 255);
+                                    _Py_CODEUNIT *jump_target = next_inst + oparg;
+                                    assert(jump_target->op.code == END_FOR);
+                                    assert((jump_target+1)->op.code == POP_ITER);
                                 }
 #endif
                                 break;
                             case OPERAND1_1:
+                                operand = read_u16(&instr[offset].cache);
                                 continue;
                             case OPERAND1_2:
+                                operand = read_u32(&instr[offset].cache);
                                 continue;
                             case OPERAND1_4:
+                                operand = read_u64(&instr[offset].cache);
                                 continue;
                             default:
                                 fprintf(stderr,
@@ -721,6 +746,19 @@ translate_bytecode_to_trace(
 
                         if (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE) {
                             TRACE_STACK_POP();
+                            /* Set the operand to the function or code object returned to,
+                             * to assist optimization passes. (See _PUSH_FRAME below.)
+                             */
+                            if (func != NULL) {
+                                operand = (uintptr_t)func;
+                            }
+                            else if (code != NULL) {
+                                operand = (uintptr_t)code | 1;
+                            }
+                            else {
+                                operand = 0;
+                            }
+                            ADD_TO_TRACE(uop, oparg, target);
                             DPRINTF(2,
                                     "Returning to %s (%s:%d) at byte offset %d\n",
                                     PyUnicode_AsUTF8(code->co_qualname),
@@ -760,7 +798,8 @@ translate_bytecode_to_trace(
                                             PyUnicode_AsUTF8(new_code->co_filename),
                                             new_code->co_firstlineno);
                                     OPT_STAT_INC(recursive_call);
-                                    ADD_TO_TRACE(_EXIT_TRACE, 0);
+                                    ADD_TO_TRACE(uop, oparg, target);
+                                    ADD_TO_TRACE(_EXIT_TRACE, 0, 0);
                                     goto done;
                                 }
                                 if (new_code->co_version != func_version) {
@@ -768,13 +807,30 @@ translate_bytecode_to_trace(
                                     // Perhaps it may happen again, so don't bother tracing.
                                     // TODO: Reason about this -- is it better to bail or not?
                                     DPRINTF(2, "Bailing because co_version != func_version\n");
-                                    ADD_TO_TRACE(_EXIT_TRACE, 0);
+                                    ADD_TO_TRACE(uop, oparg, target);
+                                    ADD_TO_TRACE(_EXIT_TRACE, 0, 0);
                                     goto done;
                                 }
                                 // Increment IP to the return address
                                 instr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + 1;
                                 TRACE_STACK_PUSH();
                                 _Py_BloomFilter_Add(dependencies, new_code);
+                                /* Set the operand to the callee's function or code object,
+                                 * to assist optimization passes.
+                                 * We prefer setting it to the function (for remove_globals())
+                                 * but if that's not available but the code is available,
+                                 * use the code, setting the low bit so the optimizer knows.
+                                 */
+                                if (new_func != NULL) {
+                                    operand = (uintptr_t)new_func;
+                                }
+                                else if (new_code != NULL) {
+                                    operand = (uintptr_t)new_code | 1;
+                                }
+                                else {
+                                    operand = 0;
+                                }
+                                ADD_TO_TRACE(uop, oparg, target);
                                 code = new_code;
                                 func = new_func;
                                 instr = _PyCode_CODE(code);
@@ -791,12 +847,24 @@ translate_bytecode_to_trace(
                             return 0;
                         }
 
+                        if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
+                            assert(i + 1 == nuops);
+                            _Py_CODEUNIT *next_instr = instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                            assert(next_instr->op.code == STORE_FAST);
+                            operand = next_instr->op.arg;
+                            // Skip the STORE_FAST:
+                            instr++;
+                        }
+
                         // All other instructions
-                        if (_PyOpcode_Deopt[opcode] == FOR_ITER || ends_with_push_frame) {
-                            ADD_TO_TRACE(uop, oparg);
+                        if (!added_macro_op) {
+                            ADD_TO_TRACE(uop, oparg, target);
                         }
                     }
                     break;
+                }
+                if (added_macro_op) {
+                    trace_length--;
                 }
                 DPRINTF(2, "Unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                 OPT_UNSUPPORTED_OPCODE(opcode);
@@ -837,7 +905,7 @@ translate_bytecode_to_trace(
     if (!is_terminator(&trace[trace_length-1])) {
         /* Allow space for _EXIT_TRACE */
         max_length += 2;
-        ADD_TO_TRACE(_EXIT_TRACE, 0);
+        ADD_TO_TRACE(_EXIT_TRACE, 0, target);
     }
     DPRINTF(1,
             "Created a proto-trace for %s (%s:%d) at byte offset %d -- length %d\n",

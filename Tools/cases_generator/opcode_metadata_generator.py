@@ -57,6 +57,7 @@ FLAGS = [
     "OPARG_AND_1",
     "ERROR_NO_POP",
     "NO_SAVE_IP",
+    "TIER1_ONLY",
 ]
 
 

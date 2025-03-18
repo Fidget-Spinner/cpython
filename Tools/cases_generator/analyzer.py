@@ -37,6 +37,7 @@ class Properties:
     const_oparg: int = -1
     needs_prev: bool = False
     no_save_ip: bool = False
+    is_viable_uop: bool = False
 
     def dump(self, indent: str) -> None:
         simple_properties = self.__dict__.copy()
