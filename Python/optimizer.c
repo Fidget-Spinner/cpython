@@ -444,7 +444,7 @@ add_to_trace(
         DPRINTF(2, "No room for %s (need %d, got %d)\n", \
                 (opname), (n), max_length - trace_length); \
         OPT_STAT_INC(trace_too_long); \
-        goto done; \
+        return 0; \
     }
 
 // Reserve space for N uops, plus 3 for _SET_IP, _CHECK_VALIDITY and _EXIT_TRACE
@@ -544,13 +544,7 @@ translate_bytecode_to_trace(
         DPRINTF(2, "%p: %s(%d)\n", target, _PyOpcode_OpName[opcode], oparg);
 
         if (opcode == EXTENDED_ARG) {
-            instr++;
-            opcode = instr->op.code;
-            oparg = (oparg << 8) | instr->op.arg;
-            if (opcode == EXTENDED_ARG) {
-                instr--;
-                goto done;
-            }
+            return 0;
         }
         if (opcode == ENTER_EXECUTOR) {
             // We have a couple of options here. We *could* peek "underneath"
