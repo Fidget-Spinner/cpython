@@ -1086,6 +1086,7 @@ tier2_dispatch:
     for (;;) {
         uopcode = next_uop->opcode;
         oparg = next_uop->oparg;
+        this_instr = next_uop->this_instr;
 #ifdef Py_DEBUG
         if (frame->lltrace >= 3) {
             dump_stack(frame, stack_pointer);

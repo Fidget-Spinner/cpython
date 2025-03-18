@@ -46,6 +46,8 @@ class Tier2Emitter(Emitter):
 
     def __init__(self, out: CWriter, labels: dict[str, Label]):
         super().__init__(out, labels)
+        self._replacers["DISPATCH_GOTO"] = self.dispatch_goto
+        self._replacers["DISPATCH"] = self.dispatch
 
     def goto_error(self, offset: int, label: str, storage: Storage) -> str:
         # To do: Add jump targets for popping values.
@@ -70,7 +72,6 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
-        self.emit("next_instr = this_instr;\n")
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
         return not always_true(first_tkn)
@@ -91,11 +92,38 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
-        self.emit("next_instr = this_instr;\n")
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
         return not always_true(first_tkn)
 
+
+    def dispatch_goto(  # type: ignore[override]
+        self,
+        tkn: Token,
+        tkn_iter: TokenIterator,
+        uop: CodeSection,
+        storage: Storage,
+        inst: Instruction | None,
+    ) -> bool:
+        next(tkn_iter)
+        next(tkn_iter)
+        next(tkn_iter)
+        self.out.start_line()
+        self.out.emit("Py_UNREACHABLE();\n")
+
+    def dispatch(  # type: ignore[override]
+        self,
+        tkn: Token,
+        tkn_iter: TokenIterator,
+        uop: CodeSection,
+        storage: Storage,
+        inst: Instruction | None,
+    ) -> bool:
+        next(tkn_iter)
+        next(tkn_iter)
+        next(tkn_iter)
+        self.out.start_line()
+        self.out.emit("Py_UNREACHABLE();\n")
 
 def declare_variable(var: StackItem, out: CWriter) -> None:
     type, null = type_and_null(var)
@@ -188,15 +216,6 @@ def uses_this(inst: Instruction) -> bool:
         for cache in uop.caches:
             if cache.name != "unused":
                 return True
-    # Can't be merged into the loop above, because
-    # this must strictly be performed at the end.
-    for uop in inst.parts:
-        if not isinstance(uop, Uop):
-            continue
-        for tkn in uop.body:
-            if (tkn.kind == "IDENTIFIER"
-                    and (tkn.text in {"DEOPT_IF", "EXIT_IF"})):
-                return True
     return False
 
 
@@ -226,14 +245,14 @@ def generate_tier2_cases(
     for name, inst in sorted(analysis.instructions.items()):
         out.emit("\n")
         out.emit(f"case {name}: {{\n")
-        needs_this = uses_this(inst)
-        unused_guard = "(void)this_instr;\n"
+        uses_this_instr = uses_this(inst)
+        if uses_this_instr:
+            out.emit(f"if (this_instr->op.code != {name}) {{\n")
+            out.emit(f"JUMP_TO_JUMP_TARGET();\n")
+            out.emit("}\n")
         if inst.properties.needs_prev:
             out.emit(f"_Py_CODEUNIT* const prev_instr = frame->instr_ptr;\n")
 
-        if needs_this and not inst.is_target:
-            out.emit(f"this_instr = next_uop[-1].this_instr;\n")
-            out.emit(unused_guard)
         if not inst.properties.no_save_ip:
             out.emit(f"frame->instr_ptr = next_instr;\n")
 

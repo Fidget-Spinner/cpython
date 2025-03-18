@@ -10,6 +10,9 @@
 
 
         case BINARY_OP: {
+            if (this_instr->op.code != BINARY_OP) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP);
             _PyStackRef lhs;
@@ -65,8 +68,6 @@
         }
 
         case BINARY_OP_ADD_FLOAT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_ADD_FLOAT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -81,12 +82,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyFloat_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyFloat_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -116,8 +115,6 @@
         }
 
         case BINARY_OP_ADD_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_ADD_INT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -132,12 +129,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyLong_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyLong_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -168,8 +163,6 @@
         }
 
         case BINARY_OP_ADD_UNICODE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_ADD_UNICODE);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -184,12 +177,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyUnicode_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyUnicode_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -218,8 +209,9 @@
         }
 
         case BINARY_OP_EXTEND: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != BINARY_OP_EXTEND) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_EXTEND);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -242,7 +234,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (!res) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -277,8 +268,6 @@
         }
 
         case BINARY_OP_INPLACE_ADD_UNICODE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_INPLACE_ADD_UNICODE);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -292,12 +281,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyUnicode_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyUnicode_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -319,7 +306,6 @@
                 assert(PyUnicode_CheckExact(left_o));
                 if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(BINARY_OP, hit);
@@ -360,8 +346,6 @@
         }
 
         case BINARY_OP_MULTIPLY_FLOAT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_MULTIPLY_FLOAT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -376,12 +360,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyFloat_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyFloat_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -411,8 +393,6 @@
         }
 
         case BINARY_OP_MULTIPLY_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_MULTIPLY_INT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -427,12 +407,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyLong_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyLong_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -463,8 +441,6 @@
         }
 
         case BINARY_OP_SUBSCR_DICT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBSCR_DICT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -478,7 +454,6 @@
             PyObject *dict = PyStackRef_AsPyObjectBorrow(dict_st);
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -515,8 +490,6 @@
         }
 
         case BINARY_OP_SUBSCR_GETITEM: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBSCR_GETITEM);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -529,7 +502,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -539,28 +511,24 @@
                 PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(container));
                 if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
                 PyObject *getitem_o = FT_ATOMIC_LOAD_PTR_ACQUIRE(ht->_spec_cache.getitem);
                 if (getitem_o == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(PyFunction_Check(getitem_o));
                 uint32_t cached_version = FT_ATOMIC_LOAD_UINT32_RELAXED(ht->_spec_cache.getitem_version);
                 if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
                 assert(code->co_argcount == 2);
                 if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 getitem = PyStackRef_FromPyObjectNew(getitem_o);
@@ -595,8 +563,6 @@
         }
 
         case BINARY_OP_SUBSCR_LIST_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBSCR_LIST_INT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -610,18 +576,15 @@
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
             if (!PyLong_CheckExact(sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyList_CheckExact(list)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             // Deopt unless 0 <= sub < PyList_Size(list)
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
@@ -631,7 +594,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -639,7 +601,6 @@
             #else
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -664,8 +625,6 @@
         }
 
         case BINARY_OP_SUBSCR_STR_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBSCR_STR_INT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -679,30 +638,25 @@
             PyObject *str = PyStackRef_AsPyObjectBorrow(str_st);
             if (!PyLong_CheckExact(sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyUnicode_CheckExact(str)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (PyUnicode_GET_LENGTH(str) <= index) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             // Specialize for reading an ASCII character from any string:
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
             if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -721,8 +675,6 @@
         }
 
         case BINARY_OP_SUBSCR_TUPLE_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBSCR_TUPLE_INT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -736,24 +688,20 @@
             PyObject *tuple = PyStackRef_AsPyObjectBorrow(tuple_st);
             if (!PyLong_CheckExact(sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyTuple_CheckExact(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             // Deopt unless 0 <= sub < PyTuple_Size(list)
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (index >= PyTuple_GET_SIZE(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -774,8 +722,6 @@
         }
 
         case BINARY_OP_SUBTRACT_FLOAT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBTRACT_FLOAT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -790,12 +736,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyFloat_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyFloat_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -825,8 +769,6 @@
         }
 
         case BINARY_OP_SUBTRACT_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP_SUBTRACT_INT);
             static_assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5, "incorrect cache size");
@@ -841,12 +783,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyLong_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyLong_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1148,6 +1088,9 @@
         }
 
         case CALL: {
+            if (this_instr->op.code != CALL) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL);
             opcode = CALL;
@@ -1330,8 +1273,9 @@
         }
 
         case CALL_ALLOC_AND_ENTER_INIT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_ALLOC_AND_ENTER_INIT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_ALLOC_AND_ENTER_INIT);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -1347,7 +1291,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1364,18 +1307,15 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (!PyStackRef_IsNull(null[0])) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyType_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyTypeObject *tp = (PyTypeObject *)callable_o;
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(tp->tp_new == PyBaseObject_Type.tp_new);
@@ -1386,7 +1326,6 @@
                 PyCodeObject *code = (PyCodeObject *)init_func->func_code;
                 if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize + _Py_InitCleanup.co_framesize)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -1455,8 +1394,9 @@
         }
 
         case CALL_BOUND_METHOD_EXACT_ARGS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_BOUND_METHOD_EXACT_ARGS) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_BOUND_METHOD_EXACT_ARGS);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -1470,7 +1410,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1480,12 +1419,10 @@
                 callable = &stack_pointer[-2 - oparg];
                 if (!PyStackRef_IsNull(null[0])) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (Py_TYPE(PyStackRef_AsPyObjectBorrow(callable[0])) != &PyMethod_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1509,13 +1446,11 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (!PyFunction_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyFunctionObject *func = (PyFunctionObject *)callable_o;
                 if (func->func_version != func_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1527,7 +1462,6 @@
                 PyCodeObject *code = (PyCodeObject *)func->func_code;
                 if (code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0]))) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1538,12 +1472,10 @@
                 PyCodeObject *code = (PyCodeObject *)func->func_code;
                 if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (tstate->py_recursion_remaining <= 1) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1589,8 +1521,9 @@
         }
 
         case CALL_BOUND_METHOD_GENERAL: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_BOUND_METHOD_GENERAL) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_BOUND_METHOD_GENERAL);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -1604,7 +1537,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1616,23 +1548,19 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (Py_TYPE(callable_o) != &PyMethod_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyObject *func = ((PyMethodObject *)callable_o)->im_func;
                 if (!PyFunction_Check(func)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (((PyFunctionObject *)func)->func_version != func_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyStackRef_IsNull(null[0])) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -1706,8 +1634,6 @@
         }
 
         case CALL_BUILTIN_CLASS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_BUILTIN_CLASS);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -1725,7 +1651,6 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (!PyType_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyTypeObject *tp = (PyTypeObject *)callable_o;
@@ -1737,7 +1662,6 @@
                 }
                 if (tp->tp_vectorcall == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -1811,8 +1735,6 @@
         }
 
         case CALL_BUILTIN_FAST: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_BUILTIN_FAST);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -1837,12 +1759,10 @@
                 }
                 if (!PyCFunction_CheckExact(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (PyCFunction_GET_FLAGS(callable_o) != METH_FASTCALL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -1922,8 +1842,6 @@
         }
 
         case CALL_BUILTIN_FAST_WITH_KEYWORDS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_BUILTIN_FAST_WITH_KEYWORDS);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -1948,12 +1866,10 @@
                 }
                 if (!PyCFunction_CheckExact(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (PyCFunction_GET_FLAGS(callable_o) != (METH_FASTCALL | METH_KEYWORDS)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -2034,8 +1950,6 @@
         }
 
         case CALL_BUILTIN_O: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_BUILTIN_O);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -2059,23 +1973,19 @@
                 }
                 if (total_args != 1) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyCFunction_CheckExact(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (PyCFunction_GET_FLAGS(callable_o) != METH_O) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 // CPython promises to check all non-vectorcall function calls.
                 if (_Py_ReachedRecursionLimit(tstate)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -2124,8 +2034,9 @@
         }
 
         case CALL_FUNCTION_EX: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_FUNCTION_EX) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_FUNCTION_EX);
             opcode = CALL_FUNCTION_EX;
@@ -2370,8 +2281,6 @@
         }
 
         case CALL_ISINSTANCE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_ISINSTANCE);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -2394,13 +2303,11 @@
             }
             if (total_args != 2) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             PyInterpreterState *interp = tstate->interp;
             if (callable_o != interp->callable_cache.isinstance) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -2434,6 +2341,9 @@
         }
 
         case CALL_KW: {
+            if (this_instr->op.code != CALL_KW) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_KW);
             opcode = CALL_KW;
@@ -2620,8 +2530,9 @@
         }
 
         case CALL_KW_BOUND_METHOD: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_KW_BOUND_METHOD) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_KW_BOUND_METHOD);
             static_assert(INLINE_CACHE_ENTRIES_CALL_KW == 3, "incorrect cache size");
@@ -2636,7 +2547,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -2648,23 +2558,19 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (Py_TYPE(callable_o) != &PyMethod_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyObject *func = ((PyMethodObject *)callable_o)->im_func;
                 if (!PyFunction_Check(func)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (((PyFunctionObject *)func)->func_version != func_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyStackRef_IsNull(null[0])) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -2748,8 +2654,6 @@
         }
 
         case CALL_KW_NON_PY: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_KW_NON_PY);
             opcode = CALL_KW_NON_PY;
@@ -2767,12 +2671,10 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (PyFunction_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (Py_TYPE(callable_o) == &PyMethod_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -2876,8 +2778,9 @@
         }
 
         case CALL_KW_PY: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_KW_PY) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_KW_PY);
             static_assert(INLINE_CACHE_ENTRIES_CALL_KW == 3, "incorrect cache size");
@@ -2891,7 +2794,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -2902,13 +2804,11 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (!PyFunction_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyFunctionObject *func = (PyFunctionObject *)callable_o;
                 if (func->func_version != func_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -2978,8 +2878,6 @@
         }
 
         case CALL_LEN: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_LEN);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3001,13 +2899,11 @@
             }
             if (total_args != 1) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             PyInterpreterState *interp = tstate->interp;
             if (callable_o != interp->callable_cache.len) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -3040,8 +2936,6 @@
         }
 
         case CALL_LIST_APPEND: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_LIST_APPEND);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3059,18 +2953,15 @@
             PyInterpreterState *interp = tstate->interp;
             if (callable_o != interp->callable_cache.list_append) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(self_o != NULL);
             if (!PyList_Check(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -3099,8 +2990,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_FAST: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_METHOD_DESCRIPTOR_FAST);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3126,19 +3015,16 @@
                 /* Builtin METH_FASTCALL methods, without keywords */
                 if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyMethodDef *meth = method->d_method;
                 if (meth->ml_flags != METH_FASTCALL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyObject *self = PyStackRef_AsPyObjectBorrow(arguments[0]);
                 if (!Py_IS_TYPE(self, method->d_common.d_type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -3216,8 +3102,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3242,20 +3126,17 @@
                 PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
                 if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyMethodDef *meth = method->d_method;
                 if (meth->ml_flags != (METH_FASTCALL|METH_KEYWORDS)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyTypeObject *d_type = method->d_common.d_type;
                 PyObject *self = PyStackRef_AsPyObjectBorrow(arguments[0]);
                 if (!Py_IS_TYPE(self, d_type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -3333,8 +3214,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_NOARGS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_METHOD_DESCRIPTOR_NOARGS);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3358,13 +3237,11 @@
                 }
                 if (total_args != 1) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
                 if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyMethodDef *meth = method->d_method;
@@ -3372,18 +3249,15 @@
                 PyObject *self = PyStackRef_AsPyObjectBorrow(self_stackref);
                 if (!Py_IS_TYPE(self, method->d_common.d_type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (meth->ml_flags != METH_NOARGS) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 // CPython promises to check all non-vectorcall function calls.
                 if (_Py_ReachedRecursionLimit(tstate)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -3431,8 +3305,6 @@
         }
 
         case CALL_METHOD_DESCRIPTOR_O: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_METHOD_DESCRIPTOR_O);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3457,24 +3329,20 @@
                 PyMethodDescrObject *method = (PyMethodDescrObject *)callable_o;
                 if (total_args != 2) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!Py_IS_TYPE(method, &PyMethodDescr_Type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyMethodDef *meth = method->d_method;
                 if (meth->ml_flags != METH_O) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 // CPython promises to check all non-vectorcall function calls.
                 if (_Py_ReachedRecursionLimit(tstate)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 _PyStackRef arg_stackref = arguments[1];
@@ -3482,7 +3350,6 @@
                 if (!Py_IS_TYPE(PyStackRef_AsPyObjectBorrow(self_stackref),
                                 method->d_common.d_type)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -3540,8 +3407,6 @@
         }
 
         case CALL_NON_PY_GENERAL: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_NON_PY_GENERAL);
             opcode = CALL_NON_PY_GENERAL;
@@ -3558,12 +3423,10 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (PyFunction_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (Py_TYPE(callable_o) == &PyMethod_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3656,8 +3519,9 @@
         }
 
         case CALL_PY_EXACT_ARGS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_PY_EXACT_ARGS) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_PY_EXACT_ARGS);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3670,7 +3534,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3681,13 +3544,11 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (!PyFunction_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyFunctionObject *func = (PyFunctionObject *)callable_o;
                 if (func->func_version != func_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3700,7 +3561,6 @@
                 PyCodeObject *code = (PyCodeObject *)func->func_code;
                 if (code->co_argcount != oparg + (!PyStackRef_IsNull(self_or_null[0]))) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3711,12 +3571,10 @@
                 PyCodeObject *code = (PyCodeObject *)func->func_code;
                 if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (tstate->py_recursion_remaining <= 1) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3762,8 +3620,9 @@
         }
 
         case CALL_PY_GENERAL: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CALL_PY_GENERAL) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_PY_GENERAL);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3776,7 +3635,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3787,13 +3645,11 @@
                 PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
                 if (!PyFunction_Check(callable_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyFunctionObject *func = (PyFunctionObject *)callable_o;
                 if (func->func_version != func_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -3853,8 +3709,6 @@
         }
 
         case CALL_STR_1: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_STR_1);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3874,12 +3728,10 @@
                 assert(oparg == 1);
                 if (!PyStackRef_IsNull(null)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (callable_o != (PyObject *)&PyUnicode_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -3921,8 +3773,6 @@
         }
 
         case CALL_TUPLE_1: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_TUPLE_1);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -3942,12 +3792,10 @@
                 assert(oparg == 1);
                 if (!PyStackRef_IsNull(null)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (callable_o != (PyObject *)&PyTuple_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(CALL, hit);
@@ -3989,8 +3837,6 @@
         }
 
         case CALL_TYPE_1: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_TYPE_1);
             static_assert(INLINE_CACHE_ENTRIES_CALL == 3, "incorrect cache size");
@@ -4008,12 +3854,10 @@
             assert(oparg == 1);
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (callable_o != (PyObject *)&PyType_Type) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -4126,8 +3970,9 @@
         }
 
         case CLEANUP_THROW: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != CLEANUP_THROW) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CLEANUP_THROW);
             _PyStackRef sub_iter;
@@ -4180,6 +4025,9 @@
         }
 
         case COMPARE_OP: {
+            if (this_instr->op.code != COMPARE_OP) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(COMPARE_OP);
             _PyStackRef left;
@@ -4245,8 +4093,6 @@
         }
 
         case COMPARE_OP_FLOAT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(COMPARE_OP_FLOAT);
             static_assert(INLINE_CACHE_ENTRIES_COMPARE_OP == 1, "incorrect cache size");
@@ -4261,12 +4107,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyFloat_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyFloat_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -4292,8 +4136,6 @@
         }
 
         case COMPARE_OP_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(COMPARE_OP_INT);
             static_assert(INLINE_CACHE_ENTRIES_COMPARE_OP == 1, "incorrect cache size");
@@ -4308,12 +4150,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyLong_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyLong_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -4324,12 +4164,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(COMPARE_OP, hit);
@@ -4351,8 +4189,6 @@
         }
 
         case COMPARE_OP_STR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(COMPARE_OP_STR);
             static_assert(INLINE_CACHE_ENTRIES_COMPARE_OP == 1, "incorrect cache size");
@@ -4367,12 +4203,10 @@
                 PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
                 if (!PyUnicode_CheckExact(left_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!PyUnicode_CheckExact(right_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -4399,6 +4233,9 @@
         }
 
         case CONTAINS_OP: {
+            if (this_instr->op.code != CONTAINS_OP) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CONTAINS_OP);
             _PyStackRef left;
@@ -4451,8 +4288,6 @@
         }
 
         case CONTAINS_OP_DICT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CONTAINS_OP_DICT);
             static_assert(INLINE_CACHE_ENTRIES_CONTAINS_OP == 1, "incorrect cache size");
@@ -4466,7 +4301,6 @@
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             if (!PyDict_CheckExact(right_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CONTAINS_OP, hit);
@@ -4494,8 +4328,6 @@
         }
 
         case CONTAINS_OP_SET: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CONTAINS_OP_SET);
             static_assert(INLINE_CACHE_ENTRIES_CONTAINS_OP == 1, "incorrect cache size");
@@ -4509,7 +4341,6 @@
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
             if (!(PySet_CheckExact(right_o) || PyFrozenSet_CheckExact(right_o))) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CONTAINS_OP, hit);
@@ -4805,8 +4636,9 @@
         }
 
         case END_ASYNC_FOR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != END_ASYNC_FOR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(END_ASYNC_FOR);
             _PyStackRef awaitable_st;
@@ -4881,8 +4713,9 @@
         }
 
         case ENTER_EXECUTOR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != ENTER_EXECUTOR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(ENTER_EXECUTOR);
             opcode = ENTER_EXECUTOR;
@@ -4903,7 +4736,7 @@
                 if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
                     PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 }
-                DISPATCH_GOTO();
+                Py_UNREACHABLE();
             }
             tstate->previous_executor = Py_None;
             Py_INCREF(executor);
@@ -4941,7 +4774,7 @@
             opcode = next_instr->op.code;
             oparg = oparg << 8 | next_instr->op.arg;
             PRE_DISPATCH_GOTO();
-            DISPATCH_GOTO();
+            Py_UNREACHABLE();
         }
 
         case FORMAT_SIMPLE: {
@@ -5010,6 +4843,9 @@
         }
 
         case FOR_ITER: {
+            if (this_instr->op.code != FOR_ITER) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(FOR_ITER);
             _PyStackRef iter;
@@ -5056,7 +4892,7 @@
                        next_instr[oparg].op.code == INSTRUMENTED_END_FOR);
                     /* Jump forward oparg, then skip following END_FOR */
                     JUMPBY(oparg + 1);
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
                 next = PyStackRef_FromPyObjectSteal(next_o);
                 // Common case: no jump, leave it to the code generator
@@ -5068,8 +4904,6 @@
         }
 
         case FOR_ITER_GEN: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(FOR_ITER_GEN);
             static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
@@ -5081,7 +4915,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -5091,7 +4924,6 @@
                 PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
                 if (Py_TYPE(gen) != &PyGen_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
@@ -5101,13 +4933,11 @@
                 // specialize them thread-safely as well.
                 if (!_PyObject_IsUniquelyReferenced((PyObject *)gen)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #endif
                 if (gen->gi_frame_state >= FRAME_EXECUTING) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(FOR_ITER, hit);
@@ -5140,8 +4970,6 @@
         }
 
         case FOR_ITER_LIST: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(FOR_ITER_LIST);
             static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
@@ -5154,20 +4982,17 @@
                 PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
                 if (Py_TYPE(iter_o) != &PyListIter_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
                 if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 _PyListIterObject *it = (_PyListIterObject *)iter_o;
                 if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #endif
@@ -5197,7 +5022,7 @@
                     }
                     /* Jump forward oparg, then skip following END_FOR instruction */
                     JUMPBY(oparg + 1);
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
                 #endif
             }
@@ -5220,14 +5045,13 @@
                 // and we need to take the slow path.
                 if (result < 0) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (result == 0) {
                     it->it_index = -1;
                     /* Jump forward oparg, then skip following END_FOR instruction */
                     JUMPBY(oparg + 1);
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
                 it->it_index++;
                 #else
@@ -5242,8 +5066,6 @@
         }
 
         case FOR_ITER_RANGE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(FOR_ITER_RANGE);
             static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
@@ -5256,13 +5078,11 @@
                 _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
                 if (Py_TYPE(r) != &PyRangeIter_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
                 if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #endif
@@ -5278,7 +5098,7 @@
                 if (r->len <= 0) {
                     // Jump over END_FOR instruction.
                     JUMPBY(oparg + 1);
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
             }
             // _ITER_NEXT_RANGE
@@ -5305,8 +5125,6 @@
         }
 
         case FOR_ITER_TUPLE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(FOR_ITER_TUPLE);
             static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 1, "incorrect cache size");
@@ -5319,13 +5137,11 @@
                 PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
                 if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
                 if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #endif
@@ -5352,7 +5168,7 @@
                     #endif
                     /* Jump forward oparg, then skip following END_FOR instruction */
                     JUMPBY(oparg + 1);
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
             }
             // _ITER_NEXT_TUPLE
@@ -5625,8 +5441,9 @@
         }
 
         case INSTRUMENTED_CALL: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_CALL) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_CALL);
             opcode = INSTRUMENTED_CALL;
@@ -5821,8 +5638,9 @@
         }
 
         case INSTRUMENTED_CALL_FUNCTION_EX: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_CALL_FUNCTION_EX) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_CALL_FUNCTION_EX);
             opcode = INSTRUMENTED_CALL_FUNCTION_EX;
@@ -6008,8 +5826,9 @@
         }
 
         case INSTRUMENTED_CALL_KW: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_CALL_KW) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_CALL_KW);
             opcode = INSTRUMENTED_CALL_KW;
@@ -6204,8 +6023,9 @@
         }
 
         case INSTRUMENTED_END_ASYNC_FOR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_END_ASYNC_FOR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_END_ASYNC_FOR);
             _PyStackRef awaitable_st;
@@ -6252,8 +6072,9 @@
         }
 
         case INSTRUMENTED_END_FOR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_END_FOR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             INSTRUCTION_STATS(INSTRUMENTED_END_FOR);
             _PyStackRef receiver;
             _PyStackRef value;
@@ -6278,8 +6099,9 @@
         }
 
         case INSTRUMENTED_END_SEND: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_END_SEND) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_END_SEND);
             _PyStackRef receiver;
@@ -6307,8 +6129,9 @@
         }
 
         case INSTRUMENTED_FOR_ITER: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_FOR_ITER) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_FOR_ITER);
             /* Skip 1 cache entry */
@@ -6344,8 +6167,9 @@
         }
 
         case INSTRUMENTED_INSTRUCTION: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_INSTRUCTION) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_INSTRUCTION);
             opcode = INSTRUMENTED_INSTRUCTION;
@@ -6362,12 +6186,13 @@
             }
             assert(next_opcode > 0 && next_opcode < 256);
             opcode = next_opcode;
-            DISPATCH_GOTO();
+            Py_UNREACHABLE();
         }
 
         case INSTRUMENTED_JUMP_BACKWARD: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_JUMP_BACKWARD) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_JUMP_BACKWARD);
             /* Skip 1 cache entry */
@@ -6392,8 +6217,9 @@
         }
 
         case INSTRUMENTED_JUMP_FORWARD: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_JUMP_FORWARD) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_JUMP_FORWARD);
             INSTRUMENTED_JUMP(this_instr, next_instr + oparg, PY_MONITORING_EVENT_JUMP);
@@ -6401,9 +6227,10 @@
         }
 
         case INSTRUMENTED_LINE: {
+            if (this_instr->op.code != INSTRUMENTED_LINE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             _Py_CODEUNIT* const prev_instr = frame->instr_ptr;
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_LINE);
             opcode = INSTRUMENTED_LINE;
@@ -6424,7 +6251,7 @@
                 }
                 next_instr = frame->instr_ptr;
                 if (next_instr != this_instr) {
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
             }
             if (_PyOpcode_Caches[original_opcode]) {
@@ -6434,12 +6261,13 @@
                 PAUSE_ADAPTIVE_COUNTER(cache->counter);
             }
             opcode = original_opcode;
-            DISPATCH_GOTO();
+            Py_UNREACHABLE();
         }
 
         case INSTRUMENTED_LOAD_SUPER_ATTR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_LOAD_SUPER_ATTR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_LOAD_SUPER_ATTR);
             opcode = INSTRUMENTED_LOAD_SUPER_ATTR;
@@ -6553,9 +6381,10 @@
         }
 
         case INSTRUMENTED_NOT_TAKEN: {
+            if (this_instr->op.code != INSTRUMENTED_NOT_TAKEN) {
+                JUMP_TO_JUMP_TARGET();
+            }
             _Py_CODEUNIT* const prev_instr = frame->instr_ptr;
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_NOT_TAKEN);
             (void)this_instr; // INSTRUMENTED_JUMP requires this_instr
@@ -6564,9 +6393,10 @@
         }
 
         case INSTRUMENTED_POP_ITER: {
+            if (this_instr->op.code != INSTRUMENTED_POP_ITER) {
+                JUMP_TO_JUMP_TARGET();
+            }
             _Py_CODEUNIT* const prev_instr = frame->instr_ptr;
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_ITER);
             _PyStackRef iter;
@@ -6581,8 +6411,9 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_FALSE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_FALSE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_FALSE);
             /* Skip 1 cache entry */
@@ -6597,8 +6428,9 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NONE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_NONE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_NONE);
             /* Skip 1 cache entry */
@@ -6617,8 +6449,9 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NOT_NONE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_NOT_NONE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_NOT_NONE);
             /* Skip 1 cache entry */
@@ -6635,8 +6468,9 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_TRUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_TRUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_TRUE);
             /* Skip 1 cache entry */
@@ -6651,8 +6485,9 @@
         }
 
         case INSTRUMENTED_RESUME: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_RESUME) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_RESUME);
             // _LOAD_BYTECODE
@@ -6673,7 +6508,7 @@
                     // Make sure this_instr gets reset correctley for any uops that
                     // follow
                     next_instr = frame->instr_ptr;
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
                 #endif
             }
@@ -6690,7 +6525,7 @@
                             JUMP_TO_ERROR();
                         }
                         next_instr = this_instr;
-                        DISPATCH();
+                        Py_UNREACHABLE();
                     }
                 }
             }
@@ -6727,8 +6562,9 @@
         }
 
         case INSTRUMENTED_RETURN_VALUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_RETURN_VALUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_RETURN_VALUE);
             _PyStackRef val;
@@ -6773,8 +6609,9 @@
         }
 
         case INSTRUMENTED_YIELD_VALUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != INSTRUMENTED_YIELD_VALUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_YIELD_VALUE);
             _PyStackRef val;
@@ -6793,7 +6630,7 @@
                 }
                 if (frame->instr_ptr != this_instr) {
                     next_instr = frame->instr_ptr;
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
             }
             // _YIELD_VALUE
@@ -6885,6 +6722,9 @@
         }
 
         case JUMP_BACKWARD: {
+            if (this_instr->op.code != JUMP_BACKWARD) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(JUMP_BACKWARD);
             /* Skip 1 cache entry */
@@ -6926,8 +6766,9 @@
         }
 
         case JUMP_BACKWARD_JIT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != JUMP_BACKWARD_JIT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(JUMP_BACKWARD_JIT);
             static_assert(1 == 1, "incorrect cache size");
@@ -7106,6 +6947,9 @@
         }
 
         case LOAD_ATTR: {
+            if (this_instr->op.code != LOAD_ATTR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR);
             _PyStackRef owner;
@@ -7194,8 +7038,9 @@
         }
 
         case LOAD_ATTR_CLASS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_CLASS) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_CLASS);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7210,13 +7055,11 @@
                 PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
                 if (!PyType_Check(owner_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7246,8 +7089,9 @@
         }
 
         case LOAD_ATTR_CLASS_WITH_METACLASS_CHECK: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_CLASS_WITH_METACLASS_CHECK) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_CLASS_WITH_METACLASS_CHECK);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7262,13 +7106,11 @@
                 PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
                 if (!PyType_Check(owner_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7279,7 +7121,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7308,8 +7149,9 @@
         }
 
         case LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7323,14 +7165,12 @@
             assert((oparg & 1) == 0);
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *cls = Py_TYPE(owner_o);
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(cls->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(Py_IS_TYPE(getattribute, &PyFunction_Type));
@@ -7338,14 +7178,12 @@
             assert(func_version != 0);
             if (f->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)f->func_code;
             assert(code->co_argcount == 2);
             if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_ATTR, hit);
@@ -7361,8 +7199,9 @@
         }
 
         case LOAD_ATTR_INSTANCE_VALUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_INSTANCE_VALUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_INSTANCE_VALUE);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7378,7 +7217,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7389,7 +7227,6 @@
                 assert(Py_TYPE(owner_o)->tp_flags & Py_TPFLAGS_INLINE_VALUES);
                 if (!FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7401,14 +7238,12 @@
                 PyObject *attr_o = FT_ATOMIC_LOAD_PTR_ACQUIRE(*value_ptr);
                 if (attr_o == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
                 if (!_Py_TryIncrefCompareStackRef(value_ptr, attr_o, &attr)) {
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -7433,8 +7268,9 @@
         }
 
         case LOAD_ATTR_METHOD_LAZY_DICT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_METHOD_LAZY_DICT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_METHOD_LAZY_DICT);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7450,7 +7286,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7462,7 +7297,6 @@
                 /* This object has a __dict__, just not yet created */
                 if (dict != NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7485,8 +7319,9 @@
         }
 
         case LOAD_ATTR_METHOD_NO_DICT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_METHOD_NO_DICT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_METHOD_NO_DICT);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7502,7 +7337,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7526,8 +7360,9 @@
         }
 
         case LOAD_ATTR_METHOD_WITH_VALUES: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_METHOD_WITH_VALUES) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_METHOD_WITH_VALUES);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7543,7 +7378,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7554,7 +7388,6 @@
                 PyDictValues *ivs = _PyObject_InlineValues(owner_o);
                 if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7566,7 +7399,6 @@
                 PyDictKeysObject *keys = owner_heap_type->ht_cached_keys;
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7589,8 +7421,9 @@
         }
 
         case LOAD_ATTR_MODULE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_MODULE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_MODULE);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7606,7 +7439,6 @@
                 PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
                 if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
@@ -7614,7 +7446,6 @@
                 PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(keys->dk_kind == DICT_KEYS_UNICODE);
@@ -7623,7 +7454,6 @@
                 PyObject *attr_o = FT_ATOMIC_LOAD_PTR_RELAXED(ep->me_value);
                 if (attr_o == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
@@ -7631,7 +7461,6 @@
                 if (!increfed) {
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -7656,8 +7485,9 @@
         }
 
         case LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_NONDESCRIPTOR_NO_DICT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_NONDESCRIPTOR_NO_DICT);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7672,7 +7502,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7698,8 +7527,9 @@
         }
 
         case LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7714,7 +7544,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7725,7 +7554,6 @@
                 PyDictValues *ivs = _PyObject_InlineValues(owner_o);
                 if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7737,7 +7565,6 @@
                 PyDictKeysObject *keys = owner_heap_type->ht_cached_keys;
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7761,8 +7588,9 @@
         }
 
         case LOAD_ATTR_PROPERTY: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_PROPERTY) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_PROPERTY);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7773,7 +7601,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7785,7 +7612,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7799,22 +7625,18 @@
                 PyCodeObject *code = (PyCodeObject *)f->func_code;
                 if ((code->co_flags & (CO_VARKEYWORDS | CO_VARARGS | CO_OPTIMIZED)) != CO_OPTIMIZED) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (code->co_kwonlyargcount) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (code->co_argcount != 1) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(LOAD_ATTR, hit);
@@ -7851,8 +7673,9 @@
         }
 
         case LOAD_ATTR_SLOT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_SLOT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_SLOT);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7868,7 +7691,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7880,14 +7702,12 @@
                 PyObject *attr_o = FT_ATOMIC_LOAD_PTR(*addr);
                 if (attr_o == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
                 int increfed = _Py_TryIncrefCompareStackRef(addr, attr_o, &attr);
                 if (!increfed) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #else
@@ -7914,8 +7734,9 @@
         }
 
         case LOAD_ATTR_WITH_HINT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_ATTR_WITH_HINT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR_WITH_HINT);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_ATTR == 9, "incorrect cache size");
@@ -7931,7 +7752,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -7943,7 +7763,6 @@
                 PyDictObject *dict = _PyObject_GetManagedDict(owner_o);
                 if (dict == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(PyDict_CheckExact((PyObject *)dict));
@@ -7951,7 +7770,6 @@
                 if (!LOCK_OBJECT(dict)) {
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -7959,7 +7777,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -7968,7 +7785,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -7977,7 +7793,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -7986,7 +7801,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -8056,6 +7870,9 @@
         }
 
         case LOAD_CONST: {
+            if (this_instr->op.code != LOAD_CONST) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_CONST);
             _PyStackRef value;
@@ -8307,6 +8124,9 @@
         }
 
         case LOAD_GLOBAL: {
+            if (this_instr->op.code != LOAD_GLOBAL) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_GLOBAL);
             _PyStackRef *res;
@@ -8353,8 +8173,9 @@
         }
 
         case LOAD_GLOBAL_BUILTIN: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_GLOBAL_BUILTIN) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_GLOBAL_BUILTIN);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_GLOBAL == 4, "incorrect cache size");
@@ -8367,13 +8188,11 @@
                 PyDictObject *dict = (PyDictObject *)GLOBALS();
                 if (!PyDict_CheckExact(dict)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(DK_IS_UNICODE(keys));
@@ -8385,13 +8204,11 @@
                 PyDictObject *dict = (PyDictObject *)BUILTINS();
                 if (!PyDict_CheckExact(dict)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(DK_IS_UNICODE(keys));
@@ -8399,14 +8216,12 @@
                 PyObject *res_o = FT_ATOMIC_LOAD_PTR_RELAXED(entries[index].me_value);
                 if (res_o == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #if Py_GIL_DISABLED
                 int increfed = _Py_TryIncrefCompareStackRef(&entries[index].me_value, res_o, &res);
                 if (!increfed) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #else
@@ -8426,8 +8241,9 @@
         }
 
         case LOAD_GLOBAL_MODULE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != LOAD_GLOBAL_MODULE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_GLOBAL_MODULE);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_GLOBAL == 4, "incorrect cache size");
@@ -8444,13 +8260,11 @@
                 PyDictObject *dict = (PyDictObject *)GLOBALS();
                 if (!PyDict_CheckExact(dict)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
                 if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 assert(DK_IS_UNICODE(keys));
@@ -8459,14 +8273,12 @@
                 PyObject *res_o = FT_ATOMIC_LOAD_PTR_RELAXED(entries[index].me_value);
                 if (res_o == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #if Py_GIL_DISABLED
                 int increfed = _Py_TryIncrefCompareStackRef(&entries[index].me_value, res_o, &res);
                 if (!increfed) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #else
@@ -8572,6 +8384,9 @@
         }
 
         case LOAD_SUPER_ATTR: {
+            if (this_instr->op.code != LOAD_SUPER_ATTR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_SUPER_ATTR);
             opcode = LOAD_SUPER_ATTR;
@@ -8701,8 +8516,6 @@
         }
 
         case LOAD_SUPER_ATTR_ATTR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_SUPER_ATTR_ATTR);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_SUPER_ATTR == 1, "incorrect cache size");
@@ -8720,12 +8533,10 @@
             assert(!(oparg & 1));
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -8758,8 +8569,6 @@
         }
 
         case LOAD_SUPER_ATTR_METHOD: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_SUPER_ATTR_METHOD);
             static_assert(INLINE_CACHE_ENTRIES_LOAD_SUPER_ATTR == 1, "incorrect cache size");
@@ -8778,12 +8587,10 @@
             assert(oparg & 1);
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -9051,8 +8858,9 @@
         }
 
         case POP_JUMP_IF_FALSE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != POP_JUMP_IF_FALSE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_FALSE);
             _PyStackRef cond;
@@ -9068,8 +8876,9 @@
         }
 
         case POP_JUMP_IF_NONE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != POP_JUMP_IF_NONE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_NONE);
             _PyStackRef value;
@@ -9107,8 +8916,9 @@
         }
 
         case POP_JUMP_IF_NOT_NONE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != POP_JUMP_IF_NOT_NONE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_NOT_NONE);
             _PyStackRef value;
@@ -9146,8 +8956,9 @@
         }
 
         case POP_JUMP_IF_TRUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != POP_JUMP_IF_TRUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_TRUE);
             _PyStackRef cond;
@@ -9211,8 +9022,9 @@
         }
 
         case RAISE_VARARGS: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != RAISE_VARARGS) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RAISE_VARARGS);
             _PyStackRef *args;
@@ -9235,8 +9047,9 @@
         }
 
         case RERAISE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != RERAISE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RERAISE);
             _PyStackRef *values;
@@ -9279,6 +9092,9 @@
         }
 
         case RESUME: {
+            if (this_instr->op.code != RESUME) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RESUME);
             // _LOAD_BYTECODE
@@ -9299,7 +9115,7 @@
                     // Make sure this_instr gets reset correctley for any uops that
                     // follow
                     next_instr = frame->instr_ptr;
-                    DISPATCH();
+                    Py_UNREACHABLE();
                 }
                 #endif
             }
@@ -9316,7 +9132,7 @@
                             JUMP_TO_ERROR();
                         }
                         next_instr = this_instr;
-                        DISPATCH();
+                        Py_UNREACHABLE();
                     }
                 }
             }
@@ -9347,15 +9163,12 @@
         }
 
         case RESUME_CHECK: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RESUME_CHECK);
             static_assert(0 == 0, "incorrect cache size");
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -9365,14 +9178,12 @@
             assert((version & _PY_EVAL_EVENTS_MASK) == 0);
             if (eval_breaker != version) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (frame->tlbc_index !=
                     ((_PyThreadStateImpl *)tstate)->tlbc_index) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -9442,6 +9253,9 @@
         }
 
         case SEND: {
+            if (this_instr->op.code != SEND) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(SEND);
             _PyStackRef receiver;
@@ -9538,8 +9352,6 @@
         }
 
         case SEND_GEN: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(SEND_GEN);
             static_assert(INLINE_CACHE_ENTRIES_SEND == 1, "incorrect cache size");
@@ -9552,7 +9364,6 @@
             {
                 if (tstate->interp->eval_frame) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -9563,12 +9374,10 @@
                 PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(receiver);
                 if (Py_TYPE(gen) != &PyGen_Type && Py_TYPE(gen) != &PyCoro_Type) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (gen->gi_frame_state >= FRAME_EXECUTING) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 STAT_INC(SEND, hit);
@@ -9712,6 +9521,9 @@
         }
 
         case STORE_ATTR: {
+            if (this_instr->op.code != STORE_ATTR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_ATTR);
             _PyStackRef owner;
@@ -9761,8 +9573,9 @@
         }
 
         case STORE_ATTR_INSTANCE_VALUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != STORE_ATTR_INSTANCE_VALUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_ATTR_INSTANCE_VALUE);
             static_assert(INLINE_CACHE_ENTRIES_STORE_ATTR == 4, "incorrect cache size");
@@ -9777,7 +9590,6 @@
                 assert(type_version != 0);
                 if (!LOCK_OBJECT(owner_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 PyTypeObject *tp = Py_TYPE(owner_o);
@@ -9785,7 +9597,6 @@
                     UNLOCK_OBJECT(owner_o);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -9800,7 +9611,6 @@
                     UNLOCK_OBJECT(owner_o);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -9832,8 +9642,9 @@
         }
 
         case STORE_ATTR_SLOT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != STORE_ATTR_SLOT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_ATTR_SLOT);
             static_assert(INLINE_CACHE_ENTRIES_STORE_ATTR == 4, "incorrect cache size");
@@ -9848,7 +9659,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -9859,7 +9669,6 @@
                 PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
                 if (!LOCK_OBJECT(owner_o)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 char *addr = (char *)owner_o + index;
@@ -9878,8 +9687,9 @@
         }
 
         case STORE_ATTR_WITH_HINT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != STORE_ATTR_WITH_HINT) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_ATTR_WITH_HINT);
             static_assert(INLINE_CACHE_ENTRIES_STORE_ATTR == 4, "incorrect cache size");
@@ -9894,7 +9704,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -9907,12 +9716,10 @@
                 PyDictObject *dict = _PyObject_GetManagedDict(owner_o);
                 if (dict == NULL) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 if (!LOCK_OBJECT(dict)) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
                 #ifdef Py_GIL_DISABLED
@@ -9920,7 +9727,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -9932,7 +9738,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -9941,7 +9746,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -9950,7 +9754,6 @@
                     UNLOCK_OBJECT(dict);
                     if (true) {
                         UOP_STAT_INC(uopcode, miss);
-                        next_instr = this_instr;
                         JUMP_TO_JUMP_TARGET();
                     }
                 }
@@ -10182,6 +9985,9 @@
         }
 
         case STORE_SUBSCR: {
+            if (this_instr->op.code != STORE_SUBSCR) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_SUBSCR);
             _PyStackRef container;
@@ -10234,8 +10040,6 @@
         }
 
         case STORE_SUBSCR_DICT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_SUBSCR_DICT);
             static_assert(INLINE_CACHE_ENTRIES_STORE_SUBSCR == 1, "incorrect cache size");
@@ -10249,7 +10053,6 @@
             PyObject *dict = PyStackRef_AsPyObjectBorrow(dict_st);
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(STORE_SUBSCR, hit);
@@ -10270,8 +10073,6 @@
         }
 
         case STORE_SUBSCR_LIST_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_SUBSCR_LIST_INT);
             static_assert(INLINE_CACHE_ENTRIES_STORE_SUBSCR == 1, "incorrect cache size");
@@ -10286,24 +10087,20 @@
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
             if (!PyLong_CheckExact(sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyList_CheckExact(list)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             // Ensure nonnegative, zero-or-one-digit ints.
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (!LOCK_OBJECT(list)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             // Ensure index < len(list)
@@ -10311,7 +10108,6 @@
                 UNLOCK_OBJECT(list);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -10346,6 +10142,9 @@
         }
 
         case TO_BOOL: {
+            if (this_instr->op.code != TO_BOOL) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL);
             _PyStackRef value;
@@ -10390,8 +10189,9 @@
         }
 
         case TO_BOOL_ALWAYS_TRUE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
+            if (this_instr->op.code != TO_BOOL_ALWAYS_TRUE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL_ALWAYS_TRUE);
             static_assert(INLINE_CACHE_ENTRIES_TO_BOOL == 3, "incorrect cache size");
@@ -10407,7 +10207,6 @@
                 assert(type_version != 0);
                 if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -10428,8 +10227,6 @@
         }
 
         case TO_BOOL_BOOL: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL_BOOL);
             static_assert(INLINE_CACHE_ENTRIES_TO_BOOL == 3, "incorrect cache size");
@@ -10439,7 +10236,6 @@
             value = stack_pointer[-1];
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -10447,8 +10243,6 @@
         }
 
         case TO_BOOL_INT: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL_INT);
             static_assert(INLINE_CACHE_ENTRIES_TO_BOOL == 3, "incorrect cache size");
@@ -10460,7 +10254,6 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -10483,8 +10276,6 @@
         }
 
         case TO_BOOL_LIST: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL_LIST);
             static_assert(INLINE_CACHE_ENTRIES_TO_BOOL == 3, "incorrect cache size");
@@ -10496,7 +10287,6 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyList_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -10512,8 +10302,6 @@
         }
 
         case TO_BOOL_NONE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL_NONE);
             static_assert(INLINE_CACHE_ENTRIES_TO_BOOL == 3, "incorrect cache size");
@@ -10525,7 +10313,6 @@
             // This one is a bit weird, because we expect *some* failures:
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -10535,8 +10322,6 @@
         }
 
         case TO_BOOL_STR: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL_STR);
             static_assert(INLINE_CACHE_ENTRIES_TO_BOOL == 3, "incorrect cache size");
@@ -10548,7 +10333,6 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -10655,6 +10439,9 @@
         }
 
         case UNPACK_SEQUENCE: {
+            if (this_instr->op.code != UNPACK_SEQUENCE) {
+                JUMP_TO_JUMP_TARGET();
+            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(UNPACK_SEQUENCE);
             _PyStackRef seq;
@@ -10698,8 +10485,6 @@
         }
 
         case UNPACK_SEQUENCE_LIST: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(UNPACK_SEQUENCE_LIST);
             static_assert(INLINE_CACHE_ENTRIES_UNPACK_SEQUENCE == 1, "incorrect cache size");
@@ -10711,19 +10496,16 @@
             PyObject *seq_o = PyStackRef_AsPyObjectBorrow(seq);
             if (!PyList_CheckExact(seq_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(seq_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (PyList_GET_SIZE(seq_o) != oparg) {
                 UNLOCK_OBJECT(seq_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    next_instr = this_instr;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -10744,8 +10526,6 @@
         }
 
         case UNPACK_SEQUENCE_TUPLE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(UNPACK_SEQUENCE_TUPLE);
             static_assert(INLINE_CACHE_ENTRIES_UNPACK_SEQUENCE == 1, "incorrect cache size");
@@ -10757,12 +10537,10 @@
             PyObject *seq_o = PyStackRef_AsPyObjectBorrow(seq);
             if (!PyTuple_CheckExact(seq_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (PyTuple_GET_SIZE(seq_o) != oparg) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);
@@ -10781,8 +10559,6 @@
         }
 
         case UNPACK_SEQUENCE_TWO_TUPLE: {
-            this_instr = next_uop[-1].this_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(UNPACK_SEQUENCE_TWO_TUPLE);
             static_assert(INLINE_CACHE_ENTRIES_UNPACK_SEQUENCE == 1, "incorrect cache size");
@@ -10795,12 +10571,10 @@
             PyObject *seq_o = PyStackRef_AsPyObjectBorrow(seq);
             if (!PyTuple_CheckExact(seq_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             if (PyTuple_GET_SIZE(seq_o) != 2) {
                 UOP_STAT_INC(uopcode, miss);
-                next_instr = this_instr;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);

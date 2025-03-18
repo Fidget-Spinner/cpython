@@ -757,8 +757,6 @@
             break;
         }
 
-        /* _SEND is not a viable micro-op for tier 2 */
-
         case _SEND_GEN_FRAME: {
             // We are about to hit the end of the trace:
             ctx->done = true;
@@ -1445,8 +1443,6 @@
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
-
-        /* _INSTRUMENTED_FOR_ITER is not a viable micro-op for tier 2 */
 
         case _ITER_CHECK_LIST: {
             break;

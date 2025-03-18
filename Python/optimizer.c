@@ -228,11 +228,12 @@ _PyTraceletInstructionPrint(const _PyTraceletInstruction *uop)
     else {
         printf("%s %d", name, uop->oparg);
     }
-    printf(" (%d, jump_target=%d, operand0=%#" PRIx64 ", operand1=%#" PRIx64,
+    printf(" (%d, jump_target=%d, operand0=%#" PRIx64 ", operand1=%#" PRIx64 ", this_instr=%p",
            uop->oparg,
            uop->jump_target,
            (uint64_t)uop->operand0,
-           (uint64_t)uop->operand1);
+           (uint64_t)uop->operand1,
+           uop->this_instr);
     printf(")");
 }
 
@@ -565,6 +566,10 @@ translate_bytecode_to_trace(
             goto done;
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
+//        if (opcode) {
+//            RESERVE_RAW(2, "_CHECK_VALIDITY");
+//            ADD_TO_TRACE(_CHECK_VALIDITY, 0, target);
+//        }
 
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
@@ -800,16 +805,14 @@ translate_bytecode_to_trace(
                                     OPT_STAT_INC(recursive_call);
                                     ADD_TO_TRACE(uop, oparg, target);
                                     ADD_TO_TRACE(_EXIT_TRACE, 0, 0);
-                                    goto done;
+                                    return 0;
                                 }
                                 if (new_code->co_version != func_version) {
                                     // func.__code__ was updated.
                                     // Perhaps it may happen again, so don't bother tracing.
                                     // TODO: Reason about this -- is it better to bail or not?
                                     DPRINTF(2, "Bailing because co_version != func_version\n");
-                                    ADD_TO_TRACE(uop, oparg, target);
-                                    ADD_TO_TRACE(_EXIT_TRACE, 0, 0);
-                                    goto done;
+                                    return 0;
                                 }
                                 // Increment IP to the return address
                                 instr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + 1;
@@ -886,7 +889,7 @@ translate_bytecode_to_trace(
         first = false;
     }  // End for (;;)
 
-    done:
+done:
     while (trace_stack_depth > 0) {
         TRACE_STACK_POP();
     }
@@ -1129,6 +1132,7 @@ make_executor_from_uops(_PyTraceletInstruction *buffer, int length, const _PyBlo
         return NULL;
     }
 #endif
+    executor->co = NULL;
     _PyObject_GC_TRACK(executor);
     return executor;
 }
