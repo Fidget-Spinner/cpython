@@ -10,9 +10,6 @@
 
 
         case BINARY_OP: {
-            if (this_instr->op.code != BINARY_OP) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(BINARY_OP);
             _PyStackRef lhs;
@@ -1088,9 +1085,6 @@
         }
 
         case CALL: {
-            if (this_instr->op.code != CALL) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL);
             opcode = CALL;
@@ -2034,9 +2028,6 @@
         }
 
         case CALL_FUNCTION_EX: {
-            if (this_instr->op.code != CALL_FUNCTION_EX) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_FUNCTION_EX);
             opcode = CALL_FUNCTION_EX;
@@ -2341,9 +2332,6 @@
         }
 
         case CALL_KW: {
-            if (this_instr->op.code != CALL_KW) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CALL_KW);
             opcode = CALL_KW;
@@ -3970,9 +3958,6 @@
         }
 
         case CLEANUP_THROW: {
-            if (this_instr->op.code != CLEANUP_THROW) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CLEANUP_THROW);
             _PyStackRef sub_iter;
@@ -4025,9 +4010,6 @@
         }
 
         case COMPARE_OP: {
-            if (this_instr->op.code != COMPARE_OP) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(COMPARE_OP);
             _PyStackRef left;
@@ -4233,9 +4215,6 @@
         }
 
         case CONTAINS_OP: {
-            if (this_instr->op.code != CONTAINS_OP) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(CONTAINS_OP);
             _PyStackRef left;
@@ -4636,9 +4615,6 @@
         }
 
         case END_ASYNC_FOR: {
-            if (this_instr->op.code != END_ASYNC_FOR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(END_ASYNC_FOR);
             _PyStackRef awaitable_st;
@@ -4713,9 +4689,6 @@
         }
 
         case ENTER_EXECUTOR: {
-            if (this_instr->op.code != ENTER_EXECUTOR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(ENTER_EXECUTOR);
             opcode = ENTER_EXECUTOR;
@@ -4843,9 +4816,6 @@
         }
 
         case FOR_ITER: {
-            if (this_instr->op.code != FOR_ITER) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(FOR_ITER);
             _PyStackRef iter;
@@ -5441,9 +5411,6 @@
         }
 
         case INSTRUMENTED_CALL: {
-            if (this_instr->op.code != INSTRUMENTED_CALL) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_CALL);
             opcode = INSTRUMENTED_CALL;
@@ -5638,9 +5605,6 @@
         }
 
         case INSTRUMENTED_CALL_FUNCTION_EX: {
-            if (this_instr->op.code != INSTRUMENTED_CALL_FUNCTION_EX) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_CALL_FUNCTION_EX);
             opcode = INSTRUMENTED_CALL_FUNCTION_EX;
@@ -5826,9 +5790,6 @@
         }
 
         case INSTRUMENTED_CALL_KW: {
-            if (this_instr->op.code != INSTRUMENTED_CALL_KW) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_CALL_KW);
             opcode = INSTRUMENTED_CALL_KW;
@@ -6023,9 +5984,6 @@
         }
 
         case INSTRUMENTED_END_ASYNC_FOR: {
-            if (this_instr->op.code != INSTRUMENTED_END_ASYNC_FOR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_END_ASYNC_FOR);
             _PyStackRef awaitable_st;
@@ -6072,9 +6030,6 @@
         }
 
         case INSTRUMENTED_END_FOR: {
-            if (this_instr->op.code != INSTRUMENTED_END_FOR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             INSTRUCTION_STATS(INSTRUMENTED_END_FOR);
             _PyStackRef receiver;
             _PyStackRef value;
@@ -6099,9 +6054,6 @@
         }
 
         case INSTRUMENTED_END_SEND: {
-            if (this_instr->op.code != INSTRUMENTED_END_SEND) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_END_SEND);
             _PyStackRef receiver;
@@ -6129,9 +6081,6 @@
         }
 
         case INSTRUMENTED_FOR_ITER: {
-            if (this_instr->op.code != INSTRUMENTED_FOR_ITER) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_FOR_ITER);
             /* Skip 1 cache entry */
@@ -6167,9 +6116,6 @@
         }
 
         case INSTRUMENTED_INSTRUCTION: {
-            if (this_instr->op.code != INSTRUMENTED_INSTRUCTION) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_INSTRUCTION);
             opcode = INSTRUMENTED_INSTRUCTION;
@@ -6190,9 +6136,6 @@
         }
 
         case INSTRUMENTED_JUMP_BACKWARD: {
-            if (this_instr->op.code != INSTRUMENTED_JUMP_BACKWARD) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_JUMP_BACKWARD);
             /* Skip 1 cache entry */
@@ -6217,9 +6160,6 @@
         }
 
         case INSTRUMENTED_JUMP_FORWARD: {
-            if (this_instr->op.code != INSTRUMENTED_JUMP_FORWARD) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_JUMP_FORWARD);
             INSTRUMENTED_JUMP(this_instr, next_instr + oparg, PY_MONITORING_EVENT_JUMP);
@@ -6227,9 +6167,6 @@
         }
 
         case INSTRUMENTED_LINE: {
-            if (this_instr->op.code != INSTRUMENTED_LINE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             _Py_CODEUNIT* const prev_instr = frame->instr_ptr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_LINE);
@@ -6265,9 +6202,6 @@
         }
 
         case INSTRUMENTED_LOAD_SUPER_ATTR: {
-            if (this_instr->op.code != INSTRUMENTED_LOAD_SUPER_ATTR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_LOAD_SUPER_ATTR);
             opcode = INSTRUMENTED_LOAD_SUPER_ATTR;
@@ -6381,9 +6315,6 @@
         }
 
         case INSTRUMENTED_NOT_TAKEN: {
-            if (this_instr->op.code != INSTRUMENTED_NOT_TAKEN) {
-                JUMP_TO_JUMP_TARGET();
-            }
             _Py_CODEUNIT* const prev_instr = frame->instr_ptr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_NOT_TAKEN);
@@ -6393,9 +6324,6 @@
         }
 
         case INSTRUMENTED_POP_ITER: {
-            if (this_instr->op.code != INSTRUMENTED_POP_ITER) {
-                JUMP_TO_JUMP_TARGET();
-            }
             _Py_CODEUNIT* const prev_instr = frame->instr_ptr;
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_ITER);
@@ -6411,9 +6339,6 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_FALSE: {
-            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_FALSE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_FALSE);
             /* Skip 1 cache entry */
@@ -6428,9 +6353,6 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NONE: {
-            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_NONE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_NONE);
             /* Skip 1 cache entry */
@@ -6449,9 +6371,6 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_NOT_NONE: {
-            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_NOT_NONE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_NOT_NONE);
             /* Skip 1 cache entry */
@@ -6468,9 +6387,6 @@
         }
 
         case INSTRUMENTED_POP_JUMP_IF_TRUE: {
-            if (this_instr->op.code != INSTRUMENTED_POP_JUMP_IF_TRUE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_POP_JUMP_IF_TRUE);
             /* Skip 1 cache entry */
@@ -6485,9 +6401,6 @@
         }
 
         case INSTRUMENTED_RESUME: {
-            if (this_instr->op.code != INSTRUMENTED_RESUME) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_RESUME);
             // _LOAD_BYTECODE
@@ -6562,9 +6475,6 @@
         }
 
         case INSTRUMENTED_RETURN_VALUE: {
-            if (this_instr->op.code != INSTRUMENTED_RETURN_VALUE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_RETURN_VALUE);
             _PyStackRef val;
@@ -6609,9 +6519,6 @@
         }
 
         case INSTRUMENTED_YIELD_VALUE: {
-            if (this_instr->op.code != INSTRUMENTED_YIELD_VALUE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(INSTRUMENTED_YIELD_VALUE);
             _PyStackRef val;
@@ -6722,9 +6629,6 @@
         }
 
         case JUMP_BACKWARD: {
-            if (this_instr->op.code != JUMP_BACKWARD) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(JUMP_BACKWARD);
             /* Skip 1 cache entry */
@@ -6947,9 +6851,6 @@
         }
 
         case LOAD_ATTR: {
-            if (this_instr->op.code != LOAD_ATTR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_ATTR);
             _PyStackRef owner;
@@ -7870,9 +7771,6 @@
         }
 
         case LOAD_CONST: {
-            if (this_instr->op.code != LOAD_CONST) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_CONST);
             _PyStackRef value;
@@ -8124,9 +8022,6 @@
         }
 
         case LOAD_GLOBAL: {
-            if (this_instr->op.code != LOAD_GLOBAL) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_GLOBAL);
             _PyStackRef *res;
@@ -8384,9 +8279,6 @@
         }
 
         case LOAD_SUPER_ATTR: {
-            if (this_instr->op.code != LOAD_SUPER_ATTR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(LOAD_SUPER_ATTR);
             opcode = LOAD_SUPER_ATTR;
@@ -8858,9 +8750,6 @@
         }
 
         case POP_JUMP_IF_FALSE: {
-            if (this_instr->op.code != POP_JUMP_IF_FALSE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_FALSE);
             _PyStackRef cond;
@@ -8876,9 +8765,6 @@
         }
 
         case POP_JUMP_IF_NONE: {
-            if (this_instr->op.code != POP_JUMP_IF_NONE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_NONE);
             _PyStackRef value;
@@ -8916,9 +8802,6 @@
         }
 
         case POP_JUMP_IF_NOT_NONE: {
-            if (this_instr->op.code != POP_JUMP_IF_NOT_NONE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_NOT_NONE);
             _PyStackRef value;
@@ -8956,9 +8839,6 @@
         }
 
         case POP_JUMP_IF_TRUE: {
-            if (this_instr->op.code != POP_JUMP_IF_TRUE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(POP_JUMP_IF_TRUE);
             _PyStackRef cond;
@@ -9022,9 +8902,6 @@
         }
 
         case RAISE_VARARGS: {
-            if (this_instr->op.code != RAISE_VARARGS) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RAISE_VARARGS);
             _PyStackRef *args;
@@ -9047,9 +8924,6 @@
         }
 
         case RERAISE: {
-            if (this_instr->op.code != RERAISE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RERAISE);
             _PyStackRef *values;
@@ -9092,9 +8966,6 @@
         }
 
         case RESUME: {
-            if (this_instr->op.code != RESUME) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(RESUME);
             // _LOAD_BYTECODE
@@ -9253,9 +9124,6 @@
         }
 
         case SEND: {
-            if (this_instr->op.code != SEND) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(SEND);
             _PyStackRef receiver;
@@ -9521,9 +9389,6 @@
         }
 
         case STORE_ATTR: {
-            if (this_instr->op.code != STORE_ATTR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_ATTR);
             _PyStackRef owner;
@@ -9985,9 +9850,6 @@
         }
 
         case STORE_SUBSCR: {
-            if (this_instr->op.code != STORE_SUBSCR) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(STORE_SUBSCR);
             _PyStackRef container;
@@ -10142,9 +10004,6 @@
         }
 
         case TO_BOOL: {
-            if (this_instr->op.code != TO_BOOL) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(TO_BOOL);
             _PyStackRef value;
@@ -10439,9 +10298,6 @@
         }
 
         case UNPACK_SEQUENCE: {
-            if (this_instr->op.code != UNPACK_SEQUENCE) {
-                JUMP_TO_JUMP_TARGET();
-            }
             frame->instr_ptr = next_instr;
             INSTRUCTION_STATS(UNPACK_SEQUENCE);
             _PyStackRef seq;
@@ -12109,7 +11965,7 @@
             PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
             _PyExitData *exit = (_PyExitData *)exit_p;
             PyCodeObject *code = _PyFrame_GetCode(frame);
-            _Py_CODEUNIT *target = THIS_INSTR();
+            _Py_CODEUNIT *target = exit->target;
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 2) {

@@ -566,10 +566,8 @@ translate_bytecode_to_trace(
             goto done;
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
-//        if (opcode) {
-//            RESERVE_RAW(2, "_CHECK_VALIDITY");
-//            ADD_TO_TRACE(_CHECK_VALIDITY, 0, target);
-//        }
+        RESERVE_RAW(2, "_CHECK_VALIDITY");
+        ADD_TO_TRACE(_CHECK_VALIDITY, 0, target);
 
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
@@ -851,12 +849,7 @@ translate_bytecode_to_trace(
                         }
 
                         if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
-                            assert(i + 1 == nuops);
-                            _Py_CODEUNIT *next_instr = instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
-                            assert(next_instr->op.code == STORE_FAST);
-                            operand = next_instr->op.arg;
-                            // Skip the STORE_FAST:
-                            instr++;
+                           return 0;
                         }
 
                         // All other instructions
@@ -1038,6 +1031,10 @@ if (!(PRED)) { \
 static void
 sanity_check(_PyExecutorObject *executor)
 {
+    for (uint32_t i = 0; i < executor->exit_count; i++) {
+        _PyExitData *exit = &executor->exits[i];
+        CHECK(exit->target != NULL);
+    }
     bool ended = false;
     uint32_t i = 0;
     CHECK(executor->trace[0].opcode == _START_EXECUTOR);
@@ -1096,6 +1093,7 @@ make_executor_from_uops(_PyTraceletInstruction *buffer, int length, const _PyBlo
         assert(opcode != _POP_JUMP_IF_FALSE && opcode != _POP_JUMP_IF_TRUE);
         if (opcode == _EXIT_TRACE) {
             _PyExitData *exit = &executor->exits[next_exit];
+            exit->target = buffer[i].this_instr;
             dest->operand0 = (uint64_t)exit;
             next_exit--;
         }
@@ -1132,7 +1130,6 @@ make_executor_from_uops(_PyTraceletInstruction *buffer, int length, const _PyBlo
         return NULL;
     }
 #endif
-    executor->co = NULL;
     _PyObject_GC_TRACK(executor);
     return executor;
 }
@@ -1176,15 +1173,15 @@ uop_optimize(
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     OPT_STAT_INC(traces_created);
-//    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
-//    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
-//        length = _Py_uop_analyze_and_optimize(frame, buffer,
-//                                           length,
-//                                           curr_stackentries, &dependencies);
-//        if (length <= 0) {
-//            return length;
-//        }
-//    }
+    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
+    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
+        length = _Py_uop_analyze_and_optimize(frame, buffer,
+                                           length,
+                                           curr_stackentries, &dependencies);
+        if (length <= 0) {
+            return length;
+        }
+    }
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
     /* Fix up */

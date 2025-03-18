@@ -247,9 +247,11 @@ def generate_tier2_cases(
         out.emit(f"case {name}: {{\n")
         uses_this_instr = uses_this(inst)
         if uses_this_instr:
-            out.emit(f"if (this_instr->op.code != {name}) {{\n")
-            out.emit(f"JUMP_TO_JUMP_TARGET();\n")
-            out.emit("}\n")
+            # The most generic instruction doesn't need to deopt.
+            if inst.family is not None and inst.family.name != name:
+                out.emit(f"if (this_instr->op.code != {name}) {{\n")
+                out.emit(f"JUMP_TO_JUMP_TARGET();\n")
+                out.emit("}\n")
         if inst.properties.needs_prev:
             out.emit(f"_Py_CODEUNIT* const prev_instr = frame->instr_ptr;\n")
 

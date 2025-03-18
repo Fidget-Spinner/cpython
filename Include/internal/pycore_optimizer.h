@@ -75,6 +75,7 @@ typedef struct {
 } _PyUOpInstruction;
 
 typedef struct {
+    _Py_CODEUNIT *target;
     _Py_BackoffCounter temperature;
     const struct _PyExecutorObject *executor;
 } _PyExitData;
@@ -126,7 +127,7 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 #define TRACE_STACK_SIZE 5
 
 int _Py_uop_analyze_and_optimize(struct _PyInterpreterFrame *frame,
-    _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
+    _PyTraceletInstruction *trace, int trace_len, int curr_stackentries,
     _PyBloomFilter *dependencies);
 
 extern PyTypeObject _PyUOpExecutor_Type;

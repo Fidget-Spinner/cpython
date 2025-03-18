@@ -527,7 +527,7 @@ error:
 
 
 static int
-remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
+remove_unneeded_uops(_PyTraceletInstruction *buffer, int buffer_size)
 {
     /* Remove _SET_IP and _CHECK_VALIDITY where possible.
      * _SET_IP is needed if the following instruction escapes or
@@ -565,7 +565,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
                 break;
             case _POP_TOP:
             {
-                _PyUOpInstruction *last = &buffer[pc-1];
+                _PyTraceletInstruction *last = &buffer[pc-1];
                 while (last->opcode == _NOP) {
                     last--;
                 }
@@ -616,26 +616,26 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
 int
 _Py_uop_analyze_and_optimize(
     _PyInterpreterFrame *frame,
-    _PyUOpInstruction *buffer,
+    _PyTraceletInstruction *buffer,
     int length,
     int curr_stacklen,
     _PyBloomFilter *dependencies
 )
 {
-    OPT_STAT_INC(optimizer_attempts);
-
-    int err = remove_globals(frame, buffer, length, dependencies);
-    if (err <= 0) {
-        return err;
-    }
-
-    length = optimize_uops(
-        _PyFrame_GetCode(frame), buffer,
-        length, curr_stacklen, dependencies);
-
-    if (length <= 0) {
-        return length;
-    }
+//    OPT_STAT_INC(optimizer_attempts);
+//
+//    int err = remove_globals(frame, buffer, length, dependencies);
+//    if (err <= 0) {
+//        return err;
+//    }
+//
+//    length = optimize_uops(
+//        _PyFrame_GetCode(frame), buffer,
+//        length, curr_stacklen, dependencies);
+//
+//    if (length <= 0) {
+//        return length;
+//    }
 
     length = remove_unneeded_uops(buffer, length);
     assert(length > 0);
