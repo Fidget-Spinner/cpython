@@ -540,6 +540,8 @@ def tier_variable(node: parser.CodeDef) -> int | None:
     """Determine whether a tier variable is used in a node."""
     if isinstance(node, parser.LabelDef):
         return None
+    if node.name.startswith("INSTRUMENTED"):
+        return 1
     for token in node.tokens:
         if token.kind == "ANNOTATION":
             if token.text == "specializing":

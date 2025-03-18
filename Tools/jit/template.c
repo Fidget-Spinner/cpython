@@ -18,6 +18,7 @@
 #include "pycore_sliceobject.h"
 #include "pycore_descrobject.h"
 #include "pycore_stackref.h"
+#include "opcode.h"
 
 #include "ceval_macros.h"
 
@@ -40,7 +41,7 @@
 do {                                                                       \
     OPT_STAT_INC(traces_executed);                                         \
     jit_func_preserve_none jitted = (EXECUTOR)->jit_side_entry;            \
-    __attribute__((musttail)) return jitted(TAIL_CALL_ARGS); \
+    __attribute__((musttail)) return jitted(frame, stack_pointer, tstate); \
 } while (0)
 
 #undef GOTO_TIER_ONE
@@ -63,14 +64,11 @@ do {                                                \
 #define PATCH_JUMP(ALIAS)                                                \
 do {                                                                     \
     PATCH_VALUE(jit_func_preserve_none, jump, ALIAS);                    \
-    __attribute__((musttail)) return jump(TAIL_CALL_ARGS); \
+    __attribute__((musttail)) return jump(frame, stack_pointer, tstate); \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
 #define JUMP_TO_JUMP_TARGET() PATCH_JUMP(_JIT_JUMP_TARGET)
-
-#undef JUMP_TO_ERROR
-#define JUMP_TO_ERROR() PATCH_JUMP(_JIT_ERROR_TARGET)
 
 #undef DISPATCH_GOTO
 #define DISPATCH_GOTO() JUMP_TO_JUMP_TARGET()
@@ -84,16 +82,37 @@ do {                                                                     \
 #undef JUMP_TO_PREDICTED
 #define JUMP_TO_PREDICTED(oop) goto deopt_if;
 
+#undef PRE_DISPATCH_GOTO
+#define PRE_DISPATCH_GOTO(op)
+
+#undef JUMPBY
+#define JUMPBY(x)
+
 #define TIER_TWO 2
 
 __attribute__((preserve_none)) _Py_CODEUNIT *
-_JIT_ENTRY(TAIL_CALL_PARAMS)
+_JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
 {
     // Locals that the instruction implementations expect to exist:
     PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
     int opcode = _JIT_OPCODE;
     _Py_CODEUNIT *this_instr;
-    PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
+    // Other stuff we need handy:
+    PATCH_VALUE(uint16_t, _oparg, _JIT_OPARG)
+#if SIZEOF_VOID_P == 8
+    PATCH_VALUE(uint64_t, _operand0, _JIT_OPERAND0)
+    PATCH_VALUE(uint64_t, _operand1, _JIT_OPERAND1)
+#else
+    assert(SIZEOF_VOID_P == 4);
+    PATCH_VALUE(uint32_t, _operand0_hi, _JIT_OPERAND0_HI)
+    PATCH_VALUE(uint32_t, _operand0_lo, _JIT_OPERAND0_LO)
+    uint64_t _operand0 = ((uint64_t)_operand0_hi << 32) | _operand0_lo;
+    PATCH_VALUE(uint32_t, _operand1_hi, _JIT_OPERAND1_HI)
+    PATCH_VALUE(uint32_t, _operand1_lo, _JIT_OPERAND1_LO)
+    uint64_t _operand1 = ((uint64_t)_operand1_hi << 32) | _operand1_lo;
+#endif
+    int oparg = CURRENT_OPARG();
+    PATCH_VALUE(_Py_CODEUNIT *, _target, _JIT_TARGET)
     OPT_STAT_INC(uops_executed);
     UOP_STAT_INC(opcode, execution_count);
     switch (opcode) {
@@ -115,5 +134,6 @@ pop_2_error:
 pop_1_error:
     STACK_SHRINK(1);
 error:
+jump_to_error_target:
     return NULL;
 }

@@ -848,7 +848,7 @@ translate_bytecode_to_trace(
                             return 0;
                         }
 
-                        if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
+                        if (uop == BINARY_OP_INPLACE_ADD_UNICODE) {
                            return 0;
                         }
 

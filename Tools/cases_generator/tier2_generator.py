@@ -243,6 +243,8 @@ def generate_tier2_cases(
     emitter = Tier2Emitter(out, analysis.labels)
     out.emit("\n")
     for name, inst in sorted(analysis.instructions.items()):
+        if inst.properties.tier == 1 or inst.name.startswith("INSTRUMENTED"):
+            continue
         out.emit("\n")
         out.emit(f"case {name}: {{\n")
         uses_this_instr = uses_this(inst)
@@ -256,7 +258,7 @@ def generate_tier2_cases(
             out.emit(f"_Py_CODEUNIT* const prev_instr = frame->instr_ptr;\n")
 
         if not inst.properties.no_save_ip:
-            out.emit(f"frame->instr_ptr = next_instr;\n")
+            out.emit(f"frame->instr_ptr = this_instr;\n")
 
         out.emit(f"INSTRUCTION_STATS({name});\n")
         if inst.properties.uses_opcode:

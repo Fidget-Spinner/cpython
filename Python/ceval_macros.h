@@ -392,7 +392,7 @@ do {                                                   \
     jit_func jitted = _executor->jit_code;             \
     /* Keep the shim frame alive via the executor: */  \
     Py_INCREF(_executor);                              \
-    next_instr = jitted(TAIL_CALL_ARGS);               \
+    next_instr = jitted(frame, stack_pointer, tstate);               \
     Py_DECREF(_executor);                              \
     Py_CLEAR(tstate->previous_executor);               \
     frame = tstate->current_frame;                     \

@@ -544,33 +544,6 @@
             break;
         }
 
-        case _BINARY_OP_INPLACE_ADD_UNICODE: {
-            JitOptSymbol *right;
-            JitOptSymbol *left;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            JitOptSymbol *res;
-            if (sym_is_const(ctx, left) && sym_is_const(ctx, right) &&
-                sym_matches_type(left, &PyUnicode_Type) && sym_matches_type(right, &PyUnicode_Type)) {
-                PyObject *temp = PyUnicode_Concat(sym_get_const(ctx, left), sym_get_const(ctx, right));
-                if (temp == NULL) {
-                    goto error;
-                }
-                res = sym_new_const(ctx, temp);
-                stack_pointer += -2;
-                assert(WITHIN_STACK_BOUNDS());
-                Py_DECREF(temp);
-            }
-            else {
-                res = sym_new_type(ctx, &PyUnicode_Type);
-                stack_pointer += -2;
-                assert(WITHIN_STACK_BOUNDS());
-            }
-            // _STORE_FAST:
-            GETLOCAL(this_instr->operand0) = res;
-            break;
-        }
-
         case _GUARD_BINARY_OP_EXTEND: {
             break;
         }
@@ -1223,8 +1196,6 @@
             break;
         }
 
-        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN is not a viable micro-op for tier 2 */
-
         case _GUARD_DORV_NO_DICT: {
             break;
         }
@@ -1629,8 +1600,6 @@
             stack_pointer[-1 - oparg] = maybe_self;
             break;
         }
-
-        /* _DO_CALL is not a viable micro-op for tier 2 */
 
         /* _MONITOR_CALL is not a viable micro-op for tier 2 */
 
@@ -2037,8 +2006,6 @@
             break;
         }
 
-        /* _DO_CALL_FUNCTION_EX is not a viable micro-op for tier 2 */
-
         case _MAKE_FUNCTION: {
             JitOptSymbol *func;
             func = sym_new_not_null(ctx);
@@ -2210,23 +2177,7 @@
             break;
         }
 
-        /* _INSTRUMENTED_LINE is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_INSTRUCTION is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_JUMP_FORWARD is not a viable micro-op for tier 2 */
-
         /* _MONITOR_JUMP_BACKWARD is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_NOT_TAKEN is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_NONE is not a viable micro-op for tier 2 */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE is not a viable micro-op for tier 2 */
 
         case _GUARD_IS_TRUE_POP: {
             JitOptSymbol *flag;

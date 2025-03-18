@@ -733,7 +733,7 @@ dummy_func(
         // So the inputs are the same as for all BINARY_OP
         // specializations, but there is no output.
         // At the end we just skip over the STORE_FAST.
-        op(_BINARY_OP_INPLACE_ADD_UNICODE, (left, right --)) {
+        tier1 op(_BINARY_OP_INPLACE_ADD_UNICODE, (left, right --)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectSteal(right);
             assert(PyUnicode_CheckExact(left_o));
@@ -2398,7 +2398,7 @@ dummy_func(
             _SAVE_RETURN_OFFSET +
             _PUSH_FRAME;
 
-        inst(LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN, (unused/1, type_version/2, func_version/2, getattribute/4, owner -- unused)) {
+        tier1 inst(LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN, (unused/1, type_version/2, func_version/2, getattribute/4, owner -- unused)) {
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
 
             assert((oparg & 1) == 0);
@@ -3590,7 +3590,7 @@ dummy_func(
         }
 
         // When calling Python, inline the call using DISPATCH_INLINED().
-        op(_DO_CALL, (callable[1], self_or_null[1], args[oparg] -- res)) {
+        tier1 op(_DO_CALL, (callable[1], self_or_null[1], args[oparg] -- res)) {
             PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable[0]);
 
             // oparg counts all of the args, but *not* self:
@@ -4664,7 +4664,7 @@ dummy_func(
             }
         }
 
-        op(_DO_CALL_FUNCTION_EX, (func_st, null, callargs_st, kwargs_st -- result)) {
+        tier1 op(_DO_CALL_FUNCTION_EX, (func_st, null, callargs_st, kwargs_st -- result)) {
             (void)null;
             PyObject *func = PyStackRef_AsPyObjectBorrow(func_st);
 

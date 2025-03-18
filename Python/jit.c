@@ -472,7 +472,7 @@ combine_symbol_mask(const symbol_mask src, symbol_mask dest)
 
 // Compiles executor in-place. Don't forget to call _PyJIT_Free later!
 int
-_PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], size_t length)
+_PyJIT_Compile(_PyExecutorObject *executor, const _PyTraceletInstruction trace[], size_t length)
 {
     const StencilGroup *group;
     // Loop once to find the total compiled size:
@@ -484,7 +484,7 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     data_size += group->data_size;
     combine_symbol_mask(group->trampoline_mask, state.trampolines.mask);
     for (size_t i = 0; i < length; i++) {
-        const _PyUOpInstruction *instruction = &trace[i];
+        const _PyTraceletInstruction  *instruction = &trace[i];
         group = &stencil_groups[instruction->opcode];
         state.instruction_starts[i] = code_size;
         code_size += group->code_size;
@@ -535,7 +535,7 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     data += group->data_size;
     assert(trace[0].opcode == _START_EXECUTOR);
     for (size_t i = 0; i < length; i++) {
-        const _PyUOpInstruction *instruction = &trace[i];
+        const _PyTraceletInstruction *instruction = &trace[i];
         group = &stencil_groups[instruction->opcode];
         group->emit(code, data, executor, instruction, &state);
         code += group->code_size;
