@@ -214,7 +214,7 @@ _PyUOpName(int index)
     if (index < 0 || index > MAX_UOP_ID) {
         return NULL;
     }
-    return _PyOpcode_uop_name[index];
+    return _PyOpcode_uop_name[index] == NULL ? _PyOpcode_OpName[index] : _PyOpcode_uop_name[index];
 }
 
 #ifdef Py_DEBUG
@@ -414,6 +414,7 @@ add_to_trace(
 {
     trace[trace_length].opcode = opcode;
     trace[trace_length].oparg = oparg;
+    trace[trace_length].jump_target = 0;
     trace[trace_length].this_instr = this_instr;
     return trace_length + 1;
 }
@@ -648,11 +649,14 @@ translate_bytecode_to_trace(
 
             default:
             {
-                if (_PyOpcode_Deopt[opcode] != FOR_ITER) {
-                    RESERVE(1);
-                    ADD_TO_TRACE(opcode, oparg);
-                }
                 const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
+                bool ends_with_push_frame = (expansion->nuops > 0 && expansion->uops[expansion->nuops-1].uop == _PUSH_FRAME);
+                if (_PyOpcode_Deopt[opcode] != FOR_ITER) {
+                    if (!ends_with_push_frame) {
+                        RESERVE(1);
+                        ADD_TO_TRACE(opcode, oparg);
+                    }
+                }
                 if (expansion->nuops > 0) {
                     // Reserve space for nuops (+ _SET_IP + _EXIT_TRACE)
                     int nuops = expansion->nuops;
@@ -788,7 +792,7 @@ translate_bytecode_to_trace(
                         }
 
                         // All other instructions
-                        if (_PyOpcode_Deopt[opcode] == FOR_ITER) {
+                        if (_PyOpcode_Deopt[opcode] == FOR_ITER || ends_with_push_frame) {
                             ADD_TO_TRACE(uop, oparg);
                         }
                     }
@@ -886,7 +890,7 @@ static int
 prepare_for_execution(_PyTraceletInstruction *buffer, int length)
 {
     int32_t current_jump = -1;
-    int32_t current_jump_target = -1;
+    _Py_CODEUNIT *current_jump_target = NULL;
     int32_t current_error = -1;
     int32_t current_error_target = -1;
     int32_t current_popped = -1;
@@ -907,20 +911,22 @@ prepare_for_execution(_PyTraceletInstruction *buffer, int length)
     for (int i = 0; i < length; i++) {
         _PyTraceletInstruction *inst = &buffer[i];
         int opcode = inst->opcode;
+        _Py_CODEUNIT *target = inst->this_instr;
         if (_PyUop_Flags[opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG)) {
             uint16_t exit_op = (_PyUop_Flags[opcode] & HAS_EXIT_FLAG) ?
-                _EXIT_TRACE : _DEOPT;
-            _Py_CODEUNIT *jump_target = inst->this_instr;
+                               _EXIT_TRACE : _DEOPT;
+            _Py_CODEUNIT *jump_target = target;
             if (is_for_iter_test[opcode]) {
                 /* Target the POP_TOP immediately after the END_FOR,
                  * leaving only the iterator on the stack. */
                 int extended_arg = inst->oparg > 255;
-                _Py_CODEUNIT *next_inst = jump_target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + extended_arg;
+                _Py_CODEUNIT *next_inst = target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + extended_arg;
                 jump_target = next_inst + inst->oparg + 1;
             }
-            if (current_exit_op != exit_op) {
+            if (jump_target != current_jump_target || current_exit_op != exit_op) {
                 make_exit(&buffer[next_spare], exit_op, jump_target);
                 current_exit_op = exit_op;
+                current_jump_target = jump_target;
                 current_jump = next_spare;
                 next_spare++;
             }
@@ -1113,11 +1119,11 @@ uop_optimize(
     for (int pc = 0; pc < length; pc++) {
         int opcode = buffer[pc].opcode;
         int oparg = buffer[pc].oparg;
-        if (_PyUop_Flags[opcode] & HAS_OPARG_AND_1_FLAG) {
-            buffer[pc].opcode = opcode + 1 + (oparg & 1);
-            assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
-        }
-        else if (oparg < _PyUop_Replication[opcode]) {
+//        if (_PyUop_Flags[opcode] & HAS_OPARG_AND_1_FLAG) {
+//            buffer[pc].opcode = opcode + 1 + (oparg & 1);
+//            assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
+//        }
+        if (oparg < _PyUop_Replication[opcode]) {
             buffer[pc].opcode = opcode + oparg + 1;
             assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
         }

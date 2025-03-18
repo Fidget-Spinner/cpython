@@ -33,6 +33,8 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
         if uop.is_viable() and uop.properties.tier != 1:
             out.emit(f"[{uop.name}] = {cflags(uop.properties)},\n")
 
+    for inst in analysis.instructions.values():
+        out.emit(f"[{inst.name}] = {cflags(inst.properties)},\n")
     out.emit("};\n\n")
     out.emit("const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {\n")
     for uop in analysis.uops.values():

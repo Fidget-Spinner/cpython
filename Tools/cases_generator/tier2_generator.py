@@ -144,7 +144,6 @@ def write_uop(
         stack.flush(emitter.out)
         return offset, stack
     try:
-        uop.emitted = True
         locals: dict[str, Local] = {}
         emitter.out.start_line()
         if braces:
@@ -201,17 +200,6 @@ def uses_this(inst: Instruction) -> bool:
     return False
 
 
-def uses_dispatch(inst: Instruction) -> bool:
-    for uop in inst.parts:
-        if not isinstance(uop, Uop):
-            continue
-        for tkn in uop.body:
-            if (tkn.kind == "IDENTIFIER"
-                    and (tkn.text.startswith("DISPATCH"))):
-                return True
-    return False
-
-
 def generate_tier2(
     filenames: list[str], analysis: Analysis, outfile: TextIO, lines: bool
 ) -> None:
@@ -236,9 +224,6 @@ def generate_tier2_cases(
     emitter = Tier2Emitter(out, analysis.labels)
     out.emit("\n")
     for name, inst in sorted(analysis.instructions.items()):
-        if uses_dispatch(inst):
-            out.emit(f"/* {name} is not a viable tier2 op as it uses DISPATCH() */\n")
-            continue
         if any(isinstance(uop, Uop) and uop.properties.tier == 1 for uop in inst.parts):
             out.emit(f"/* {name} is not a viable tier2 op as it is tier 1 only() */\n")
             continue
@@ -266,10 +251,16 @@ def generate_tier2_cases(
         declare_variables(inst, out)
         offset = 1  # The instruction itself
         stack = Stack()
+        is_composite_call = (isinstance(inst.parts[-1], Uop) and inst.parts[-1].name == "_PUSH_FRAME")
+        is_for_iter = name.startswith("FOR_ITER")
         for part in inst.parts:
             # Only emit braces if more than one uop
             insert_braces = len([p for p in inst.parts if isinstance(p, Uop)]) > 1
             offset, stack = write_uop(part, emitter, offset, stack, inst, insert_braces)
+            if not is_composite_call and not is_for_iter:
+                part.emitted = True
+            else:
+                part.emitted = False
         out.start_line()
 
         stack.flush(out)
