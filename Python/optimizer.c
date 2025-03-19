@@ -113,6 +113,9 @@ _PyOptimizer_Optimize(
     // make progress in order to avoid infinite loops or excessively-long
     // side-exit chains. We can only insert the executor into the bytecode if
     // this is true, since a deopt won't infinitely re-enter the executor:
+    if (chain_depth >= MAX_CHAIN_DEPTH - 1) {
+        return 0;
+    }
     chain_depth %= MAX_CHAIN_DEPTH;
     bool progress_needed = chain_depth == 0;
     PyCodeObject *code = _PyFrame_GetCode(frame);
@@ -1638,10 +1641,10 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
          * then the outgoing edge is `{EXEC_NAME}:17 -> {TARGET}`
          * https://graphviz.readthedocs.io/en/stable/manual.html#node-ports-compass
          */
-        _PyTraceletInstruction  const *inst = &executor->trace[i];
+        _PyTraceletInstruction const *inst = &executor->trace[i];
         const char *opname = _PyOpcode_uop_name[inst->opcode];
 #ifdef Py_STATS
-        fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s -- </td></tr>\n", i, opname);
+        fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s -- %" PRIu64 "</td></tr>\n", i, opname, inst->execution_count);
 #else
         fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s</td></tr>\n", i, opname);
 #endif
@@ -1651,6 +1654,27 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
     }
     fprintf(out, "    </table>>\n");
     fprintf(out, "]\n\n");
+
+    /* Write all the outgoing edges */
+    for (uint32_t i = 0; i < executor->code_size; i++) {
+        _PyTraceletInstruction  const *inst = &executor->trace[i];
+        uint16_t flags = _PyUop_Flags[inst->opcode];
+        _PyExitData *exit = NULL;
+        if (inst->opcode == _EXIT_TRACE) {
+            exit = (_PyExitData *)inst->operand0;
+        }
+        else if (flags & HAS_EXIT_FLAG) {
+            _PyTraceletInstruction const *exit_inst = &executor->trace[inst->jump_target];
+            assert(exit_inst->opcode == _EXIT_TRACE);
+            exit = (_PyExitData *)exit_inst->operand0;
+        }
+        if (exit != NULL && exit->executor != NULL) {
+            fprintf(out, "executor_%p:i%d -> executor_%p:start\n", executor, i, exit->executor);
+        }
+        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+            break;
+        }
+    }
 }
 
 /* Write the graph of all the live tracelets in graphviz format. */
