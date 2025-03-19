@@ -643,6 +643,7 @@ translate_bytecode_to_trace(
 
             case JUMP_FORWARD:
             {
+                return 0;
                 ADD_TO_TRACE(JUMP_FORWARD, oparg, target);
                 instr += oparg;
                 break;
