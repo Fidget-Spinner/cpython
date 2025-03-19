@@ -585,6 +585,11 @@ translate_bytecode_to_trace(
             RESERVE_RAW(2, "_EXIT_TRACE");
             max_length--;
         }
+        if (OPCODE_HAS_ERROR(opcode)) {
+            // Make space for error stub and final _EXIT_TRACE:
+            RESERVE_RAW(2, "_ERROR_POP_N");
+            max_length--;
+        }
         switch (opcode) {
             case POP_JUMP_IF_NONE:
             case POP_JUMP_IF_NOT_NONE:
@@ -964,7 +969,7 @@ prepare_for_execution(_PyTraceletInstruction *buffer, int length)
     int32_t current_jump = -1;
     _Py_CODEUNIT *current_jump_target = NULL;
     int32_t current_error = -1;
-    int32_t current_error_target = -1;
+    _Py_CODEUNIT *current_error_target = NULL;
     int32_t current_popped = -1;
     int32_t current_exit_op = -1;
     /* Leaving in NOPs slows down the interpreter and messes up the stats */
@@ -1003,6 +1008,19 @@ prepare_for_execution(_PyTraceletInstruction *buffer, int length)
                 next_spare++;
             }
             buffer[i].jump_target = current_jump;
+        }
+        if (_PyUop_Flags[opcode] & HAS_ERROR_FLAG) {
+            int popped = (_PyUop_Flags[opcode] & HAS_ERROR_NO_POP_FLAG) ?
+                         0 : _PyUop_num_popped(opcode, inst->oparg);
+            if (target != current_error_target || popped != current_popped) {
+                current_popped = popped;
+                current_error = next_spare;
+                current_error_target = target;
+                make_exit(&buffer[next_spare], _ERROR_POP_N, target);
+                buffer[next_spare].operand0 = (uint64_t)target;
+                next_spare++;
+            }
+            buffer[i].error_target = current_error;
         }
         if (opcode == _JUMP_TO_TOP) {
             assert(buffer[0].opcode == _START_EXECUTOR);

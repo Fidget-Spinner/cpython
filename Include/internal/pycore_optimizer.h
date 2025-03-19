@@ -43,6 +43,7 @@ typedef struct {
     uint16_t opcode;
     uint16_t oparg;
     uint16_t jump_target;
+    uint16_t error_target;
     _Py_CODEUNIT *this_instr;
     uint64_t operand0;  // A cache entry
     uint64_t operand1;

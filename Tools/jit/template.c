@@ -70,6 +70,9 @@ do {                                                                     \
 #undef JUMP_TO_JUMP_TARGET
 #define JUMP_TO_JUMP_TARGET() PATCH_JUMP(_JIT_JUMP_TARGET)
 
+#undef JUMP_TO_ERROR
+#define JUMP_TO_ERROR() PATCH_JUMP(_JIT_ERROR_TARGET)
+
 #undef DISPATCH_GOTO
 #define DISPATCH_GOTO() JUMP_TO_JUMP_TARGET()
 
@@ -122,18 +125,4 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
             Py_UNREACHABLE();
     }
     PATCH_JUMP(_JIT_CONTINUE);
-
-deopt_if:
-    GOTO_TIER_ONE(this_instr);
-pop_4_error:
-    STACK_SHRINK(1);
-pop_3_error:
-    STACK_SHRINK(1);
-pop_2_error:
-    STACK_SHRINK(1);
-pop_1_error:
-    STACK_SHRINK(1);
-error:
-jump_to_error_target:
-    GOTO_TIER_ONE(NULL);
 }

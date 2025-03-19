@@ -5170,10 +5170,10 @@ dummy_func(
             GOTO_TIER_ONE(CURRENT_TARGET());
         }
 
-        tier3 op(_ERROR_POP_N, (target/2 --)) {
+        tier2 op(_ERROR_POP_N, (target/4 --)) {
             tstate->previous_executor = (PyObject *)current_executor;
             assert(oparg == 0);
-            frame->instr_ptr = _PyFrame_GetBytecode(frame) + target;
+            frame->instr_ptr = target;
             SYNC_SP();
             GOTO_TIER_ONE(NULL);
         }

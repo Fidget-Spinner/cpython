@@ -9451,6 +9451,16 @@
             break;
         }
 
+        case _ERROR_POP_N: {
+            oparg = CURRENT_OPARG();
+            PyObject *target = (PyObject *)CURRENT_OPERAND0();
+            tstate->previous_executor = (PyObject *)current_executor;
+            assert(oparg == 0);
+            frame->instr_ptr = target;
+            GOTO_TIER_ONE(NULL);
+            break;
+        }
+
         case _TIER2_RESUME_CHECK: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
