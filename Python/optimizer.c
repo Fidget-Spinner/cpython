@@ -1102,6 +1102,7 @@ make_executor_from_uops(_PyTraceletInstruction *buffer, int length, const _PyBlo
             _PyExitData *exit = &executor->exits[next_exit];
             exit->target = buffer[i].this_instr;
             dest->operand0 = (uint64_t)exit;
+            exit->executor = NULL;
             next_exit--;
         }
     }
