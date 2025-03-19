@@ -124,7 +124,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_JUMP(_JIT_CONTINUE);
 
 deopt_if:
-    return this_instr;
+    GOTO_TIER_ONE(this_instr);
 pop_4_error:
     STACK_SHRINK(1);
 pop_3_error:
