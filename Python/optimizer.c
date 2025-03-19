@@ -660,11 +660,19 @@ translate_bytecode_to_trace(
                 const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
                 bool added_macro_op = false;
                 bool ends_with_push_frame = (expansion->nuops > 0 && expansion->uops[expansion->nuops-1].uop == _PUSH_FRAME);
-                if (_PyOpcode_Deopt[opcode] != FOR_ITER) {
+                if (_PyOpcode_Deopt[opcode] != FOR_ITER && opcode != LOAD_FAST_LOAD_FAST) {
                     if (OPCODE_HAS_TIER1_ONLY(opcode)) {
+                        if (_PyOpcode_Deopt[opcode] == LOAD_ATTR) {
+                            ADD_TO_TRACE(_LOAD_ATTR, oparg, target);
+                            instr++;
+                            // Add cache size for opcode
+                            instr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                            goto top;
+                        }
+                        ADD_TO_TRACE(_EXIT_TRACE, 0, target);
                         DPRINTF(2, "Unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                         OPT_UNSUPPORTED_OPCODE(opcode);
-                        return 0;
+                        goto done;
                     }
                     if (!ends_with_push_frame) {
                         RESERVE(1);
@@ -1196,7 +1204,15 @@ uop_optimize(
             buffer[pc].opcode = opcode + oparg + 1;
             assert(strncmp(_PyOpcode_uop_name[buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
         }
-        else if (is_terminator(&buffer[pc])) {
+        else {
+            if (opcode == _LOAD_FAST) {
+                buffer[pc].opcode = LOAD_FAST;
+            }
+            else if (opcode == LOAD_ATTR) {
+                buffer[pc].opcode = _LOAD_ATTR;
+            }
+        }
+        if (is_terminator(&buffer[pc])) {
             break;
         }
         assert(_PyOpcode_uop_name[buffer[pc].opcode] || _PyOpcode_OpName[buffer[pc].opcode]);
