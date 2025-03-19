@@ -643,6 +643,7 @@ translate_bytecode_to_trace(
 
             case JUMP_FORWARD:
             {
+                return 0;
                 RESERVE(0);
                 // This will emit two _SET_IP instructions; leave it to the optimizer
                 instr += oparg;
