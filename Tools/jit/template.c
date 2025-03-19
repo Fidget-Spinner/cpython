@@ -135,5 +135,5 @@ pop_1_error:
     STACK_SHRINK(1);
 error:
 jump_to_error_target:
-    return NULL;
+    GOTO_TIER_ONE(NULL);
 }
