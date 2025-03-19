@@ -667,8 +667,32 @@ translate_bytecode_to_trace(
                 bool ends_with_push_frame = (expansion->nuops > 0 && expansion->uops[expansion->nuops-1].uop == _PUSH_FRAME);
                 if (_PyOpcode_Deopt[opcode] != FOR_ITER && opcode != LOAD_FAST_LOAD_FAST) {
                     if (OPCODE_HAS_TIER1_ONLY(opcode)) {
-                        if (_PyOpcode_Deopt[opcode] == LOAD_ATTR) {
-                            ADD_TO_TRACE(_LOAD_ATTR, oparg, target);
+                        int deopt = _PyOpcode_Deopt[opcode];
+                        int to_add = 0;
+                        switch(deopt) {
+                            case LOAD_ATTR:
+                                to_add = _LOAD_ATTR;
+                                break;
+                            case BINARY_OP:
+                                to_add = _BINARY_OP;
+                                break;
+                            case STORE_SUBSCR:
+                                to_add = _STORE_SUBSCR;
+                                break;
+                            case TO_BOOL:
+                                to_add = _TO_BOOL;
+                                break;
+                            case COMPARE_OP:
+                                to_add = _COMPARE_OP;
+                                break;
+                            case UNPACK_SEQUENCE:
+                                to_add = _UNPACK_SEQUENCE;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (to_add != 0) {
+                            ADD_TO_TRACE(to_add, oparg, target);
                             instr++;
                             // Add cache size for opcode
                             instr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
