@@ -255,6 +255,7 @@ dummy_func(
         }
 
         macro(INSTRUMENTED_RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM +
@@ -1282,12 +1283,16 @@ dummy_func(
             _SEND_GEN_FRAME +
             _PUSH_FRAME;
 
-        inst(YIELD_VALUE, (retval -- value)) {
+        macro(YIELD_VALUE_JIT) = unused/1 + _JIT + _YIELD_VALUE;
+
+        macro(YIELD_VALUE) = unused/1 + _YIELD_VALUE;
+
+        op(_YIELD_VALUE, (retval -- value)) {
             // NOTE: It's important that YIELD_VALUE never raises an exception!
             // The compiler treats any exception raised here as a failed close()
             // or throw() call.
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
-            frame->instr_ptr++;
+            frame->instr_ptr += INSTRUCTION_SIZE;
             PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
             assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
             assert(oparg == 0 || oparg == 1);
@@ -1331,8 +1336,9 @@ dummy_func(
         }
 
         macro(INSTRUMENTED_YIELD_VALUE) =
+            unused/1 +
             _YIELD_VALUE_EVENT +
-            YIELD_VALUE;
+            _YIELD_VALUE;
 
         inst(POP_EXCEPT, (exc_value -- )) {
             _PyErr_StackItem *exc_info = tstate->exc_info;

@@ -127,6 +127,7 @@ extern "C" {
 #define UNPACK_EX                              114
 #define UNPACK_SEQUENCE                        115
 #define YIELD_VALUE                            116
+#define YIELD_VALUE_JIT                        117
 #define RESUME                                 128
 #define BINARY_OP_ADD_FLOAT                    129
 #define BINARY_OP_ADD_INT                      130
