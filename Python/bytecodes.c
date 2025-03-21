@@ -145,8 +145,9 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
-        family(RESUME, 0) = {
+        family(RESUME, 1) = {
             RESUME_CHECK,
+            RESUME_JIT,
         };
 
         macro(NOT_TAKEN) = NOP;
@@ -213,12 +214,22 @@ dummy_func(
         }
 
         macro(RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (--)) {
+        macro(RESUME_JIT) =
+            unused/1 +
+            _RESUME_CHECK +
+            _JIT;
+
+        macro(RESUME_CHECK) =
+            unused/1 +
+            _RESUME_CHECK;
+
+        op(_RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
