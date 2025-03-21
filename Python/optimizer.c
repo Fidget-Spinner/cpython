@@ -380,6 +380,10 @@ BRANCH_TO_GUARD[MAX_UOP_ID + 1] = {
     [POP_JUMP_IF_TRUE] = _GUARD_IS_FALSE_POP,
     [POP_JUMP_IF_NONE] = _GUARD_IS_NOT_NONE_POP,
     [POP_JUMP_IF_NOT_NONE] = _GUARD_IS_NONE_POP,
+    [POP_JUMP_IF_FALSE_JIT] = _GUARD_IS_TRUE_POP,
+    [POP_JUMP_IF_TRUE_JIT] = _GUARD_IS_FALSE_POP,
+    [POP_JUMP_IF_NONE_JIT] = _GUARD_IS_NOT_NONE_POP,
+    [POP_JUMP_IF_NOT_NONE_JIT] = _GUARD_IS_NONE_POP,
 };
 
 
@@ -515,6 +519,20 @@ translate_bytecode_to_trace(
     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
     uint32_t target = 0;
 
+    if (initial_instr->op.code == RETURN_VALUE_JIT) {
+        _Py_CODEUNIT *old_instr_ptr = instr;
+        frame = frame->previous;
+        instr = frame->instr_ptr + frame->return_offset;
+        if (frame->owner != FRAME_OWNED_BY_THREAD) {
+            return 0;
+        }
+        ADD_TO_TRACE(_GUARD_RETURNING_IP, 0, (uint64_t)instr, INSTR_IP(old_instr_ptr, code));
+        ADD_TO_TRACE(_RETURN_VALUE, 0, 0, 0);
+        code = _PyFrame_GetCode(frame);
+        func = _PyFrame_GetFunction(frame);
+        _Py_BloomFilter_Add(dependencies, code);
+        initial_code = code;
+    }
     for (;;) {
         target = INSTR_IP(instr, code);
         // Need space for _DEOPT
@@ -542,17 +560,33 @@ translate_bytecode_to_trace(
             }
         }
         if (opcode == ENTER_EXECUTOR) {
-            // We have a couple of options here. We *could* peek "underneath"
-            // this executor and continue tracing, which could give us a longer,
-            // more optimizeable trace (at the expense of lots of duplicated
-            // tier two code). Instead, we choose to just end here and stitch to
-            // the other trace, which allows a side-exit traces to rejoin the
-            // "main" trace periodically (and also helps protect us against
-            // pathological behavior where the amount of tier two code explodes
-            // for a medium-length, branchy code path). This seems to work
-            // better in practice, but in the future we could be smarter about
-            // what we do here:
-            goto done;
+            // Trace into executors that come from RESUME, and RETURN_VALUE
+            assert(code->co_executors);
+            assert(code->co_executors->executors);
+            _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
+            int exec_opcode = executor->vm_data.opcode;
+            opcode = exec_opcode;
+        }
+        switch(opcode) {
+            case RETURN_VALUE_JIT:
+                opcode = RETURN_VALUE;
+                break;
+            case POP_JUMP_IF_NONE_JIT:
+                opcode = POP_JUMP_IF_NONE;
+                break;
+            case POP_JUMP_IF_NOT_NONE_JIT:
+                opcode = POP_JUMP_IF_NOT_NONE;
+                break;
+            case POP_JUMP_IF_FALSE_JIT:
+                opcode = POP_JUMP_IF_FALSE;
+                break;
+            case POP_JUMP_IF_TRUE_JIT:
+                opcode = POP_JUMP_IF_TRUE_JIT;
+                break;
+            case RESUME_JIT:
+                opcode = RESUME;
+                break;
+            default: break;
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
         if (OPCODE_HAS_NO_SAVE_IP(opcode)) {
@@ -591,7 +625,7 @@ translate_bytecode_to_trace(
             case POP_JUMP_IF_FALSE:
             case POP_JUMP_IF_TRUE:
             {
-                if (!first) {
+                if (instr != initial_instr) {
                     goto done;
                 }
                 RESERVE(1);
@@ -646,8 +680,7 @@ translate_bytecode_to_trace(
                         // LOAD_CONST + _RETURN_VALUE.
                         if (trace_stack_depth == 0) {
                             DPRINTF(2, "Trace stack underflow\n");
-                            OPT_STAT_INC(trace_stack_underflow);
-                            return 0;
+                            goto done;
                         }
                     }
                     uint32_t orig_oparg = oparg;  // For OPARG_TOP/BOTTOM

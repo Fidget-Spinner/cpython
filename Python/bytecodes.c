@@ -1124,7 +1124,7 @@ dummy_func(
             unused/1 +
             _RETURN_VALUE;
 
-        macro(RETURN_VALUE_JIT) = unused/1 + _RETURN_VALUE + _JIT;
+        macro(RETURN_VALUE_JIT) = unused/1 + _JIT_RETURN_VALUE + _RETURN_VALUE;
 
         // The stack effect here is a bit misleading.
         // retval is popped from the stack, but res
@@ -1145,6 +1145,39 @@ dummy_func(
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
+        }
+
+        tier1 op(_JIT_RETURN_VALUE, (--)) {
+#ifdef _Py_TIER2
+        _Py_BackoffCounter counter = this_instr[1].counter;
+            int this_instr_op_code = this_instr->op.code;
+            if (backoff_counter_triggers(counter) &&
+                (this_instr_op_code == RETURN_VALUE_JIT)) {
+                _Py_CODEUNIT *start = this_instr;
+                /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                while (oparg > 255) {
+                    oparg >>= 8;
+                    start--;
+                }
+                _PyExecutorObject *executor;
+                int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                if (optimized <= 0) {
+                    this_instr[1].counter = restart_backoff_counter(counter);
+                    ERROR_IF(optimized < 0, error);
+                }
+                else {
+                    this_instr[1].counter = initial_jump_backoff_counter();
+                    assert(tstate->previous_executor == NULL);
+                    // tstate->previous_executor = Py_None;
+                    // Can't enter tier two for this round, because we have already
+                    // popped the frame. So let it enter the next time.
+                    // GOTO_TIER_TWO(executor);
+                }
+            }
+            else {
+                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+            }
+#endif
         }
 
         tier1 op(_RETURN_VALUE_EVENT, (val -- val)) {
@@ -2800,28 +2833,18 @@ dummy_func(
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
             int this_instr_op_code = this_instr->op.code;
-            int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-            int is_branch_instruction =
+            if (backoff_counter_triggers(counter) &&
+                (this_instr_op_code == JUMP_BACKWARD_JIT ||
+                    this_instr_op_code == RESUME_JIT ||
                     this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
                     this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
                     this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                    this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
-            if (backoff_counter_triggers(counter) &&
-                (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                    is_function_exit ||
-                    this_instr_op_code == RESUME_JIT ||
-                    is_branch_instruction)) {
-                _Py_CODEUNIT *start = NULL;
-                if (is_function_exit) {
-                    start = next_instr;
-                }
-                else {
-                    start = this_instr;
-                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                    while (oparg > 255) {
-                        oparg >>= 8;
-                        start--;
-                    }
+                    this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                _Py_CODEUNIT *start = this_instr;
+                /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                while (oparg > 255) {
+                    oparg >>= 8;
+                    start--;
                 }
                 _PyExecutorObject *executor;
                 int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
@@ -2938,13 +2961,13 @@ dummy_func(
 
         macro(POP_JUMP_IF_NOT_NONE) = unused/1 + _IS_NONE + _POP_JUMP_IF_FALSE;
 
-        macro(POP_JUMP_IF_TRUE_JIT) = unused/1 + _POP_JUMP_IF_TRUE + _JIT;
+        macro(POP_JUMP_IF_TRUE_JIT) = unused/1 + _JIT + _POP_JUMP_IF_TRUE ;
 
-        macro(POP_JUMP_IF_FALSE_JIT) = unused/1 + _POP_JUMP_IF_FALSE + _JIT;
+        macro(POP_JUMP_IF_FALSE_JIT) = unused/1 + _JIT + _POP_JUMP_IF_FALSE;
 
-        macro(POP_JUMP_IF_NONE_JIT) = unused/1 + _IS_NONE + _POP_JUMP_IF_TRUE + _JIT;
+        macro(POP_JUMP_IF_NONE_JIT) = unused/1 + _JIT + _IS_NONE + _POP_JUMP_IF_TRUE;
 
-        macro(POP_JUMP_IF_NOT_NONE_JIT) = unused/1 + _IS_NONE + _POP_JUMP_IF_FALSE + _JIT;
+        macro(POP_JUMP_IF_NOT_NONE_JIT) = unused/1 + _JIT + _IS_NONE + _POP_JUMP_IF_FALSE;
 
         tier1 inst(JUMP_BACKWARD_NO_INTERRUPT, (--)) {
             /* This bytecode is used in the `yield from` or `await` loop.
@@ -5107,6 +5130,10 @@ dummy_func(
             #if TIER_TWO
             frame->return_offset = oparg;
             #endif
+        }
+
+        op(_GUARD_RETURNING_IP, (instr_ptr/4--)) {
+            EXIT_IF(frame->previous->instr_ptr + frame->previous->return_offset != (_Py_CODEUNIT *)instr_ptr);
         }
 
         tier2 op(_EXIT_TRACE, (exit_p/4 --)) {

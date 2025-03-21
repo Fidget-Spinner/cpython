@@ -6807,6 +6807,15 @@
             break;
         }
 
+        case _GUARD_RETURNING_IP: {
+            PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
+            if (frame->previous->instr_ptr + frame->previous->return_offset != (_Py_CODEUNIT *)instr_ptr) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
         case _EXIT_TRACE: {
             PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
             _PyExitData *exit = (_PyExitData *)exit_p;

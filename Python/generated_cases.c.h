@@ -7559,27 +7559,18 @@
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
                         this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
+                        this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
                     }
                     _PyExecutorObject *executor;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -9964,44 +9955,25 @@
             INSTRUCTION_STATS(POP_JUMP_IF_FALSE_JIT);
             _PyStackRef cond;
             /* Skip 1 cache entry */
-            // _POP_JUMP_IF_FALSE
-            {
-                cond = stack_pointer[-1];
-                assert(PyStackRef_BoolCheck(cond));
-                int flag = PyStackRef_IsFalse(cond);
-                JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
-            }
             // _JIT
             {
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
                         this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
+                        this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
                     }
                     _PyExecutorObject *executor;
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -10022,11 +9994,18 @@
                 }
                 else {
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
                 }
                 #endif
             }
+            // _POP_JUMP_IF_FALSE
+            {
+                cond = stack_pointer[-1];
+                assert(PyStackRef_BoolCheck(cond));
+                int flag = PyStackRef_IsFalse(cond);
+                JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+            }
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
         }
 
@@ -10085,6 +10064,48 @@
             _PyStackRef b;
             _PyStackRef cond;
             /* Skip 1 cache entry */
+            // _JIT
+            {
+                #ifdef _Py_TIER2
+                _Py_BackoffCounter counter = this_instr[1].counter;
+                int this_instr_op_code = this_instr->op.code;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_op_code == JUMP_BACKWARD_JIT ||
+                        this_instr_op_code == RESUME_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
+                    _PyExecutorObject *executor;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        this_instr[1].counter = restart_backoff_counter(counter);
+                        if (optimized < 0) {
+                            JUMP_TO_LABEL(error);
+                        }
+                    }
+                    else {
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        this_instr[1].counter = initial_jump_backoff_counter();
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        assert(tstate->previous_executor == NULL);
+                        tstate->previous_executor = Py_None;
+                        GOTO_TIER_TWO(executor);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                #endif
+            }
             // _IS_NONE
             {
                 value = stack_pointer[-1];
@@ -10109,62 +10130,8 @@
                 int flag = PyStackRef_IsTrue(cond);
                 JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             }
-            // _JIT
-            {
-                #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
-                int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
-                if (backoff_counter_triggers(counter) &&
-                    (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
-                        this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
-                    }
-                    _PyExecutorObject *executor;
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
-                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
-                    if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
-                        if (optimized < 0) {
-                            JUMP_TO_LABEL(error);
-                        }
-                    }
-                    else {
-                        _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
-                        stack_pointer = _PyFrame_GetStackPointer(frame);
-                        assert(tstate->previous_executor == NULL);
-                        tstate->previous_executor = Py_None;
-                        GOTO_TIER_TWO(executor);
-                    }
-                }
-                else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
-                }
-                #endif
-            }
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
         }
 
@@ -10223,6 +10190,48 @@
             _PyStackRef b;
             _PyStackRef cond;
             /* Skip 1 cache entry */
+            // _JIT
+            {
+                #ifdef _Py_TIER2
+                _Py_BackoffCounter counter = this_instr[1].counter;
+                int this_instr_op_code = this_instr->op.code;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_op_code == JUMP_BACKWARD_JIT ||
+                        this_instr_op_code == RESUME_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
+                    _PyExecutorObject *executor;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        this_instr[1].counter = restart_backoff_counter(counter);
+                        if (optimized < 0) {
+                            JUMP_TO_LABEL(error);
+                        }
+                    }
+                    else {
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        this_instr[1].counter = initial_jump_backoff_counter();
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        assert(tstate->previous_executor == NULL);
+                        tstate->previous_executor = Py_None;
+                        GOTO_TIER_TWO(executor);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                #endif
+            }
             // _IS_NONE
             {
                 value = stack_pointer[-1];
@@ -10247,62 +10256,8 @@
                 int flag = PyStackRef_IsFalse(cond);
                 JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
             }
-            // _JIT
-            {
-                #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
-                int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
-                if (backoff_counter_triggers(counter) &&
-                    (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
-                        this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
-                    }
-                    _PyExecutorObject *executor;
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
-                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
-                    if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
-                        if (optimized < 0) {
-                            JUMP_TO_LABEL(error);
-                        }
-                    }
-                    else {
-                        _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
-                        stack_pointer = _PyFrame_GetStackPointer(frame);
-                        assert(tstate->previous_executor == NULL);
-                        tstate->previous_executor = Py_None;
-                        GOTO_TIER_TWO(executor);
-                    }
-                }
-                else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
-                }
-                #endif
-            }
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
         }
 
@@ -10337,44 +10292,25 @@
             INSTRUCTION_STATS(POP_JUMP_IF_TRUE_JIT);
             _PyStackRef cond;
             /* Skip 1 cache entry */
-            // _POP_JUMP_IF_TRUE
-            {
-                cond = stack_pointer[-1];
-                assert(PyStackRef_BoolCheck(cond));
-                int flag = PyStackRef_IsTrue(cond);
-                JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
-            }
             // _JIT
             {
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
                         this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
+                        this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
                     }
                     _PyExecutorObject *executor;
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -10395,11 +10331,18 @@
                 }
                 else {
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                    stack_pointer += -1;
-                    assert(WITHIN_STACK_BOUNDS());
                 }
                 #endif
             }
+            // _POP_JUMP_IF_TRUE
+            {
+                cond = stack_pointer[-1];
+                assert(PyStackRef_BoolCheck(cond));
+                int flag = PyStackRef_IsTrue(cond);
+                JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+            }
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
         }
 
@@ -10709,28 +10652,18 @@
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
                         this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
+                        this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                        this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
                     }
                     _PyExecutorObject *executor;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -10847,6 +10780,45 @@
             _PyStackRef retval;
             _PyStackRef res;
             /* Skip 1 cache entry */
+            // _JIT_RETURN_VALUE
+            {
+                #ifdef _Py_TIER2
+                _Py_BackoffCounter counter = this_instr[1].counter;
+                int this_instr_op_code = this_instr->op.code;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_op_code == RETURN_VALUE_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
+                    _PyExecutorObject *executor;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        this_instr[1].counter = restart_backoff_counter(counter);
+                        if (optimized < 0) {
+                            JUMP_TO_LABEL(error);
+                        }
+                    }
+                    else {
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        this_instr[1].counter = initial_jump_backoff_counter();
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        assert(tstate->previous_executor == NULL);
+                        // tstate->previous_executor = Py_None;
+                        // Can't enter tier two for this round, because we have already
+                        // popped the frame. So let it enter the next time.
+                        // GOTO_TIER_TWO(executor);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                #endif
+            }
             // _RETURN_VALUE
             {
                 retval = stack_pointer[-1];
@@ -10867,64 +10839,9 @@
                 res = temp;
                 LLTRACE_RESUME_FRAME();
             }
-            // _JIT
-            {
-                #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
-                int this_instr_op_code = this_instr->op.code;
-                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
-                int is_branch_instruction =
-                this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
-                this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
-                if (backoff_counter_triggers(counter) &&
-                    (this_instr_op_code == JUMP_BACKWARD_JIT ||
-                        is_function_exit ||
-                        this_instr_op_code == RESUME_JIT ||
-                        is_branch_instruction)) {
-                    _Py_CODEUNIT *start = NULL;
-                    if (is_function_exit) {
-                        start = next_instr;
-                    }
-                    else {
-                        start = this_instr;
-                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                        while (oparg > 255) {
-                            oparg >>= 8;
-                            start--;
-                        }
-                    }
-                    _PyExecutorObject *executor;
-                    stack_pointer[0] = res;
-                    stack_pointer += 1;
-                    assert(WITHIN_STACK_BOUNDS());
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
-                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
-                    if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
-                        if (optimized < 0) {
-                            JUMP_TO_LABEL(error);
-                        }
-                    }
-                    else {
-                        _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
-                        stack_pointer = _PyFrame_GetStackPointer(frame);
-                        assert(tstate->previous_executor == NULL);
-                        tstate->previous_executor = Py_None;
-                        GOTO_TIER_TWO(executor);
-                    }
-                }
-                else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                    stack_pointer += 1;
-                    assert(WITHIN_STACK_BOUNDS());
-                }
-                #endif
-            }
-            stack_pointer[-1] = res;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             DISPATCH();
         }
 

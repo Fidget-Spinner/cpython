@@ -2341,6 +2341,10 @@
             break;
         }
 
+        case _GUARD_RETURNING_IP: {
+            break;
+        }
+
         case _EXIT_TRACE: {
             PyObject *exit_p = (PyObject *)this_instr->operand0;
             (void)exit_p;

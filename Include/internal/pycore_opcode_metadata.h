@@ -1742,7 +1742,7 @@ int _PyOpcode_max_stack_effect(int opcode, int oparg, int *effect)  {
             return 0;
         }
         case POP_JUMP_IF_FALSE_JIT: {
-            *effect = -1;
+            *effect = 0;
             return 0;
         }
         case POP_JUMP_IF_NONE: {
@@ -1766,7 +1766,7 @@ int _PyOpcode_max_stack_effect(int opcode, int oparg, int *effect)  {
             return 0;
         }
         case POP_JUMP_IF_TRUE_JIT: {
-            *effect = -1;
+            *effect = 0;
             return 0;
         }
         case POP_TOP: {
