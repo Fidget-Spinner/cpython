@@ -97,6 +97,9 @@ _cache_format = {
     "JUMP_BACKWARD": {
         "counter": 1,
     },
+    "RETURN_VALUE": {
+        "counter": 1,
+    },
     "TO_BOOL": {
         "counter": 1,
         "version": 2,

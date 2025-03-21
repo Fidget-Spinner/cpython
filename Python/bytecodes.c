@@ -1103,7 +1103,7 @@ dummy_func(
         // The stack effect here is a bit misleading.
         // retval is popped from the stack, but res
         // is pushed to a different frame, the callers' frame.
-        inst(RETURN_VALUE, (retval -- res)) {
+        inst(RETURN_VALUE, (counter/1, retval -- res)) {
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
             assert(PyStackRef_IsHeapSafe(temp));

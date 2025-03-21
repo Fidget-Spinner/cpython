@@ -710,6 +710,7 @@
             JitOptSymbol *retval;
             JitOptSymbol *res;
             retval = stack_pointer[-1];
+            uint16_t counter = (uint16_t)this_instr->operand0;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;

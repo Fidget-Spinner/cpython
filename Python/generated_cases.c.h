@@ -7304,7 +7304,7 @@
             _Py_CODEUNIT* const this_instr = next_instr;
             (void)this_instr;
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(INSTRUMENTED_RETURN_VALUE);
             _PyStackRef val;
             _PyStackRef retval;
@@ -7324,6 +7324,8 @@
             // _RETURN_VALUE
             {
                 retval = val;
+                uint16_t counter = read_u16(&this_instr[1].cache);
+                (void)counter;
                 assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
                 _PyStackRef temp = retval;
                 assert(PyStackRef_IsHeapSafe(temp));
@@ -10357,12 +10359,16 @@
             int opcode = RETURN_VALUE;
             (void)(opcode);
             #endif
+            _Py_CODEUNIT* const this_instr = next_instr;
+            (void)this_instr;
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            next_instr += 2;
             INSTRUCTION_STATS(RETURN_VALUE);
             _PyStackRef retval;
             _PyStackRef res;
             retval = stack_pointer[-1];
+            uint16_t counter = read_u16(&this_instr[1].cache);
+            (void)counter;
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
             assert(PyStackRef_IsHeapSafe(temp));

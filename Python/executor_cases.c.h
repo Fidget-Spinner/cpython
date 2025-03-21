@@ -1693,6 +1693,7 @@
             _PyStackRef retval;
             _PyStackRef res;
             retval = stack_pointer[-1];
+            uint16_t counter = (uint16_t)CURRENT_OPERAND0();
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
             assert(PyStackRef_IsHeapSafe(temp));

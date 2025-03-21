@@ -595,38 +595,7 @@ translate_bytecode_to_trace(
             case POP_JUMP_IF_FALSE:
             case POP_JUMP_IF_TRUE:
             {
-                RESERVE(1);
-                int counter = instr[1].cache;
-                int bitcount = _Py_popcount32(counter);
-                int jump_likely = bitcount > 8;
-                /* If bitcount is 8 (half the jumps were taken), adjust confidence by 50%.
-                   For values in between, adjust proportionally. */
-                if (jump_likely) {
-                    confidence = confidence * bitcount / 16;
-                }
-                else {
-                    confidence = confidence * (16 - bitcount) / 16;
-                }
-                uint32_t uopcode = BRANCH_TO_GUARD[opcode - POP_JUMP_IF_FALSE][jump_likely];
-                DPRINTF(2, "%d: %s(%d): counter=%04x, bitcount=%d, likely=%d, confidence=%d, uopcode=%s\n",
-                        target, _PyOpcode_OpName[opcode], oparg,
-                        counter, bitcount, jump_likely, confidence, _PyUOpName(uopcode));
-                if (confidence < CONFIDENCE_CUTOFF) {
-                    DPRINTF(2, "Confidence too low (%d < %d)\n", confidence, CONFIDENCE_CUTOFF);
-                    OPT_STAT_INC(low_confidence);
-                    goto done;
-                }
-                _Py_CODEUNIT *next_instr = instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
-                _Py_CODEUNIT *target_instr = next_instr + oparg;
-                if (jump_likely) {
-                    DPRINTF(2, "Jump likely (%04x = %d bits), continue at byte offset %d\n",
-                            instr[1].cache, bitcount, 2 * INSTR_IP(target_instr, code));
-                    instr = target_instr;
-                    ADD_TO_TRACE(uopcode, 0, 0, INSTR_IP(next_instr, code));
-                    goto top;
-                }
-                ADD_TO_TRACE(uopcode, 0, 0, INSTR_IP(target_instr, code));
-                break;
+                goto done;
             }
 
             case JUMP_BACKWARD:
