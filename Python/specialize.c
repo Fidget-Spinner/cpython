@@ -477,6 +477,10 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
                 case JUMP_BACKWARD:
                     instructions[i + 1].counter = jump_counter;
                     break;
+                case RESUME:
+                    instructions[i].op.code = PyThreadState_GET()->interp->jit ? RESUME_JIT: RESUME;
+                    instructions[i + 1].counter = jump_counter;
+                    break;
                 case RETURN_VALUE:
                     instructions[i].op.code = PyThreadState_GET()->interp->jit ? RETURN_VALUE_JIT: RETURN_VALUE_NO_JIT;
                     instructions[i + 1].counter = jump_counter;

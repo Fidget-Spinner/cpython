@@ -100,6 +100,9 @@ _cache_format = {
     "RETURN_VALUE": {
         "counter": 1,
     },
+    "RESUME": {
+        "counter": 1,
+    },
     "TO_BOOL": {
         "counter": 1,
         "version": 2,

@@ -146,8 +146,9 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
-        family(RESUME, 0) = {
+        family(RESUME, 1) = {
             RESUME_CHECK,
+            RESUME_JIT,
         };
 
         macro(NOT_TAKEN) = NOP;
@@ -214,12 +215,22 @@ dummy_func(
         }
 
         macro(RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (--)) {
+        macro(RESUME_JIT) =
+            unused/1 +
+            _RESUME_CHECK +
+            _JIT;
+
+        macro(RESUME_CHECK) =
+            unused/1 +
+            _RESUME_CHECK;
+
+        op(_RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -1113,7 +1124,7 @@ dummy_func(
             unused/1 +
             _RETURN_VALUE;
 
-        macro(RETURN_VALUE_JIT) = unused/1 + _RETURN_VALUE;
+        macro(RETURN_VALUE_JIT) = unused/1 + _RETURN_VALUE + _JIT;
 
         // The stack effect here is a bit misleading.
         // retval is popped from the stack, but res
@@ -2791,7 +2802,9 @@ dummy_func(
             int this_instr_op_code = this_instr->op.code;
             int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
             if (backoff_counter_triggers(counter) &&
-                (this_instr_op_code == JUMP_BACKWARD_JIT || is_function_exit)) {
+                (this_instr_op_code == JUMP_BACKWARD_JIT ||
+                    is_function_exit ||
+                    this_instr_op_code == RESUME_JIT)) {
                 _Py_CODEUNIT *start = NULL;
                 if (is_function_exit) {
                     start = next_instr;
