@@ -1100,10 +1100,25 @@ dummy_func(
             return result;
         }
 
+        family(RETURN_VALUE, 1) = {
+            RETURN_VALUE_NO_JIT,
+            RETURN_VALUE_JIT,
+        };
+
+        macro(RETURN_VALUE) =
+            unused/1 +
+            _RETURN_VALUE;
+
+        macro(RETURN_VALUE_NO_JIT) =
+            unused/1 +
+            _RETURN_VALUE;
+
+        macro(RETURN_VALUE_JIT) = unused/1 + _RETURN_VALUE;
+
         // The stack effect here is a bit misleading.
         // retval is popped from the stack, but res
         // is pushed to a different frame, the callers' frame.
-        inst(RETURN_VALUE, (counter/1, retval -- res)) {
+        op(_RETURN_VALUE, (retval -- res)) {
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
             assert(PyStackRef_IsHeapSafe(temp));
@@ -1130,7 +1145,7 @@ dummy_func(
 
         macro(INSTRUMENTED_RETURN_VALUE) =
             _RETURN_VALUE_EVENT +
-            RETURN_VALUE;
+            _RETURN_VALUE;
 
         inst(GET_AITER, (obj -- iter)) {
             unaryfunc getter = NULL;
@@ -2773,12 +2788,21 @@ dummy_func(
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
-            if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
-                _Py_CODEUNIT *start = this_instr;
-                /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                while (oparg > 255) {
-                    oparg >>= 8;
-                    start--;
+            int this_instr_op_code = this_instr->op.code;
+            int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
+            if (backoff_counter_triggers(counter) &&
+                (this_instr_op_code == JUMP_BACKWARD_JIT || is_function_exit)) {
+                _Py_CODEUNIT *start = NULL;
+                if (is_function_exit) {
+                    start = next_instr;
+                }
+                else {
+                    start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
                 }
                 _PyExecutorObject *executor;
                 int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);

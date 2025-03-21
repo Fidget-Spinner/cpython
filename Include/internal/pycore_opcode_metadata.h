@@ -415,6 +415,10 @@ int _PyOpcode_num_popped(int opcode, int oparg)  {
             return 0;
         case RETURN_VALUE:
             return 1;
+        case RETURN_VALUE_JIT:
+            return 1;
+        case RETURN_VALUE_NO_JIT:
+            return 1;
         case SEND:
             return 2;
         case SEND_GEN:
@@ -889,6 +893,10 @@ int _PyOpcode_num_pushed(int opcode, int oparg)  {
         case RETURN_GENERATOR:
             return 1;
         case RETURN_VALUE:
+            return 1;
+        case RETURN_VALUE_JIT:
+            return 1;
+        case RETURN_VALUE_NO_JIT:
             return 1;
         case SEND:
             return 2;
@@ -1765,6 +1773,14 @@ int _PyOpcode_max_stack_effect(int opcode, int oparg, int *effect)  {
             *effect = 0;
             return 0;
         }
+        case RETURN_VALUE_JIT: {
+            *effect = 0;
+            return 0;
+        }
+        case RETURN_VALUE_NO_JIT: {
+            *effect = 0;
+            return 0;
+        }
         case SEND: {
             *effect = 0;
             return 0;
@@ -2124,7 +2140,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[266] = {
     [INSTRUMENTED_POP_JUMP_IF_NOT_NONE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_ESCAPES_FLAG },
     [INSTRUMENTED_POP_JUMP_IF_TRUE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG },
     [INSTRUMENTED_RESUME] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG },
-    [INSTRUMENTED_RETURN_VALUE] = { true, INSTR_FMT_IXC, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
+    [INSTRUMENTED_RETURN_VALUE] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [INSTRUMENTED_YIELD_VALUE] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG },
     [INTERPRETER_EXIT] = { true, INSTR_FMT_IX, 0 },
     [IS_OP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
@@ -2196,6 +2212,8 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[266] = {
     [RESUME_CHECK] = { true, INSTR_FMT_IX, HAS_DEOPT_FLAG },
     [RETURN_GENERATOR] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [RETURN_VALUE] = { true, INSTR_FMT_IXC, HAS_ESCAPES_FLAG },
+    [RETURN_VALUE_JIT] = { true, INSTR_FMT_IXC, HAS_ESCAPES_FLAG },
+    [RETURN_VALUE_NO_JIT] = { true, INSTR_FMT_IXC, HAS_ESCAPES_FLAG },
     [SEND] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [SEND_GEN] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_DEOPT_FLAG },
     [SETUP_ANNOTATIONS] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
@@ -2397,7 +2415,9 @@ _PyOpcode_macro_expansion[256] = {
     [PUSH_NULL] = { .nuops = 1, .uops = { { _PUSH_NULL, OPARG_SIMPLE, 0 } } },
     [RESUME_CHECK] = { .nuops = 1, .uops = { { _RESUME_CHECK, OPARG_SIMPLE, 0 } } },
     [RETURN_GENERATOR] = { .nuops = 1, .uops = { { _RETURN_GENERATOR, OPARG_SIMPLE, 0 } } },
-    [RETURN_VALUE] = { .nuops = 1, .uops = { { _RETURN_VALUE, 1, 0 } } },
+    [RETURN_VALUE] = { .nuops = 1, .uops = { { _RETURN_VALUE, OPARG_SIMPLE, 1 } } },
+    [RETURN_VALUE_JIT] = { .nuops = 1, .uops = { { _RETURN_VALUE, OPARG_SIMPLE, 1 } } },
+    [RETURN_VALUE_NO_JIT] = { .nuops = 1, .uops = { { _RETURN_VALUE, OPARG_SIMPLE, 1 } } },
     [SEND_GEN] = { .nuops = 3, .uops = { { _CHECK_PEP_523, OPARG_SIMPLE, 1 }, { _SEND_GEN_FRAME, OPARG_SIMPLE, 1 }, { _PUSH_FRAME, OPARG_SIMPLE, 1 } } },
     [SETUP_ANNOTATIONS] = { .nuops = 1, .uops = { { _SETUP_ANNOTATIONS, OPARG_SIMPLE, 0 } } },
     [SET_ADD] = { .nuops = 1, .uops = { { _SET_ADD, OPARG_SIMPLE, 0 } } },
@@ -2631,6 +2651,8 @@ const char *_PyOpcode_OpName[266] = {
     [RESUME_CHECK] = "RESUME_CHECK",
     [RETURN_GENERATOR] = "RETURN_GENERATOR",
     [RETURN_VALUE] = "RETURN_VALUE",
+    [RETURN_VALUE_JIT] = "RETURN_VALUE_JIT",
+    [RETURN_VALUE_NO_JIT] = "RETURN_VALUE_NO_JIT",
     [SEND] = "SEND",
     [SEND_GEN] = "SEND_GEN",
     [SETUP_ANNOTATIONS] = "SETUP_ANNOTATIONS",
@@ -2679,9 +2701,9 @@ const char *_PyOpcode_OpName[266] = {
 extern const uint8_t _PyOpcode_Caches[256];
 #ifdef NEED_OPCODE_METADATA
 const uint8_t _PyOpcode_Caches[256] = {
-    [RETURN_VALUE] = 1,
     [TO_BOOL] = 3,
     [STORE_SUBSCR] = 1,
+    [RETURN_VALUE] = 1,
     [SEND] = 1,
     [UNPACK_SEQUENCE] = 1,
     [STORE_ATTR] = 4,
@@ -2889,6 +2911,8 @@ const uint8_t _PyOpcode_Deopt[256] = {
     [RESUME_CHECK] = RESUME,
     [RETURN_GENERATOR] = RETURN_GENERATOR,
     [RETURN_VALUE] = RETURN_VALUE,
+    [RETURN_VALUE_JIT] = RETURN_VALUE,
+    [RETURN_VALUE_NO_JIT] = RETURN_VALUE,
     [SEND] = SEND,
     [SEND_GEN] = SEND,
     [SETUP_ANNOTATIONS] = SETUP_ANNOTATIONS,
@@ -2943,8 +2967,6 @@ const uint8_t _PyOpcode_Deopt[256] = {
     case 125: \
     case 126: \
     case 127: \
-    case 211: \
-    case 212: \
     case 213: \
     case 214: \
     case 215: \

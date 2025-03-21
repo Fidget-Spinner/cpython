@@ -7304,7 +7304,7 @@
             _Py_CODEUNIT* const this_instr = next_instr;
             (void)this_instr;
             frame->instr_ptr = next_instr;
-            next_instr += 2;
+            next_instr += 1;
             INSTRUCTION_STATS(INSTRUMENTED_RETURN_VALUE);
             _PyStackRef val;
             _PyStackRef retval;
@@ -7324,8 +7324,6 @@
             // _RETURN_VALUE
             {
                 retval = val;
-                uint16_t counter = read_u16(&this_instr[1].cache);
-                (void)counter;
                 assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
                 _PyStackRef temp = retval;
                 assert(PyStackRef_IsHeapSafe(temp));
@@ -7564,12 +7562,21 @@
             {
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
-                if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
-                    _Py_CODEUNIT *start = this_instr;
-                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
-                    while (oparg > 255) {
-                        oparg >>= 8;
-                        start--;
+                int this_instr_op_code = this_instr->op.code;
+                int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_op_code == JUMP_BACKWARD_JIT || is_function_exit)) {
+                    _Py_CODEUNIT *start = NULL;
+                    if (is_function_exit) {
+                        start = next_instr;
+                    }
+                    else {
+                        start = this_instr;
+                        /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                        while (oparg > 255) {
+                            oparg >>= 8;
+                            start--;
+                        }
                     }
                     _PyExecutorObject *executor;
                     _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -10359,16 +10366,84 @@
             int opcode = RETURN_VALUE;
             (void)(opcode);
             #endif
-            _Py_CODEUNIT* const this_instr = next_instr;
-            (void)this_instr;
             frame->instr_ptr = next_instr;
             next_instr += 2;
             INSTRUCTION_STATS(RETURN_VALUE);
+            PREDICTED_RETURN_VALUE:;
             _PyStackRef retval;
             _PyStackRef res;
+            /* Skip 1 cache entry */
             retval = stack_pointer[-1];
-            uint16_t counter = read_u16(&this_instr[1].cache);
-            (void)counter;
+            assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
+            _PyStackRef temp = retval;
+            assert(PyStackRef_IsHeapSafe(temp));
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            assert(EMPTY());
+            _Py_LeaveRecursiveCallPy(tstate);
+            // GH-99729: We need to unlink the frame *before* clearing it:
+            _PyInterpreterFrame *dying = frame;
+            frame = tstate->current_frame = dying->previous;
+            _PyEval_FrameClearAndPop(tstate, dying);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            LOAD_IP(frame->return_offset);
+            res = temp;
+            LLTRACE_RESUME_FRAME();
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            DISPATCH();
+        }
+
+        TARGET(RETURN_VALUE_JIT) {
+            #if Py_TAIL_CALL_INTERP
+            int opcode = RETURN_VALUE_JIT;
+            (void)(opcode);
+            #endif
+            frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(RETURN_VALUE_JIT);
+            static_assert(1 == 1, "incorrect cache size");
+            _PyStackRef retval;
+            _PyStackRef res;
+            /* Skip 1 cache entry */
+            retval = stack_pointer[-1];
+            assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
+            _PyStackRef temp = retval;
+            assert(PyStackRef_IsHeapSafe(temp));
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            assert(EMPTY());
+            _Py_LeaveRecursiveCallPy(tstate);
+            // GH-99729: We need to unlink the frame *before* clearing it:
+            _PyInterpreterFrame *dying = frame;
+            frame = tstate->current_frame = dying->previous;
+            _PyEval_FrameClearAndPop(tstate, dying);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            LOAD_IP(frame->return_offset);
+            res = temp;
+            LLTRACE_RESUME_FRAME();
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
+            DISPATCH();
+        }
+
+        TARGET(RETURN_VALUE_NO_JIT) {
+            #if Py_TAIL_CALL_INTERP
+            int opcode = RETURN_VALUE_NO_JIT;
+            (void)(opcode);
+            #endif
+            frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(RETURN_VALUE_NO_JIT);
+            static_assert(1 == 1, "incorrect cache size");
+            _PyStackRef retval;
+            _PyStackRef res;
+            /* Skip 1 cache entry */
+            retval = stack_pointer[-1];
             assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
             _PyStackRef temp = retval;
             assert(PyStackRef_IsHeapSafe(temp));
