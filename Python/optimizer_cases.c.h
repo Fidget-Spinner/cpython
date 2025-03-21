@@ -765,6 +765,10 @@
             break;
         }
 
+        case _GUARD_YIELDING_IP: {
+            break;
+        }
+
         case _YIELD_VALUE: {
             JitOptSymbol *res;
             res = sym_new_unknown(ctx);

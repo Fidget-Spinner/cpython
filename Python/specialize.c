@@ -478,7 +478,11 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
                     instructions[i + 1].counter = jump_counter;
                     break;
                 case RESUME:
-                    instructions[i].op.code = PyThreadState_GET()->interp->jit ? RESUME_JIT: RESUME;
+                    instructions[i].op.code = PyThreadState_GET()->interp->jit ? RESUME_JIT : RESUME;
+                    instructions[i + 1].counter = jump_counter;
+                    break;
+                case YIELD_VALUE:
+                    instructions[i].op.code = PyThreadState_GET()->interp->jit ? YIELD_VALUE_JIT : YIELD_VALUE;
                     instructions[i + 1].counter = jump_counter;
                     break;
                 case POP_JUMP_IF_FALSE:

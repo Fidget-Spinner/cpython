@@ -7566,7 +7566,11 @@
             {
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
-                if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
+                int this_instr_opcode = this_instr->op.code;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_opcode == JUMP_BACKWARD_JIT ||
+                        this_instr_opcode == RESUME_JIT ||
+                        this_instr_opcode == YIELD_VALUE_JIT)) {
                     _Py_CODEUNIT *start = this_instr;
                     /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                     while (oparg > 255) {
@@ -10382,7 +10386,11 @@
             {
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
-                if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
+                int this_instr_opcode = this_instr->op.code;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_opcode == JUMP_BACKWARD_JIT ||
+                        this_instr_opcode == RESUME_JIT ||
+                        this_instr_opcode == YIELD_VALUE_JIT)) {
                     _Py_CODEUNIT *start = this_instr;
                     /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                     while (oparg > 255) {
@@ -12180,7 +12188,11 @@
             {
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
-                if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
+                int this_instr_opcode = this_instr->op.code;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_opcode == JUMP_BACKWARD_JIT ||
+                        this_instr_opcode == RESUME_JIT ||
+                        this_instr_opcode == YIELD_VALUE_JIT)) {
                     _Py_CODEUNIT *start = this_instr;
                     /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                     while (oparg > 255) {

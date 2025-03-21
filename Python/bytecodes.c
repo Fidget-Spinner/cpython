@@ -1287,6 +1287,10 @@ dummy_func(
 
         macro(YIELD_VALUE) = unused/1 + _YIELD_VALUE;
 
+        op(_GUARD_YIELDING_IP, (instr_ptr/4--)) {
+            EXIT_IF(frame->previous->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND  != (_Py_CODEUNIT *)instr_ptr);
+        }
+
         op(_YIELD_VALUE, (retval -- value)) {
             // NOTE: It's important that YIELD_VALUE never raises an exception!
             // The compiler treats any exception raised here as a failed close()
@@ -2791,7 +2795,11 @@ dummy_func(
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
-            if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
+            int this_instr_opcode = this_instr->op.code;
+            if (backoff_counter_triggers(counter) &&
+                (this_instr_opcode == JUMP_BACKWARD_JIT ||
+                 this_instr_opcode == RESUME_JIT ||
+                 this_instr_opcode == YIELD_VALUE_JIT)) {
                 _Py_CODEUNIT *start = this_instr;
                 /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                 while (oparg > 255) {

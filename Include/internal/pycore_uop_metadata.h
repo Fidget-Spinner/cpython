@@ -105,6 +105,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GET_ANEXT] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_GET_AWAITABLE] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_SEND_GEN_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
+    [_GUARD_YIELDING_IP] = HAS_EXIT_FLAG,
     [_YIELD_VALUE] = HAS_ARG_FLAG,
     [_POP_EXCEPT] = HAS_ESCAPES_FLAG,
     [_LOAD_COMMON_CONSTANT] = HAS_ARG_FLAG,
@@ -415,6 +416,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GUARD_TOS_INT] = "_GUARD_TOS_INT",
     [_GUARD_TYPE_VERSION] = "_GUARD_TYPE_VERSION",
     [_GUARD_TYPE_VERSION_AND_LOCK] = "_GUARD_TYPE_VERSION_AND_LOCK",
+    [_GUARD_YIELDING_IP] = "_GUARD_YIELDING_IP",
     [_IMPORT_FROM] = "_IMPORT_FROM",
     [_IMPORT_NAME] = "_IMPORT_NAME",
     [_INIT_CALL_BOUND_METHOD_EXACT_ARGS] = "_INIT_CALL_BOUND_METHOD_EXACT_ARGS",
@@ -731,6 +733,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _SEND_GEN_FRAME:
             return 1;
+        case _GUARD_YIELDING_IP:
+            return 0;
         case _YIELD_VALUE:
             return 1;
         case _POP_EXCEPT:

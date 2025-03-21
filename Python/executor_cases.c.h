@@ -1840,6 +1840,15 @@
             break;
         }
 
+        case _GUARD_YIELDING_IP: {
+            PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
+            if (frame->previous->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND  != (_Py_CODEUNIT *)instr_ptr) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
         case _YIELD_VALUE: {
             _PyStackRef retval;
             _PyStackRef value;

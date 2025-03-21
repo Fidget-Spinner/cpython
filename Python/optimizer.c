@@ -514,6 +514,25 @@ translate_bytecode_to_trace(
     }
 #endif
 
+    if (initial_instr->op.code == YIELD_VALUE_JIT) {
+        _Py_CODEUNIT *old_instr_ptr = instr;
+        frame = frame->previous;
+        assert(frame->owner == FRAME_OWNED_BY_GENERATOR);
+        char frame_owner = frame->owner;
+        if (frame_owner != FRAME_OWNED_BY_GENERATOR &&
+            frame_owner != FRAME_OWNED_BY_THREAD) {
+            DPRINTF(2, "Gen frame not owned by proper owner %d\n", frame_owner);
+            return 0;
+        }
+        instr = frame->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND;
+        ADD_TO_TRACE(_GUARD_YIELDING_IP, 0, (uint64_t)instr, INSTR_IP(old_instr_ptr, code));
+        ADD_TO_TRACE(_YIELD_VALUE, 0, 0, 0);
+        code = _PyFrame_GetCode(frame);
+        func = _PyFrame_GetFunction(frame);
+        _Py_BloomFilter_Add(dependencies, code);
+        initial_code = code;
+    }
+
     DPRINTF(2,
             "Optimizing %s (%s:%d) at byte offset %d\n",
             PyUnicode_AsUTF8(code->co_qualname),
@@ -562,6 +581,15 @@ translate_bytecode_to_trace(
             // better in practice, but in the future we could be smarter about
             // what we do here:
             goto done;
+        }
+        switch (opcode) {
+            case YIELD_VALUE_JIT:
+                opcode = YIELD_VALUE;
+                break;
+            case RESUME_JIT:
+                opcode = RESUME;
+                break;
+            default: break;
         }
         assert(opcode != ENTER_EXECUTOR && opcode != EXTENDED_ARG);
         if (OPCODE_HAS_NO_SAVE_IP(opcode)) {
