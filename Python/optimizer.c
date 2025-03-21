@@ -375,15 +375,11 @@ is_for_iter_test[MAX_UOP_ID + 1] = {
 };
 
 static const uint16_t
-BRANCH_TO_GUARD[4][2] = {
-    [POP_JUMP_IF_FALSE - POP_JUMP_IF_FALSE][0] = _GUARD_IS_TRUE_POP,
-    [POP_JUMP_IF_FALSE - POP_JUMP_IF_FALSE][1] = _GUARD_IS_FALSE_POP,
-    [POP_JUMP_IF_TRUE - POP_JUMP_IF_FALSE][0] = _GUARD_IS_FALSE_POP,
-    [POP_JUMP_IF_TRUE - POP_JUMP_IF_FALSE][1] = _GUARD_IS_TRUE_POP,
-    [POP_JUMP_IF_NONE - POP_JUMP_IF_FALSE][0] = _GUARD_IS_NOT_NONE_POP,
-    [POP_JUMP_IF_NONE - POP_JUMP_IF_FALSE][1] = _GUARD_IS_NONE_POP,
-    [POP_JUMP_IF_NOT_NONE - POP_JUMP_IF_FALSE][0] = _GUARD_IS_NONE_POP,
-    [POP_JUMP_IF_NOT_NONE - POP_JUMP_IF_FALSE][1] = _GUARD_IS_NOT_NONE_POP,
+BRANCH_TO_GUARD[MAX_UOP_ID + 1] = {
+    [POP_JUMP_IF_FALSE] = _GUARD_IS_TRUE_POP,
+    [POP_JUMP_IF_TRUE] = _GUARD_IS_FALSE_POP,
+    [POP_JUMP_IF_NONE] = _GUARD_IS_NOT_NONE_POP,
+    [POP_JUMP_IF_NOT_NONE] = _GUARD_IS_NONE_POP,
 };
 
 
@@ -595,7 +591,15 @@ translate_bytecode_to_trace(
             case POP_JUMP_IF_FALSE:
             case POP_JUMP_IF_TRUE:
             {
-                goto done;
+                if (!first) {
+                    goto done;
+                }
+                RESERVE(1);
+                uint32_t uopcode = BRANCH_TO_GUARD[opcode];
+                _Py_CODEUNIT *next_instr = instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                _Py_CODEUNIT *target_instr = next_instr + oparg;
+                ADD_TO_TRACE(uopcode, 0, 0, INSTR_IP(target_instr, code));
+                break;
             }
 
             case JUMP_BACKWARD:

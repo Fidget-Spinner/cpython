@@ -467,6 +467,7 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
     int opcode = 0;
     int oparg = 0;
     /* The last code unit cannot have a cache, so we don't need to check it */
+    int jit = PyThreadState_GET()->interp->jit;
     for (Py_ssize_t i = 0; i < size-1; i++) {
         opcode = instructions[i].op.code;
         int caches = _PyOpcode_Caches[opcode];
@@ -474,6 +475,22 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
         if (caches) {
             // The initial value depends on the opcode
             switch (opcode) {
+                case POP_JUMP_IF_NONE:
+                    instructions[i].op.code = jit ? POP_JUMP_IF_NONE_JIT : POP_JUMP_IF_NONE;
+                    instructions[i + 1].counter = jump_counter;
+                    break;
+                case POP_JUMP_IF_NOT_NONE:
+                    instructions[i].op.code = jit ? POP_JUMP_IF_NOT_NONE_JIT : POP_JUMP_IF_NOT_NONE;
+                    instructions[i + 1].counter = jump_counter;
+                    break;
+                case POP_JUMP_IF_FALSE:
+                    instructions[i].op.code = jit ? POP_JUMP_IF_FALSE_JIT : POP_JUMP_IF_FALSE;
+                    instructions[i + 1].counter = jump_counter;
+                    break;
+                case POP_JUMP_IF_TRUE:
+                    instructions[i].op.code = jit ? POP_JUMP_IF_TRUE_JIT : POP_JUMP_IF_TRUE;
+                    instructions[i + 1].counter = jump_counter;
+                    break;
                 case JUMP_BACKWARD:
                     instructions[i + 1].counter = jump_counter;
                     break;
@@ -484,12 +501,6 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
                 case RETURN_VALUE:
                     instructions[i].op.code = PyThreadState_GET()->interp->jit ? RETURN_VALUE_JIT: RETURN_VALUE_NO_JIT;
                     instructions[i + 1].counter = jump_counter;
-                    break;
-                case POP_JUMP_IF_FALSE:
-                case POP_JUMP_IF_TRUE:
-                case POP_JUMP_IF_NONE:
-                case POP_JUMP_IF_NOT_NONE:
-                    instructions[i + 1].cache = 0x5555;  // Alternating 0, 1 bits
                     break;
                 default:
                     instructions[i + 1].counter = adaptive_counter;

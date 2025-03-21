@@ -2801,10 +2801,16 @@ dummy_func(
             _Py_BackoffCounter counter = this_instr[1].counter;
             int this_instr_op_code = this_instr->op.code;
             int is_function_exit = this_instr_op_code == RETURN_VALUE_JIT;
+            int is_branch_instruction =
+                    this_instr_op_code == POP_JUMP_IF_TRUE_JIT ||
+                    this_instr_op_code == POP_JUMP_IF_FALSE_JIT ||
+                    this_instr_op_code == POP_JUMP_IF_NONE_JIT ||
+                    this_instr_op_code == POP_JUMP_IF_NOT_NONE_JIT;
             if (backoff_counter_triggers(counter) &&
                 (this_instr_op_code == JUMP_BACKWARD_JIT ||
                     is_function_exit ||
-                    this_instr_op_code == RESUME_JIT)) {
+                    this_instr_op_code == RESUME_JIT ||
+                    is_branch_instruction)) {
                 _Py_CODEUNIT *start = NULL;
                 if (is_function_exit) {
                     start = next_instr;
@@ -2903,7 +2909,6 @@ dummy_func(
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsFalse(cond);
             DEAD(cond);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
@@ -2911,7 +2916,6 @@ dummy_func(
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsTrue(cond);
             DEAD(cond);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
@@ -2933,6 +2937,14 @@ dummy_func(
         macro(POP_JUMP_IF_NONE) = unused/1 + _IS_NONE + _POP_JUMP_IF_TRUE;
 
         macro(POP_JUMP_IF_NOT_NONE) = unused/1 + _IS_NONE + _POP_JUMP_IF_FALSE;
+
+        macro(POP_JUMP_IF_TRUE_JIT) = unused/1 + _POP_JUMP_IF_TRUE + _JIT;
+
+        macro(POP_JUMP_IF_FALSE_JIT) = unused/1 + _POP_JUMP_IF_FALSE + _JIT;
+
+        macro(POP_JUMP_IF_NONE_JIT) = unused/1 + _IS_NONE + _POP_JUMP_IF_TRUE + _JIT;
+
+        macro(POP_JUMP_IF_NOT_NONE_JIT) = unused/1 + _IS_NONE + _POP_JUMP_IF_FALSE + _JIT;
 
         tier1 inst(JUMP_BACKWARD_NO_INTERRUPT, (--)) {
             /* This bytecode is used in the `yield from` or `await` loop.
@@ -4989,7 +5001,6 @@ dummy_func(
             _PyStackRef cond = POP();
             assert(PyStackRef_BoolCheck(cond));
             int jump = PyStackRef_IsTrue(cond);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, jump);
             if (jump) {
                 INSTRUMENTED_JUMP(this_instr, next_instr + oparg, PY_MONITORING_EVENT_BRANCH_RIGHT);
             }
@@ -4999,7 +5010,6 @@ dummy_func(
             _PyStackRef cond = POP();
             assert(PyStackRef_BoolCheck(cond));
             int jump = PyStackRef_IsFalse(cond);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, jump);
             if (jump) {
                 INSTRUMENTED_JUMP(this_instr, next_instr + oparg, PY_MONITORING_EVENT_BRANCH_RIGHT);
             }
@@ -5008,7 +5018,6 @@ dummy_func(
         inst(INSTRUMENTED_POP_JUMP_IF_NONE, (unused/1 -- )) {
             _PyStackRef value_stackref = POP();
             int jump = PyStackRef_IsNone(value_stackref);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, jump);
             if (jump) {
                 INSTRUMENTED_JUMP(this_instr, next_instr + oparg, PY_MONITORING_EVENT_BRANCH_RIGHT);
             }
@@ -5020,7 +5029,6 @@ dummy_func(
         inst(INSTRUMENTED_POP_JUMP_IF_NOT_NONE, (unused/1 -- )) {
             _PyStackRef value_stackref = POP();
             int jump = !PyStackRef_IsNone(value_stackref);
-            RECORD_BRANCH_TAKEN(this_instr[1].cache, jump);
             if (jump) {
                 PyStackRef_CLOSE(value_stackref);
                 INSTRUMENTED_JUMP(this_instr, next_instr + oparg, PY_MONITORING_EVENT_BRANCH_RIGHT);

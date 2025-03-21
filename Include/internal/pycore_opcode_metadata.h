@@ -389,11 +389,19 @@ int _PyOpcode_num_popped(int opcode, int oparg)  {
             return 1;
         case POP_JUMP_IF_FALSE:
             return 1;
+        case POP_JUMP_IF_FALSE_JIT:
+            return 1;
         case POP_JUMP_IF_NONE:
+            return 1;
+        case POP_JUMP_IF_NONE_JIT:
             return 1;
         case POP_JUMP_IF_NOT_NONE:
             return 1;
+        case POP_JUMP_IF_NOT_NONE_JIT:
+            return 1;
         case POP_JUMP_IF_TRUE:
+            return 1;
+        case POP_JUMP_IF_TRUE_JIT:
             return 1;
         case POP_TOP:
             return 1;
@@ -870,11 +878,19 @@ int _PyOpcode_num_pushed(int opcode, int oparg)  {
             return 0;
         case POP_JUMP_IF_FALSE:
             return 0;
+        case POP_JUMP_IF_FALSE_JIT:
+            return 0;
         case POP_JUMP_IF_NONE:
+            return 0;
+        case POP_JUMP_IF_NONE_JIT:
             return 0;
         case POP_JUMP_IF_NOT_NONE:
             return 0;
+        case POP_JUMP_IF_NOT_NONE_JIT:
+            return 0;
         case POP_JUMP_IF_TRUE:
+            return 0;
+        case POP_JUMP_IF_TRUE_JIT:
             return 0;
         case POP_TOP:
             return 0;
@@ -1725,7 +1741,15 @@ int _PyOpcode_max_stack_effect(int opcode, int oparg, int *effect)  {
             *effect = -1;
             return 0;
         }
+        case POP_JUMP_IF_FALSE_JIT: {
+            *effect = -1;
+            return 0;
+        }
         case POP_JUMP_IF_NONE: {
+            *effect = 0;
+            return 0;
+        }
+        case POP_JUMP_IF_NONE_JIT: {
             *effect = 0;
             return 0;
         }
@@ -1733,7 +1757,15 @@ int _PyOpcode_max_stack_effect(int opcode, int oparg, int *effect)  {
             *effect = 0;
             return 0;
         }
+        case POP_JUMP_IF_NOT_NONE_JIT: {
+            *effect = 0;
+            return 0;
+        }
         case POP_JUMP_IF_TRUE: {
+            *effect = -1;
+            return 0;
+        }
+        case POP_JUMP_IF_TRUE_JIT: {
             *effect = -1;
             return 0;
         }
@@ -2207,9 +2239,13 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[266] = {
     [POP_EXCEPT] = { true, INSTR_FMT_IX, HAS_ESCAPES_FLAG },
     [POP_ITER] = { true, INSTR_FMT_IX, HAS_ESCAPES_FLAG | HAS_PURE_FLAG },
     [POP_JUMP_IF_FALSE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG },
+    [POP_JUMP_IF_FALSE_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [POP_JUMP_IF_NONE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG },
+    [POP_JUMP_IF_NONE_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [POP_JUMP_IF_NOT_NONE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG },
+    [POP_JUMP_IF_NOT_NONE_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [POP_JUMP_IF_TRUE] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG },
+    [POP_JUMP_IF_TRUE_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [POP_TOP] = { true, INSTR_FMT_IX, HAS_ESCAPES_FLAG | HAS_PURE_FLAG },
     [PUSH_EXC_INFO] = { true, INSTR_FMT_IX, 0 },
     [PUSH_NULL] = { true, INSTR_FMT_IX, HAS_PURE_FLAG },
@@ -2646,9 +2682,13 @@ const char *_PyOpcode_OpName[266] = {
     [POP_EXCEPT] = "POP_EXCEPT",
     [POP_ITER] = "POP_ITER",
     [POP_JUMP_IF_FALSE] = "POP_JUMP_IF_FALSE",
+    [POP_JUMP_IF_FALSE_JIT] = "POP_JUMP_IF_FALSE_JIT",
     [POP_JUMP_IF_NONE] = "POP_JUMP_IF_NONE",
+    [POP_JUMP_IF_NONE_JIT] = "POP_JUMP_IF_NONE_JIT",
     [POP_JUMP_IF_NOT_NONE] = "POP_JUMP_IF_NOT_NONE",
+    [POP_JUMP_IF_NOT_NONE_JIT] = "POP_JUMP_IF_NOT_NONE_JIT",
     [POP_JUMP_IF_TRUE] = "POP_JUMP_IF_TRUE",
+    [POP_JUMP_IF_TRUE_JIT] = "POP_JUMP_IF_TRUE_JIT",
     [POP_TOP] = "POP_TOP",
     [PUSH_EXC_INFO] = "PUSH_EXC_INFO",
     [PUSH_NULL] = "PUSH_NULL",
@@ -2727,6 +2767,10 @@ const uint8_t _PyOpcode_Caches[256] = {
     [POP_JUMP_IF_FALSE] = 1,
     [POP_JUMP_IF_NONE] = 1,
     [POP_JUMP_IF_NOT_NONE] = 1,
+    [POP_JUMP_IF_TRUE_JIT] = 1,
+    [POP_JUMP_IF_FALSE_JIT] = 1,
+    [POP_JUMP_IF_NONE_JIT] = 1,
+    [POP_JUMP_IF_NOT_NONE_JIT] = 1,
     [FOR_ITER] = 1,
     [CALL] = 3,
     [CALL_KW] = 3,
@@ -2908,9 +2952,13 @@ const uint8_t _PyOpcode_Deopt[256] = {
     [POP_EXCEPT] = POP_EXCEPT,
     [POP_ITER] = POP_ITER,
     [POP_JUMP_IF_FALSE] = POP_JUMP_IF_FALSE,
+    [POP_JUMP_IF_FALSE_JIT] = POP_JUMP_IF_FALSE_JIT,
     [POP_JUMP_IF_NONE] = POP_JUMP_IF_NONE,
+    [POP_JUMP_IF_NONE_JIT] = POP_JUMP_IF_NONE_JIT,
     [POP_JUMP_IF_NOT_NONE] = POP_JUMP_IF_NOT_NONE,
+    [POP_JUMP_IF_NOT_NONE_JIT] = POP_JUMP_IF_NOT_NONE_JIT,
     [POP_JUMP_IF_TRUE] = POP_JUMP_IF_TRUE,
+    [POP_JUMP_IF_TRUE_JIT] = POP_JUMP_IF_TRUE_JIT,
     [POP_TOP] = POP_TOP,
     [PUSH_EXC_INFO] = PUSH_EXC_INFO,
     [PUSH_NULL] = PUSH_NULL,
@@ -2967,10 +3015,6 @@ const uint8_t _PyOpcode_Deopt[256] = {
 #endif // NEED_OPCODE_METADATA
 
 #define EXTRA_CASES \
-    case 117: \
-    case 118: \
-    case 119: \
-    case 120: \
     case 121: \
     case 122: \
     case 123: \
