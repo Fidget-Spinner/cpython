@@ -15,6 +15,7 @@
 #include "pycore_pystate.h"       // _PyInterpreterState_GET()
 #include "pycore_tuple.h" // _PyTuple_FromArraySteal
 #include "pycore_unicodeobject.h" // _PyUnicode_FromASCII
+#include "pycore_function.h"
 #include "pycore_uop_ids.h"
 #include "pycore_jit.h"
 #include <stdbool.h>
