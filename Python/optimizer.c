@@ -517,13 +517,14 @@ translate_bytecode_to_trace(
     if (initial_instr->op.code == YIELD_VALUE_JIT) {
         _Py_CODEUNIT *old_instr_ptr = instr;
         frame = frame->previous;
-        assert(frame->owner == FRAME_OWNED_BY_GENERATOR);
         char frame_owner = frame->owner;
         if (frame_owner != FRAME_OWNED_BY_GENERATOR &&
             frame_owner != FRAME_OWNED_BY_THREAD) {
             DPRINTF(2, "Gen frame not owned by proper owner %d\n", frame_owner);
             return 0;
         }
+        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
         instr = frame->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND;
         ADD_TO_TRACE(_GUARD_YIELDING_IP, 0, (uint64_t)instr, INSTR_IP(old_instr_ptr, code));
         ADD_TO_TRACE(_YIELD_VALUE, 0, 0, 0);
@@ -531,6 +532,7 @@ translate_bytecode_to_trace(
         func = _PyFrame_GetFunction(frame);
         _Py_BloomFilter_Add(dependencies, code);
         initial_code = code;
+        first = false;
     }
 
     DPRINTF(2,
@@ -539,8 +541,10 @@ translate_bytecode_to_trace(
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
             2 * INSTR_IP(initial_instr, code));
-    ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-    ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+    if (first) {
+        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+    }
     uint32_t target = 0;
 
     for (;;) {

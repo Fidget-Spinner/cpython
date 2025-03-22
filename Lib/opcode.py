@@ -65,6 +65,7 @@ _cache_format = {
     },
     "FOR_ITER": {
         "counter": 1,
+        "jit_counter": 1,
     },
     "LOAD_SUPER_ATTR": {
         "counter": 1,
@@ -93,6 +94,7 @@ _cache_format = {
     },
     "SEND": {
         "counter": 1,
+        "jit_counter": 1,
     },
     "JUMP_BACKWARD": {
         "counter": 1,

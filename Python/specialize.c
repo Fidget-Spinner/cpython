@@ -3087,7 +3087,7 @@ static _PyCodeArray init_cleanup_tlbc = {
 };
 #endif
 
-const struct _PyCode8 _Py_InitCleanup = {
+const struct _PyCode10 _Py_InitCleanup = {
     _PyVarObject_HEAD_INIT(&PyCode_Type, 3),
     .co_consts = (PyObject *)&_Py_SINGLETON(tuple_empty),
     .co_names = (PyObject *)&_Py_SINGLETON(tuple_empty),
@@ -3109,5 +3109,6 @@ const struct _PyCode8 _Py_InitCleanup = {
         EXIT_INIT_CHECK, 0,
         RETURN_VALUE, 0,
         RESUME, RESUME_AT_FUNC_START,
+        CACHE, 0,
     }
 };

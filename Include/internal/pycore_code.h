@@ -137,12 +137,14 @@ typedef struct {
 
 typedef struct {
     _Py_BackoffCounter counter;
+    _Py_BackoffCounter jit_counter;
 } _PyForIterCache;
 
 #define INLINE_CACHE_ENTRIES_FOR_ITER CACHE_ENTRIES(_PyForIterCache)
 
 typedef struct {
     _Py_BackoffCounter counter;
+    _Py_BackoffCounter jit_counter;
 } _PySendCache;
 
 #define INLINE_CACHE_ENTRIES_SEND CACHE_ENTRIES(_PySendCache)
@@ -516,9 +518,9 @@ extern int _PyInstruction_GetLength(PyCodeObject *code, int offset);
 
 extern PyObject *_PyInstrumentation_BranchesIterator(PyCodeObject *code);
 
-struct _PyCode8 _PyCode_DEF(8);
+struct _PyCode10 _PyCode_DEF(10);
 
-PyAPI_DATA(const struct _PyCode8) _Py_InitCleanup;
+PyAPI_DATA(const struct _PyCode10) _Py_InitCleanup;
 
 #ifdef Py_GIL_DISABLED
 
