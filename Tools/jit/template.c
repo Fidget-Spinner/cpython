@@ -26,6 +26,7 @@
 #include "pycore_stackref.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_function.h"
 
 #include "ceval_macros.h"
 

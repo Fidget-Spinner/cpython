@@ -22,6 +22,7 @@
 #include "pycore_sliceobject.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_function.h"
 
 #include "pycore_jit.h"
 
