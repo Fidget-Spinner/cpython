@@ -1844,7 +1844,7 @@
             receiver = stack_pointer[-2];
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
             PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
-            if (!PyGen_CheckExact(receiver_o)) {
+            if (Py_TYPE(receiver_o) != &PyGen_Type && Py_TYPE(receiver_o) != &PyCoro_Type) {
                 // Prevent infinite loops.
                 _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
                 if (1) {

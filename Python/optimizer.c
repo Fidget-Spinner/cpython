@@ -508,6 +508,7 @@ translate_bytecode_to_trace(
     int trace_stack_depth = 0;
     int confidence = CONFIDENCE_RANGE;  // Adjusted by branch instructions
     bool jump_seen = false;
+    bool is_special_trace = false;
     int initial_opcode = initial_instr->op.code;
 
 #ifdef Py_DEBUG
@@ -548,31 +549,32 @@ translate_bytecode_to_trace(
         initial_code = code;
         first = false;
     }
-//    else if (initial_opcode == SEND_GEN_JIT) {
-//        if (!PyGen_CheckExact(PyStackRef_AsPyObjectBorrow(frame->stackpointer[-2]))) {
-//            DPRINTF(2, "SEND_GEN received non-generator receiver\n");
-//            return 0;
-//        }
-//        PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(frame->stackpointer[-2]);
-//        _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
-//        frame = send_gen_frame;
-//
-//        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-//        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
-//        ADD_TO_TRACE(_GUARD_SENDING_IP, 0, (uint64_t)frame->instr_ptr, INSTR_IP(instr, code));
-//        ADD_TO_TRACE(_CHECK_PEP_523, 0, 0, 0);
-//        ADD_TO_TRACE(_SEND_GEN_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
-//        ADD_TO_TRACE(_SET_IP, 0, 0, INSTR_IP(instr, code));
-//        ADD_TO_TRACE(_PUSH_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
-//        code = _PyFrame_GetCode(frame);
-//        func = _PyFrame_GetFunction(frame);
-//        instr = frame->instr_ptr;
-//        _Py_BloomFilter_Add(dependencies, code);
-//        initial_code = code;
-//        first = false;
-//    }
+    else if (initial_opcode == SEND_GEN_JIT) {
+        PyTypeObject *typ = PyStackRef_TYPE(frame->stackpointer[-2]);
+        if (typ != &PyCoro_Type && typ != &PyGen_Type) {
+            DPRINTF(2, "SEND_GEN received non-generator receiver\n");
+            return 0;
+        }
+        PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(frame->stackpointer[-2]);
+        _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+        frame = send_gen_frame;
+
+        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_GUARD_SENDING_IP, 0, (uint64_t)frame->instr_ptr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_SET_IP, 0, (uint64_t)instr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_CHECK_PEP_523, 0, 0, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_SEND_GEN_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_PUSH_FRAME, initial_instr->op.arg, 0, 0);
+        code = _PyFrame_GetCode(frame);
+        func = _PyFrame_GetFunction(frame);
+        instr = frame->instr_ptr;
+        _Py_BloomFilter_Add(dependencies, code);
+        initial_code = code;
+        first = false;
+    }
     else if (initial_opcode == FOR_ITER_GEN_JIT) {
-        if (!PyGen_CheckExact(PyStackRef_AsPyObjectBorrow(frame->stackpointer[-1]))) {
+        if (PyStackRef_TYPE(frame->stackpointer[-1]) != &PyGen_Type) {
             DPRINTF(2, "FOR_ITER_GEN received non-generator receiver\n");
             return 0;
         }
@@ -1006,7 +1008,7 @@ done:
     }
     // assert(code == initial_code);/
     // Skip short traces where we can't even translate a single instruction:
-    if (first) {
+    if (first || trace_length <= 5) {
         OPT_STAT_INC(trace_too_short);
         DPRINTF(2,
                 "No trace for %s (%s:%d) at byte offset %d (no progress)\n",
