@@ -267,6 +267,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GUARD_IS_NONE_POP] = HAS_EXIT_FLAG | HAS_ESCAPES_FLAG,
     [_GUARD_IS_NOT_NONE_POP] = HAS_EXIT_FLAG | HAS_ESCAPES_FLAG,
     [_JUMP_TO_TOP] = 0,
+    [_JUMP_ABS] = 0,
     [_SET_IP] = 0,
     [_CHECK_STACK_SPACE_OPERAND] = HAS_DEOPT_FLAG,
     [_SAVE_RETURN_OFFSET] = HAS_ARG_FLAG,
@@ -279,7 +280,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_POP_TWO_LOAD_CONST_INLINE_BORROW] = HAS_ESCAPES_FLAG | HAS_PURE_FLAG,
     [_CHECK_FUNCTION] = HAS_DEOPT_FLAG,
     [_START_EXECUTOR] = HAS_ESCAPES_FLAG,
-    [_MAKE_WARM] = 0,
+    [_MAKE_WARM] = HAS_DEOPT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_MAKE_WARM_NO_RECOMPILE] = 0,
     [_FATAL_ERROR] = 0,
     [_CHECK_VALIDITY_AND_SET_IP] = HAS_DEOPT_FLAG,
     [_DEOPT] = 0,
@@ -438,6 +440,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_ITER_NEXT_LIST_TIER_TWO] = "_ITER_NEXT_LIST_TIER_TWO",
     [_ITER_NEXT_RANGE] = "_ITER_NEXT_RANGE",
     [_ITER_NEXT_TUPLE] = "_ITER_NEXT_TUPLE",
+    [_JUMP_ABS] = "_JUMP_ABS",
     [_JUMP_TO_TOP] = "_JUMP_TO_TOP",
     [_LIST_APPEND] = "_LIST_APPEND",
     [_LIST_EXTEND] = "_LIST_EXTEND",
@@ -490,6 +493,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_MAKE_CELL] = "_MAKE_CELL",
     [_MAKE_FUNCTION] = "_MAKE_FUNCTION",
     [_MAKE_WARM] = "_MAKE_WARM",
+    [_MAKE_WARM_NO_RECOMPILE] = "_MAKE_WARM_NO_RECOMPILE",
     [_MAP_ADD] = "_MAP_ADD",
     [_MATCH_CLASS] = "_MATCH_CLASS",
     [_MATCH_KEYS] = "_MATCH_KEYS",
@@ -1061,6 +1065,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _JUMP_TO_TOP:
             return 0;
+        case _JUMP_ABS:
+            return 0;
         case _SET_IP:
             return 0;
         case _CHECK_STACK_SPACE_OPERAND:
@@ -1086,6 +1092,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _START_EXECUTOR:
             return 0;
         case _MAKE_WARM:
+            return 0;
+        case _MAKE_WARM_NO_RECOMPILE:
             return 0;
         case _FATAL_ERROR:
             return 0;

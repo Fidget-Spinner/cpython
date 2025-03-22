@@ -5168,6 +5168,10 @@ dummy_func(
             JUMP_TO_JUMP_TARGET();
         }
 
+        op(_JUMP_ABS, (--)) {
+            JUMP_TO_JUMP_TARGET();
+        }
+
         tier2 op(_SET_IP, (instr_ptr/4 --)) {
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
@@ -5275,8 +5279,33 @@ dummy_func(
             assert(((_PyExecutorObject *)executor)->vm_data.valid);
         }
 
-        tier2 op(_MAKE_WARM, (--)) {
+        tier2 op(_MAKE_WARM, (tar/4 --)) {
             current_executor->vm_data.warm = true;
+            if (backoff_counter_triggers(current_executor->vm_data.recompile_counter)) {
+                _PyExecutorObject *executor;
+                int offset;
+                int res = _PyOptimizer_ReOptimize(frame, current_executor, &executor, &offset, (_Py_CODEUNIT*)tar);
+                if (res <= 0) {
+                    current_executor->vm_data.recompile_counter = restart_backoff_counter(current_executor->vm_data.recompile_counter);
+                    ERROR_IF(res < 0, error);
+                }
+                else {
+                    current_executor->vm_data.recompile_counter = initial_recompile_backoff_counter();
+                    // Re-enter the new executor.
+                    DEOPT_IF(1);
+                }
+            }
+            else {
+                ADVANCE_ADAPTIVE_COUNTER(current_executor->vm_data.recompile_counter);
+            }
+            // It's okay if this ends up going negative.
+            if (--tstate->interp->trace_run_counter == 0) {
+                _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);
+            }
+        }
+
+        tier2 op(_MAKE_WARM_NO_RECOMPILE, (exec/4 --)) {
+            ((_PyExecutorObject *)exec)->vm_data.warm = true;
             // It's okay if this ends up going negative.
             if (--tstate->interp->trace_run_counter == 0) {
                 _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);

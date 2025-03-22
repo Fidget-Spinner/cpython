@@ -2367,6 +2367,10 @@
             break;
         }
 
+        case _JUMP_ABS: {
+            break;
+        }
+
         case _SET_IP: {
             break;
         }
@@ -2449,6 +2453,10 @@
         }
 
         case _MAKE_WARM: {
+            break;
+        }
+
+        case _MAKE_WARM_NO_RECOMPILE: {
             break;
         }
 

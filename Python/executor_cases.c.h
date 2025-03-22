@@ -6851,6 +6851,11 @@
             break;
         }
 
+        case _JUMP_ABS: {
+            JUMP_TO_JUMP_TARGET();
+            break;
+        }
+
         case _SET_IP: {
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
@@ -7046,7 +7051,44 @@
         }
 
         case _MAKE_WARM: {
+            PyObject *tar = (PyObject *)CURRENT_OPERAND0();
             current_executor->vm_data.warm = true;
+            if (backoff_counter_triggers(current_executor->vm_data.recompile_counter)) {
+                _PyExecutorObject *executor;
+                int offset;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                int res = _PyOptimizer_ReOptimize(frame, current_executor, &executor, &offset, (_Py_CODEUNIT*)tar);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                if (res <= 0) {
+                    current_executor->vm_data.recompile_counter = restart_backoff_counter(current_executor->vm_data.recompile_counter);
+                    if (res < 0) {
+                        JUMP_TO_ERROR();
+                    }
+                }
+                else {
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    current_executor->vm_data.recompile_counter = initial_recompile_backoff_counter();
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    // Re-enter the new executor.
+                    if (1) {
+                        UOP_STAT_INC(uopcode, miss);
+                        JUMP_TO_JUMP_TARGET();
+                    }
+                }
+            }
+            else {
+                ADVANCE_ADAPTIVE_COUNTER(current_executor->vm_data.recompile_counter);
+            }
+            // It's okay if this ends up going negative.
+            if (--tstate->interp->trace_run_counter == 0) {
+                _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);
+            }
+            break;
+        }
+
+        case _MAKE_WARM_NO_RECOMPILE: {
+            PyObject *exec = (PyObject *)CURRENT_OPERAND0();
+            ((_PyExecutorObject *)exec)->vm_data.warm = true;
             // It's okay if this ends up going negative.
             if (--tstate->interp->trace_run_counter == 0) {
                 _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);

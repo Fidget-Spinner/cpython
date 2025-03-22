@@ -93,6 +93,7 @@ insert_executor(PyCodeObject *code, _Py_CODEUNIT *instr, int index, _PyExecutorO
     executor->vm_data.oparg = instr->op.arg;
     executor->vm_data.code = code;
     executor->vm_data.index = (int)(instr - _PyCode_CODE(code));
+    executor->vm_data.recompile_counter = initial_recompile_backoff_counter();
     code->co_executors->executors[index] = executor;
     assert(index < MAX_EXECUTORS_SIZE);
     instr->op.code = ENTER_EXECUTOR;
@@ -153,6 +154,228 @@ _PyOptimizer_Optimize(
     (*executor_ptr)->vm_data.chain_depth = chain_depth;
     assert((*executor_ptr)->vm_data.valid);
     return 1;
+}
+
+#ifdef Py_DEBUG
+#define DPRINTF(level, ...) \
+    if (lltrace >= (level)) { printf(__VA_ARGS__); }
+#else
+#define DPRINTF(level, ...)
+#endif
+
+void _PyUOpPrint(const _PyUOpInstruction *uop);
+
+#define EXEC_MAPPING_MAX_SIZE 20
+
+typedef struct _PyExecutorMapping {
+    struct {
+        _PyExecutorObject *exec;
+        long offset;
+    } execs[EXEC_MAPPING_MAX_SIZE];
+    int used;
+} _PyExecutorMapping;
+
+long
+executor_in_mapping(_PyExecutorMapping *mapping, _PyExecutorObject *exec)
+{
+    for (int i = 0; i < mapping->used; i++) {
+        if (mapping->execs[i].exec == exec) {
+            return mapping->execs[i].offset;
+        }
+    }
+    return -1;
+}
+
+int
+insert_executor_into_mapping(_PyExecutorMapping *mapping, _PyExecutorObject *exec, long offset)
+{
+    int next = mapping->used;
+    if (next >= EXEC_MAPPING_MAX_SIZE) {
+        return -1;
+    }
+    mapping->execs[next].exec = exec;
+    mapping->execs[next].offset = offset;
+    mapping->used++;
+    return 0;
+}
+
+int
+combine_traces(long curr_start_length, long *updated_max_length, const _PyExecutorObject *root_executor, const _PyExecutorObject *from_executor, _PyUOpInstruction *buffer, _PyExecutorMapping *mapping)
+{
+#ifdef Py_DEBUG
+    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
+    int lltrace = 0;
+    if (python_lltrace != NULL && *python_lltrace >= '0') {
+        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
+    }
+#endif
+    DPRINTF(2, "Merging executor %p:%ld:%d\n", from_executor, curr_start_length, from_executor->code_size);
+    const _PyUOpInstruction *from_buffer = from_executor->trace;
+    *updated_max_length = from_executor->code_size + *updated_max_length;
+    if (*updated_max_length >= UOP_MAX_REOPTIMIZE_LENGTH) {
+        DPRINTF(1, "Trace tree too big %ld\n", *updated_max_length);
+        return 0;
+    }
+    memcpy(&buffer[curr_start_length], from_executor->trace, from_executor->code_size * sizeof(_PyUOpInstruction));
+    for (long x = curr_start_length; x < curr_start_length + from_executor->code_size; x++) {
+        if (_PyUop_Flags[buffer[x].opcode] & HAS_EXIT_FLAG) {
+            _PyUOpInstruction *exit_inst = &buffer[curr_start_length + buffer[x].jump_target];
+            assert(exit_inst->opcode == _EXIT_TRACE);
+            _PyExitData *exit = (_PyExitData *)exit_inst->operand0;
+            buffer[x].jump_target = curr_start_length + buffer[x].jump_target;
+            if (exit->executor == NULL) {
+                continue;
+            }
+            // Fix up the exits.
+            exit_inst->opcode = _JUMP_ABS;
+            exit_inst->format = UOP_FORMAT_JUMP;
+            long executor_offset = executor_in_mapping(mapping, exit->executor);
+            if (executor_offset >= 0) {
+                exit_inst->jump_target = executor_offset;
+            }
+            else {
+                if (insert_executor_into_mapping(mapping, exit->executor, *updated_max_length) < 0) {
+                    DPRINTF(2, "Out of space in executor mapping\n");
+                    return 0;
+                }
+                exit_inst->jump_target = *updated_max_length;
+                if (!combine_traces(*updated_max_length, updated_max_length, root_executor, exit->executor, buffer, mapping)) {
+                    return 0;
+                }
+            }
+            assert(buffer[exit_inst->jump_target].opcode == _START_EXECUTOR);
+            // buffer[buffer[x].jump_target].opcode = _NOP;
+        }
+        else if (_PyUop_Flags[buffer[x].opcode] & HAS_ERROR_FLAG) {
+            _PyUOpInstruction *exit_inst = &buffer[curr_start_length + buffer[x].error_target];
+            assert(exit_inst->opcode == _ERROR_POP_N);
+            _PyExitData *exit = (_PyExitData *)exit_inst->operand0;
+            buffer[x].error_target = curr_start_length +  buffer[x].error_target;
+        }
+        else if (_PyUop_Flags[buffer[x].opcode] & HAS_DEOPT_FLAG) {
+            _PyUOpInstruction *exit_inst = &buffer[curr_start_length + buffer[x].jump_target];
+            assert(exit_inst->opcode == _DEOPT);
+            _PyExitData *exit = (_PyExitData *)exit_inst->operand0;
+            buffer[x].jump_target = curr_start_length + buffer[x].jump_target;
+        }
+        if (buffer[x].opcode == _JUMP_TO_TOP) {
+            buffer[x].jump_target = curr_start_length;
+        }
+        if (buffer[x].opcode == _MAKE_WARM) {
+            buffer[x].opcode = _MAKE_WARM_NO_RECOMPILE;
+            buffer[x].operand0 = (uint64_t)root_executor;
+        }
+    }
+}
+
+static int count_exits(_PyUOpInstruction *buffer, int length);
+static _PyExecutorObject * allocate_executor(int exit_count, int length);
+
+int
+_PyOptimizer_ReOptimize(_PyInterpreterFrame *frame, _PyExecutorObject *current_executor, _PyExecutorObject **exec_ptr, int *offset, _Py_CODEUNIT *target)
+{
+    PyCodeObject *code = _PyFrame_GetCode(frame);
+    _Py_CODEUNIT *code_arr = _PyCode_CODE(code);
+#ifdef Py_DEBUG
+    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
+    int lltrace = 0;
+    if (python_lltrace != NULL && *python_lltrace >= '0') {
+        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
+    }
+#endif
+    if (current_executor->vm_data.chain_depth != 0) {
+        DPRINTF(2, "Not root executor\n");
+        return 0;
+    }
+    assert(target->op.code == ENTER_EXECUTOR);
+    _PyExecutorObject *root_executor = code->co_executors->executors[target->op.arg & 255];
+    assert(root_executor == current_executor);
+    PyInterpreterState *is = PyInterpreterState_Get();
+    _PyUOpInstruction *buffer = is->buffer;
+    long curr_max_length = 0;
+    char *env_var = Py_GETENV("PYTHON_UOPS_STITCH");
+
+    _PyExecutorMapping mapping;
+    mapping.used = 0;
+
+    if (env_var != NULL && *env_var > '0') {
+        if (!combine_traces(0, &curr_max_length, root_executor, root_executor, buffer, &mapping)) {
+            DPRINTF(2, "Failed to combine traces\n");
+            return 0;
+        }
+    }
+    else {
+        return 0;
+    }
+#ifdef Py_DEBUG
+    if (lltrace >= 2) {
+        printf("Stitched trace (length %d):\n", curr_max_length);
+        for (int i = 0; i < curr_max_length; i++) {
+            printf("%4d Stitched: ", i);
+            _PyUOpPrint(&buffer[i]);
+            printf("\n");
+        }
+    }
+#endif
+
+    int exit_count = count_exits(buffer, curr_max_length);
+    _PyExecutorObject *executor = allocate_executor(exit_count, curr_max_length);
+    if (executor == NULL) {
+        return -1;
+    }
+    /* Initialize exits */
+    for (int i = 0; i < exit_count; i++) {
+        executor->exits[i].executor = NULL;
+        executor->exits[i].temperature = initial_temperature_backoff_counter();
+    }
+    int next_exit = exit_count-1;
+    _PyUOpInstruction *dest = (_PyUOpInstruction *)&executor->trace[curr_max_length];
+    assert(buffer[0].opcode == _START_EXECUTOR);
+    buffer[0].operand0 = (uint64_t)executor;
+    for (int i = curr_max_length-1; i >= 0; i--) {
+        int opcode = buffer[i].opcode;
+        dest--;
+        *dest = buffer[i];
+        assert(opcode != _POP_JUMP_IF_FALSE && opcode != _POP_JUMP_IF_TRUE);
+        if (opcode == _EXIT_TRACE) {
+            _PyExitData *exit = &executor->exits[next_exit];
+            exit->target = buffer[i].target;
+            dest->operand0 = (uint64_t)exit;
+            next_exit--;
+        }
+    }
+    assert(next_exit == -1);
+    assert(dest == executor->trace);
+    assert(dest->opcode == _START_EXECUTOR);
+    _Py_ExecutorInit(executor, &root_executor->vm_data.bloom);
+#ifdef _Py_JIT
+    executor->jit_code = NULL;
+    executor->jit_side_entry = NULL;
+    executor->jit_size = 0;
+    // This is initialized to true so we can prevent the executor
+    // from being immediately detected as cold and invalidated.
+    executor->vm_data.warm = true;
+    if (_PyJIT_Compile(executor, executor->trace, curr_max_length)) {
+        Py_DECREF(executor);
+        return -1;
+    }
+#endif
+    _PyObject_GC_TRACK(executor);
+    int index = get_index_for_executor(code, target);
+    if (index < 0) {
+        /* Out of memory. Don't raise and assume that the
+         * error will show up elsewhere.
+         *
+         * If an optimizer has already produced an executor,
+         * it might get confused by the executor disappearing,
+         * but there is not much we can do about that here. */
+        Py_DECREF(executor);
+        return 0;
+    }
+    insert_executor(code, target, index, executor);
+    executor->vm_data.chain_depth = 0;
+    *exec_ptr = executor;
+    return 0;
 }
 
 static _PyExecutorObject *
@@ -532,7 +755,7 @@ translate_bytecode_to_trace(
             return 0;
         }
         ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_MAKE_WARM, 0, 0, INSTR_IP(instr, code));
         assert(frame->instr_ptr->op.code == INSTRUMENTED_LINE ||
                frame->instr_ptr->op.code == INSTRUMENTED_INSTRUCTION ||
                _PyOpcode_Deopt[frame->instr_ptr->op.code] == SEND ||
@@ -560,7 +783,7 @@ translate_bytecode_to_trace(
         frame = send_gen_frame;
 
         ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_MAKE_WARM, 0, (uint64_t)instr, INSTR_IP(instr, code));
         ADD_TO_TRACE(_GUARD_SENDING_IP, 0, (uint64_t)frame->instr_ptr, INSTR_IP(instr, code));
         ADD_TO_TRACE(_SET_IP, 0, (uint64_t)instr, INSTR_IP(instr, code));
         ADD_TO_TRACE(_CHECK_PEP_523, 0, 0, INSTR_IP(instr, code));
@@ -588,7 +811,7 @@ translate_bytecode_to_trace(
         }
 
         ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_MAKE_WARM, 0, (uint64_t)instr, INSTR_IP(instr, code));
         ADD_TO_TRACE(_GUARD_SENDING_ITERATOR_IP, 0, (uint64_t)frame->instr_ptr, INSTR_IP(instr, code));
         ADD_TO_TRACE(_SET_IP, 0, (uint64_t)instr, 0);
         ADD_TO_TRACE(_CHECK_PEP_523, 0, 0, 0);
@@ -612,7 +835,7 @@ translate_bytecode_to_trace(
             return 0;
         }
         ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_MAKE_WARM, 0, (uint64_t)instr, INSTR_IP(instr, code));
         instr = frame->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND;
         ADD_TO_TRACE(_GUARD_YIELDING_IP, 0, (uint64_t)instr, INSTR_IP(old_instr_ptr, code));
         ADD_TO_TRACE(_YIELD_VALUE, 0, 0, 0);
@@ -631,7 +854,7 @@ translate_bytecode_to_trace(
             2 * INSTR_IP(initial_instr, code));
     if (first) {
         ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
-        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_MAKE_WARM, 0, (uint64_t)instr, INSTR_IP(instr, code));
     }
     uint32_t target = 0;
 
@@ -1008,7 +1231,7 @@ done:
     }
     // assert(code == initial_code);/
     // Skip short traces where we can't even translate a single instruction:
-    if (first || trace_length <= 5) {
+    if (first) {
         OPT_STAT_INC(trace_too_short);
         DPRINTF(2,
                 "No trace for %s (%s:%d) at byte offset %d (no progress)\n",
@@ -1742,9 +1965,9 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
 #else
         fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s</td></tr>\n", i, opname);
 #endif
-        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
-            break;
-        }
+//        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+//            break;
+//        }
     }
     fprintf(out, "    </table>>\n");
     fprintf(out, "]\n\n");
@@ -1760,15 +1983,15 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
         else if (flags & HAS_EXIT_FLAG) {
             assert(inst->format == UOP_FORMAT_JUMP);
             _PyUOpInstruction const *exit_inst = &executor->trace[inst->jump_target];
-            assert(exit_inst->opcode == _EXIT_TRACE);
+            assert(exit_inst->opcode == _EXIT_TRACE || exit_inst->opcode == _JUMP_ABS);
             exit = (_PyExitData *)exit_inst->operand0;
         }
         if (exit != NULL && exit->executor != NULL) {
             fprintf(out, "executor_%p:i%d -> executor_%p:start\n", executor, i, exit->executor);
         }
-        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
-            break;
-        }
+//        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+//            break;
+//        }
     }
 }
 

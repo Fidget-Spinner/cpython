@@ -409,6 +409,13 @@ do { \
     assert(next_uop->opcode == _START_EXECUTOR); \
     goto enter_tier_two; \
 } while (0)
+
+#define GOTO_TIER_THREE(EXECUTOR, OFFSET) \
+do { \
+    OPT_STAT_INC(traces_executed); \
+    next_uop = (EXECUTOR)->trace + (OFFSET); \
+    goto enter_tier_two; \
+} while (0)
 #endif
 
 #define GOTO_TIER_ONE(TARGET)                                         \

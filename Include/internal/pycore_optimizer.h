@@ -11,7 +11,7 @@ extern "C" {
 #include "pycore_typedefs.h"      // _PyInterpreterFrame
 #include "pycore_uop_ids.h"
 #include <stdbool.h>
-
+#include "pycore_code.h"
 
 typedef struct _PyExecutorLinkListNode {
     struct _PyExecutorObject *next;
@@ -34,6 +34,7 @@ typedef struct {
     uint8_t linked:1;
     uint8_t chain_depth:6;  // Must be big enough for MAX_CHAIN_DEPTH - 1.
     bool warm;
+    _Py_BackoffCounter recompile_counter;
     int index;           // Index of ENTER_EXECUTOR (if code isn't NULL, below).
     _PyBloomFilter bloom;
     _PyExecutorLinkListNode links;
@@ -53,7 +54,7 @@ typedef struct {
     uint16_t format:1;
     uint16_t oparg;
     union {
-        uint32_t target;
+        uint64_t target;
         struct {
             uint16_t jump_target;
             uint16_t error_target;
@@ -115,6 +116,7 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 
 // This is the length of the trace we project initially.
 #define UOP_MAX_TRACE_LENGTH 800
+#define UOP_MAX_REOPTIMIZE_LENGTH UOP_MAX_TRACE_LENGTH * 10
 
 #define TRACE_STACK_SIZE 5
 
@@ -293,6 +295,7 @@ extern int _Py_uop_frame_pop(JitOptContext *ctx);
 PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 
 PyAPI_FUNC(int) _PyOptimizer_Optimize(_PyInterpreterFrame *frame, _Py_CODEUNIT *start, _PyExecutorObject **exec_ptr, int chain_depth);
+PyAPI_FUNC(int) _PyOptimizer_ReOptimize(_PyInterpreterFrame *frame, _PyExecutorObject *current_executor, _PyExecutorObject **exec_ptr, int *offset, _Py_CODEUNIT *target);
 
 static inline int is_terminator(const _PyUOpInstruction *uop)
 {
