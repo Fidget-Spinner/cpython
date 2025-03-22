@@ -105,6 +105,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GET_ANEXT] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_GET_AWAITABLE] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_SEND_GEN_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
+    [_GUARD_SENDING_IP] = HAS_EXIT_FLAG,
     [_GUARD_YIELDING_IP] = HAS_EXIT_FLAG,
     [_YIELD_VALUE] = HAS_ARG_FLAG,
     [_POP_EXCEPT] = HAS_ESCAPES_FLAG,
@@ -194,6 +195,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GUARD_NOT_EXHAUSTED_RANGE] = HAS_EXIT_FLAG,
     [_ITER_NEXT_RANGE] = HAS_ERROR_FLAG,
     [_FOR_ITER_GEN_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
+    [_GUARD_SENDING_ITERATOR_IP] = HAS_EXIT_FLAG,
     [_LOAD_SPECIAL] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_WITH_EXCEPT_START] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_PUSH_EXC_INFO] = 0,
@@ -412,6 +414,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GUARD_NOT_EXHAUSTED_LIST] = "_GUARD_NOT_EXHAUSTED_LIST",
     [_GUARD_NOT_EXHAUSTED_RANGE] = "_GUARD_NOT_EXHAUSTED_RANGE",
     [_GUARD_NOT_EXHAUSTED_TUPLE] = "_GUARD_NOT_EXHAUSTED_TUPLE",
+    [_GUARD_SENDING_IP] = "_GUARD_SENDING_IP",
+    [_GUARD_SENDING_ITERATOR_IP] = "_GUARD_SENDING_ITERATOR_IP",
     [_GUARD_TOS_FLOAT] = "_GUARD_TOS_FLOAT",
     [_GUARD_TOS_INT] = "_GUARD_TOS_INT",
     [_GUARD_TYPE_VERSION] = "_GUARD_TYPE_VERSION",
@@ -733,6 +737,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _SEND_GEN_FRAME:
             return 1;
+        case _GUARD_SENDING_IP:
+            return 0;
         case _GUARD_YIELDING_IP:
             return 0;
         case _YIELD_VALUE:
@@ -910,6 +916,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _ITER_NEXT_RANGE:
             return 0;
         case _FOR_ITER_GEN_FRAME:
+            return 0;
+        case _GUARD_SENDING_ITERATOR_IP:
             return 0;
         case _LOAD_SPECIAL:
             return 1;

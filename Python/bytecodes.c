@@ -1196,6 +1196,7 @@ dummy_func(
 
         family(SEND, INLINE_CACHE_ENTRIES_SEND) = {
             SEND_GEN,
+            SEND_GEN_JIT,
         };
 
         specializing op(_SPECIALIZE_SEND, (counter/1, receiver, unused -- receiver, unused)) {
@@ -1277,8 +1278,31 @@ dummy_func(
             gen_frame->previous = frame;
         }
 
+        op(_GUARD_SENDING_IP, (instr_ptr/4, receiver, unused -- receiver, unused)) {
+            PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
+            if (!PyGen_CheckExact(receiver_o)) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                EXIT_IF(1);
+            }
+            PyGenObject *gen = (PyGenObject *)receiver_o;
+            _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+            if (send_gen_frame->instr_ptr != (_Py_CODEUNIT *)instr_ptr) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                EXIT_IF(1);
+            }
+        }
+
         macro(SEND_GEN) =
             unused/2 +
+            _CHECK_PEP_523 +
+            _SEND_GEN_FRAME +
+            _PUSH_FRAME;
+
+        macro(SEND_GEN_JIT) =
+            unused/2 +
+            _JIT +
             _CHECK_PEP_523 +
             _SEND_GEN_FRAME +
             _PUSH_FRAME;
@@ -1287,8 +1311,18 @@ dummy_func(
 
         macro(YIELD_VALUE) = unused/1 + _YIELD_VALUE;
 
-        op(_GUARD_YIELDING_IP, (instr_ptr/4--)) {
-            EXIT_IF(frame->previous->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND  != (_Py_CODEUNIT *)instr_ptr);
+        op(_GUARD_YIELDING_IP, (instr_ptr_1/4, instr_ptr_2/4 --)) {
+            // 2 for INSTRUCTION_SIZE of YIELD_VALUE
+            if (frame->instr_ptr != (_Py_CODEUNIT *)instr_ptr_1) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                EXIT_IF(1);
+            }
+            if (frame->previous->instr_ptr  != (_Py_CODEUNIT *)instr_ptr_2) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                EXIT_IF(1);
+            }
         }
 
         op(_YIELD_VALUE, (retval -- value)) {
@@ -2792,14 +2826,12 @@ dummy_func(
         #endif
         }
 
-        tier1 op(_JIT, (--)) {
+        tier1 op(_JIT_GEN, (--)) {
         #ifdef _Py_TIER2
-            _Py_BackoffCounter counter = this_instr[1].counter;
             int this_instr_opcode = this_instr->op.code;
+            _Py_BackoffCounter counter = this_instr[2].counter;
             if (backoff_counter_triggers(counter) &&
-                (this_instr_opcode == JUMP_BACKWARD_JIT ||
-                 this_instr_opcode == RESUME_JIT ||
-                 this_instr_opcode == YIELD_VALUE_JIT)) {
+                (this_instr_opcode == FOR_ITER_GEN_JIT)) {
                 _Py_CODEUNIT *start = this_instr;
                 /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                 while (oparg > 255) {
@@ -2809,18 +2841,53 @@ dummy_func(
                 _PyExecutorObject *executor;
                 int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
                 if (optimized <= 0) {
-                    this_instr[1].counter = restart_backoff_counter(counter);
+                    this_instr[2].counter = restart_backoff_counter(counter);
                     ERROR_IF(optimized < 0, error);
                 }
                 else {
-                    this_instr[1].counter = initial_jump_backoff_counter();
+                    this_instr[2].counter = initial_gen_backoff_counter();
                     assert(tstate->previous_executor == NULL);
                     tstate->previous_executor = Py_None;
                     GOTO_TIER_TWO(executor);
                 }
             }
             else {
-                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                ADVANCE_ADAPTIVE_COUNTER(this_instr[2].counter);
+            }
+        #endif
+        }
+
+        tier1 op(_JIT, (--)) {
+        #ifdef _Py_TIER2
+            int this_instr_opcode = this_instr->op.code;
+            int is_for_iter_or_send = this_instr_opcode  == SEND_GEN_JIT;
+            _Py_BackoffCounter counter = this_instr[is_for_iter_or_send ? 2 : 1].counter;
+            if (backoff_counter_triggers(counter) &&
+                (this_instr_opcode == JUMP_BACKWARD_JIT ||
+                 this_instr_opcode == RESUME_JIT ||
+                 this_instr_opcode == YIELD_VALUE_JIT ||
+                 is_for_iter_or_send)) {
+                _Py_CODEUNIT *start = this_instr;
+                /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                while (oparg > 255) {
+                    oparg >>= 8;
+                    start--;
+                }
+                _PyExecutorObject *executor;
+                int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                if (optimized <= 0) {
+                    this_instr[is_for_iter_or_send ? 2 : 1].counter = restart_backoff_counter(counter);
+                    ERROR_IF(optimized < 0, error);
+                }
+                else {
+                    this_instr[is_for_iter_or_send ? 2 : 1].counter = initial_jump_backoff_counter();
+                    assert(tstate->previous_executor == NULL);
+                    tstate->previous_executor = Py_None;
+                    GOTO_TIER_TWO(executor);
+                }
+            }
+            else {
+                ADVANCE_ADAPTIVE_COUNTER(this_instr[is_for_iter_or_send ? 2 : 1].counter);
             }
         #endif
         }
@@ -2871,7 +2938,7 @@ dummy_func(
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
-            if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
+            if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & (_PY_EVAL_EVENTS_MASK | _Py_EVAL_JIT_DONT_ENTER_BIT)) {
                 opcode = executor->vm_data.opcode;
                 oparg = (oparg & ~255) | executor->vm_data.oparg;
                 next_instr = this_instr;
@@ -3029,6 +3096,7 @@ dummy_func(
             FOR_ITER_TUPLE,
             FOR_ITER_RANGE,
             FOR_ITER_GEN,
+            FOR_ITER_GEN_JIT,
         };
 
         specializing op(_SPECIALIZE_FOR_ITER, (counter/1, iter -- iter)) {
@@ -3365,6 +3433,29 @@ dummy_func(
             // oparg is the return offset from the next instruction.
             frame->return_offset = (uint16_t)(INSTRUCTION_SIZE + oparg);
         }
+
+        op(_GUARD_SENDING_ITERATOR_IP, (instr_ptr/4, iter -- iter)) {
+            PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(iter);
+            if (!PyGen_CheckExact(receiver_o)) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                EXIT_IF(1);
+            }
+            PyGenObject *gen = (PyGenObject *)receiver_o;
+            _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+            if (send_gen_frame->instr_ptr != (_Py_CODEUNIT *)instr_ptr) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                EXIT_IF(1);
+            }
+        }
+
+        macro(FOR_ITER_GEN_JIT) =
+            unused/2 +
+            _JIT_GEN +
+            _CHECK_PEP_523 +
+            _FOR_ITER_GEN_FRAME +
+            _PUSH_FRAME;
 
         macro(FOR_ITER_GEN) =
             unused/2 +

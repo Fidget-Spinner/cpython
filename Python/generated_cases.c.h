@@ -5283,7 +5283,7 @@
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
-            if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
+            if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & (_PY_EVAL_EVENTS_MASK | _Py_EVAL_JIT_DONT_ENTER_BIT)) {
                 opcode = executor->vm_data.opcode;
                 oparg = (oparg & ~255) | executor->vm_data.oparg;
                 next_instr = this_instr;
@@ -5498,6 +5498,120 @@
             _PyInterpreterFrame *gen_frame;
             _PyInterpreterFrame *new_frame;
             /* Skip 2 cache entries */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UPDATE_MISS_STATS(FOR_ITER);
+                    assert(_PyOpcode_Deopt[opcode] == (FOR_ITER));
+                    JUMP_TO_PREDICTED(FOR_ITER);
+                }
+            }
+            // _FOR_ITER_GEN_FRAME
+            {
+                iter = stack_pointer[-1];
+                PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(iter);
+                if (Py_TYPE(gen) != &PyGen_Type) {
+                    UPDATE_MISS_STATS(FOR_ITER);
+                    assert(_PyOpcode_Deopt[opcode] == (FOR_ITER));
+                    JUMP_TO_PREDICTED(FOR_ITER);
+                }
+                #ifdef Py_GIL_DISABLED
+                // Since generators can't be used by multiple threads anyway we
+                // don't need to deopt here, but this lets us work on making
+                // generators thread-safe without necessarily having to
+                // specialize them thread-safely as well.
+                if (!_PyObject_IsUniquelyReferenced((PyObject *)gen)) {
+                    UPDATE_MISS_STATS(FOR_ITER);
+                    assert(_PyOpcode_Deopt[opcode] == (FOR_ITER));
+                    JUMP_TO_PREDICTED(FOR_ITER);
+                }
+                #endif
+                if (gen->gi_frame_state >= FRAME_EXECUTING) {
+                    UPDATE_MISS_STATS(FOR_ITER);
+                    assert(_PyOpcode_Deopt[opcode] == (FOR_ITER));
+                    JUMP_TO_PREDICTED(FOR_ITER);
+                }
+                STAT_INC(FOR_ITER, hit);
+                gen_frame = &gen->gi_iframe;
+                _PyFrame_StackPush(gen_frame, PyStackRef_None);
+                gen->gi_frame_state = FRAME_EXECUTING;
+                gen->gi_exc_state.previous_item = tstate->exc_info;
+                tstate->exc_info = &gen->gi_exc_state;
+                gen_frame->previous = frame;
+                // oparg is the return offset from the next instruction.
+                frame->return_offset = (uint16_t)( 3 + oparg);
+            }
+            // _PUSH_FRAME
+            {
+                new_frame = gen_frame;
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
+            DISPATCH();
+        }
+
+        TARGET(FOR_ITER_GEN_JIT) {
+            #if Py_TAIL_CALL_INTERP
+            int opcode = FOR_ITER_GEN_JIT;
+            (void)(opcode);
+            #endif
+            _Py_CODEUNIT* const this_instr = next_instr;
+            (void)this_instr;
+            frame->instr_ptr = next_instr;
+            next_instr += 3;
+            INSTRUCTION_STATS(FOR_ITER_GEN_JIT);
+            static_assert(INLINE_CACHE_ENTRIES_FOR_ITER == 2, "incorrect cache size");
+            _PyStackRef iter;
+            _PyInterpreterFrame *gen_frame;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 2 cache entries */
+            // _JIT_GEN
+            {
+                #ifdef _Py_TIER2
+                int this_instr_opcode = this_instr->op.code;
+                _Py_BackoffCounter counter = this_instr[2].counter;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_opcode == FOR_ITER_GEN_JIT)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
+                    _PyExecutorObject *executor;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        this_instr[2].counter = restart_backoff_counter(counter);
+                        if (optimized < 0) {
+                            JUMP_TO_LABEL(error);
+                        }
+                    }
+                    else {
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        this_instr[2].counter = initial_gen_backoff_counter();
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        assert(tstate->previous_executor == NULL);
+                        tstate->previous_executor = Py_None;
+                        GOTO_TIER_TWO(executor);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[2].counter);
+                }
+                #endif
+            }
             // _CHECK_PEP_523
             {
                 if (tstate->interp->eval_frame) {
@@ -7566,12 +7680,14 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_opcode = this_instr->op.code;
+                int is_for_iter_or_send = this_instr_opcode  == SEND_GEN_JIT;
+                _Py_BackoffCounter counter = this_instr[is_for_iter_or_send ? 2 : 1].counter;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_opcode == JUMP_BACKWARD_JIT ||
                         this_instr_opcode == RESUME_JIT ||
-                        this_instr_opcode == YIELD_VALUE_JIT)) {
+                        this_instr_opcode == YIELD_VALUE_JIT ||
+                        is_for_iter_or_send)) {
                     _Py_CODEUNIT *start = this_instr;
                     /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                     while (oparg > 255) {
@@ -7583,14 +7699,14 @@
                     int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = restart_backoff_counter(counter);
                         if (optimized < 0) {
                             JUMP_TO_LABEL(error);
                         }
                     }
                     else {
                         _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = initial_jump_backoff_counter();
                         stack_pointer = _PyFrame_GetStackPointer(frame);
                         assert(tstate->previous_executor == NULL);
                         tstate->previous_executor = Py_None;
@@ -7598,7 +7714,7 @@
                     }
                 }
                 else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[is_for_iter_or_send ? 2 : 1].counter);
                 }
                 #endif
             }
@@ -10386,12 +10502,14 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_opcode = this_instr->op.code;
+                int is_for_iter_or_send = this_instr_opcode  == SEND_GEN_JIT;
+                _Py_BackoffCounter counter = this_instr[is_for_iter_or_send ? 2 : 1].counter;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_opcode == JUMP_BACKWARD_JIT ||
                         this_instr_opcode == RESUME_JIT ||
-                        this_instr_opcode == YIELD_VALUE_JIT)) {
+                        this_instr_opcode == YIELD_VALUE_JIT ||
+                        is_for_iter_or_send)) {
                     _Py_CODEUNIT *start = this_instr;
                     /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                     while (oparg > 255) {
@@ -10403,14 +10521,14 @@
                     int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = restart_backoff_counter(counter);
                         if (optimized < 0) {
                             JUMP_TO_LABEL(error);
                         }
                     }
                     else {
                         _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = initial_jump_backoff_counter();
                         stack_pointer = _PyFrame_GetStackPointer(frame);
                         assert(tstate->previous_executor == NULL);
                         tstate->previous_executor = Py_None;
@@ -10418,7 +10536,7 @@
                     }
                 }
                 else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[is_for_iter_or_send ? 2 : 1].counter);
                 }
                 #endif
             }
@@ -10618,6 +10736,117 @@
             _PyInterpreterFrame *gen_frame;
             _PyInterpreterFrame *new_frame;
             /* Skip 2 cache entries */
+            // _CHECK_PEP_523
+            {
+                if (tstate->interp->eval_frame) {
+                    UPDATE_MISS_STATS(SEND);
+                    assert(_PyOpcode_Deopt[opcode] == (SEND));
+                    JUMP_TO_PREDICTED(SEND);
+                }
+            }
+            // _SEND_GEN_FRAME
+            {
+                v = stack_pointer[-1];
+                receiver = stack_pointer[-2];
+                PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(receiver);
+                if (Py_TYPE(gen) != &PyGen_Type && Py_TYPE(gen) != &PyCoro_Type) {
+                    UPDATE_MISS_STATS(SEND);
+                    assert(_PyOpcode_Deopt[opcode] == (SEND));
+                    JUMP_TO_PREDICTED(SEND);
+                }
+                if (gen->gi_frame_state >= FRAME_EXECUTING) {
+                    UPDATE_MISS_STATS(SEND);
+                    assert(_PyOpcode_Deopt[opcode] == (SEND));
+                    JUMP_TO_PREDICTED(SEND);
+                }
+                STAT_INC(SEND, hit);
+                gen_frame = &gen->gi_iframe;
+                _PyFrame_StackPush(gen_frame, v);
+                gen->gi_frame_state = FRAME_EXECUTING;
+                gen->gi_exc_state.previous_item = tstate->exc_info;
+                tstate->exc_info = &gen->gi_exc_state;
+                assert( 3 + oparg <= UINT16_MAX);
+                frame->return_offset = (uint16_t)( 3 + oparg);
+                gen_frame->previous = frame;
+            }
+            // _PUSH_FRAME
+            {
+                new_frame = gen_frame;
+                // Write it out explicitly because it's subtly different.
+                // Eventually this should be the only occurrence of this code.
+                assert(tstate->interp->eval_frame == NULL);
+                _PyInterpreterFrame *temp = new_frame;
+                stack_pointer += -1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                assert(new_frame->previous == frame || new_frame->previous->previous == frame);
+                CALL_STAT_INC(inlined_py_calls);
+                frame = tstate->current_frame = temp;
+                tstate->py_recursion_remaining--;
+                LOAD_SP();
+                LOAD_IP(0);
+                LLTRACE_RESUME_FRAME();
+            }
+            DISPATCH();
+        }
+
+        TARGET(SEND_GEN_JIT) {
+            #if Py_TAIL_CALL_INTERP
+            int opcode = SEND_GEN_JIT;
+            (void)(opcode);
+            #endif
+            _Py_CODEUNIT* const this_instr = next_instr;
+            (void)this_instr;
+            frame->instr_ptr = next_instr;
+            next_instr += 3;
+            INSTRUCTION_STATS(SEND_GEN_JIT);
+            static_assert(INLINE_CACHE_ENTRIES_SEND == 2, "incorrect cache size");
+            _PyStackRef receiver;
+            _PyStackRef v;
+            _PyInterpreterFrame *gen_frame;
+            _PyInterpreterFrame *new_frame;
+            /* Skip 2 cache entries */
+            // _JIT
+            {
+                #ifdef _Py_TIER2
+                int this_instr_opcode = this_instr->op.code;
+                int is_for_iter_or_send = this_instr_opcode  == SEND_GEN_JIT;
+                _Py_BackoffCounter counter = this_instr[is_for_iter_or_send ? 2 : 1].counter;
+                if (backoff_counter_triggers(counter) &&
+                    (this_instr_opcode == JUMP_BACKWARD_JIT ||
+                        this_instr_opcode == RESUME_JIT ||
+                        this_instr_opcode == YIELD_VALUE_JIT ||
+                        is_for_iter_or_send)) {
+                    _Py_CODEUNIT *start = this_instr;
+                    /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        start--;
+                    }
+                    _PyExecutorObject *executor;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = restart_backoff_counter(counter);
+                        if (optimized < 0) {
+                            JUMP_TO_LABEL(error);
+                        }
+                    }
+                    else {
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = initial_jump_backoff_counter();
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        assert(tstate->previous_executor == NULL);
+                        tstate->previous_executor = Py_None;
+                        GOTO_TIER_TWO(executor);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[is_for_iter_or_send ? 2 : 1].counter);
+                }
+                #endif
+            }
             // _CHECK_PEP_523
             {
                 if (tstate->interp->eval_frame) {
@@ -12189,12 +12418,14 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
-                _Py_BackoffCounter counter = this_instr[1].counter;
                 int this_instr_opcode = this_instr->op.code;
+                int is_for_iter_or_send = this_instr_opcode  == SEND_GEN_JIT;
+                _Py_BackoffCounter counter = this_instr[is_for_iter_or_send ? 2 : 1].counter;
                 if (backoff_counter_triggers(counter) &&
                     (this_instr_opcode == JUMP_BACKWARD_JIT ||
                         this_instr_opcode == RESUME_JIT ||
-                        this_instr_opcode == YIELD_VALUE_JIT)) {
+                        this_instr_opcode == YIELD_VALUE_JIT ||
+                        is_for_iter_or_send)) {
                     _Py_CODEUNIT *start = this_instr;
                     /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                     while (oparg > 255) {
@@ -12206,14 +12437,14 @@
                     int optimized = _PyOptimizer_Optimize(frame, start, &executor, 0);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
                     if (optimized <= 0) {
-                        this_instr[1].counter = restart_backoff_counter(counter);
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = restart_backoff_counter(counter);
                         if (optimized < 0) {
                             JUMP_TO_LABEL(error);
                         }
                     }
                     else {
                         _PyFrame_SetStackPointer(frame, stack_pointer);
-                        this_instr[1].counter = initial_jump_backoff_counter();
+                        this_instr[is_for_iter_or_send ? 2 : 1].counter = initial_jump_backoff_counter();
                         stack_pointer = _PyFrame_GetStackPointer(frame);
                         assert(tstate->previous_executor == NULL);
                         tstate->previous_executor = Py_None;
@@ -12221,7 +12452,7 @@
                     }
                 }
                 else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[is_for_iter_or_send ? 2 : 1].counter);
                 }
                 #endif
             }

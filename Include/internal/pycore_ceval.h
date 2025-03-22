@@ -316,9 +316,10 @@ _Py_Check_ArgsIterable(PyThreadState *tstate, PyObject *func, PyObject *args);
 #define _PY_EVAL_PLEASE_STOP_BIT (1U << 5)
 #define _PY_EVAL_EXPLICIT_MERGE_BIT (1U << 6)
 #define _PY_EVAL_JIT_INVALIDATE_COLD_BIT (1U << 7)
+#define _Py_EVAL_JIT_DONT_ENTER_BIT (1U << 8)
 
 /* Reserve a few bits for future use */
-#define _PY_EVAL_EVENTS_BITS 8
+#define _PY_EVAL_EVENTS_BITS 9
 #define _PY_EVAL_EVENTS_MASK ((1 << _PY_EVAL_EVENTS_BITS)-1)
 
 static inline void

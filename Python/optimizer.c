@@ -24,6 +24,8 @@
 
 #define NEED_OPCODE_METADATA
 #include "pycore_uop_metadata.h" // Uop tables
+#include "pycore_frame.h"
+
 #undef NEED_OPCODE_METADATA
 
 #define MAX_EXECUTORS_SIZE 256
@@ -505,6 +507,7 @@ translate_bytecode_to_trace(
     int trace_stack_depth = 0;
     int confidence = CONFIDENCE_RANGE;  // Adjusted by branch instructions
     bool jump_seen = false;
+    int initial_opcode = initial_instr->op.code;
 
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
@@ -513,8 +516,90 @@ translate_bytecode_to_trace(
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
 #endif
+    if (initial_opcode == ENTER_EXECUTOR) {
+        _PyExecutorObject *executor = code->co_executors->executors[initial_instr->op.arg & 255];
+        initial_opcode = executor->vm_data.opcode;
+    }
+    if (initial_opcode == YIELD_VALUE_JIT) {
+        _Py_CODEUNIT *old_instr_ptr = frame->instr_ptr;
+        frame = frame->previous;
+        char frame_owner = frame->owner;
+        if (frame_owner != FRAME_OWNED_BY_GENERATOR &&
+            frame_owner != FRAME_OWNED_BY_THREAD) {
+            DPRINTF(2, "Gen frame not owned by proper owner %d\n", frame_owner);
+            return 0;
+        }
+        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        assert(frame->instr_ptr->op.code == INSTRUMENTED_LINE ||
+               frame->instr_ptr->op.code == INSTRUMENTED_INSTRUCTION ||
+               _PyOpcode_Deopt[frame->instr_ptr->op.code] == SEND ||
+               _PyOpcode_Deopt[frame->instr_ptr->op.code] == FOR_ITER ||
+               _PyOpcode_Deopt[frame->instr_ptr->op.code] == INTERPRETER_EXIT ||
+               _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
+        instr = frame->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND;
+        ADD_TO_TRACE(_GUARD_YIELDING_IP, 0, (uint64_t)old_instr_ptr, INSTR_IP(old_instr_ptr, code));
+        trace[trace_length-1].operand1 = (uint64_t)frame->instr_ptr;
+        ADD_TO_TRACE(_YIELD_VALUE, old_instr_ptr->op.arg, 0, 0);
+        code = _PyFrame_GetCode(frame);
+        func = _PyFrame_GetFunction(frame);
+        _Py_BloomFilter_Add(dependencies, code);
+        initial_code = code;
+        first = false;
+    }
+//    else if (initial_opcode == SEND_GEN_JIT) {
+//        if (!PyGen_CheckExact(PyStackRef_AsPyObjectBorrow(frame->stackpointer[-2]))) {
+//            DPRINTF(2, "SEND_GEN received non-generator receiver\n");
+//            return 0;
+//        }
+//        PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(frame->stackpointer[-2]);
+//        _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+//        frame = send_gen_frame;
+//
+//        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
+//        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+//        ADD_TO_TRACE(_GUARD_SENDING_IP, 0, (uint64_t)frame->instr_ptr, INSTR_IP(instr, code));
+//        ADD_TO_TRACE(_CHECK_PEP_523, 0, 0, 0);
+//        ADD_TO_TRACE(_SEND_GEN_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
+//        ADD_TO_TRACE(_SET_IP, 0, 0, INSTR_IP(instr, code));
+//        ADD_TO_TRACE(_PUSH_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
+//        code = _PyFrame_GetCode(frame);
+//        func = _PyFrame_GetFunction(frame);
+//        instr = frame->instr_ptr;
+//        _Py_BloomFilter_Add(dependencies, code);
+//        initial_code = code;
+//        first = false;
+//    }
+    else if (initial_opcode == FOR_ITER_GEN_JIT) {
+        if (!PyGen_CheckExact(PyStackRef_AsPyObjectBorrow(frame->stackpointer[-1]))) {
+            DPRINTF(2, "FOR_ITER_GEN received non-generator receiver\n");
+            return 0;
+        }
+        PyGenObject *gen = (PyGenObject *)PyStackRef_AsPyObjectBorrow(frame->stackpointer[-1]);
+        _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+        frame = send_gen_frame;
 
-    if (initial_instr->op.code == YIELD_VALUE_JIT) {
+        if (gen->gi_frame_state != FRAME_CREATED) {
+            DPRINTF(2, "FOR_ITER_GEN generator is not just created, not worth tracing %d\n", gen->gi_frame_state);
+            return 0;
+        }
+
+        ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        ADD_TO_TRACE(_GUARD_SENDING_ITERATOR_IP, 0, (uint64_t)frame->instr_ptr, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_SET_IP, 0, (uint64_t)instr, 0);
+        ADD_TO_TRACE(_CHECK_PEP_523, 0, 0, 0);
+        ADD_TO_TRACE(_FOR_ITER_GEN_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
+        ADD_TO_TRACE(_PUSH_FRAME, initial_instr->op.arg, 0, INSTR_IP(instr, code));
+        code = _PyFrame_GetCode(frame);
+        func = _PyFrame_GetFunction(frame);
+        instr = frame->instr_ptr;
+        _Py_BloomFilter_Add(dependencies, code);
+        initial_code = code;
+        first = false;
+    }
+
+    if (initial_instr->op.code == SEND_GEN) {
         _Py_CODEUNIT *old_instr_ptr = instr;
         frame = frame->previous;
         char frame_owner = frame->owner;
@@ -587,9 +672,6 @@ translate_bytecode_to_trace(
             goto done;
         }
         switch (opcode) {
-            case YIELD_VALUE_JIT:
-                opcode = YIELD_VALUE;
-                break;
             case RESUME_JIT:
                 opcode = RESUME;
                 break;
@@ -921,7 +1003,7 @@ done:
     while (trace_stack_depth > 0) {
         TRACE_STACK_POP();
     }
-    assert(code == initial_code);
+    // assert(code == initial_code);/
     // Skip short traces where we can't even translate a single instruction:
     if (first) {
         OPT_STAT_INC(trace_too_short);

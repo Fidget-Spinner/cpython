@@ -199,6 +199,8 @@ int _PyOpcode_num_popped(int opcode, int oparg)  {
             return 1;
         case FOR_ITER_GEN:
             return 1;
+        case FOR_ITER_GEN_JIT:
+            return 1;
         case FOR_ITER_LIST:
             return 1;
         case FOR_ITER_RANGE:
@@ -420,6 +422,8 @@ int _PyOpcode_num_popped(int opcode, int oparg)  {
         case SEND:
             return 2;
         case SEND_GEN:
+            return 2;
+        case SEND_GEN_JIT:
             return 2;
         case SETUP_ANNOTATIONS:
             return 0;
@@ -678,6 +682,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg)  {
             return 2;
         case FOR_ITER_GEN:
             return 1;
+        case FOR_ITER_GEN_JIT:
+            return 1;
         case FOR_ITER_LIST:
             return 2;
         case FOR_ITER_RANGE:
@@ -899,6 +905,8 @@ int _PyOpcode_num_pushed(int opcode, int oparg)  {
         case SEND:
             return 2;
         case SEND_GEN:
+            return 1;
+        case SEND_GEN_JIT:
             return 1;
         case SETUP_ANNOTATIONS:
             return 0;
@@ -1144,6 +1152,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[266] = {
     [FORMAT_WITH_SPEC] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [FOR_ITER] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG },
     [FOR_ITER_GEN] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_DEOPT_FLAG },
+    [FOR_ITER_GEN_JIT] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [FOR_ITER_LIST] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
     [FOR_ITER_RANGE] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EXIT_FLAG | HAS_ERROR_FLAG },
     [FOR_ITER_TUPLE] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },
@@ -1249,6 +1258,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[266] = {
     [RETURN_VALUE] = { true, INSTR_FMT_IX, HAS_ESCAPES_FLAG },
     [SEND] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [SEND_GEN] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_DEOPT_FLAG },
+    [SEND_GEN_JIT] = { true, INSTR_FMT_IBC0, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [SETUP_ANNOTATIONS] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [SET_ADD] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [SET_FUNCTION_ATTRIBUTE] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
@@ -1575,6 +1585,7 @@ const char *_PyOpcode_OpName[266] = {
     [FORMAT_WITH_SPEC] = "FORMAT_WITH_SPEC",
     [FOR_ITER] = "FOR_ITER",
     [FOR_ITER_GEN] = "FOR_ITER_GEN",
+    [FOR_ITER_GEN_JIT] = "FOR_ITER_GEN_JIT",
     [FOR_ITER_LIST] = "FOR_ITER_LIST",
     [FOR_ITER_RANGE] = "FOR_ITER_RANGE",
     [FOR_ITER_TUPLE] = "FOR_ITER_TUPLE",
@@ -1686,6 +1697,7 @@ const char *_PyOpcode_OpName[266] = {
     [RETURN_VALUE] = "RETURN_VALUE",
     [SEND] = "SEND",
     [SEND_GEN] = "SEND_GEN",
+    [SEND_GEN_JIT] = "SEND_GEN_JIT",
     [SETUP_ANNOTATIONS] = "SETUP_ANNOTATIONS",
     [SETUP_CLEANUP] = "SETUP_CLEANUP",
     [SETUP_FINALLY] = "SETUP_FINALLY",
@@ -1843,6 +1855,7 @@ const uint8_t _PyOpcode_Deopt[256] = {
     [FORMAT_WITH_SPEC] = FORMAT_WITH_SPEC,
     [FOR_ITER] = FOR_ITER,
     [FOR_ITER_GEN] = FOR_ITER,
+    [FOR_ITER_GEN_JIT] = FOR_ITER,
     [FOR_ITER_LIST] = FOR_ITER,
     [FOR_ITER_RANGE] = FOR_ITER,
     [FOR_ITER_TUPLE] = FOR_ITER,
@@ -1948,6 +1961,7 @@ const uint8_t _PyOpcode_Deopt[256] = {
     [RETURN_VALUE] = RETURN_VALUE,
     [SEND] = SEND,
     [SEND_GEN] = SEND,
+    [SEND_GEN_JIT] = SEND,
     [SETUP_ANNOTATIONS] = SETUP_ANNOTATIONS,
     [SET_ADD] = SET_ADD,
     [SET_FUNCTION_ATTRIBUTE] = SET_FUNCTION_ATTRIBUTE,
@@ -2000,8 +2014,6 @@ const uint8_t _PyOpcode_Deopt[256] = {
     case 125: \
     case 126: \
     case 127: \
-    case 212: \
-    case 213: \
     case 214: \
     case 215: \
     case 216: \

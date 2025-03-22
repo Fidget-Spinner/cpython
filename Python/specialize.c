@@ -455,14 +455,16 @@ void
 _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters)
 {
     #if ENABLE_SPECIALIZATION_FT
-    _Py_BackoffCounter jump_counter, adaptive_counter;
+    _Py_BackoffCounter jump_counter, adaptive_counter, gen_counter;
     if (enable_counters) {
         jump_counter = initial_jump_backoff_counter();
         adaptive_counter = adaptive_counter_warmup();
+        gen_counter = initial_gen_backoff_counter();
     }
     else {
         jump_counter = initial_unreachable_backoff_counter();
         adaptive_counter = initial_unreachable_backoff_counter();
+        gen_counter = initial_unreachable_backoff_counter();
     }
     int opcode = 0;
     int oparg = 0;
@@ -480,6 +482,12 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
                 case RESUME:
                     instructions[i].op.code = PyThreadState_GET()->interp->jit ? RESUME_JIT : RESUME;
                     instructions[i + 1].counter = jump_counter;
+                    break;
+                case FOR_ITER:
+                    instructions[i + 2].counter = gen_counter;
+                    break;
+                case SEND:
+                    instructions[i + 2].counter = jump_counter;
                     break;
                 case YIELD_VALUE:
                     instructions[i].op.code = PyThreadState_GET()->interp->jit ? YIELD_VALUE_JIT : YIELD_VALUE;
@@ -2880,7 +2888,7 @@ _Py_Specialize_ForIter(_PyStackRef iter, _Py_CODEUNIT *instr, int oparg)
         /* Don't specialize if PEP 523 is active */
         if (_PyInterpreterState_GET()->eval_frame)
             goto failure;
-        specialize(instr, FOR_ITER_GEN);
+        specialize(instr, _PyInterpreterState_GET()->jit ? FOR_ITER_GEN_JIT : FOR_ITER_GEN);
         return;
     }
 failure:
@@ -2903,7 +2911,7 @@ _Py_Specialize_Send(_PyStackRef receiver_st, _Py_CODEUNIT *instr)
             SPECIALIZATION_FAIL(SEND, SPEC_FAIL_OTHER);
             goto failure;
         }
-        specialize(instr, SEND_GEN);
+        specialize(instr, _PyInterpreterState_GET()->jit ? SEND_GEN_JIT : SEND_GEN);
         return;
     }
     SPECIALIZATION_FAIL(SEND,

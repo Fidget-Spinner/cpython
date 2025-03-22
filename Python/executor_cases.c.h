@@ -1840,11 +1840,51 @@
             break;
         }
 
-        case _GUARD_YIELDING_IP: {
+        case _GUARD_SENDING_IP: {
+            _PyStackRef receiver;
+            receiver = stack_pointer[-2];
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
-            if (frame->previous->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND  != (_Py_CODEUNIT *)instr_ptr) {
-                UOP_STAT_INC(uopcode, miss);
-                JUMP_TO_JUMP_TARGET();
+            PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
+            if (!PyGen_CheckExact(receiver_o)) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            PyGenObject *gen = (PyGenObject *)receiver_o;
+            _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+            if (send_gen_frame->instr_ptr != (_Py_CODEUNIT *)instr_ptr) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            break;
+        }
+
+        case _GUARD_YIELDING_IP: {
+            PyObject *instr_ptr_1 = (PyObject *)CURRENT_OPERAND0();
+            PyObject *instr_ptr_2 = (PyObject *)CURRENT_OPERAND1();
+            // 2 for INSTRUCTION_SIZE of YIELD_VALUE
+            if (frame->instr_ptr != (_Py_CODEUNIT *)instr_ptr_1) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            if (frame->previous->instr_ptr  != (_Py_CODEUNIT *)instr_ptr_2) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
             }
             break;
         }
@@ -4421,6 +4461,32 @@
             stack_pointer[0].bits = (uintptr_t)gen_frame;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _GUARD_SENDING_ITERATOR_IP: {
+            _PyStackRef iter;
+            iter = stack_pointer[-1];
+            PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
+            PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(iter);
+            if (!PyGen_CheckExact(receiver_o)) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            PyGenObject *gen = (PyGenObject *)receiver_o;
+            _PyInterpreterFrame *send_gen_frame = &gen->gi_iframe;
+            if (send_gen_frame->instr_ptr != (_Py_CODEUNIT *)instr_ptr) {
+                // Prevent infinite loops.
+                _Py_set_eval_breaker_bit(tstate, _Py_EVAL_JIT_DONT_ENTER_BIT);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
             break;
         }
 

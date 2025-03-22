@@ -765,6 +765,10 @@
             break;
         }
 
+        case _GUARD_SENDING_IP: {
+            break;
+        }
+
         case _GUARD_YIELDING_IP: {
             break;
         }
@@ -1545,6 +1549,10 @@
         case _FOR_ITER_GEN_FRAME: {
             /* We are about to hit the end of the trace */
             ctx->done = true;
+            break;
+        }
+
+        case _GUARD_SENDING_ITERATOR_IP: {
             break;
         }
 
