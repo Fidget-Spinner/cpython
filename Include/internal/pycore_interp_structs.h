@@ -13,7 +13,7 @@ extern "C" {
 #include "pycore_structs.h"       // PyHamtObject
 #include "pycore_tstate.h"        // _PyThreadStateImpl
 #include "pycore_typedefs.h"      // _PyRuntimeState
-
+#include "pycore_optimizer.h"
 
 #define CODE_MAX_WATCHERS 8
 #define CONTEXT_MAX_WATCHERS 8
@@ -944,6 +944,8 @@ struct _is {
     _Py_hashtable_t *closed_stackrefs_table;
 #  endif
 #endif
+    int jit_translation_ctxs_in_use;
+    _PyByteCodeTranslationCtx jit_translation_ctx[TRACE_STACK_SIZE];
 };
 
 

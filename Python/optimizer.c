@@ -917,6 +917,298 @@ done:
     return trace_length;
 }
 
+// Credits to Max Bernstein for this
+// algorithm/data structure
+// https://bernsteinbear.com/blog/discovering-basic-blocks/
+
+#define INSTR_OFFSET(instr) (instr - ctx->initial_instr)
+
+static int
+compare( const void *arg1, const void *arg2 )
+{
+    return (uintptr_t)arg1 > (uintptr_t)arg2;
+}
+
+static void
+dump_cfg(_PyByteCodeTranslationCtx *ctx)
+{
+    fprintf(stdout, "BBs of %s:%s\n", PyUnicode_AsUTF8(ctx->co->co_filename), PyUnicode_AsUTF8(ctx->co->co_qualname));
+    for (int i = 0; i < ctx->max_seen_bb_count; i++) {
+        fprintf(stdout, "BB %d {\n", i);
+        for (int curr = ctx->bbs[i].slice.start; curr <= ctx->bbs[i].slice.end;) {
+            int opcode = ctx->initial_instr[curr].op.code;
+            int oparg = ctx->initial_instr[curr].op.arg;
+            if (opcode == ENTER_EXECUTOR) {
+                opcode = JUMP_BACKWARD;
+            }
+            fprintf(stdout,  "    %d: %s %d\n", curr, _PyOpcode_OpName[opcode], ctx->initial_instr[curr].op.arg);
+            curr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + 1;
+        }
+        switch(ctx->bbs[i].terminator.kind) {
+            case BB_BRANCH:
+                fprintf(stderr, "Consequent: -> BB %d\n",ctx->bbs[i].terminator.op.branch.consequent_bb->id);
+                fprintf(stderr, "Alternative: -> BB %d\n",ctx->bbs[i].terminator.op.branch.alternative_bb->id);
+                break;
+            case BB_JUMP:
+                fprintf(stderr, "Jump: -> BB %d\n",ctx->bbs[i].terminator.op.jump.jump_bb->id);
+                break;
+            case BB_FALLTHROUGH:
+                fprintf(stderr, "Fallthrough: -> BB %d\n", i + 1);
+                break;
+            case BB_EXIT:
+                fprintf(stderr, "Exit\n");
+                break;
+        }
+        fprintf(stdout, "} \n");
+    }
+}
+
+static int
+translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
+{
+    if (INSTR_OFFSET(ctx->last_instr) > MAX_BYTECODE_SIZE) {
+        return 0;
+    }
+    // Step 1. Mark all entrypoints
+    for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
+        ctx->instr_is_bb_start[i] = false;
+    }
+    int opcode;
+    int oparg;
+    _Py_CODEUNIT *curr = ctx->initial_instr;
+    while (curr < ctx->last_instr) {
+        if (curr->op.code == CACHE || curr->op.code == RESERVED) {
+            return 0;
+        }
+        oparg = curr->op.arg;
+    top:
+        opcode = curr->op.code;
+        if (opcode == ENTER_EXECUTOR) {
+            opcode = JUMP_BACKWARD;
+            int og_oparg = ctx->co->co_executors->executors[oparg & 255]->vm_data.oparg;
+            // Account for EXTENDED_ARG
+            oparg = (oparg & (~255)) | og_oparg;
+        }
+        switch (_PyOpcode_Deopt[opcode]) {
+            // Don't support exception code for now.
+            case RAISE_VARARGS:
+            case RERAISE:
+            case CLEANUP_THROW:
+            case PUSH_EXC_INFO:
+            case CHECK_EXC_MATCH:
+            case CHECK_EG_MATCH:
+                return 0;
+            case EXTENDED_ARG:
+                return 0;
+                oparg = oparg << 8 | (curr+1)->op.arg;
+                curr++;
+                goto top;
+            case POP_JUMP_IF_FALSE:
+            case POP_JUMP_IF_TRUE:
+            case POP_JUMP_IF_NONE:
+            case POP_JUMP_IF_NOT_NONE:
+            case SEND:
+            {
+                _Py_CODEUNIT *next_instr = curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                _Py_CODEUNIT *target_instr = next_instr + oparg;
+                ctx->instr_is_bb_start[INSTR_OFFSET(next_instr)] = true;
+                ctx->instr_is_bb_start[INSTR_OFFSET(target_instr)] = true;
+                break;
+            }
+            case JUMP_BACKWARD:
+            case JUMP_BACKWARD_JIT:
+            case JUMP_BACKWARD_NO_INTERRUPT:
+            {
+                _Py_CODEUNIT *target_instr = curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] - (int)oparg;
+                ctx->instr_is_bb_start[INSTR_OFFSET(target_instr)] = true;
+                break;
+            }
+            case JUMP_FORWARD:
+            {
+                _Py_CODEUNIT *target_instr = curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + (int)oparg;
+                ctx->instr_is_bb_start[INSTR_OFFSET(target_instr)] = true;
+                break;
+            }
+            case FOR_ITER:
+            {
+                _Py_CODEUNIT *next_instr = curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                _Py_CODEUNIT *target_instr = next_instr + oparg + 1;
+                ctx->instr_is_bb_start[INSTR_OFFSET(next_instr)] = true;
+                ctx->instr_is_bb_start[INSTR_OFFSET(target_instr)] = true;
+                break;
+            }
+            case RESUME:
+            case RETURN_VALUE:
+            case YIELD_VALUE:
+            case RETURN_GENERATOR:
+            case END_FOR:
+            {
+                ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
+                break;
+            }
+            default:
+                break;
+        }
+        // The last instruction is an artificial end.
+        if (curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] > ctx->last_instr) {
+            ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
+        }
+        curr += 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+    }
+    // Step 2. Build the CFG
+    ctx->max_seen_bb_count = 0;
+    for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
+        if (ctx->instr_is_bb_start[i]) {
+            ctx->indices[ctx->max_seen_bb_count] = i;
+            ctx->max_seen_bb_count++;
+            if (ctx->max_seen_bb_count > MAX_BBS_ALLOWED) {
+                return 0;
+            }
+        }
+    }
+    qsort((void *)ctx->indices, ctx->max_seen_bb_count, sizeof(int), compare);
+    for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
+        ctx->instr_to_bb_id[i] = -1;
+    }
+    for (int i = 0; i < ctx->max_seen_bb_count; i++) {
+        int start_indice = ctx->indices[i];
+        int end_indice = start_indice;
+        // For the end indice, we need to "rewind" to the last instruction
+        // due to the CACHE entries.
+        int real_end = i == ctx->max_seen_bb_count - 1 ? (int)INSTR_OFFSET(ctx->last_instr) : ctx->indices[i+1];
+        int end_oparg = ctx->initial_instr[end_indice].op.arg;
+        while (end_indice < real_end) {
+            int end_opcode = ctx->initial_instr[end_indice].op.code;
+            if (end_opcode == EXTENDED_ARG) {
+                while (end_opcode == EXTENDED_ARG) {
+                    end_oparg =
+                        end_oparg << 8 | ctx->initial_instr[end_indice + 1].op.arg;
+                    end_indice++;
+                    end_opcode = ctx->initial_instr[end_indice].op.code;
+                }
+            }
+            else if (end_opcode == ENTER_EXECUTOR)  {
+                opcode = JUMP_BACKWARD;
+            }
+            if (end_indice + _PyOpcode_Caches[_PyOpcode_Deopt[end_opcode]] + 1 >= real_end) {
+                break;
+            }
+            end_indice += _PyOpcode_Caches[_PyOpcode_Deopt[end_opcode]] + 1;
+            end_oparg = ctx->initial_instr[end_indice].op.arg;
+        }
+        ctx->bbs[i].id = i;
+        ctx->bbs[i].slice.start = start_indice;
+        ctx->bbs[i].slice.end = end_indice;
+        ctx->instr_to_bb_id[start_indice] = i;
+        int opcode = ctx->initial_instr[end_indice].op.code;
+        int oparg = end_oparg;
+        if (opcode == ENTER_EXECUTOR) {
+            int og_oparg = ctx->co->co_executors->executors[oparg & 255]->vm_data.oparg;
+            oparg = (oparg & (~255)) | og_oparg;
+            opcode = JUMP_BACKWARD;
+        }
+        switch (_PyOpcode_Deopt[opcode]) {
+            case POP_JUMP_IF_FALSE:
+            case POP_JUMP_IF_TRUE:
+            case POP_JUMP_IF_NONE:
+            case POP_JUMP_IF_NOT_NONE:
+            case SEND:
+            {
+                int next_instr = end_indice + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                int target_instr = next_instr + oparg;
+                assert(ctx->instr_is_bb_start[next_instr]);
+                assert(ctx->instr_is_bb_start[target_instr]);
+                ctx->bbs[i].terminator.kind = BB_BRANCH;
+                ctx->bbs[i].terminator.op.branch.consequent_target = next_instr;
+                ctx->bbs[i].terminator.op.branch.alternative_target = target_instr;
+                break;
+            }
+            case JUMP_BACKWARD_NO_INTERRUPT:
+            case JUMP_BACKWARD:
+            case JUMP_BACKWARD_JIT: {
+                int jump_target = end_indice + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] - (int)oparg;;
+                if (!ctx->instr_is_bb_start[jump_target]) {
+                    dump_cfg(ctx);
+                    fprintf(stderr, "OP: %s:%s\n", _PyOpcode_OpName[(ctx->initial_instr + jump_target)->op.code], _PyOpcode_OpName[ctx->initial_instr[end_indice].op.code]);
+                }
+                assert(ctx->instr_is_bb_start[jump_target]);
+                ctx->bbs[i].terminator.kind = BB_JUMP;
+                ctx->bbs[i].terminator.op.jump.jump_target = jump_target;
+                break;
+            }
+            case JUMP_FORWARD: {
+                int jump_target = end_indice + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + (int)oparg;;
+                if (!ctx->instr_is_bb_start[jump_target]) {
+                    dump_cfg(ctx);
+                    fprintf(stderr, "OP: %s:%s\n", _PyOpcode_OpName[(ctx->initial_instr + jump_target)->op.code], _PyOpcode_OpName[ctx->initial_instr[end_indice].op.code]);
+                }
+                assert(ctx->instr_is_bb_start[jump_target]);
+                ctx->bbs[i].terminator.kind = BB_JUMP;
+                ctx->bbs[i].terminator.op.jump.jump_target = jump_target;
+                break;
+            }
+            case FOR_ITER:
+            {
+                int next_instr = end_indice + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                int target_instr = next_instr + oparg + 1;
+                if (!ctx->instr_is_bb_start[next_instr]) {
+                    dump_cfg(ctx);
+                    fprintf(stderr, "OP: %s\n", _PyOpcode_OpName[(ctx->initial_instr + next_instr)->op.code]);
+                }
+                assert(ctx->instr_is_bb_start[next_instr]);
+                assert(ctx->instr_is_bb_start[target_instr]);
+
+                ctx->bbs[i].terminator.kind = BB_BRANCH;
+                ctx->bbs[i].terminator.op.branch.consequent_target = next_instr;
+                ctx->bbs[i].terminator.op.branch.alternative_target = target_instr;
+                break;
+            }
+            case RETURN_VALUE:
+            case RETURN_GENERATOR:
+            case YIELD_VALUE:
+                ctx->bbs[i].terminator.kind = BB_EXIT;
+                break;
+            default:
+                ctx->bbs[i].terminator.kind = BB_FALLTHROUGH;
+                break;
+        }
+    }
+
+
+    // Step 3. Link up the BBs
+    for (int i = 0; i < ctx->max_seen_bb_count; i++) {
+        switch(ctx->bbs[i].terminator.kind) {
+            case BB_BRANCH: {
+                int alt_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.alternative_target];
+                assert(alt_bb_id >= 0);
+                ctx->bbs[i].terminator.op.branch.alternative_bb = &ctx->bbs[alt_bb_id];
+                int cons_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.consequent_target];
+                ctx->bbs[i].terminator.op.branch.consequent_bb = &ctx->bbs[cons_bb_id];
+                break;
+            }
+            case BB_JUMP:
+            {
+                int jump_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.jump.jump_target];
+                assert(jump_bb_id >= 0);
+                ctx->bbs[i].terminator.op.jump.jump_bb = &ctx->bbs[jump_bb_id];
+                break;
+            }
+            case BB_FALLTHROUGH:
+            {
+                assert(i < ctx->max_seen_bb_count);
+                ctx->bbs[i].terminator.op.jump.jump_bb = &ctx->bbs[i + 1];
+                break;
+            }
+            case BB_EXIT:
+                break;
+        }
+    }
+
+    // Step 4. Translate the BBs.
+    
+
+}
+
 #undef RESERVE
 #undef RESERVE_RAW
 #undef INSTR_IP
@@ -1209,6 +1501,16 @@ uop_optimize(
     _Py_BloomFilter_Init(&dependencies);
     _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
     OPT_STAT_INC(attempts);
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    _PyByteCodeTranslationCtx *ctx = &interp->jit_translation_ctx[0];
+    ctx->co = _PyFrame_GetCode(frame);
+    ctx->initial_instr = _PyCode_CODE(ctx->co);
+    ctx->last_instr = _PyCode_CODE(ctx->co) + Py_SIZE(ctx->co);
+    interp->jit_translation_ctxs_in_use = 1;
+    char *second = Py_GETENV("PYTHON_UOPS_CFG");
+    if (second != NULL) {
+        translate_bytecode_to_cfg(ctx);
+    }
     int length = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
     if (length <= 0) {
         // Error or nothing translated

@@ -305,6 +305,63 @@ static inline int is_terminator(const _PyUOpInstruction *uop)
 
 PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
 
+typedef struct _PyByteCodeSlice {
+    int start;
+    int end;
+} _PyByteCodeSlice;
+
+typedef enum _PyByteCodeTerminatorKind {
+    BB_BRANCH,
+    BB_JUMP,
+    BB_FALLTHROUGH,
+    BB_EXIT,
+} _PyByteCodeTerminatorKind;
+
+typedef struct _PyBytecodeBBBranch {
+    int consequent_target;
+    struct _PyByteCodeBB *consequent_bb;
+    int alternative_target;
+    struct _PyByteCodeBB *alternative_bb;
+} _PyBytecodeBBBranch;
+
+typedef struct _PyBytecodeBBJump {
+    int jump_target;
+    struct _PyByteCodeBB *jump_bb;
+} _PyBytecodeBBJump;
+
+typedef struct _PyByteCodeBB {
+    int id;
+    _PyByteCodeSlice slice;
+    struct {
+        _PyByteCodeTerminatorKind kind;
+        union {
+            _PyBytecodeBBBranch branch;
+            _PyBytecodeBBJump jump;
+        } op;
+    } terminator;
+} _PyByteCodeBB;
+
+#define MAX_BBS_ALLOWED 100
+#define MAX_BYTECODE_SIZE 4000
+
+
+typedef struct _PyByteCodeTranslationCtx {
+    PyCodeObject *co;
+    _Py_CODEUNIT *initial_instr;
+    _Py_CODEUNIT *last_instr;
+    _PyByteCodeBB bbs[MAX_BBS_ALLOWED];
+    // Bytecode offset -> is_entrypoint?
+    int instr_to_bb_id[MAX_BYTECODE_SIZE];
+    char instr_is_bb_start[MAX_BYTECODE_SIZE];
+    // instr_is_bb_start but compressed.
+    int max_seen_bb_count;
+    int indices[MAX_BBS_ALLOWED];
+    // Stuff like RESUME
+    int max_seen_entrypoint_count;
+    int entrypoint_bbs[MAX_BBS_ALLOWED];
+} _PyByteCodeTranslationCtx;
+
+
 #ifdef __cplusplus
 }
 #endif
