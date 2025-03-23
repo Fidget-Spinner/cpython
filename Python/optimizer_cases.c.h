@@ -1398,7 +1398,11 @@
 
         /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
 
+        /* _TIER2_POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
+
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
+
+        /* _TIER2_POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
 
         case _IS_NONE: {
             JitOptSymbol *b;
@@ -2457,6 +2461,10 @@
         }
 
         case _TIER2_RESUME_CHECK: {
+            break;
+        }
+
+        case _TIER2_JUMP: {
             break;
         }
 

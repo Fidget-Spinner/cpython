@@ -342,8 +342,8 @@ typedef struct _PyByteCodeBB {
 } _PyByteCodeBB;
 
 #define MAX_BBS_ALLOWED 100
-#define MAX_BYTECODE_SIZE 4000
-
+#define MAX_BYTECODE_SIZE 2000
+#define UOP_MAX_METHOD_LENGTH (MAX_BYTECODE_SIZE * 5)
 
 typedef struct _PyByteCodeTranslationCtx {
     PyCodeObject *co;
@@ -359,6 +359,10 @@ typedef struct _PyByteCodeTranslationCtx {
     // Stuff like RESUME
     int max_seen_entrypoint_count;
     int entrypoint_bbs[MAX_BBS_ALLOWED];
+    int buffer_length;
+    int buffer_max_length;
+    _PyUOpInstruction buffer[UOP_MAX_METHOD_LENGTH];
+    _PyBloomFilter *dependencies;
 } _PyByteCodeTranslationCtx;
 
 

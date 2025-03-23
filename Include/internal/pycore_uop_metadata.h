@@ -282,6 +282,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_DEOPT] = 0,
     [_ERROR_POP_N] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
+    [_TIER2_JUMP] = 0,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -538,6 +539,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_STORE_SUBSCR_DICT] = "_STORE_SUBSCR_DICT",
     [_STORE_SUBSCR_LIST_INT] = "_STORE_SUBSCR_LIST_INT",
     [_SWAP] = "_SWAP",
+    [_TIER2_JUMP] = "_TIER2_JUMP",
     [_TIER2_RESUME_CHECK] = "_TIER2_RESUME_CHECK",
     [_TO_BOOL] = "_TO_BOOL",
     [_TO_BOOL_BOOL] = "_TO_BOOL_BOOL",
@@ -1084,6 +1086,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _ERROR_POP_N:
             return 0;
         case _TIER2_RESUME_CHECK:
+            return 0;
+        case _TIER2_JUMP:
             return 0;
         default:
             return -1;

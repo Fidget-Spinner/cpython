@@ -3919,7 +3919,11 @@
 
         /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 because it is replaced */
 
+        /* _TIER2_POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 because it is replaced */
+
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is replaced */
+
+        /* _TIER2_POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is replaced */
 
         case _IS_NONE: {
             _PyStackRef value;
@@ -7025,6 +7029,11 @@
                 JUMP_TO_JUMP_TARGET();
             }
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
+            break;
+        }
+
+        case _TIER2_JUMP: {
+            JUMP_TO_JUMP_TARGET();
             break;
         }
 

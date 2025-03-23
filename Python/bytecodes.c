@@ -2877,12 +2877,32 @@ dummy_func(
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
+        replaced op(_TIER2_POP_JUMP_IF_FALSE, (cond -- )) {
+            assert(PyStackRef_BoolCheck(cond));
+            int flag = PyStackRef_IsFalse(cond);
+            DEAD(cond);
+            if (flag) {
+                stack_pointer--;
+                JUMP_TO_JUMP_TARGET();
+            }
+        }
+
         replaced op(_POP_JUMP_IF_TRUE, (cond -- )) {
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsTrue(cond);
             DEAD(cond);
             RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
+        }
+
+        replaced op(_TIER2_POP_JUMP_IF_TRUE, (cond -- )) {
+            assert(PyStackRef_BoolCheck(cond));
+            int flag = PyStackRef_IsTrue(cond);
+            DEAD(cond);
+            if (flag) {
+                stack_pointer--;
+                JUMP_TO_JUMP_TARGET();
+            }
         }
 
         op(_IS_NONE, (value -- b)) {
@@ -5200,6 +5220,10 @@ dummy_func(
             uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
             DEOPT_IF(eval_breaker & _PY_EVAL_EVENTS_MASK);
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
+        }
+
+        tier2 op(_TIER2_JUMP, (--)) {
+            JUMP_TO_JUMP_TARGET();
         }
 
         label(pop_4_error) {
