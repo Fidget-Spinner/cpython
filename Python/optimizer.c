@@ -552,6 +552,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
         DPRINTF(2, "%d: %s(%d)\n", target, _PyOpcode_OpName[opcode], oparg);
 
         if (opcode == EXTENDED_ARG) {
+            mark_entrypoint(ctx, &trace[trace_length], instr);
             instr++;
             opcode = instr->op.code;
             oparg = (oparg << 8) | instr->op.arg;
@@ -1045,11 +1046,9 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case STORE_DEREF:
             case RERAISE:
 //            case RERAISE: // TODO move this down later.
-//                DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
-//                return 0;
+                DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                 return 0;
             case EXTENDED_ARG:
-                return 0;
                 oparg = oparg << 8 | (curr+1)->op.arg;
                 curr++;
                 goto top;
@@ -1155,15 +1154,24 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         // For the end indice, we need to "rewind" to the last instruction
         // due to the CACHE entries.
         int real_end = i == ctx->max_seen_bb_count - 1 ? (int)INSTR_OFFSET(ctx->last_instr) : ctx->indices[i+1];
+        oparg = ctx->initial_instr[end_indice].op.arg;
         while (end_indice < real_end) {
             int end_opcode = ctx->initial_instr[end_indice].op.code;
             if (end_opcode == ENTER_EXECUTOR)  {
-                end_opcode = ctx->co->co_executors->executors[ctx->initial_instr[end_indice].op.arg & 255]->vm_data.opcode;
+                end_opcode = ctx->co->co_executors->executors[oparg & 255]->vm_data.opcode;
+            }
+            else if (end_opcode == EXTENDED_ARG) {
+                while (end_opcode == EXTENDED_ARG) {
+                    oparg = oparg << 8 | ctx->initial_instr[end_indice + 1].op.arg;
+                    end_indice++;
+                    end_opcode = ctx->initial_instr[end_indice].op.code;
+                }
             }
             if (end_indice + _PyOpcode_Caches[_PyOpcode_Deopt[end_opcode]] + 1 >= real_end) {
                 break;
             }
             end_indice += _PyOpcode_Caches[_PyOpcode_Deopt[end_opcode]] + 1;
+            oparg = ctx->initial_instr[end_indice].op.arg;
         }
         ctx->bbs[i].id = i;
         ctx->bbs[i].is_entrypoint = false;
@@ -1171,7 +1179,6 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         ctx->bbs[i].slice.end = ctx->initial_instr + end_indice;
         ctx->instr_to_bb_id[start_indice] = i;
         int opcode = ctx->initial_instr[end_indice].op.code;
-        int oparg = ctx->initial_instr[end_indice].op.arg;
         if (opcode == ENTER_EXECUTOR) {
             opcode = ctx->co->co_executors->executors[oparg & 255]->vm_data.opcode;
             oparg = ctx->co->co_executors->executors[oparg & 255]->vm_data.oparg;
@@ -2018,9 +2025,9 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
 #else
         fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s</td></tr>\n", i, opname);
 #endif
-        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
-            break;
-        }
+//        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+//            break;
+//        }
     }
     fprintf(out, "    </table>>\n");
     fprintf(out, "]\n\n");
@@ -2042,9 +2049,9 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
         if (exit != NULL && exit->executor != NULL) {
             fprintf(out, "executor_%p:i%d -> executor_%p:start\n", executor, i, exit->executor);
         }
-        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
-            break;
-        }
+//        if (inst->opcode == _EXIT_TRACE || inst->opcode == _JUMP_TO_TOP) {
+//            break;
+//        }
     }
 }
 
