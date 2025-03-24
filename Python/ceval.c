@@ -886,7 +886,8 @@ static const _Py_CODEUNIT _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS[] = {
     { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on return */
     { .op.code = NOP, .op.arg = 0 },
     { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on yield */
-    { .op.code = RESUME, .op.arg = RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START }
+    { .op.code = RESUME, .op.arg = RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START },
+    { .op.code = CACHE, .op.arg = 0},
 };
 
 #ifdef Py_DEBUG
@@ -1152,9 +1153,9 @@ jump_to_jump_target:
     goto tier2_dispatch;
 
 jump_to_dynamic:
-    // TODO swap to a jump table.
-    target = next_uop[-1].operand1;
-    next_uop = current_executor->trace + target;
+    target = (int)(frame->instr_ptr - (_Py_CODEUNIT*)next_uop[-1].operand1);
+    assert(current_executor->bc_offset_to_trace_offset[target] >= 0);
+    next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target];
     goto tier2_dispatch;
 
 #endif  // _Py_JIT

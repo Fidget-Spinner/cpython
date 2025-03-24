@@ -145,9 +145,13 @@ dummy_func(
         pure inst(NOP, (--)) {
         }
 
-        family(RESUME, 0) = {
+        family(RESUME, 1) = {
             RESUME_CHECK,
+            RESUME_CHECK_JIT,
         };
+
+        macro(RESUME_CHECK_JIT) = unused/1 + _RESUME_CHECK + _JIT;
+        macro(RESUME_CHECK) = unused/1 + _RESUME_CHECK;
 
         macro(NOT_TAKEN) = NOP;
 
@@ -174,7 +178,8 @@ dummy_func(
         op(_QUICKEN_RESUME, (--)) {
             #if ENABLE_SPECIALIZATION_FT
             if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                int op = tstate->interp->jit ? RESUME_CHECK_JIT : RESUME_CHECK;
+                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, op);
             }
             #endif  /* ENABLE_SPECIALIZATION_FT */
         }
@@ -213,12 +218,13 @@ dummy_func(
         }
 
         macro(RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (--)) {
+        op(_RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -244,6 +250,7 @@ dummy_func(
         }
 
         macro(INSTRUMENTED_RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM +
@@ -2778,9 +2785,12 @@ dummy_func(
         }
 
         tier1 op(_JIT, (--)) {
+            DEOPT_IF(!tstate->interp->jit);
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
-            if (backoff_counter_triggers(counter) && this_instr->op.code == JUMP_BACKWARD_JIT) {
+            if (backoff_counter_triggers(counter) &&
+                (this_instr->op.code == JUMP_BACKWARD_JIT ||
+                this_instr->op.code == RESUME_CHECK_JIT)) {
                 _Py_CODEUNIT *start = this_instr;
                 /* Back up over EXTENDED_ARGs so optimizer sees the whole instruction */
                 while (oparg > 255) {
@@ -5121,7 +5131,7 @@ dummy_func(
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-            if (frame->lltrace >= 2) {
+            if (frame->lltrace >= 3) {
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
                 printf(", exit %lu, temp %d, target %d -> %s]\n",
@@ -5130,35 +5140,36 @@ dummy_func(
                     _PyOpcode_OpName[target->op.code]);
             }
         #endif
-            if (exit->executor && !exit->executor->vm_data.valid) {
-                exit->temperature = initial_temperature_backoff_counter();
-                Py_CLEAR(exit->executor);
-            }
-            tstate->previous_executor = (PyObject *)current_executor;
-            if (exit->executor == NULL) {
-                _Py_BackoffCounter temperature = exit->temperature;
-                if (!backoff_counter_triggers(temperature)) {
-                    exit->temperature = advance_backoff_counter(temperature);
-                    GOTO_TIER_ONE(target);
-                }
-                _PyExecutorObject *executor;
-                if (target->op.code == ENTER_EXECUTOR) {
-                    executor = code->co_executors->executors[target->op.arg];
-                    Py_INCREF(executor);
-                }
-                else {
-                    int chain_depth = current_executor->vm_data.chain_depth + 1;
-                    int optimized = _PyOptimizer_Optimize(frame, target, &executor, chain_depth);
-                    if (optimized <= 0) {
-                        exit->temperature = restart_backoff_counter(temperature);
-                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
-                    }
-                    exit->temperature = initial_temperature_backoff_counter();
-                }
-                exit->executor = executor;
-            }
-            Py_INCREF(exit->executor);
-            GOTO_TIER_TWO(exit->executor);
+            GOTO_TIER_ONE(target);
+//            if (exit->executor && !exit->executor->vm_data.valid) {
+//                exit->temperature = initial_temperature_backoff_counter();
+//                Py_CLEAR(exit->executor);
+//            }
+//            tstate->previous_executor = (PyObject *)current_executor;
+//            if (exit->executor == NULL) {
+//                _Py_BackoffCounter temperature = exit->temperature;
+//                if (!backoff_counter_triggers(temperature)) {
+//                    exit->temperature = advance_backoff_counter(temperature);
+//                    GOTO_TIER_ONE(target);
+//                }
+//                _PyExecutorObject *executor;
+//                if (target->op.code == ENTER_EXECUTOR) {
+//                    executor = code->co_executors->executors[target->op.arg];
+//                    Py_INCREF(executor);
+//                }
+//                else {
+//                    int chain_depth = current_executor->vm_data.chain_depth + 1;
+//                    int optimized = _PyOptimizer_Optimize(frame, target, &executor, chain_depth);
+//                    if (optimized <= 0) {
+//                        exit->temperature = restart_backoff_counter(temperature);
+//                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
+//                    }
+//                    exit->temperature = initial_temperature_backoff_counter();
+//                }
+//                exit->executor = executor;
+//            }
+//            Py_INCREF(exit->executor);
+//            GOTO_TIER_TWO(exit->executor);
         }
 
         tier2 op(_CHECK_VALIDITY, (--)) {

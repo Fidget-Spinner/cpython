@@ -951,6 +951,7 @@ struct _is {
     _Py_CODEUNIT *osr_entry_instr;
     _PyUOpInstruction *osr_entry_uop;
     _PyUOpInstruction buffer[UOP_MAX_METHOD_LENGTH];
+    int bc_offset_to_uop_offsets[MAX_BYTECODE_SIZE];
 };
 
 

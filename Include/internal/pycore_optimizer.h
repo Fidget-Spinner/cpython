@@ -73,10 +73,16 @@ typedef struct {
     const struct _PyExecutorObject *executor;
 } _PyExitData;
 
+#define MAX_BBS_ALLOWED 500
+#define MAX_BYTECODE_SIZE 1000
+#define UOP_MAX_METHOD_LENGTH (MAX_BYTECODE_SIZE * 5)
+
+
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
     int osr_entry_offset;
     const _PyUOpInstruction *trace;
+    int bc_offset_to_trace_offset[MAX_BYTECODE_SIZE];
     _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
     uint32_t exit_count;
     uint32_t code_size;
@@ -337,7 +343,7 @@ typedef struct _PyBytecodeBBJump {
 typedef struct _PyByteCodeBB {
     int id;
     _PyByteCodeSlice slice;
-    char seen_by_optimizer;
+    char is_entrypoint;
     struct {
         _PyByteCodeTerminatorKind kind;
         union {
@@ -347,9 +353,6 @@ typedef struct _PyByteCodeBB {
     } terminator;
 } _PyByteCodeBB;
 
-#define MAX_BBS_ALLOWED 500
-#define MAX_BYTECODE_SIZE 2000
-#define UOP_MAX_METHOD_LENGTH (MAX_BYTECODE_SIZE * 5)
 
 typedef struct _PyByteCodeTranslationCtx {
     int stackdepth;
@@ -365,9 +368,7 @@ typedef struct _PyByteCodeTranslationCtx {
     // instr_is_bb_start but compressed.
     int max_seen_bb_count;
     int indices[MAX_BBS_ALLOWED];
-    // Stuff like RESUME
-    int max_seen_entrypoint_count;
-    char entrypoint_bbs[MAX_BBS_ALLOWED];
+    int seen_entrypoints;
     _PyBloomFilter *dependencies;
 } _PyByteCodeTranslationCtx;
 
