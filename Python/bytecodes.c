@@ -5262,7 +5262,8 @@ dummy_func(
         }
 
         tier2 op(_TIER2_IP_TO_JUMP_TARGET, (--)) {
-            JUMP_TO_DYNAMIC();
+            JUMP_TO_JUMP_TARGET();
+            // JUMP_TO_DYNAMIC();
         }
 
         label(pop_4_error) {

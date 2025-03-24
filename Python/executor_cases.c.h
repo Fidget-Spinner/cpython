@@ -7071,7 +7071,8 @@
         }
 
         case _TIER2_IP_TO_JUMP_TARGET: {
-            JUMP_TO_DYNAMIC();
+            JUMP_TO_JUMP_TARGET();
+            // JUMP_TO_DYNAMIC();
             break;
         }
 

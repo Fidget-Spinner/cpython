@@ -1575,10 +1575,10 @@ uop_optimize(
     interp->jit_translation_ctxs_used = 0;
     interp->osr_entry_instr = instr;
     interp->osr_entry_uop = NULL;
-    char *second = Py_GETENV("PYTHON_UOPS_CFG");
-    if (second == NULL) {
-        return 0;
-    }
+//    char *second = Py_GETENV("PYTHON_UOPS_CFG");
+//    if (second == NULL) {
+//        return 0;
+//    }
     _PyByteCodeTranslationCtx *ctx = translation_ctx_init(&dependencies,
                                                           _PyFrame_GetCode(frame),
                                                           _PyFrame_GetFunction(frame), 0);
