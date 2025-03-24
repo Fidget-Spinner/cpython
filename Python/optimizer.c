@@ -467,6 +467,9 @@ translation_ctx_init(
     if (interp->jit_translation_ctxs_used + 1 > MAX_JIT_TRANSLATION_CTXS) {
         return NULL;
     }
+    if (co->co_flags & CO_NESTED) {
+        return NULL;
+    }
     _PyByteCodeTranslationCtx *ctx = &interp->jit_translation_ctx[interp->jit_translation_ctxs_used];
     ctx->stackdepth = stackdepth;
     _Py_BloomFilter_Add(dependencies, co);
