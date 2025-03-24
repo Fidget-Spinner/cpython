@@ -944,8 +944,11 @@ struct _is {
     _Py_hashtable_t *closed_stackrefs_table;
 #  endif
 #endif
-    int jit_translation_ctxs_in_use;
-    _PyByteCodeTranslationCtx jit_translation_ctx[TRACE_STACK_SIZE];
+    int jit_translation_ctxs_used;
+    _PyByteCodeTranslationCtx jit_translation_ctx[MAX_JIT_TRANSLATION_CTXS];
+    int buffer_length;
+    int buffer_max_length;
+    _PyUOpInstruction buffer[UOP_MAX_METHOD_LENGTH];
 };
 
 

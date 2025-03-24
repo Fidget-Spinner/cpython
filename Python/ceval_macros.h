@@ -434,6 +434,7 @@ do { \
 
 #define JUMP_TO_JUMP_TARGET() goto jump_to_jump_target
 #define JUMP_TO_ERROR() goto jump_to_error_target
+#define JUMP_TO_DYNAMIC() goto jump_to_dynamic
 
 /* Stackref macros */
 

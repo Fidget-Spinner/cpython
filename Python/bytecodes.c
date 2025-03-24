@@ -5226,6 +5226,10 @@ dummy_func(
             JUMP_TO_JUMP_TARGET();
         }
 
+        tier2 op(_TIER2_IP_TO_JUMP_TARGET, (--)) {
+            JUMP_TO_DYNAMIC();
+        }
+
         label(pop_4_error) {
             STACK_SHRINK(4);
             goto error;

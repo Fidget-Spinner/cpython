@@ -118,6 +118,8 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 
 #define TRACE_STACK_SIZE 5
 
+#define MAX_JIT_TRANSLATION_CTXS (TRACE_STACK_SIZE * 2)
+
 int _Py_uop_analyze_and_optimize(_PyInterpreterFrame *frame,
     _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
     _PyBloomFilter *dependencies);
@@ -306,27 +308,29 @@ static inline int is_terminator(const _PyUOpInstruction *uop)
 PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
 
 typedef struct _PyByteCodeSlice {
-    int start;
-    int end;
+    _Py_CODEUNIT *start;
+    _Py_CODEUNIT *end;
 } _PyByteCodeSlice;
 
 typedef enum _PyByteCodeTerminatorKind {
     BB_BRANCH,
     BB_JUMP,
+    BB_INLINED_CALL,
     BB_FALLTHROUGH,
     BB_EXIT,
 } _PyByteCodeTerminatorKind;
 
 typedef struct _PyBytecodeBBBranch {
-    int consequent_target;
+    _Py_CODEUNIT* consequent_target;
     struct _PyByteCodeBB *consequent_bb;
-    int alternative_target;
+    _Py_CODEUNIT* alternative_target;
     struct _PyByteCodeBB *alternative_bb;
 } _PyBytecodeBBBranch;
 
 typedef struct _PyBytecodeBBJump {
-    int jump_target;
+    _Py_CODEUNIT* jump_target;
     struct _PyByteCodeBB *jump_bb;
+    struct _PyByteCodeTranslationCtx *target_ctx;
 } _PyBytecodeBBJump;
 
 typedef struct _PyByteCodeBB {
@@ -341,12 +345,14 @@ typedef struct _PyByteCodeBB {
     } terminator;
 } _PyByteCodeBB;
 
-#define MAX_BBS_ALLOWED 100
+#define MAX_BBS_ALLOWED 500
 #define MAX_BYTECODE_SIZE 2000
 #define UOP_MAX_METHOD_LENGTH (MAX_BYTECODE_SIZE * 5)
 
 typedef struct _PyByteCodeTranslationCtx {
+    int stackdepth;
     PyCodeObject *co;
+    PyFunctionObject *func;
     _Py_CODEUNIT *initial_instr;
     _Py_CODEUNIT *last_instr;
     _PyByteCodeBB bbs[MAX_BBS_ALLOWED];
@@ -359,9 +365,6 @@ typedef struct _PyByteCodeTranslationCtx {
     // Stuff like RESUME
     int max_seen_entrypoint_count;
     int entrypoint_bbs[MAX_BBS_ALLOWED];
-    int buffer_length;
-    int buffer_max_length;
-    _PyUOpInstruction buffer[UOP_MAX_METHOD_LENGTH];
     _PyBloomFilter *dependencies;
 } _PyByteCodeTranslationCtx;
 

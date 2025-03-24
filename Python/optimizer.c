@@ -578,7 +578,6 @@ translate_bytecode_to_trace(
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
         if (first && progress_needed) {
-            assert(first);
             if (OPCODE_HAS_EXIT(opcode) || OPCODE_HAS_DEOPT(opcode)) {
                 opcode = _PyOpcode_Deopt[opcode];
             }
@@ -883,7 +882,6 @@ translate_bytecode_to_trace(
             instr++;
         }
     top:
-        // Jump here after _PUSH_FRAME or likely branches.
         first = false;
     }  // End for (;;)
 
@@ -919,18 +917,46 @@ done:
     return trace_length;
 }
 
+
+static _PyByteCodeTranslationCtx *
+translation_ctx_init(
+    _PyBloomFilter *dependencies,
+    PyCodeObject *co, PyFunctionObject *func, int stackdepth)
+{
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    if (interp->jit_translation_ctxs_used + 1 > MAX_JIT_TRANSLATION_CTXS) {
+        return NULL;
+    }
+    _PyByteCodeTranslationCtx *ctx = &interp->jit_translation_ctx[interp->jit_translation_ctxs_used];
+    ctx->stackdepth = stackdepth;
+    _Py_BloomFilter_Add(dependencies, co);
+    ctx->co = co;
+    ctx->func = func;
+    ctx->initial_instr = _PyCode_CODE(ctx->co);
+    ctx->last_instr = _PyCode_CODE(ctx->co) + Py_SIZE(ctx->co);
+
+    interp->jit_translation_ctxs_used++;
+    ctx->dependencies = dependencies;
+    return ctx;
+}
+
+static int translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx);
+static int translate_cfg_to_uops(_PyByteCodeTranslationCtx *ctx);
+
 static int
 translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
 {
-    bool first = true;
     _Py_BloomFilter_Add(ctx->dependencies, ctx->co);
+    PyInterpreterState *interp = _PyInterpreterState_GET();
     PyCodeObject *code = ctx->co;
-    _PyUOpInstruction *trace = ctx->buffer;
-    int trace_length = ctx->buffer_length;
-    int max_length = ctx->buffer_max_length;
-    _Py_CODEUNIT *instr = &ctx->initial_instr[bb->slice.start];
-    _Py_CODEUNIT *end = &ctx->initial_instr[bb->slice.end];
+    PyFunctionObject *func = ctx->func;
+    _PyUOpInstruction *trace = interp->buffer;
+    int trace_length = interp->buffer_length;
+    int max_length = interp->buffer_max_length;
+    _Py_CODEUNIT *instr = bb->slice.start;
+    _Py_CODEUNIT *end = bb->slice.end;
 
+    bool first = true;
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
     int lltrace = 0;
@@ -982,8 +1008,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
 
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
-        if (first) {
-            assert(first);
+        if (bb->id == 0 && first) {
             if (OPCODE_HAS_EXIT(opcode) || OPCODE_HAS_DEOPT(opcode)) {
                 opcode = _PyOpcode_Deopt[opcode];
             }
@@ -1016,20 +1041,14 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                 break;
 
             case RESUME:
-                ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t)instr, target);
-                ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+                if (ctx->stackdepth == 0 && bb->id == 0) {
+                    ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t) instr, target);
+                    ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+                }
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
                 break;
-            case POP_JUMP_IF_NONE:
-            case POP_JUMP_IF_NOT_NONE:
-            case POP_JUMP_IF_FALSE:
-            case POP_JUMP_IF_TRUE:
-            {
-
-                break;
-            }
             default:
             {
                 const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
@@ -1071,7 +1090,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                                 uop = _PyUOp_Replacements[uop];
                                 assert(uop != 0);
 #ifdef Py_DEBUG
-                                {
+                                if (_PyOpcode_Deopt[opcode] == FOR_ITER) {
                                     uint32_t next_inst = target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER + (oparg > 255);
                                     uint32_t jump_target = next_inst + oparg;
                                     assert(_Py_GetBaseCodeUnit(code, jump_target).op.code == END_FOR);
@@ -1102,17 +1121,52 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                                         expansion->uops[i].offset);
                                 Py_FatalError("garbled expansion");
                         }
-                        if (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE) {
-                            assert(instr == end);
-                            ADD_TO_TRACE(_EXIT_TRACE, oparg, operand, target);
-                            DPRINTF(2,
-                                    "Returning to %s (%s:%d) at byte offset %d\n",
-                                    PyUnicode_AsUTF8(code->co_qualname),
-                                    PyUnicode_AsUTF8(code->co_filename),
-                                    code->co_firstlineno,
-                                    2 * INSTR_IP(instr, code));
+                        if (uop == _PUSH_FRAME) {
+                            assert(i + 1 == nuops);
+                            if (opcode == FOR_ITER_GEN ||
+                                opcode == LOAD_ATTR_PROPERTY ||
+                                opcode == BINARY_OP_SUBSCR_GETITEM ||
+                                opcode == SEND_GEN)
+                            {
+                                DPRINTF(2, "Bailing due to dynamic target\n");
+                                OPT_STAT_INC(unknown_callee);
+                                return 0;
+                                // Rewind the trace and bail.
+                                trace_length -= nuops;
+                                goto done;
+                            }
+                            // This should be an inlined call.
+                            if (bb->terminator.kind == BB_INLINED_CALL) {
+                                assert(instr == end);
+                                interp->buffer_max_length = max_length;
+                                interp->buffer_length = trace_length;
+                                if (!translate_cfg_to_uops(
+                                    bb->terminator.op.jump.target_ctx)) {
+                                    return 0;
+                                }
+                                max_length = interp->buffer_max_length;
+                                trace_length = interp->buffer_length;
+                            }
+                            else {
+                                // Rewind the trace and exit.
+                                trace_length -= nuops;
+                                goto done;
+                            }
                             break;
                         }
+                        if (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE) {
+                            assert(instr == end);
+                            if (ctx->stackdepth == 0) {
+                                ADD_TO_TRACE(_EXIT_TRACE, oparg, operand,
+                                             target);
+                            }
+                            else {
+                                ADD_TO_TRACE(uop, oparg, operand,
+                                             target);
+                            }
+                            break;
+                        }
+
                         if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
                             assert(i + 1 == nuops);
                             _Py_CODEUNIT *next_instr = instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
@@ -1144,38 +1198,40 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
         }
         first = false;
     }  // End for (;;)
+    assert(instr >= end);
     DPRINTF(1,
             "Fully translated BB %d for %s (%s:%d) at byte offset %d -- length %d\n",
             bb->id,
             PyUnicode_AsUTF8(code->co_qualname),
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
-            2 * bb->slice.start,
+            2 * INSTR_IP(bb->slice.start, code),
             trace_length);
-    ctx->buffer_max_length = max_length;
-    ctx->buffer_length = trace_length;
+    interp->buffer_max_length = max_length;
+    interp->buffer_length = trace_length;
     return 1;
 done:
-    ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+    if (instr != end) {
+        ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+    }
     DPRINTF(1,
             "Partially translated BB %d for %s (%s:%d) at byte offset %d -- length %d\n",
             bb->id,
             PyUnicode_AsUTF8(code->co_qualname),
             PyUnicode_AsUTF8(code->co_filename),
             code->co_firstlineno,
-            2 * bb->slice.start,
+            2 * INSTR_IP(bb->slice.start, code),
             trace_length);
     OPT_HIST(trace_length, trace_length_hist);
-    ctx->buffer_max_length = max_length;
-    ctx->buffer_length = trace_length;
+    interp->buffer_max_length = max_length;
+    interp->buffer_length = trace_length;
     return 1;
 }
 
 static int
 translate_cfg_to_uops(_PyByteCodeTranslationCtx *ctx)
 {
-    ctx->buffer_length = 0;
-    ctx->buffer_max_length = UOP_MAX_METHOD_LENGTH - 2;
+    PyInterpreterState *interp = _PyInterpreterState_GET();
     _Py_BloomFilter_Add(ctx->dependencies, ctx->co);
     for (int i = 0; i < ctx->max_seen_bb_count; i++) {
         if (translate_bb_to_uops(ctx, &ctx->bbs[i]) == 0) {
@@ -1189,10 +1245,10 @@ translate_cfg_to_uops(_PyByteCodeTranslationCtx *ctx)
         lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
     }
     if (lltrace >= 2) {
-        printf("Unoptimized uops (length %d):\n", ctx->buffer_length);
-        for (int i = 0; i < ctx->buffer_length; i++) {
+        printf("Unoptimized uops (length %d):\n", interp->buffer_length);
+        for (int i = 0; i < interp->buffer_length; i++) {
             printf("%4d UNOPTIMIZED: ", i);
-            _PyUOpPrint(&ctx->buffer[i]);
+            _PyUOpPrint(&interp->buffer[i]);
             printf("\n");
         }
     }
@@ -1206,6 +1262,112 @@ translate_cfg_to_uops(_PyByteCodeTranslationCtx *ctx)
 
 #define INSTR_OFFSET(instr) (instr - ctx->initial_instr)
 
+static void
+inline_possible_push_frame(_PyByteCodeTranslationCtx *ctx, _Py_CODEUNIT *instr, int opcode, int oparg, int starting_bb_id)
+{
+#if Py_DEBUG
+    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
+    int lltrace = 0;
+    if (python_lltrace != NULL && *python_lltrace >= '0') {
+        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
+    }
+#endif
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    assert(_PyOpcode_Deopt[opcode] == CALL);
+    const struct opcode_macro_expansion *expansion = &_PyOpcode_macro_expansion[opcode];
+    // Reserve space for nuops (+ _SET_IP + _EXIT_TRACE)
+    int nuops = expansion->nuops;
+    uint32_t orig_oparg = oparg;  // For OPARG_TOP/BOTTOM
+    for (int i = 0; i < nuops; i++) {
+        oparg = orig_oparg;
+        uint32_t uop = expansion->uops[i].uop;
+        uint64_t operand = 0;
+        // Add one to account for the actual opcode/oparg pair:
+        int offset = expansion->uops[i].offset + 1;
+
+        if (uop == _PUSH_FRAME) {
+            assert(i + 1 == nuops);
+            assert(_PyOpcode_Deopt[opcode] == CALL || _PyOpcode_Deopt[opcode] == CALL_KW);
+            int func_version_offset =
+                offsetof(_PyCallCache, func_version)/sizeof(_Py_CODEUNIT)
+                // Add one to account for the actual opcode/oparg pair:
+                + 1;
+            uint32_t func_version = read_u32(&instr[func_version_offset].cache);
+            PyCodeObject *new_code = NULL;
+            PyFunctionObject *new_func =
+                _PyFunction_LookupByVersion(func_version, (PyObject **) &new_code);
+            if (new_code != NULL) {
+                if (new_code == ctx->co) {
+                    // Recursive call, bail (we could be here forever).
+                    DPRINTF(2, "Bailing on recursive call to %s (%s:%d)\n",
+                            PyUnicode_AsUTF8(new_code->co_qualname),
+                            PyUnicode_AsUTF8(new_code->co_filename),
+                            new_code->co_firstlineno);
+                    OPT_STAT_INC(recursive_call);
+                    // Point the current BB to the recursive one.
+                    ctx->bbs[starting_bb_id].terminator.kind = BB_JUMP;
+                    ctx->bbs[starting_bb_id].terminator.op.jump.jump_target = ctx->bbs[0].slice.start;
+                    ctx->bbs[starting_bb_id].terminator.op.jump.target_ctx = ctx;
+                    return;
+                }
+                if (new_code->co_version != func_version) {
+                    ctx->bbs[starting_bb_id].terminator.kind = BB_EXIT;
+                    return;
+                }
+                // Increment IP to the return address
+                instr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + 1;
+                /* Set the operand to the callee's function or code object,
+                 * to assist optimization passes.
+                 * We prefer setting it to the function (for remove_globals())
+                 * but if that's not available but the code is available,
+                 * use the code, setting the low bit so the optimizer knows.
+                 */
+                if (new_func != NULL) {
+                    operand = (uintptr_t)new_func;
+                }
+                else if (new_code != NULL) {
+                    operand = (uintptr_t)new_code | 1;
+                }
+                else {
+                    operand = 0;
+                }
+                _PyByteCodeTranslationCtx *inlinee_ctx = translation_ctx_init(ctx->dependencies, new_code, new_func, ctx->stackdepth + 1);
+                if (inlinee_ctx == NULL) {
+                    ctx->bbs[starting_bb_id].terminator.kind = BB_EXIT;
+                    return;
+                }
+                DPRINTF(2,
+                        "Inlining %s (%s:%d)\n",
+                        PyUnicode_AsUTF8(new_code->co_qualname),
+                        PyUnicode_AsUTF8(new_code->co_filename),
+                        new_code->co_firstlineno);
+                // Cannot inline
+                if (translate_bytecode_to_cfg(inlinee_ctx) == 0) {
+                    ctx->bbs[starting_bb_id].terminator.kind = BB_EXIT;
+                    return;
+                }
+                // Cannot inline
+                if (ctx->max_seen_bb_count + inlinee_ctx->max_seen_bb_count > MAX_BBS_ALLOWED) {
+                    ctx->bbs[starting_bb_id].terminator.kind = BB_EXIT;
+                    return;
+                }
+                // Insert the new BBs.
+
+                ctx->bbs[starting_bb_id].terminator.kind = BB_INLINED_CALL;
+                ctx->bbs[starting_bb_id].terminator.op.jump.target_ctx = inlinee_ctx;
+                ctx->bbs[starting_bb_id].terminator.op.jump.jump_bb = &inlinee_ctx->bbs[0];
+                ctx->bbs[starting_bb_id].terminator.op.jump.jump_target = _PyCode_CODE(new_code);
+                return;
+            }
+            DPRINTF(2, "Bail, new_code == NULL\n");
+            OPT_STAT_INC(unknown_callee);
+            ctx->bbs[starting_bb_id].terminator.kind = BB_EXIT;
+            return;
+        }
+    }
+    ctx->bbs[starting_bb_id].terminator.kind = BB_FALLTHROUGH;
+}
+
 static int
 compare( const void *arg1, const void *arg2 )
 {
@@ -1218,28 +1380,37 @@ dump_cfg(_PyByteCodeTranslationCtx *ctx)
     fprintf(stdout, "BBs of %s:%s\n", PyUnicode_AsUTF8(ctx->co->co_filename), PyUnicode_AsUTF8(ctx->co->co_qualname));
     for (int i = 0; i < ctx->max_seen_bb_count; i++) {
         fprintf(stdout, "BB %d {\n", i);
-        for (int curr = ctx->bbs[i].slice.start; curr <= ctx->bbs[i].slice.end;) {
-            int opcode = ctx->initial_instr[curr].op.code;
-            int oparg = ctx->initial_instr[curr].op.arg;
+        for (_Py_CODEUNIT *curr = ctx->bbs[i].slice.start; curr <= ctx->bbs[i].slice.end;) {
+            int opcode = curr->op.code;
+            int oparg = curr->op.arg;
             if (opcode == ENTER_EXECUTOR) {
                 opcode = JUMP_BACKWARD;
             }
-            fprintf(stdout,  "    %d: %s %d\n", curr, _PyOpcode_OpName[opcode], ctx->initial_instr[curr].op.arg);
+            fprintf(stdout,  "    %d: %s %d\n", (int)(curr - ctx->initial_instr), _PyOpcode_OpName[opcode], curr->op.arg);
             curr += _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] + 1;
         }
         switch(ctx->bbs[i].terminator.kind) {
             case BB_BRANCH:
-                fprintf(stderr, "Consequent: -> BB %d\n",ctx->bbs[i].terminator.op.branch.consequent_bb->id);
-                fprintf(stderr, "Alternative: -> BB %d\n",ctx->bbs[i].terminator.op.branch.alternative_bb->id);
+                fprintf(stdout, "Consequent: -> BB %d\n",ctx->bbs[i].terminator.op.branch.consequent_bb->id);
+                fprintf(stdout, "Alternative: -> BB %d\n",ctx->bbs[i].terminator.op.branch.alternative_bb->id);
                 break;
             case BB_JUMP:
-                fprintf(stderr, "Jump: -> BB %d\n",ctx->bbs[i].terminator.op.jump.jump_bb->id);
+                fprintf(stdout, "Jump: -> BB %d (CTX, %p)\n",ctx->bbs[i].terminator.op.jump.jump_bb->id, ctx->bbs[i].terminator.op.jump.target_ctx);
                 break;
+            case BB_INLINED_CALL: {
+                _PyByteCodeTranslationCtx *target_ctx = ctx->bbs[i].terminator.op.jump.target_ctx;
+                fprintf(stdout, "Inlined Call: -> BB %d\n",
+                        (int) (ctx->bbs[i].terminator.op.jump.jump_bb - target_ctx->bbs));
+                fprintf(stdout, "Start Inlined Call\n");
+                dump_cfg(target_ctx);
+                fprintf(stdout, "End Inlined Call\n");
+                break;
+            }
             case BB_FALLTHROUGH:
-                fprintf(stderr, "Fallthrough: -> BB %d\n", i + 1);
+                fprintf(stdout, "Fallthrough: -> BB %d\n", i + 1);
                 break;
             case BB_EXIT:
-                fprintf(stderr, "Exit\n");
+                fprintf(stdout, "Exit\n");
                 break;
         }
         fprintf(stdout, "} \n");
@@ -1256,6 +1427,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
     for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
         ctx->instr_is_bb_start[i] = false;
     }
+    ctx->max_seen_entrypoint_count = 0;
     int opcode;
     int oparg;
     _Py_CODEUNIT *curr = ctx->initial_instr;
@@ -1321,12 +1493,21 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 break;
             }
             case RESUME:
+                ctx->max_seen_entrypoint_count++;
+                _Py_FALLTHROUGH;
             case RETURN_VALUE:
             case YIELD_VALUE:
             case RETURN_GENERATOR:
             case END_FOR:
             {
                 ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
+                break;
+            }
+            case CALL: // Every Call could be an inline site.
+            {
+                ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
+                _Py_CODEUNIT *target_instr = curr + 1 + _PyOpcode_Caches[CALL];
+                ctx->instr_is_bb_start[INSTR_OFFSET(target_instr)] = true;
                 break;
             }
             default:
@@ -1380,8 +1561,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             end_oparg = ctx->initial_instr[end_indice].op.arg;
         }
         ctx->bbs[i].id = i;
-        ctx->bbs[i].slice.start = start_indice;
-        ctx->bbs[i].slice.end = end_indice;
+        ctx->bbs[i].slice.start = ctx->initial_instr + start_indice;
+        ctx->bbs[i].slice.end = ctx->initial_instr + end_indice;
         ctx->instr_to_bb_id[start_indice] = i;
         int opcode = ctx->initial_instr[end_indice].op.code;
         int oparg = end_oparg;
@@ -1402,8 +1583,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 assert(ctx->instr_is_bb_start[next_instr]);
                 assert(ctx->instr_is_bb_start[target_instr]);
                 ctx->bbs[i].terminator.kind = BB_BRANCH;
-                ctx->bbs[i].terminator.op.branch.consequent_target = next_instr;
-                ctx->bbs[i].terminator.op.branch.alternative_target = target_instr;
+                ctx->bbs[i].terminator.op.branch.consequent_target = ctx->initial_instr + next_instr;
+                ctx->bbs[i].terminator.op.branch.alternative_target = ctx->initial_instr + target_instr;
                 break;
             }
             case JUMP_BACKWARD_NO_INTERRUPT:
@@ -1416,7 +1597,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 }
                 assert(ctx->instr_is_bb_start[jump_target]);
                 ctx->bbs[i].terminator.kind = BB_JUMP;
-                ctx->bbs[i].terminator.op.jump.jump_target = jump_target;
+                ctx->bbs[i].terminator.op.jump.jump_target = ctx->initial_instr + jump_target;
+                ctx->bbs[i].terminator.op.jump.target_ctx = ctx;
                 break;
             }
             case JUMP_FORWARD: {
@@ -1427,7 +1609,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 }
                 assert(ctx->instr_is_bb_start[jump_target]);
                 ctx->bbs[i].terminator.kind = BB_JUMP;
-                ctx->bbs[i].terminator.op.jump.jump_target = jump_target;
+                ctx->bbs[i].terminator.op.jump.jump_target = ctx->initial_instr + jump_target;
+                ctx->bbs[i].terminator.op.jump.target_ctx = ctx;
                 break;
             }
             case FOR_ITER:
@@ -1442,8 +1625,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 assert(ctx->instr_is_bb_start[target_instr]);
 
                 ctx->bbs[i].terminator.kind = BB_BRANCH;
-                ctx->bbs[i].terminator.op.branch.consequent_target = next_instr;
-                ctx->bbs[i].terminator.op.branch.alternative_target = target_instr;
+                ctx->bbs[i].terminator.op.branch.consequent_target = ctx->initial_instr + next_instr;
+                ctx->bbs[i].terminator.op.branch.alternative_target = ctx->initial_instr + target_instr;
                 break;
             }
             case RETURN_VALUE:
@@ -1451,29 +1634,33 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case YIELD_VALUE:
                 ctx->bbs[i].terminator.kind = BB_EXIT;
                 break;
+            case CALL:
+                inline_possible_push_frame(ctx, &ctx->initial_instr[end_indice],
+                                           opcode, oparg, i);
+                break;
             default:
                 ctx->bbs[i].terminator.kind = BB_FALLTHROUGH;
                 break;
         }
     }
 
-
     // Step 3. Link up the BBs
     for (int i = 0; i < ctx->max_seen_bb_count; i++) {
         switch(ctx->bbs[i].terminator.kind) {
             case BB_BRANCH: {
-                int alt_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.alternative_target];
+                int alt_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.alternative_target - ctx->initial_instr];
                 assert(alt_bb_id >= 0);
                 ctx->bbs[i].terminator.op.branch.alternative_bb = &ctx->bbs[alt_bb_id];
-                int cons_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.consequent_target];
+                int cons_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.consequent_target - ctx->initial_instr];
                 ctx->bbs[i].terminator.op.branch.consequent_bb = &ctx->bbs[cons_bb_id];
                 break;
             }
             case BB_JUMP:
             {
-                int jump_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.jump.jump_target];
+                _PyByteCodeTranslationCtx *target_ctx = ctx->bbs[i].terminator.op.jump.target_ctx;
+                int jump_bb_id = target_ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.jump.jump_target - ctx->initial_instr];
                 assert(jump_bb_id >= 0);
-                ctx->bbs[i].terminator.op.jump.jump_bb = &ctx->bbs[jump_bb_id];
+                ctx->bbs[i].terminator.op.jump.jump_bb = &target_ctx->bbs[jump_bb_id];
                 break;
             }
             case BB_FALLTHROUGH:
@@ -1482,14 +1669,14 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 ctx->bbs[i].terminator.op.jump.jump_bb = &ctx->bbs[i + 1];
                 break;
             }
+            case BB_INLINED_CALL:
             case BB_EXIT:
                 break;
         }
     }
 
-    // Step 4. Translate the BBs.
-    return translate_cfg_to_uops(ctx);
-
+    //    dump_cfg(ctx);
+    return 1;
 }
 
 #undef RESERVE
@@ -1785,15 +1972,21 @@ uop_optimize(
     _PyUOpInstruction buffer[UOP_MAX_TRACE_LENGTH];
     OPT_STAT_INC(attempts);
     PyInterpreterState *interp = _PyInterpreterState_GET();
-    _PyByteCodeTranslationCtx *ctx = &interp->jit_translation_ctx[0];
-    ctx->co = _PyFrame_GetCode(frame);
-    ctx->initial_instr = _PyCode_CODE(ctx->co);
-    ctx->last_instr = _PyCode_CODE(ctx->co) + Py_SIZE(ctx->co);
-    interp->jit_translation_ctxs_in_use = 1;
-    ctx->dependencies = &dependencies;
+    interp->jit_translation_ctxs_used = 0;
     char *second = Py_GETENV("PYTHON_UOPS_CFG");
     if (second != NULL) {
-        translate_bytecode_to_cfg(ctx);
+        _PyByteCodeTranslationCtx *ctx = translation_ctx_init(&dependencies,
+                                                              _PyFrame_GetCode(frame),
+                                                              _PyFrame_GetFunction(frame), 0);
+        if (ctx == NULL) {
+            return 0;
+        }
+        if (!translate_bytecode_to_cfg(ctx)) {
+            return 0;
+        }
+        interp->buffer_length = 0;
+        interp->buffer_max_length = UOP_MAX_METHOD_LENGTH - 2;
+        translate_cfg_to_uops(ctx);
     }
     int length = translate_bytecode_to_trace(frame, instr, buffer, UOP_MAX_TRACE_LENGTH, &dependencies, progress_needed);
     if (length <= 0) {

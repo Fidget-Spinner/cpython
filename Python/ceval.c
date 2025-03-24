@@ -1151,6 +1151,12 @@ jump_to_jump_target:
     next_uop = current_executor->trace + target;
     goto tier2_dispatch;
 
+jump_to_dynamic:
+    // TODO swap to a jump table.
+    target = next_uop[-1].operand1;
+    next_uop = current_executor->trace + target;
+    goto tier2_dispatch;
+
 #endif  // _Py_JIT
 
 #endif // _Py_TIER2
