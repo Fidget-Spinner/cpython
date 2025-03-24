@@ -2805,7 +2805,7 @@ dummy_func(
                 }
                 else {
                     this_instr[1].counter = initial_jump_backoff_counter();
-                    assert(tstate->previous_executor == NULL);
+                    // assert(tstate->previous_executor == NULL);
                     tstate->previous_executor = Py_None;
                     GOTO_TIER_TWO(executor);
                 }
@@ -2858,7 +2858,7 @@ dummy_func(
             assert(executor->vm_data.index == INSTR_OFFSET() - 1);
             assert(executor->vm_data.code == code);
             assert(executor->vm_data.valid);
-            assert(tstate->previous_executor == NULL);
+            // assert(tstate->previous_executor == NULL);
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */

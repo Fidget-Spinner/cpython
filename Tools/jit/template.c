@@ -56,6 +56,7 @@ do {                                                                       \
 #define GOTO_TIER_ONE(TARGET)                       \
 do {                                                \
     _PyFrame_SetStackPointer(frame, stack_pointer); \
+    Py_CLEAR(tstate->previous_executor);  \
     return TARGET;                                  \
 } while (0)
 

@@ -1287,7 +1287,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         }
     }
 
-     dump_cfg(ctx);
+//     dump_cfg(ctx);
     return 1;
 }
 

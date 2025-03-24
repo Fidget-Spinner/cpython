@@ -389,6 +389,11 @@ do {                                                   \
     _PyExecutorObject *_executor = (EXECUTOR);         \
     jit_func jitted = _executor->jit_code;             \
     /* Keep the shim frame alive via the executor: */  \
+    int target = (int)(this_instr - (_Py_CODEUNIT*)_PyCode_CODE(_PyFrame_GetCode(frame)));  \
+    assert(target >= 0);                                                   \
+    int uop_offset = _executor->bc_offset_to_trace_offset[target]; \
+    assert(uop_offset >= 0);                           \
+    _executor->osr_entry_offset = uop_offset;          \
     Py_INCREF(_executor);                              \
     next_instr = jitted(frame, stack_pointer, tstate); \
     Py_DECREF(_executor);                              \

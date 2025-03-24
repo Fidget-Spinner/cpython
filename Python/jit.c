@@ -131,20 +131,8 @@ mark_executable(unsigned char *memory, size_t size)
 
 // JIT compiler stuff: /////////////////////////////////////////////////////////
 
-#define SYMBOL_MASK_WORDS 4
 
-typedef uint32_t symbol_mask[SYMBOL_MASK_WORDS];
 
-typedef struct {
-    unsigned char *mem;
-    symbol_mask mask;
-    size_t size;
-} trampoline_state;
-
-typedef struct {
-    trampoline_state trampolines;
-    uintptr_t instruction_starts[UOP_MAX_TRACE_LENGTH];
-} jit_state;
 
 // Warning! AArch64 requires you to get your hands dirty. These are your gloves:
 
@@ -576,6 +564,7 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     executor->jit_code = memory;
     executor->jit_side_entry = memory + shim.code_size;
     executor->jit_size = total_size;
+    memcpy(&executor->jit_state, &state, sizeof(state));
     return 0;
 }
 

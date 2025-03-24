@@ -77,6 +77,20 @@ typedef struct {
 #define MAX_BYTECODE_SIZE 1000
 #define UOP_MAX_METHOD_LENGTH (MAX_BYTECODE_SIZE * 5)
 
+#define SYMBOL_MASK_WORDS 4
+
+typedef uint32_t symbol_mask[SYMBOL_MASK_WORDS];
+
+typedef struct {
+    unsigned char *mem;
+    symbol_mask mask;
+    size_t size;
+} trampoline_state;
+
+typedef struct {
+    trampoline_state trampolines;
+    uintptr_t instruction_starts[UOP_MAX_METHOD_LENGTH];
+} jit_state;
 
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
@@ -89,6 +103,7 @@ typedef struct _PyExecutorObject {
     size_t jit_size;
     void *jit_code;
     void *jit_side_entry;
+    jit_state jit_state;
     _PyExitData exits[1];
 } _PyExecutorObject;
 
