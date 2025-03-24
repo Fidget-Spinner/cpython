@@ -405,8 +405,8 @@ do {                                                   \
 #define GOTO_TIER_TWO(EXECUTOR) \
 do { \
     OPT_STAT_INC(traces_executed); \
-    next_uop = (EXECUTOR)->trace; \
-    assert(next_uop->opcode == _START_EXECUTOR); \
+    next_uop = (EXECUTOR)->trace + (EXECUTOR)->osr_entry_offset; \
+    current_executor = (EXECUTOR); \
     goto enter_tier_two; \
 } while (0)
 #endif

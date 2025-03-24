@@ -948,6 +948,8 @@ struct _is {
     _PyByteCodeTranslationCtx jit_translation_ctx[MAX_JIT_TRANSLATION_CTXS];
     int buffer_length;
     int buffer_max_length;
+    _Py_CODEUNIT *osr_entry_instr;
+    _PyUOpInstruction *osr_entry_uop;
     _PyUOpInstruction buffer[UOP_MAX_METHOD_LENGTH];
 };
 

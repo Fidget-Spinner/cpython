@@ -511,6 +511,9 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
     uint32_t target = 0;
 
     for (;instr <= end;) {
+        if (instr == interp->osr_entry_instr) {
+            interp->osr_entry_uop = &trace[trace_length];
+        }
         target = INSTR_IP(instr, code);
         // Need space for _DEOPT
         max_length--;
@@ -670,7 +673,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                             assert(instr == end);
                             ADD_TO_TRACE(uop, oparg, operand, target);
                             trace[trace_length-1].branch_or_jump_target_bb = bb->terminator.op.branch.alternative_bb;
-                            break;
+                            continue;
                         }
                         if (uop == _PUSH_FRAME) {
                             assert(i + 1 == nuops);
@@ -1533,6 +1536,8 @@ uop_optimize(
     OPT_STAT_INC(attempts);
     PyInterpreterState *interp = _PyInterpreterState_GET();
     interp->jit_translation_ctxs_used = 0;
+    interp->osr_entry_instr = instr;
+    interp->osr_entry_uop = NULL;
     char *second = Py_GETENV("PYTHON_UOPS_CFG");
     if (second == NULL) {
         return 0;
@@ -1548,7 +1553,10 @@ uop_optimize(
     }
     interp->buffer_length = 0;
     interp->buffer_max_length = UOP_MAX_METHOD_LENGTH - 2;
-    translate_cfg_to_uops(ctx);
+    if (!translate_cfg_to_uops(ctx)) {
+        return 0;
+    }
+    assert(interp->osr_entry_uop != NULL);
     int length = interp->buffer_length;
 
     assert(length < UOP_MAX_METHOD_LENGTH);
@@ -1584,6 +1592,8 @@ uop_optimize(
     }
     assert(length <= UOP_MAX_TRACE_LENGTH);
     *exec_ptr = executor;
+    executor->osr_entry_offset = (int)(interp->osr_entry_uop - interp->buffer);
+    assert(executor->osr_entry_offset <= interp->buffer_length);
     return 1;
 }
 
