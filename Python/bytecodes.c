@@ -3157,7 +3157,7 @@ dummy_func(
         }
 
 
-        replaced op(_TIER2_ITER_JUMP_LIST, (iter -- iter)) {
+        op(_TIER2_ITER_JUMP_LIST, (iter -- iter)) {
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             assert(Py_TYPE(iter_o) == &PyListIter_Type);
     // For free-threaded Python, the loop exit can happen at any point during

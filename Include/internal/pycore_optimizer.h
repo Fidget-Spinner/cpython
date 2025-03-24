@@ -355,6 +355,7 @@ typedef struct _PyByteCodeBB {
 
 typedef struct _PyByteCodeTranslationCtx {
     int stackdepth;
+    _PyByteCodeBB *return_to_this_bb;
     PyCodeObject *co;
     PyFunctionObject *func;
     _Py_CODEUNIT *initial_instr;

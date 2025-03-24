@@ -1497,7 +1497,9 @@
 
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 */
 
-        /* _TIER2_ITER_JUMP_LIST is not a viable micro-op for tier 2 */
+        case _TIER2_ITER_JUMP_LIST: {
+            break;
+        }
 
         /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 */
 

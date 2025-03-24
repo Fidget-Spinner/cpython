@@ -4218,7 +4218,35 @@
 
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 because it is replaced */
 
-        /* _TIER2_ITER_JUMP_LIST is not a viable micro-op for tier 2 because it is replaced */
+        case _TIER2_ITER_JUMP_LIST: {
+            _PyStackRef iter;
+            iter = stack_pointer[-1];
+            PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
+            assert(Py_TYPE(iter_o) == &PyListIter_Type);
+            // For free-threaded Python, the loop exit can happen at any point during
+            // item retrieval, so it doesn't make much sense to check and jump
+            // separately before item retrieval. Any length check we do here can be
+            // invalid by the time we actually try to fetch the item.
+            #ifdef Py_GIL_DISABLED
+            assert(_PyObject_IsUniquelyReferenced(iter_o));
+            (void)iter_o;
+            #else
+            _PyListIterObject *it = (_PyListIterObject *)iter_o;
+            STAT_INC(FOR_ITER, hit);
+            PyListObject *seq = it->it_seq;
+            if (seq == NULL || (size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
+                it->it_index = -1;
+                if (seq != NULL) {
+                    it->it_seq = NULL;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    Py_DECREF(seq);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                }
+                JUMP_TO_JUMP_TARGET();
+            }
+            #endif
+            break;
+        }
 
         /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 because it is replaced */
 
