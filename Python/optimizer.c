@@ -540,7 +540,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
             }
         }
         assert(opcode != EXTENDED_ARG);
-        if (!first && instr != interp->osr_entry_instr) {
+        if (interp->buffer != &trace[interp->buffer_length] && instr != interp->osr_entry_instr) {
             if (OPCODE_HAS_NO_SAVE_IP(opcode)) {
                 RESERVE_RAW(2, "_CHECK_VALIDITY");
                 ADD_TO_TRACE(_CHECK_VALIDITY, 0, 0, target);
@@ -706,14 +706,9 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                                 return 1;
                             }
                             else {
-                                assert(bb->terminator.kind == BB_EXIT || bb->terminator.kind == BB_FALLTHROUGH);
-                                if (bb->terminator.kind == BB_EXIT) {
-                                    return 0;
-                                }
-                                else {
-                                    return 0;
-                                };
-                                goto done;
+                                // BB Jump means recursion.
+                                assert(bb->terminator.kind == BB_EXIT || bb->terminator.kind == BB_FALLTHROUGH || bb->terminator.kind == BB_JUMP);
+                                return 0;
                             }
                             break;
                         }
@@ -1033,6 +1028,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
+            case LOAD_DEREF:
                 return 0;
             case EXTENDED_ARG:
                 return 0;
@@ -1223,6 +1219,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
                 assert(alt_bb_id >= 0);
                 ctx->bbs[i].terminator.op.branch.alternative_bb = &ctx->bbs[alt_bb_id];
                 int cons_bb_id = ctx->instr_to_bb_id[ctx->bbs[i].terminator.op.branch.consequent_target - ctx->initial_instr];
+                assert(cons_bb_id >= 0);
                 ctx->bbs[i].terminator.op.branch.consequent_bb = &ctx->bbs[cons_bb_id];
                 break;
             }
