@@ -478,6 +478,10 @@ translation_ctx_init(
     ctx->initial_instr = _PyCode_CODE(ctx->co);
     ctx->last_instr = _PyCode_CODE(ctx->co) + Py_SIZE(ctx->co);
 
+    for (int i = 0; i < MAX_BBS_ALLOWED; i++) {
+        ctx->entrypoint_bbs[i] = false;
+    }
+
     interp->jit_translation_ctxs_used++;
     ctx->dependencies = dependencies;
     ctx->return_to_this_bb = NULL;
@@ -596,6 +600,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                     ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t) instr, target);
                     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
                 }
+                ctx->entrypoint_bbs[bb->id] = true;
                 /* Use a special tier 2 version of RESUME_CHECK to allow traces to
                  *  start with RESUME_CHECK */
                 ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
@@ -1556,15 +1561,15 @@ uop_optimize(
     assert(length < UOP_MAX_METHOD_LENGTH);
 
     OPT_STAT_INC(traces_created);
-//    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
-//    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
-//        length = _Py_uop_analyze_and_optimize(frame, buffer,
-//                                           length,
-//                                           curr_stackentries, &dependencies);
-//        if (length <= 0) {
-//            return length;
-//        }
-//    }
+    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
+    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
+        length = _Py_uop_analyze_and_optimize(ctx, interp->buffer,
+                                           length,
+                                           curr_stackentries, &dependencies);
+        if (length <= 0) {
+            return length;
+        }
+    }
     assert(length < UOP_MAX_METHOD_LENGTH);
     assert(length >= 1);
     /* Fix up */

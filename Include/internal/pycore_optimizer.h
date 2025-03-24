@@ -122,9 +122,6 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 
 #define MAX_JIT_TRANSLATION_CTXS (TRACE_STACK_SIZE * 2)
 
-int _Py_uop_analyze_and_optimize(_PyInterpreterFrame *frame,
-    _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
-    _PyBloomFilter *dependencies);
 
 extern PyTypeObject _PyUOpExecutor_Type;
 
@@ -340,6 +337,7 @@ typedef struct _PyBytecodeBBJump {
 typedef struct _PyByteCodeBB {
     int id;
     _PyByteCodeSlice slice;
+    char seen_by_optimizer;
     struct {
         _PyByteCodeTerminatorKind kind;
         union {
@@ -369,9 +367,13 @@ typedef struct _PyByteCodeTranslationCtx {
     int indices[MAX_BBS_ALLOWED];
     // Stuff like RESUME
     int max_seen_entrypoint_count;
-    int entrypoint_bbs[MAX_BBS_ALLOWED];
+    char entrypoint_bbs[MAX_BBS_ALLOWED];
     _PyBloomFilter *dependencies;
 } _PyByteCodeTranslationCtx;
+
+int _Py_uop_analyze_and_optimize(_PyByteCodeTranslationCtx *ctx,
+                                 _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
+                                 _PyBloomFilter *dependencies);
 
 
 #ifdef __cplusplus
