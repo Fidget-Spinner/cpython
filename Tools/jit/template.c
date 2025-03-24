@@ -2,12 +2,20 @@
 
 #include "pycore_backoff.h"
 #include "pycore_call.h"
-#include "pycore_ceval.h"
 #include "pycore_cell.h"
+#include "pycore_ceval.h"
+#include "pycore_code.h"
+#include "pycore_descrobject.h"
 #include "pycore_dict.h"
 #include "pycore_emscripten_signal.h"
+#include "pycore_floatobject.h"
+#include "pycore_frame.h"
+#include "pycore_function.h"
+#include "pycore_genobject.h"
+#include "pycore_interpframe.h"
 #include "pycore_intrinsics.h"
 #include "pycore_jit.h"
+#include "pycore_list.h"
 #include "pycore_long.h"
 #include "pycore_opcode_metadata.h"
 #include "pycore_opcode_utils.h"
@@ -16,8 +24,9 @@
 #include "pycore_range.h"
 #include "pycore_setobject.h"
 #include "pycore_sliceobject.h"
-#include "pycore_descrobject.h"
 #include "pycore_stackref.h"
+#include "pycore_tuple.h"
+#include "pycore_unicodeobject.h"
 
 #include "ceval_macros.h"
 
@@ -35,14 +44,8 @@ extern py_tail_call_funcptr INSTRUCTION_TABLE[256];
 #undef CURRENT_OPERAND1
 #define CURRENT_OPERAND1() (_operand1)
 
-#undef ENABLE_SPECIALIZATION
-#define ENABLE_SPECIALIZATION (0)
-
-#undef GOTO_ERROR
-#define GOTO_ERROR(LABEL)        \
-    do {                         \
-        goto LABEL ## _tier_two; \
-    } while (0)
+#undef CURRENT_TARGET
+#define CURRENT_TARGET() (_target)
 
 #undef GOTO_TIER_TWO
 #define GOTO_TIER_TWO(EXECUTOR) \
@@ -69,15 +72,16 @@ do {  \
     do {                \
     } while (0)
 
-#define PATCH_VALUE(TYPE, NAME, ALIAS)  \
-    PyAPI_DATA(void) ALIAS;             \
-    TYPE NAME = (TYPE)(uintptr_t)&ALIAS;
+#undef LLTRACE_RESUME_FRAME
+#define LLTRACE_RESUME_FRAME() \
+    do {                       \
+    } while (0)
 
 #define PATCH_JUMP(ALIAS)                                    \
 do {                                                         \
-    PyAPI_DATA(void) ALIAS;                                  \
+    PATCH_VALUE(jit_func_preserve_none, jump, ALIAS);                                  \
     __attribute__((musttail))                                \
-    return ((jit_func_preserve_none)&ALIAS)(TAIL_CALL_ARGS); \
+    return ((jit_func_preserve_none)&jump)(TAIL_CALL_ARGS); \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
@@ -85,9 +89,6 @@ do {                                                         \
 
 #undef JUMP_TO_ERROR
 #define JUMP_TO_ERROR() PATCH_JUMP(_JIT_ERROR_TARGET)
-
-#undef WITHIN_STACK_BOUNDS
-#define WITHIN_STACK_BOUNDS() 1
 
 #define TIER_TWO 2
 
@@ -107,13 +108,11 @@ _JIT_ENTRY(TAIL_CALL_PARAMS)
     PATCH_VALUE(uint32_t, _operand0_hi, _JIT_OPERAND0_HI)
     PATCH_VALUE(uint32_t, _operand0_lo, _JIT_OPERAND0_LO)
     uint64_t _operand0 = ((uint64_t)_operand0_hi << 32) | _operand0_lo;
-
     PATCH_VALUE(uint32_t, _operand1_hi, _JIT_OPERAND1_HI)
     PATCH_VALUE(uint32_t, _operand1_lo, _JIT_OPERAND1_LO)
     uint64_t _operand1 = ((uint64_t)_operand1_hi << 32) | _operand1_lo;
 #endif
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
-
     OPT_STAT_INC(uops_executed);
     UOP_STAT_INC(opcode, execution_count);
 
@@ -124,15 +123,4 @@ _JIT_ENTRY(TAIL_CALL_PARAMS)
             Py_UNREACHABLE();
     }
     PATCH_JUMP(_JIT_CONTINUE);
-    // Labels that the instruction implementations expect to exist:
-
-error_tier_two:
-    tstate->previous_executor = (PyObject *)current_executor;
-    GOTO_TIER_ONE(NULL);
-exit_to_tier1:
-    tstate->previous_executor = (PyObject *)current_executor;
-    GOTO_TIER_ONE(_PyCode_CODE(_PyFrame_GetCode(frame)) + _target);
-exit_to_tier1_dynamic:
-    tstate->previous_executor = (PyObject *)current_executor;
-    GOTO_TIER_ONE(frame->instr_ptr);
 }
