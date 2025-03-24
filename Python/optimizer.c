@@ -1103,7 +1103,10 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case YIELD_VALUE:
             {
                 ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
-                ctx->instr_is_bb_start[INSTR_OFFSET(curr+1+_PyOpcode_Caches[_PyOpcode_Deopt[opcode]])] = true;
+                _Py_CODEUNIT *after = curr+1+_PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                if (after < ctx->last_instr) {
+                    ctx->instr_is_bb_start[INSTR_OFFSET(after)] = true;
+                }
                 break;
             }
             case END_FOR:
@@ -1284,7 +1287,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         }
     }
 
-    // dump_cfg(ctx);
+     dump_cfg(ctx);
     return 1;
 }
 
