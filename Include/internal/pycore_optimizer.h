@@ -61,6 +61,7 @@ typedef struct {
     };
     uint64_t operand0;  // A cache entry
     uint64_t operand1;
+    struct _PyByteCodeBB *branch_or_jump_target_bb;
 #ifdef Py_STATS
     uint64_t execution_count;
 #endif
@@ -310,6 +311,8 @@ PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
 typedef struct _PyByteCodeSlice {
     _Py_CODEUNIT *start;
     _Py_CODEUNIT *end;
+    _PyUOpInstruction *uop_start;
+    _PyUOpInstruction *uop_end;
 } _PyByteCodeSlice;
 
 typedef enum _PyByteCodeTerminatorKind {

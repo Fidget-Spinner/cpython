@@ -1398,11 +1398,19 @@
 
         /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
 
-        /* _TIER2_POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 */
+        case _TIER2_POP_JUMP_IF_FALSE: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
 
-        /* _TIER2_POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
+        case _TIER2_POP_JUMP_IF_TRUE: {
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
 
         case _IS_NONE: {
             JitOptSymbol *b;
@@ -1489,9 +1497,7 @@
 
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 */
 
-        case _GUARD_NOT_EXHAUSTED_LIST: {
-            break;
-        }
+        /* _TIER2_ITER_JUMP_LIST is not a viable micro-op for tier 2 */
 
         /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 */
 
@@ -1510,7 +1516,7 @@
 
         /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 */
 
-        case _GUARD_NOT_EXHAUSTED_TUPLE: {
+        case _TIER2_ITER_JUMP_TUPLE: {
             break;
         }
 
@@ -1529,7 +1535,7 @@
 
         /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 */
 
-        case _GUARD_NOT_EXHAUSTED_RANGE: {
+        case _TIER2_ITER_JUMP_RANGE: {
             break;
         }
 
@@ -2465,6 +2471,10 @@
         }
 
         case _TIER2_JUMP: {
+            break;
+        }
+
+        case _TIER2_IP_TO_JUMP_TARGET: {
             break;
         }
 

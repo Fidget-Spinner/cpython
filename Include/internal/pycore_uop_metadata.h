@@ -174,6 +174,8 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_CHECK_EXC_MATCH] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_IMPORT_NAME] = HAS_ARG_FLAG | HAS_NAME_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_IMPORT_FROM] = HAS_ARG_FLAG | HAS_NAME_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_TIER2_POP_JUMP_IF_FALSE] = 0,
+    [_TIER2_POP_JUMP_IF_TRUE] = 0,
     [_IS_NONE] = 0,
     [_GET_LEN] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_MATCH_CLASS] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -182,15 +184,14 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_MATCH_KEYS] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_GET_ITER] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_GET_YIELD_FROM_ITER] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
-    [_FOR_ITER_TIER_TWO] = HAS_EXIT_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
+    [_FOR_ITER_TIER_TWO] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_ITER_CHECK_LIST] = HAS_EXIT_FLAG,
-    [_GUARD_NOT_EXHAUSTED_LIST] = HAS_EXIT_FLAG,
     [_ITER_NEXT_LIST_TIER_TWO] = HAS_EXIT_FLAG | HAS_ESCAPES_FLAG,
     [_ITER_CHECK_TUPLE] = HAS_EXIT_FLAG,
-    [_GUARD_NOT_EXHAUSTED_TUPLE] = HAS_EXIT_FLAG,
+    [_TIER2_ITER_JUMP_TUPLE] = HAS_ESCAPES_FLAG,
     [_ITER_NEXT_TUPLE] = 0,
     [_ITER_CHECK_RANGE] = HAS_EXIT_FLAG,
-    [_GUARD_NOT_EXHAUSTED_RANGE] = HAS_EXIT_FLAG,
+    [_TIER2_ITER_JUMP_RANGE] = 0,
     [_ITER_NEXT_RANGE] = HAS_ERROR_FLAG,
     [_FOR_ITER_GEN_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
     [_LOAD_SPECIAL] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -283,6 +284,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_ERROR_POP_N] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_DEOPT_FLAG,
     [_TIER2_JUMP] = 0,
+    [_TIER2_IP_TO_JUMP_TARGET] = 0,
 };
 
 const uint8_t _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -409,9 +411,6 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GUARD_KEYS_VERSION] = "_GUARD_KEYS_VERSION",
     [_GUARD_NOS_FLOAT] = "_GUARD_NOS_FLOAT",
     [_GUARD_NOS_INT] = "_GUARD_NOS_INT",
-    [_GUARD_NOT_EXHAUSTED_LIST] = "_GUARD_NOT_EXHAUSTED_LIST",
-    [_GUARD_NOT_EXHAUSTED_RANGE] = "_GUARD_NOT_EXHAUSTED_RANGE",
-    [_GUARD_NOT_EXHAUSTED_TUPLE] = "_GUARD_NOT_EXHAUSTED_TUPLE",
     [_GUARD_TOS_FLOAT] = "_GUARD_TOS_FLOAT",
     [_GUARD_TOS_INT] = "_GUARD_TOS_INT",
     [_GUARD_TYPE_VERSION] = "_GUARD_TYPE_VERSION",
@@ -539,7 +538,12 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_STORE_SUBSCR_DICT] = "_STORE_SUBSCR_DICT",
     [_STORE_SUBSCR_LIST_INT] = "_STORE_SUBSCR_LIST_INT",
     [_SWAP] = "_SWAP",
+    [_TIER2_IP_TO_JUMP_TARGET] = "_TIER2_IP_TO_JUMP_TARGET",
+    [_TIER2_ITER_JUMP_RANGE] = "_TIER2_ITER_JUMP_RANGE",
+    [_TIER2_ITER_JUMP_TUPLE] = "_TIER2_ITER_JUMP_TUPLE",
     [_TIER2_JUMP] = "_TIER2_JUMP",
+    [_TIER2_POP_JUMP_IF_FALSE] = "_TIER2_POP_JUMP_IF_FALSE",
+    [_TIER2_POP_JUMP_IF_TRUE] = "_TIER2_POP_JUMP_IF_TRUE",
     [_TIER2_RESUME_CHECK] = "_TIER2_RESUME_CHECK",
     [_TO_BOOL] = "_TO_BOOL",
     [_TO_BOOL_BOOL] = "_TO_BOOL_BOOL",
@@ -871,6 +875,10 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 2;
         case _IMPORT_FROM:
             return 0;
+        case _TIER2_POP_JUMP_IF_FALSE:
+            return 1;
+        case _TIER2_POP_JUMP_IF_TRUE:
+            return 1;
         case _IS_NONE:
             return 1;
         case _GET_LEN:
@@ -891,19 +899,17 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 0;
         case _ITER_CHECK_LIST:
             return 0;
-        case _GUARD_NOT_EXHAUSTED_LIST:
-            return 0;
         case _ITER_NEXT_LIST_TIER_TWO:
             return 0;
         case _ITER_CHECK_TUPLE:
             return 0;
-        case _GUARD_NOT_EXHAUSTED_TUPLE:
+        case _TIER2_ITER_JUMP_TUPLE:
             return 0;
         case _ITER_NEXT_TUPLE:
             return 0;
         case _ITER_CHECK_RANGE:
             return 0;
-        case _GUARD_NOT_EXHAUSTED_RANGE:
+        case _TIER2_ITER_JUMP_RANGE:
             return 0;
         case _ITER_NEXT_RANGE:
             return 0;
@@ -1088,6 +1094,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _TIER2_RESUME_CHECK:
             return 0;
         case _TIER2_JUMP:
+            return 0;
+        case _TIER2_IP_TO_JUMP_TARGET:
             return 0;
         default:
             return -1;
