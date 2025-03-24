@@ -474,6 +474,7 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
         if (caches) {
             // The initial value depends on the opcode
             switch (opcode) {
+                case RESUME:
                 case JUMP_BACKWARD:
                     instructions[i + 1].counter = jump_counter;
                     break;
