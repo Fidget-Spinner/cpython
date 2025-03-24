@@ -56,6 +56,10 @@ do {  \
 } while (0)
 
 #undef GOTO_TIER_ONE
+
+#undef PRE_DISPATCH_GOTO
+#define PRE_DISPATCH_GOTO()
+
 #define GOTO_TIER_ONE(TARGET) \
 do {  \
     next_instr = TARGET; \
@@ -63,8 +67,10 @@ do {  \
         next_instr = frame->instr_ptr; \
         JUMP_TO_LABEL(error); \
     }                         \
+    stack_pointer = _PyFrame_GetStackPointer(frame); \
     tstate->previous_executor = NULL; \
-    DISPATCH(); \
+    PRE_DISPATCH_GOTO(); \
+    DISPATCH_GOTO(); \
 } while (0)
 
 #undef LOAD_IP
