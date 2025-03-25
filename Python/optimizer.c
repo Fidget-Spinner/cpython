@@ -1680,6 +1680,10 @@ uop_optimize(
         }
         assert(interp->osr_entry_uop != NULL);
         int length = interp->buffer_length;
+        if (length <= 64) {
+            // Too short.
+            return 0;
+        }
 
         assert(length < UOP_MAX_METHOD_LENGTH);
 
