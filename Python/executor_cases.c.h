@@ -6859,7 +6859,7 @@
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
                 printf(", exit %lu, temp %d, target %d -> %s]\n",
-                       exit - current_executor->shared->exits, exit->temperature.value_and_backoff,
+                       exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
                        _PyOpcode_OpName[target->op.code]);
                 stack_pointer = _PyFrame_GetStackPointer(frame);

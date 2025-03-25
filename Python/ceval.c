@@ -1042,7 +1042,7 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 
 #if defined(_Py_TIER2) && !defined(_Py_JIT)
     /* Tier 2 interpreter state */
-    _PyExecutorSharedObject *executor = NULL;
+    _PyExecutorSharedObject *current_executor = NULL;
     const _PyUOpInstruction *next_uop = NULL;
 #endif
 
@@ -1154,8 +1154,8 @@ jump_to_jump_target:
 
 jump_to_dynamic:
     target = (int)(frame->instr_ptr - (_Py_CODEUNIT*)next_uop[-1].operand1);
-    assert(current_executor->shared->bc_offset_to_trace_offset[target] >= 0);
-    next_uop = current_executor->trace + current_executor->shared->bc_offset_to_trace_offset[target];
+    assert(current_executor->bc_offset_to_trace_offset[target] >= 0);
+    next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target];
     goto tier2_dispatch;
 
 #endif  // _Py_JIT

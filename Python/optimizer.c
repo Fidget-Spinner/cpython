@@ -1059,6 +1059,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
     }
     int opcode;
     int oparg;
+    _Py_CODEUNIT *prev = NULL;
     _Py_CODEUNIT *curr = ctx->initial_instr;
     // Initial instruction is always an entrypoint.
     ctx->instr_is_bb_start[INSTR_OFFSET(ctx->initial_instr)] = true;
@@ -1073,16 +1074,25 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             oparg = ctx->co->co_executors->executors[oparg & 255]->vm_data.oparg;
         }
         switch (_PyOpcode_Deopt[opcode]) {
-            // Don't support exception code for now.
+            // Unsupported opcodes get their own BB.
             case CLEANUP_THROW:
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
             case RAISE_VARARGS:
-            case RERAISE:
-//            case RERAISE: // TODO move this down later.
+            case RERAISE: {
                 DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
-                return 0;
+                if (prev != NULL) {
+                    ctx->instr_is_bb_start[INSTR_OFFSET(prev)] = true;
+                }
+                ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
+                _Py_CODEUNIT *after =
+                    curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
+                if (after < ctx->last_instr) {
+                    ctx->instr_is_bb_start[INSTR_OFFSET(after)] = true;
+                }
+                break;
+            }
             case EXTENDED_ARG:
                 oparg = oparg << 8 | (curr+1)->op.arg;
                 curr++;
@@ -1164,6 +1174,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         if (curr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]] >= ctx->last_instr) {
             ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
         }
+        prev = curr;
         curr += 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
     }
     // Step 2. Build the CFG
