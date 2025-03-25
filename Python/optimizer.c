@@ -105,7 +105,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
 static int
 uop_optimize(_PyInterpreterFrame *frame, _Py_CODEUNIT *instr,
              _PyExecutorObject **exec_ptr, int curr_stackentries,
-             bool progress_needed, _PyExecutorSharedObject **shared_ptr);
+             bool progress_needed, int chain_depth, _PyExecutorSharedObject **shared_ptr);
 
 /* Returns 1 if optimized, 0 if not optimized, and -1 for an error.
  * If optimized, *executor_ptr contains a new reference to the executor
@@ -116,10 +116,10 @@ _PyOptimizer_Optimize(
     _PyExecutorObject **executor_ptr, int chain_depth)
 {
     _PyStackRef *stack_pointer = frame->stackpointer;
-    if (chain_depth != 0) {
+    assert(_PyInterpreterState_GET()->jit);
+    if (chain_depth >= MAX_CHAIN_DEPTH) {
         return 0;
     }
-    assert(_PyInterpreterState_GET()->jit);
     // The first executor in a chain and the MAX_CHAIN_DEPTH'th executor *must*
     // make progress in order to avoid infinite loops or excessively-long
     // side-exit chains. We can only insert the executor into the bytecode if
@@ -132,7 +132,7 @@ _PyOptimizer_Optimize(
         return 0;
     }
     _PyExecutorSharedObject *shared;
-    int err = uop_optimize(frame, start, executor_ptr, (int)(stack_pointer - _PyFrame_Stackbase(frame)), progress_needed, &shared);
+    int err = uop_optimize(frame, start, executor_ptr, (int)(stack_pointer - _PyFrame_Stackbase(frame)), progress_needed, chain_depth, &shared);
     if (err <= 0) {
         return err;
     }
@@ -151,12 +151,14 @@ _PyOptimizer_Optimize(
             return 0;
         }
         insert_executor(code, start, index, *executor_ptr);
-        _Py_SetImmortal(shared);
     }
     else {
         (*executor_ptr)->vm_data.code = NULL;
     }
-    Py_XSETREF(code->co_executors->shared, Py_NewRef(shared));
+    _Py_SetImmortal(shared);
+    if (chain_depth == 0) {
+        code->co_executors->shared = shared;
+    }
     (*executor_ptr)->vm_data.chain_depth = chain_depth;
     assert((*executor_ptr)->vm_data.alive);
     assert(shared->vm_data.valid);
@@ -485,7 +487,7 @@ add_to_trace(
 static _PyByteCodeTranslationCtx *
 translation_ctx_init(
     _PyBloomFilter *dependencies,
-    PyCodeObject *co, PyFunctionObject *func, int stackdepth)
+    PyCodeObject *co, PyFunctionObject *func, int stackdepth, int chain_depth, _Py_CODEUNIT *target_instr, int progress_needed)
 {
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
@@ -511,6 +513,10 @@ translation_ctx_init(
     ctx->initial_instr = _PyCode_CODE(ctx->co);
     ctx->last_instr = _PyCode_CODE(ctx->co) + Py_SIZE(ctx->co);
     ctx->seen_entrypoints = 1;
+    ctx->chain_depth = chain_depth;
+    assert(target_instr != NULL);
+    ctx->target_instr = target_instr;
+    ctx->progress_needed = progress_needed;
 
     interp->jit_translation_ctxs_used++;
     ctx->dependencies = dependencies;
@@ -576,6 +582,10 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
         if (instr == interp->osr_entry_instr) {
             interp->osr_entry_uop = &trace[trace_length];
         }
+        if (instr == ctx->target_instr && ctx->stackdepth == 0) {
+            mark_entrypoint(ctx, &trace[trace_length], instr);
+            ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
+        }
         target = INSTR_IP(instr, code);
         // Need space for _DEOPT
         max_length--;
@@ -587,7 +597,9 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
         DPRINTF(2, "%d: %s(%d)\n", target, _PyOpcode_OpName[opcode], oparg);
 
         if (opcode == EXTENDED_ARG) {
-            mark_entrypoint(ctx, &trace[trace_length], instr);
+            if (ctx->stackdepth == 0) {
+                mark_entrypoint(ctx, &trace[trace_length], instr);
+            }
             instr++;
             opcode = instr->op.code;
             oparg = (oparg << 8) | instr->op.arg;
@@ -611,7 +623,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
 
         /* Special case the first instruction,
          * so that we can guarantee forward progress */
-        if (bb->id == 0 && first) {
+        if ((instr == ctx->target_instr) && first) {
             if (OPCODE_HAS_EXIT(opcode) || OPCODE_HAS_DEOPT(opcode)) {
                 opcode = _PyOpcode_Deopt[opcode];
             }
@@ -642,7 +654,9 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
             case JUMP_BACKWARD_NO_INTERRUPT:
             case JUMP_BACKWARD: {
                 ADD_TO_TRACE(_CHECK_VALIDITY_AND_SET_IP, 0, (uintptr_t) instr, target);
-                mark_entrypoint(ctx, &trace[trace_length], instr);
+                if (ctx->stackdepth == 0) {
+                    mark_entrypoint(ctx, &trace[trace_length], instr);
+                }
                 ADD_TO_TRACE(_CHECK_PERIODIC, 0, 0, target);
                 ADD_TO_TRACE(_TIER2_JUMP, 0, 0, 0);
                 if (bb->terminator.kind != BB_JUMP) {
@@ -655,7 +669,9 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                 }
             case RESUME:
             case RESUME_CHECK_JIT:
-                mark_entrypoint(ctx, &trace[trace_length], instr);
+                if (ctx->stackdepth == 0) {
+                    mark_entrypoint(ctx, &trace[trace_length], instr);
+                }
                 if (ctx->stackdepth == 0 && bb->id == 0 && instr != ctx->initial_instr) {
                     ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
                 }
@@ -786,7 +802,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
                         if (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE) {
                             assert(instr == end);
                             if (ctx->stackdepth == 0) {
-                                ADD_TO_TRACE(_EXIT_TRACE, oparg, operand,
+                                ADD_TO_TRACE(_EXIT_TRACE, ctx->chain_depth, operand,
                                              target);
                             }
                             else {
@@ -831,7 +847,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
     bb->slice.uop_end = &trace[trace_length];
     return 1;
 done:
-    ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+    ADD_TO_TRACE(_EXIT_TRACE, ctx->chain_depth, 0, target);
     DPRINTF(1,
             "Partially translated BB %d for %s (%s:%d) at byte offset %d -- length %d\n",
             bb->id,
@@ -948,7 +964,7 @@ inline_possible_push_frame(_PyByteCodeTranslationCtx *ctx, _Py_CODEUNIT *instr, 
                     ctx->bbs[starting_bb_id].terminator.kind = BB_EXIT;
                     return 0;
                 }
-                _PyByteCodeTranslationCtx *inlinee_ctx = translation_ctx_init(ctx->dependencies, new_code, new_func, ctx->stackdepth + 1);
+                _PyByteCodeTranslationCtx *inlinee_ctx = translation_ctx_init(ctx->dependencies, new_code, new_func, ctx->stackdepth + 1, ctx->chain_depth, ctx->target_instr, ctx->progress_needed);
                 if (inlinee_ctx == NULL) {
                     return 0;
                 }
@@ -1070,7 +1086,6 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         opcode = curr->op.code;
         if (opcode == ENTER_EXECUTOR) {
             opcode = ctx->co->co_executors->executors[oparg & 255]->vm_data.opcode;
-            assert(opcode == JUMP_BACKWARD_JIT || opcode == RESUME_CHECK_JIT);
             oparg = ctx->co->co_executors->executors[oparg & 255]->vm_data.oparg;
         }
         switch (_PyOpcode_Deopt[opcode]) {
@@ -1079,10 +1094,10 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
+            case RERAISE:
                 DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                 return 0;
-            case RAISE_VARARGS:
-            case RERAISE: {
+            case RAISE_VARARGS: {
                 if (prev != NULL) {
                     ctx->instr_is_bb_start[INSTR_OFFSET(prev)] = true;
                 }
@@ -1375,10 +1390,10 @@ count_exits(_PyUOpInstruction *buffer, int length)
     return exit_count;
 }
 
-static void make_exit(_PyUOpInstruction *inst, int opcode, int target)
+static void make_exit(_PyUOpInstruction *inst, int opcode, int target, int chain_depth)
 {
     inst->opcode = opcode;
-    inst->oparg = 0;
+    inst->oparg = chain_depth;
     inst->operand0 = 0;
     inst->format = UOP_FORMAT_TARGET;
     inst->target = target;
@@ -1390,7 +1405,7 @@ static void make_exit(_PyUOpInstruction *inst, int opcode, int target)
 /* Convert implicit exits, errors and deopts
  * into explicit ones. */
 static int
-prepare_for_execution(_PyUOpInstruction *buffer, int length)
+prepare_for_execution(_PyUOpInstruction *buffer, int length, int chain_depth)
 {
     int32_t current_jump = -1;
     int32_t current_jump_target = -1;
@@ -1419,7 +1434,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 jump_target = next_inst + inst->oparg + 1;
             }
             if (jump_target != current_jump_target || current_exit_op != exit_op) {
-                make_exit(&buffer[next_spare], exit_op, jump_target);
+                make_exit(&buffer[next_spare], exit_op, jump_target, chain_depth);
                 current_exit_op = exit_op;
                 current_jump_target = jump_target;
                 current_jump = next_spare;
@@ -1435,7 +1450,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 current_popped = popped;
                 current_error = next_spare;
                 current_error_target = target;
-                make_exit(&buffer[next_spare], _ERROR_POP_N, 0);
+                make_exit(&buffer[next_spare], _ERROR_POP_N, 0, 0);
                 buffer[next_spare].operand0 = target;
                 next_spare++;
             }
@@ -1657,6 +1672,7 @@ uop_optimize(
     _PyExecutorObject **exec_ptr,
     int curr_stackentries,
     bool progress_needed,
+    int chain_depth,
     _PyExecutorSharedObject **shared_ptr)
 {;
     OPT_STAT_INC(attempts);
@@ -1667,7 +1683,8 @@ uop_optimize(
     PyCodeObject *code = _PyFrame_GetCode(frame);
     _PyExecutorSharedObject *shared = NULL;
     // No shared object.
-    if (code->co_executors == NULL ||
+    if (chain_depth != 0 ||
+        code->co_executors == NULL ||
         code->co_executors->shared == NULL ||
         !code->co_executors->shared->vm_data.valid ||
         // No entrypoint in the trace.
@@ -1680,7 +1697,7 @@ uop_optimize(
         _Py_BloomFilter_Init(&dependencies);
         _PyByteCodeTranslationCtx *ctx = translation_ctx_init(&dependencies,
                                                               code,
-                                                              _PyFrame_GetFunction(frame), 0);
+                                                              _PyFrame_GetFunction(frame), 0, chain_depth, instr, progress_needed);
         if (ctx == NULL) {
             return 0;
         }
@@ -1723,7 +1740,7 @@ uop_optimize(
             assert(_PyOpcode_uop_name[interp->buffer[pc].opcode]);
         }
         OPT_HIST(effective_trace_length(interp->buffer, length), optimized_trace_length_hist);
-        length = prepare_for_execution(interp->buffer, length);
+        length = prepare_for_execution(interp->buffer, length, chain_depth);
         assert(length <= UOP_MAX_METHOD_LENGTH);
         shared = make_shared_from_uops(interp->buffer, length, &dependencies);
         for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {

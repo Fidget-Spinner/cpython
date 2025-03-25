@@ -53,6 +53,16 @@ do {                                                                       \
     __attribute__((musttail)) return jitted(frame, stack_pointer, tstate); \
 } while (0)
 
+#define TIER_TWO_TO_TIER_TWO(EXECUTOR) \
+do { \
+    current_executor = (EXECUTOR)->shared; \
+    int target = (int)(exit->target);      \
+    assert(current_executor->bc_offset_to_trace_offset[target] >= 0); \
+    int uop_offset = current_executor->bc_offset_to_trace_offset[target]; \
+    __attribute__((musttail)) return ((jit_func_preserve_none)(current_executor->jit_state.instruction_starts[uop_offset]))(frame, stack_pointer, tstate);\
+} while (0)
+
+
 #undef GOTO_TIER_ONE
 #define GOTO_TIER_ONE(TARGET)                       \
 do {                                                \

@@ -6865,36 +6865,39 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
             #endif
-            GOTO_TIER_ONE(target);
-            //            if (exit->executor && !exit->executor->vm_data.valid) {
-                //                exit->temperature = initial_temperature_backoff_counter();
-                //                Py_CLEAR(exit->executor);
-            //            }
-            //            tstate->previous_executor = (PyObject *)current_executor;
-            //            if (exit->executor == NULL) {
-                //                _Py_BackoffCounter temperature = exit->temperature;
-                //                if (!backoff_counter_triggers(temperature)) {
-                    //                    exit->temperature = advance_backoff_counter(temperature);
-                    //                    GOTO_TIER_ONE(target);
-                //                }
-                //                _PyExecutorObject *executor;
-                //                if (target->op.code == ENTER_EXECUTOR) {
-                    //                    executor = code->co_executors->executors[target->op.arg];
-                    //                    Py_INCREF(executor);
-                //                }
-                //                else {
-                    //                    int chain_depth = current_executor->vm_data.chain_depth + 1;
-                    //                    int optimized = _PyOptimizer_Optimize(frame, target, &executor, chain_depth);
-                    //                    if (optimized <= 0) {
-                        //                        exit->temperature = restart_backoff_counter(temperature);
-                        //                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
-                    //                    }
-                    //                    exit->temperature = initial_temperature_backoff_counter();
-                //                }
-                //                exit->executor = executor;
-            //            }
-            //            Py_INCREF(exit->executor);
-            //            GOTO_TIER_TWO(exit->executor);
+            if (exit->executor && !exit->executor->shared->vm_data.valid) {
+                exit->temperature = initial_temperature_backoff_counter();
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                Py_CLEAR(exit->executor);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
+            tstate->previous_executor = (PyObject *)current_executor;
+            if (exit->executor == NULL) {
+                _Py_BackoffCounter temperature = exit->temperature;
+                if (!backoff_counter_triggers(temperature)) {
+                    exit->temperature = advance_backoff_counter(temperature);
+                    GOTO_TIER_ONE(target);
+                }
+                _PyExecutorObject *executor;
+                if (target->op.code == ENTER_EXECUTOR) {
+                    executor = code->co_executors->executors[target->op.arg];
+                    Py_INCREF(executor);
+                }
+                else {
+                    int chain_depth = CURRENT_OPARG() + 1;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int optimized = _PyOptimizer_Optimize(frame, target, &executor, chain_depth);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (optimized <= 0) {
+                        exit->temperature = restart_backoff_counter(temperature);
+                        GOTO_TIER_ONE(optimized < 0 ? NULL : target);
+                    }
+                    exit->temperature = initial_temperature_backoff_counter();
+                }
+                exit->executor = executor;
+            }
+            Py_INCREF(exit->executor);
+            TIER_TWO_TO_TIER_TWO(exit->executor);
             break;
         }
 

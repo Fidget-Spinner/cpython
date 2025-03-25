@@ -93,6 +93,7 @@ typedef struct {
 
 typedef struct _PyExecutorSharedObject {
     PyObject_VAR_HEAD
+    struct _PyExecutorSharedObject *next;
     _PyUOpInstruction trace[UOP_MAX_METHOD_LENGTH];
     jit_state jit_state;
     size_t jit_size;
@@ -109,6 +110,12 @@ typedef struct _PyExecutorSharedObject {
     int osr_entry_offset;
     _PyExitData exits[1];
 } _PyExecutorSharedObject;
+
+// The maximum number of side exits that we can take before requiring forward
+// progress (and inserting a new ENTER_EXECUTOR instruction). In practice, this
+// is the "maximum amount of polymorphism" that an isolated trace tree can
+// handle before rejoining the rest of the program.
+#define MAX_CHAIN_DEPTH 4
 
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
@@ -186,11 +193,6 @@ static inline uint16_t uop_get_error_target(const _PyUOpInstruction *inst)
 // Need extras for root frame and for overflow frame (see TRACE_STACK_PUSH())
 #define MAX_ABSTRACT_FRAME_DEPTH (TRACE_STACK_SIZE + 2)
 
-// The maximum number of side exits that we can take before requiring forward
-// progress (and inserting a new ENTER_EXECUTOR instruction). In practice, this
-// is the "maximum amount of polymorphism" that an isolated trace tree can
-// handle before rejoining the rest of the program.
-#define MAX_CHAIN_DEPTH 4
 
 /* Symbols */
 /* See explanation in optimizer_symbols.c */
@@ -380,10 +382,13 @@ typedef struct _PyByteCodeBB {
 
 
 typedef struct _PyByteCodeTranslationCtx {
+    int progress_needed;
     int stackdepth;
+    int chain_depth;
     _PyByteCodeBB *return_to_this_bb;
     PyCodeObject *co;
     PyFunctionObject *func;
+    _Py_CODEUNIT *target_instr;
     _Py_CODEUNIT *initial_instr;
     _Py_CODEUNIT *last_instr;
     _PyByteCodeBB bbs[MAX_BBS_ALLOWED];

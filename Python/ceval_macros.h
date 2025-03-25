@@ -395,10 +395,8 @@ do {                                                   \
     assert(uop_offset >= 0);                           \
     _executor->shared->osr_entry_offset = uop_offset;          \
     Py_INCREF(_executor);                              \
-    Py_INCREF(_executor->shared);                                                   \
     next_instr = jitted(frame, stack_pointer, tstate); \
     Py_DECREF(_executor);                              \
-    Py_DECREF(_executor->shared);                                                   \
     Py_CLEAR(tstate->previous_executor);               \
     frame = tstate->current_frame;                     \
     stack_pointer = _PyFrame_GetStackPointer(frame);   \
@@ -414,6 +412,18 @@ do { \
     current_executor = (EXECUTOR)->shared;                            \
     OPT_STAT_INC(traces_executed); \
     int target = (int)(this_instr - (_Py_CODEUNIT*)_PyCode_CODE(_PyFrame_GetCode(frame)));   \
+    /* fprintf(stderr, "TARGET:%d, %d\n", target, current_executor->bc_offset_to_trace_offset[target]); */                           \
+    assert(current_executor->bc_offset_to_trace_offset[target] >= 0); \
+    next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target]; \
+    Py_CLEAR(tstate->previous_executor); \
+    goto enter_tier_two; \
+} while (0)
+
+#define TIER_TWO_TO_TIER_TWO(EXECUTOR) \
+do { \
+    current_executor = (EXECUTOR)->shared;                            \
+    OPT_STAT_INC(traces_executed); \
+    int target = (int)(exit->target);   \
     /* fprintf(stderr, "TARGET:%d, %d\n", target, current_executor->bc_offset_to_trace_offset[target]); */                           \
     assert(current_executor->bc_offset_to_trace_offset[target] >= 0); \
     next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target]; \
