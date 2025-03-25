@@ -178,7 +178,7 @@ dummy_func(
         op(_QUICKEN_RESUME, (--)) {
             #if ENABLE_SPECIALIZATION_FT
             if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                int op = tstate->interp->jit ? RESUME_CHECK_JIT : RESUME_CHECK;
+                int op = tstate->interp->jit ? RESUME_CHECK : RESUME_CHECK;
                 FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, op);
             }
             #endif  /* ENABLE_SPECIALIZATION_FT */
