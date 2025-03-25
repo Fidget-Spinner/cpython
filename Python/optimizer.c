@@ -1722,7 +1722,7 @@ uop_optimize(
             }
             assert(_PyOpcode_uop_name[interp->buffer[pc].opcode]);
         }
-        OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
+        OPT_HIST(effective_trace_length(interp->buffer, length), optimized_trace_length_hist);
         length = prepare_for_execution(interp->buffer, length);
         assert(length <= UOP_MAX_METHOD_LENGTH);
         shared = make_shared_from_uops(interp->buffer, length, &dependencies);
