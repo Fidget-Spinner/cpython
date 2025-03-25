@@ -5275,16 +5275,16 @@
             #ifdef _Py_TIER2
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
-            assert(executor->vm_data.index == INSTR_OFFSET() - 1);
-            assert(executor->vm_data.code == code);
-            assert(executor->vm_data.valid);
+            assert(executor->index == INSTR_OFFSET() - 1);
+            assert(executor->code == code);
+            assert(executor->exec_code->vm_data.valid);
             // assert(tstate->previous_executor == NULL);
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
             if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
-                opcode = executor->vm_data.opcode;
-                oparg = (oparg & ~255) | executor->vm_data.oparg;
+                opcode = executor->opcode;
+                oparg = (oparg & ~255) | executor->oparg;
                 next_instr = this_instr;
                 if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
                     PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter);

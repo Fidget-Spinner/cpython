@@ -6854,12 +6854,12 @@
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
             #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-            if (frame->lltrace >= 3) {
+            if (frame->lltrace >= 2) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
                 printf(", exit %lu, temp %d, target %d -> %s]\n",
-                       exit - current_executor->exits, exit->temperature.value_and_backoff,
+                       exit - current_executor->exec_code->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
                        _PyOpcode_OpName[target->op.code]);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -6899,7 +6899,7 @@
         }
 
         case _CHECK_VALIDITY: {
-            if (!current_executor->vm_data.valid) {
+            if (!current_executor->exec_code->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -7003,12 +7003,12 @@
             #ifndef _Py_JIT
             current_executor = (_PyExecutorObject*)executor;
             #endif
-            assert(((_PyExecutorObject *)executor)->vm_data.valid);
+            assert(((_PyExecutorObject *)executor)->exec_code->vm_data.valid);
             break;
         }
 
         case _MAKE_WARM: {
-            current_executor->vm_data.warm = true;
+            current_executor->exec_code->vm_data.warm = true;
             // It's okay if this ends up going negative.
             if (--tstate->interp->trace_run_counter == 0) {
                 _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);
@@ -7024,7 +7024,7 @@
 
         case _CHECK_VALIDITY_AND_SET_IP: {
             PyObject *instr_ptr = (PyObject *)CURRENT_OPERAND0();
-            if (!current_executor->vm_data.valid) {
+            if (!current_executor->exec_code->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }

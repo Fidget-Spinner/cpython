@@ -1097,7 +1097,7 @@ tier2_dispatch:
                 printf("%4d uop: ", 0);
             }
             else {
-                printf("%4d uop: ", (int)(next_uop - current_executor->trace));
+                printf("%4d uop: ", (int)(next_uop - current_executor->exec_code->trace));
             }
             _PyUOpPrint(next_uop);
             printf("\n");
@@ -1121,7 +1121,7 @@ tier2_dispatch:
             {
                 printf("Unknown uop: ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(" @ %d\n", (int)(next_uop - current_executor->trace - 1));
+                printf(" @ %d\n", (int)(next_uop - current_executor->exec_code->trace - 1));
                 Py_FatalError("Unknown uop");
             }
 #else
@@ -1137,25 +1137,25 @@ jump_to_error_target:
         printf("Error: [UOp ");
         _PyUOpPrint(&next_uop[-1]);
         printf(" @ %d -> %s]\n",
-               (int)(next_uop - current_executor->trace - 1),
+               (int)(next_uop - current_executor->exec_code->trace - 1),
                _PyOpcode_OpName[frame->instr_ptr->op.code]);
     }
 #endif
     assert(next_uop[-1].format == UOP_FORMAT_JUMP);
     uint16_t target = uop_get_error_target(&next_uop[-1]);
-    next_uop = current_executor->trace + target;
+    next_uop = current_executor->exec_code->trace + target;
     goto tier2_dispatch;
 
 jump_to_jump_target:
     assert(next_uop[-1].format == UOP_FORMAT_JUMP);
     target = uop_get_jump_target(&next_uop[-1]);
-    next_uop = current_executor->trace + target;
+    next_uop = current_executor->exec_code->trace + target;
     goto tier2_dispatch;
 
 jump_to_dynamic:
     target = (int)(frame->instr_ptr - (_Py_CODEUNIT*)next_uop[-1].operand1);
-    assert(current_executor->bc_offset_to_trace_offset[target] >= 0);
-    next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target];
+    assert(current_executor->exec_code->bc_offset_to_trace_offset[target] >= 0);
+    next_uop = current_executor->exec_code->trace + current_executor->exec_code->bc_offset_to_trace_offset[target];
     goto tier2_dispatch;
 
 #endif  // _Py_JIT

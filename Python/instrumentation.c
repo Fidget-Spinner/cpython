@@ -647,9 +647,9 @@ _Py_GetBaseCodeUnit(PyCodeObject *code, int i)
     }
     if (opcode == ENTER_EXECUTOR) {
         _PyExecutorObject *exec = code->co_executors->executors[inst.op.arg];
-        opcode = _PyOpcode_Deopt[exec->vm_data.opcode];
+        opcode = _PyOpcode_Deopt[exec->opcode];
         inst.op.code = opcode;
-        inst.op.arg = exec->vm_data.oparg;
+        inst.op.arg = exec->oparg;
         assert(inst.op.code < MIN_SPECIALIZED_OPCODE);
         return inst;
     }

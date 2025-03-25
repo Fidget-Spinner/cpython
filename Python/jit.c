@@ -478,7 +478,7 @@ combine_symbol_mask(const symbol_mask src, symbol_mask dest)
 
 // Compiles executor in-place. Don't forget to call _PyJIT_Free later!
 int
-_PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], size_t length)
+_PyJIT_Compile(_PyExecutorCodeObject *executor, const _PyUOpInstruction trace[], size_t length)
 {
     const StencilGroup *group;
     // Loop once to find the total compiled size:
@@ -569,14 +569,14 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
 }
 
 void
-_PyJIT_Free(_PyExecutorObject *executor)
+_PyJIT_Free(_PyExecutorCodeObject *exec_code)
 {
-    unsigned char *memory = (unsigned char *)executor->jit_code;
-    size_t size = executor->jit_size;
+    unsigned char *memory = (unsigned char *)exec_code->jit_code;
+    size_t size = exec_code->jit_size;
     if (memory) {
-        executor->jit_code = NULL;
-        executor->jit_side_entry = NULL;
-        executor->jit_size = 0;
+        exec_code->jit_code = NULL;
+        exec_code->jit_side_entry = NULL;
+        exec_code->jit_size = 0;
         if (jit_free(memory, size)) {
             PyErr_FormatUnraisable("Exception ignored while "
                                    "freeing JIT memory");

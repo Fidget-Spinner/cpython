@@ -22,6 +22,7 @@ typedef struct {
 } _PyExecutorArray;
 
 
+
 #ifdef Py_GIL_DISABLED
 
 /* Each thread specializes a thread-local copy of the bytecode in free-threaded
@@ -98,6 +99,7 @@ typedef struct {
     PyObject *co_linetable;       /* bytes object that holds location info */  \
     PyObject *co_weakreflist;     /* to support weakrefs to code objects */    \
     _PyExecutorArray *co_executors;      /* executors from optimizer */        \
+    struct _PyExecutorCodeObject *co_exec_code;                                                                           \
     _PyCoCached *_co_cached;      /* cached co_* attributes */                 \
     uintptr_t _co_instrumentation_version; /* current instrumentation version */ \
     struct _PyCoMonitoringData *_co_monitoring; /* Monitoring data */          \

@@ -28,16 +28,10 @@ typedef struct {
 } _PyBloomFilter;
 
 typedef struct {
-    uint8_t opcode;
-    uint8_t oparg;
     uint8_t valid:1;
     uint8_t linked:1;
     uint8_t chain_depth:6;  // Must be big enough for MAX_CHAIN_DEPTH - 1.
     bool warm;
-    int index;           // Index of ENTER_EXECUTOR (if code isn't NULL, below).
-    _PyBloomFilter bloom;
-    _PyExecutorLinkListNode links;
-    PyCodeObject *code;  // Weak (NULL if no corresponding ENTER_EXECUTOR).
 } _PyVMData;
 
 /* Depending on the format,
@@ -92,12 +86,12 @@ typedef struct {
     uintptr_t instruction_starts[UOP_MAX_METHOD_LENGTH];
 } jit_state;
 
-typedef struct _PyExecutorObject {
+typedef struct _PyExecutorCodeObject {
     PyObject_VAR_HEAD
-    int osr_entry_offset;
+    _PyBloomFilter bloom;
+    _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
     const _PyUOpInstruction *trace;
     int bc_offset_to_trace_offset[MAX_BYTECODE_SIZE];
-    _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
     uint32_t exit_count;
     uint32_t code_size;
     size_t jit_size;
@@ -105,7 +99,20 @@ typedef struct _PyExecutorObject {
     void *jit_side_entry;
     jit_state jit_state;
     _PyExitData exits[1];
+} _PyExecutorCodeObject;
+
+typedef struct _PyExecutorObject {
+    PyObject_VAR_HEAD
+    _PyExecutorLinkListNode links;
+    uint8_t opcode;
+    uint8_t oparg;
+    PyCodeObject *code;  // Weak (NULL if no corresponding ENTER_EXECUTOR).
+    int index;           // Index of ENTER_EXECUTOR (if code isn't NULL, below).
+    int osr_entry_offset;
+    _PyExecutorCodeObject *exec_code;
+    void *end;
 } _PyExecutorObject;
+
 
 
 // Export for '_opcode' shared extension (JIT compiler).

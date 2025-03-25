@@ -2855,16 +2855,16 @@ dummy_func(
             #ifdef _Py_TIER2
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
-            assert(executor->vm_data.index == INSTR_OFFSET() - 1);
-            assert(executor->vm_data.code == code);
-            assert(executor->vm_data.valid);
+            assert(executor->index == INSTR_OFFSET() - 1);
+            assert(executor->code == code);
+            assert(executor->exec_code->vm_data.valid);
             // assert(tstate->previous_executor == NULL);
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
             if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
-                opcode = executor->vm_data.opcode;
-                oparg = (oparg & ~255) | executor->vm_data.oparg;
+                opcode = executor->opcode;
+                oparg = (oparg & ~255) | executor->oparg;
                 next_instr = this_instr;
                 if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
                     PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter);
@@ -5131,11 +5131,11 @@ dummy_func(
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
-            if (frame->lltrace >= 3) {
+            if (frame->lltrace >= 2) {
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
                 printf(", exit %lu, temp %d, target %d -> %s]\n",
-                    exit - current_executor->exits, exit->temperature.value_and_backoff,
+                    exit - current_executor->exec_code->exits, exit->temperature.value_and_backoff,
                     (int)(target - _PyFrame_GetBytecode(frame)),
                     _PyOpcode_OpName[target->op.code]);
             }
@@ -5173,7 +5173,7 @@ dummy_func(
         }
 
         tier2 op(_CHECK_VALIDITY, (--)) {
-            DEOPT_IF(!current_executor->vm_data.valid);
+            DEOPT_IF(!current_executor->exec_code->vm_data.valid);
         }
 
         tier2 pure op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
@@ -5211,11 +5211,11 @@ dummy_func(
 #ifndef _Py_JIT
             current_executor = (_PyExecutorObject*)executor;
 #endif
-            assert(((_PyExecutorObject *)executor)->vm_data.valid);
+            assert(((_PyExecutorObject *)executor)->exec_code->vm_data.valid);
         }
 
         tier2 op(_MAKE_WARM, (--)) {
-            current_executor->vm_data.warm = true;
+            current_executor->exec_code->vm_data.warm = true;
             // It's okay if this ends up going negative.
             if (--tstate->interp->trace_run_counter == 0) {
                 _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);
@@ -5228,7 +5228,7 @@ dummy_func(
         }
 
         tier2 op(_CHECK_VALIDITY_AND_SET_IP, (instr_ptr/4 --)) {
-            DEOPT_IF(!current_executor->vm_data.valid);
+            DEOPT_IF(!current_executor->exec_code->vm_data.valid);
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }
 

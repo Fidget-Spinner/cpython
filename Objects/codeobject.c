@@ -566,6 +566,7 @@ init_code(PyCodeObject *co, struct _PyCodeConstructor *con)
     co->co_extra = NULL;
     co->_co_cached = NULL;
     co->co_executors = NULL;
+    co->co_exec_code = NULL;
 
     memcpy(_PyCode_CODE(co), PyBytes_AS_STRING(con->code),
            PyBytes_GET_SIZE(con->code));
@@ -1703,6 +1704,7 @@ clear_executors(PyCodeObject *co)
     }
     PyMem_Free(co->co_executors);
     co->co_executors = NULL;
+    Py_CLEAR(co->co_exec_code);
 }
 
 void
