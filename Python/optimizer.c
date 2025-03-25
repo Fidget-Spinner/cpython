@@ -531,7 +531,7 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
             2 * INSTR_IP(ctx->initial_instr, code));
     uint32_t target = 0;
 
-    if (instr == ctx->initial_instr) {
+    if (instr == ctx->initial_instr && ctx->stackdepth == 0) {
         mark_entrypoint(ctx, &trace[trace_length], instr);
         ADD_TO_TRACE(_START_EXECUTOR, 0, (uintptr_t) instr, target);
         ADD_TO_TRACE(_MAKE_WARM, 0, 0, 0);
@@ -1044,7 +1044,6 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
-            case RERAISE:
 //            case RERAISE: // TODO move this down later.
                 DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                 return 0;
