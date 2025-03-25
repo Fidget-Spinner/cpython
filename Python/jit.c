@@ -23,6 +23,7 @@
 #include "pycore_sliceobject.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_uop_metadata.h"
 
 #include "pycore_jit.h"
 
@@ -478,7 +479,7 @@ combine_symbol_mask(const symbol_mask src, symbol_mask dest)
 
 // Compiles executor in-place. Don't forget to call _PyJIT_Free later!
 int
-_PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], size_t length)
+_PyJIT_Compile(_PyExecutorSharedObject *executor, const _PyUOpInstruction trace[], size_t length)
 {
     const StencilGroup *group;
     // Loop once to find the total compiled size:
@@ -539,7 +540,7 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     group->emit(code, data, executor, NULL, &state);
     code += group->code_size;
     data += group->data_size;
-    assert(trace[0].opcode == _START_EXECUTOR);
+//    assert(trace[0].opcode == _START_EXECUTOR);
     for (size_t i = 0; i < length; i++) {
         const _PyUOpInstruction *instruction = &trace[i];
         group = &stencil_groups[instruction->opcode];

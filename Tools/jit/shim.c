@@ -11,7 +11,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
 {
     // Note that this is *not* a tail call:
     PATCH_VALUE(jit_func_preserve_none, call, _JIT_CONTINUE);
-    PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
+    PATCH_VALUE(_PyExecutorSharedObject *, current_executor, _JIT_EXECUTOR)
     call = (jit_func_preserve_none)(current_executor->jit_state.instruction_starts[current_executor->osr_entry_offset]);
     return call(frame, stack_pointer, tstate);
 }

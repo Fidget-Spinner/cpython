@@ -76,7 +76,7 @@ static size_t jump;
 static uint16_t invert, counter, index, hint;
 #define unused 0  // Used in a macro def, can't be static
 static uint32_t type_version;
-static _PyExecutorObject *current_executor;
+static _PyExecutorSharedObject *current_executor;
 
 static PyObject *
 dummy_func(
@@ -2857,7 +2857,7 @@ dummy_func(
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
             assert(executor->vm_data.index == INSTR_OFFSET() - 1);
             assert(executor->vm_data.code == code);
-            assert(executor->vm_data.valid);
+            assert(executor->vm_data.alive);
             // assert(tstate->previous_executor == NULL);
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
@@ -5207,11 +5207,11 @@ dummy_func(
         }
 
         tier2 op(_START_EXECUTOR, (executor/4 --)) {
-            Py_CLEAR(tstate->previous_executor);
-#ifndef _Py_JIT
-            current_executor = (_PyExecutorObject*)executor;
-#endif
-            assert(((_PyExecutorObject *)executor)->vm_data.valid);
+//            Py_CLEAR(tstate->previous_executor);
+//#ifndef _Py_JIT
+//            current_executor = (_PyExecutorObject*)executor;
+//#endif
+//            assert(((_PyExecutorObject *)executor)->vm_data.valid);
         }
 
         tier2 op(_MAKE_WARM, (--)) {

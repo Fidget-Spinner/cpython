@@ -30,10 +30,9 @@ typedef struct {
 typedef struct {
     uint8_t opcode;
     uint8_t oparg;
-    uint8_t valid:1;
+    uint8_t alive:1;
     uint8_t linked:1;
     uint8_t chain_depth:6;  // Must be big enough for MAX_CHAIN_DEPTH - 1.
-    bool warm;
     int index;           // Index of ENTER_EXECUTOR (if code isn't NULL, below).
     _PyBloomFilter bloom;
     _PyExecutorLinkListNode links;
@@ -103,15 +102,19 @@ typedef struct _PyExecutorSharedObject {
     _PyBloomFilter dependencies;
     int bc_offset_to_trace_offset[MAX_BYTECODE_SIZE];
     uint32_t exit_count;
+    struct {
+        char valid;
+        bool warm;
+    } vm_data;
+    int osr_entry_offset;
     _PyExitData exits[1];
 } _PyExecutorSharedObject;
 
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
-    int osr_entry_offset;
-    const _PyUOpInstruction *trace;
+    _PyUOpInstruction *trace;
     _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
-    _PyExecutorSharedObject *shared;
+    _PyExecutorSharedObject *shared; // Strong ref
 } _PyExecutorObject;
 
 

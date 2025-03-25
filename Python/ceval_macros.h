@@ -387,16 +387,18 @@ _PyFrame_SetStackPointer(frame, stack_pointer)
 do {                                                   \
     OPT_STAT_INC(traces_executed);                     \
     _PyExecutorObject *_executor = (EXECUTOR);         \
-    jit_func jitted = _executor->jit_code;             \
+    jit_func jitted = _executor->shared->jit_code;             \
     /* Keep the shim frame alive via the executor: */  \
     int target = (int)(this_instr - (_Py_CODEUNIT*)_PyCode_CODE(_PyFrame_GetCode(frame)));  \
     assert(target >= 0);                                                   \
-    int uop_offset = _executor->bc_offset_to_trace_offset[target]; \
+    int uop_offset = _executor->shared->bc_offset_to_trace_offset[target]; \
     assert(uop_offset >= 0);                           \
-    _executor->osr_entry_offset = uop_offset;          \
+    _executor->shared->osr_entry_offset = uop_offset;          \
     Py_INCREF(_executor);                              \
+    Py_INCREF(_executor->shared);                                                   \
     next_instr = jitted(frame, stack_pointer, tstate); \
     Py_DECREF(_executor);                              \
+    Py_DECREF(_executor->shared);                                                   \
     Py_CLEAR(tstate->previous_executor);               \
     frame = tstate->current_frame;                     \
     stack_pointer = _PyFrame_GetStackPointer(frame);   \

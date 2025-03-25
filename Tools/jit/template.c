@@ -27,6 +27,7 @@
 #include "pycore_stackref.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_uop_metadata.h"
 
 #include "ceval_macros.h"
 
@@ -88,7 +89,7 @@ __attribute__((preserve_none)) _Py_CODEUNIT *
 _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
 {
     // Locals that the instruction implementations expect to exist:
-    PATCH_VALUE(_PyExecutorObject *, current_executor, _JIT_EXECUTOR)
+    PATCH_VALUE(_PyExecutorSharedObject *, current_executor, _JIT_EXECUTOR)
     int oparg;
     int uopcode = _JIT_OPCODE;
     _Py_CODEUNIT *next_instr;
@@ -109,6 +110,7 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
     PATCH_VALUE(uint32_t, _target, _JIT_TARGET)
     OPT_STAT_INC(uops_executed);
     UOP_STAT_INC(uopcode, execution_count);
+//    fprintf(stderr, "OP: %s\n", _PyOpcode_uop_name[uopcode]);
     switch (uopcode) {
         // The actual instruction definition gets inserted here:
         CASE

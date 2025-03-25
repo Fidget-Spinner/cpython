@@ -1042,7 +1042,7 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 
 #if defined(_Py_TIER2) && !defined(_Py_JIT)
     /* Tier 2 interpreter state */
-    _PyExecutorObject *current_executor = NULL;
+    _PyExecutorSharedObject *executor = NULL;
     const _PyUOpInstruction *next_uop = NULL;
 #endif
 
