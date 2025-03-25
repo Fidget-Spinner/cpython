@@ -49,10 +49,12 @@ get_index_for_executor(PyCodeObject *code, _Py_CODEUNIT *instr)
     _PyExecutorArray *old = code->co_executors;
     int size = 0;
     int capacity = 0;
+    _PyExecutorSharedObject *shared = NULL;
     if (old != NULL) {
         size = old->size;
         capacity = old->capacity;
         assert(size < MAX_EXECUTORS_SIZE);
+        shared = old->shared;
     }
     assert(size <= capacity);
     if (size == capacity) {
@@ -65,6 +67,7 @@ get_index_for_executor(PyCodeObject *code, _Py_CODEUNIT *instr)
         if (new == NULL) {
             return -1;
         }
+        new->shared = shared;
         new->capacity = new_capacity;
         new->size = size;
         code->co_executors = new;
@@ -102,7 +105,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
 static int
 uop_optimize(_PyInterpreterFrame *frame, _Py_CODEUNIT *instr,
              _PyExecutorObject **exec_ptr, int curr_stackentries,
-             bool progress_needed);
+             bool progress_needed, _PyExecutorSharedObject **shared_ptr);
 
 /* Returns 1 if optimized, 0 if not optimized, and -1 for an error.
  * If optimized, *executor_ptr contains a new reference to the executor
@@ -128,11 +131,13 @@ _PyOptimizer_Optimize(
     if (progress_needed && !has_space_for_executor(code, start)) {
         return 0;
     }
-    int err = uop_optimize(frame, start, executor_ptr, (int)(stack_pointer - _PyFrame_Stackbase(frame)), progress_needed);
+    _PyExecutorSharedObject *shared;
+    int err = uop_optimize(frame, start, executor_ptr, (int)(stack_pointer - _PyFrame_Stackbase(frame)), progress_needed, &shared);
     if (err <= 0) {
         return err;
     }
     assert(*executor_ptr != NULL);
+    assert(shared != NULL);
     if (progress_needed) {
         int index = get_index_for_executor(code, start);
         if (index < 0) {
@@ -150,6 +155,7 @@ _PyOptimizer_Optimize(
     else {
         (*executor_ptr)->vm_data.code = NULL;
     }
+    Py_XSETREF(code->co_executors->shared, Py_NewRef(shared));
     (*executor_ptr)->vm_data.chain_depth = chain_depth;
     assert((*executor_ptr)->vm_data.valid);
     return 1;
@@ -210,6 +216,12 @@ uop_dealloc(_PyExecutorObject *self) {
     _PyObject_GC_UNTRACK(self);
     assert(self->vm_data.code == NULL);
     unlink_executor(self);
+    PyObject_GC_Del(self);
+}
+
+static void
+shared_dealloc(_PyExecutorSharedObject *self) {
+    _PyObject_GC_UNTRACK(self);
 #ifdef _Py_JIT
     _PyJIT_Free(self);
 #endif
@@ -265,7 +277,7 @@ _PyUOpPrint(const _PyUOpInstruction *uop)
 static Py_ssize_t
 uop_len(_PyExecutorObject *self)
 {
-    return self->code_size;
+    return self->shared->code_size;
 }
 
 static PyObject *
@@ -315,6 +327,14 @@ static int
 executor_traverse(PyObject *o, visitproc visit, void *arg)
 {
     _PyExecutorObject *executor = (_PyExecutorObject *)o;
+    Py_VISIT(executor->shared);
+    return 0;
+}
+
+static int
+shared_traverse(PyObject *o, visitproc visit, void *arg)
+{
+    _PyExecutorSharedObject *executor = (_PyExecutorSharedObject  *)o;
     for (uint32_t i = 0; i < executor->exit_count; i++) {
         Py_VISIT(executor->exits[i].executor);
     }
@@ -329,10 +349,10 @@ get_jit_code(PyObject *self, PyObject *Py_UNUSED(ignored))
     return NULL;
 #else
     _PyExecutorObject *executor = (_PyExecutorObject *)self;
-    if (executor->jit_code == NULL || executor->jit_size == 0) {
+    if (executor->shared->jit_code == NULL || executor->shared->jit_size == 0) {
         Py_RETURN_NONE;
     }
-    return PyBytes_FromStringAndSize(executor->jit_code, executor->jit_size);
+    return PyBytes_FromStringAndSize(executor->shared->jit_code, executor->shared->jit_size);
 #endif
 }
 
@@ -353,7 +373,7 @@ executor_is_gc(PyObject *o)
 PyTypeObject _PyUOpExecutor_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     .tp_name = "uop_executor",
-    .tp_basicsize = offsetof(_PyExecutorObject, exits),
+    .tp_basicsize = offsetof(_PyExecutorObject, shared),
     .tp_itemsize = 1,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION | Py_TPFLAGS_HAVE_GC,
     .tp_dealloc = (destructor)uop_dealloc,
@@ -361,6 +381,20 @@ PyTypeObject _PyUOpExecutor_Type = {
     .tp_methods = uop_executor_methods,
     .tp_traverse = executor_traverse,
     .tp_clear = (inquiry)executor_clear,
+    .tp_is_gc = executor_is_gc,
+};
+
+static int shared_clear(_PyExecutorSharedObject *executor);
+
+PyTypeObject _PyUOpShared_Type = {
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    .tp_name = "uop_executor_shared_Data",
+    .tp_basicsize = offsetof(_PyExecutorSharedObject, exits),
+    .tp_itemsize = 1,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_DISALLOW_INSTANTIATION | Py_TPFLAGS_HAVE_GC,
+    .tp_dealloc = (destructor)shared_dealloc,
+    .tp_traverse = shared_traverse,
+    .tp_clear = (inquiry)shared_clear,
     .tp_is_gc = executor_is_gc,
 };
 
@@ -1044,6 +1078,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
+            case RAISE_VARARGS:
+            case RERAISE:
 //            case RERAISE: // TODO move this down later.
                 DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                 return 0;
@@ -1099,7 +1135,6 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case RETURN_VALUE:
             case RETURN_GENERATOR:
             case YIELD_VALUE:
-            case RAISE_VARARGS:
             {
                 ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
                 _Py_CODEUNIT *after = curr+1+_PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
@@ -1403,14 +1438,24 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
 static _PyExecutorObject *
 allocate_executor(int exit_count, int length)
 {
-    int size = exit_count*sizeof(_PyExitData) + length*sizeof(_PyUOpInstruction);
-    _PyExecutorObject *res = PyObject_GC_NewVar(_PyExecutorObject, &_PyUOpExecutor_Type, size);
+    _PyExecutorObject *res = PyObject_GC_NewVar(_PyExecutorObject, &_PyUOpExecutor_Type, 1);
     if (res == NULL) {
         return NULL;
     }
-    res->trace = (_PyUOpInstruction *)(res->exits + exit_count);
-    res->code_size = length;
+    res->trace = NULL;
+    return res;
+}
+
+static _PyExecutorSharedObject *
+allocate_shared(int exit_count, int length)
+{
+    int size = exit_count*sizeof(_PyExitData);
+    _PyExecutorSharedObject *res = PyObject_GC_NewVar(_PyExecutorSharedObject , &_PyUOpShared_Type, size);
+    if (res == NULL) {
+        return NULL;
+    }
     res->exit_count = exit_count;
+    res->code_size = length;
     return res;
 }
 
@@ -1431,14 +1476,14 @@ target_unused(int opcode)
 static void
 sanity_check(_PyExecutorObject *executor)
 {
-    for (uint32_t i = 0; i < executor->exit_count; i++) {
-        _PyExitData *exit = &executor->exits[i];
+    for (uint32_t i = 0; i < executor->shared->exit_count; i++) {
+        _PyExitData *exit = &executor->shared->exits[i];
         CHECK(exit->target < (1 << 25));
     }
     bool ended = false;
     uint32_t i = 0;
     CHECK(executor->trace[0].opcode == _START_EXECUTOR);
-    for (; i < executor->code_size; i++) {
+    for (; i < executor->shared->code_size; i++) {
         const _PyUOpInstruction *inst = &executor->trace[i];
         uint16_t opcode = inst->opcode;
         CHECK(opcode <= MAX_UOP_ID);
@@ -1448,12 +1493,12 @@ sanity_check(_PyExecutorObject *executor)
                 CHECK(target_unused(opcode));
                 break;
             case UOP_FORMAT_JUMP:
-                CHECK(inst->jump_target < executor->code_size);
+                CHECK(inst->jump_target < executor->shared->code_size);
                 break;
         }
         if (_PyUop_Flags[opcode] & HAS_ERROR_FLAG) {
             CHECK(inst->format == UOP_FORMAT_JUMP);
-            CHECK(inst->error_target < executor->code_size);
+            CHECK(inst->error_target < executor->shared->code_size);
         }
         if (is_terminator(inst)) {
             ended = true;
@@ -1480,19 +1525,47 @@ sanity_check(_PyExecutorObject *executor)
  * and not a NOP.
  */
 static _PyExecutorObject *
-make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFilter *dependencies)
+make_executor_from_shared(_PyExecutorSharedObject *shared)
 {
-    int exit_count = count_exits(buffer, length);
-    _PyExecutorObject *executor = allocate_executor(exit_count, length);
+    int exit_count = count_exits(shared->trace, shared->code_size);
+    _PyExecutorObject *executor = allocate_executor(exit_count, shared->code_size);
     if (executor == NULL) {
         return NULL;
     }
 
-    /* Initialize exits */
+    executor->shared = shared;
+    executor->trace = (const _PyUOpInstruction *)shared->trace;
+
+    _Py_ExecutorInit(executor, &shared->dependencies);
+#ifdef Py_DEBUG
+    sanity_check(executor);
+#endif
+    // This is initialized to true so we can prevent the executor
+    // from being immediately detected as cold and invalidated.
+    executor->vm_data.warm = true;
+
+    _PyObject_GC_TRACK(executor);
+    return executor;
+}
+
+static _PyExecutorSharedObject *
+make_shared_from_uops(_PyUOpInstruction *buffer, int length, _PyBloomFilter *dependencies)
+{
+    int exit_count = count_exits(buffer, length);
+    _PyExecutorSharedObject *executor = allocate_shared(exit_count, length);
+    if (executor == NULL) {
+        return NULL;
+    }
+
     for (int i = 0; i < exit_count; i++) {
         executor->exits[i].executor = NULL;
         executor->exits[i].temperature = initial_temperature_backoff_counter();
     }
+
+    memcpy(executor->trace, buffer, length * sizeof(_PyUOpInstruction));
+
+    memcpy(&executor->dependencies, dependencies, sizeof(_PyBloomFilter));
+
     int next_exit = exit_count-1;
     _PyUOpInstruction *dest = (_PyUOpInstruction *)&executor->trace[length];
     assert(buffer[0].opcode == _START_EXECUTOR);
@@ -1517,7 +1590,6 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
     assert(next_exit == -1);
     assert(dest == executor->trace);
     assert(dest->opcode == _START_EXECUTOR);
-    _Py_ExecutorInit(executor, dependencies);
 #ifdef Py_DEBUG
     char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
     int lltrace = 0;
@@ -1532,21 +1604,16 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
             printf("\n");
         }
     }
-    sanity_check(executor);
 #endif
 #ifdef _Py_JIT
     executor->jit_code = NULL;
     executor->jit_side_entry = NULL;
     executor->jit_size = 0;
-    // This is initialized to true so we can prevent the executor
-    // from being immediately detected as cold and invalidated.
-    executor->vm_data.warm = true;
     if (_PyJIT_Compile(executor, executor->trace, length)) {
         Py_DECREF(executor);
         return NULL;
     }
 #endif
-    _PyObject_GC_TRACK(executor);
     return executor;
 }
 
@@ -1576,79 +1643,88 @@ uop_optimize(
     _Py_CODEUNIT *instr,
     _PyExecutorObject **exec_ptr,
     int curr_stackentries,
-    bool progress_needed)
-{
-    _PyBloomFilter dependencies;
-    _Py_BloomFilter_Init(&dependencies);
+    bool progress_needed,
+    _PyExecutorSharedObject **shared_ptr)
+{;
     OPT_STAT_INC(attempts);
-    PyInterpreterState *interp = _PyInterpreterState_GET();
-    interp->jit_translation_ctxs_used = 0;
-    interp->osr_entry_instr = instr;
-    interp->osr_entry_uop = NULL;
 //    char *second = Py_GETENV("PYTHON_UOPS_CFG");
 //    if (second == NULL) {
 //        return 0;
 //    }
-    _PyByteCodeTranslationCtx *ctx = translation_ctx_init(&dependencies,
-                                                          _PyFrame_GetCode(frame),
-                                                          _PyFrame_GetFunction(frame), 0);
-    if (ctx == NULL) {
-        return 0;
-    }
-    if (!translate_bytecode_to_cfg(ctx)) {
-        return 0;
-    }
-    interp->buffer_length = 0;
-    interp->buffer_max_length = UOP_MAX_METHOD_LENGTH - 2;
-    for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
-        interp->bc_offset_to_uop_offsets[i] = -1;
-    }
-    if (!translate_cfg_to_uops(ctx)) {
-        return 0;
-    }
-    assert(interp->osr_entry_uop != NULL);
-    int length = interp->buffer_length;
+    PyCodeObject *code = _PyFrame_GetCode(frame);
+    _PyExecutorSharedObject *shared = NULL;
+    // No shared object.
+    if (code->co_executors == NULL || code->co_executors->shared == NULL) {
+        PyInterpreterState *interp = _PyInterpreterState_GET();
+        interp->jit_translation_ctxs_used = 0;
+        interp->osr_entry_instr = instr;
+        interp->osr_entry_uop = NULL;
+        _PyBloomFilter dependencies;
+        _Py_BloomFilter_Init(&dependencies);
+        _PyByteCodeTranslationCtx *ctx = translation_ctx_init(&dependencies,
+                                                              code,
+                                                              _PyFrame_GetFunction(frame), 0);
+        if (ctx == NULL) {
+            return 0;
+        }
+        if (!translate_bytecode_to_cfg(ctx)) {
+            return 0;
+        }
+        interp->buffer_length = 0;
+        interp->buffer_max_length = UOP_MAX_METHOD_LENGTH - 2;
+        for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
+            interp->bc_offset_to_uop_offsets[i] = -1;
+        }
+        if (!translate_cfg_to_uops(ctx)) {
+            return 0;
+        }
+        assert(interp->osr_entry_uop != NULL);
+        int length = interp->buffer_length;
 
-    assert(length < UOP_MAX_METHOD_LENGTH);
+        assert(length < UOP_MAX_METHOD_LENGTH);
 
-    OPT_STAT_INC(traces_created);
-    char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
-    if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
-        length = _Py_uop_analyze_and_optimize(ctx, interp->buffer,
-                                           length,
-                                           curr_stackentries, &dependencies);
-        if (length <= 0) {
-            return length;
+        OPT_STAT_INC(traces_created);
+        char *env_var = Py_GETENV("PYTHON_UOPS_OPTIMIZE");
+        if (env_var == NULL || *env_var == '\0' || *env_var > '0') {
+            length = _Py_uop_analyze_and_optimize(ctx, interp->buffer,
+                                                  length,
+                                                  curr_stackentries, &dependencies);
+            if (length <= 0) {
+                return length;
+            }
+        }
+        assert(length < UOP_MAX_METHOD_LENGTH);
+        assert(length >= 1);
+        /* Fix up */
+        for (int pc = 0; pc < interp->buffer_length; pc++) {
+            int opcode = interp->buffer[pc].opcode;
+            int oparg = interp->buffer[pc].oparg;
+            if (oparg < _PyUop_Replication[opcode]) {
+                interp->buffer[pc].opcode = opcode + oparg + 1;
+                assert(strncmp(_PyOpcode_uop_name[interp->buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
+            }
+            assert(_PyOpcode_uop_name[interp->buffer[pc].opcode]);
+        }
+        OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
+        length = prepare_for_execution(interp->buffer, length);
+        assert(length <= UOP_MAX_METHOD_LENGTH);
+        shared = make_shared_from_uops(interp->buffer, length, &dependencies);
+        for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
+            shared->bc_offset_to_trace_offset[i] = interp->bc_offset_to_uop_offsets[i];
         }
     }
-    assert(length < UOP_MAX_METHOD_LENGTH);
-    assert(length >= 1);
-    /* Fix up */
-    for (int pc = 0; pc < interp->buffer_length; pc++) {
-        int opcode = interp->buffer[pc].opcode;
-        int oparg = interp->buffer[pc].oparg;
-        if (oparg < _PyUop_Replication[opcode]) {
-            interp->buffer[pc].opcode = opcode + oparg + 1;
-            assert(strncmp(_PyOpcode_uop_name[interp->buffer[pc].opcode], _PyOpcode_uop_name[opcode], strlen(_PyOpcode_uop_name[opcode])) == 0);
-        }
-        assert(_PyOpcode_uop_name[interp->buffer[pc].opcode]);
-    }
-    OPT_HIST(effective_trace_length(buffer, length), optimized_trace_length_hist);
-    length = prepare_for_execution(interp->buffer, length);
-    assert(length <= UOP_MAX_METHOD_LENGTH);
-    _PyExecutorObject *executor = make_executor_from_uops(interp->buffer, length,  &dependencies);
+    else {
+        // Yay cached shared object.
+        Py_INCREF(code->co_executors->shared);
+        shared = code->co_executors->shared;
+    };
+
+    _PyExecutorObject *executor = make_executor_from_shared(shared);
     if (executor == NULL) {
         return -1;
     }
-    assert(length <= UOP_MAX_METHOD_LENGTH);
+    *shared_ptr = shared;
     *exec_ptr = executor;
-    executor->osr_entry_offset = (int)(interp->osr_entry_uop - interp->buffer);
-    assert(executor->osr_entry_offset <= interp->buffer_length);
-
-    for (int i = 0; i < MAX_BYTECODE_SIZE; i++) {
-        executor->bc_offset_to_trace_offset[i] = interp->bc_offset_to_uop_offsets[i];
-    }
-
     return 1;
 }
 
@@ -1830,6 +1906,13 @@ executor_clear(_PyExecutorObject *executor)
     assert(executor->vm_data.valid == 1);
     unlink_executor(executor);
     executor->vm_data.valid = 0;
+    _Py_ExecutorDetach(executor);
+    return 0;
+}
+
+static int
+shared_clear(_PyExecutorSharedObject *executor)
+{
     /* It is possible for an executor to form a reference
      * cycle with itself, so decref'ing a side exit could
      * free the executor unless we hold a strong reference to it
@@ -1839,7 +1922,6 @@ executor_clear(_PyExecutorObject *executor)
         executor->exits[i].temperature = initial_unreachable_backoff_counter();
         Py_CLEAR(executor->exits[i].executor);
     }
-    _Py_ExecutorDetach(executor);
     Py_DECREF(executor);
     return 0;
 }
@@ -2011,7 +2093,7 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
         int line = find_line_number(code, executor);
         fprintf(out, ": %d</td></tr>\n", line);
     }
-    for (uint32_t i = 0; i < executor->code_size; i++) {
+    for (uint32_t i = 0; i < executor->shared->code_size; i++) {
         /* Write row for uop.
          * The `port` is a marker so that outgoing edges can
          * be placed correctly. If a row is marked `port=17`,
@@ -2033,7 +2115,7 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
     fprintf(out, "]\n\n");
 
     /* Write all the outgoing edges */
-    for (uint32_t i = 0; i < executor->code_size; i++) {
+    for (uint32_t i = 0; i < executor->shared->code_size; i++) {
         _PyUOpInstruction const *inst = &executor->trace[i];
         uint16_t flags = _PyUop_Flags[inst->opcode];
         _PyExitData *exit = NULL;

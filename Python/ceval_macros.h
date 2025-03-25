@@ -413,8 +413,8 @@ do { \
     OPT_STAT_INC(traces_executed); \
     int target = (int)(this_instr - (_Py_CODEUNIT*)_PyCode_CODE(_PyFrame_GetCode(frame)));   \
     /* fprintf(stderr, "TARGET:%d, %d\n", target, current_executor->bc_offset_to_trace_offset[target]); */                           \
-    assert(current_executor->bc_offset_to_trace_offset[target] >= 0); \
-    next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target]; \
+    assert(current_executor->shared->bc_offset_to_trace_offset[target] >= 0); \
+    next_uop = current_executor->trace + current_executor->shared->bc_offset_to_trace_offset[target]; \
     Py_CLEAR(tstate->previous_executor); \
     goto enter_tier_two; \
 } while (0)

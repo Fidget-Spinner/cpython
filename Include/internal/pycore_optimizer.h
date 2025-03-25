@@ -92,19 +92,26 @@ typedef struct {
     uintptr_t instruction_starts[UOP_MAX_METHOD_LENGTH];
 } jit_state;
 
+typedef struct _PyExecutorSharedObject {
+    PyObject_VAR_HEAD
+    _PyUOpInstruction trace[UOP_MAX_METHOD_LENGTH];
+    jit_state jit_state;
+    size_t jit_size;
+    void *jit_code;
+    void *jit_side_entry;
+    uint32_t code_size;
+    _PyBloomFilter dependencies;
+    int bc_offset_to_trace_offset[MAX_BYTECODE_SIZE];
+    uint32_t exit_count;
+    _PyExitData exits[1];
+} _PyExecutorSharedObject;
+
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
     int osr_entry_offset;
     const _PyUOpInstruction *trace;
-    int bc_offset_to_trace_offset[MAX_BYTECODE_SIZE];
     _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
-    uint32_t exit_count;
-    uint32_t code_size;
-    size_t jit_size;
-    void *jit_code;
-    void *jit_side_entry;
-    jit_state jit_state;
-    _PyExitData exits[1];
+    _PyExecutorSharedObject *shared;
 } _PyExecutorObject;
 
 

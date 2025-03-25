@@ -1701,6 +1701,7 @@ clear_executors(PyCodeObject *co)
             assert(co->co_executors->executors[i] == NULL);
         }
     }
+    Py_CLEAR(co->co_executors->shared);
     PyMem_Free(co->co_executors);
     co->co_executors = NULL;
 }

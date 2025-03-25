@@ -18,6 +18,7 @@ typedef struct {
 typedef struct {
     int size;
     int capacity;
+    struct _PyExecutorSharedObject *shared;
     struct _PyExecutorObject *executors[1];
 } _PyExecutorArray;
 

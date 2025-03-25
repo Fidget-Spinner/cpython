@@ -1154,8 +1154,8 @@ jump_to_jump_target:
 
 jump_to_dynamic:
     target = (int)(frame->instr_ptr - (_Py_CODEUNIT*)next_uop[-1].operand1);
-    assert(current_executor->bc_offset_to_trace_offset[target] >= 0);
-    next_uop = current_executor->trace + current_executor->bc_offset_to_trace_offset[target];
+    assert(current_executor->shared->bc_offset_to_trace_offset[target] >= 0);
+    next_uop = current_executor->trace + current_executor->shared->bc_offset_to_trace_offset[target];
     goto tier2_dispatch;
 
 #endif  // _Py_JIT

@@ -569,7 +569,7 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
 }
 
 void
-_PyJIT_Free(_PyExecutorObject *executor)
+_PyJIT_Free(_PyExecutorSharedObject *executor)
 {
     unsigned char *memory = (unsigned char *)executor->jit_code;
     size_t size = executor->jit_size;
