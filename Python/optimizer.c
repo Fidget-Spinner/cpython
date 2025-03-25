@@ -1079,9 +1079,10 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
+                DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
+                return 0;
             case RAISE_VARARGS:
             case RERAISE: {
-                DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
                 if (prev != NULL) {
                     ctx->instr_is_bb_start[INSTR_OFFSET(prev)] = true;
                 }
@@ -1297,11 +1298,16 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case RETURN_VALUE:
             case RETURN_GENERATOR:
             case YIELD_VALUE:
-            case RERAISE:
+            case CLEANUP_THROW:
                 ctx->bbs[i].terminator.kind = BB_EXIT;
                 break;
             case ENTER_EXECUTOR:
                 Py_UNREACHABLE();
+            case PUSH_EXC_INFO:
+            case CHECK_EXC_MATCH:
+            case CHECK_EG_MATCH:
+            case RAISE_VARARGS:
+            case RERAISE:
             default:
                 ctx->bbs[i].terminator.kind = BB_FALLTHROUGH;
                 break;
