@@ -141,7 +141,7 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 
 #define TRACE_STACK_SIZE 5
 
-#define MAX_JIT_TRANSLATION_CTXS (TRACE_STACK_SIZE * 2)
+#define MAX_JIT_TRANSLATION_CTXS (TRACE_STACK_SIZE * 5)
 
 
 extern PyTypeObject _PyUOpExecutor_Type;

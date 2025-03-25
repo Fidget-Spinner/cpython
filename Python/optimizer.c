@@ -599,7 +599,8 @@ translate_bb_to_uops(_PyByteCodeTranslationCtx *ctx, _PyByteCodeBB *bb)
             oparg = ctx->co->co_executors->executors[oparg & 255]->vm_data.oparg;
         }
         if (opcode == CALL_LIST_APPEND || opcode == BINARY_OP_INPLACE_ADD_UNICODE) {
-            return 0;
+            DPRINTF(2, "Unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
+            goto done;
         }
         switch (opcode) {
             case JUMP_BACKWARD_JIT:
@@ -1025,6 +1026,8 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
     int opcode;
     int oparg;
     _Py_CODEUNIT *curr = ctx->initial_instr;
+    // Initial instruction is always an entrypoint.
+    ctx->instr_is_bb_start[INSTR_OFFSET(ctx->initial_instr)] = true;
     while (curr < ctx->last_instr) {
         assert(curr->op.code != CACHE && curr->op.code != RESERVED);
         oparg = curr->op.arg;
@@ -1037,13 +1040,10 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
         }
         switch (_PyOpcode_Deopt[opcode]) {
             // Don't support exception code for now.
-            case RAISE_VARARGS:
             case CLEANUP_THROW:
             case PUSH_EXC_INFO:
             case CHECK_EXC_MATCH:
             case CHECK_EG_MATCH:
-            case LOAD_DEREF:
-            case STORE_DEREF:
             case RERAISE:
 //            case RERAISE: // TODO move this down later.
                 DPRINTF(2, "unsupported opcode %s\n", _PyOpcode_OpName[opcode]);
@@ -1100,6 +1100,7 @@ translate_bytecode_to_cfg(_PyByteCodeTranslationCtx *ctx)
             case RETURN_VALUE:
             case RETURN_GENERATOR:
             case YIELD_VALUE:
+            case RAISE_VARARGS:
             {
                 ctx->instr_is_bb_start[INSTR_OFFSET(curr)] = true;
                 _Py_CODEUNIT *after = curr+1+_PyOpcode_Caches[_PyOpcode_Deopt[opcode]];
