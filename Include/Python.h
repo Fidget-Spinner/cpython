@@ -45,6 +45,8 @@
 #  endif
 #endif
 
+#define Py_TAIL_CALL_INTERP 1
+
 // gh-111506: The free-threaded build is not compatible with the limited API
 // or the stable ABI.
 #if defined(Py_LIMITED_API) && defined(Py_GIL_DISABLED)
