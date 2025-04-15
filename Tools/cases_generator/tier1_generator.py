@@ -230,6 +230,7 @@ def generate_tier1_cases(
         out.emit(f"int opcode = {name};\n")
         out.emit(f"(void)(opcode);\n")
         out.emit(f"#endif\n")
+        out.emit("{\n")
         needs_this = uses_this(inst)
         unused_guard = "(void)this_instr;\n"
         if inst.properties.needs_prev:
@@ -265,7 +266,10 @@ def generate_tier1_cases(
         out.start_line()
         if reachable: # type: ignore[possibly-undefined]
             stack.flush(out)
+            out.emit("}\n")
             out.emit("DISPATCH();\n")
+        else:
+            out.emit("}\n")
         out.start_line()
         out.emit("}")
         out.emit("\n")
