@@ -70,14 +70,25 @@
 #define INSTRUCTION_STATS(op) ((void)0)
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define Py_UNLIKELY(x)     (__builtin_expect(!!(x),false))
+#define Py_LIKELY(x)       (__builtin_expect(!!(x),true))
+#elif (defined(__cplusplus) && (__cplusplus >= 202002L)) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#define Py_UNLIKELY(x)     (x) [[unlikely]]
+#define Py_LIKELY(x)       (x) [[likely]]
+#else
+#define Py_UNLIKELY(x)     (x)
+#define Py_LIKELY(x)       (x)
+#endif
+
 #define TAIL_CALL_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _Py_CODEUNIT *next_instr, int oparg
 #define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr, oparg
 
 #if Py_TAIL_CALL_INTERP
     // Note: [[clang::musttail]] works for GCC 15, but not __attribute__((musttail)) at the moment.
 #   define Py_MUSTTAIL [[clang::musttail]]
-#   define Py_PRESERVE_NONE_CC __attribute__((preserve_none))
-    Py_PRESERVE_NONE_CC typedef PyObject* (*py_tail_call_funcptr)(TAIL_CALL_PARAMS);
+#   define Py_PRESERVE_NONE_CC __attribute__((preserve_none,no_instrument_function,no_profile_instrument_function)) _Py_HOT_FUNCTION
+    __attribute__((preserve_none)) typedef PyObject* (*py_tail_call_funcptr)(TAIL_CALL_PARAMS);
 
 #   define TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_##op(TAIL_CALL_PARAMS)
 #   define DISPATCH_GOTO() \

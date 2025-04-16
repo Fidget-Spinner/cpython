@@ -152,12 +152,12 @@ class Emitter:
         inst: Instruction | None,
     ) -> bool:
         self.out.start_line()
-        self.out.emit("if (")
+        self.out.emit("if (Py_UNLIKELY(")
         lparen = next(tkn_iter)
         assert lparen.kind == "LPAREN"
         first_tkn = tkn_iter.peek()
         emit_to(self.out, tkn_iter, "RPAREN")
-        self.emit(") {\n")
+        self.emit(")) {\n")
         next(tkn_iter)  # Semi colon
         assert inst is not None
         assert inst.family is not None
@@ -198,8 +198,9 @@ class Emitter:
         else:
             self.out.emit_at("if ", tkn)
             self.emit(lparen)
+            self.emit("Py_UNLIKELY(")
             emit_to(self.out, tkn_iter, "COMMA")
-            self.out.emit(") {\n")
+            self.out.emit(")) {\n")
         label = next(tkn_iter).text
         next(tkn_iter)  # RPAREN
         next(tkn_iter)  # Semi colon
