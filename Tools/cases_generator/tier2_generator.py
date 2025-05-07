@@ -162,6 +162,16 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
         raise analysis_error(ex.args[0], uop.body.open) from None
     return storage.stack
 
+class Tier2OutlineEmitter(Tier2Emitter):
+    def goto_error(self, offset: int, storage: Storage) -> str:
+        # To do: Add jump targets for popping values.
+        if offset != 0:
+            storage.copy().flush(self.out)
+        self.out.emit("_JITOutlinedReturnVal _retval = {frame, stack_pointer, tstate, 1};\n")
+        self.out.emit(f"return _retval;\n")
+        return f""
+
+
 SKIPS = ("_EXTENDED_ARG",)
 
 def uop_cannot_outline(uop: Uop) -> bool:
@@ -171,9 +181,13 @@ def uop_cannot_outline(uop: Uop) -> bool:
     return (uop.properties.always_exits
             or uop.properties.deopts
             or uop.properties.side_exit
-            or uop.properties.error_with_pop
-            or uop.properties.error_without_pop
+            # Errors are fine because we will return nearly immediately out of tier 2 anyways.
+            # or uop.properties.error_with_pop
+            # or uop.properties.error_without_pop
             or uop.properties.has_non_error_jump)
+
+def uop_can_error(uop: Uop) -> bool:
+    return uop.properties.error_with_pop or uop.properties.error_without_pop
 
 def generate_tier2(
     filenames: list[str], analysis: Analysis, outfile: TextIO, outfile2: TextIO, outfile3: TextIO, lines: bool
@@ -189,6 +203,7 @@ def generate_tier2(
     )
     out = CWriter(outfile2, 2, lines)
     emitter = Tier2Emitter(out, analysis.labels)
+    outline_emitter = Tier2OutlineEmitter(out, analysis.labels)
     out.emit("\n")
     for name, uop in analysis.uops.items():
         if uop.properties.tier == 1:
@@ -209,9 +224,9 @@ def generate_tier2(
             out.emit("int oparg;\n")
             declare_variables(uop, out)
             stack = Stack()
-            stack = write_uop(uop, emitter, stack)
+            stack = write_uop(uop, outline_emitter, stack)
             out.start_line()
-            out.emit("_JITOutlinedReturnVal _retval = {frame, stack_pointer, tstate};\n")
+            out.emit("_JITOutlinedReturnVal _retval = {frame, stack_pointer, tstate, 0};\n")
             out.emit(f"return _retval;\n")
             out.emit("}")
             out.emit("\n\n")
@@ -239,6 +254,8 @@ def generate_tier2(
             out.emit(f"stack_pointer = retval.stack_pointer;\n")
             out.emit(f"tstate = retval.tstate;\n")
             out.emit(f"frame = retval.frame;\n")
+            if uop_can_error(uop):
+                out.emit("if (retval.is_err) { JUMP_TO_ERROR(); }")
         out.emit("break;\n")
         out.start_line()
         out.emit("}")

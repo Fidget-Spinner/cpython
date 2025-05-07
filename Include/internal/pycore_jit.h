@@ -22,6 +22,7 @@ typedef struct _JITOutlinedReturnVal {
     _PyInterpreterFrame *frame;
     _PyStackRef *stack_pointer;
     PyThreadState *tstate;
+    int is_err;
 } _JITOutlinedReturnVal;
 
 typedef _Py_CODEUNIT *(*jit_func)(JIT_PARAMS);
