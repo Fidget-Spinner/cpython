@@ -3457,3 +3457,15 @@ _PyEval_SpecialMethodCanSuggest(PyObject *self, int oparg)
             Py_FatalError("unsupported special method");
     }
 }
+
+#undef LOAD_IP
+#undef CURRENT_OPARG
+#undef CURRENT_OPERAND0
+#undef CURRENT_OPERAND1
+
+#define CURRENT_OPARG()    (_oparg)
+#define CURRENT_OPERAND0() (_operand0)
+#define CURRENT_OPERAND1() (_operand1)
+#define LOAD_IP(unused)
+
+#include "Python/executor_cases_outlined.c"

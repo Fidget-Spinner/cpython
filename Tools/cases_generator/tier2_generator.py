@@ -14,6 +14,7 @@ from analyzer import (
     analyze_files,
     StackItem,
     analysis_error,
+    variable_used,
 )
 from generators_common import (
     DEFAULT_INPUT,
@@ -31,7 +32,8 @@ from lexer import Token
 from stack import Local, Stack, StackError, Storage
 
 DEFAULT_OUTPUT = ROOT / "Python/executor_cases.c.h"
-
+DEFAULT_OUTPUT2 = ROOT / "Python/executor_cases_outlined.c"
+DEFAULT_OUTPUT3 = ROOT / "Python/executor_cases_outlined.h"
 
 def declare_variable(
     var: StackItem, uop: Uop, seen: set[str], out: CWriter
@@ -162,9 +164,19 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
 
 SKIPS = ("_EXTENDED_ARG",)
 
+def uop_cannot_outline(uop: Uop) -> bool:
+    if len(uop.body.body) < 6:
+        return True
+    # Outlining these would lead to unbounded stack growth.
+    return (uop.properties.always_exits
+            or uop.properties.deopts
+            or uop.properties.side_exit
+            or uop.properties.error_with_pop
+            or uop.properties.error_without_pop
+            or uop.properties.has_non_error_jump)
 
 def generate_tier2(
-    filenames: list[str], analysis: Analysis, outfile: TextIO, lines: bool
+    filenames: list[str], analysis: Analysis, outfile: TextIO, outfile2: TextIO, outfile3: TextIO, lines: bool
 ) -> None:
     write_header(__file__, filenames, outfile)
     outfile.write(
@@ -175,7 +187,7 @@ def generate_tier2(
 #define TIER_TWO 2
 """
     )
-    out = CWriter(outfile, 2, lines)
+    out = CWriter(outfile2, 2, lines)
     emitter = Tier2Emitter(out, analysis.labels)
     out.emit("\n")
     for name, uop in analysis.uops.items():
@@ -189,16 +201,63 @@ def generate_tier2(
                 f"/* {uop.name} is not a viable micro-op for tier 2 because it {why_not_viable} */\n\n"
             )
             continue
+
+        if uop_cannot_outline(uop):
+            out.emit(f"/* Cannot outline {uop.name}. */\n\n")
+        else:
+            out.emit(f"extern _JITOutlinedReturnVal {uop.name}_outlined(JIT_PARAMS, int _oparg, uint64_t _operand0, uint64_t _operand1, _PyExecutorObject *current_executor) {{\n")
+            out.emit("int oparg;\n")
+            declare_variables(uop, out)
+            stack = Stack()
+            stack = write_uop(uop, emitter, stack)
+            out.start_line()
+            out.emit("_JITOutlinedReturnVal _retval = {frame, stack_pointer, tstate};\n")
+            out.emit(f"return _retval;\n")
+            out.emit("}")
+            out.emit("\n\n")
+
+
+    out = CWriter(outfile, 2, lines)
+    emitter = Tier2Emitter(out, analysis.labels)
+    out.emit("\n")
+    for name, uop in analysis.uops.items():
+        if uop.properties.tier == 1:
+            continue
+        if uop.is_super():
+            continue
+        why_not_viable = uop.why_not_viable()
+        if why_not_viable is not None:
+            continue
         out.emit(f"case {uop.name}: {{\n")
-        declare_variables(uop, out)
-        stack = Stack()
-        stack = write_uop(uop, emitter, stack)
-        out.start_line()
-        if not uop.properties.always_exits:
-            out.emit("break;\n")
+        if uop_cannot_outline(uop):
+            declare_variables(uop, out)
+            stack = Stack()
+            stack = write_uop(uop, emitter, stack)
+            out.start_line()
+        else:
+            out.emit(f"_JITOutlinedReturnVal retval = {uop.name}_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);\n")
+            out.emit(f"stack_pointer = retval.stack_pointer;\n")
+            out.emit(f"tstate = retval.tstate;\n")
+            out.emit(f"frame = retval.frame;\n")
+        out.emit("break;\n")
         out.start_line()
         out.emit("}")
         out.emit("\n\n")
+
+    out = CWriter(outfile3, 2, lines)
+    for name, uop in analysis.uops.items():
+        if uop.properties.tier == 1:
+            continue
+        if uop.is_super():
+            continue
+        why_not_viable = uop.why_not_viable()
+        if why_not_viable is not None:
+            continue
+
+        if uop_cannot_outline(uop):
+            pass
+        else:
+            out.emit(f"extern _JITOutlinedReturnVal {uop.name}_outlined(JIT_PARAMS, int _oparg, uint64_t _operand0, uint64_t _operand1, _PyExecutorObject *current_executor);\n")
     outfile.write("#undef TIER_TWO\n")
 
 
@@ -209,6 +268,14 @@ arg_parser = argparse.ArgumentParser(
 
 arg_parser.add_argument(
     "-o", "--output", type=str, help="Generated code", default=DEFAULT_OUTPUT
+)
+
+arg_parser.add_argument(
+    "-o2", "--output2", type=str, help="Generated code (outlined definitions)", default=DEFAULT_OUTPUT2
+)
+
+arg_parser.add_argument(
+    "-o3", "--output3", type=str, help="Generated code (outlined definitions header)", default=DEFAULT_OUTPUT3
 )
 
 arg_parser.add_argument(
@@ -224,5 +291,5 @@ if __name__ == "__main__":
     if len(args.input) == 0:
         args.input.append(DEFAULT_INPUT)
     data = analyze_files(args.input)
-    with open(args.output, "w") as outfile:
-        generate_tier2(args.input, data, outfile, args.emit_line_directives)
+    with open(args.output, "w") as outfile, open(args.output2, "w") as outfile2, open(args.output3, "w") as outfile3:
+        generate_tier2(args.input, data, outfile, outfile2, outfile3, args.emit_line_directives)

@@ -29,6 +29,7 @@
 #include "pycore_template.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "executor_cases_outlined.h"
 
 #include "ceval_macros.h"
 

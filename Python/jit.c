@@ -27,6 +27,7 @@
 #include "pycore_unicodeobject.h"
 
 #include "pycore_jit.h"
+#include "Python/executor_cases_outlined.h"
 
 // Memory management stuff: ////////////////////////////////////////////////////
 

@@ -43,10 +43,6 @@
             break;
         }
 
-        /* _QUICKEN_RESUME is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
-        /* _LOAD_BYTECODE is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
         case _RESUME_CHECK: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
@@ -71,8 +67,6 @@
             #endif
             break;
         }
-
-        /* _MONITOR_RESUME is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _LOAD_FAST_CHECK: {
             _PyStackRef value;
@@ -318,8 +312,6 @@
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
-
-        /* _LOAD_CONST is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _LOAD_CONST_MORTAL: {
             _PyStackRef value;
@@ -1169,34 +1161,10 @@
         }
 
         case _BINARY_OP_EXTEND: {
-            _PyStackRef right;
-            _PyStackRef left;
-            _PyStackRef res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            PyObject *descr = (PyObject *)CURRENT_OPERAND0();
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            assert(INLINE_CACHE_ENTRIES_BINARY_OP == 5);
-            _PyBinaryOpSpecializationDescr *d = (_PyBinaryOpSpecializationDescr*)descr;
-            STAT_INC(BINARY_OP, hit);
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyObject *res_o = d->action(left_o, right_o);
-            _PyStackRef tmp = right;
-            right = PyStackRef_NULL;
-            stack_pointer[-1] = right;
-            PyStackRef_CLOSE(tmp);
-            tmp = left;
-            left = PyStackRef_NULL;
-            stack_pointer[-2] = left;
-            PyStackRef_CLOSE(tmp);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -2;
-            assert(WITHIN_STACK_BOUNDS());
-            res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _BINARY_OP_EXTEND_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -1803,26 +1771,10 @@
         }
 
         case _RETURN_VALUE: {
-            _PyStackRef retval;
-            _PyStackRef res;
-            retval = stack_pointer[-1];
-            assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
-            _PyStackRef temp = PyStackRef_MakeHeapSafe(retval);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            assert(STACK_LEVEL() == 0);
-            _Py_LeaveRecursiveCallPy(tstate);
-            _PyInterpreterFrame *dying = frame;
-            frame = tstate->current_frame = dying->previous;
-            _PyEval_FrameClearAndPop(tstate, dying);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
-            LOAD_IP(frame->return_offset);
-            res = temp;
-            LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _RETURN_VALUE_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -1920,8 +1872,6 @@
             break;
         }
 
-        /* _SEND is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
         case _SEND_GEN_FRAME: {
             _PyStackRef v;
             _PyStackRef receiver;
@@ -1952,42 +1902,10 @@
         }
 
         case _YIELD_VALUE: {
-            _PyStackRef retval;
-            _PyStackRef value;
-            oparg = CURRENT_OPARG();
-            retval = stack_pointer[-1];
-            assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
-            frame->instr_ptr++;
-            PyGenObject *gen = _PyGen_GetGeneratorFromFrame(frame);
-            assert(FRAME_SUSPENDED_YIELD_FROM == FRAME_SUSPENDED + 1);
-            assert(oparg == 0 || oparg == 1);
-            gen->gi_frame_state = FRAME_SUSPENDED + oparg;
-            _PyStackRef temp = retval;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            tstate->exc_info = gen->gi_exc_state.previous_item;
-            gen->gi_exc_state.previous_item = NULL;
-            _Py_LeaveRecursiveCallPy(tstate);
-            _PyInterpreterFrame *gen_frame = frame;
-            frame = tstate->current_frame = frame->previous;
-            gen_frame->previous = NULL;
-            assert(INLINE_CACHE_ENTRIES_SEND == INLINE_CACHE_ENTRIES_FOR_ITER);
-            #if TIER_ONE
-            assert(frame->instr_ptr->op.code == INSTRUMENTED_LINE ||
-                  frame->instr_ptr->op.code == INSTRUMENTED_INSTRUCTION ||
-                  _PyOpcode_Deopt[frame->instr_ptr->op.code] == SEND ||
-                  _PyOpcode_Deopt[frame->instr_ptr->op.code] == FOR_ITER ||
-                  _PyOpcode_Deopt[frame->instr_ptr->op.code] == INTERPRETER_EXIT ||
-                  _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
-            #endif
-            stack_pointer = _PyFrame_GetStackPointer(frame);
-            LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
-            value = PyStackRef_MakeHeapSafe(temp);
-            LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _YIELD_VALUE_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -2332,8 +2250,6 @@
             break;
         }
 
-        /* _LOAD_FROM_DICT_OR_GLOBALS is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
-
         case _LOAD_NAME: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
@@ -2596,17 +2512,10 @@
         }
 
         case _COPY_FREE_VARS: {
-            oparg = CURRENT_OPARG();
-            PyCodeObject *co = _PyFrame_GetCode(frame);
-            assert(PyStackRef_FunctionCheck(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
-            PyObject *closure = func->func_closure;
-            assert(oparg == co->co_nfreevars);
-            int offset = co->co_nlocalsplus - oparg;
-            for (int i = 0; i < oparg; ++i) {
-                PyObject *o = PyTuple_GET_ITEM(closure, i);
-                frame->localsplus[offset + i] = PyStackRef_FromPyObjectNew(o);
-            }
+            _JITOutlinedReturnVal retval = _COPY_FREE_VARS_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -3520,8 +3429,6 @@
             break;
         }
 
-        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN is not a viable micro-op for tier 2 because it has too many cache entries */
-
         case _GUARD_DORV_NO_DICT: {
             _PyStackRef owner;
             owner = stack_pointer[-1];
@@ -3540,29 +3447,10 @@
         }
 
         case _STORE_ATTR_INSTANCE_VALUE: {
-            _PyStackRef owner;
-            _PyStackRef value;
-            owner = stack_pointer[-1];
-            value = stack_pointer[-2];
-            uint16_t offset = (uint16_t)CURRENT_OPERAND0();
-            PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
-            STAT_INC(STORE_ATTR, hit);
-            assert(_PyObject_GetManagedDict(owner_o) == NULL);
-            PyObject **value_ptr = (PyObject**)(((char *)owner_o) + offset);
-            PyObject *old_value = *value_ptr;
-            FT_ATOMIC_STORE_PTR_RELEASE(*value_ptr, PyStackRef_AsPyObjectSteal(value));
-            if (old_value == NULL) {
-                PyDictValues *values = _PyObject_InlineValues(owner_o);
-                Py_ssize_t index = value_ptr - values->values;
-                _PyDictValues_AddToInsertionOrder(values, index);
-            }
-            UNLOCK_OBJECT(owner_o);
-            stack_pointer += -2;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(owner);
-            Py_XDECREF(old_value);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
+            _JITOutlinedReturnVal retval = _STORE_ATTR_INSTANCE_VALUE_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -3705,24 +3593,10 @@
         }
 
         case _COMPARE_OP_FLOAT: {
-            _PyStackRef right;
-            _PyStackRef left;
-            _PyStackRef res;
-            oparg = CURRENT_OPARG();
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            STAT_INC(COMPARE_OP, hit);
-            double dleft = PyFloat_AS_DOUBLE(left_o);
-            double dright = PyFloat_AS_DOUBLE(right_o);
-            int sign_ish = COMPARISON_BIT(dleft, dright);
-            PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
-            PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
-            res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _COMPARE_OP_FLOAT_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -3759,26 +3633,10 @@
         }
 
         case _COMPARE_OP_STR: {
-            _PyStackRef right;
-            _PyStackRef left;
-            _PyStackRef res;
-            oparg = CURRENT_OPARG();
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
-            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
-            STAT_INC(COMPARE_OP, hit);
-            int eq = _PyUnicode_Equal(left_o, right_o);
-            assert((oparg >> 5) == Py_EQ || (oparg >> 5) == Py_NE);
-            PyStackRef_CLOSE_SPECIALIZED(left, _PyUnicode_ExactDealloc);
-            PyStackRef_CLOSE_SPECIALIZED(right, _PyUnicode_ExactDealloc);
-            assert(eq == 0 || eq == 1);
-            assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
-            assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
-            res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _COMPARE_OP_STR_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -4066,10 +3924,6 @@
             break;
         }
 
-        /* _POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 because it is replaced */
-
-        /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is replaced */
-
         case _IS_NONE: {
             _PyStackRef value;
             _PyStackRef b;
@@ -4266,8 +4120,6 @@
             break;
         }
 
-        /* _FOR_ITER is not a viable micro-op for tier 2 because it is replaced */
-
         case _FOR_ITER_TIER_TWO: {
             _PyStackRef iter;
             _PyStackRef next;
@@ -4301,8 +4153,6 @@
             break;
         }
 
-        /* _INSTRUMENTED_FOR_ITER is not a viable micro-op for tier 2 because it is instrumented */
-
         case _ITER_CHECK_LIST: {
             _PyStackRef iter;
             iter = stack_pointer[-1];
@@ -4326,8 +4176,6 @@
             break;
         }
 
-        /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 because it is replaced */
-
         case _GUARD_NOT_EXHAUSTED_LIST: {
             _PyStackRef iter;
             iter = stack_pointer[-1];
@@ -4350,8 +4198,6 @@
             #endif
             break;
         }
-
-        /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 because it is replaced */
 
         case _ITER_NEXT_LIST_TIER_TWO: {
             _PyStackRef iter;
@@ -4409,8 +4255,6 @@
             break;
         }
 
-        /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 because it is replaced */
-
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
             _PyStackRef iter;
             iter = stack_pointer[-1];
@@ -4433,22 +4277,10 @@
         }
 
         case _ITER_NEXT_TUPLE: {
-            _PyStackRef iter;
-            _PyStackRef next;
-            iter = stack_pointer[-1];
-            PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
-            _PyTupleIterObject *it = (_PyTupleIterObject *)iter_o;
-            assert(Py_TYPE(iter_o) == &PyTupleIter_Type);
-            PyTupleObject *seq = it->it_seq;
-            #ifdef Py_GIL_DISABLED
-            assert(_PyObject_IsUniquelyReferenced(iter_o));
-            #endif
-            assert(seq);
-            assert(it->it_index < PyTuple_GET_SIZE(seq));
-            next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _ITER_NEXT_TUPLE_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -4468,8 +4300,6 @@
             #endif
             break;
         }
-
-        /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 because it is replaced */
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
             _PyStackRef iter;
@@ -4620,24 +4450,10 @@
         }
 
         case _PUSH_EXC_INFO: {
-            _PyStackRef exc;
-            _PyStackRef prev_exc;
-            _PyStackRef new_exc;
-            exc = stack_pointer[-1];
-            _PyErr_StackItem *exc_info = tstate->exc_info;
-            if (exc_info->exc_value != NULL) {
-                prev_exc = PyStackRef_FromPyObjectSteal(exc_info->exc_value);
-            }
-            else {
-                prev_exc = PyStackRef_None;
-            }
-            assert(PyStackRef_ExceptionInstanceCheck(exc));
-            exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
-            new_exc = exc;
-            stack_pointer[-1] = prev_exc;
-            stack_pointer[0] = new_exc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _PUSH_EXC_INFO_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -4669,43 +4485,18 @@
         }
 
         case _LOAD_ATTR_METHOD_WITH_VALUES: {
-            _PyStackRef owner;
-            _PyStackRef attr;
-            _PyStackRef self;
-            oparg = CURRENT_OPARG();
-            owner = stack_pointer[-1];
-            PyObject *descr = (PyObject *)CURRENT_OPERAND0();
-            assert(oparg & 1);
-            STAT_INC(LOAD_ATTR, hit);
-            assert(descr != NULL);
-            assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
-            attr = PyStackRef_FromPyObjectNew(descr);
-            self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _LOAD_ATTR_METHOD_WITH_VALUES_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _LOAD_ATTR_METHOD_NO_DICT: {
-            _PyStackRef owner;
-            _PyStackRef attr;
-            _PyStackRef self;
-            oparg = CURRENT_OPARG();
-            owner = stack_pointer[-1];
-            PyObject *descr = (PyObject *)CURRENT_OPERAND0();
-            assert(oparg & 1);
-            assert(Py_TYPE(PyStackRef_AsPyObjectBorrow(owner))->tp_dictoffset == 0);
-            STAT_INC(LOAD_ATTR, hit);
-            assert(descr != NULL);
-            assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
-            attr = PyStackRef_FromPyObjectNew(descr);
-            self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _LOAD_ATTR_METHOD_NO_DICT_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -4731,24 +4522,10 @@
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
-            _PyStackRef owner;
-            _PyStackRef attr;
-            oparg = CURRENT_OPARG();
-            owner = stack_pointer[-1];
-            PyObject *descr = (PyObject *)CURRENT_OPERAND0();
-            assert((oparg & 1) == 0);
-            assert(Py_TYPE(PyStackRef_AsPyObjectBorrow(owner))->tp_dictoffset == 0);
-            STAT_INC(LOAD_ATTR, hit);
-            assert(descr != NULL);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(owner);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
-            attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _LOAD_ATTR_NONDESCRIPTOR_NO_DICT_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -4766,22 +4543,10 @@
         }
 
         case _LOAD_ATTR_METHOD_LAZY_DICT: {
-            _PyStackRef owner;
-            _PyStackRef attr;
-            _PyStackRef self;
-            oparg = CURRENT_OPARG();
-            owner = stack_pointer[-1];
-            PyObject *descr = (PyObject *)CURRENT_OPERAND0();
-            assert(oparg & 1);
-            STAT_INC(LOAD_ATTR, hit);
-            assert(descr != NULL);
-            assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
-            attr = PyStackRef_FromPyObjectNew(descr);
-            self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _LOAD_ATTR_METHOD_LAZY_DICT_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -4808,10 +4573,6 @@
             stack_pointer[-1 - oparg] = self_or_null;
             break;
         }
-
-        /* _DO_CALL is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
-        /* _MONITOR_CALL is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _PY_FRAME_GENERAL: {
             _PyStackRef *args;
@@ -4908,23 +4669,10 @@
         }
 
         case _EXPAND_METHOD: {
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            oparg = CURRENT_OPARG();
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
-            assert(PyStackRef_IsNull(self_or_null));
-            assert(Py_TYPE(callable_o) == &PyMethod_Type);
-            self_or_null = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_self);
-            _PyStackRef temp = callable;
-            callable = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_func);
-            assert(PyStackRef_FunctionCheck(callable));
-            stack_pointer[-2 - oparg] = callable;
-            stack_pointer[-1 - oparg] = self_or_null;
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(temp);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
+            _JITOutlinedReturnVal retval = _EXPAND_METHOD_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -5039,22 +4787,10 @@
         }
 
         case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            oparg = CURRENT_OPARG();
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            assert(PyStackRef_IsNull(self_or_null));
-            PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
-            STAT_INC(CALL, hit);
-            self_or_null = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_self);
-            _PyStackRef temp = callable;
-            callable = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_func);
-            stack_pointer[-2 - oparg] = callable;
-            stack_pointer[-1 - oparg] = self_or_null;
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(temp);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
+            _JITOutlinedReturnVal retval = _INIT_CALL_BOUND_METHOD_EXACT_ARGS_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -5106,163 +4842,58 @@
         }
 
         case _INIT_CALL_PY_EXACT_ARGS_0: {
-            _PyStackRef *args;
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            _PyInterpreterFrame *new_frame;
-            oparg = 0;
-            assert(oparg == CURRENT_OPARG());
-            args = &stack_pointer[-oparg];
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            int has_self = !PyStackRef_IsNull(self_or_null);
-            STAT_INC(CALL, hit);
-            new_frame = _PyFrame_PushUnchecked(tstate, callable, oparg + has_self, frame);
-            _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null;
-            for (int i = 0; i < oparg; i++) {
-                first_non_self_local[i] = args[i];
-            }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
-            stack_pointer += -1 - oparg;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _INIT_CALL_PY_EXACT_ARGS_0_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _INIT_CALL_PY_EXACT_ARGS_1: {
-            _PyStackRef *args;
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            _PyInterpreterFrame *new_frame;
-            oparg = 1;
-            assert(oparg == CURRENT_OPARG());
-            args = &stack_pointer[-oparg];
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            int has_self = !PyStackRef_IsNull(self_or_null);
-            STAT_INC(CALL, hit);
-            new_frame = _PyFrame_PushUnchecked(tstate, callable, oparg + has_self, frame);
-            _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null;
-            for (int i = 0; i < oparg; i++) {
-                first_non_self_local[i] = args[i];
-            }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
-            stack_pointer += -1 - oparg;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _INIT_CALL_PY_EXACT_ARGS_1_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _INIT_CALL_PY_EXACT_ARGS_2: {
-            _PyStackRef *args;
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            _PyInterpreterFrame *new_frame;
-            oparg = 2;
-            assert(oparg == CURRENT_OPARG());
-            args = &stack_pointer[-oparg];
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            int has_self = !PyStackRef_IsNull(self_or_null);
-            STAT_INC(CALL, hit);
-            new_frame = _PyFrame_PushUnchecked(tstate, callable, oparg + has_self, frame);
-            _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null;
-            for (int i = 0; i < oparg; i++) {
-                first_non_self_local[i] = args[i];
-            }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
-            stack_pointer += -1 - oparg;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _INIT_CALL_PY_EXACT_ARGS_2_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _INIT_CALL_PY_EXACT_ARGS_3: {
-            _PyStackRef *args;
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            _PyInterpreterFrame *new_frame;
-            oparg = 3;
-            assert(oparg == CURRENT_OPARG());
-            args = &stack_pointer[-oparg];
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            int has_self = !PyStackRef_IsNull(self_or_null);
-            STAT_INC(CALL, hit);
-            new_frame = _PyFrame_PushUnchecked(tstate, callable, oparg + has_self, frame);
-            _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null;
-            for (int i = 0; i < oparg; i++) {
-                first_non_self_local[i] = args[i];
-            }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
-            stack_pointer += -1 - oparg;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _INIT_CALL_PY_EXACT_ARGS_3_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _INIT_CALL_PY_EXACT_ARGS_4: {
-            _PyStackRef *args;
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            _PyInterpreterFrame *new_frame;
-            oparg = 4;
-            assert(oparg == CURRENT_OPARG());
-            args = &stack_pointer[-oparg];
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            int has_self = !PyStackRef_IsNull(self_or_null);
-            STAT_INC(CALL, hit);
-            new_frame = _PyFrame_PushUnchecked(tstate, callable, oparg + has_self, frame);
-            _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null;
-            for (int i = 0; i < oparg; i++) {
-                first_non_self_local[i] = args[i];
-            }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
-            stack_pointer += -1 - oparg;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _INIT_CALL_PY_EXACT_ARGS_4_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _INIT_CALL_PY_EXACT_ARGS: {
-            _PyStackRef *args;
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            _PyInterpreterFrame *new_frame;
-            oparg = CURRENT_OPARG();
-            args = &stack_pointer[-oparg];
-            self_or_null = stack_pointer[-1 - oparg];
-            callable = stack_pointer[-2 - oparg];
-            int has_self = !PyStackRef_IsNull(self_or_null);
-            STAT_INC(CALL, hit);
-            new_frame = _PyFrame_PushUnchecked(tstate, callable, oparg + has_self, frame);
-            _PyStackRef *first_non_self_local = new_frame->localsplus + has_self;
-            new_frame->localsplus[0] = self_or_null;
-            for (int i = 0; i < oparg; i++) {
-                first_non_self_local[i] = args[i];
-            }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
-            stack_pointer += -1 - oparg;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _INIT_CALL_PY_EXACT_ARGS_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
         case _PUSH_FRAME: {
-            _PyInterpreterFrame *new_frame;
-            new_frame = (_PyInterpreterFrame *)stack_pointer[-1].bits;
-            assert(tstate->interp->eval_frame == NULL);
-            _PyInterpreterFrame *temp = new_frame;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            assert(new_frame->previous == frame || new_frame->previous->previous == frame);
-            CALL_STAT_INC(inlined_py_calls);
-            frame = tstate->current_frame = temp;
-            tstate->py_recursion_remaining--;
-            LOAD_SP();
-            LOAD_IP(0);
-            LLTRACE_RESUME_FRAME();
+            _JITOutlinedReturnVal retval = _PUSH_FRAME_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -5288,26 +4919,10 @@
         }
 
         case _CALL_TYPE_1: {
-            _PyStackRef arg;
-            _PyStackRef null;
-            _PyStackRef callable;
-            _PyStackRef res;
-            oparg = CURRENT_OPARG();
-            arg = stack_pointer[-1];
-            null = stack_pointer[-2];
-            callable = stack_pointer[-3];
-            PyObject *arg_o = PyStackRef_AsPyObjectBorrow(arg);
-            assert(oparg == 1);
-            (void)callable;
-            (void)null;
-            STAT_INC(CALL, hit);
-            res = PyStackRef_FromPyObjectNew(Py_TYPE(arg_o));
-            stack_pointer[-3] = res;
-            stack_pointer += -2;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(arg);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
+            _JITOutlinedReturnVal retval = _CALL_TYPE_1_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -6296,8 +5911,6 @@
             break;
         }
 
-        /* _MONITOR_CALL_KW is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
         case _MAYBE_EXPAND_METHOD_KW: {
             _PyStackRef self_or_null;
             _PyStackRef callable;
@@ -6321,8 +5934,6 @@
             stack_pointer[-2 - oparg] = self_or_null;
             break;
         }
-
-        /* _DO_CALL_KW is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _PY_FRAME_KW: {
             _PyStackRef kwnames;
@@ -6417,23 +6028,10 @@
         }
 
         case _EXPAND_METHOD_KW: {
-            _PyStackRef self_or_null;
-            _PyStackRef callable;
-            oparg = CURRENT_OPARG();
-            self_or_null = stack_pointer[-2 - oparg];
-            callable = stack_pointer[-3 - oparg];
-            assert(PyStackRef_IsNull(self_or_null));
-            _PyStackRef callable_s = callable;
-            PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
-            assert(Py_TYPE(callable_o) == &PyMethod_Type);
-            self_or_null = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_self);
-            callable = PyStackRef_FromPyObjectNew(((PyMethodObject *)callable_o)->im_func);
-            assert(PyStackRef_FunctionCheck(callable));
-            stack_pointer[-3 - oparg] = callable;
-            stack_pointer[-2 - oparg] = self_or_null;
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(callable_s);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
+            _JITOutlinedReturnVal retval = _EXPAND_METHOD_KW_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -6572,8 +6170,6 @@
             break;
         }
 
-        /* _DO_CALL_FUNCTION_EX is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
         case _MAKE_FUNCTION: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
@@ -6601,24 +6197,10 @@
         }
 
         case _SET_FUNCTION_ATTRIBUTE: {
-            _PyStackRef func_in;
-            _PyStackRef attr_st;
-            _PyStackRef func_out;
-            oparg = CURRENT_OPARG();
-            func_in = stack_pointer[-1];
-            attr_st = stack_pointer[-2];
-            PyObject *func = PyStackRef_AsPyObjectBorrow(func_in);
-            PyObject *attr = PyStackRef_AsPyObjectSteal(attr_st);
-            func_out = func_in;
-            assert(PyFunction_Check(func));
-            size_t offset = _Py_FunctionAttributeOffsets[oparg];
-            assert(offset != 0);
-            PyObject **ptr = (PyObject **)(((char *)func) + offset);
-            assert(*ptr == NULL);
-            *ptr = attr;
-            stack_pointer[-2] = func_out;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
+            _JITOutlinedReturnVal retval = _SET_FUNCTION_ATTRIBUTE_outlined(JIT_ARGS, _oparg, _operand0, _operand1, current_executor);
+            stack_pointer = retval.stack_pointer;
+            tstate = retval.tstate;
+            frame = retval.frame;
             break;
         }
 
@@ -6826,24 +6408,6 @@
             stack_pointer[-1] = top;
             break;
         }
-
-        /* _INSTRUMENTED_LINE is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _INSTRUMENTED_INSTRUCTION is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _INSTRUMENTED_JUMP_FORWARD is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _MONITOR_JUMP_BACKWARD is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
-
-        /* _INSTRUMENTED_NOT_TAKEN is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_NONE is not a viable micro-op for tier 2 because it is instrumented */
-
-        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE is not a viable micro-op for tier 2 because it is instrumented */
 
         case _GUARD_IS_TRUE_POP: {
             _PyStackRef flag;

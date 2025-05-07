@@ -15,7 +15,16 @@ extern "C" {
 
 #ifdef _Py_JIT
 
-typedef _Py_CODEUNIT *(*jit_func)(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate);
+#define JIT_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate
+#define JIT_ARGS frame, stack_pointer, tstate
+
+typedef struct _JITOutlinedReturnVal {
+    _PyInterpreterFrame *frame;
+    _PyStackRef *stack_pointer;
+    PyThreadState *tstate;
+} _JITOutlinedReturnVal;
+
+typedef _Py_CODEUNIT *(*jit_func)(JIT_PARAMS);
 
 int _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction *trace, size_t length);
 void _PyJIT_Free(_PyExecutorObject *executor);

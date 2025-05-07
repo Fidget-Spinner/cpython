@@ -33,6 +33,7 @@ class Properties:
     side_exit: bool
     pure: bool
     uses_opcode: bool
+    has_non_error_jump: bool
     tier: int | None = None
     const_oparg: int = -1
     needs_prev: bool = False
@@ -68,6 +69,7 @@ class Properties:
             uses_co_names=any(p.uses_co_names for p in properties),
             uses_locals=any(p.uses_locals for p in properties),
             uses_opcode=any(p.uses_opcode for p in properties),
+            has_non_error_jump=any(p.has_non_error_jump for p in properties),
             has_free=any(p.has_free for p in properties),
             side_exit=any(p.side_exit for p in properties),
             pure=all(p.pure for p in properties),
@@ -96,6 +98,7 @@ SKIP_PROPERTIES = Properties(
     uses_locals=False,
     uses_opcode=False,
     has_free=False,
+    has_non_error_jump=False,
     side_exit=False,
     pure=True,
     no_save_ip=False,
@@ -553,6 +556,15 @@ def has_error_without_pop(op: parser.CodeDef) -> bool:
         or variable_used(op, "exception_unwind")
     )
 
+def has_non_error_jump(op: parser.CodeDef) -> bool:
+    return (
+        variable_used(op, "DEOPT_IF")
+            or variable_used(op, "EXIT_IF")
+            or variable_used(op, "JUMP_TO_JUMP_TARGET")
+            or variable_used(op, "GOTO_TIER_ONE")
+            or variable_used(op, "GOTO_TIER_TWO")
+    )
+
 
 NON_ESCAPING_FUNCTIONS = (
     "PyCFunction_GET_FLAGS",
@@ -852,6 +864,7 @@ def compute_properties(op: parser.CodeDef) -> Properties:
         uses_co_names=variable_used(op, "FRAME_CO_NAMES"),
         uses_locals=variable_used(op, "GETLOCAL") and not has_free,
         uses_opcode=variable_used(op, "opcode"),
+        has_non_error_jump=has_non_error_jump(op),
         has_free=has_free,
         pure=pure,
         no_save_ip=no_save_ip,
