@@ -2570,6 +2570,48 @@ sys__dump_tracelets_impl(PyObject *module, PyObject *outpath)
     Py_RETURN_NONE;
 }
 
+static int
+report_shared(_Py_hashtable_t *ht, const void *key, const void *value, void *shared)
+{
+    assert(PyList_CheckExact(shared));
+    if (value == NULL) {
+        return 0;
+    }
+    PyObject *ll = PyLong_FromVoidPtr((void *)value);
+    if (ll == NULL) {
+        return -1;
+    }
+    PyObject *pair = PyTuple_Pack(2, key, ll);
+    if (pair == NULL) {
+        return -1;
+    }
+    return PyList_Append((PyObject *)shared, pair);
+}
+
+/*[clinic input]
+sys._get_thread_shared
+
+Get all the current thread's objects that are shared across threads.
+[clinic start generated code]*/
+
+static PyObject *
+sys__get_thread_shared_impl(PyObject *module)
+/*[clinic end generated code: output=865b7898c246061d input=43e40186eda2a61d]*/
+{
+    _PyEval_StopTheWorldAll(&_PyRuntime);
+    PyThreadState *tstate = PyThreadState_GET();
+    PyObject *shared = PyList_New(0);
+    if (shared == NULL) {
+        _PyEval_StartTheWorldAll(&_PyRuntime);
+        return NULL;
+    }
+    if (_Py_hashtable_foreach(tstate->thread_shared_objects, report_shared, shared) < 0) {
+        _PyEval_StartTheWorldAll(&_PyRuntime);
+        return NULL;
+    }
+    _PyEval_StartTheWorldAll(&_PyRuntime);
+    return shared;
+}
 
 /*[clinic input]
 sys._getframemodulename
@@ -2835,6 +2877,7 @@ static PyMethodDef sys_methods[] = {
     SYS__GET_CPU_COUNT_CONFIG_METHODDEF
     SYS__IS_GIL_ENABLED_METHODDEF
     SYS__DUMP_TRACELETS_METHODDEF
+    SYS__GET_THREAD_SHARED_METHODDEF
     {NULL, NULL}  // sentinel
 };
 

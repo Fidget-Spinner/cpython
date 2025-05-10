@@ -2,6 +2,7 @@
 #  error "this header file must not be included directly"
 #endif
 
+#include "pycore_hashtable.h"
 
 /* private interpreter helpers */
 
@@ -206,6 +207,8 @@ struct _ts {
     */
     PyObject *threading_local_sentinel;
     _PyRemoteDebuggerSupport remote_debugger_support;
+
+    _Py_hashtable_t *thread_shared_objects; // hashtable of shared objects across threads.
 };
 
 /* other API */

@@ -1675,6 +1675,24 @@ exit:
     return return_value;
 }
 
+PyDoc_STRVAR(sys__get_thread_shared__doc__,
+"_get_thread_shared($module, /)\n"
+"--\n"
+"\n"
+"Get all the current thread\'s objects that are shared across threads.");
+
+#define SYS__GET_THREAD_SHARED_METHODDEF    \
+    {"_get_thread_shared", (PyCFunction)sys__get_thread_shared, METH_NOARGS, sys__get_thread_shared__doc__},
+
+static PyObject *
+sys__get_thread_shared_impl(PyObject *module);
+
+static PyObject *
+sys__get_thread_shared(PyObject *module, PyObject *Py_UNUSED(ignored))
+{
+    return sys__get_thread_shared_impl(module);
+}
+
 PyDoc_STRVAR(sys__getframemodulename__doc__,
 "_getframemodulename($module, /, depth=0)\n"
 "--\n"
@@ -1948,4 +1966,4 @@ exit:
 #ifndef SYS_GETANDROIDAPILEVEL_METHODDEF
     #define SYS_GETANDROIDAPILEVEL_METHODDEF
 #endif /* !defined(SYS_GETANDROIDAPILEVEL_METHODDEF) */
-/*[clinic end generated code: output=449d16326e69dcf6 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=b8314912dcd47435 input=a9049054013a1b77]*/

@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 
+#include "pycore_hashtable.h"
 
 /*
 Immortalization:
@@ -288,6 +289,9 @@ static inline Py_ALWAYS_INLINE void Py_INCREF(PyObject *op)
         _Py_atomic_store_uint32_relaxed(&op->ob_ref_local, new_local);
     }
     else {
+        PyThreadState *tstate = PyThreadState_GET();
+        uintptr_t count = (uintptr_t)_Py_hashtable_get(tstate->thread_shared_objects, op);
+        _Py_hashtable_set(tstate->thread_shared_objects, (void *)op, (void *)((uintptr_t)count + 1));
         _Py_atomic_add_ssize(&op->ob_ref_shared, (1 << _Py_REF_SHARED_SHIFT));
     }
 #elif SIZEOF_VOID_P > 4

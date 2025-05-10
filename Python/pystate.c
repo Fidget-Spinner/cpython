@@ -1578,6 +1578,20 @@ init_threadstate(_PyThreadStateImpl *_tstate,
     tstate->what_event = -1;
     tstate->current_executor = NULL;
     tstate->dict_global_version = 0;
+    _Py_hashtable_allocator_t alloc = {
+        .malloc = malloc,
+        .free = free,
+    };
+    tstate->thread_shared_objects = _Py_hashtable_new_full(
+        _Py_hashtable_hash_ptr,
+        _Py_hashtable_compare_direct,
+        NULL,
+        NULL,
+        &alloc
+    );
+    if (tstate->thread_shared_objects == NULL) {
+        Py_FatalError("Could not allocate new hashtable for thread shared objects");
+    }
 
     _tstate->c_stack_soft_limit = UINTPTR_MAX;
     _tstate->c_stack_top = 0;

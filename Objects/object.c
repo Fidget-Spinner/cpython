@@ -419,6 +419,20 @@ _Py_DecRefSharedIsDead(PyObject *o, const char *filename, int lineno)
 void
 _Py_DecRefSharedDebug(PyObject *o, const char *filename, int lineno)
 {
+    PyThreadState *tstate = PyThreadState_GET();
+    int64_t count = (int64_t)_Py_hashtable_get(tstate->thread_shared_objects, o);
+    if (count < 0) {
+//        PyObject_Print(o, stderr, Py_PRINT_RAW);
+        fprintf(stderr, "Reference counting error: object %p of type %s has negative shared refcount %ld\n", o, Py_TYPE(o)->tp_name, count);
+        Py_FatalError("Bad path");
+    }
+    else if (count == 0) {
+        // We need to destroy the old reference, due to the ABA problem.
+        _Py_hashtable_steal(tstate->thread_shared_objects, (void *)o);
+    }
+    else {
+        _Py_hashtable_set(tstate->thread_shared_objects, (void *)o, (void *)((uintptr_t)count - 1));
+    }
     if (_Py_DecRefSharedIsDead(o, filename, lineno)) {
         _Py_Dealloc(o);
     }
