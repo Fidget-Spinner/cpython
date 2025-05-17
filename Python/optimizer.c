@@ -1267,6 +1267,10 @@ uop_regalloc(_PyUOpInstruction *buffer, int length)
         switch (reged) {
 #include "regalloc_cases.c.h"
         default:
+            // Spill previous inst
+            if (curr_regs_in > 0) {
+                buffer[pc-1].opcode = buffer[pc-1].opcode - 1;
+            }
             break;
         }
         buffer[pc].opcode = reged;

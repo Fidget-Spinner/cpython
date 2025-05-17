@@ -10,6 +10,10 @@
 
         case _NOP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _NOP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _NOP___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -34,13 +38,18 @@
                 reged = _NOP___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_PERIODIC: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_PERIODIC;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_PERIODIC___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -65,13 +74,18 @@
                 reged = _CHECK_PERIODIC___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_PERIODIC_IF_NOT_YIELD_FROM: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_PERIODIC_IF_NOT_YIELD_FROM___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -96,7 +110,8 @@
                 reged = _CHECK_PERIODIC_IF_NOT_YIELD_FROM___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -107,6 +122,10 @@
 
         case _RESUME_CHECK: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _RESUME_CHECK;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _RESUME_CHECK___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -131,7 +150,8 @@
                 reged = _RESUME_CHECK___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -164,7 +184,12 @@
                 reged = _LOAD_FAST_CHECK___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_FAST_CHECK___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -195,7 +220,12 @@
                 reged = _LOAD_FAST___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_FAST___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -226,7 +256,12 @@
                 reged = _LOAD_FAST_BORROW___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_FAST_BORROW___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -257,7 +292,12 @@
                 reged = _LOAD_FAST_AND_CLEAR___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_FAST_AND_CLEAR___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -290,7 +330,12 @@
                 reged = _LOAD_CONST_MORTAL___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_CONST_MORTAL___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -321,7 +366,12 @@
                 reged = _LOAD_CONST_IMMORTAL___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_CONST_IMMORTAL___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -352,13 +402,22 @@
                 reged = _LOAD_SMALL_INT___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_SMALL_INT___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_FAST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_FAST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _STORE_FAST___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -383,13 +442,18 @@
                 reged = _STORE_FAST___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _POP_TOP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _POP_TOP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _POP_TOP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -414,7 +478,8 @@
                 reged = _POP_TOP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -445,13 +510,22 @@
                 reged = _PUSH_NULL___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _PUSH_NULL___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _END_FOR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _END_FOR;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _END_FOR___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -476,13 +550,18 @@
                 reged = _END_FOR___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _END_SEND: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _END_SEND;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _END_SEND___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -507,13 +586,18 @@
                 reged = _END_SEND___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _UNARY_NEGATIVE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _UNARY_NEGATIVE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _UNARY_NEGATIVE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -538,13 +622,18 @@
                 reged = _UNARY_NEGATIVE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _UNARY_NOT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _UNARY_NOT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _UNARY_NOT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -569,13 +658,18 @@
                 reged = _UNARY_NOT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TO_BOOL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TO_BOOL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TO_BOOL___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -600,13 +694,18 @@
                 reged = _TO_BOOL___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TO_BOOL_BOOL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TO_BOOL_BOOL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TO_BOOL_BOOL___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -631,13 +730,18 @@
                 reged = _TO_BOOL_BOOL___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TO_BOOL_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TO_BOOL_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TO_BOOL_INT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -662,13 +766,18 @@
                 reged = _TO_BOOL_INT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_LIST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_LIST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_LIST___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -693,13 +802,18 @@
                 reged = _GUARD_NOS_LIST___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_LIST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_LIST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_LIST___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -724,13 +838,18 @@
                 reged = _GUARD_TOS_LIST___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_SLICE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_SLICE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_SLICE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -755,13 +874,18 @@
                 reged = _GUARD_TOS_SLICE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TO_BOOL_LIST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TO_BOOL_LIST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TO_BOOL_LIST___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -786,13 +910,18 @@
                 reged = _TO_BOOL_LIST___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TO_BOOL_NONE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TO_BOOL_NONE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TO_BOOL_NONE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -817,13 +946,18 @@
                 reged = _TO_BOOL_NONE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_UNICODE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_UNICODE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_UNICODE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -848,13 +982,18 @@
                 reged = _GUARD_NOS_UNICODE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_UNICODE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_UNICODE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_UNICODE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -879,13 +1018,18 @@
                 reged = _GUARD_TOS_UNICODE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TO_BOOL_STR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TO_BOOL_STR;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TO_BOOL_STR___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -910,13 +1054,18 @@
                 reged = _TO_BOOL_STR___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _REPLACE_WITH_TRUE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _REPLACE_WITH_TRUE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _REPLACE_WITH_TRUE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -941,13 +1090,18 @@
                 reged = _REPLACE_WITH_TRUE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _UNARY_INVERT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _UNARY_INVERT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _UNARY_INVERT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -972,13 +1126,18 @@
                 reged = _UNARY_INVERT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_INT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1003,13 +1162,18 @@
                 reged = _GUARD_NOS_INT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_INT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1034,13 +1198,18 @@
                 reged = _GUARD_TOS_INT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_MULTIPLY_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_MULTIPLY_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_MULTIPLY_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1065,13 +1234,18 @@
                 reged = _BINARY_OP_MULTIPLY_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_ADD_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_ADD_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_ADD_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1096,13 +1270,18 @@
                 reged = _BINARY_OP_ADD_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBTRACT_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBTRACT_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBTRACT_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1127,13 +1306,18 @@
                 reged = _BINARY_OP_SUBTRACT_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_FLOAT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_FLOAT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_FLOAT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1158,13 +1342,18 @@
                 reged = _GUARD_NOS_FLOAT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_FLOAT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_FLOAT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_FLOAT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1189,13 +1378,18 @@
                 reged = _GUARD_TOS_FLOAT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_MULTIPLY_FLOAT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_MULTIPLY_FLOAT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1220,13 +1414,18 @@
                 reged = _BINARY_OP_MULTIPLY_FLOAT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_ADD_FLOAT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_ADD_FLOAT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_ADD_FLOAT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1251,13 +1450,18 @@
                 reged = _BINARY_OP_ADD_FLOAT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBTRACT_FLOAT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBTRACT_FLOAT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1282,13 +1486,18 @@
                 reged = _BINARY_OP_SUBTRACT_FLOAT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_ADD_UNICODE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_ADD_UNICODE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_ADD_UNICODE___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1313,13 +1522,19 @@
                 reged = _BINARY_OP_ADD_UNICODE___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_INPLACE_ADD_UNICODE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_INPLACE_ADD_UNICODE;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _BINARY_OP_INPLACE_ADD_UNICODE___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -1340,13 +1555,18 @@
                 reged = _BINARY_OP_INPLACE_ADD_UNICODE___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_BINARY_OP_EXTEND: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_BINARY_OP_EXTEND;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_BINARY_OP_EXTEND___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1371,13 +1591,18 @@
                 reged = _GUARD_BINARY_OP_EXTEND___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_EXTEND: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_EXTEND;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_EXTEND___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1402,13 +1627,19 @@
                 reged = _BINARY_OP_EXTEND___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_SLICE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_SLICE;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _BINARY_SLICE___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -1429,13 +1660,21 @@
                 reged = _BINARY_SLICE___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_SLICE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_SLICE;
+                curr_regs_in = 0;
+                break;
+                case 1:
+                case 2:
+                case 3:
                 case 4:
                 reged = _STORE_SLICE___CACHED_4in_0out;
                 curr_regs_in = 0;
@@ -1448,13 +1687,18 @@
                 reged = _STORE_SLICE___CACHED_6in_2out;
                 curr_regs_in = 2;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBSCR_LIST_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBSCR_LIST_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBSCR_LIST_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1479,13 +1723,18 @@
                 reged = _BINARY_OP_SUBSCR_LIST_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBSCR_LIST_SLICE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBSCR_LIST_SLICE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBSCR_LIST_SLICE___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1510,13 +1759,18 @@
                 reged = _BINARY_OP_SUBSCR_LIST_SLICE___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBSCR_STR_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBSCR_STR_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBSCR_STR_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1541,13 +1795,18 @@
                 reged = _BINARY_OP_SUBSCR_STR_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_TUPLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_TUPLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_TUPLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1572,13 +1831,18 @@
                 reged = _GUARD_NOS_TUPLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_TUPLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_TUPLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_TUPLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1603,13 +1867,18 @@
                 reged = _GUARD_TOS_TUPLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBSCR_TUPLE_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBSCR_TUPLE_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBSCR_TUPLE_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1634,13 +1903,18 @@
                 reged = _BINARY_OP_SUBSCR_TUPLE_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_DICT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1665,13 +1939,18 @@
                 reged = _GUARD_NOS_DICT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_DICT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1696,13 +1975,18 @@
                 reged = _GUARD_TOS_DICT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP_SUBSCR_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP_SUBSCR_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP_SUBSCR_DICT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1727,7 +2011,8 @@
                 reged = _BINARY_OP_SUBSCR_DICT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -1758,13 +2043,24 @@
                 reged = _BINARY_OP_SUBSCR_CHECK_FUNC___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _BINARY_OP_SUBSCR_CHECK_FUNC___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_SUBSCR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_SUBSCR;
+                curr_regs_in = 0;
+                break;
+                case 1:
+                case 2:
                 case 3:
                 reged = _STORE_SUBSCR___CACHED_3in_0out;
                 curr_regs_in = 0;
@@ -1781,13 +2077,20 @@
                 reged = _STORE_SUBSCR___CACHED_6in_3out;
                 curr_regs_in = 3;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_SUBSCR_LIST_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_SUBSCR_LIST_INT;
+                curr_regs_in = 0;
+                break;
+                case 1:
+                case 2:
                 case 3:
                 reged = _STORE_SUBSCR_LIST_INT___CACHED_3in_0out;
                 curr_regs_in = 0;
@@ -1804,13 +2107,20 @@
                 reged = _STORE_SUBSCR_LIST_INT___CACHED_6in_3out;
                 curr_regs_in = 3;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_SUBSCR_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_SUBSCR_DICT;
+                curr_regs_in = 0;
+                break;
+                case 1:
+                case 2:
                 case 3:
                 reged = _STORE_SUBSCR_DICT___CACHED_3in_0out;
                 curr_regs_in = 0;
@@ -1827,13 +2137,19 @@
                 reged = _STORE_SUBSCR_DICT___CACHED_6in_3out;
                 curr_regs_in = 3;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DELETE_SUBSCR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DELETE_SUBSCR;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _DELETE_SUBSCR___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -1854,13 +2170,18 @@
                 reged = _DELETE_SUBSCR___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_INTRINSIC_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_INTRINSIC_1;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CALL_INTRINSIC_1___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1885,13 +2206,18 @@
                 reged = _CALL_INTRINSIC_1___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_INTRINSIC_2: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_INTRINSIC_2;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CALL_INTRINSIC_2___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -1916,13 +2242,18 @@
                 reged = _CALL_INTRINSIC_2___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _RETURN_VALUE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _RETURN_VALUE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _RETURN_VALUE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1947,13 +2278,18 @@
                 reged = _RETURN_VALUE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GET_AITER: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GET_AITER;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GET_AITER___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -1978,7 +2314,8 @@
                 reged = _GET_AITER___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2009,13 +2346,22 @@
                 reged = _GET_ANEXT___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _GET_ANEXT___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GET_AWAITABLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GET_AWAITABLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GET_AWAITABLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2040,7 +2386,8 @@
                 reged = _GET_AWAITABLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2049,6 +2396,10 @@
 
         case _YIELD_VALUE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _YIELD_VALUE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _YIELD_VALUE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2073,13 +2424,18 @@
                 reged = _YIELD_VALUE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _POP_EXCEPT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _POP_EXCEPT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _POP_EXCEPT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2104,7 +2460,8 @@
                 reged = _POP_EXCEPT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2135,7 +2492,12 @@
                 reged = _LOAD_COMMON_CONSTANT___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_COMMON_CONSTANT___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2166,13 +2528,22 @@
                 reged = _LOAD_BUILD_CLASS___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_BUILD_CLASS___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_NAME: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_NAME;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _STORE_NAME___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2197,13 +2568,18 @@
                 reged = _STORE_NAME___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DELETE_NAME: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DELETE_NAME;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _DELETE_NAME___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2228,7 +2604,8 @@
                 reged = _DELETE_NAME___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2259,13 +2636,23 @@
                 reged = _UNPACK_SEQUENCE_TWO_TUPLE___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _UNPACK_SEQUENCE_TWO_TUPLE___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_ATTR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_ATTR;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _STORE_ATTR___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -2286,13 +2673,18 @@
                 reged = _STORE_ATTR___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DELETE_ATTR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DELETE_ATTR;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _DELETE_ATTR___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2317,13 +2709,18 @@
                 reged = _DELETE_ATTR___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_GLOBAL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_GLOBAL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _STORE_GLOBAL___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2348,13 +2745,18 @@
                 reged = _STORE_GLOBAL___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DELETE_GLOBAL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DELETE_GLOBAL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _DELETE_GLOBAL___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2379,7 +2781,8 @@
                 reged = _DELETE_GLOBAL___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2410,7 +2813,12 @@
                 reged = _LOAD_LOCALS___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_LOCALS___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2443,13 +2851,22 @@
                 reged = _LOAD_NAME___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_NAME___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_GLOBALS_VERSION: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_GLOBALS_VERSION;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_GLOBALS_VERSION___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2474,7 +2891,8 @@
                 reged = _GUARD_GLOBALS_VERSION___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2505,7 +2923,12 @@
                 reged = _LOAD_GLOBAL_MODULE___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_GLOBAL_MODULE___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2536,13 +2959,22 @@
                 reged = _LOAD_GLOBAL_BUILTINS___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_GLOBAL_BUILTINS___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DELETE_FAST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DELETE_FAST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _DELETE_FAST___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2567,13 +2999,18 @@
                 reged = _DELETE_FAST___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _MAKE_CELL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _MAKE_CELL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _MAKE_CELL___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2598,13 +3035,18 @@
                 reged = _MAKE_CELL___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DELETE_DEREF: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DELETE_DEREF;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _DELETE_DEREF___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2629,13 +3071,18 @@
                 reged = _DELETE_DEREF___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_FROM_DICT_OR_DEREF: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_FROM_DICT_OR_DEREF;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_FROM_DICT_OR_DEREF___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2660,7 +3107,8 @@
                 reged = _LOAD_FROM_DICT_OR_DEREF___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -2691,13 +3139,22 @@
                 reged = _LOAD_DEREF___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_DEREF___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_DEREF: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_DEREF;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _STORE_DEREF___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2722,13 +3179,18 @@
                 reged = _STORE_DEREF___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _COPY_FREE_VARS: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _COPY_FREE_VARS;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _COPY_FREE_VARS___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2753,13 +3215,18 @@
                 reged = _COPY_FREE_VARS___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BUILD_TEMPLATE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BUILD_TEMPLATE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BUILD_TEMPLATE___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2784,13 +3251,18 @@
                 reged = _BUILD_TEMPLATE___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _SETUP_ANNOTATIONS: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _SETUP_ANNOTATIONS;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _SETUP_ANNOTATIONS___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2815,13 +3287,19 @@
                 reged = _SETUP_ANNOTATIONS___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_SUPER_ATTR_ATTR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_SUPER_ATTR_ATTR;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _LOAD_SUPER_ATTR_ATTR___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -2842,13 +3320,18 @@
                 reged = _LOAD_SUPER_ATTR_ATTR___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_SUPER_ATTR_METHOD: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_SUPER_ATTR_METHOD;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_SUPER_ATTR_METHOD___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -2873,13 +3356,18 @@
                 reged = _LOAD_SUPER_ATTR_METHOD___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TYPE_VERSION: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TYPE_VERSION;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TYPE_VERSION___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2904,13 +3392,18 @@
                 reged = _GUARD_TYPE_VERSION___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TYPE_VERSION_AND_LOCK: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TYPE_VERSION_AND_LOCK;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TYPE_VERSION_AND_LOCK___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2935,13 +3428,18 @@
                 reged = _GUARD_TYPE_VERSION_AND_LOCK___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_MANAGED_OBJECT_HAS_VALUES;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_MANAGED_OBJECT_HAS_VALUES___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2966,13 +3464,18 @@
                 reged = _CHECK_MANAGED_OBJECT_HAS_VALUES___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_INSTANCE_VALUE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_INSTANCE_VALUE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -2997,13 +3500,18 @@
                 reged = _LOAD_ATTR_INSTANCE_VALUE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_MODULE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_MODULE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_MODULE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3028,13 +3536,18 @@
                 reged = _LOAD_ATTR_MODULE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_WITH_HINT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_WITH_HINT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_WITH_HINT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3059,13 +3572,18 @@
                 reged = _LOAD_ATTR_WITH_HINT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_SLOT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_SLOT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_SLOT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3090,13 +3608,18 @@
                 reged = _LOAD_ATTR_SLOT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_ATTR_CLASS: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_ATTR_CLASS;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_ATTR_CLASS___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3121,13 +3644,18 @@
                 reged = _CHECK_ATTR_CLASS___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_CLASS: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_CLASS;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_CLASS___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3152,7 +3680,8 @@
                 reged = _LOAD_ATTR_CLASS___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3161,6 +3690,10 @@
 
         case _GUARD_DORV_NO_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_DORV_NO_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_DORV_NO_DICT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3185,13 +3718,19 @@
                 reged = _GUARD_DORV_NO_DICT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_ATTR_INSTANCE_VALUE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_ATTR_INSTANCE_VALUE;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _STORE_ATTR_INSTANCE_VALUE___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -3212,13 +3751,19 @@
                 reged = _STORE_ATTR_INSTANCE_VALUE___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_ATTR_WITH_HINT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_ATTR_WITH_HINT;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _STORE_ATTR_WITH_HINT___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -3239,13 +3784,19 @@
                 reged = _STORE_ATTR_WITH_HINT___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _STORE_ATTR_SLOT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _STORE_ATTR_SLOT;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _STORE_ATTR_SLOT___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -3266,13 +3817,18 @@
                 reged = _STORE_ATTR_SLOT___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _COMPARE_OP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _COMPARE_OP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _COMPARE_OP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3297,13 +3853,18 @@
                 reged = _COMPARE_OP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _COMPARE_OP_FLOAT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _COMPARE_OP_FLOAT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _COMPARE_OP_FLOAT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3328,13 +3889,18 @@
                 reged = _COMPARE_OP_FLOAT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _COMPARE_OP_INT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _COMPARE_OP_INT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _COMPARE_OP_INT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3359,13 +3925,18 @@
                 reged = _COMPARE_OP_INT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _COMPARE_OP_STR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _COMPARE_OP_STR;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _COMPARE_OP_STR___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3390,13 +3961,18 @@
                 reged = _COMPARE_OP_STR___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _IS_OP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _IS_OP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _IS_OP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3421,13 +3997,18 @@
                 reged = _IS_OP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CONTAINS_OP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CONTAINS_OP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CONTAINS_OP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3452,13 +4033,18 @@
                 reged = _CONTAINS_OP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_TOS_ANY_SET: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_TOS_ANY_SET;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_TOS_ANY_SET___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3483,13 +4069,18 @@
                 reged = _GUARD_TOS_ANY_SET___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CONTAINS_OP_SET: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CONTAINS_OP_SET;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CONTAINS_OP_SET___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3514,13 +4105,18 @@
                 reged = _CONTAINS_OP_SET___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CONTAINS_OP_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CONTAINS_OP_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CONTAINS_OP_DICT___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3545,13 +4141,18 @@
                 reged = _CONTAINS_OP_DICT___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_EG_MATCH: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_EG_MATCH;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_EG_MATCH___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3576,13 +4177,18 @@
                 reged = _CHECK_EG_MATCH___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_EXC_MATCH: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_EXC_MATCH;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_EXC_MATCH___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3607,13 +4213,18 @@
                 reged = _CHECK_EXC_MATCH___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _IMPORT_NAME: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _IMPORT_NAME;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _IMPORT_NAME___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -3638,7 +4249,8 @@
                 reged = _IMPORT_NAME___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3669,7 +4281,12 @@
                 reged = _IMPORT_FROM___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _IMPORT_FROM___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3680,6 +4297,10 @@
 
         case _IS_NONE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _IS_NONE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _IS_NONE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3704,7 +4325,8 @@
                 reged = _IS_NONE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3735,13 +4357,23 @@
                 reged = _GET_LEN___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _GET_LEN___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _MATCH_CLASS: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _MATCH_CLASS;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _MATCH_CLASS___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -3762,7 +4394,8 @@
                 reged = _MATCH_CLASS___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3793,7 +4426,12 @@
                 reged = _MATCH_MAPPING___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _MATCH_MAPPING___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3824,7 +4462,12 @@
                 reged = _MATCH_SEQUENCE___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _MATCH_SEQUENCE___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3855,13 +4498,22 @@
                 reged = _MATCH_KEYS___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _MATCH_KEYS___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GET_ITER: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GET_ITER;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GET_ITER___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3886,13 +4538,18 @@
                 reged = _GET_ITER___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GET_YIELD_FROM_ITER: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GET_YIELD_FROM_ITER;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GET_YIELD_FROM_ITER___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3917,7 +4574,8 @@
                 reged = _GET_YIELD_FROM_ITER___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3950,7 +4608,12 @@
                 reged = _FOR_ITER_TIER_TWO___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _FOR_ITER_TIER_TWO___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3959,6 +4622,10 @@
 
         case _ITER_CHECK_LIST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _ITER_CHECK_LIST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _ITER_CHECK_LIST___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -3983,7 +4650,8 @@
                 reged = _ITER_CHECK_LIST___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -3992,6 +4660,10 @@
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOT_EXHAUSTED_LIST;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOT_EXHAUSTED_LIST___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4016,7 +4688,8 @@
                 reged = _GUARD_NOT_EXHAUSTED_LIST___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4049,13 +4722,22 @@
                 reged = _ITER_NEXT_LIST_TIER_TWO___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _ITER_NEXT_LIST_TIER_TWO___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _ITER_CHECK_TUPLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _ITER_CHECK_TUPLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _ITER_CHECK_TUPLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4080,7 +4762,8 @@
                 reged = _ITER_CHECK_TUPLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4089,6 +4772,10 @@
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOT_EXHAUSTED_TUPLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOT_EXHAUSTED_TUPLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4113,7 +4800,8 @@
                 reged = _GUARD_NOT_EXHAUSTED_TUPLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4144,13 +4832,22 @@
                 reged = _ITER_NEXT_TUPLE___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _ITER_NEXT_TUPLE___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _ITER_CHECK_RANGE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _ITER_CHECK_RANGE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _ITER_CHECK_RANGE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4175,7 +4872,8 @@
                 reged = _ITER_CHECK_RANGE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4184,6 +4882,10 @@
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOT_EXHAUSTED_RANGE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOT_EXHAUSTED_RANGE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4208,7 +4910,8 @@
                 reged = _GUARD_NOT_EXHAUSTED_RANGE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4239,7 +4942,12 @@
                 reged = _ITER_NEXT_RANGE___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _ITER_NEXT_RANGE___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4270,7 +4978,12 @@
                 reged = _WITH_EXCEPT_START___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _WITH_EXCEPT_START___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4301,13 +5014,22 @@
                 reged = _PUSH_EXC_INFO___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _PUSH_EXC_INFO___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4332,13 +5054,18 @@
                 reged = _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_KEYS_VERSION: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_KEYS_VERSION;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_KEYS_VERSION___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4363,7 +5090,8 @@
                 reged = _GUARD_KEYS_VERSION___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4394,7 +5122,12 @@
                 reged = _LOAD_ATTR_METHOD_WITH_VALUES___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_ATTR_METHOD_WITH_VALUES___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4425,13 +5158,22 @@
                 reged = _LOAD_ATTR_METHOD_NO_DICT___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_ATTR_METHOD_NO_DICT___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4456,13 +5198,18 @@
                 reged = _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _LOAD_ATTR_NONDESCRIPTOR_NO_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _LOAD_ATTR_NONDESCRIPTOR_NO_DICT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4487,13 +5234,18 @@
                 reged = _LOAD_ATTR_NONDESCRIPTOR_NO_DICT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_ATTR_METHOD_LAZY_DICT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_ATTR_METHOD_LAZY_DICT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4518,7 +5270,8 @@
                 reged = _CHECK_ATTR_METHOD_LAZY_DICT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4549,7 +5302,12 @@
                 reged = _LOAD_ATTR_METHOD_LAZY_DICT___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_ATTR_METHOD_LAZY_DICT___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -4560,6 +5318,10 @@
 
         case _CHECK_FUNCTION_VERSION_INLINE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_FUNCTION_VERSION_INLINE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_FUNCTION_VERSION_INLINE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4584,13 +5346,18 @@
                 reged = _CHECK_FUNCTION_VERSION_INLINE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_PEP_523: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_PEP_523;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_PEP_523___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4615,13 +5382,18 @@
                 reged = _CHECK_PEP_523___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_RECURSION_REMAINING: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_RECURSION_REMAINING;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_RECURSION_REMAINING___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4646,13 +5418,18 @@
                 reged = _CHECK_RECURSION_REMAINING___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_NOS_NULL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_NOS_NULL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_NOS_NULL___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4677,13 +5454,18 @@
                 reged = _GUARD_NOS_NULL___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_THIRD_NULL: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_THIRD_NULL;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_THIRD_NULL___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4708,13 +5490,18 @@
                 reged = _GUARD_THIRD_NULL___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_CALLABLE_TYPE_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_CALLABLE_TYPE_1;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_CALLABLE_TYPE_1___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4739,13 +5526,19 @@
                 reged = _GUARD_CALLABLE_TYPE_1___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_TYPE_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_TYPE_1;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _CALL_TYPE_1___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -4766,13 +5559,18 @@
                 reged = _CALL_TYPE_1___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_CALLABLE_STR_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_CALLABLE_STR_1;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_CALLABLE_STR_1___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4797,13 +5595,19 @@
                 reged = _GUARD_CALLABLE_STR_1___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_STR_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_STR_1;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _CALL_STR_1___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -4824,13 +5628,18 @@
                 reged = _CALL_STR_1___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_CALLABLE_TUPLE_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_CALLABLE_TUPLE_1;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_CALLABLE_TUPLE_1___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4855,13 +5664,19 @@
                 reged = _GUARD_CALLABLE_TUPLE_1___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_TUPLE_1: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_TUPLE_1;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _CALL_TUPLE_1___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -4882,13 +5697,18 @@
                 reged = _CALL_TUPLE_1___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _EXIT_INIT_CHECK: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _EXIT_INIT_CHECK;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _EXIT_INIT_CHECK___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -4913,13 +5733,18 @@
                 reged = _EXIT_INIT_CHECK___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_CALLABLE_LEN: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_CALLABLE_LEN;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_CALLABLE_LEN___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -4944,13 +5769,19 @@
                 reged = _GUARD_CALLABLE_LEN___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_LEN: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_LEN;
+                curr_regs_in = 0;
+                break;
+                case 1:
                 case 2:
                 reged = _CALL_LEN___CACHED_2in_0out;
                 curr_regs_in = 0;
@@ -4971,13 +5802,18 @@
                 reged = _CALL_LEN___CACHED_6in_4out;
                 curr_regs_in = 4;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_CALLABLE_ISINSTANCE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_CALLABLE_ISINSTANCE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_CALLABLE_ISINSTANCE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5002,13 +5838,20 @@
                 reged = _GUARD_CALLABLE_ISINSTANCE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_ISINSTANCE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_ISINSTANCE;
+                curr_regs_in = 0;
+                break;
+                case 1:
+                case 2:
                 case 3:
                 reged = _CALL_ISINSTANCE___CACHED_3in_0out;
                 curr_regs_in = 0;
@@ -5025,13 +5868,20 @@
                 reged = _CALL_ISINSTANCE___CACHED_6in_3out;
                 curr_regs_in = 3;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CALL_LIST_APPEND: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CALL_LIST_APPEND;
+                curr_regs_in = 0;
+                break;
+                case 1:
+                case 2:
                 case 3:
                 reged = _CALL_LIST_APPEND___CACHED_3in_0out;
                 curr_regs_in = 0;
@@ -5048,7 +5898,8 @@
                 reged = _CALL_LIST_APPEND___CACHED_6in_3out;
                 curr_regs_in = 3;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -5059,6 +5910,10 @@
 
         case _MAKE_CALLARGS_A_TUPLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _MAKE_CALLARGS_A_TUPLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _MAKE_CALLARGS_A_TUPLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5083,7 +5938,8 @@
                 reged = _MAKE_CALLARGS_A_TUPLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -5092,6 +5948,10 @@
 
         case _MAKE_FUNCTION: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _MAKE_FUNCTION;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _MAKE_FUNCTION___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5116,13 +5976,18 @@
                 reged = _MAKE_FUNCTION___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _SET_FUNCTION_ATTRIBUTE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _SET_FUNCTION_ATTRIBUTE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _SET_FUNCTION_ATTRIBUTE___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5147,7 +6012,8 @@
                 reged = _SET_FUNCTION_ATTRIBUTE___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -5178,13 +6044,22 @@
                 reged = _RETURN_GENERATOR___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _RETURN_GENERATOR___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CONVERT_VALUE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CONVERT_VALUE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CONVERT_VALUE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5209,13 +6084,18 @@
                 reged = _CONVERT_VALUE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _FORMAT_SIMPLE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _FORMAT_SIMPLE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _FORMAT_SIMPLE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5240,13 +6120,18 @@
                 reged = _FORMAT_SIMPLE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _FORMAT_WITH_SPEC: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _FORMAT_WITH_SPEC;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _FORMAT_WITH_SPEC___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5271,13 +6156,18 @@
                 reged = _FORMAT_WITH_SPEC___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _BINARY_OP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _BINARY_OP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _BINARY_OP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5302,7 +6192,8 @@
                 reged = _BINARY_OP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -5327,6 +6218,10 @@
 
         case _GUARD_IS_TRUE_POP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_IS_TRUE_POP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_IS_TRUE_POP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5351,13 +6246,18 @@
                 reged = _GUARD_IS_TRUE_POP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_IS_FALSE_POP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_IS_FALSE_POP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_IS_FALSE_POP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5382,13 +6282,18 @@
                 reged = _GUARD_IS_FALSE_POP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_IS_NONE_POP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_IS_NONE_POP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_IS_NONE_POP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5413,13 +6318,18 @@
                 reged = _GUARD_IS_NONE_POP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _GUARD_IS_NOT_NONE_POP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _GUARD_IS_NOT_NONE_POP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _GUARD_IS_NOT_NONE_POP___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5444,13 +6354,18 @@
                 reged = _GUARD_IS_NOT_NONE_POP___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _JUMP_TO_TOP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _JUMP_TO_TOP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _JUMP_TO_TOP___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5475,13 +6390,18 @@
                 reged = _JUMP_TO_TOP___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _SET_IP: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _SET_IP;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _SET_IP___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5506,13 +6426,18 @@
                 reged = _SET_IP___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_STACK_SPACE_OPERAND: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_STACK_SPACE_OPERAND;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_STACK_SPACE_OPERAND___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5537,13 +6462,18 @@
                 reged = _CHECK_STACK_SPACE_OPERAND___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _SAVE_RETURN_OFFSET: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _SAVE_RETURN_OFFSET;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _SAVE_RETURN_OFFSET___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5568,13 +6498,18 @@
                 reged = _SAVE_RETURN_OFFSET___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _EXIT_TRACE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _EXIT_TRACE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _EXIT_TRACE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5599,13 +6534,18 @@
                 reged = _EXIT_TRACE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_VALIDITY: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_VALIDITY;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_VALIDITY___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5630,7 +6570,8 @@
                 reged = _CHECK_VALIDITY___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -5661,13 +6602,22 @@
                 reged = _LOAD_CONST_INLINE___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_CONST_INLINE___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _POP_TOP_LOAD_CONST_INLINE: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _POP_TOP_LOAD_CONST_INLINE;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _POP_TOP_LOAD_CONST_INLINE___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5692,7 +6642,8 @@
                 reged = _POP_TOP_LOAD_CONST_INLINE___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
@@ -5723,13 +6674,22 @@
                 reged = _LOAD_CONST_INLINE_BORROW___CACHED_5in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                case 6:
+                reged = _LOAD_CONST_INLINE_BORROW___CACHED_6in_0out;
+                curr_regs_in = 0;
+                break;
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _POP_TOP_LOAD_CONST_INLINE_BORROW: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _POP_TOP_LOAD_CONST_INLINE_BORROW;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _POP_TOP_LOAD_CONST_INLINE_BORROW___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5754,13 +6714,18 @@
                 reged = _POP_TOP_LOAD_CONST_INLINE_BORROW___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _POP_TWO_LOAD_CONST_INLINE_BORROW: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _POP_TWO_LOAD_CONST_INLINE_BORROW;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _POP_TWO_LOAD_CONST_INLINE_BORROW___CACHED_1in_0out;
                 curr_regs_in = 0;
@@ -5785,13 +6750,18 @@
                 reged = _POP_TWO_LOAD_CONST_INLINE_BORROW___CACHED_6in_5out;
                 curr_regs_in = 5;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _CHECK_FUNCTION: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _CHECK_FUNCTION;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _CHECK_FUNCTION___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5816,13 +6786,18 @@
                 reged = _CHECK_FUNCTION___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _START_EXECUTOR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _START_EXECUTOR;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _START_EXECUTOR___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5847,13 +6822,18 @@
                 reged = _START_EXECUTOR___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _MAKE_WARM: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _MAKE_WARM;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _MAKE_WARM___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5878,13 +6858,18 @@
                 reged = _MAKE_WARM___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _FATAL_ERROR: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _FATAL_ERROR;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _FATAL_ERROR___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5909,13 +6894,18 @@
                 reged = _FATAL_ERROR___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _DEOPT: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _DEOPT;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _DEOPT___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5940,13 +6930,18 @@
                 reged = _DEOPT___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _ERROR_POP_N: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _ERROR_POP_N;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _ERROR_POP_N___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -5971,13 +6966,18 @@
                 reged = _ERROR_POP_N___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }
 
         case _TIER2_RESUME_CHECK: {
             switch(curr_regs_in) {
+                case 0:
+                reged = _TIER2_RESUME_CHECK;
+                curr_regs_in = 0;
+                break;
                 case 1:
                 reged = _TIER2_RESUME_CHECK___CACHED_1in_1out;
                 curr_regs_in = 1;
@@ -6002,7 +7002,8 @@
                 reged = _TIER2_RESUME_CHECK___CACHED_6in_6out;
                 curr_regs_in = 6;
                 break;
-                default: Py_UNREACHABLE();
+                default: fprintf(stderr, "%d\n", curr_regs_in);
+Py_UNREACHABLE();
             }
             break;
         }

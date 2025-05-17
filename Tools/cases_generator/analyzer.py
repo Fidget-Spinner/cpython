@@ -217,7 +217,7 @@ class Uop:
         return self._size
 
     def why_not_viable(self) -> str | None:
-        if self.name == "_SAVE_RETURN_OFFSET":
+        if self.name.startswith("_SAVE_RETURN_OFFSET"):
             return None  # Adjusts next_instr, but only in tier 1 code
         if "INSTRUMENTED" in self.name:
             return "is instrumented"
@@ -939,6 +939,26 @@ def make_uop(
                 continue
             if num_live_registers_out > 6:
                 num_live_registers_out = 0
+            underscore = "" if op.name.startswith("_") else "_"
+            name_cached = f"{underscore}{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
+            stack=analyze_stack(op, num_live_registers_in=num_live_registers_in, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)
+            cached = Uop(
+                name=name_cached,
+                context=op.context,
+                annotations=op.annotations,
+                stack=stack,
+                caches=analyze_caches(inputs),
+                local_stores=find_variable_stores(op),
+                body=op.block,
+                properties=properties,
+                tos_cached_version_of=result,
+                tos_cached_inputs=num_live_registers_in,
+                tos_cached_outputs=num_live_registers_out,
+            )
+            tos_variants.append(cached)
+            uops[name_cached] = cached
+            # Generate one variant that spills everything too for perf reasons.
+            num_live_registers_out = 0
             underscore = "" if op.name.startswith("_") else "_"
             name_cached = f"{underscore}{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
             stack=analyze_stack(op, num_live_registers_in=num_live_registers_in, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)

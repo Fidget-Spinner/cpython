@@ -80,15 +80,18 @@ def generate_tier2_regalloc(
         out.emit("switch(curr_regs_in) {\n")
         for i_in in range(0, 7):
             num_live_registers_out = i_in + net_effect
-            if num_live_registers_out < 0 or num_live_registers_out > 6:
-                continue
-            if num_live_registers_out == 0 and i_in == 0:
-                continue
             out.emit(f"case {i_in}:\n")
-            out.emit(f"reged = {uop.name}___CACHED_{i_in}in_{num_live_registers_out}out;\n")
-            out.emit(f"curr_regs_in = {num_live_registers_out};\n")
+            if i_in == 0 and num_live_registers_out <= 0:
+                out.emit(f"reged = {uop.name};\n")
+                out.emit(f"curr_regs_in = 0;\n")
+            elif num_live_registers_out < 0:
+                continue
+            else:
+                num_live_registers_out = num_live_registers_out if num_live_registers_out <= 6 else 0
+                out.emit(f"reged = {uop.name}___CACHED_{i_in}in_{num_live_registers_out}out;\n")
+                out.emit(f"curr_regs_in = {num_live_registers_out};\n")
             out.emit("break;\n")
-        out.emit("default: Py_UNREACHABLE();\n")
+        out.emit('default: fprintf(stderr, "%d\\n", curr_regs_in);\nPy_UNREACHABLE();\n')
         out.emit("}\n")
         out.emit("break;\n")
         out.emit("}")

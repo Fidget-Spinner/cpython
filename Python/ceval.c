@@ -194,6 +194,24 @@ dump_stack(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
 }
 
 static void
+dump_stack_and_tos(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, _PyStackRef _TOS1, _PyStackRef _TOS2, _PyStackRef _TOS3, _PyStackRef _TOS4, _PyStackRef _TOS5, _PyStackRef _TOS6)
+{
+    printf("REG1: ");
+    dump_item(_TOS1);
+    printf(" REG2: ");
+    dump_item(_TOS2);
+    printf(" REG3: ");
+    dump_item(_TOS3);
+    printf(" REG4: ");
+    dump_item(_TOS4);
+    printf(" REG5: ");
+    dump_item(_TOS5);
+    printf(" REG6: ");
+    dump_item(_TOS6);
+    dump_stack(frame, stack_pointer);
+}
+
+static void
 lltrace_instruction(_PyInterpreterFrame *frame,
                     _PyStackRef *stack_pointer,
                     _Py_CODEUNIT *next_instr,
@@ -1153,7 +1171,7 @@ tier2_dispatch:
         uopcode = next_uop->opcode;
 #ifdef Py_DEBUG
         if (frame->lltrace >= 3) {
-            dump_stack(frame, stack_pointer);
+            dump_stack_and_tos(frame, stack_pointer, __TOS1, __TOS2, __TOS3, __TOS4, __TOS5, __TOS6);
             if (next_uop->opcode == _START_EXECUTOR) {
                 printf("%4d uop: ", 0);
             }
