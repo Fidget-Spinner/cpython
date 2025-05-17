@@ -1264,16 +1264,18 @@ uop_regalloc(_PyUOpInstruction *buffer, int length)
     int curr_regs_in = 0;
     for (int pc = 0; pc < length; pc++) {
         int reged = buffer[pc].opcode;
-        if (reged == _NOP) {
-            continue;
-        }
         switch (reged) {
 #include "regalloc_cases.c.h"
         default:
             // Unsupported, we need to spill regs if any:
             if (curr_regs_in > 0) {
+//                printf("SPILL:");
+//                _PyUOpPrint(&buffer[pc-1]);
+//                printf("\n");
                 buffer[pc-1].opcode = buffer[pc-1].opcode - 1;
                 curr_regs_in = 0;
+//                _PyUOpPrint(&buffer[pc-1]);
+//                printf("\n");
             }
             break;
         }
@@ -1318,21 +1320,21 @@ uop_optimize(
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
     uop_regalloc(buffer, length);
-#ifdef Py_DEBUG
-    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
-    int lltrace = 0;
-    if (python_lltrace != NULL && *python_lltrace >= '0') {
-        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
-    }
-    if (lltrace >= 2) {
-        printf("Optimized traclet (length %d):\n", length);
-        for (int i = 0; i < length; i++) {
-            printf("%4d TRACELET: ", i);
-            _PyUOpPrint(&buffer[i]);
-            printf("\n");
-        }
-    }
-#endif
+//#ifdef Py_DEBUG
+//    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
+//    int lltrace = 0;
+//    if (python_lltrace != NULL && *python_lltrace >= '0') {
+//        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
+//    }
+//    if (lltrace >= 2) {
+//        printf("Optimized traclet (length %d):\n", length);
+//        for (int i = 0; i < length; i++) {
+//            printf("%4d TRACELET: ", i);
+//            _PyUOpPrint(&buffer[i]);
+//            printf("\n");
+//        }
+//    }
+//#endif
     /* Fix up */
     for (int pc = 0; pc < length; pc++) {
         int opcode = buffer[pc].opcode;
