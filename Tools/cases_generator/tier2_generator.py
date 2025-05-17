@@ -50,7 +50,10 @@ def declare_variables(uop: Uop, out: CWriter) -> None:
     for var in reversed(uop.stack.inputs):
         stack.pop(var, null)
     for var in uop.stack.outputs:
-        stack.push(Local.undefined(var))
+        if var.register:
+            stack.push(Local.register(var))
+        else:
+            stack.push(Local.undefined(var))
     seen = {"unused"}
     for var in reversed(uop.stack.inputs):
         declare_variable(var, uop, seen, out)

@@ -167,9 +167,8 @@ class Local:
         return Local(defn, offset, True)
 
     @staticmethod
-    def register(name: str) -> "Local":
-        item = StackItem(name, None, "", False, True, register=name)
-        return Local(item, None, True)
+    def register(defn: StackItem) -> "Local":
+        return Local(defn, None, True)
 
     def kill(self) -> None:
         self.in_local = False

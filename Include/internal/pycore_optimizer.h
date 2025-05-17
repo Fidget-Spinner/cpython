@@ -298,12 +298,58 @@ PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 
 PyAPI_FUNC(int) _PyOptimizer_Optimize(_PyInterpreterFrame *frame, _Py_CODEUNIT *start, _PyExecutorObject **exec_ptr, int chain_depth);
 
+// TODO automatically generate this.
+static int
+is_jump_to_top(int opcode)
+{
+    switch(opcode) {
+        case  _JUMP_TO_TOP:
+        case _JUMP_TO_TOP___CACHED_1in_0out:
+        case _JUMP_TO_TOP___CACHED_1in_1out:
+        case _JUMP_TO_TOP___CACHED_2in_0out:
+        case _JUMP_TO_TOP___CACHED_2in_2out:
+        case _JUMP_TO_TOP___CACHED_3in_0out:
+        case _JUMP_TO_TOP___CACHED_3in_3out:
+        case _JUMP_TO_TOP___CACHED_4in_0out:
+        case _JUMP_TO_TOP___CACHED_4in_4out:
+        case _JUMP_TO_TOP___CACHED_5in_0out:
+        case _JUMP_TO_TOP___CACHED_5in_5out:
+        case _JUMP_TO_TOP___CACHED_6in_0out:
+        case _JUMP_TO_TOP___CACHED_6in_6out:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static int
+is_exit_trace(int opcode)
+{
+    switch(opcode) {
+        case  _EXIT_TRACE:
+        case _EXIT_TRACE___CACHED_1in_0out:
+        case _EXIT_TRACE___CACHED_1in_1out:
+        case _EXIT_TRACE___CACHED_2in_0out:
+        case _EXIT_TRACE___CACHED_2in_2out:
+        case _EXIT_TRACE___CACHED_3in_0out:
+        case _EXIT_TRACE___CACHED_3in_3out:
+        case _EXIT_TRACE___CACHED_4in_0out:
+        case _EXIT_TRACE___CACHED_4in_4out:
+        case _EXIT_TRACE___CACHED_5in_0out:
+        case _EXIT_TRACE___CACHED_5in_5out:
+        case _EXIT_TRACE___CACHED_6in_0out:
+        case _EXIT_TRACE___CACHED_6in_6out:
+            return true;
+        default:
+            return false;
+    }
+}
+
 static inline int is_terminator(const _PyUOpInstruction *uop)
 {
     int opcode = uop->opcode;
     return (
-        opcode == _EXIT_TRACE ||
-        opcode == _JUMP_TO_TOP
+        is_jump_to_top(opcode) || is_exit_trace(opcode)
     );
 }
 

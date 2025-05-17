@@ -996,7 +996,7 @@ count_exits(_PyUOpInstruction *buffer, int length)
     int exit_count = 0;
     for (int i = 0; i < length; i++) {
         int opcode = buffer[i].opcode;
-        if (opcode == _EXIT_TRACE) {
+        if (is_exit_trace(opcode)) {
             exit_count++;
         }
     }
@@ -1081,7 +1081,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 buffer[i].jump_target = 0;
             }
         }
-        if (opcode == _JUMP_TO_TOP) {
+        if (is_jump_to_top(opcode)) {
             assert(buffer[0].opcode == _START_EXECUTOR);
             buffer[i].format = UOP_FORMAT_JUMP;
             buffer[i].jump_target = 1;
@@ -1195,7 +1195,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
         dest--;
         *dest = buffer[i];
         assert(opcode != _POP_JUMP_IF_FALSE && opcode != _POP_JUMP_IF_TRUE);
-        if (opcode == _EXIT_TRACE) {
+        if (is_exit_trace(opcode)) {
             _PyExitData *exit = &executor->exits[next_exit];
             exit->target = buffer[i].target;
             dest->operand0 = (uint64_t)exit;
@@ -1267,11 +1267,18 @@ uop_regalloc(_PyUOpInstruction *buffer, int length)
         switch (reged) {
 #include "regalloc_cases.c.h"
         default:
-            // Spill previous inst
+            // Unsupported, we need to spill regs if any:
             if (curr_regs_in > 0) {
                 buffer[pc-1].opcode = buffer[pc-1].opcode - 1;
+                curr_regs_in = 0;
             }
             break;
+        }
+        // Spill current inst
+        if (is_terminator(&buffer[pc])) {
+            if (reged != _EXIT_TRACE && reged != _JUMP_TO_TOP) {
+                reged -= 1;
+            }
         }
         buffer[pc].opcode = reged;
     }
@@ -1308,6 +1315,21 @@ uop_optimize(
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
     uop_regalloc(buffer, length);
+#ifdef Py_DEBUG
+    char *python_lltrace = Py_GETENV("PYTHON_LLTRACE");
+    int lltrace = 0;
+    if (python_lltrace != NULL && *python_lltrace >= '0') {
+        lltrace = *python_lltrace - '0';  // TODO: Parse an int and all that
+    }
+    if (lltrace >= 2) {
+        printf("Optimized traclet (length %d):\n", length);
+        for (int i = 0; i < length; i++) {
+            printf("%4d TRACELET: ", i);
+            _PyUOpPrint(&buffer[i]);
+            printf("\n");
+        }
+    }
+#endif
     /* Fix up */
     for (int pc = 0; pc < length; pc++) {
         int opcode = buffer[pc].opcode;

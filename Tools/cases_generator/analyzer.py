@@ -421,14 +421,14 @@ def analyze_stack(
             if variable_used(op, output.name):
                 output.used = True
     check_unused(inputs, input_names)
-    if num_registers_for_output is not None and num_live_registers_out is not None:
+    if num_registers_for_output is not None:
+        assert num_live_registers_out is not None
         for outp in reversed(outputs):
-            if num_registers_for_output <= 0 or num_live_registers_out <= 0:
+            if num_live_registers_out <= 0:
                 break
             assert 0 < num_live_registers_out <= 6, num_live_registers_out
             outp.register = f"__TOS{num_live_registers_out}"
             num_live_registers_out -= 1
-            num_registers_for_output -= 1
 
     if num_live_registers_in is not None:
         for inp in reversed(inputs):
@@ -961,7 +961,7 @@ def make_uop(
             num_live_registers_out = 0
             underscore = "" if op.name.startswith("_") else "_"
             name_cached = f"{underscore}{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
-            stack=analyze_stack(op, num_live_registers_in=num_live_registers_in, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)
+            stack=analyze_stack(op, num_live_registers_in=num_live_registers_in, num_live_registers_out=num_live_registers_out, num_registers_for_output=0)
             cached = Uop(
                 name=name_cached,
                 context=op.context,
