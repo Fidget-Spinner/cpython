@@ -1764,7 +1764,7 @@
                 break;
             }
             new_frame = frame_new(ctx, co, 0, NULL, 0);
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
+            stack_pointer[-2 - oparg] = (JitOptSymbol *)new_frame;
             stack_pointer += -1 - oparg;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1890,7 +1890,7 @@
             } else {
                 new_frame = frame_new(ctx, co, 0, NULL, 0);
             }
-            stack_pointer[-2 - oparg].bits = (uintptr_t)new_frame;
+            stack_pointer[-2 - oparg] = (JitOptSymbol *)new_frame;
             stack_pointer += -1 - oparg;
             assert(WITHIN_STACK_BOUNDS());
             break;

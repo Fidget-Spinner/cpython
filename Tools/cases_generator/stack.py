@@ -224,6 +224,7 @@ class Stack:
         self.extract_bits = extract_bits
         self.cast_type = cast_type
         self.num_in_tos_cache = num_in_tos_cache
+        assert isinstance(num_in_tos_cache, int) and not isinstance(num_in_tos_cache, bool)
 
     def drop(self, var: StackItem, check_liveness: bool) -> None:
         self.logical_sp = self.logical_sp.pop(var)
@@ -353,7 +354,8 @@ class Stack:
                 if reg_i < min_i:
                     min_i = reg_i
                 out.emit(f"/* Flushing cache {reg_i} */\n")
-                out.emit(f"stack_pointer[-{7-reg_i}] = {var.item.register};\n")
+                assert self.num_in_tos_cache-reg_i >= 0, self.num_in_tos_cache-reg_i
+                out.emit(f"stack_pointer[-{self.num_in_tos_cache-reg_i+1}] = {var.item.register};\n")
                 self._print(out)
         if min_i <= 6:
             min_i -= 1
@@ -361,7 +363,7 @@ class Stack:
             min_i = self.num_in_tos_cache
         while min_i > 0:
             out.emit(f"/* Flushing cache {min_i} */\n")
-            out.emit(f"stack_pointer[-{7-min_i}] = __TOS{min_i};\n")
+            out.emit(f"stack_pointer[-{self.num_in_tos_cache-min_i+1}] = __TOS{min_i};\n")
             min_i -= 1
 
         out.start_line()
@@ -386,7 +388,7 @@ class Stack:
             out.emit(self.as_comment() + "\n")
 
     def copy(self) -> "Stack":
-        other = Stack(self.extract_bits, self.cast_type)
+        other = Stack(self.num_in_tos_cache, self.extract_bits, self.cast_type)
         other.base_offset = self.base_offset
         other.physical_sp = self.physical_sp
         other.logical_sp = self.logical_sp

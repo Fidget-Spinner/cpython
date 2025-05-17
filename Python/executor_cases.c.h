@@ -286,7 +286,7 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -297,7 +297,7 @@
             if (eval_breaker != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -305,7 +305,7 @@
                     ((_PyThreadStateImpl *)tstate)->tlbc_index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -317,9 +317,9 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -330,9 +330,9 @@
             if (eval_breaker != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -340,9 +340,9 @@
                     ((_PyThreadStateImpl *)tstate)->tlbc_index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -354,11 +354,11 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -369,11 +369,11 @@
             if (eval_breaker != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -381,11 +381,11 @@
                     ((_PyThreadStateImpl *)tstate)->tlbc_index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -397,13 +397,13 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -414,13 +414,13 @@
             if (eval_breaker != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -428,13 +428,13 @@
                     ((_PyThreadStateImpl *)tstate)->tlbc_index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -446,15 +446,15 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -465,15 +465,15 @@
             if (eval_breaker != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -481,15 +481,15 @@
                     ((_PyThreadStateImpl *)tstate)->tlbc_index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -3376,7 +3376,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -4562,7 +4562,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -4727,7 +4727,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -4812,7 +4812,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -6780,7 +6780,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -6977,7 +6977,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -7164,7 +7164,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -7516,7 +7516,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -7708,7 +7708,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -7900,7 +7900,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -8091,7 +8091,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -8271,9 +8271,9 @@
             if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -8299,8 +8299,10 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache True */
-            stack_pointer[-6] = __TOSTrue;
+            /* Flushing cache 2 */
+            stack_pointer[-1] = __TOS2;
+            /* Flushing cache 1 */
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -8324,11 +8326,11 @@
             if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -8376,13 +8378,13 @@
             if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -8430,15 +8432,15 @@
             if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -8543,8 +8545,6 @@
             assert(PyUnicode_CheckExact(left_o));
             if (PyStackRef_AsPyObjectBorrow(*target_local) != left_o) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -8589,7 +8589,7 @@
             if (!res) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -8612,9 +8612,9 @@
             if (!res) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -8637,11 +8637,11 @@
             if (!res) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -8664,13 +8664,13 @@
             if (!res) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -8693,15 +8693,15 @@
             if (!res) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -8792,7 +8792,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9027,9 +9027,9 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -9276,13 +9276,13 @@
             }
             /* Cache spill */
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -9431,7 +9431,7 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
@@ -9442,7 +9442,7 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9451,7 +9451,7 @@
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9473,8 +9473,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache True */
-            stack_pointer[-6] = __TOSTrue;
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9491,9 +9491,9 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
@@ -9504,9 +9504,9 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9515,9 +9515,9 @@
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9554,11 +9554,11 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
@@ -9569,11 +9569,11 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9582,11 +9582,11 @@
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9623,13 +9623,13 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
@@ -9640,13 +9640,13 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9655,13 +9655,13 @@
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9698,15 +9698,15 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
@@ -9717,15 +9717,15 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9734,15 +9734,15 @@
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9881,8 +9881,6 @@
             #else
             if (index >= PyList_GET_SIZE(list)) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -9941,7 +9939,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -10174,21 +10172,21 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (PyUnicode_GET_LENGTH(str) <= index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
             if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10205,7 +10203,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -10222,27 +10220,27 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (PyUnicode_GET_LENGTH(str) <= index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
             if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10273,33 +10271,33 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (PyUnicode_GET_LENGTH(str) <= index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
             if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10330,39 +10328,39 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (PyUnicode_GET_LENGTH(str) <= index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
             if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10393,45 +10391,45 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (PyUnicode_GET_LENGTH(str) <= index) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_UCS4 c = PyUnicode_READ_CHAR(str, index);
             if (Py_ARRAY_LENGTH(_Py_SINGLETON(strings).ascii) <= c) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10730,14 +10728,14 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (index >= PyTuple_GET_SIZE(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10755,7 +10753,7 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -10772,18 +10770,18 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (index >= PyTuple_GET_SIZE(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10815,22 +10813,22 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (index >= PyTuple_GET_SIZE(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10862,26 +10860,26 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (index >= PyTuple_GET_SIZE(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -10913,30 +10911,30 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (index >= PyTuple_GET_SIZE(tuple)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(BINARY_OP, hit);
@@ -11242,8 +11240,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache True */
-            stack_pointer[-6] = __TOSTrue;
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -11536,7 +11534,7 @@
             if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
@@ -11544,7 +11542,7 @@
             if (getitem_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(PyFunction_Check(getitem_o));
@@ -11552,7 +11550,7 @@
             if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
@@ -11560,7 +11558,7 @@
             if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
@@ -11579,9 +11577,9 @@
             if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
@@ -11589,9 +11587,9 @@
             if (getitem_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(PyFunction_Check(getitem_o));
@@ -11599,9 +11597,9 @@
             if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
@@ -11609,9 +11607,9 @@
             if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
@@ -11630,11 +11628,11 @@
             if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
@@ -11642,11 +11640,11 @@
             if (getitem_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(PyFunction_Check(getitem_o));
@@ -11654,11 +11652,11 @@
             if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
@@ -11666,11 +11664,11 @@
             if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
@@ -11689,13 +11687,13 @@
             if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
@@ -11703,13 +11701,13 @@
             if (getitem_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(PyFunction_Check(getitem_o));
@@ -11717,13 +11715,13 @@
             if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
@@ -11731,13 +11729,13 @@
             if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
@@ -11756,15 +11754,15 @@
             if (!PyType_HasFeature(tp, Py_TPFLAGS_HEAPTYPE)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyHeapTypeObject *ht = (PyHeapTypeObject *)tp;
@@ -11772,15 +11770,15 @@
             if (getitem_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(PyFunction_Check(getitem_o));
@@ -11788,15 +11786,15 @@
             if (((PyFunctionObject *)getitem_o)->func_version != cached_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyCodeObject *code = (PyCodeObject *)PyFunction_GET_CODE(getitem_o);
@@ -11804,15 +11802,15 @@
             if (!_PyThreadState_HasStackSpace(tstate, code->co_framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
@@ -12039,11 +12037,11 @@
             }
             /* Cache spill */
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -12181,22 +12179,22 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (!LOCK_OBJECT(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             if (index >= PyList_GET_SIZE(list)) {
@@ -12204,11 +12202,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -12227,11 +12225,11 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -12249,26 +12247,26 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (!LOCK_OBJECT(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (index >= PyList_GET_SIZE(list)) {
@@ -12276,13 +12274,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -12316,30 +12314,30 @@
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             if (!LOCK_OBJECT(list)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (index >= PyList_GET_SIZE(list)) {
@@ -12347,15 +12345,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -12478,8 +12476,6 @@
                 UNLOCK_OBJECT(list);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -12524,11 +12520,11 @@
             }
             /* Cache spill */
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -12660,9 +12656,9 @@
             }
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -12991,7 +12987,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -14385,7 +14381,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -14810,7 +14806,7 @@
             }
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -15295,7 +15291,7 @@
             if (PyTuple_GET_SIZE(seq_o) != 2) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);
@@ -15323,9 +15319,9 @@
             if (PyTuple_GET_SIZE(seq_o) != 2) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);
@@ -15353,11 +15349,11 @@
             if (PyTuple_GET_SIZE(seq_o) != 2) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);
@@ -15385,13 +15381,13 @@
             if (PyTuple_GET_SIZE(seq_o) != 2) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);
@@ -15419,15 +15415,15 @@
             if (PyTuple_GET_SIZE(seq_o) != 2) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(UNPACK_SEQUENCE, hit);
@@ -15561,8 +15557,6 @@
                 UNLOCK_OBJECT(seq_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -15627,9 +15621,9 @@
             }
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -15786,7 +15780,7 @@
             }
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -15922,7 +15916,7 @@
             }
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16519,14 +16513,14 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16539,18 +16533,18 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16563,22 +16557,22 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16591,26 +16585,26 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16623,30 +16617,30 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16755,14 +16749,14 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16772,7 +16766,7 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -16780,7 +16774,7 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -16801,18 +16795,18 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16822,9 +16816,9 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -16832,9 +16826,9 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -16855,22 +16849,22 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16880,11 +16874,11 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -16892,11 +16886,11 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -16917,26 +16911,26 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -16946,13 +16940,13 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -16960,13 +16954,13 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -16987,30 +16981,30 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -17020,15 +17014,15 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -17036,15 +17030,15 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -17141,8 +17135,18 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache True */
-            stack_pointer[-6] = __TOSTrue;
+            /* Flushing cache 6 */
+            stack_pointer[-1] = __TOS6;
+            /* Flushing cache 5 */
+            stack_pointer[-2] = __TOS5;
+            /* Flushing cache 4 */
+            stack_pointer[-3] = __TOS4;
+            /* Flushing cache 3 */
+            stack_pointer[-4] = __TOS3;
+            /* Flushing cache 2 */
+            stack_pointer[-5] = __TOS2;
+            /* Flushing cache 1 */
+            stack_pointer[-6] = __TOS1;
             break;
         }
 
@@ -17229,14 +17233,14 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -17245,7 +17249,7 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -17253,7 +17257,7 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -17274,18 +17278,18 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -17294,9 +17298,9 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -17304,9 +17308,9 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -17327,22 +17331,22 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -17351,11 +17355,11 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -17363,11 +17367,11 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -17388,26 +17392,26 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -17416,13 +17420,13 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -17430,13 +17434,13 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -17457,30 +17461,30 @@
             if (!PyDict_CheckExact(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *keys = FT_ATOMIC_LOAD_PTR_ACQUIRE(dict->ma_keys);
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(DK_IS_UNICODE(keys));
@@ -17489,15 +17493,15 @@
             if (res_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #if Py_GIL_DISABLED
@@ -17505,15 +17509,15 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -17609,8 +17613,18 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache True */
-            stack_pointer[-6] = __TOSTrue;
+            /* Flushing cache 6 */
+            stack_pointer[-1] = __TOS6;
+            /* Flushing cache 5 */
+            stack_pointer[-2] = __TOS5;
+            /* Flushing cache 4 */
+            stack_pointer[-3] = __TOS4;
+            /* Flushing cache 3 */
+            stack_pointer[-4] = __TOS3;
+            /* Flushing cache 2 */
+            stack_pointer[-5] = __TOS2;
+            /* Flushing cache 1 */
+            stack_pointer[-6] = __TOS1;
             break;
         }
 
@@ -18482,7 +18496,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -18792,7 +18806,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -19561,17 +19575,17 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -19602,9 +19616,9 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -19624,21 +19638,21 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -19686,25 +19700,25 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -19752,29 +19766,29 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -19947,13 +19961,13 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -19999,7 +20013,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -20020,17 +20034,17 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -20094,21 +20108,21 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -20172,25 +20186,25 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -20254,29 +20268,29 @@
             if (global_super != (PyObject *)&PySuper_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyType_Check(class)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(LOAD_SUPER_ATTR, hit);
@@ -20778,7 +20792,7 @@
             if (!FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20793,9 +20807,9 @@
             if (!FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20810,11 +20824,11 @@
             if (!FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20829,13 +20843,13 @@
             if (!FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20850,15 +20864,15 @@
             if (!FT_ATOMIC_LOAD_UINT8(_PyObject_InlineValues(owner_o)->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20913,7 +20927,7 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -20922,7 +20936,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20948,9 +20962,9 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -20959,9 +20973,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20987,11 +21001,11 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21000,11 +21014,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21030,13 +21044,13 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21045,13 +21059,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21077,15 +21091,15 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21094,15 +21108,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21189,8 +21203,6 @@
             if (!increfed) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21215,7 +21227,7 @@
             if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
@@ -21224,7 +21236,7 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(keys->dk_kind == DICT_KEYS_UNICODE);
@@ -21234,7 +21246,7 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21243,7 +21255,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21268,9 +21280,9 @@
             if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
@@ -21279,9 +21291,9 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(keys->dk_kind == DICT_KEYS_UNICODE);
@@ -21291,9 +21303,9 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21302,9 +21314,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21329,11 +21341,11 @@
             if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
@@ -21342,11 +21354,11 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(keys->dk_kind == DICT_KEYS_UNICODE);
@@ -21356,11 +21368,11 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21369,11 +21381,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21398,13 +21410,13 @@
             if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
@@ -21413,13 +21425,13 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(keys->dk_kind == DICT_KEYS_UNICODE);
@@ -21429,13 +21441,13 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21444,13 +21456,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21475,15 +21487,15 @@
             if (Py_TYPE(owner_o)->tp_getattro != PyModule_Type.tp_getattro) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictObject *dict = (PyDictObject *)((PyModuleObject *)owner_o)->md_dict;
@@ -21492,15 +21504,15 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != dict_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(keys->dk_kind == DICT_KEYS_UNICODE);
@@ -21510,15 +21522,15 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -21527,15 +21539,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21674,8 +21686,6 @@
             if (!increfed) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21702,7 +21712,7 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *dk = FT_ATOMIC_LOAD_PTR(dict->ma_keys);
@@ -21711,7 +21721,7 @@
             if (!_Py_IsOwnedByCurrentThread((PyObject *)dict) && !_PyObject_GC_IS_SHARED(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -21720,7 +21730,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21729,7 +21739,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21738,7 +21748,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21747,7 +21757,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21758,7 +21768,7 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21784,9 +21794,9 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *dk = FT_ATOMIC_LOAD_PTR(dict->ma_keys);
@@ -21795,9 +21805,9 @@
             if (!_Py_IsOwnedByCurrentThread((PyObject *)dict) && !_PyObject_GC_IS_SHARED(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -21806,9 +21816,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21817,9 +21827,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21828,9 +21838,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21839,9 +21849,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21852,9 +21862,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21880,11 +21890,11 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *dk = FT_ATOMIC_LOAD_PTR(dict->ma_keys);
@@ -21893,11 +21903,11 @@
             if (!_Py_IsOwnedByCurrentThread((PyObject *)dict) && !_PyObject_GC_IS_SHARED(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -21906,11 +21916,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21919,11 +21929,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21932,11 +21942,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21945,11 +21955,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21960,11 +21970,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -21990,13 +22000,13 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *dk = FT_ATOMIC_LOAD_PTR(dict->ma_keys);
@@ -22005,13 +22015,13 @@
             if (!_Py_IsOwnedByCurrentThread((PyObject *)dict) && !_PyObject_GC_IS_SHARED(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -22020,13 +22030,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22035,13 +22045,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22050,13 +22060,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22065,13 +22075,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22082,13 +22092,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22114,15 +22124,15 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyDictKeysObject *dk = FT_ATOMIC_LOAD_PTR(dict->ma_keys);
@@ -22131,15 +22141,15 @@
             if (!_Py_IsOwnedByCurrentThread((PyObject *)dict) && !_PyObject_GC_IS_SHARED(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -22148,15 +22158,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22165,15 +22175,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22182,15 +22192,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22199,15 +22209,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22218,15 +22228,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22417,8 +22427,6 @@
             if (hint >= (size_t)FT_ATOMIC_LOAD_SSIZE_RELAXED(dk->dk_nentries)) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22426,8 +22434,6 @@
             if (dk->dk_kind != DICT_KEYS_UNICODE) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22435,8 +22441,6 @@
             if (FT_ATOMIC_LOAD_PTR_RELAXED(ep->me_key) != name) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22444,8 +22448,6 @@
             if (attr_o == NULL) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22455,8 +22457,6 @@
             if (!increfed) {
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22481,7 +22481,7 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -22489,7 +22489,7 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -22516,9 +22516,9 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -22526,9 +22526,9 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -22555,11 +22555,11 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -22567,11 +22567,11 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -22598,13 +22598,13 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -22612,13 +22612,13 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -22645,15 +22645,15 @@
             if (attr_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -22661,15 +22661,15 @@
             if (!increfed) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #else
@@ -23200,8 +23200,10 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache True */
-            stack_pointer[-6] = __TOSTrue;
+            /* Flushing cache 2 */
+            stack_pointer[-1] = __TOS2;
+            /* Flushing cache 1 */
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -23353,17 +23355,17 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -23372,9 +23374,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23387,9 +23389,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23399,9 +23401,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23411,9 +23413,9 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-2] = __TOS1;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-1] = __TOS2;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23431,9 +23433,9 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -23450,21 +23452,21 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -23473,11 +23475,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23490,11 +23492,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23504,11 +23506,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23518,11 +23520,11 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-2] = __TOS2;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-1] = __TOS3;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23554,25 +23556,25 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -23581,13 +23583,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23600,13 +23602,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23616,13 +23618,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23632,13 +23634,13 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-2] = __TOS3;
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-1] = __TOS4;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-3] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23670,29 +23672,29 @@
             if (dict == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(dict)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
@@ -23701,15 +23703,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23722,15 +23724,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23740,15 +23742,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23758,15 +23760,15 @@
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
+                    stack_pointer[-2] = __TOS4;
                     /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
+                    stack_pointer[-1] = __TOS5;
                     /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
+                    stack_pointer[-3] = __TOS3;
                     /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
+                    stack_pointer[-4] = __TOS2;
                     /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23948,8 +23950,6 @@
                 UNLOCK_OBJECT(dict);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23961,8 +23961,6 @@
                 UNLOCK_OBJECT(dict);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23971,8 +23969,6 @@
                 UNLOCK_OBJECT(dict);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23981,8 +23977,6 @@
                 UNLOCK_OBJECT(dict);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache True */
-                    stack_pointer[-6] = __TOSTrue;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -24011,9 +24005,9 @@
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             char *addr = (char *)owner_o + index;
@@ -24029,9 +24023,9 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -24045,11 +24039,11 @@
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             char *addr = (char *)owner_o + index;
@@ -24076,13 +24070,13 @@
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             char *addr = (char *)owner_o + index;
@@ -24109,15 +24103,15 @@
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             char *addr = (char *)owner_o + index;
@@ -24240,7 +24234,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -24535,7 +24529,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -24683,13 +24677,13 @@
             if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(COMPARE_OP, hit);
@@ -24706,7 +24700,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -24722,17 +24716,17 @@
             if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(COMPARE_OP, hit);
@@ -24762,21 +24756,21 @@
             if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(COMPARE_OP, hit);
@@ -24806,25 +24800,25 @@
             if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(COMPARE_OP, hit);
@@ -24854,29 +24848,29 @@
             if (!_PyLong_IsCompact((PyLongObject *)left_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!_PyLong_IsCompact((PyLongObject *)right_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(COMPARE_OP, hit);
@@ -25005,7 +24999,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25179,7 +25173,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25376,7 +25370,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25579,7 +25573,7 @@
             if (!PyAnySet_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -25592,9 +25586,9 @@
             if (!PyAnySet_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -25607,11 +25601,11 @@
             if (!PyAnySet_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -25624,13 +25618,13 @@
             if (!PyAnySet_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -25643,15 +25637,15 @@
             if (!PyAnySet_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -25724,7 +25718,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25965,7 +25959,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -26884,7 +26878,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -27645,9 +27639,9 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -31177,7 +31171,7 @@
             if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31192,9 +31186,9 @@
             if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31209,11 +31203,11 @@
             if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31228,13 +31222,13 @@
             if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31249,15 +31243,15 @@
             if (!FT_ATOMIC_LOAD_UINT8(ivs->valid)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31311,7 +31305,7 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31327,9 +31321,9 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31345,11 +31339,11 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31365,13 +31359,13 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -31387,15 +31381,15 @@
             if (FT_ATOMIC_LOAD_UINT32_RELAXED(keys->dk_version) != keys_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32105,7 +32099,7 @@
             if (dict != NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32120,9 +32114,9 @@
             if (dict != NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32137,11 +32131,11 @@
             if (dict != NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32156,13 +32150,13 @@
             if (dict != NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32177,15 +32171,15 @@
             if (dict != NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32751,7 +32745,7 @@
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32761,9 +32755,9 @@
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32773,11 +32767,11 @@
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32787,13 +32781,13 @@
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32803,15 +32797,15 @@
             if (tstate->interp->eval_frame) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32880,7 +32874,7 @@
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32890,9 +32884,9 @@
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32902,11 +32896,11 @@
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32916,13 +32910,13 @@
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32932,15 +32926,15 @@
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33141,7 +33135,7 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33153,9 +33147,9 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33167,11 +33161,11 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33183,13 +33177,13 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33201,15 +33195,15 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33253,7 +33247,7 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33265,9 +33259,9 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33279,11 +33273,11 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33295,13 +33289,13 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33313,15 +33307,15 @@
             if (!PyStackRef_IsNull(null)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33366,7 +33360,7 @@
             if (callable_o != (PyObject *)&PyType_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33379,9 +33373,9 @@
             if (callable_o != (PyObject *)&PyType_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33394,11 +33388,11 @@
             if (callable_o != (PyObject *)&PyType_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33411,13 +33405,13 @@
             if (callable_o != (PyObject *)&PyType_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33430,15 +33424,15 @@
             if (callable_o != (PyObject *)&PyType_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33501,9 +33495,9 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -33634,7 +33628,7 @@
             if (callable_o != (PyObject *)&PyUnicode_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33647,9 +33641,9 @@
             if (callable_o != (PyObject *)&PyUnicode_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33662,11 +33656,11 @@
             if (callable_o != (PyObject *)&PyUnicode_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33679,13 +33673,13 @@
             if (callable_o != (PyObject *)&PyUnicode_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33698,15 +33692,15 @@
             if (callable_o != (PyObject *)&PyUnicode_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33777,9 +33771,9 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -33950,7 +33944,7 @@
             if (callable_o != (PyObject *)&PyTuple_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33963,9 +33957,9 @@
             if (callable_o != (PyObject *)&PyTuple_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33978,11 +33972,11 @@
             if (callable_o != (PyObject *)&PyTuple_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -33995,13 +33989,13 @@
             if (callable_o != (PyObject *)&PyTuple_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34014,15 +34008,15 @@
             if (callable_o != (PyObject *)&PyTuple_Type) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34093,9 +34087,9 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -34360,7 +34354,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -34483,8 +34477,6 @@
             }
             if (tp->tp_vectorcall == NULL) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -34617,14 +34609,10 @@
             }
             if (!PyCFunction_CheckExact(callable_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             if (PyCFunction_GET_FLAGS(callable_o) != METH_FASTCALL) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -34705,14 +34693,10 @@
             }
             if (!PyCFunction_CheckExact(callable_o)) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             if (PyCFunction_GET_FLAGS(callable_o) != (METH_FASTCALL | METH_KEYWORDS)) {
                 UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache True */
-                stack_pointer[-6] = __TOSTrue;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -34783,7 +34767,7 @@
             if (callable_o != interp->callable_cache.len) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34797,9 +34781,9 @@
             if (callable_o != interp->callable_cache.len) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34813,11 +34797,11 @@
             if (callable_o != interp->callable_cache.len) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34831,13 +34815,13 @@
             if (callable_o != interp->callable_cache.len) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34851,15 +34835,15 @@
             if (callable_o != interp->callable_cache.len) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34939,9 +34923,9 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -35148,7 +35132,7 @@
             if (callable_o != interp->callable_cache.isinstance) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -35162,9 +35146,9 @@
             if (callable_o != interp->callable_cache.isinstance) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -35178,11 +35162,11 @@
             if (callable_o != interp->callable_cache.isinstance) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -35196,13 +35180,13 @@
             if (callable_o != interp->callable_cache.isinstance) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -35216,15 +35200,15 @@
             if (callable_o != interp->callable_cache.isinstance) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -35308,11 +35292,11 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -35503,41 +35487,41 @@
             if (callable_o != interp->callable_cache.list_append) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             if (self_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyList_Check(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -35563,11 +35547,11 @@
             #endif
             /* Cache spill */
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -35586,49 +35570,49 @@
             if (callable_o != interp->callable_cache.list_append) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (self_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyList_Check(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -35670,57 +35654,57 @@
             if (callable_o != interp->callable_cache.list_append) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (self_o == NULL) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!PyList_Check(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (!LOCK_OBJECT(self_o)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(CALL, hit);
@@ -36901,7 +36885,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -37748,7 +37732,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -37970,7 +37954,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38319,7 +38303,7 @@
             }
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38413,7 +38397,7 @@
             }
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38514,7 +38498,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38653,7 +38637,7 @@
             }
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38836,13 +38820,13 @@
             if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38854,17 +38838,17 @@
             if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38876,21 +38860,21 @@
             if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38902,25 +38886,25 @@
             if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38932,29 +38916,29 @@
             if (!_PyThreadState_HasStackSpace(tstate, framesize)) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (tstate->py_recursion_remaining <= 1) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -39403,7 +39387,7 @@
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -39413,9 +39397,9 @@
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -39425,11 +39409,11 @@
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -39439,13 +39423,13 @@
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -39455,15 +39439,15 @@
             if (!current_executor->vm_data.valid) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -39944,7 +39928,7 @@
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -40099,7 +40083,7 @@
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -40112,9 +40096,9 @@
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -40127,11 +40111,11 @@
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -40144,13 +40128,13 @@
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -40163,15 +40147,15 @@
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -40475,7 +40459,7 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -40484,7 +40468,7 @@
             if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
@@ -40496,9 +40480,9 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -40507,9 +40491,9 @@
             if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-1] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
@@ -40521,11 +40505,11 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -40534,11 +40518,11 @@
             if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-1] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-2] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
@@ -40550,13 +40534,13 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -40565,13 +40549,13 @@
             if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-1] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-2] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-3] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
@@ -40583,15 +40567,15 @@
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -40600,15 +40584,15 @@
             if (eval_breaker & _PY_EVAL_EVENTS_MASK) {
                 UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
+                stack_pointer[-1] = __TOS5;
                 /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
+                stack_pointer[-2] = __TOS4;
                 /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
+                stack_pointer[-3] = __TOS3;
                 /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
+                stack_pointer[-4] = __TOS2;
                 /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(tstate->tracing || eval_breaker == FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version));
