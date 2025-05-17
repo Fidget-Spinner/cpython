@@ -206,7 +206,9 @@ def generate_abstract_interpreter(
     out = CWriter(outfile, 2, False)
     out.emit("\n")
     base_uop_names = set([uop.name for uop in base.uops.values()])
-    for abstract_uop_name in abstract.uops:
+    for abstract_uop_name, uop in abstract.uops.items():
+        if uop.tos_cached_version_of:
+            continue
         assert (
             abstract_uop_name in base_uop_names
         ), f"All abstract uops should override base uops, but {abstract_uop_name} is not."
@@ -219,6 +221,8 @@ def generate_abstract_interpreter(
         if uop.properties.tier == 1:
             continue
         if uop.replicates:
+            continue
+        if uop.tos_cached_version_of:
             continue
         if uop.is_super():
             continue

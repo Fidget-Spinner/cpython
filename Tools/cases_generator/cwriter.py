@@ -140,9 +140,11 @@ class CWriter:
     def maybe_write_spill(self) -> None:
         if self.pending_spill:
             self.pending_spill = False
+            self.emit_str("JIT_SPILL_REGS();\n")
             self.emit_str("_PyFrame_SetStackPointer(frame, stack_pointer);\n")
         elif self.pending_reload:
             self.pending_reload = False
+            self.emit_str("JIT_LOAD_REGS();\n")
             self.emit_str("stack_pointer = _PyFrame_GetStackPointer(frame);\n")
 
     def emit_reload(self) -> None:

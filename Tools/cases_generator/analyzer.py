@@ -186,6 +186,9 @@ class Uop:
     replicates: "Uop | None" = None
     # Size of the instruction(s), only set for uops containing the INSTRUCTION_SIZE macro
     instruction_size: int | None = None
+    tos_cached_version_of: "Uop | None" = None
+    tos_cached_inputs: list[str] | None = None
+    tos_cached_outputs: list[str] | None = None
 
     def dump(self, indent: str) -> None:
         print(
@@ -876,29 +879,57 @@ def make_uop(
         body=op.block,
         properties=compute_properties(op),
     )
+
+    tos_variants = []
+    properties = compute_properties(op)
+    for input_variant in ((), ("__IN_TOS1",), ("__IN_TOS1", "__IN_TOS2")):
+        for output_variant in ((), ("__OUT_TOS1",), ("__OUT_TOS1", "__OUT_TOS2")):
+            if not output_variant and not input_variant:
+                continue
+            if len(output_variant) > len(op.outputs) or len(input_variant) > len(op.inputs):
+                continue
+            name_cached = f"{op.name}___CACHED_START___{'_'.join(input_variant)}___IO___{'_'.join(output_variant)}"
+            cached = Uop(
+                name=name_cached,
+                context=op.context,
+                annotations=op.annotations,
+                stack=analyze_stack(op),
+                caches=analyze_caches(inputs),
+                local_stores=find_variable_stores(op),
+                body=op.block,
+                properties=properties,
+                tos_cached_version_of=result,
+                tos_cached_inputs=input_variant,
+                tos_cached_outputs=output_variant,
+            )
+            tos_variants.append(cached)
+            uops[name_cached] = cached
+
     for anno in op.annotations:
         if anno.startswith("replicate"):
             result.replicated = int(anno[10:-1])
             break
     else:
         return result
-    for oparg in range(result.replicated):
-        name_x = name + "_" + str(oparg)
-        properties = compute_properties(op)
-        properties.oparg = False
-        properties.const_oparg = oparg
-        rep = Uop(
-            name=name_x,
-            context=op.context,
-            annotations=op.annotations,
-            stack=analyze_stack(op),
-            caches=analyze_caches(inputs),
-            local_stores=find_variable_stores(op),
-            body=op.block,
-            properties=properties,
-        )
-        rep.replicates = result
-        uops[name_x] = rep
+
+    for variant in (result, *tos_variants):
+        for oparg in range(result.replicated):
+            name_x = variant.name + "_" + str(oparg)
+            properties = compute_properties(op)
+            properties.oparg = False
+            properties.const_oparg = oparg
+            rep = Uop(
+                name=name_x,
+                context=op.context,
+                annotations=op.annotations,
+                stack=analyze_stack(op),
+                caches=analyze_caches(inputs),
+                local_stores=find_variable_stores(op),
+                body=op.block,
+                properties=properties,
+            )
+            rep.replicates = result
+            uops[name_x] = rep
 
     return result
 
@@ -1111,7 +1142,7 @@ def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop)
 
     size = None
     for inst in instructions.values():
-        if uop in inst.parts:
+        if uop in inst.parts or uop.tos_cached_version_of in inst.parts:
             if size is None:
                 size = inst.size
             if size != inst.size:

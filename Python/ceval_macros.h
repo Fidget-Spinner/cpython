@@ -425,3 +425,6 @@ do { \
     _PyObjectArray_Free(NAME - 1, NAME##_temp);
 
 #define CONVERSION_FAILED(NAME) ((NAME) == NULL)
+
+#define JIT_SPILL_REGS()
+#define JIT_LOAD_REGS()

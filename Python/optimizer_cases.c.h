@@ -1441,8 +1441,11 @@
         }
 
         case _CHECK_EXC_MATCH: {
+            JitOptSymbol *left_st;
             JitOptSymbol *b;
+            left_st = sym_new_not_null(ctx);
             b = sym_new_not_null(ctx);
+            stack_pointer[-2] = left_st;
             stack_pointer[-1] = b;
             break;
         }

@@ -2853,7 +2853,7 @@ dummy_func(
             match = PyStackRef_FromPyObjectSteal(match_o);
         }
 
-        inst(CHECK_EXC_MATCH, (left, right -- left, b)) {
+        inst(CHECK_EXC_MATCH, (left, right -- left_st, b)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
 
@@ -2866,6 +2866,8 @@ dummy_func(
             int res = PyErr_GivenExceptionMatches(left_o, right_o);
             PyStackRef_CLOSE(right);
             b = res ? PyStackRef_True : PyStackRef_False;
+            left_st = left;
+            DEAD(left);
         }
 
          inst(IMPORT_NAME, (level, fromlist -- res)) {

@@ -192,6 +192,9 @@ def generate_tier2(
         out.emit(f"case {uop.name}: {{\n")
         declare_variables(uop, out)
         stack = Stack()
+        if uop.tos_cached_inputs:
+            for cache in reversed(uop.tos_cached_inputs):
+                stack.push(Local.register(cache))
         stack = write_uop(uop, emitter, stack)
         out.start_line()
         if not uop.properties.always_exits:
