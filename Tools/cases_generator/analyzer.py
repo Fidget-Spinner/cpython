@@ -139,6 +139,7 @@ class StackItem:
     size: str
     peek: bool = False
     used: bool = False
+    register: str | None = None
 
     def __str__(self) -> str:
         size = f"[{self.size}]" if self.size else ""
@@ -160,6 +161,18 @@ class StackEffect:
     def __str__(self) -> str:
         return f"({', '.join([str(i) for i in self.inputs])} -- {', '.join([str(i) for i in self.outputs])})"
 
+    def net_effect(self) -> str:
+        # Imports must be here to avoid circular import.
+        from stack import Stack, Local
+        from cwriter import CWriter
+        stack = Stack()
+        null = CWriter.null()
+        for var in reversed(self.inputs):
+            stack.pop(var, null)
+        for var in self.outputs:
+            stack.push(Local.undefined(var))
+
+        return stack.logical_sp.to_c()
 
 @dataclass
 class CacheEntry:
@@ -187,8 +200,8 @@ class Uop:
     # Size of the instruction(s), only set for uops containing the INSTRUCTION_SIZE macro
     instruction_size: int | None = None
     tos_cached_version_of: "Uop | None" = None
-    tos_cached_inputs: list[str] | None = None
-    tos_cached_outputs: list[str] | None = None
+    tos_cached_inputs: int = 0
+    tos_cached_outputs: int = 0
 
     def dump(self, indent: str) -> None:
         print(
@@ -363,7 +376,8 @@ def check_unused(stack: list[StackItem], input_names: dict[str, lexer.Token]) ->
 
 
 def analyze_stack(
-    op: parser.InstDef | parser.Pseudo, replace_op_arg_1: str | None = None
+    op: parser.InstDef | parser.Pseudo, replace_op_arg_1: str | None = None,
+    num_live_registers_out: int | None = None, num_registers_for_output: int | None = None
 ) -> StackEffect:
     inputs: list[StackItem] = [
         convert_stack_item(i, replace_op_arg_1)
@@ -406,6 +420,15 @@ def analyze_stack(
             if variable_used(op, output.name):
                 output.used = True
     check_unused(inputs, input_names)
+    if num_registers_for_output is not None and num_live_registers_out is not None:
+        for outp in reversed(outputs):
+            if num_registers_for_output <= 0 or num_live_registers_out <= 0:
+                break
+            assert 0 < num_live_registers_out <= 6, num_live_registers_out
+            outp.register = f"__TOS{num_live_registers_out}"
+            num_live_registers_out -= 1
+            num_registers_for_output -= 1
+
     return StackEffect(inputs, outputs)
 
 
@@ -638,6 +661,7 @@ NON_ESCAPING_FUNCTIONS = (
     "_PyLong_DigitCount",
     "_PyLong_IsCompact",
     "_PyLong_IsNegative",
+    "_PyLong_Add",
     "_PyLong_IsNonNegativeCompact",
     "_PyLong_IsZero",
     "_PyManagedDictPointer_IsValues",
@@ -882,25 +906,46 @@ def make_uop(
 
     tos_variants = []
     properties = compute_properties(op)
-    for input_variant in ((), ("__IN_TOS1",), ("__IN_TOS1", "__IN_TOS2")):
-        for output_variant in ((), ("__OUT_TOS1",), ("__OUT_TOS1", "__OUT_TOS2")):
-            if not output_variant and not input_variant:
+
+    stack=analyze_stack(op)
+
+    try:
+        net_effect_static = int(stack.net_effect())
+    except ValueError:
+        net_effect_static = None
+    # Don't stack cache type casted items, as we expect the registers to be
+    # _PyStackRef.
+    for effect in (*stack.inputs, *stack.outputs):
+        if effect.type or effect.size:
+            net_effect_static = None
+            break
+    # Make sure we only consume up to 6 additional registers.
+    # Things with variadic args can't be determined.
+    if net_effect_static is not None:
+        for num_live_registers_in in range(0, 7):
+            num_live_registers_out = num_live_registers_in + net_effect_static
+            # Doesn't need a register variant.
+            if num_live_registers_in == 0 and num_live_registers_out == 0:
                 continue
-            if len(output_variant) > len(op.outputs) or len(input_variant) > len(op.inputs):
+            # Using too many registers
+            if not (0 <= num_live_registers_out):
                 continue
-            name_cached = f"{op.name}___CACHED_START___{'_'.join(input_variant)}___IO___{'_'.join(output_variant)}"
+            if num_live_registers_out > 6:
+                num_live_registers_out = 0
+            name_cached = f"{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
+            stack=analyze_stack(op, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)
             cached = Uop(
                 name=name_cached,
                 context=op.context,
                 annotations=op.annotations,
-                stack=analyze_stack(op),
+                stack=stack,
                 caches=analyze_caches(inputs),
                 local_stores=find_variable_stores(op),
                 body=op.block,
                 properties=properties,
                 tos_cached_version_of=result,
-                tos_cached_inputs=input_variant,
-                tos_cached_outputs=output_variant,
+                tos_cached_inputs=num_live_registers_in,
+                tos_cached_outputs=num_live_registers_out,
             )
             tos_variants.append(cached)
             uops[name_cached] = cached

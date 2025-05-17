@@ -143,6 +143,9 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
         elif uop.properties.const_oparg >= 0:
             emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
             emitter.emit(f"assert(oparg == CURRENT_OPARG());\n")
+        if uop.tos_cached_inputs:
+            emitter.emit("#undef N_TOS\n")
+            emitter.emit(f"#define N_TOS {uop.tos_cached_inputs}\n")
         storage = Storage.for_uop(stack, uop, emitter.out)
         idx = 0
         for cache in uop.caches:
@@ -156,6 +159,8 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
                 idx += 1
         _, storage = emitter.emit_tokens(uop, storage, None, False)
         storage.flush(emitter.out)
+        if uop.name.endswith("0out"):
+            emitter.emit("JIT_SPILL_TOS(N_TOS);\n")
     except StackError as ex:
         raise analysis_error(ex.args[0], uop.body.open) from None
     return storage.stack
@@ -193,8 +198,9 @@ def generate_tier2(
         declare_variables(uop, out)
         stack = Stack()
         if uop.tos_cached_inputs:
-            for cache in reversed(uop.tos_cached_inputs):
-                stack.push(Local.register(cache))
+            for cache_idx in reversed(range(1, min(len(uop.stack.inputs), uop.tos_cached_inputs)+1)):
+                assert 6 >= cache_idx > 0
+                stack.push(Local.register(f"__TOS{cache_idx}"))
         stack = write_uop(uop, emitter, stack)
         out.start_line()
         if not uop.properties.always_exits:

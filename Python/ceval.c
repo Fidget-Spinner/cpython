@@ -1052,6 +1052,12 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     tstate->current_frame = frame;
     entry.frame.localsplus[0] = PyStackRef_NULL;
 #ifdef _Py_TIER2
+    _PyStackRef __TOS1 = PyStackRef_NULL;
+    _PyStackRef __TOS2 = PyStackRef_NULL;
+    _PyStackRef __TOS3 = PyStackRef_NULL;
+    _PyStackRef __TOS4 = PyStackRef_NULL;
+    _PyStackRef __TOS5 = PyStackRef_NULL;
+    _PyStackRef __TOS6 = PyStackRef_NULL;
     if (tstate->current_executor != NULL) {
         entry.frame.localsplus[0] = PyStackRef_FromPyObjectNew(tstate->current_executor);
         tstate->current_executor = NULL;

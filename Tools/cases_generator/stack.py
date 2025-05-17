@@ -168,7 +168,7 @@ class Local:
 
     @staticmethod
     def register(name: str) -> "Local":
-        item = StackItem(name, None, "", False, True)
+        item = StackItem(name, None, "", False, True, register=name)
         return Local(item, None, True)
 
     def kill(self) -> None:
@@ -297,7 +297,10 @@ class Stack:
     ) -> None:
         cast = f"({cast_type})" if var.type else ""
         bits = ".bits" if cast and extract_bits else ""
-        out.emit(f"stack_pointer[{stack_offset.to_c()}]{bits} = {cast}{var.name};\n")
+        if var.register:
+            out.emit(f"{var.register}{bits} = {cast}{var.name};\n")
+        else:
+            out.emit(f"stack_pointer[{stack_offset.to_c()}]{bits} = {cast}{var.name};\n")
 
     def _save_physical_sp(self, out: CWriter) -> None:
         if self.physical_sp != self.logical_sp:
