@@ -199,7 +199,7 @@ def generate_tier2(
             continue
         out.emit(f"case {uop.name}: {{\n")
         declare_variables(uop, out)
-        stack = Stack(num_in_tos_cache=uop.tos_cached_inputs)
+        stack = Stack(num_in_tos_cache=uop.tos_cached_base)
         stack = write_uop(uop, emitter, stack)
         out.start_line()
         if not uop.properties.always_exits:

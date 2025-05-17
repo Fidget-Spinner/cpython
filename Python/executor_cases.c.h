@@ -6345,8 +6345,6 @@
             PyStackRef_XCLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -6384,10 +6382,8 @@
             PyStackRef_XCLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -6425,12 +6421,10 @@
             PyStackRef_XCLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -6468,14 +6462,12 @@
             PyStackRef_XCLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -6513,16 +6505,14 @@
             PyStackRef_XCLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -6560,18 +6550,16 @@
             PyStackRef_XCLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -8426,8 +8414,6 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -8451,10 +8437,8 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -8478,12 +8462,10 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -8507,14 +8489,12 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -8538,16 +8518,14 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -8571,18 +8549,16 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -8781,8 +8757,6 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -8806,10 +8780,8 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -8833,12 +8805,10 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -8862,14 +8832,12 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -8893,16 +8861,14 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -8926,18 +8892,16 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -8966,8 +8930,6 @@
             PyStackRef_CLOSE(receiver);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9001,10 +8963,6 @@
             PyStackRef_CLOSE(receiver);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -9038,12 +8996,8 @@
             PyStackRef_CLOSE(receiver);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9077,14 +9031,10 @@
             PyStackRef_CLOSE(receiver);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -9118,16 +9068,12 @@
             PyStackRef_CLOSE(receiver);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -9161,18 +9107,14 @@
             PyStackRef_CLOSE(receiver);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -9234,8 +9176,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9281,10 +9221,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9330,12 +9268,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -9381,14 +9317,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -9434,16 +9368,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -9489,18 +9421,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -9546,8 +9476,6 @@
             ? PyStackRef_True : PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9571,10 +9499,8 @@
             ? PyStackRef_True : PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9598,12 +9524,10 @@
             ? PyStackRef_True : PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -9627,14 +9551,12 @@
             ? PyStackRef_True : PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -9658,16 +9580,14 @@
             ? PyStackRef_True : PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -9691,18 +9611,16 @@
             ? PyStackRef_True : PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -9759,8 +9677,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9806,10 +9722,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -9855,12 +9769,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -9906,14 +9818,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -9959,16 +9869,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -10014,18 +9922,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -10382,8 +10288,6 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -10447,10 +10351,8 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -10518,12 +10420,10 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -10595,14 +10495,12 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -10678,16 +10576,14 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -10767,18 +10663,16 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -11667,8 +11561,6 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -11705,10 +11597,8 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -11745,12 +11635,10 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -11787,14 +11675,12 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -11831,16 +11717,14 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -11877,18 +11761,16 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -11939,8 +11821,6 @@
             res = PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -11978,10 +11858,8 @@
             res = PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -12023,12 +11901,10 @@
             res = PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -12074,14 +11950,12 @@
             res = PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -12131,16 +12005,14 @@
             res = PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -12194,18 +12066,16 @@
             res = PyStackRef_False;
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -12819,8 +12689,6 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -12870,10 +12738,8 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -12923,12 +12789,10 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -12978,14 +12842,12 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -13035,16 +12897,14 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -13094,18 +12954,16 @@
             }
             stack_pointer[-1] = res;
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -13163,8 +13021,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -13198,10 +13054,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -13235,12 +13089,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -13274,14 +13126,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -13315,16 +13165,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -13358,18 +13206,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -13431,8 +13277,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -13478,10 +13322,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -13527,12 +13369,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -13578,14 +13418,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -13631,16 +13469,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -13686,18 +13522,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -14299,8 +14133,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -14358,10 +14190,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -14419,12 +14247,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -14482,14 +14306,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -14547,16 +14367,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -14614,18 +14430,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -14681,8 +14493,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -14736,10 +14546,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -14793,12 +14599,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -14852,14 +14654,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -14913,16 +14711,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -14976,18 +14770,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -15043,8 +14833,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -15102,10 +14890,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -15163,12 +14947,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -15226,14 +15006,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -15291,16 +15067,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -15358,18 +15130,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -15976,8 +15744,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16033,10 +15799,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -16092,12 +15854,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16153,14 +15911,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -16216,16 +15970,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -16281,18 +16031,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -16348,8 +16094,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16405,10 +16149,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -16464,12 +16204,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16525,14 +16261,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -16588,16 +16320,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -16653,18 +16381,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -16720,8 +16444,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16777,10 +16499,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -16836,12 +16554,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -16897,14 +16611,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -16960,16 +16670,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -17025,18 +16731,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -17091,8 +16793,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -17146,10 +16846,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -17203,12 +16899,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -17262,14 +16954,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -17323,16 +17011,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -17386,18 +17070,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -17475,10 +17155,6 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -17584,12 +17260,8 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -17699,14 +17371,10 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -17820,16 +17488,12 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -17947,18 +17611,14 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -18443,8 +18103,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -18510,10 +18168,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -18579,12 +18233,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -18650,14 +18300,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -18723,16 +18369,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -18798,18 +18440,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -18883,10 +18521,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -18968,12 +18602,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -19055,14 +18683,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -19144,16 +18766,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -19235,18 +18851,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -19332,14 +18942,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -19429,16 +19031,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -19528,18 +19122,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -19642,8 +19228,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -19772,10 +19356,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -19916,12 +19496,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -20074,14 +19650,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -20246,16 +19818,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -20432,18 +20000,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -20532,8 +20096,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -20607,10 +20169,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -20684,12 +20242,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -20763,14 +20317,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -20844,16 +20394,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -20927,18 +20473,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -21021,8 +20563,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -21126,10 +20666,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -21245,12 +20781,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -21378,14 +20910,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -21525,16 +21053,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -21686,18 +21210,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -22327,8 +21847,6 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -22417,10 +21935,6 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -22517,12 +22031,8 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -22627,14 +22137,10 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -22747,16 +22253,12 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -22877,18 +22379,14 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -23516,8 +23014,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -23601,10 +23097,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -23688,12 +23180,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -23777,14 +23265,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -23868,16 +23352,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -23961,18 +23441,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -24928,12 +24404,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -24995,14 +24465,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25064,16 +24528,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -25135,18 +24593,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -25239,12 +24691,6 @@
             Py_DECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -25380,14 +24826,8 @@
             Py_DECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25535,16 +24975,10 @@
             Py_DECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -25704,18 +25138,12 @@
             Py_DECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -25786,12 +25214,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -25845,14 +25267,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -25906,16 +25322,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -25969,18 +25379,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -26033,10 +25437,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -26088,12 +25488,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -26145,14 +25541,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -26204,16 +25596,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -26265,18 +25653,14 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -26351,8 +25735,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -26402,10 +25784,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -26455,12 +25835,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -26510,14 +25888,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -26567,16 +25943,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -26626,18 +26000,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -26696,8 +26068,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -26765,10 +26135,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -26836,12 +26202,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -26909,14 +26271,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -26984,16 +26342,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -27061,18 +26415,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -27155,8 +26505,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -27206,10 +26554,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -27259,12 +26605,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -27314,14 +26658,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -27371,16 +26713,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -27430,18 +26770,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -27575,8 +26913,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -27686,10 +27022,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -27799,12 +27133,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -27914,14 +27246,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -28031,16 +27361,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -28150,18 +27478,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -28550,8 +27876,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -28599,10 +27923,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -28650,12 +27972,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -28703,14 +28023,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -28758,16 +28076,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -28815,18 +28131,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -28986,8 +28300,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -29069,10 +28381,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -29154,12 +28464,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -29241,14 +28549,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -29330,16 +28636,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -29421,18 +28725,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -29488,8 +28790,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -29519,10 +28819,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -29552,12 +28850,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -29587,14 +28883,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -29624,16 +28918,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -29663,18 +28955,16 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -30304,8 +29594,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -30387,10 +29675,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -30472,12 +29758,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -30559,14 +29843,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -30648,16 +29930,14 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -30739,18 +30019,16 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -31308,8 +30586,6 @@
             PyStackRef_CLOSE(seq);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -31371,10 +30647,8 @@
             PyStackRef_CLOSE(seq);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -31440,12 +30714,10 @@
             PyStackRef_CLOSE(seq);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -31515,14 +30787,12 @@
             PyStackRef_CLOSE(seq);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -31596,16 +30866,14 @@
             PyStackRef_CLOSE(seq);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -31645,18 +30913,16 @@
             PyStackRef_CLOSE(seq);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -31790,10 +31056,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -31849,12 +31111,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -31910,14 +31168,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -31973,16 +31227,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -32038,18 +31288,14 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -32097,8 +31343,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -32138,10 +31382,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -32181,12 +31423,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -32226,14 +31466,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -32273,16 +31511,14 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -32322,18 +31558,16 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -32373,8 +31607,6 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -32414,10 +31646,8 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -32457,12 +31687,10 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -32502,14 +31730,12 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -32549,16 +31775,14 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -32598,18 +31822,16 @@
                 JUMP_TO_ERROR();
             }
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -36586,8 +35808,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -36667,10 +35887,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -36750,12 +35968,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -36835,14 +36051,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -36922,16 +36136,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -37011,18 +36223,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -37433,8 +36643,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -37462,10 +36670,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -37493,12 +36699,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -37526,14 +36730,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -37561,16 +36763,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -37598,18 +36798,16 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -37991,8 +37189,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38056,10 +37252,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -38123,12 +37315,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -38192,14 +37380,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -38263,16 +37447,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -38336,18 +37516,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -39283,10 +38459,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -39412,12 +38584,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -39551,14 +38717,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -39700,16 +38860,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -39859,18 +39013,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -39992,8 +39140,6 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -40144,10 +39290,6 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -40306,12 +39448,6 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -40478,14 +39614,8 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -40660,16 +39790,10 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -40852,18 +39976,12 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -42144,8 +41262,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -42225,10 +41341,8 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -42316,12 +41430,10 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -42417,14 +41529,12 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -42528,16 +41638,14 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -42649,18 +41757,16 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -42799,8 +41905,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -42924,10 +42028,8 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -43067,12 +42169,10 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -43228,14 +42328,12 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -43407,16 +42505,14 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -43604,18 +42700,16 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -43826,8 +42920,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -44021,10 +43113,8 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -44246,12 +43336,10 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -44501,14 +43589,12 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -44786,16 +43872,14 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -45101,18 +44185,16 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -45253,8 +44335,6 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -45335,10 +44415,8 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -45427,12 +44505,10 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -45529,14 +44605,12 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -45641,16 +44715,14 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -45763,18 +44835,16 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -46279,8 +45349,6 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -46317,10 +45385,8 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -46357,12 +45423,10 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -46399,14 +45463,12 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -46443,16 +45505,14 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -46489,18 +45549,16 @@
             PyStackRef_CLOSE(tmp);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -46958,10 +46016,6 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -47017,12 +46071,8 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -47078,14 +46128,10 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -47141,16 +46187,12 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -47206,18 +46248,14 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -47338,10 +46376,6 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -47551,12 +46585,8 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -47790,14 +46820,10 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -48055,16 +47081,12 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -48346,18 +47368,14 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -48456,10 +47474,6 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -48523,12 +47537,8 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -48596,14 +47606,10 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -48675,16 +47681,12 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -48760,18 +47762,14 @@
             Py_XDECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -48843,8 +47841,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -48936,10 +47932,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -49031,12 +48023,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -49128,14 +48116,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -49227,16 +48211,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -49328,18 +48308,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -49408,8 +48384,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -49455,10 +48429,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -49504,12 +48474,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -49555,14 +48521,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -49608,16 +48570,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -49663,18 +48621,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -49734,8 +48688,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -49817,10 +48769,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -49910,12 +48858,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -50013,14 +48957,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -50126,16 +49066,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -50249,18 +49185,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -50318,8 +49250,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -50369,10 +49299,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -50422,12 +49348,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -50477,14 +49399,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -50534,16 +49452,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -50593,18 +49507,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -50657,8 +49567,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -50714,10 +49622,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -50773,12 +49677,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -50834,14 +49734,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -50897,16 +49793,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -50962,18 +49854,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -51034,8 +49922,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -51101,10 +49987,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -51170,12 +50052,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -51241,14 +50119,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -51314,16 +50188,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -51389,18 +50259,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -51743,8 +50609,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -51814,10 +50678,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -51887,12 +50747,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -51962,14 +50818,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -52039,16 +50891,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -52118,18 +50966,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -52199,8 +51043,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -52270,10 +51112,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -52343,12 +51181,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -52418,14 +51252,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -52495,16 +51325,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -52574,18 +51400,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -52749,8 +51571,6 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -52880,10 +51700,6 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -53013,12 +51829,8 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -53148,14 +51960,10 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -53285,16 +52093,12 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -53424,18 +52228,14 @@
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -53567,8 +52367,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -53636,10 +52434,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -53707,12 +52501,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -53780,14 +52570,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -53855,16 +52641,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -53932,18 +52714,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -54011,8 +52789,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -54080,10 +52856,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -54151,12 +52923,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -54224,14 +52992,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -54299,16 +53063,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -54376,18 +53136,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -54826,8 +53582,6 @@
             }
             stack_pointer[-1] = b;
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -54870,10 +53624,8 @@
             }
             stack_pointer[-1] = b;
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -54916,12 +53668,10 @@
             }
             stack_pointer[-1] = b;
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -54964,14 +53714,12 @@
             }
             stack_pointer[-1] = b;
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -55014,16 +53762,14 @@
             }
             stack_pointer[-1] = b;
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -55066,18 +53812,16 @@
             }
             stack_pointer[-1] = b;
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -55488,10 +54232,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -55585,12 +54325,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -55684,14 +54418,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -55785,16 +54513,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -55888,18 +54610,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -56764,8 +55480,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -56821,10 +55535,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -56880,12 +55592,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -56941,14 +55651,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -57004,16 +55712,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -57069,18 +55775,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -57186,8 +55890,6 @@
             }
             stack_pointer[-1] = iter;
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -57266,10 +55968,8 @@
             }
             stack_pointer[-1] = iter;
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -57348,12 +56048,10 @@
             }
             stack_pointer[-1] = iter;
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -57432,14 +56130,12 @@
             }
             stack_pointer[-1] = iter;
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -57518,16 +56214,14 @@
             }
             stack_pointer[-1] = iter;
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -57606,18 +56300,16 @@
             }
             stack_pointer[-1] = iter;
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -63364,8 +62056,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -63411,10 +62101,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -63460,12 +62148,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -63511,14 +62197,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -63564,16 +62248,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -63597,18 +62279,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -64328,8 +63008,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -64371,10 +63049,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -64416,12 +63092,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -64463,14 +63137,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -64512,16 +63184,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -64543,18 +63213,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -64661,8 +63329,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -64706,10 +63372,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -64753,12 +63417,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -64802,14 +63464,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -64853,16 +63513,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -64885,18 +63543,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -64961,8 +63617,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -65006,10 +63660,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -65053,12 +63705,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -65102,14 +63752,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -65153,16 +63801,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -65206,18 +63852,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -65284,8 +63928,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -65331,10 +63973,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -65380,12 +64020,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -65431,14 +64069,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -65484,16 +64120,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -65539,18 +64173,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -65956,8 +64588,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -65999,10 +64629,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -66044,12 +64672,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -66091,14 +64717,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -66140,16 +64764,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -66171,18 +64793,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -68240,10 +66860,6 @@
             PyStackRef_CLOSE(arg);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -68293,12 +66909,6 @@
             PyStackRef_CLOSE(arg);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -68348,14 +66958,8 @@
             PyStackRef_CLOSE(arg);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -68405,16 +67009,10 @@
             PyStackRef_CLOSE(arg);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -68464,18 +67062,12 @@
             PyStackRef_CLOSE(arg);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -68808,10 +67400,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -68877,12 +67465,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -68948,14 +67530,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -69021,16 +67597,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -69096,18 +67666,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -69448,10 +68012,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -69517,12 +68077,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -69588,14 +68142,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -69661,16 +68209,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -69736,18 +68278,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -69883,8 +68419,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -69918,10 +68452,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -69955,12 +68487,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -69994,14 +68524,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -70035,16 +68563,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -70078,18 +68604,16 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -70739,10 +69263,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -70822,12 +69342,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -70907,14 +69421,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -70994,16 +69502,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -71083,18 +69585,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -71466,12 +69962,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -71559,14 +70049,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -71654,16 +70136,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -71751,18 +70225,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -71883,12 +70349,6 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -72058,14 +70518,8 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -72251,16 +70705,10 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -72462,18 +70910,12 @@
             SKIP_OVER(1);
             #endif
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -73612,8 +72054,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -73667,10 +72107,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -73724,12 +72162,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -73783,14 +72219,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -73844,16 +72278,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -73907,18 +72339,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -73968,8 +72398,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -74015,10 +72443,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -74064,12 +72488,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -74115,14 +72535,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -74168,16 +72584,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -74223,18 +72635,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -74836,8 +73244,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -74891,10 +73297,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -74948,12 +73352,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -75007,14 +73409,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -75068,16 +73468,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -75131,18 +73529,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -75228,8 +73624,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -75289,10 +73683,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -75352,12 +73744,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -75417,14 +73807,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -75484,16 +73872,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -75553,18 +73939,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -75624,8 +74008,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -75685,10 +74067,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -75748,12 +74126,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -75813,14 +74187,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -75880,16 +74250,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -75949,18 +74315,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -76036,8 +74398,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -76104,10 +74464,6 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -76174,12 +74530,8 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -76246,14 +74598,10 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -76320,16 +74668,12 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -76396,18 +74740,14 @@
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -76692,6 +75032,35 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            /* Cache spill */
+            break;
+        }
+
+        case _GUARD_IS_TRUE_POP___CACHED_2in_1out: {
+            _PyStackRef flag;
+            flag = __TOS2;
+            int is_true = PyStackRef_IsTrue(flag);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            if (!is_true) {
+                UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
+        case _GUARD_IS_TRUE_POP___CACHED_2in_0out: {
+            _PyStackRef flag;
+            flag = __TOS2;
+            int is_true = PyStackRef_IsTrue(flag);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            if (!is_true) {
+                UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
                 stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
@@ -76702,9 +75071,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_2in_1out: {
+        case _GUARD_IS_TRUE_POP___CACHED_3in_2out: {
             _PyStackRef flag;
-            flag = __TOS2;
+            flag = __TOS3;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76719,9 +75088,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_2in_0out: {
+        case _GUARD_IS_TRUE_POP___CACHED_3in_0out: {
             _PyStackRef flag;
-            flag = __TOS2;
+            flag = __TOS3;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76741,9 +75110,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_3in_2out: {
+        case _GUARD_IS_TRUE_POP___CACHED_4in_3out: {
             _PyStackRef flag;
-            flag = __TOS3;
+            flag = __TOS4;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76760,9 +75129,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_3in_0out: {
+        case _GUARD_IS_TRUE_POP___CACHED_4in_0out: {
             _PyStackRef flag;
-            flag = __TOS3;
+            flag = __TOS4;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76786,9 +75155,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_4in_3out: {
+        case _GUARD_IS_TRUE_POP___CACHED_5in_4out: {
             _PyStackRef flag;
-            flag = __TOS4;
+            flag = __TOS5;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76807,9 +75176,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_4in_0out: {
+        case _GUARD_IS_TRUE_POP___CACHED_5in_0out: {
             _PyStackRef flag;
-            flag = __TOS4;
+            flag = __TOS5;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76837,9 +75206,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_5in_4out: {
+        case _GUARD_IS_TRUE_POP___CACHED_6in_5out: {
             _PyStackRef flag;
-            flag = __TOS5;
+            flag = __TOS6;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76860,9 +75229,9 @@
             break;
         }
 
-        case _GUARD_IS_TRUE_POP___CACHED_5in_0out: {
+        case _GUARD_IS_TRUE_POP___CACHED_6in_0out: {
             _PyStackRef flag;
-            flag = __TOS5;
+            flag = __TOS6;
             int is_true = PyStackRef_IsTrue(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -76891,69 +75260,6 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
-            break;
-        }
-
-        case _GUARD_IS_TRUE_POP___CACHED_6in_5out: {
-            _PyStackRef flag;
-            flag = __TOS6;
-            int is_true = PyStackRef_IsTrue(flag);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            if (!is_true) {
-                UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache 6 */
-                stack_pointer[-1] = __TOS6;
-                /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
-                /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
-                /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
-                /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
-                /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
-                JUMP_TO_JUMP_TARGET();
-            }
-            break;
-        }
-
-        case _GUARD_IS_TRUE_POP___CACHED_6in_0out: {
-            _PyStackRef flag;
-            flag = __TOS6;
-            int is_true = PyStackRef_IsTrue(flag);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            if (!is_true) {
-                UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache 6 */
-                stack_pointer[-1] = __TOS6;
-                /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
-                /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
-                /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
-                /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
-                /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
-                JUMP_TO_JUMP_TARGET();
-            }
-            /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
             break;
         }
 
@@ -76978,6 +75284,35 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            /* Cache spill */
+            break;
+        }
+
+        case _GUARD_IS_FALSE_POP___CACHED_2in_1out: {
+            _PyStackRef flag;
+            flag = __TOS2;
+            int is_false = PyStackRef_IsFalse(flag);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            if (!is_false) {
+                UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
+        case _GUARD_IS_FALSE_POP___CACHED_2in_0out: {
+            _PyStackRef flag;
+            flag = __TOS2;
+            int is_false = PyStackRef_IsFalse(flag);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            if (!is_false) {
+                UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
                 stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
@@ -76988,9 +75323,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_2in_1out: {
+        case _GUARD_IS_FALSE_POP___CACHED_3in_2out: {
             _PyStackRef flag;
-            flag = __TOS2;
+            flag = __TOS3;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77005,9 +75340,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_2in_0out: {
+        case _GUARD_IS_FALSE_POP___CACHED_3in_0out: {
             _PyStackRef flag;
-            flag = __TOS2;
+            flag = __TOS3;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77027,9 +75362,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_3in_2out: {
+        case _GUARD_IS_FALSE_POP___CACHED_4in_3out: {
             _PyStackRef flag;
-            flag = __TOS3;
+            flag = __TOS4;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77046,9 +75381,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_3in_0out: {
+        case _GUARD_IS_FALSE_POP___CACHED_4in_0out: {
             _PyStackRef flag;
-            flag = __TOS3;
+            flag = __TOS4;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77072,9 +75407,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_4in_3out: {
+        case _GUARD_IS_FALSE_POP___CACHED_5in_4out: {
             _PyStackRef flag;
-            flag = __TOS4;
+            flag = __TOS5;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77093,9 +75428,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_4in_0out: {
+        case _GUARD_IS_FALSE_POP___CACHED_5in_0out: {
             _PyStackRef flag;
-            flag = __TOS4;
+            flag = __TOS5;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77123,9 +75458,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_5in_4out: {
+        case _GUARD_IS_FALSE_POP___CACHED_6in_5out: {
             _PyStackRef flag;
-            flag = __TOS5;
+            flag = __TOS6;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77146,9 +75481,9 @@
             break;
         }
 
-        case _GUARD_IS_FALSE_POP___CACHED_5in_0out: {
+        case _GUARD_IS_FALSE_POP___CACHED_6in_0out: {
             _PyStackRef flag;
-            flag = __TOS5;
+            flag = __TOS6;
             int is_false = PyStackRef_IsFalse(flag);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77177,69 +75512,6 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
-            break;
-        }
-
-        case _GUARD_IS_FALSE_POP___CACHED_6in_5out: {
-            _PyStackRef flag;
-            flag = __TOS6;
-            int is_false = PyStackRef_IsFalse(flag);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            if (!is_false) {
-                UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache 6 */
-                stack_pointer[-1] = __TOS6;
-                /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
-                /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
-                /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
-                /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
-                /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
-                JUMP_TO_JUMP_TARGET();
-            }
-            break;
-        }
-
-        case _GUARD_IS_FALSE_POP___CACHED_6in_0out: {
-            _PyStackRef flag;
-            flag = __TOS6;
-            int is_false = PyStackRef_IsFalse(flag);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            if (!is_false) {
-                UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache 6 */
-                stack_pointer[-1] = __TOS6;
-                /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
-                /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
-                /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
-                /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
-                /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
-                JUMP_TO_JUMP_TARGET();
-            }
-            /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
             break;
         }
 
@@ -77268,6 +75540,49 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            /* Cache spill */
+            break;
+        }
+
+        case _GUARD_IS_NONE_POP___CACHED_2in_1out: {
+            _PyStackRef val;
+            val = __TOS2;
+            int is_none = PyStackRef_IsNone(val);
+            if (!is_none) {
+                stack_pointer += -1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyStackRef_CLOSE(val);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _GUARD_IS_NONE_POP___CACHED_2in_0out: {
+            _PyStackRef val;
+            val = __TOS2;
+            int is_none = PyStackRef_IsNone(val);
+            if (!is_none) {
+                stack_pointer += -1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyStackRef_CLOSE(val);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                if (1) {
+                    UOP_STAT_INC(uopcode, miss);
                     /* Flushing cache 1 */
                     stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
@@ -77281,9 +75596,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_2in_1out: {
+        case _GUARD_IS_NONE_POP___CACHED_3in_2out: {
             _PyStackRef val;
-            val = __TOS2;
+            val = __TOS3;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77305,9 +75620,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_2in_0out: {
+        case _GUARD_IS_NONE_POP___CACHED_3in_0out: {
             _PyStackRef val;
-            val = __TOS2;
+            val = __TOS3;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77334,9 +75649,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_3in_2out: {
+        case _GUARD_IS_NONE_POP___CACHED_4in_3out: {
             _PyStackRef val;
-            val = __TOS3;
+            val = __TOS4;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77360,9 +75675,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_3in_0out: {
+        case _GUARD_IS_NONE_POP___CACHED_4in_0out: {
             _PyStackRef val;
-            val = __TOS3;
+            val = __TOS4;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77393,9 +75708,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_4in_3out: {
+        case _GUARD_IS_NONE_POP___CACHED_5in_4out: {
             _PyStackRef val;
-            val = __TOS4;
+            val = __TOS5;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77421,9 +75736,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_4in_0out: {
+        case _GUARD_IS_NONE_POP___CACHED_5in_0out: {
             _PyStackRef val;
-            val = __TOS4;
+            val = __TOS5;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77458,9 +75773,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_5in_4out: {
+        case _GUARD_IS_NONE_POP___CACHED_6in_5out: {
             _PyStackRef val;
-            val = __TOS5;
+            val = __TOS6;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77488,9 +75803,9 @@
             break;
         }
 
-        case _GUARD_IS_NONE_POP___CACHED_5in_0out: {
+        case _GUARD_IS_NONE_POP___CACHED_6in_0out: {
             _PyStackRef val;
-            val = __TOS5;
+            val = __TOS6;
             int is_none = PyStackRef_IsNone(val);
             if (!is_none) {
                 stack_pointer += -1;
@@ -77526,83 +75841,6 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
-            break;
-        }
-
-        case _GUARD_IS_NONE_POP___CACHED_6in_5out: {
-            _PyStackRef val;
-            val = __TOS6;
-            int is_none = PyStackRef_IsNone(val);
-            if (!is_none) {
-                stack_pointer += -1;
-                assert(WITHIN_STACK_BOUNDS());
-                _PyFrame_SetStackPointer(frame, stack_pointer);
-                PyStackRef_CLOSE(val);
-                stack_pointer = _PyFrame_GetStackPointer(frame);
-                if (1) {
-                    UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache 6 */
-                    stack_pointer[-1] = __TOS6;
-                    /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
-                    /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
-                    /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
-                    /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
-                    /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
-                    JUMP_TO_JUMP_TARGET();
-                }
-            }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            break;
-        }
-
-        case _GUARD_IS_NONE_POP___CACHED_6in_0out: {
-            _PyStackRef val;
-            val = __TOS6;
-            int is_none = PyStackRef_IsNone(val);
-            if (!is_none) {
-                stack_pointer += -1;
-                assert(WITHIN_STACK_BOUNDS());
-                _PyFrame_SetStackPointer(frame, stack_pointer);
-                PyStackRef_CLOSE(val);
-                stack_pointer = _PyFrame_GetStackPointer(frame);
-                if (1) {
-                    UOP_STAT_INC(uopcode, miss);
-                    /* Flushing cache 6 */
-                    stack_pointer[-1] = __TOS6;
-                    /* Flushing cache 5 */
-                    stack_pointer[-2] = __TOS5;
-                    /* Flushing cache 4 */
-                    stack_pointer[-3] = __TOS4;
-                    /* Flushing cache 3 */
-                    stack_pointer[-4] = __TOS3;
-                    /* Flushing cache 2 */
-                    stack_pointer[-5] = __TOS2;
-                    /* Flushing cache 1 */
-                    stack_pointer[-6] = __TOS1;
-                    JUMP_TO_JUMP_TARGET();
-                }
-            }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
             break;
         }
 
@@ -77637,6 +75875,41 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            /* Cache spill */
+            break;
+        }
+
+        case _GUARD_IS_NOT_NONE_POP___CACHED_2in_1out: {
+            _PyStackRef val;
+            val = __TOS2;
+            int is_none = PyStackRef_IsNone(val);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(val);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (is_none) {
+                UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
+        case _GUARD_IS_NOT_NONE_POP___CACHED_2in_0out: {
+            _PyStackRef val;
+            val = __TOS2;
+            int is_none = PyStackRef_IsNone(val);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyStackRef_CLOSE(val);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (is_none) {
+                UOP_STAT_INC(uopcode, miss);
                 /* Flushing cache 1 */
                 stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
@@ -77647,9 +75920,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_2in_1out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_3in_2out: {
             _PyStackRef val;
-            val = __TOS2;
+            val = __TOS3;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77667,9 +75940,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_2in_0out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_3in_0out: {
             _PyStackRef val;
-            val = __TOS2;
+            val = __TOS3;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77692,9 +75965,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_3in_2out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_4in_3out: {
             _PyStackRef val;
-            val = __TOS3;
+            val = __TOS4;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77714,9 +75987,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_3in_0out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_4in_0out: {
             _PyStackRef val;
-            val = __TOS3;
+            val = __TOS4;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77743,9 +76016,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_4in_3out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_5in_4out: {
             _PyStackRef val;
-            val = __TOS4;
+            val = __TOS5;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77767,9 +76040,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_4in_0out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_5in_0out: {
             _PyStackRef val;
-            val = __TOS4;
+            val = __TOS5;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77800,9 +76073,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_5in_4out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_6in_5out: {
             _PyStackRef val;
-            val = __TOS5;
+            val = __TOS6;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77826,9 +76099,9 @@
             break;
         }
 
-        case _GUARD_IS_NOT_NONE_POP___CACHED_5in_0out: {
+        case _GUARD_IS_NOT_NONE_POP___CACHED_6in_0out: {
             _PyStackRef val;
-            val = __TOS5;
+            val = __TOS6;
             int is_none = PyStackRef_IsNone(val);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -77860,75 +76133,6 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
-            break;
-        }
-
-        case _GUARD_IS_NOT_NONE_POP___CACHED_6in_5out: {
-            _PyStackRef val;
-            val = __TOS6;
-            int is_none = PyStackRef_IsNone(val);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(val);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
-            if (is_none) {
-                UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache 6 */
-                stack_pointer[-1] = __TOS6;
-                /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
-                /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
-                /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
-                /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
-                /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
-                JUMP_TO_JUMP_TARGET();
-            }
-            break;
-        }
-
-        case _GUARD_IS_NOT_NONE_POP___CACHED_6in_0out: {
-            _PyStackRef val;
-            val = __TOS6;
-            int is_none = PyStackRef_IsNone(val);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyStackRef_CLOSE(val);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
-            if (is_none) {
-                UOP_STAT_INC(uopcode, miss);
-                /* Flushing cache 6 */
-                stack_pointer[-1] = __TOS6;
-                /* Flushing cache 5 */
-                stack_pointer[-2] = __TOS5;
-                /* Flushing cache 4 */
-                stack_pointer[-3] = __TOS4;
-                /* Flushing cache 3 */
-                stack_pointer[-4] = __TOS3;
-                /* Flushing cache 2 */
-                stack_pointer[-5] = __TOS2;
-                /* Flushing cache 1 */
-                stack_pointer[-6] = __TOS1;
-                JUMP_TO_JUMP_TARGET();
-            }
-            /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
             break;
         }
 
@@ -79957,8 +78161,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -79994,10 +78196,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -80033,12 +78233,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -80074,14 +78272,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -80117,16 +78313,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -80162,18 +78356,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -80415,8 +78607,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -80452,10 +78642,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -80491,12 +78679,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -80532,14 +78718,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -80575,16 +78759,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 
@@ -80620,18 +78802,16 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
             /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
+            stack_pointer[-1] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-3] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-5] = __TOS1;
             break;
         }
 
@@ -80674,8 +78854,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -80725,10 +78903,6 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 2 */
-            stack_pointer[-1] = __TOS2;
-            /* Flushing cache 1 */
-            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -80778,12 +78952,8 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 3 */
-            stack_pointer[-1] = __TOS3;
-            /* Flushing cache 2 */
-            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -80833,14 +79003,10 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 4 */
-            stack_pointer[-1] = __TOS4;
-            /* Flushing cache 3 */
-            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-3] = __TOS2;
+            stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = __TOS1;
             break;
         }
 
@@ -80890,16 +79056,12 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 5 */
-            stack_pointer[-1] = __TOS5;
-            /* Flushing cache 4 */
-            stack_pointer[-2] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-3] = __TOS3;
+            stack_pointer[-1] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-4] = __TOS2;
+            stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-5] = __TOS1;
+            stack_pointer[-3] = __TOS1;
             break;
         }
 
@@ -80949,18 +79111,14 @@
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
-            /* Flushing cache 6 */
-            stack_pointer[-1] = __TOS6;
-            /* Flushing cache 5 */
-            stack_pointer[-2] = __TOS5;
             /* Flushing cache 4 */
-            stack_pointer[-3] = __TOS4;
+            stack_pointer[-1] = __TOS4;
             /* Flushing cache 3 */
-            stack_pointer[-4] = __TOS3;
+            stack_pointer[-2] = __TOS3;
             /* Flushing cache 2 */
-            stack_pointer[-5] = __TOS2;
+            stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
-            stack_pointer[-6] = __TOS1;
+            stack_pointer[-4] = __TOS1;
             break;
         }
 

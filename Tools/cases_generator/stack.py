@@ -344,6 +344,10 @@ class Stack:
         self._print(out)
         out.start_line()
         min_i = 64
+        num_in_tos_cache = 0
+        for var in self.variables:
+            num_in_tos_cache += 1 if var.item.register else 0
+        num_in_tos_cache += self.num_in_tos_cache
         for var in self.variables:
             if (
                 var.item.register
@@ -353,16 +357,16 @@ class Stack:
                 if reg_i < min_i:
                     min_i = reg_i
                 out.emit(f"/* Flushing cache {reg_i} */\n")
-                assert self.num_in_tos_cache-reg_i >= 0, self.num_in_tos_cache-reg_i
-                out.emit(f"stack_pointer[-{self.num_in_tos_cache-reg_i+1}] = {var.item.register};\n")
+                assert num_in_tos_cache >= 0, num_in_tos_cache
+                out.emit(f"stack_pointer[-{num_in_tos_cache-reg_i+1}] = {var.item.register};\n")
                 self._print(out)
         if min_i <= 6:
             min_i -= 1
         else:
-            min_i = self.num_in_tos_cache
+            min_i = num_in_tos_cache
         while min_i > 0:
             out.emit(f"/* Flushing cache {min_i} */\n")
-            out.emit(f"stack_pointer[-{self.num_in_tos_cache-min_i+1}] = __TOS{min_i};\n")
+            out.emit(f"stack_pointer[-{num_in_tos_cache-min_i+1}] = __TOS{min_i};\n")
             min_i -= 1
 
         out.start_line()

@@ -200,6 +200,7 @@ class Uop:
     # Size of the instruction(s), only set for uops containing the INSTRUCTION_SIZE macro
     instruction_size: int | None = None
     tos_cached_version_of: "Uop | None" = None
+    tos_cached_base: int = 0
     tos_cached_inputs: int = 0
     tos_cached_outputs: int = 0
 
@@ -952,6 +953,7 @@ def make_uop(
                 body=op.block,
                 properties=properties,
                 tos_cached_version_of=result,
+                tos_cached_base=max(0, num_live_registers_in - len(stack.inputs)),
                 tos_cached_inputs=num_live_registers_in,
                 tos_cached_outputs=num_live_registers_out,
             )
@@ -972,6 +974,7 @@ def make_uop(
                 body=op.block,
                 properties=properties,
                 tos_cached_version_of=result,
+                tos_cached_base=max(0, num_live_registers_in - len(stack.inputs)),
                 tos_cached_inputs=num_live_registers_in,
                 tos_cached_outputs=num_live_registers_out,
             )

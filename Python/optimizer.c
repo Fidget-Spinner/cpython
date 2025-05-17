@@ -1264,6 +1264,9 @@ uop_regalloc(_PyUOpInstruction *buffer, int length)
     int curr_regs_in = 0;
     for (int pc = 0; pc < length; pc++) {
         int reged = buffer[pc].opcode;
+        if (reged == _NOP) {
+            continue;
+        }
         switch (reged) {
 #include "regalloc_cases.c.h"
         default:
