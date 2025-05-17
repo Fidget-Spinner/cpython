@@ -160,10 +160,11 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
                 emitter.emit(f"{type}{cache.name} = ({cast})CURRENT_OPERAND{idx}();\n")
                 idx += 1
         _, storage = emitter.emit_tokens(uop, storage, None, False)
-        storage.flush(emitter.out)
         if uop.name.endswith("0out"):
+            emitter.out.start_line()
             emitter.emit("/* Cache spill */\n")
             storage.flush_tos_cache(emitter.out)
+        storage.flush(emitter.out)
     except StackError as ex:
         raise analysis_error(ex.args[0], uop.body.open) from None
     return storage.stack

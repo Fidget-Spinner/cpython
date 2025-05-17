@@ -1344,10 +1344,10 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -1385,12 +1385,12 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1428,14 +1428,14 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1473,9 +1473,6 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -1483,6 +1480,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1520,9 +1520,6 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -1532,6 +1529,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1569,9 +1569,6 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -1583,6 +1580,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1600,9 +1600,6 @@
                 JUMP_TO_ERROR();
             }
             value = PyStackRef_DUP(value_s);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -1616,6 +1613,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1655,10 +1655,10 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -1678,12 +1678,12 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1703,14 +1703,14 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1730,9 +1730,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -1740,6 +1737,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1759,9 +1759,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -1771,6 +1768,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1790,9 +1790,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -1804,6 +1801,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -1812,9 +1812,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_DUP(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -1828,6 +1825,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -3202,10 +3202,10 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -3225,12 +3225,12 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -3250,14 +3250,14 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -3277,9 +3277,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -3287,6 +3284,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -3306,9 +3306,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -3318,6 +3315,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -3337,9 +3337,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -3351,6 +3348,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -3359,9 +3359,6 @@
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
             value = PyStackRef_Borrow(GETLOCAL(oparg));
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -3375,6 +3372,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4749,10 +4749,10 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -4772,12 +4772,12 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4797,14 +4797,14 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4824,9 +4824,6 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -4834,6 +4831,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4853,9 +4853,6 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -4865,6 +4862,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4884,9 +4884,6 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -4898,6 +4895,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4906,9 +4906,6 @@
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
             GETLOCAL(oparg) = PyStackRef_NULL;
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -4922,6 +4919,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -4980,10 +4980,10 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -5003,12 +5003,12 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5028,14 +5028,14 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5055,9 +5055,6 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -5065,6 +5062,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5084,9 +5084,6 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -5096,6 +5093,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5115,9 +5115,6 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -5129,6 +5126,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5137,9 +5137,6 @@
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             value = PyStackRef_FromPyObjectNewMortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -5153,6 +5150,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5185,10 +5185,10 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -5210,12 +5210,12 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5237,14 +5237,14 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5266,9 +5266,6 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -5276,6 +5273,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5297,9 +5297,6 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -5309,6 +5306,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5330,9 +5330,6 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -5344,6 +5341,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5353,9 +5353,6 @@
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
             assert(_Py_IsImmortal(obj));
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -5369,6 +5366,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5402,10 +5402,10 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -5427,12 +5427,12 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5454,14 +5454,14 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5483,9 +5483,6 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -5493,6 +5490,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5514,9 +5514,6 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -5526,6 +5523,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5547,9 +5547,6 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -5561,6 +5558,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -5570,9 +5570,6 @@
             assert(oparg < _PY_NSMALLPOSINTS);
             PyObject *obj = (PyObject *)&_PyLong_SMALL_INTS[_PY_NSMALLNEGINTS + oparg];
             value = PyStackRef_FromPyObjectImmortal(obj);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -5586,6 +5583,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -8585,10 +8585,10 @@
         case _PUSH_NULL___CACHED_0in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -8604,12 +8604,12 @@
         case _PUSH_NULL___CACHED_1in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -8625,14 +8625,14 @@
         case _PUSH_NULL___CACHED_2in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -8648,9 +8648,6 @@
         case _PUSH_NULL___CACHED_3in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -8658,6 +8655,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -8673,9 +8673,6 @@
         case _PUSH_NULL___CACHED_4in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -8685,6 +8682,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -8700,9 +8700,6 @@
         case _PUSH_NULL___CACHED_5in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -8714,15 +8711,15 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _PUSH_NULL___CACHED_6in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -8736,6 +8733,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9172,10 +9172,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -9217,12 +9217,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9264,14 +9264,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9313,9 +9313,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -9323,6 +9320,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9364,9 +9364,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -9376,6 +9373,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9417,9 +9417,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -9431,6 +9428,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9474,8 +9474,8 @@
             assert(PyStackRef_BoolCheck(value));
             res = PyStackRef_IsFalse(value)
             ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -9497,10 +9497,10 @@
             assert(PyStackRef_BoolCheck(value));
             res = PyStackRef_IsFalse(value)
             ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -9522,12 +9522,12 @@
             assert(PyStackRef_BoolCheck(value));
             res = PyStackRef_IsFalse(value)
             ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -9549,7 +9549,6 @@
             assert(PyStackRef_BoolCheck(value));
             res = PyStackRef_IsFalse(value)
             ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -9557,6 +9556,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -9578,7 +9578,6 @@
             assert(PyStackRef_BoolCheck(value));
             res = PyStackRef_IsFalse(value)
             ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -9588,6 +9587,7 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -9609,7 +9609,6 @@
             assert(PyStackRef_BoolCheck(value));
             res = PyStackRef_IsFalse(value)
             ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -9621,6 +9620,7 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -9673,10 +9673,10 @@
                 JUMP_TO_ERROR();
             }
             res = err ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -9718,12 +9718,12 @@
                 JUMP_TO_ERROR();
             }
             res = err ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9765,14 +9765,14 @@
                 JUMP_TO_ERROR();
             }
             res = err ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9814,9 +9814,6 @@
                 JUMP_TO_ERROR();
             }
             res = err ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -9824,6 +9821,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9865,9 +9865,6 @@
                 JUMP_TO_ERROR();
             }
             res = err ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -9877,6 +9874,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -9918,9 +9918,6 @@
                 JUMP_TO_ERROR();
             }
             res = err ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -9932,6 +9929,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -10286,8 +10286,8 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -10349,10 +10349,10 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -10418,12 +10418,12 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -10493,7 +10493,6 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -10501,6 +10500,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -10574,7 +10574,6 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -10584,6 +10583,7 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -10661,7 +10661,6 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -10673,6 +10672,7 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -11819,8 +11819,8 @@
             }
             STAT_INC(TO_BOOL, hit);
             res = PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -11856,10 +11856,10 @@
             }
             STAT_INC(TO_BOOL, hit);
             res = PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -11899,12 +11899,12 @@
             }
             STAT_INC(TO_BOOL, hit);
             res = PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -11948,7 +11948,6 @@
             }
             STAT_INC(TO_BOOL, hit);
             res = PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -11956,6 +11955,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12003,7 +12003,6 @@
             }
             STAT_INC(TO_BOOL, hit);
             res = PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -12013,6 +12012,7 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12064,7 +12064,6 @@
             }
             STAT_INC(TO_BOOL, hit);
             res = PyStackRef_False;
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -12076,6 +12075,7 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12687,8 +12687,8 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12736,10 +12736,10 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12787,12 +12787,12 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12840,7 +12840,6 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -12848,6 +12847,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12895,7 +12895,6 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -12905,6 +12904,7 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -12952,7 +12952,6 @@
                 res = PyStackRef_True;
                 stack_pointer += 1;
             }
-            stack_pointer[-1] = res;
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -12964,6 +12963,7 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = res;
             break;
         }
 
@@ -13017,10 +13017,10 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_True;
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -13050,12 +13050,12 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_True;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13085,14 +13085,14 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_True;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13122,9 +13122,6 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_True;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -13132,6 +13129,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13161,9 +13161,6 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_True;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -13173,6 +13170,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13202,9 +13202,6 @@
             PyStackRef_CLOSE(value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_True;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -13216,6 +13213,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13273,10 +13273,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -13318,12 +13318,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13365,14 +13365,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13414,9 +13414,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -13424,6 +13421,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13465,9 +13465,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -13477,6 +13474,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -13518,9 +13518,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -13532,6 +13529,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14129,10 +14129,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -14186,10 +14186,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -14243,12 +14243,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14302,14 +14302,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14363,9 +14363,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -14373,6 +14370,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14426,9 +14426,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -14438,6 +14435,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14489,10 +14489,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -14542,10 +14542,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -14595,12 +14595,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14650,14 +14650,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14707,9 +14707,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -14717,6 +14714,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14766,9 +14766,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -14778,6 +14775,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -14829,10 +14829,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -14886,10 +14886,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -14943,12 +14943,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -15002,14 +15002,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -15063,9 +15063,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -15073,6 +15070,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -15126,9 +15126,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -15138,6 +15135,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -15740,10 +15740,10 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -15795,10 +15795,10 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -15850,12 +15850,12 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -15907,14 +15907,14 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -15966,9 +15966,6 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -15976,6 +15973,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16027,9 +16027,6 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -16039,6 +16036,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16090,10 +16090,10 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -16145,10 +16145,10 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -16200,12 +16200,12 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16257,14 +16257,14 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16316,9 +16316,6 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -16326,6 +16323,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16377,9 +16377,6 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -16389,6 +16386,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16440,10 +16440,10 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -16495,10 +16495,10 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -16550,12 +16550,12 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16607,14 +16607,14 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16666,9 +16666,6 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -16676,6 +16673,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16727,9 +16727,6 @@
                 assert(WITHIN_STACK_BOUNDS());
                 JUMP_TO_ERROR();
             }
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -16739,6 +16736,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16789,10 +16789,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -16842,10 +16842,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -16895,12 +16895,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -16950,14 +16950,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -17007,9 +17007,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -17017,6 +17014,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -17066,9 +17066,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -17078,6 +17075,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18099,10 +18099,10 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -18164,10 +18164,10 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -18229,12 +18229,12 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18296,14 +18296,14 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18365,9 +18365,6 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -18375,6 +18372,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18436,9 +18436,6 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -18448,6 +18445,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18517,10 +18517,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -18598,10 +18598,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -18679,12 +18679,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18762,14 +18762,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -18847,9 +18847,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -18857,6 +18854,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -20092,10 +20092,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -20165,10 +20165,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -20238,12 +20238,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -20313,14 +20313,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -20390,9 +20390,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -20400,6 +20397,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -20469,9 +20469,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -20481,6 +20478,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -20559,10 +20559,10 @@
             PyStackRef_CLOSE(str_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectImmortal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -20662,10 +20662,10 @@
             PyStackRef_CLOSE(str_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectImmortal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -20777,12 +20777,12 @@
             PyStackRef_CLOSE(str_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectImmortal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -20906,14 +20906,14 @@
             PyStackRef_CLOSE(str_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectImmortal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -21049,9 +21049,6 @@
             PyStackRef_CLOSE(str_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectImmortal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -21059,6 +21056,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -21206,9 +21206,6 @@
             PyStackRef_CLOSE(str_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectImmortal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -21218,6 +21215,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23010,10 +23010,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -23093,10 +23093,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -23176,12 +23176,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23261,14 +23261,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23348,9 +23348,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -23358,6 +23355,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23437,9 +23437,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -23449,6 +23446,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23557,10 +23557,10 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
+            /* Cache spill */
             stack_pointer[0] = getitem;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -23644,12 +23644,12 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
-            stack_pointer[0] = getitem;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = getitem;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23749,14 +23749,14 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
-            stack_pointer[0] = getitem;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
+            stack_pointer[0] = getitem;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -23872,9 +23872,6 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
-            stack_pointer[0] = getitem;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-2] = __TOS2;
@@ -23882,6 +23879,9 @@
             stack_pointer[-1] = __TOS3;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = getitem;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -24013,9 +24013,6 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
-            stack_pointer[0] = getitem;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-2] = __TOS3;
@@ -24025,6 +24022,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = getitem;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -24172,9 +24172,6 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
-            stack_pointer[0] = getitem;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-2] = __TOS4;
@@ -24186,6 +24183,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = getitem;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -24266,9 +24266,6 @@
             }
             getitem = PyStackRef_FromPyObjectNew(getitem_o);
             STAT_INC(BINARY_OP, hit);
-            stack_pointer[0] = getitem;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-2] = __TOS5;
@@ -24282,6 +24279,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = getitem;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -25731,10 +25731,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -25780,12 +25780,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -25831,14 +25831,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -25884,9 +25884,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -25894,6 +25891,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -25939,9 +25939,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -25951,6 +25948,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -25996,9 +25996,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -26010,6 +26007,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26064,10 +26064,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -26131,10 +26131,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -26198,12 +26198,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26267,14 +26267,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26338,9 +26338,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -26348,6 +26345,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26411,9 +26411,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -26423,6 +26420,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26501,10 +26501,10 @@
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -26550,12 +26550,12 @@
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26601,14 +26601,14 @@
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26654,9 +26654,6 @@
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -26664,6 +26661,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26709,9 +26709,6 @@
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -26721,6 +26718,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26766,9 +26766,6 @@
             LOAD_IP(frame->return_offset);
             res = temp;
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -26780,6 +26777,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -26909,10 +26909,10 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
+            /* Cache spill */
             stack_pointer[0] = iter;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -27018,12 +27018,12 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27129,14 +27129,14 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27242,9 +27242,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -27252,6 +27249,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27357,9 +27357,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -27369,6 +27366,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27474,9 +27474,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -27488,6 +27485,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27573,10 +27573,10 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
+            /* Cache spill */
             stack_pointer[0] = awaitable;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -27608,12 +27608,12 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
-            stack_pointer[0] = awaitable;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = awaitable;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27645,14 +27645,14 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
-            stack_pointer[0] = awaitable;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = awaitable;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27684,9 +27684,6 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
-            stack_pointer[0] = awaitable;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -27694,6 +27691,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = awaitable;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27725,9 +27725,6 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
-            stack_pointer[0] = awaitable;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -27737,6 +27734,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = awaitable;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27768,9 +27768,6 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
-            stack_pointer[0] = awaitable;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -27782,6 +27779,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = awaitable;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27796,9 +27796,6 @@
                 JUMP_TO_ERROR();
             }
             awaitable = PyStackRef_FromPyObjectSteal(awaitable_o);
-            stack_pointer[0] = awaitable;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -27812,6 +27809,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = awaitable;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27872,10 +27872,10 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
+            /* Cache spill */
             stack_pointer[0] = iter;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -27919,12 +27919,12 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -27968,14 +27968,14 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28019,9 +28019,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -28029,6 +28026,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28072,9 +28072,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -28084,6 +28081,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28127,9 +28127,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -28141,6 +28138,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28296,10 +28296,10 @@
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -28377,12 +28377,12 @@
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28460,14 +28460,14 @@
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28545,9 +28545,6 @@
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -28555,6 +28552,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28632,9 +28632,6 @@
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -28644,6 +28641,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28721,9 +28721,6 @@
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -28735,6 +28732,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28787,9 +28787,9 @@
                        PyStackRef_IsNone(exc_value)
                        ? NULL : PyStackRef_AsPyObjectSteal(exc_value));
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            /* Cache spill */
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -28816,11 +28816,11 @@
                        PyStackRef_IsNone(exc_value)
                        ? NULL : PyStackRef_AsPyObjectSteal(exc_value));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28847,13 +28847,13 @@
                        PyStackRef_IsNone(exc_value)
                        ? NULL : PyStackRef_AsPyObjectSteal(exc_value));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28880,8 +28880,6 @@
                        PyStackRef_IsNone(exc_value)
                        ? NULL : PyStackRef_AsPyObjectSteal(exc_value));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -28889,6 +28887,8 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28915,8 +28915,6 @@
                        PyStackRef_IsNone(exc_value)
                        ? NULL : PyStackRef_AsPyObjectSteal(exc_value));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -28926,6 +28924,8 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28952,8 +28952,6 @@
                        PyStackRef_IsNone(exc_value)
                        ? NULL : PyStackRef_AsPyObjectSteal(exc_value));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -28965,6 +28963,8 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -28998,10 +28998,10 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -29021,12 +29021,12 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29046,14 +29046,14 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29073,9 +29073,6 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -29083,6 +29080,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29102,9 +29102,6 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -29114,6 +29111,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29133,9 +29133,6 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -29147,6 +29144,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29155,9 +29155,6 @@
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
             value = PyStackRef_FromPyObjectNew(tstate->interp->common_consts[oparg]);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -29171,6 +29168,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29225,10 +29225,10 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
+            /* Cache spill */
             stack_pointer[0] = bc;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -29272,12 +29272,12 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
-            stack_pointer[0] = bc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = bc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29321,14 +29321,14 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
-            stack_pointer[0] = bc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = bc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29372,9 +29372,6 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
-            stack_pointer[0] = bc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -29382,6 +29379,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = bc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29425,9 +29425,6 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
-            stack_pointer[0] = bc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -29437,6 +29434,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = bc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29480,9 +29480,6 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
-            stack_pointer[0] = bc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -29494,6 +29491,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = bc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -29514,9 +29514,6 @@
                 JUMP_TO_ERROR();
             }
             bc = PyStackRef_FromPyObjectSteal(bc_o);
-            stack_pointer[0] = bc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -29530,6 +29527,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = bc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32177,10 +32177,10 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
+            /* Cache spill */
             stack_pointer[0] = locals;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -32212,12 +32212,12 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
-            stack_pointer[0] = locals;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = locals;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32249,14 +32249,14 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
-            stack_pointer[0] = locals;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = locals;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32288,9 +32288,6 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
-            stack_pointer[0] = locals;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -32298,6 +32295,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = locals;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32329,9 +32329,6 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
-            stack_pointer[0] = locals;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -32341,6 +32338,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = locals;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32372,9 +32372,6 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
-            stack_pointer[0] = locals;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -32386,6 +32383,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = locals;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32400,9 +32400,6 @@
                 JUMP_TO_ERROR();
             }
             locals = PyStackRef_FromPyObjectNew(l);
-            stack_pointer[0] = locals;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -32416,6 +32413,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = locals;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32490,10 +32490,10 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
+            /* Cache spill */
             stack_pointer[0] = v;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -32525,12 +32525,12 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
-            stack_pointer[0] = v;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = v;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32562,14 +32562,14 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
-            stack_pointer[0] = v;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = v;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32601,9 +32601,6 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
-            stack_pointer[0] = v;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -32611,6 +32608,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = v;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32642,9 +32642,6 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
-            stack_pointer[0] = v;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -32654,6 +32651,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = v;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32685,9 +32685,6 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
-            stack_pointer[0] = v;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -32699,6 +32696,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = v;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -32713,9 +32713,6 @@
                 JUMP_TO_ERROR();
             }
             v = PyStackRef_FromPyObjectSteal(v_o);
-            stack_pointer[0] = v;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -32729,6 +32726,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = v;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -33271,10 +33271,10 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -33364,12 +33364,12 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -33475,14 +33475,14 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -33604,9 +33604,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -33614,6 +33611,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -33751,9 +33751,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -33763,6 +33760,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -33916,9 +33916,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -33930,6 +33927,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34013,9 +34013,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -34029,6 +34026,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34138,10 +34138,10 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -34229,12 +34229,12 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34338,14 +34338,14 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34465,9 +34465,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -34475,6 +34472,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34610,9 +34610,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -34622,6 +34619,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34773,9 +34773,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -34787,6 +34784,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -34869,9 +34869,6 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(LOAD_GLOBAL, hit);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -34885,6 +34882,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -35804,10 +35804,10 @@
             PyStackRef_CLOSE(class_dict_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectSteal(value_o);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -35883,12 +35883,12 @@
             PyStackRef_CLOSE(class_dict_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectSteal(value_o);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -35964,14 +35964,14 @@
             PyStackRef_CLOSE(class_dict_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectSteal(value_o);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36047,9 +36047,6 @@
             PyStackRef_CLOSE(class_dict_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectSteal(value_o);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -36057,6 +36054,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36132,9 +36132,6 @@
             PyStackRef_CLOSE(class_dict_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectSteal(value_o);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -36144,6 +36141,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36219,9 +36219,6 @@
             PyStackRef_CLOSE(class_dict_st);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectSteal(value_o);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -36233,6 +36230,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36313,10 +36313,10 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -36358,12 +36358,12 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36405,14 +36405,14 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36454,9 +36454,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -36464,6 +36461,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36505,9 +36505,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -36517,6 +36514,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36558,9 +36558,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -36572,6 +36569,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36591,9 +36591,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -36607,6 +36604,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36640,9 +36640,9 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyCell_SetTakeRef(cell, PyStackRef_AsPyObjectSteal(v));
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            /* Cache spill */
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -36667,11 +36667,11 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyCell_SetTakeRef(cell, PyStackRef_AsPyObjectSteal(v));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36696,13 +36696,13 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyCell_SetTakeRef(cell, PyStackRef_AsPyObjectSteal(v));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36727,8 +36727,6 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyCell_SetTakeRef(cell, PyStackRef_AsPyObjectSteal(v));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -36736,6 +36734,8 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36760,8 +36760,6 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyCell_SetTakeRef(cell, PyStackRef_AsPyObjectSteal(v));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -36771,6 +36769,8 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -36795,8 +36795,6 @@
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyCell_SetTakeRef(cell, PyStackRef_AsPyObjectSteal(v));
             stack_pointer = _PyFrame_GetStackPointer(frame);
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -36808,6 +36806,8 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -37185,10 +37185,10 @@
                 JUMP_TO_ERROR();
             }
             template = PyStackRef_FromPyObjectSteal(template_o);
+            /* Cache spill */
             stack_pointer[0] = template;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -37248,10 +37248,10 @@
                 JUMP_TO_ERROR();
             }
             template = PyStackRef_FromPyObjectSteal(template_o);
+            /* Cache spill */
             stack_pointer[0] = template;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -37311,12 +37311,12 @@
                 JUMP_TO_ERROR();
             }
             template = PyStackRef_FromPyObjectSteal(template_o);
-            stack_pointer[0] = template;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = template;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -37376,14 +37376,14 @@
                 JUMP_TO_ERROR();
             }
             template = PyStackRef_FromPyObjectSteal(template_o);
-            stack_pointer[0] = template;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = template;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -37443,9 +37443,6 @@
                 JUMP_TO_ERROR();
             }
             template = PyStackRef_FromPyObjectSteal(template_o);
-            stack_pointer[0] = template;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -37453,6 +37450,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = template;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -37512,9 +37512,6 @@
                 JUMP_TO_ERROR();
             }
             template = PyStackRef_FromPyObjectSteal(template_o);
-            stack_pointer[0] = template;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -37524,6 +37521,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = template;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -38455,10 +38455,10 @@
                 JUMP_TO_ERROR();
             }
             attr_st = PyStackRef_FromPyObjectSteal(attr);
+            /* Cache spill */
             stack_pointer[0] = attr_st;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -38580,10 +38580,10 @@
                 JUMP_TO_ERROR();
             }
             attr_st = PyStackRef_FromPyObjectSteal(attr);
+            /* Cache spill */
             stack_pointer[0] = attr_st;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -38713,12 +38713,12 @@
                 JUMP_TO_ERROR();
             }
             attr_st = PyStackRef_FromPyObjectSteal(attr);
-            stack_pointer[0] = attr_st;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = attr_st;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -38856,14 +38856,14 @@
                 JUMP_TO_ERROR();
             }
             attr_st = PyStackRef_FromPyObjectSteal(attr);
-            stack_pointer[0] = attr_st;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = attr_st;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -39009,9 +39009,6 @@
                 JUMP_TO_ERROR();
             }
             attr_st = PyStackRef_FromPyObjectSteal(attr);
-            stack_pointer[0] = attr_st;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -39019,6 +39016,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = attr_st;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -39135,11 +39135,11 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             attr = PyStackRef_FromPyObjectSteal(attr_o);
+            /* Cache spill */
             stack_pointer[0] = attr;
             stack_pointer[1] = self_or_null;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -39285,11 +39285,11 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             attr = PyStackRef_FromPyObjectSteal(attr_o);
+            /* Cache spill */
             stack_pointer[0] = attr;
             stack_pointer[1] = self_or_null;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -39443,11 +39443,11 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             attr = PyStackRef_FromPyObjectSteal(attr_o);
+            /* Cache spill */
             stack_pointer[0] = attr;
             stack_pointer[1] = self_or_null;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -39609,13 +39609,13 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             attr = PyStackRef_FromPyObjectSteal(attr_o);
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[0] = attr;
             stack_pointer[1] = self_or_null;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -39785,15 +39785,15 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             attr = PyStackRef_FromPyObjectSteal(attr_o);
-            stack_pointer[0] = attr;
-            stack_pointer[1] = self_or_null;
-            stack_pointer += 2;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer[1] = self_or_null;
+            stack_pointer += 2;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -39971,10 +39971,6 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             attr = PyStackRef_FromPyObjectSteal(attr_o);
-            stack_pointer[0] = attr;
-            stack_pointer[1] = self_or_null;
-            stack_pointer += 2;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -39982,6 +39978,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer[1] = self_or_null;
+            stack_pointer += 2;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -47837,10 +47837,10 @@
             else {
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -47928,10 +47928,10 @@
             else {
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -48019,12 +48019,12 @@
             else {
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48112,14 +48112,14 @@
             else {
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48207,9 +48207,6 @@
             else {
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -48217,6 +48214,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48304,9 +48304,6 @@
             else {
                 res = PyStackRef_FromPyObjectSteal(res_o);
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -48316,6 +48313,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48380,10 +48380,10 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
             res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -48425,10 +48425,10 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
             res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -48470,12 +48470,12 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
             res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48517,14 +48517,14 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
             res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48566,9 +48566,6 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
             res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -48576,6 +48573,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48617,9 +48617,6 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyFloat_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyFloat_ExactDealloc);
             res = (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -48629,6 +48626,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48684,10 +48684,10 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -48765,10 +48765,10 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -48854,12 +48854,12 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -48953,14 +48953,14 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49062,9 +49062,6 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -49072,6 +49069,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49181,9 +49181,6 @@
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             res =  (sign_ish & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -49193,6 +49190,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49246,10 +49246,10 @@
             assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
             assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
             res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -49295,10 +49295,10 @@
             assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
             assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
             res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -49344,12 +49344,12 @@
             assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
             assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
             res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49395,14 +49395,14 @@
             assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
             assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
             res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49448,9 +49448,6 @@
             assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
             assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
             res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -49458,6 +49455,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49503,9 +49503,6 @@
             assert((oparg & 0xf) == COMPARISON_NOT_EQUALS || (oparg & 0xf) == COMPARISON_EQUALS);
             assert(COMPARISON_NOT_EQUALS + 1 == COMPARISON_EQUALS);
             res = ((COMPARISON_NOT_EQUALS + eq) & oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -49515,6 +49512,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49563,10 +49563,10 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             b = res ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -49618,10 +49618,10 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             b = res ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -49673,12 +49673,12 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             b = res ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49730,14 +49730,14 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             b = res ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49789,9 +49789,6 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             b = res ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -49799,6 +49796,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49850,9 +49850,6 @@
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             b = res ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -49862,6 +49859,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -49918,10 +49918,10 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -49983,10 +49983,10 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -50048,12 +50048,12 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50115,14 +50115,14 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50184,9 +50184,6 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -50194,6 +50191,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50255,9 +50255,6 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -50267,6 +50264,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50605,10 +50605,10 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -50674,10 +50674,10 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -50743,12 +50743,12 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50814,14 +50814,14 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50887,9 +50887,6 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -50897,6 +50894,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -50962,9 +50962,6 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -50974,6 +50971,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -51039,10 +51039,10 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -51108,10 +51108,10 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -51177,12 +51177,12 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -51248,14 +51248,14 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -51321,9 +51321,6 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -51331,6 +51328,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -51396,9 +51396,6 @@
                 JUMP_TO_ERROR();
             }
             b = (res ^ oparg) ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -51408,6 +51405,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -51566,11 +51566,11 @@
             }
             rest = PyStackRef_FromPyObjectSteal(rest_o);
             match = PyStackRef_FromPyObjectSteal(match_o);
+            /* Cache spill */
             stack_pointer[0] = rest;
             stack_pointer[1] = match;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -51695,11 +51695,11 @@
             }
             rest = PyStackRef_FromPyObjectSteal(rest_o);
             match = PyStackRef_FromPyObjectSteal(match_o);
+            /* Cache spill */
             stack_pointer[0] = rest;
             stack_pointer[1] = match;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -51824,13 +51824,13 @@
             }
             rest = PyStackRef_FromPyObjectSteal(rest_o);
             match = PyStackRef_FromPyObjectSteal(match_o);
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[0] = rest;
             stack_pointer[1] = match;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -51955,15 +51955,15 @@
             }
             rest = PyStackRef_FromPyObjectSteal(rest_o);
             match = PyStackRef_FromPyObjectSteal(match_o);
-            stack_pointer[0] = rest;
-            stack_pointer[1] = match;
-            stack_pointer += 2;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = rest;
+            stack_pointer[1] = match;
+            stack_pointer += 2;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52088,10 +52088,6 @@
             }
             rest = PyStackRef_FromPyObjectSteal(rest_o);
             match = PyStackRef_FromPyObjectSteal(match_o);
-            stack_pointer[0] = rest;
-            stack_pointer[1] = match;
-            stack_pointer += 2;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -52099,6 +52095,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = rest;
+            stack_pointer[1] = match;
+            stack_pointer += 2;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52223,10 +52223,6 @@
             }
             rest = PyStackRef_FromPyObjectSteal(rest_o);
             match = PyStackRef_FromPyObjectSteal(match_o);
-            stack_pointer[0] = rest;
-            stack_pointer[1] = match;
-            stack_pointer += 2;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -52236,6 +52232,10 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = rest;
+            stack_pointer[1] = match;
+            stack_pointer += 2;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52362,11 +52362,11 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             b = res ? PyStackRef_True : PyStackRef_False;
             left_st = left;
+            /* Cache spill */
             stack_pointer[-1] = left_st;
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -52429,11 +52429,11 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             b = res ? PyStackRef_True : PyStackRef_False;
             left_st = left;
+            /* Cache spill */
             stack_pointer[-1] = left_st;
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -52496,13 +52496,13 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             b = res ? PyStackRef_True : PyStackRef_False;
             left_st = left;
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[-1] = left_st;
             stack_pointer[0] = b;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -52565,15 +52565,15 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             b = res ? PyStackRef_True : PyStackRef_False;
             left_st = left;
-            stack_pointer[-1] = left_st;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = left_st;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52636,10 +52636,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             b = res ? PyStackRef_True : PyStackRef_False;
             left_st = left;
-            stack_pointer[-1] = left_st;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -52647,6 +52643,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = left_st;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52709,10 +52709,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             b = res ? PyStackRef_True : PyStackRef_False;
             left_st = left;
-            stack_pointer[-1] = left_st;
-            stack_pointer[0] = b;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -52722,6 +52718,10 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = left_st;
+            stack_pointer[0] = b;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52785,10 +52785,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -52852,10 +52852,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -52919,12 +52919,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -52988,14 +52988,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53059,9 +53059,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -53069,6 +53066,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53132,9 +53132,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -53144,6 +53141,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53212,10 +53212,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -53251,12 +53251,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53292,14 +53292,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53335,9 +53335,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -53345,6 +53342,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53380,9 +53380,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -53392,6 +53389,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53427,9 +53427,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -53441,6 +53438,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53457,9 +53457,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -53473,6 +53470,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53580,8 +53580,8 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = b;
             /* Cache spill */
+            stack_pointer[-1] = b;
             break;
         }
 
@@ -53622,10 +53622,10 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = b;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-1] = b;
             break;
         }
 
@@ -53666,12 +53666,12 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = b;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = b;
             break;
         }
 
@@ -53712,7 +53712,6 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = b;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -53720,6 +53719,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = b;
             break;
         }
 
@@ -53760,7 +53760,6 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = b;
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -53770,6 +53769,7 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = b;
             break;
         }
 
@@ -53810,7 +53810,6 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = b;
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -53822,6 +53821,7 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = b;
             break;
         }
 
@@ -53881,10 +53881,10 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
+            /* Cache spill */
             stack_pointer[0] = len;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -53924,12 +53924,12 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
-            stack_pointer[0] = len;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = len;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -53969,14 +53969,14 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
-            stack_pointer[0] = len;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = len;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54016,9 +54016,6 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
-            stack_pointer[0] = len;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -54026,6 +54023,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = len;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54065,9 +54065,6 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
-            stack_pointer[0] = len;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -54077,6 +54074,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = len;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54116,9 +54116,6 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
-            stack_pointer[0] = len;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -54130,6 +54127,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = len;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54148,9 +54148,6 @@
                 JUMP_TO_ERROR();
             }
             len = PyStackRef_FromPyObjectSteal(len_o);
-            stack_pointer[0] = len;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -54164,6 +54161,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = len;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54228,10 +54228,10 @@
                 }
                 attrs = PyStackRef_None;
             }
+            /* Cache spill */
             stack_pointer[0] = attrs;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -54321,10 +54321,10 @@
                 }
                 attrs = PyStackRef_None;
             }
+            /* Cache spill */
             stack_pointer[0] = attrs;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -54414,12 +54414,12 @@
                 }
                 attrs = PyStackRef_None;
             }
-            stack_pointer[0] = attrs;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = attrs;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54509,14 +54509,14 @@
                 }
                 attrs = PyStackRef_None;
             }
-            stack_pointer[0] = attrs;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = attrs;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54606,9 +54606,6 @@
                 }
                 attrs = PyStackRef_None;
             }
-            stack_pointer[0] = attrs;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -54616,6 +54613,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = attrs;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54683,10 +54683,10 @@
             subject = stack_pointer[-1];
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -54708,12 +54708,12 @@
             subject = __TOS1;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54735,14 +54735,14 @@
             subject = __TOS2;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54764,9 +54764,6 @@
             subject = __TOS3;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -54774,6 +54771,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54795,9 +54795,6 @@
             subject = __TOS4;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -54807,6 +54804,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54828,9 +54828,6 @@
             subject = __TOS5;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -54842,6 +54839,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54851,9 +54851,6 @@
             subject = __TOS6;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_MAPPING;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -54867,6 +54864,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54900,10 +54900,10 @@
             subject = stack_pointer[-1];
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -54925,12 +54925,12 @@
             subject = __TOS1;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54952,14 +54952,14 @@
             subject = __TOS2;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -54981,9 +54981,6 @@
             subject = __TOS3;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -54991,6 +54988,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55012,9 +55012,6 @@
             subject = __TOS4;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -55024,6 +55021,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55045,9 +55045,6 @@
             subject = __TOS5;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -55059,6 +55056,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55068,9 +55068,6 @@
             subject = __TOS6;
             int match = PyStackRef_TYPE(subject)->tp_flags & Py_TPFLAGS_SEQUENCE;
             res = match ? PyStackRef_True : PyStackRef_False;
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -55084,6 +55081,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55133,10 +55133,10 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
+            /* Cache spill */
             stack_pointer[0] = values_or_none;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -55174,12 +55174,12 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
-            stack_pointer[0] = values_or_none;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = values_or_none;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55217,14 +55217,14 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
-            stack_pointer[0] = values_or_none;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
+            stack_pointer[0] = values_or_none;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55262,9 +55262,6 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
-            stack_pointer[0] = values_or_none;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-2] = __TOS2;
@@ -55272,6 +55269,9 @@
             stack_pointer[-1] = __TOS3;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = values_or_none;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55309,9 +55309,6 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
-            stack_pointer[0] = values_or_none;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-2] = __TOS3;
@@ -55321,6 +55318,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = values_or_none;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55358,9 +55358,6 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
-            stack_pointer[0] = values_or_none;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-2] = __TOS4;
@@ -55372,6 +55369,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = values_or_none;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55389,9 +55389,6 @@
                 JUMP_TO_ERROR();
             }
             values_or_none = PyStackRef_FromPyObjectSteal(values_or_none_o);
-            stack_pointer[0] = values_or_none;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-2] = __TOS5;
@@ -55405,6 +55402,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = values_or_none;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55476,10 +55476,10 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
+            /* Cache spill */
             stack_pointer[0] = iter;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -55531,12 +55531,12 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55588,14 +55588,14 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55647,9 +55647,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -55657,6 +55654,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55708,9 +55708,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -55720,6 +55717,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55771,9 +55771,6 @@
                 JUMP_TO_ERROR();
             }
             iter = PyStackRef_FromPyObjectSteal(iter_o);
-            stack_pointer[0] = iter;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -55785,6 +55782,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = iter;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -55888,8 +55888,8 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = iter;
             /* Cache spill */
+            stack_pointer[-1] = iter;
             break;
         }
 
@@ -55966,10 +55966,10 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = iter;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-1] = iter;
             break;
         }
 
@@ -56046,12 +56046,12 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = iter;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = iter;
             break;
         }
 
@@ -56128,7 +56128,6 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = iter;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -56136,6 +56135,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = iter;
             break;
         }
 
@@ -56212,7 +56212,6 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = iter;
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -56222,6 +56221,7 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = iter;
             break;
         }
 
@@ -56298,7 +56298,6 @@
                 PyStackRef_CLOSE(tmp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-1] = iter;
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -56310,6 +56309,7 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = iter;
             break;
         }
 
@@ -56439,10 +56439,10 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
+            /* Cache spill */
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -56510,12 +56510,12 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -56587,14 +56587,14 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -56670,9 +56670,6 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -56680,6 +56677,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -56759,9 +56759,6 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -56771,6 +56768,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -56854,9 +56854,6 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -56868,6 +56865,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -56910,9 +56910,6 @@
                 }
             }
             next = PyStackRef_FromPyObjectSteal(next_o);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -56926,6 +56923,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -58230,10 +58230,10 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
+            /* Cache spill */
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -58317,12 +58317,12 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -58414,14 +58414,14 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -58521,9 +58521,6 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -58531,6 +58528,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -58638,9 +58638,6 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -58650,6 +58647,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -58765,9 +58765,6 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -58779,6 +58776,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -58839,9 +58839,6 @@
             assert(it->it_index < PyList_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyList_GET_ITEM(seq, it->it_index++));
             #endif
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -58855,6 +58852,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -59883,10 +59883,10 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
+            /* Cache spill */
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -59924,12 +59924,12 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -59967,14 +59967,14 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -60012,9 +60012,6 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -60022,6 +60019,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -60059,9 +60059,6 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -60071,6 +60068,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -60108,9 +60108,6 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -60122,6 +60119,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -60139,9 +60139,6 @@
             assert(seq);
             assert(it->it_index < PyTuple_GET_SIZE(seq));
             next = PyStackRef_FromPyObjectNew(PyTuple_GET_ITEM(seq, it->it_index++));
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -60155,6 +60152,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -60971,10 +60971,10 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
+            /* Cache spill */
             stack_pointer[0] = next;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -61020,12 +61020,12 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61071,14 +61071,14 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61124,9 +61124,6 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -61134,6 +61131,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61179,9 +61179,6 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -61191,6 +61188,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61236,9 +61236,6 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -61250,6 +61247,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61271,9 +61271,6 @@
                 JUMP_TO_ERROR();
             }
             next = PyStackRef_FromPyObjectSteal(res);
-            stack_pointer[0] = next;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -61287,6 +61284,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = next;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61458,10 +61458,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -61535,12 +61535,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61614,14 +61614,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61695,9 +61695,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
@@ -61705,6 +61702,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61778,9 +61778,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
@@ -61790,6 +61787,9 @@
             stack_pointer[-2] = __TOS3;
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61863,9 +61863,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
@@ -61877,6 +61874,9 @@
             stack_pointer[-2] = __TOS4;
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -61912,9 +61912,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-5] = __TOS2;
@@ -61928,6 +61925,9 @@
             stack_pointer[-1] = __TOS6;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -62006,11 +62006,11 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
+            /* Cache spill */
             stack_pointer[-1] = prev_exc;
             stack_pointer[0] = new_exc;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -62051,11 +62051,11 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
+            /* Cache spill */
             stack_pointer[-1] = prev_exc;
             stack_pointer[0] = new_exc;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -62096,13 +62096,13 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[-1] = prev_exc;
             stack_pointer[0] = new_exc;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -62143,15 +62143,15 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
-            stack_pointer[-1] = prev_exc;
-            stack_pointer[0] = new_exc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = prev_exc;
+            stack_pointer[0] = new_exc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -62192,10 +62192,6 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
-            stack_pointer[-1] = prev_exc;
-            stack_pointer[0] = new_exc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -62203,6 +62199,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = prev_exc;
+            stack_pointer[0] = new_exc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -62243,10 +62243,6 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
-            stack_pointer[-1] = prev_exc;
-            stack_pointer[0] = new_exc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -62256,6 +62252,10 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = prev_exc;
+            stack_pointer[0] = new_exc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -62274,10 +62274,6 @@
             assert(PyStackRef_ExceptionInstanceCheck(exc));
             exc_info->exc_value = PyStackRef_AsPyObjectNew(exc);
             new_exc = exc;
-            stack_pointer[-1] = prev_exc;
-            stack_pointer[0] = new_exc;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -62289,6 +62285,10 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = prev_exc;
+            stack_pointer[0] = new_exc;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -62962,11 +62962,11 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -63003,11 +63003,11 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -63044,13 +63044,13 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -63087,15 +63087,15 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63132,10 +63132,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -63143,6 +63139,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63179,10 +63179,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -63192,6 +63188,10 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63208,10 +63208,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -63223,6 +63219,10 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63281,11 +63281,11 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -63324,11 +63324,11 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -63367,13 +63367,13 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -63412,15 +63412,15 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63459,10 +63459,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -63470,6 +63466,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63508,10 +63508,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -63521,6 +63517,10 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63538,10 +63538,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -63553,6 +63549,10 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63613,10 +63613,10 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
+            /* Cache spill */
             stack_pointer[0] = attr;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -63656,12 +63656,12 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63701,14 +63701,14 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63748,9 +63748,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -63758,6 +63755,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63797,9 +63797,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -63809,6 +63806,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63848,9 +63848,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -63862,6 +63859,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -63924,10 +63924,10 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
+            /* Cache spill */
             stack_pointer[0] = attr;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -63969,12 +63969,12 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64016,14 +64016,14 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64065,9 +64065,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -64075,6 +64072,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64116,9 +64116,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -64128,6 +64125,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64169,9 +64169,6 @@
             PyStackRef_CLOSE(owner);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             attr = PyStackRef_FromPyObjectNew(descr);
-            stack_pointer[0] = attr;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -64183,6 +64180,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = attr;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64542,11 +64542,11 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -64583,11 +64583,11 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -64624,13 +64624,13 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
+            /* Cache spill */
+            /* Flushing cache 1 */
+            stack_pointer[-1] = __TOS1;
             stack_pointer[-1] = attr;
             stack_pointer[0] = self;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
-            /* Flushing cache 1 */
-            stack_pointer[-1] = __TOS1;
             break;
         }
 
@@ -64667,15 +64667,15 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64712,10 +64712,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -64723,6 +64719,10 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64759,10 +64759,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -64772,6 +64768,10 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -64788,10 +64788,6 @@
             assert(_PyType_HasFeature(Py_TYPE(descr), Py_TPFLAGS_METHOD_DESCRIPTOR));
             attr = PyStackRef_FromPyObjectNew(descr);
             self = owner;
-            stack_pointer[-1] = attr;
-            stack_pointer[0] = self;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -64803,6 +64799,10 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[-1] = attr;
+            stack_pointer[0] = self;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -67396,10 +67396,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -67461,10 +67461,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -67526,12 +67526,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -67593,14 +67593,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -67662,9 +67662,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -67672,6 +67669,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68008,10 +68008,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -68073,10 +68073,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -68138,12 +68138,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68205,14 +68205,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68274,9 +68274,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -68284,6 +68281,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68416,9 +68416,9 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
+            /* Cache spill */
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -68449,11 +68449,11 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68484,13 +68484,13 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68521,8 +68521,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -68530,6 +68528,8 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68560,8 +68560,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -68571,6 +68569,8 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -68601,8 +68601,6 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 JUMP_TO_ERROR();
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -68614,6 +68612,8 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -69259,10 +69259,10 @@
             PyStackRef_CLOSE(callable);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -69338,10 +69338,10 @@
             PyStackRef_CLOSE(callable);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -69417,12 +69417,12 @@
             PyStackRef_CLOSE(callable);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -69498,14 +69498,14 @@
             PyStackRef_CLOSE(callable);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -69581,9 +69581,6 @@
             PyStackRef_CLOSE(callable);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -69591,6 +69588,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -69958,10 +69958,10 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = retval ? PyStackRef_True : PyStackRef_False;
             assert((!PyStackRef_IsNull(res)) ^ (_PyErr_Occurred(tstate) != NULL));
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -70045,10 +70045,10 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = retval ? PyStackRef_True : PyStackRef_False;
             assert((!PyStackRef_IsNull(res)) ^ (_PyErr_Occurred(tstate) != NULL));
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -70132,12 +70132,12 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = retval ? PyStackRef_True : PyStackRef_False;
             assert((!PyStackRef_IsNull(res)) ^ (_PyErr_Occurred(tstate) != NULL));
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -70221,14 +70221,14 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = retval ? PyStackRef_True : PyStackRef_False;
             assert((!PyStackRef_IsNull(res)) ^ (_PyErr_Occurred(tstate) != NULL));
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -71606,10 +71606,10 @@
                 PyStackRef_CLOSE(temp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            stack_pointer[-2] = callargs;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = callargs;
             break;
         }
 
@@ -71669,12 +71669,12 @@
                 PyStackRef_CLOSE(temp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            __TOS1 = callargs;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
+            __TOS1 = callargs;
             break;
         }
 
@@ -71734,7 +71734,6 @@
                 PyStackRef_CLOSE(temp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            __TOS2 = callargs;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
@@ -71742,6 +71741,7 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
+            __TOS2 = callargs;
             break;
         }
 
@@ -71801,7 +71801,6 @@
                 PyStackRef_CLOSE(temp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            __TOS3 = callargs;
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
@@ -71811,6 +71810,7 @@
             stack_pointer[-2] = __TOS3;
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
+            __TOS3 = callargs;
             break;
         }
 
@@ -71870,7 +71870,6 @@
                 PyStackRef_CLOSE(temp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            __TOS4 = callargs;
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-4] = __TOS2;
@@ -71882,6 +71881,7 @@
             stack_pointer[-1] = __TOS5;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            __TOS4 = callargs;
             break;
         }
 
@@ -71941,7 +71941,6 @@
                 PyStackRef_CLOSE(temp);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
-            __TOS5 = callargs;
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-4] = __TOS3;
@@ -71955,6 +71954,7 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            __TOS5 = callargs;
             break;
         }
 
@@ -72050,10 +72050,10 @@
             _PyFunction_SetVersion(
                                    func_obj, ((PyCodeObject *)codeobj)->co_version);
             func = PyStackRef_FromPyObjectSteal((PyObject *)func_obj);
+            /* Cache spill */
             stack_pointer[0] = func;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -72103,12 +72103,12 @@
             _PyFunction_SetVersion(
                                    func_obj, ((PyCodeObject *)codeobj)->co_version);
             func = PyStackRef_FromPyObjectSteal((PyObject *)func_obj);
-            stack_pointer[0] = func;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = func;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72158,14 +72158,14 @@
             _PyFunction_SetVersion(
                                    func_obj, ((PyCodeObject *)codeobj)->co_version);
             func = PyStackRef_FromPyObjectSteal((PyObject *)func_obj);
-            stack_pointer[0] = func;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = func;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72215,9 +72215,6 @@
             _PyFunction_SetVersion(
                                    func_obj, ((PyCodeObject *)codeobj)->co_version);
             func = PyStackRef_FromPyObjectSteal((PyObject *)func_obj);
-            stack_pointer[0] = func;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -72225,6 +72222,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = func;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72274,9 +72274,6 @@
             _PyFunction_SetVersion(
                                    func_obj, ((PyCodeObject *)codeobj)->co_version);
             func = PyStackRef_FromPyObjectSteal((PyObject *)func_obj);
-            stack_pointer[0] = func;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -72286,6 +72283,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = func;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72335,9 +72335,6 @@
             _PyFunction_SetVersion(
                                    func_obj, ((PyCodeObject *)codeobj)->co_version);
             func = PyStackRef_FromPyObjectSteal((PyObject *)func_obj);
-            stack_pointer[0] = func;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -72349,6 +72346,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = func;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72394,10 +72394,10 @@
             PyObject **ptr = (PyObject **)(((char *)func) + offset);
             assert(*ptr == NULL);
             *ptr = attr;
+            /* Cache spill */
             stack_pointer[-2] = func_out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -72439,10 +72439,10 @@
             PyObject **ptr = (PyObject **)(((char *)func) + offset);
             assert(*ptr == NULL);
             *ptr = attr;
+            /* Cache spill */
             stack_pointer[-2] = func_out;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -72484,12 +72484,12 @@
             PyObject **ptr = (PyObject **)(((char *)func) + offset);
             assert(*ptr == NULL);
             *ptr = attr;
-            stack_pointer[-2] = func_out;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[-2] = func_out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72531,14 +72531,14 @@
             PyObject **ptr = (PyObject **)(((char *)func) + offset);
             assert(*ptr == NULL);
             *ptr = attr;
-            stack_pointer[-2] = func_out;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[-2] = func_out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72580,9 +72580,6 @@
             PyObject **ptr = (PyObject **)(((char *)func) + offset);
             assert(*ptr == NULL);
             *ptr = attr;
-            stack_pointer[-2] = func_out;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -72590,6 +72587,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[-2] = func_out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72631,9 +72631,6 @@
             PyObject **ptr = (PyObject **)(((char *)func) + offset);
             assert(*ptr == NULL);
             *ptr = attr;
-            stack_pointer[-2] = func_out;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -72643,6 +72640,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[-2] = func_out;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72726,10 +72726,10 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -72791,12 +72791,12 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72858,14 +72858,14 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72927,9 +72927,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -72937,6 +72934,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -72998,9 +72998,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -73010,6 +73007,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73071,9 +73071,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -73085,6 +73082,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73114,9 +73114,6 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -73130,6 +73127,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73240,10 +73240,10 @@
                 JUMP_TO_ERROR();
             }
             result = PyStackRef_FromPyObjectSteal(result_o);
+            /* Cache spill */
             stack_pointer[0] = result;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -73293,12 +73293,12 @@
                 JUMP_TO_ERROR();
             }
             result = PyStackRef_FromPyObjectSteal(result_o);
-            stack_pointer[0] = result;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = result;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73348,14 +73348,14 @@
                 JUMP_TO_ERROR();
             }
             result = PyStackRef_FromPyObjectSteal(result_o);
-            stack_pointer[0] = result;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = result;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73405,9 +73405,6 @@
                 JUMP_TO_ERROR();
             }
             result = PyStackRef_FromPyObjectSteal(result_o);
-            stack_pointer[0] = result;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -73415,6 +73412,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = result;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73464,9 +73464,6 @@
                 JUMP_TO_ERROR();
             }
             result = PyStackRef_FromPyObjectSteal(result_o);
-            stack_pointer[0] = result;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -73476,6 +73473,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = result;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73525,9 +73525,6 @@
                 JUMP_TO_ERROR();
             }
             result = PyStackRef_FromPyObjectSteal(result_o);
-            stack_pointer[0] = result;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -73539,6 +73536,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = result;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73620,10 +73620,10 @@
                 res = value;
                 stack_pointer += -1;
             }
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -73679,12 +73679,12 @@
                 res = value;
                 stack_pointer += -1;
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73740,14 +73740,14 @@
                 res = value;
                 stack_pointer += -1;
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73803,9 +73803,6 @@
                 res = value;
                 stack_pointer += -1;
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -73813,6 +73810,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73868,9 +73868,6 @@
                 res = value;
                 stack_pointer += -1;
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -73880,6 +73877,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -73935,9 +73935,6 @@
                 res = value;
                 stack_pointer += -1;
             }
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -73949,6 +73946,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -74004,10 +74004,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -74063,10 +74063,10 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
+            /* Cache spill */
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -74122,12 +74122,12 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -74183,14 +74183,14 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -74246,9 +74246,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -74256,6 +74253,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -74311,9 +74311,6 @@
                 JUMP_TO_ERROR();
             }
             res = PyStackRef_FromPyObjectSteal(res_o);
-            stack_pointer[0] = res;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -74323,6 +74320,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = res;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -75543,9 +75543,9 @@
                     JUMP_TO_JUMP_TARGET();
                 }
             }
+            /* Cache spill */
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -75588,11 +75588,11 @@
                     JUMP_TO_JUMP_TARGET();
                 }
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -75639,13 +75639,13 @@
                     JUMP_TO_JUMP_TARGET();
                 }
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -75696,8 +75696,6 @@
                     JUMP_TO_JUMP_TARGET();
                 }
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -75705,6 +75703,8 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -75759,8 +75759,6 @@
                     JUMP_TO_JUMP_TARGET();
                 }
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -75770,6 +75768,8 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -75828,8 +75828,6 @@
                     JUMP_TO_JUMP_TARGET();
                 }
             }
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -75841,6 +75839,8 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -77954,10 +77954,10 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -77975,12 +77975,12 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -77998,14 +77998,14 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78023,9 +78023,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -78033,6 +78030,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78050,9 +78050,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -78062,6 +78059,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78079,9 +78079,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -78093,6 +78090,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78100,9 +78100,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -78116,6 +78113,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78157,10 +78157,10 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectNew(ptr);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -78192,12 +78192,12 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78229,14 +78229,14 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78268,9 +78268,6 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -78278,6 +78275,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78309,9 +78309,6 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -78321,6 +78318,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78352,9 +78352,6 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectNew(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -78366,6 +78363,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78400,10 +78400,10 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -78421,12 +78421,12 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78444,14 +78444,14 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78469,9 +78469,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -78479,6 +78476,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78496,9 +78496,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -78508,6 +78505,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78525,9 +78525,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -78539,6 +78536,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78546,9 +78546,6 @@
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 6 */
             stack_pointer[-1] = __TOS6;
@@ -78562,6 +78559,9 @@
             stack_pointer[-5] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-6] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78603,10 +78603,10 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -78638,12 +78638,12 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78675,14 +78675,14 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78714,9 +78714,6 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -78724,6 +78721,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78755,9 +78755,6 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -78767,6 +78764,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78798,9 +78798,6 @@
             PyStackRef_CLOSE(pop);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 5 */
             stack_pointer[-1] = __TOS5;
@@ -78812,6 +78809,9 @@
             stack_pointer[-4] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-5] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78850,10 +78850,10 @@
             PyStackRef_CLOSE(pop1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -78899,10 +78899,10 @@
             PyStackRef_CLOSE(pop1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
+            /* Cache spill */
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            /* Cache spill */
             break;
         }
 
@@ -78948,12 +78948,12 @@
             PyStackRef_CLOSE(pop1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 1 */
             stack_pointer[-1] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -78999,14 +78999,14 @@
             PyStackRef_CLOSE(pop1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 2 */
             stack_pointer[-1] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-2] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -79052,9 +79052,6 @@
             PyStackRef_CLOSE(pop1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 3 */
             stack_pointer[-1] = __TOS3;
@@ -79062,6 +79059,9 @@
             stack_pointer[-2] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-3] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -79107,9 +79107,6 @@
             PyStackRef_CLOSE(pop1);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             value = PyStackRef_FromPyObjectImmortal(ptr);
-            stack_pointer[0] = value;
-            stack_pointer += 1;
-            assert(WITHIN_STACK_BOUNDS());
             /* Cache spill */
             /* Flushing cache 4 */
             stack_pointer[-1] = __TOS4;
@@ -79119,6 +79116,9 @@
             stack_pointer[-3] = __TOS2;
             /* Flushing cache 1 */
             stack_pointer[-4] = __TOS1;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 

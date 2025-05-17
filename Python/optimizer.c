@@ -437,9 +437,72 @@ _PyUOp_Replacements[MAX_UOP_ID + 1] = {
 static const uint8_t
 is_for_iter_test[MAX_UOP_ID + 1] = {
     [_GUARD_NOT_EXHAUSTED_RANGE] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_1in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_1in_1out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_2in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_2in_2out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_3in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_3in_3out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_4in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_4in_4out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_5in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_5in_5out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_6in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_RANGE___CACHED_6in_6out] = 1,
+
     [_GUARD_NOT_EXHAUSTED_LIST] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_1in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_1in_1out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_2in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_2in_2out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_3in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_3in_3out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_4in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_4in_4out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_5in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_5in_5out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_6in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_LIST___CACHED_6in_6out] = 1,
+
     [_GUARD_NOT_EXHAUSTED_TUPLE] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_1in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_1in_1out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_2in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_2in_2out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_3in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_3in_3out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_4in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_4in_4out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_5in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_5in_5out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_6in_0out] = 1,
+    [_GUARD_NOT_EXHAUSTED_TUPLE___CACHED_6in_6out] = 1,
+
     [_FOR_ITER_TIER_TWO] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_0in_0out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_0in_1out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_1in_0out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_1in_2out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_2in_0out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_2in_3out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_3in_0out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_3in_4out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_4in_0out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_4in_5out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_5in_0out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_5in_6out] = 1,
+    [_FOR_ITER_TIER_TWO___CACHED_6in_0out] = 1,
+};
+
+static const uint8_t
+is_true_nop[MAX_UOP_ID + 1] = {
+    [_NOP] = 1,
+    [_NOP___CACHED_1in_1out] = 1,
+    [_NOP___CACHED_2in_2out] = 1,
+    [_NOP___CACHED_3in_3out] = 1,
+    [_NOP___CACHED_4in_4out] = 1,
+    [_NOP___CACHED_5in_5out] = 1,
+    [_NOP___CACHED_6in_6out] = 1,
 };
 
 static const uint16_t
@@ -1286,6 +1349,11 @@ uop_regalloc(_PyUOpInstruction *buffer, int length)
             }
         }
         buffer[pc].opcode = reged;
+        if (pc > 1) {
+            if (is_true_nop[buffer[pc - 1].opcode]) {
+                buffer[pc - 1].opcode = _NOP;
+            }
+        }
     }
 }
 
