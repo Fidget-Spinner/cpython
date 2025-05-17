@@ -216,13 +216,14 @@ def array_or_scalar(var: StackItem | Local) -> str:
     return "array" if var.is_array() else "scalar"
 
 class Stack:
-    def __init__(self, extract_bits: bool=True, cast_type: str = "uintptr_t") -> None:
+    def __init__(self, num_in_tos_cache: int, extract_bits: bool=True, cast_type: str = "uintptr_t") -> None:
         self.base_offset = PointerOffset.zero()
         self.physical_sp = PointerOffset.zero()
         self.logical_sp = PointerOffset.zero()
         self.variables: list[Local] = []
         self.extract_bits = extract_bits
         self.cast_type = cast_type
+        self.num_in_tos_cache = num_in_tos_cache
 
     def drop(self, var: StackItem, check_liveness: bool) -> None:
         self.logical_sp = self.logical_sp.pop(var)
@@ -263,7 +264,10 @@ class Stack:
                     popped.in_local = True
             else:
                 defn = rename
-            out.emit(defn)
+            if var.register:
+                out.emit(f"{var.name} = {var.register};\n")
+            else:
+                out.emit(defn)
             return popped
         self.base_offset = self.logical_sp
         if var.name in UNUSED or not var.used:
@@ -272,7 +276,10 @@ class Stack:
         bits = ".bits" if cast and self.extract_bits else ""
         c_offset = (self.base_offset - self.physical_sp).to_c()
         assign = f"{var.name} = {cast}{indirect}stack_pointer[{c_offset}]{bits};\n"
-        out.emit(assign)
+        if var.register:
+            out.emit(f"{var.name} = {var.register};\n")
+        else:
+            out.emit(assign)
         self._print(out)
         return Local.from_memory(var, self.base_offset)
 
@@ -331,6 +338,32 @@ class Stack:
         self._print(out)
         self.save_variables(out)
         self._save_physical_sp(out)
+        out.start_line()
+
+    def flush_tos_cache(self, out: CWriter) -> None:
+        self._print(out)
+        out.start_line()
+        min_i = 64
+        for var in self.variables:
+            if (
+                var.item.register
+            ):
+                self._print(out)
+                reg_i = int(var.item.register[-1])
+                if reg_i < min_i:
+                    min_i = reg_i
+                out.emit(f"/* Flushing cache {reg_i} */\n")
+                out.emit(f"stack_pointer[-{7-reg_i}] = {var.item.register};\n")
+                self._print(out)
+        if min_i <= 6:
+            min_i -= 1
+        else:
+            min_i = self.num_in_tos_cache
+        while min_i > 0:
+            out.emit(f"/* Flushing cache {min_i} */\n")
+            out.emit(f"stack_pointer[-{7-min_i}] = __TOS{min_i};\n")
+            min_i -= 1
+
         out.start_line()
 
     def is_flushed(self) -> bool:
@@ -424,7 +457,7 @@ def apply_stack_effect(stack: Stack, effect: StackEffect) -> None:
 
 
 def get_stack_effect(inst: Instruction | PseudoInstruction) -> Stack:
-    stack = Stack()
+    stack = Stack(0)
     for s in stacks(inst):
         apply_stack_effect(stack, s)
     return stack
@@ -520,6 +553,9 @@ class Storage:
             out.start_line()
             out.emit_spill()
         self.spilled += 1
+
+    def flush_tos_cache(self, out: CWriter) -> None:
+        self.stack.flush_tos_cache(out)
 
     def save_inputs(self, out: CWriter) -> None:
         assert self.spilled >= 0

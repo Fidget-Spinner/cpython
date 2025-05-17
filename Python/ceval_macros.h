@@ -425,7 +425,3 @@ do { \
     _PyObjectArray_Free(NAME - 1, NAME##_temp);
 
 #define CONVERSION_FAILED(NAME) ((NAME) == NULL)
-
-#define JIT_SPILL_TOS(N)
-#define JIT_LOAD_TOS(N)
-#define N_TOS

@@ -45,7 +45,7 @@ def declare_variable(
 
 
 def declare_variables(uop: Uop, out: CWriter) -> None:
-    stack = Stack()
+    stack = Stack(0)
     null = CWriter.null()
     for var in reversed(uop.stack.inputs):
         stack.pop(var, null)
@@ -87,6 +87,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
+        storage.flush_tos_cache(self.out)
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
         return not always_true(first_tkn)
@@ -143,9 +144,6 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
         elif uop.properties.const_oparg >= 0:
             emitter.emit(f"oparg = {uop.properties.const_oparg};\n")
             emitter.emit(f"assert(oparg == CURRENT_OPARG());\n")
-        if uop.tos_cached_inputs:
-            emitter.emit("#undef N_TOS\n")
-            emitter.emit(f"#define N_TOS {uop.tos_cached_inputs}\n")
         storage = Storage.for_uop(stack, uop, emitter.out)
         idx = 0
         for cache in uop.caches:
@@ -160,7 +158,8 @@ def write_uop(uop: Uop, emitter: Emitter, stack: Stack) -> Stack:
         _, storage = emitter.emit_tokens(uop, storage, None, False)
         storage.flush(emitter.out)
         if uop.name.endswith("0out"):
-            emitter.emit("JIT_SPILL_TOS(N_TOS);\n")
+            emitter.emit("/* Cache spill */\n")
+            storage.flush_tos_cache(emitter.out)
     except StackError as ex:
         raise analysis_error(ex.args[0], uop.body.open) from None
     return storage.stack
@@ -196,11 +195,7 @@ def generate_tier2(
             continue
         out.emit(f"case {uop.name}: {{\n")
         declare_variables(uop, out)
-        stack = Stack()
-        if uop.tos_cached_inputs:
-            for cache_idx in reversed(range(1, min(len(uop.stack.inputs), uop.tos_cached_inputs)+1)):
-                assert 6 >= cache_idx > 0
-                stack.push(Local.register(f"__TOS{cache_idx}"))
+        stack = Stack(num_in_tos_cache=uop.tos_cached_inputs)
         stack = write_uop(uop, emitter, stack)
         out.start_line()
         if not uop.properties.always_exits:

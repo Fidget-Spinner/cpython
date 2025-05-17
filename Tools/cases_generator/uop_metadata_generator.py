@@ -50,7 +50,7 @@ def generate_names_and_flags(analysis: Analysis, out: CWriter) -> None:
     null = CWriter.null()
     for uop in analysis.uops.values():
         if uop.is_viable() and uop.properties.tier != 1:
-            stack = Stack()
+            stack = Stack(0)
             for var in reversed(uop.stack.inputs):
                 if var.peek:
                     break

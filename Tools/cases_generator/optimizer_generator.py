@@ -234,7 +234,7 @@ def generate_abstract_interpreter(
             declare_variables(override, out, skip_inputs=False)
         else:
             declare_variables(uop, out, skip_inputs=True)
-        stack = Stack(extract_bits=False, cast_type="JitOptSymbol *")
+        stack = Stack(0, extract_bits=False, cast_type="JitOptSymbol *")
         write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
         out.start_line()
         out.emit("break;\n")

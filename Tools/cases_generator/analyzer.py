@@ -165,7 +165,7 @@ class StackEffect:
         # Imports must be here to avoid circular import.
         from stack import Stack, Local
         from cwriter import CWriter
-        stack = Stack()
+        stack = Stack(0)
         null = CWriter.null()
         for var in reversed(self.inputs):
             stack.pop(var, null)
@@ -377,6 +377,7 @@ def check_unused(stack: list[StackItem], input_names: dict[str, lexer.Token]) ->
 
 def analyze_stack(
     op: parser.InstDef | parser.Pseudo, replace_op_arg_1: str | None = None,
+    num_live_registers_in: int | None = None,
     num_live_registers_out: int | None = None, num_registers_for_output: int | None = None
 ) -> StackEffect:
     inputs: list[StackItem] = [
@@ -429,6 +430,12 @@ def analyze_stack(
             num_live_registers_out -= 1
             num_registers_for_output -= 1
 
+    if num_live_registers_in is not None:
+        for inp in reversed(inputs):
+            if num_live_registers_in <= 0:
+                break
+            inp.register = f"__TOS{num_live_registers_in}"
+            num_live_registers_in -= 1
     return StackEffect(inputs, outputs)
 
 
@@ -933,7 +940,7 @@ def make_uop(
             if num_live_registers_out > 6:
                 num_live_registers_out = 0
             name_cached = f"{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
-            stack=analyze_stack(op, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)
+            stack=analyze_stack(op, num_live_registers_in=num_live_registers_in, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)
             cached = Uop(
                 name=name_cached,
                 context=op.context,

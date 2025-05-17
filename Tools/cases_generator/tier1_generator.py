@@ -204,7 +204,7 @@ def generate_tier1_labels(
     # Emit tail-callable labels as function defintions
     for name, label in analysis.labels.items():
         emitter.emit(f"LABEL({name})\n")
-        storage = Storage(Stack(), [], [], 0, False)
+        storage = Storage(Stack(0), [], [], 0, False)
         if label.spilled:
             storage.spilled = 1
         emitter.emit_tokens(label, storage, None)
@@ -257,7 +257,7 @@ def generate_tier1_cases(
             )
         declare_variables(inst, out)
         offset = 1  # The instruction itself
-        stack = Stack()
+        stack = Stack(0)
         for part in inst.parts:
             # Only emit braces if more than one uop
             insert_braces = len([p for p in inst.parts if isinstance(p, Uop)]) > 1
