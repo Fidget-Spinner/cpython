@@ -108,6 +108,7 @@ class Tier2Emitter(Emitter):
         next(tkn_iter)  # Semi colon
         self.emit(") {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
+        storage.flush_tos_cache(self.out)
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
         return not always_true(first_tkn)

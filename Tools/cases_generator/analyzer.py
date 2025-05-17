@@ -935,11 +935,12 @@ def make_uop(
             if num_live_registers_in == 0 and num_live_registers_out == 0:
                 continue
             # Using too many registers
-            if not (0 <= num_live_registers_out):
+            if num_live_registers_out < 0:
                 continue
             if num_live_registers_out > 6:
                 num_live_registers_out = 0
-            name_cached = f"{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
+            underscore = "" if op.name.startswith("_") else "_"
+            name_cached = f"{underscore}{op.name}___CACHED_{num_live_registers_in}in_{num_live_registers_out}out"
             stack=analyze_stack(op, num_live_registers_in=num_live_registers_in, num_live_registers_out=num_live_registers_out, num_registers_for_output=net_effect_static)
             cached = Uop(
                 name=name_cached,

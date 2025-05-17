@@ -8,27 +8,27 @@
 #endif
 #define TIER_TWO 2
 
-        case NOP___CACHED_1in_1out: {
+        case _NOP___CACHED_1in_1out: {
             break;
         }
 
-        case NOP___CACHED_2in_2out: {
+        case _NOP___CACHED_2in_2out: {
             break;
         }
 
-        case NOP___CACHED_3in_3out: {
+        case _NOP___CACHED_3in_3out: {
             break;
         }
 
-        case NOP___CACHED_4in_4out: {
+        case _NOP___CACHED_4in_4out: {
             break;
         }
 
-        case NOP___CACHED_5in_5out: {
+        case _NOP___CACHED_5in_5out: {
             break;
         }
 
-        case NOP___CACHED_6in_6out: {
+        case _NOP___CACHED_6in_6out: {
             break;
         }
 
@@ -281,7 +281,7 @@
 
         /* _LOAD_BYTECODE is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        case RESUME_CHECK___CACHED_1in_1out: {
+        case _RESUME_CHECK___CACHED_1in_1out: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -312,7 +312,7 @@
             break;
         }
 
-        case RESUME_CHECK___CACHED_2in_2out: {
+        case _RESUME_CHECK___CACHED_2in_2out: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -349,7 +349,7 @@
             break;
         }
 
-        case RESUME_CHECK___CACHED_3in_3out: {
+        case _RESUME_CHECK___CACHED_3in_3out: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -392,7 +392,7 @@
             break;
         }
 
-        case RESUME_CHECK___CACHED_4in_4out: {
+        case _RESUME_CHECK___CACHED_4in_4out: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -441,7 +441,7 @@
             break;
         }
 
-        case RESUME_CHECK___CACHED_5in_5out: {
+        case _RESUME_CHECK___CACHED_5in_5out: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -496,7 +496,7 @@
             break;
         }
 
-        case RESUME_CHECK___CACHED_6in_6out: {
+        case _RESUME_CHECK___CACHED_6in_6out: {
             #if defined(__EMSCRIPTEN__)
             if (_Py_emscripten_signal_clock == 0) {
                 UOP_STAT_INC(uopcode, miss);
@@ -596,7 +596,7 @@
 
         /* _MONITOR_RESUME is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        case LOAD_FAST_CHECK___CACHED_0in_1out: {
+        case _LOAD_FAST_CHECK___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -616,7 +616,7 @@
             break;
         }
 
-        case LOAD_FAST_CHECK___CACHED_1in_2out: {
+        case _LOAD_FAST_CHECK___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -636,7 +636,7 @@
             break;
         }
 
-        case LOAD_FAST_CHECK___CACHED_2in_3out: {
+        case _LOAD_FAST_CHECK___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -656,7 +656,7 @@
             break;
         }
 
-        case LOAD_FAST_CHECK___CACHED_3in_4out: {
+        case _LOAD_FAST_CHECK___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -676,7 +676,7 @@
             break;
         }
 
-        case LOAD_FAST_CHECK___CACHED_4in_5out: {
+        case _LOAD_FAST_CHECK___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -696,7 +696,7 @@
             break;
         }
 
-        case LOAD_FAST_CHECK___CACHED_5in_6out: {
+        case _LOAD_FAST_CHECK___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -716,7 +716,7 @@
             break;
         }
 
-        case LOAD_FAST_CHECK___CACHED_6in_0out: {
+        case _LOAD_FAST_CHECK___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             _PyStackRef value_s = GETLOCAL(oparg);
@@ -769,7 +769,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out: {
+        case _LOAD_FAST___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -780,7 +780,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out: {
+        case _LOAD_FAST___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -791,7 +791,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out: {
+        case _LOAD_FAST___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -802,7 +802,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out: {
+        case _LOAD_FAST___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -813,7 +813,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out: {
+        case _LOAD_FAST___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -824,7 +824,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out: {
+        case _LOAD_FAST___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -835,7 +835,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out: {
+        case _LOAD_FAST___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -955,7 +955,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_0: {
+        case _LOAD_FAST___CACHED_0in_1out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -967,7 +967,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_1: {
+        case _LOAD_FAST___CACHED_0in_1out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -979,7 +979,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_2: {
+        case _LOAD_FAST___CACHED_0in_1out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -991,7 +991,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_3: {
+        case _LOAD_FAST___CACHED_0in_1out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1003,7 +1003,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_4: {
+        case _LOAD_FAST___CACHED_0in_1out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1015,7 +1015,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_5: {
+        case _LOAD_FAST___CACHED_0in_1out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1027,7 +1027,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_6: {
+        case _LOAD_FAST___CACHED_0in_1out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1039,7 +1039,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_0in_1out_7: {
+        case _LOAD_FAST___CACHED_0in_1out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1051,7 +1051,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_0: {
+        case _LOAD_FAST___CACHED_1in_2out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1063,7 +1063,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_1: {
+        case _LOAD_FAST___CACHED_1in_2out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1075,7 +1075,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_2: {
+        case _LOAD_FAST___CACHED_1in_2out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1087,7 +1087,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_3: {
+        case _LOAD_FAST___CACHED_1in_2out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1099,7 +1099,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_4: {
+        case _LOAD_FAST___CACHED_1in_2out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1111,7 +1111,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_5: {
+        case _LOAD_FAST___CACHED_1in_2out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1123,7 +1123,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_6: {
+        case _LOAD_FAST___CACHED_1in_2out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1135,7 +1135,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_1in_2out_7: {
+        case _LOAD_FAST___CACHED_1in_2out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1147,7 +1147,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_0: {
+        case _LOAD_FAST___CACHED_2in_3out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1159,7 +1159,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_1: {
+        case _LOAD_FAST___CACHED_2in_3out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1171,7 +1171,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_2: {
+        case _LOAD_FAST___CACHED_2in_3out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1183,7 +1183,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_3: {
+        case _LOAD_FAST___CACHED_2in_3out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1195,7 +1195,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_4: {
+        case _LOAD_FAST___CACHED_2in_3out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1207,7 +1207,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_5: {
+        case _LOAD_FAST___CACHED_2in_3out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1219,7 +1219,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_6: {
+        case _LOAD_FAST___CACHED_2in_3out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1231,7 +1231,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_2in_3out_7: {
+        case _LOAD_FAST___CACHED_2in_3out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1243,7 +1243,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_0: {
+        case _LOAD_FAST___CACHED_3in_4out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1255,7 +1255,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_1: {
+        case _LOAD_FAST___CACHED_3in_4out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1267,7 +1267,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_2: {
+        case _LOAD_FAST___CACHED_3in_4out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1279,7 +1279,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_3: {
+        case _LOAD_FAST___CACHED_3in_4out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1291,7 +1291,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_4: {
+        case _LOAD_FAST___CACHED_3in_4out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1303,7 +1303,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_5: {
+        case _LOAD_FAST___CACHED_3in_4out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1315,7 +1315,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_6: {
+        case _LOAD_FAST___CACHED_3in_4out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1327,7 +1327,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_3in_4out_7: {
+        case _LOAD_FAST___CACHED_3in_4out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1339,7 +1339,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_0: {
+        case _LOAD_FAST___CACHED_4in_5out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1351,7 +1351,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_1: {
+        case _LOAD_FAST___CACHED_4in_5out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1363,7 +1363,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_2: {
+        case _LOAD_FAST___CACHED_4in_5out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1375,7 +1375,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_3: {
+        case _LOAD_FAST___CACHED_4in_5out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1387,7 +1387,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_4: {
+        case _LOAD_FAST___CACHED_4in_5out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1399,7 +1399,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_5: {
+        case _LOAD_FAST___CACHED_4in_5out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1411,7 +1411,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_6: {
+        case _LOAD_FAST___CACHED_4in_5out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1423,7 +1423,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_4in_5out_7: {
+        case _LOAD_FAST___CACHED_4in_5out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1435,7 +1435,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_0: {
+        case _LOAD_FAST___CACHED_5in_6out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1447,7 +1447,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_1: {
+        case _LOAD_FAST___CACHED_5in_6out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1459,7 +1459,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_2: {
+        case _LOAD_FAST___CACHED_5in_6out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1471,7 +1471,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_3: {
+        case _LOAD_FAST___CACHED_5in_6out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1483,7 +1483,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_4: {
+        case _LOAD_FAST___CACHED_5in_6out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1495,7 +1495,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_5: {
+        case _LOAD_FAST___CACHED_5in_6out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1507,7 +1507,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_6: {
+        case _LOAD_FAST___CACHED_5in_6out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1519,7 +1519,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_5in_6out_7: {
+        case _LOAD_FAST___CACHED_5in_6out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1531,7 +1531,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_0: {
+        case _LOAD_FAST___CACHED_6in_0out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1543,7 +1543,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_1: {
+        case _LOAD_FAST___CACHED_6in_0out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1555,7 +1555,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_2: {
+        case _LOAD_FAST___CACHED_6in_0out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1567,7 +1567,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_3: {
+        case _LOAD_FAST___CACHED_6in_0out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1579,7 +1579,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_4: {
+        case _LOAD_FAST___CACHED_6in_0out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1591,7 +1591,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_5: {
+        case _LOAD_FAST___CACHED_6in_0out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1603,7 +1603,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_6: {
+        case _LOAD_FAST___CACHED_6in_0out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1615,7 +1615,7 @@
             break;
         }
 
-        case LOAD_FAST___CACHED_6in_0out_7: {
+        case _LOAD_FAST___CACHED_6in_0out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1638,7 +1638,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1649,7 +1649,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1660,7 +1660,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1671,7 +1671,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1682,7 +1682,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1693,7 +1693,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1704,7 +1704,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(!PyStackRef_IsNull(GETLOCAL(oparg)));
@@ -1824,7 +1824,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_0: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1836,7 +1836,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_1: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1848,7 +1848,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_2: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1860,7 +1860,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_3: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1872,7 +1872,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_4: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1884,7 +1884,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_5: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1896,7 +1896,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_6: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -1908,7 +1908,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_0in_1out_7: {
+        case _LOAD_FAST_BORROW___CACHED_0in_1out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -1920,7 +1920,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_0: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -1932,7 +1932,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_1: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -1944,7 +1944,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_2: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -1956,7 +1956,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_3: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -1968,7 +1968,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_4: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -1980,7 +1980,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_5: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -1992,7 +1992,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_6: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -2004,7 +2004,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_1in_2out_7: {
+        case _LOAD_FAST_BORROW___CACHED_1in_2out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -2016,7 +2016,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_0: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -2028,7 +2028,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_1: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -2040,7 +2040,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_2: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -2052,7 +2052,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_3: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -2064,7 +2064,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_4: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -2076,7 +2076,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_5: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -2088,7 +2088,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_6: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -2100,7 +2100,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_2in_3out_7: {
+        case _LOAD_FAST_BORROW___CACHED_2in_3out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -2112,7 +2112,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_0: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -2124,7 +2124,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_1: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -2136,7 +2136,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_2: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -2148,7 +2148,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_3: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -2160,7 +2160,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_4: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -2172,7 +2172,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_5: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -2184,7 +2184,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_6: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -2196,7 +2196,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_3in_4out_7: {
+        case _LOAD_FAST_BORROW___CACHED_3in_4out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -2208,7 +2208,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_0: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -2220,7 +2220,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_1: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -2232,7 +2232,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_2: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -2244,7 +2244,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_3: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -2256,7 +2256,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_4: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -2268,7 +2268,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_5: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -2280,7 +2280,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_6: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -2292,7 +2292,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_4in_5out_7: {
+        case _LOAD_FAST_BORROW___CACHED_4in_5out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -2304,7 +2304,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_0: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -2316,7 +2316,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_1: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -2328,7 +2328,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_2: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -2340,7 +2340,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_3: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -2352,7 +2352,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_4: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -2364,7 +2364,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_5: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -2376,7 +2376,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_6: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -2388,7 +2388,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_5in_6out_7: {
+        case _LOAD_FAST_BORROW___CACHED_5in_6out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -2400,7 +2400,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_0: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -2412,7 +2412,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_1: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -2424,7 +2424,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_2: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -2436,7 +2436,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_3: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -2448,7 +2448,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_4: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -2460,7 +2460,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_5: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -2472,7 +2472,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_6: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -2484,7 +2484,7 @@
             break;
         }
 
-        case LOAD_FAST_BORROW___CACHED_6in_0out_7: {
+        case _LOAD_FAST_BORROW___CACHED_6in_0out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -2507,7 +2507,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_0in_1out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2518,7 +2518,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_1in_2out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2529,7 +2529,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_2in_3out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2540,7 +2540,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_3in_4out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2551,7 +2551,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_4in_5out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2562,7 +2562,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_5in_6out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2573,7 +2573,7 @@
             break;
         }
 
-        case LOAD_FAST_AND_CLEAR___CACHED_6in_0out: {
+        case _LOAD_FAST_AND_CLEAR___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = GETLOCAL(oparg);
@@ -2608,23 +2608,23 @@
             break;
         }
 
-        /* LOAD_CONST___CACHED_0in_1out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_0in_1out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* LOAD_CONST___CACHED_1in_2out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_1in_2out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* LOAD_CONST___CACHED_2in_3out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_2in_3out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* LOAD_CONST___CACHED_3in_4out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_3in_4out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* LOAD_CONST___CACHED_4in_5out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_4in_5out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* LOAD_CONST___CACHED_5in_6out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_5in_6out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* LOAD_CONST___CACHED_6in_0out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+        /* _LOAD_CONST___CACHED_6in_0out is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         /* _LOAD_CONST is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        case LOAD_CONST_MORTAL___CACHED_0in_1out: {
+        case _LOAD_CONST_MORTAL___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2635,7 +2635,7 @@
             break;
         }
 
-        case LOAD_CONST_MORTAL___CACHED_1in_2out: {
+        case _LOAD_CONST_MORTAL___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2646,7 +2646,7 @@
             break;
         }
 
-        case LOAD_CONST_MORTAL___CACHED_2in_3out: {
+        case _LOAD_CONST_MORTAL___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2657,7 +2657,7 @@
             break;
         }
 
-        case LOAD_CONST_MORTAL___CACHED_3in_4out: {
+        case _LOAD_CONST_MORTAL___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2668,7 +2668,7 @@
             break;
         }
 
-        case LOAD_CONST_MORTAL___CACHED_4in_5out: {
+        case _LOAD_CONST_MORTAL___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2679,7 +2679,7 @@
             break;
         }
 
-        case LOAD_CONST_MORTAL___CACHED_5in_6out: {
+        case _LOAD_CONST_MORTAL___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2690,7 +2690,7 @@
             break;
         }
 
-        case LOAD_CONST_MORTAL___CACHED_6in_0out: {
+        case _LOAD_CONST_MORTAL___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2725,7 +2725,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_0in_1out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2737,7 +2737,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_1in_2out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2749,7 +2749,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_2in_3out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2761,7 +2761,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_3in_4out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2773,7 +2773,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_4in_5out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2785,7 +2785,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_5in_6out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2797,7 +2797,7 @@
             break;
         }
 
-        case LOAD_CONST_IMMORTAL___CACHED_6in_0out: {
+        case _LOAD_CONST_IMMORTAL___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyObject *obj = GETITEM(FRAME_CO_CONSTS, oparg);
@@ -2834,7 +2834,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_0in_1out: {
+        case _LOAD_SMALL_INT___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2846,7 +2846,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_1in_2out: {
+        case _LOAD_SMALL_INT___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2858,7 +2858,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_2in_3out: {
+        case _LOAD_SMALL_INT___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2870,7 +2870,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_3in_4out: {
+        case _LOAD_SMALL_INT___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2882,7 +2882,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_4in_5out: {
+        case _LOAD_SMALL_INT___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2894,7 +2894,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_5in_6out: {
+        case _LOAD_SMALL_INT___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2906,7 +2906,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_6in_0out: {
+        case _LOAD_SMALL_INT___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < _PY_NSMALLPOSINTS);
@@ -2983,7 +2983,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_0in_1out_0: {
+        case _LOAD_SMALL_INT___CACHED_0in_1out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -2996,7 +2996,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_0in_1out_1: {
+        case _LOAD_SMALL_INT___CACHED_0in_1out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3009,7 +3009,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_0in_1out_2: {
+        case _LOAD_SMALL_INT___CACHED_0in_1out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3022,7 +3022,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_0in_1out_3: {
+        case _LOAD_SMALL_INT___CACHED_0in_1out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3035,7 +3035,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_1in_2out_0: {
+        case _LOAD_SMALL_INT___CACHED_1in_2out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3048,7 +3048,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_1in_2out_1: {
+        case _LOAD_SMALL_INT___CACHED_1in_2out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3061,7 +3061,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_1in_2out_2: {
+        case _LOAD_SMALL_INT___CACHED_1in_2out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3074,7 +3074,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_1in_2out_3: {
+        case _LOAD_SMALL_INT___CACHED_1in_2out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3087,7 +3087,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_2in_3out_0: {
+        case _LOAD_SMALL_INT___CACHED_2in_3out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3100,7 +3100,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_2in_3out_1: {
+        case _LOAD_SMALL_INT___CACHED_2in_3out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3113,7 +3113,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_2in_3out_2: {
+        case _LOAD_SMALL_INT___CACHED_2in_3out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3126,7 +3126,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_2in_3out_3: {
+        case _LOAD_SMALL_INT___CACHED_2in_3out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3139,7 +3139,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_3in_4out_0: {
+        case _LOAD_SMALL_INT___CACHED_3in_4out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3152,7 +3152,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_3in_4out_1: {
+        case _LOAD_SMALL_INT___CACHED_3in_4out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3165,7 +3165,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_3in_4out_2: {
+        case _LOAD_SMALL_INT___CACHED_3in_4out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3178,7 +3178,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_3in_4out_3: {
+        case _LOAD_SMALL_INT___CACHED_3in_4out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3191,7 +3191,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_4in_5out_0: {
+        case _LOAD_SMALL_INT___CACHED_4in_5out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3204,7 +3204,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_4in_5out_1: {
+        case _LOAD_SMALL_INT___CACHED_4in_5out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3217,7 +3217,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_4in_5out_2: {
+        case _LOAD_SMALL_INT___CACHED_4in_5out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3230,7 +3230,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_4in_5out_3: {
+        case _LOAD_SMALL_INT___CACHED_4in_5out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3243,7 +3243,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_5in_6out_0: {
+        case _LOAD_SMALL_INT___CACHED_5in_6out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3256,7 +3256,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_5in_6out_1: {
+        case _LOAD_SMALL_INT___CACHED_5in_6out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3269,7 +3269,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_5in_6out_2: {
+        case _LOAD_SMALL_INT___CACHED_5in_6out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3282,7 +3282,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_5in_6out_3: {
+        case _LOAD_SMALL_INT___CACHED_5in_6out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3295,7 +3295,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_6in_0out_0: {
+        case _LOAD_SMALL_INT___CACHED_6in_0out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3308,7 +3308,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_6in_0out_1: {
+        case _LOAD_SMALL_INT___CACHED_6in_0out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3321,7 +3321,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_6in_0out_2: {
+        case _LOAD_SMALL_INT___CACHED_6in_0out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3334,7 +3334,7 @@
             break;
         }
 
-        case LOAD_SMALL_INT___CACHED_6in_0out_3: {
+        case _LOAD_SMALL_INT___CACHED_6in_0out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3359,7 +3359,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out: {
+        case _STORE_FAST___CACHED_1in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = __TOS1;
@@ -3380,7 +3380,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out: {
+        case _STORE_FAST___CACHED_2in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = __TOS2;
@@ -3398,7 +3398,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out: {
+        case _STORE_FAST___CACHED_3in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = __TOS3;
@@ -3416,7 +3416,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out: {
+        case _STORE_FAST___CACHED_4in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = __TOS4;
@@ -3434,7 +3434,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out: {
+        case _STORE_FAST___CACHED_5in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = __TOS5;
@@ -3452,7 +3452,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out: {
+        case _STORE_FAST___CACHED_6in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             value = __TOS6;
@@ -3622,7 +3622,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_0: {
+        case _STORE_FAST___CACHED_1in_0out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3641,7 +3641,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_1: {
+        case _STORE_FAST___CACHED_1in_0out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3660,7 +3660,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_2: {
+        case _STORE_FAST___CACHED_1in_0out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3679,7 +3679,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_3: {
+        case _STORE_FAST___CACHED_1in_0out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3698,7 +3698,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_4: {
+        case _STORE_FAST___CACHED_1in_0out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -3717,7 +3717,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_5: {
+        case _STORE_FAST___CACHED_1in_0out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -3736,7 +3736,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_6: {
+        case _STORE_FAST___CACHED_1in_0out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -3755,7 +3755,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_1in_0out_7: {
+        case _STORE_FAST___CACHED_1in_0out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -3774,7 +3774,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_0: {
+        case _STORE_FAST___CACHED_2in_1out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3793,7 +3793,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_1: {
+        case _STORE_FAST___CACHED_2in_1out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3812,7 +3812,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_2: {
+        case _STORE_FAST___CACHED_2in_1out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3831,7 +3831,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_3: {
+        case _STORE_FAST___CACHED_2in_1out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -3850,7 +3850,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_4: {
+        case _STORE_FAST___CACHED_2in_1out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -3869,7 +3869,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_5: {
+        case _STORE_FAST___CACHED_2in_1out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -3888,7 +3888,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_6: {
+        case _STORE_FAST___CACHED_2in_1out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -3907,7 +3907,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_2in_1out_7: {
+        case _STORE_FAST___CACHED_2in_1out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -3926,7 +3926,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_0: {
+        case _STORE_FAST___CACHED_3in_2out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -3945,7 +3945,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_1: {
+        case _STORE_FAST___CACHED_3in_2out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -3964,7 +3964,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_2: {
+        case _STORE_FAST___CACHED_3in_2out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -3983,7 +3983,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_3: {
+        case _STORE_FAST___CACHED_3in_2out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -4002,7 +4002,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_4: {
+        case _STORE_FAST___CACHED_3in_2out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -4021,7 +4021,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_5: {
+        case _STORE_FAST___CACHED_3in_2out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -4040,7 +4040,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_6: {
+        case _STORE_FAST___CACHED_3in_2out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -4059,7 +4059,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_3in_2out_7: {
+        case _STORE_FAST___CACHED_3in_2out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -4078,7 +4078,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_0: {
+        case _STORE_FAST___CACHED_4in_3out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -4097,7 +4097,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_1: {
+        case _STORE_FAST___CACHED_4in_3out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -4116,7 +4116,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_2: {
+        case _STORE_FAST___CACHED_4in_3out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -4135,7 +4135,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_3: {
+        case _STORE_FAST___CACHED_4in_3out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -4154,7 +4154,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_4: {
+        case _STORE_FAST___CACHED_4in_3out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -4173,7 +4173,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_5: {
+        case _STORE_FAST___CACHED_4in_3out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -4192,7 +4192,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_6: {
+        case _STORE_FAST___CACHED_4in_3out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -4211,7 +4211,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_4in_3out_7: {
+        case _STORE_FAST___CACHED_4in_3out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -4230,7 +4230,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_0: {
+        case _STORE_FAST___CACHED_5in_4out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -4249,7 +4249,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_1: {
+        case _STORE_FAST___CACHED_5in_4out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -4268,7 +4268,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_2: {
+        case _STORE_FAST___CACHED_5in_4out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -4287,7 +4287,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_3: {
+        case _STORE_FAST___CACHED_5in_4out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -4306,7 +4306,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_4: {
+        case _STORE_FAST___CACHED_5in_4out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -4325,7 +4325,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_5: {
+        case _STORE_FAST___CACHED_5in_4out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -4344,7 +4344,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_6: {
+        case _STORE_FAST___CACHED_5in_4out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -4363,7 +4363,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_5in_4out_7: {
+        case _STORE_FAST___CACHED_5in_4out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -4382,7 +4382,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_0: {
+        case _STORE_FAST___CACHED_6in_5out_0: {
             _PyStackRef value;
             oparg = 0;
             assert(oparg == CURRENT_OPARG());
@@ -4401,7 +4401,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_1: {
+        case _STORE_FAST___CACHED_6in_5out_1: {
             _PyStackRef value;
             oparg = 1;
             assert(oparg == CURRENT_OPARG());
@@ -4420,7 +4420,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_2: {
+        case _STORE_FAST___CACHED_6in_5out_2: {
             _PyStackRef value;
             oparg = 2;
             assert(oparg == CURRENT_OPARG());
@@ -4439,7 +4439,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_3: {
+        case _STORE_FAST___CACHED_6in_5out_3: {
             _PyStackRef value;
             oparg = 3;
             assert(oparg == CURRENT_OPARG());
@@ -4458,7 +4458,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_4: {
+        case _STORE_FAST___CACHED_6in_5out_4: {
             _PyStackRef value;
             oparg = 4;
             assert(oparg == CURRENT_OPARG());
@@ -4477,7 +4477,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_5: {
+        case _STORE_FAST___CACHED_6in_5out_5: {
             _PyStackRef value;
             oparg = 5;
             assert(oparg == CURRENT_OPARG());
@@ -4496,7 +4496,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_6: {
+        case _STORE_FAST___CACHED_6in_5out_6: {
             _PyStackRef value;
             oparg = 6;
             assert(oparg == CURRENT_OPARG());
@@ -4515,7 +4515,7 @@
             break;
         }
 
-        case STORE_FAST___CACHED_6in_5out_7: {
+        case _STORE_FAST___CACHED_6in_5out_7: {
             _PyStackRef value;
             oparg = 7;
             assert(oparg == CURRENT_OPARG());
@@ -4552,7 +4552,7 @@
             break;
         }
 
-        case POP_TOP___CACHED_1in_0out: {
+        case _POP_TOP___CACHED_1in_0out: {
             _PyStackRef value;
             value = __TOS1;
             stack_pointer += -1;
@@ -4566,7 +4566,7 @@
             break;
         }
 
-        case POP_TOP___CACHED_2in_1out: {
+        case _POP_TOP___CACHED_2in_1out: {
             _PyStackRef value;
             value = __TOS2;
             stack_pointer += -1;
@@ -4577,7 +4577,7 @@
             break;
         }
 
-        case POP_TOP___CACHED_3in_2out: {
+        case _POP_TOP___CACHED_3in_2out: {
             _PyStackRef value;
             value = __TOS3;
             stack_pointer += -1;
@@ -4588,7 +4588,7 @@
             break;
         }
 
-        case POP_TOP___CACHED_4in_3out: {
+        case _POP_TOP___CACHED_4in_3out: {
             _PyStackRef value;
             value = __TOS4;
             stack_pointer += -1;
@@ -4599,7 +4599,7 @@
             break;
         }
 
-        case POP_TOP___CACHED_5in_4out: {
+        case _POP_TOP___CACHED_5in_4out: {
             _PyStackRef value;
             value = __TOS5;
             stack_pointer += -1;
@@ -4610,7 +4610,7 @@
             break;
         }
 
-        case POP_TOP___CACHED_6in_5out: {
+        case _POP_TOP___CACHED_6in_5out: {
             _PyStackRef value;
             value = __TOS6;
             stack_pointer += -1;
@@ -4632,7 +4632,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_0in_1out: {
+        case _PUSH_NULL___CACHED_0in_1out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             __TOS1 = res;
@@ -4641,7 +4641,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_1in_2out: {
+        case _PUSH_NULL___CACHED_1in_2out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             __TOS2 = res;
@@ -4650,7 +4650,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_2in_3out: {
+        case _PUSH_NULL___CACHED_2in_3out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             __TOS3 = res;
@@ -4659,7 +4659,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_3in_4out: {
+        case _PUSH_NULL___CACHED_3in_4out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             __TOS4 = res;
@@ -4668,7 +4668,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_4in_5out: {
+        case _PUSH_NULL___CACHED_4in_5out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             __TOS5 = res;
@@ -4677,7 +4677,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_5in_6out: {
+        case _PUSH_NULL___CACHED_5in_6out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             __TOS6 = res;
@@ -4686,7 +4686,7 @@
             break;
         }
 
-        case PUSH_NULL___CACHED_6in_0out: {
+        case _PUSH_NULL___CACHED_6in_0out: {
             _PyStackRef res;
             res = PyStackRef_NULL;
             stack_pointer[0] = res;
@@ -4717,7 +4717,7 @@
             break;
         }
 
-        case END_FOR___CACHED_1in_0out: {
+        case _END_FOR___CACHED_1in_0out: {
             _PyStackRef value;
             value = __TOS1;
             stack_pointer += -1;
@@ -4731,7 +4731,7 @@
             break;
         }
 
-        case END_FOR___CACHED_2in_1out: {
+        case _END_FOR___CACHED_2in_1out: {
             _PyStackRef value;
             value = __TOS2;
             stack_pointer += -1;
@@ -4742,7 +4742,7 @@
             break;
         }
 
-        case END_FOR___CACHED_3in_2out: {
+        case _END_FOR___CACHED_3in_2out: {
             _PyStackRef value;
             value = __TOS3;
             stack_pointer += -1;
@@ -4753,7 +4753,7 @@
             break;
         }
 
-        case END_FOR___CACHED_4in_3out: {
+        case _END_FOR___CACHED_4in_3out: {
             _PyStackRef value;
             value = __TOS4;
             stack_pointer += -1;
@@ -4764,7 +4764,7 @@
             break;
         }
 
-        case END_FOR___CACHED_5in_4out: {
+        case _END_FOR___CACHED_5in_4out: {
             _PyStackRef value;
             value = __TOS5;
             stack_pointer += -1;
@@ -4775,7 +4775,7 @@
             break;
         }
 
-        case END_FOR___CACHED_6in_5out: {
+        case _END_FOR___CACHED_6in_5out: {
             _PyStackRef value;
             value = __TOS6;
             stack_pointer += -1;
@@ -4797,7 +4797,7 @@
             break;
         }
 
-        case END_SEND___CACHED_1in_0out: {
+        case _END_SEND___CACHED_1in_0out: {
             _PyStackRef value;
             _PyStackRef receiver;
             _PyStackRef val;
@@ -4816,7 +4816,7 @@
             break;
         }
 
-        case END_SEND___CACHED_2in_1out: {
+        case _END_SEND___CACHED_2in_1out: {
             _PyStackRef value;
             _PyStackRef receiver;
             _PyStackRef val;
@@ -4832,7 +4832,7 @@
             break;
         }
 
-        case END_SEND___CACHED_3in_2out: {
+        case _END_SEND___CACHED_3in_2out: {
             _PyStackRef value;
             _PyStackRef receiver;
             _PyStackRef val;
@@ -4848,7 +4848,7 @@
             break;
         }
 
-        case END_SEND___CACHED_4in_3out: {
+        case _END_SEND___CACHED_4in_3out: {
             _PyStackRef value;
             _PyStackRef receiver;
             _PyStackRef val;
@@ -4864,7 +4864,7 @@
             break;
         }
 
-        case END_SEND___CACHED_5in_4out: {
+        case _END_SEND___CACHED_5in_4out: {
             _PyStackRef value;
             _PyStackRef receiver;
             _PyStackRef val;
@@ -4880,7 +4880,7 @@
             break;
         }
 
-        case END_SEND___CACHED_6in_5out: {
+        case _END_SEND___CACHED_6in_5out: {
             _PyStackRef value;
             _PyStackRef receiver;
             _PyStackRef val;
@@ -4912,7 +4912,7 @@
             break;
         }
 
-        case UNARY_NEGATIVE___CACHED_1in_1out: {
+        case _UNARY_NEGATIVE___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS1;
@@ -4934,7 +4934,7 @@
             break;
         }
 
-        case UNARY_NEGATIVE___CACHED_2in_2out: {
+        case _UNARY_NEGATIVE___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS2;
@@ -4956,7 +4956,7 @@
             break;
         }
 
-        case UNARY_NEGATIVE___CACHED_3in_3out: {
+        case _UNARY_NEGATIVE___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS3;
@@ -4978,7 +4978,7 @@
             break;
         }
 
-        case UNARY_NEGATIVE___CACHED_4in_4out: {
+        case _UNARY_NEGATIVE___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS4;
@@ -5000,7 +5000,7 @@
             break;
         }
 
-        case UNARY_NEGATIVE___CACHED_5in_5out: {
+        case _UNARY_NEGATIVE___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS5;
@@ -5022,7 +5022,7 @@
             break;
         }
 
-        case UNARY_NEGATIVE___CACHED_6in_6out: {
+        case _UNARY_NEGATIVE___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS6;
@@ -5066,7 +5066,7 @@
             break;
         }
 
-        case UNARY_NOT___CACHED_1in_1out: {
+        case _UNARY_NOT___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS1;
@@ -5077,7 +5077,7 @@
             break;
         }
 
-        case UNARY_NOT___CACHED_2in_2out: {
+        case _UNARY_NOT___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS2;
@@ -5088,7 +5088,7 @@
             break;
         }
 
-        case UNARY_NOT___CACHED_3in_3out: {
+        case _UNARY_NOT___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS3;
@@ -5099,7 +5099,7 @@
             break;
         }
 
-        case UNARY_NOT___CACHED_4in_4out: {
+        case _UNARY_NOT___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS4;
@@ -5110,7 +5110,7 @@
             break;
         }
 
-        case UNARY_NOT___CACHED_5in_5out: {
+        case _UNARY_NOT___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS5;
@@ -5121,7 +5121,7 @@
             break;
         }
 
-        case UNARY_NOT___CACHED_6in_6out: {
+        case _UNARY_NOT___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS6;
@@ -5297,66 +5297,108 @@
             break;
         }
 
-        case TO_BOOL_BOOL___CACHED_1in_1out: {
+        case _TO_BOOL_BOOL___CACHED_1in_1out: {
             _PyStackRef value;
             value = __TOS1;
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
             break;
         }
 
-        case TO_BOOL_BOOL___CACHED_2in_2out: {
+        case _TO_BOOL_BOOL___CACHED_2in_2out: {
             _PyStackRef value;
             value = __TOS2;
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
             break;
         }
 
-        case TO_BOOL_BOOL___CACHED_3in_3out: {
+        case _TO_BOOL_BOOL___CACHED_3in_3out: {
             _PyStackRef value;
             value = __TOS3;
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
             break;
         }
 
-        case TO_BOOL_BOOL___CACHED_4in_4out: {
+        case _TO_BOOL_BOOL___CACHED_4in_4out: {
             _PyStackRef value;
             value = __TOS4;
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
             break;
         }
 
-        case TO_BOOL_BOOL___CACHED_5in_5out: {
+        case _TO_BOOL_BOOL___CACHED_5in_5out: {
             _PyStackRef value;
             value = __TOS5;
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
             break;
         }
 
-        case TO_BOOL_BOOL___CACHED_6in_6out: {
+        case _TO_BOOL_BOOL___CACHED_6in_6out: {
             _PyStackRef value;
             value = __TOS6;
             if (!PyStackRef_BoolCheck(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5374,13 +5416,15 @@
             break;
         }
 
-        case TO_BOOL_INT___CACHED_1in_1out: {
+        case _TO_BOOL_INT___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS1;
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5401,13 +5445,17 @@
             break;
         }
 
-        case TO_BOOL_INT___CACHED_2in_2out: {
+        case _TO_BOOL_INT___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS2;
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5428,13 +5476,19 @@
             break;
         }
 
-        case TO_BOOL_INT___CACHED_3in_3out: {
+        case _TO_BOOL_INT___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS3;
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5455,13 +5509,21 @@
             break;
         }
 
-        case TO_BOOL_INT___CACHED_4in_4out: {
+        case _TO_BOOL_INT___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS4;
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5482,13 +5544,23 @@
             break;
         }
 
-        case TO_BOOL_INT___CACHED_5in_5out: {
+        case _TO_BOOL_INT___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS5;
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5509,13 +5581,25 @@
             break;
         }
 
-        case TO_BOOL_INT___CACHED_6in_6out: {
+        case _TO_BOOL_INT___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS6;
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5569,6 +5653,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5580,6 +5666,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5591,6 +5681,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5602,6 +5698,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5613,6 +5717,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5624,6 +5738,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5646,6 +5772,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5657,6 +5785,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5668,6 +5800,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5679,6 +5817,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5690,6 +5836,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5701,6 +5857,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyList_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5723,6 +5891,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PySlice_Check(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5734,6 +5904,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PySlice_Check(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5745,6 +5919,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PySlice_Check(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5756,6 +5936,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PySlice_Check(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5767,6 +5955,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PySlice_Check(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5778,6 +5976,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PySlice_Check(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -5913,12 +6123,14 @@
             break;
         }
 
-        case TO_BOOL_NONE___CACHED_1in_1out: {
+        case _TO_BOOL_NONE___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS1;
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5927,12 +6139,16 @@
             break;
         }
 
-        case TO_BOOL_NONE___CACHED_2in_2out: {
+        case _TO_BOOL_NONE___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS2;
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5941,12 +6157,18 @@
             break;
         }
 
-        case TO_BOOL_NONE___CACHED_3in_3out: {
+        case _TO_BOOL_NONE___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS3;
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5955,12 +6177,20 @@
             break;
         }
 
-        case TO_BOOL_NONE___CACHED_4in_4out: {
+        case _TO_BOOL_NONE___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS4;
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5969,12 +6199,22 @@
             break;
         }
 
-        case TO_BOOL_NONE___CACHED_5in_5out: {
+        case _TO_BOOL_NONE___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS5;
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -5983,12 +6223,24 @@
             break;
         }
 
-        case TO_BOOL_NONE___CACHED_6in_6out: {
+        case _TO_BOOL_NONE___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS6;
             if (!PyStackRef_IsNone(value)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             STAT_INC(TO_BOOL, hit);
@@ -6017,6 +6269,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyUnicode_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6028,6 +6282,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyUnicode_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6039,6 +6297,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyUnicode_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6050,6 +6314,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyUnicode_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6061,6 +6333,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyUnicode_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6072,6 +6354,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyUnicode_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6094,6 +6388,8 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6105,6 +6401,10 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6116,6 +6416,12 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6127,6 +6433,14 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6138,6 +6452,16 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6149,6 +6473,18 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyUnicode_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6445,7 +6781,7 @@
             break;
         }
 
-        case UNARY_INVERT___CACHED_1in_1out: {
+        case _UNARY_INVERT___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS1;
@@ -6467,7 +6803,7 @@
             break;
         }
 
-        case UNARY_INVERT___CACHED_2in_2out: {
+        case _UNARY_INVERT___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS2;
@@ -6489,7 +6825,7 @@
             break;
         }
 
-        case UNARY_INVERT___CACHED_3in_3out: {
+        case _UNARY_INVERT___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS3;
@@ -6511,7 +6847,7 @@
             break;
         }
 
-        case UNARY_INVERT___CACHED_4in_4out: {
+        case _UNARY_INVERT___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS4;
@@ -6533,7 +6869,7 @@
             break;
         }
 
-        case UNARY_INVERT___CACHED_5in_5out: {
+        case _UNARY_INVERT___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS5;
@@ -6555,7 +6891,7 @@
             break;
         }
 
-        case UNARY_INVERT___CACHED_6in_6out: {
+        case _UNARY_INVERT___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS6;
@@ -6605,6 +6941,8 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6616,6 +6954,10 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6627,6 +6969,12 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6638,6 +6986,14 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6649,6 +7005,16 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6660,6 +7026,18 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyLong_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6682,6 +7060,8 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6693,6 +7073,10 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6704,6 +7088,12 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6715,6 +7105,14 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6726,6 +7124,16 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -6737,6 +7145,18 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyLong_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7342,6 +7762,8 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyFloat_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7353,6 +7775,10 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyFloat_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7364,6 +7790,12 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyFloat_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7375,6 +7807,14 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyFloat_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7386,6 +7826,16 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyFloat_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7397,6 +7847,18 @@
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             if (!PyFloat_CheckExact(left_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7419,6 +7881,8 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyFloat_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7430,6 +7894,10 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyFloat_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7441,6 +7909,12 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyFloat_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7452,6 +7926,14 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyFloat_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7463,6 +7945,16 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyFloat_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -7474,6 +7966,18 @@
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!PyFloat_CheckExact(value_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10567,6 +11071,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10578,6 +11084,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10589,6 +11099,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10600,6 +11116,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10611,6 +11135,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10622,6 +11156,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10644,6 +11190,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10655,6 +11203,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10666,6 +11218,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10677,6 +11235,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10688,6 +11254,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -10699,6 +11275,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyTuple_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11053,6 +11641,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11064,6 +11654,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11075,6 +11669,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11086,6 +11686,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11097,6 +11705,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11108,6 +11726,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(nos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11130,6 +11760,8 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11141,6 +11773,10 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11152,6 +11788,12 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11163,6 +11805,14 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11174,6 +11824,16 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -11185,6 +11845,18 @@
             PyObject *o = PyStackRef_AsPyObjectBorrow(tos);
             if (!PyDict_CheckExact(o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -12632,7 +13304,7 @@
             break;
         }
 
-        case DELETE_SUBSCR___CACHED_2in_0out: {
+        case _DELETE_SUBSCR___CACHED_2in_0out: {
             _PyStackRef sub;
             _PyStackRef container;
             sub = __TOS2;
@@ -12662,7 +13334,7 @@
             break;
         }
 
-        case DELETE_SUBSCR___CACHED_3in_1out: {
+        case _DELETE_SUBSCR___CACHED_3in_1out: {
             _PyStackRef sub;
             _PyStackRef container;
             sub = __TOS3;
@@ -12687,7 +13359,7 @@
             break;
         }
 
-        case DELETE_SUBSCR___CACHED_4in_2out: {
+        case _DELETE_SUBSCR___CACHED_4in_2out: {
             _PyStackRef sub;
             _PyStackRef container;
             sub = __TOS4;
@@ -12712,7 +13384,7 @@
             break;
         }
 
-        case DELETE_SUBSCR___CACHED_5in_3out: {
+        case _DELETE_SUBSCR___CACHED_5in_3out: {
             _PyStackRef sub;
             _PyStackRef container;
             sub = __TOS5;
@@ -12737,7 +13409,7 @@
             break;
         }
 
-        case DELETE_SUBSCR___CACHED_6in_4out: {
+        case _DELETE_SUBSCR___CACHED_6in_4out: {
             _PyStackRef sub;
             _PyStackRef container;
             sub = __TOS6;
@@ -12787,7 +13459,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_1___CACHED_1in_1out: {
+        case _CALL_INTRINSIC_1___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -12811,7 +13483,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_1___CACHED_2in_2out: {
+        case _CALL_INTRINSIC_1___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -12835,7 +13507,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_1___CACHED_3in_3out: {
+        case _CALL_INTRINSIC_1___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -12859,7 +13531,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_1___CACHED_4in_4out: {
+        case _CALL_INTRINSIC_1___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -12883,7 +13555,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_1___CACHED_5in_5out: {
+        case _CALL_INTRINSIC_1___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -12907,7 +13579,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_1___CACHED_6in_6out: {
+        case _CALL_INTRINSIC_1___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -12955,7 +13627,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_2___CACHED_1in_0out: {
+        case _CALL_INTRINSIC_2___CACHED_1in_0out: {
             _PyStackRef value1_st;
             _PyStackRef value2_st;
             _PyStackRef res;
@@ -12991,7 +13663,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_2___CACHED_2in_1out: {
+        case _CALL_INTRINSIC_2___CACHED_2in_1out: {
             _PyStackRef value1_st;
             _PyStackRef value2_st;
             _PyStackRef res;
@@ -13024,7 +13696,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_2___CACHED_3in_2out: {
+        case _CALL_INTRINSIC_2___CACHED_3in_2out: {
             _PyStackRef value1_st;
             _PyStackRef value2_st;
             _PyStackRef res;
@@ -13057,7 +13729,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_2___CACHED_4in_3out: {
+        case _CALL_INTRINSIC_2___CACHED_4in_3out: {
             _PyStackRef value1_st;
             _PyStackRef value2_st;
             _PyStackRef res;
@@ -13090,7 +13762,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_2___CACHED_5in_4out: {
+        case _CALL_INTRINSIC_2___CACHED_5in_4out: {
             _PyStackRef value1_st;
             _PyStackRef value2_st;
             _PyStackRef res;
@@ -13123,7 +13795,7 @@
             break;
         }
 
-        case CALL_INTRINSIC_2___CACHED_6in_5out: {
+        case _CALL_INTRINSIC_2___CACHED_6in_5out: {
             _PyStackRef value1_st;
             _PyStackRef value2_st;
             _PyStackRef res;
@@ -13189,7 +13861,7 @@
             break;
         }
 
-        case RETURN_VALUE___CACHED_1in_1out: {
+        case _RETURN_VALUE___CACHED_1in_1out: {
             _PyStackRef retval;
             _PyStackRef res;
             retval = __TOS1;
@@ -13213,7 +13885,7 @@
             break;
         }
 
-        case RETURN_VALUE___CACHED_2in_2out: {
+        case _RETURN_VALUE___CACHED_2in_2out: {
             _PyStackRef retval;
             _PyStackRef res;
             retval = __TOS2;
@@ -13237,7 +13909,7 @@
             break;
         }
 
-        case RETURN_VALUE___CACHED_3in_3out: {
+        case _RETURN_VALUE___CACHED_3in_3out: {
             _PyStackRef retval;
             _PyStackRef res;
             retval = __TOS3;
@@ -13261,7 +13933,7 @@
             break;
         }
 
-        case RETURN_VALUE___CACHED_4in_4out: {
+        case _RETURN_VALUE___CACHED_4in_4out: {
             _PyStackRef retval;
             _PyStackRef res;
             retval = __TOS4;
@@ -13285,7 +13957,7 @@
             break;
         }
 
-        case RETURN_VALUE___CACHED_5in_5out: {
+        case _RETURN_VALUE___CACHED_5in_5out: {
             _PyStackRef retval;
             _PyStackRef res;
             retval = __TOS5;
@@ -13309,7 +13981,7 @@
             break;
         }
 
-        case RETURN_VALUE___CACHED_6in_6out: {
+        case _RETURN_VALUE___CACHED_6in_6out: {
             _PyStackRef retval;
             _PyStackRef res;
             retval = __TOS6;
@@ -13357,7 +14029,7 @@
             break;
         }
 
-        case GET_AITER___CACHED_1in_1out: {
+        case _GET_AITER___CACHED_1in_1out: {
             _PyStackRef obj;
             _PyStackRef iter;
             obj = __TOS1;
@@ -13411,7 +14083,7 @@
             break;
         }
 
-        case GET_AITER___CACHED_2in_2out: {
+        case _GET_AITER___CACHED_2in_2out: {
             _PyStackRef obj;
             _PyStackRef iter;
             obj = __TOS2;
@@ -13465,7 +14137,7 @@
             break;
         }
 
-        case GET_AITER___CACHED_3in_3out: {
+        case _GET_AITER___CACHED_3in_3out: {
             _PyStackRef obj;
             _PyStackRef iter;
             obj = __TOS3;
@@ -13519,7 +14191,7 @@
             break;
         }
 
-        case GET_AITER___CACHED_4in_4out: {
+        case _GET_AITER___CACHED_4in_4out: {
             _PyStackRef obj;
             _PyStackRef iter;
             obj = __TOS4;
@@ -13573,7 +14245,7 @@
             break;
         }
 
-        case GET_AITER___CACHED_5in_5out: {
+        case _GET_AITER___CACHED_5in_5out: {
             _PyStackRef obj;
             _PyStackRef iter;
             obj = __TOS5;
@@ -13627,7 +14299,7 @@
             break;
         }
 
-        case GET_AITER___CACHED_6in_6out: {
+        case _GET_AITER___CACHED_6in_6out: {
             _PyStackRef obj;
             _PyStackRef iter;
             obj = __TOS6;
@@ -13735,7 +14407,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_0in_1out: {
+        case _GET_ANEXT___CACHED_0in_1out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = stack_pointer[-1];
@@ -13752,7 +14424,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_1in_2out: {
+        case _GET_ANEXT___CACHED_1in_2out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = __TOS1;
@@ -13769,7 +14441,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_2in_3out: {
+        case _GET_ANEXT___CACHED_2in_3out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = __TOS2;
@@ -13786,7 +14458,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_3in_4out: {
+        case _GET_ANEXT___CACHED_3in_4out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = __TOS3;
@@ -13803,7 +14475,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_4in_5out: {
+        case _GET_ANEXT___CACHED_4in_5out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = __TOS4;
@@ -13820,7 +14492,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_5in_6out: {
+        case _GET_ANEXT___CACHED_5in_6out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = __TOS5;
@@ -13837,7 +14509,7 @@
             break;
         }
 
-        case GET_ANEXT___CACHED_6in_0out: {
+        case _GET_ANEXT___CACHED_6in_0out: {
             _PyStackRef aiter;
             _PyStackRef awaitable;
             aiter = __TOS6;
@@ -13884,7 +14556,7 @@
             break;
         }
 
-        case GET_AWAITABLE___CACHED_1in_1out: {
+        case _GET_AWAITABLE___CACHED_1in_1out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG();
@@ -13907,7 +14579,7 @@
             break;
         }
 
-        case GET_AWAITABLE___CACHED_2in_2out: {
+        case _GET_AWAITABLE___CACHED_2in_2out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG();
@@ -13930,7 +14602,7 @@
             break;
         }
 
-        case GET_AWAITABLE___CACHED_3in_3out: {
+        case _GET_AWAITABLE___CACHED_3in_3out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG();
@@ -13953,7 +14625,7 @@
             break;
         }
 
-        case GET_AWAITABLE___CACHED_4in_4out: {
+        case _GET_AWAITABLE___CACHED_4in_4out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG();
@@ -13976,7 +14648,7 @@
             break;
         }
 
-        case GET_AWAITABLE___CACHED_5in_5out: {
+        case _GET_AWAITABLE___CACHED_5in_5out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG();
@@ -13999,7 +14671,7 @@
             break;
         }
 
-        case GET_AWAITABLE___CACHED_6in_6out: {
+        case _GET_AWAITABLE___CACHED_6in_6out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             oparg = CURRENT_OPARG();
@@ -14088,7 +14760,7 @@
             break;
         }
 
-        case YIELD_VALUE___CACHED_1in_1out: {
+        case _YIELD_VALUE___CACHED_1in_1out: {
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -14128,7 +14800,7 @@
             break;
         }
 
-        case YIELD_VALUE___CACHED_2in_2out: {
+        case _YIELD_VALUE___CACHED_2in_2out: {
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -14168,7 +14840,7 @@
             break;
         }
 
-        case YIELD_VALUE___CACHED_3in_3out: {
+        case _YIELD_VALUE___CACHED_3in_3out: {
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -14208,7 +14880,7 @@
             break;
         }
 
-        case YIELD_VALUE___CACHED_4in_4out: {
+        case _YIELD_VALUE___CACHED_4in_4out: {
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -14248,7 +14920,7 @@
             break;
         }
 
-        case YIELD_VALUE___CACHED_5in_5out: {
+        case _YIELD_VALUE___CACHED_5in_5out: {
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -14288,7 +14960,7 @@
             break;
         }
 
-        case YIELD_VALUE___CACHED_6in_6out: {
+        case _YIELD_VALUE___CACHED_6in_6out: {
             _PyStackRef retval;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -14368,7 +15040,7 @@
             break;
         }
 
-        case POP_EXCEPT___CACHED_1in_0out: {
+        case _POP_EXCEPT___CACHED_1in_0out: {
             _PyStackRef exc_value;
             exc_value = __TOS1;
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -14385,7 +15057,7 @@
             break;
         }
 
-        case POP_EXCEPT___CACHED_2in_1out: {
+        case _POP_EXCEPT___CACHED_2in_1out: {
             _PyStackRef exc_value;
             exc_value = __TOS2;
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -14399,7 +15071,7 @@
             break;
         }
 
-        case POP_EXCEPT___CACHED_3in_2out: {
+        case _POP_EXCEPT___CACHED_3in_2out: {
             _PyStackRef exc_value;
             exc_value = __TOS3;
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -14413,7 +15085,7 @@
             break;
         }
 
-        case POP_EXCEPT___CACHED_4in_3out: {
+        case _POP_EXCEPT___CACHED_4in_3out: {
             _PyStackRef exc_value;
             exc_value = __TOS4;
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -14427,7 +15099,7 @@
             break;
         }
 
-        case POP_EXCEPT___CACHED_5in_4out: {
+        case _POP_EXCEPT___CACHED_5in_4out: {
             _PyStackRef exc_value;
             exc_value = __TOS5;
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -14441,7 +15113,7 @@
             break;
         }
 
-        case POP_EXCEPT___CACHED_6in_5out: {
+        case _POP_EXCEPT___CACHED_6in_5out: {
             _PyStackRef exc_value;
             exc_value = __TOS6;
             _PyErr_StackItem *exc_info = tstate->exc_info;
@@ -14469,7 +15141,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_0in_1out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14480,7 +15152,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_1in_2out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14491,7 +15163,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_2in_3out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14502,7 +15174,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_3in_4out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14513,7 +15185,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_4in_5out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14524,7 +15196,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_5in_6out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14535,7 +15207,7 @@
             break;
         }
 
-        case LOAD_COMMON_CONSTANT___CACHED_6in_0out: {
+        case _LOAD_COMMON_CONSTANT___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             assert(oparg < NUM_COMMON_CONSTANTS);
@@ -14570,7 +15242,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_0in_1out: {
+        case _LOAD_BUILD_CLASS___CACHED_0in_1out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14593,7 +15265,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_1in_2out: {
+        case _LOAD_BUILD_CLASS___CACHED_1in_2out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14616,7 +15288,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_2in_3out: {
+        case _LOAD_BUILD_CLASS___CACHED_2in_3out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14639,7 +15311,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_3in_4out: {
+        case _LOAD_BUILD_CLASS___CACHED_3in_4out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14662,7 +15334,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_4in_5out: {
+        case _LOAD_BUILD_CLASS___CACHED_4in_5out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14685,7 +15357,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_5in_6out: {
+        case _LOAD_BUILD_CLASS___CACHED_5in_6out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14708,7 +15380,7 @@
             break;
         }
 
-        case LOAD_BUILD_CLASS___CACHED_6in_0out: {
+        case _LOAD_BUILD_CLASS___CACHED_6in_0out: {
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -14767,7 +15439,7 @@
             break;
         }
 
-        case STORE_NAME___CACHED_1in_0out: {
+        case _STORE_NAME___CACHED_1in_0out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS1;
@@ -14810,7 +15482,7 @@
             break;
         }
 
-        case STORE_NAME___CACHED_2in_1out: {
+        case _STORE_NAME___CACHED_2in_1out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS2;
@@ -14850,7 +15522,7 @@
             break;
         }
 
-        case STORE_NAME___CACHED_3in_2out: {
+        case _STORE_NAME___CACHED_3in_2out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS3;
@@ -14890,7 +15562,7 @@
             break;
         }
 
-        case STORE_NAME___CACHED_4in_3out: {
+        case _STORE_NAME___CACHED_4in_3out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS4;
@@ -14930,7 +15602,7 @@
             break;
         }
 
-        case STORE_NAME___CACHED_5in_4out: {
+        case _STORE_NAME___CACHED_5in_4out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS5;
@@ -14970,7 +15642,7 @@
             break;
         }
 
-        case STORE_NAME___CACHED_6in_5out: {
+        case _STORE_NAME___CACHED_6in_5out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS6;
@@ -15050,7 +15722,7 @@
             break;
         }
 
-        case DELETE_NAME___CACHED_1in_1out: {
+        case _DELETE_NAME___CACHED_1in_1out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -15076,7 +15748,7 @@
             break;
         }
 
-        case DELETE_NAME___CACHED_2in_2out: {
+        case _DELETE_NAME___CACHED_2in_2out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -15102,7 +15774,7 @@
             break;
         }
 
-        case DELETE_NAME___CACHED_3in_3out: {
+        case _DELETE_NAME___CACHED_3in_3out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -15128,7 +15800,7 @@
             break;
         }
 
-        case DELETE_NAME___CACHED_4in_4out: {
+        case _DELETE_NAME___CACHED_4in_4out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -15154,7 +15826,7 @@
             break;
         }
 
-        case DELETE_NAME___CACHED_5in_5out: {
+        case _DELETE_NAME___CACHED_5in_5out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -15180,7 +15852,7 @@
             break;
         }
 
-        case DELETE_NAME___CACHED_6in_6out: {
+        case _DELETE_NAME___CACHED_6in_6out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *ns = LOCALS();
@@ -15762,7 +16434,7 @@
             break;
         }
 
-        case DELETE_ATTR___CACHED_1in_0out: {
+        case _DELETE_ATTR___CACHED_1in_0out: {
             _PyStackRef owner;
             oparg = CURRENT_OPARG();
             owner = __TOS1;
@@ -15784,7 +16456,7 @@
             break;
         }
 
-        case DELETE_ATTR___CACHED_2in_1out: {
+        case _DELETE_ATTR___CACHED_2in_1out: {
             _PyStackRef owner;
             oparg = CURRENT_OPARG();
             owner = __TOS2;
@@ -15803,7 +16475,7 @@
             break;
         }
 
-        case DELETE_ATTR___CACHED_3in_2out: {
+        case _DELETE_ATTR___CACHED_3in_2out: {
             _PyStackRef owner;
             oparg = CURRENT_OPARG();
             owner = __TOS3;
@@ -15822,7 +16494,7 @@
             break;
         }
 
-        case DELETE_ATTR___CACHED_4in_3out: {
+        case _DELETE_ATTR___CACHED_4in_3out: {
             _PyStackRef owner;
             oparg = CURRENT_OPARG();
             owner = __TOS4;
@@ -15841,7 +16513,7 @@
             break;
         }
 
-        case DELETE_ATTR___CACHED_5in_4out: {
+        case _DELETE_ATTR___CACHED_5in_4out: {
             _PyStackRef owner;
             oparg = CURRENT_OPARG();
             owner = __TOS5;
@@ -15860,7 +16532,7 @@
             break;
         }
 
-        case DELETE_ATTR___CACHED_6in_5out: {
+        case _DELETE_ATTR___CACHED_6in_5out: {
             _PyStackRef owner;
             oparg = CURRENT_OPARG();
             owner = __TOS6;
@@ -15898,7 +16570,7 @@
             break;
         }
 
-        case STORE_GLOBAL___CACHED_1in_0out: {
+        case _STORE_GLOBAL___CACHED_1in_0out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS1;
@@ -15920,7 +16592,7 @@
             break;
         }
 
-        case STORE_GLOBAL___CACHED_2in_1out: {
+        case _STORE_GLOBAL___CACHED_2in_1out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS2;
@@ -15939,7 +16611,7 @@
             break;
         }
 
-        case STORE_GLOBAL___CACHED_3in_2out: {
+        case _STORE_GLOBAL___CACHED_3in_2out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS3;
@@ -15958,7 +16630,7 @@
             break;
         }
 
-        case STORE_GLOBAL___CACHED_4in_3out: {
+        case _STORE_GLOBAL___CACHED_4in_3out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS4;
@@ -15977,7 +16649,7 @@
             break;
         }
 
-        case STORE_GLOBAL___CACHED_5in_4out: {
+        case _STORE_GLOBAL___CACHED_5in_4out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS5;
@@ -15996,7 +16668,7 @@
             break;
         }
 
-        case STORE_GLOBAL___CACHED_6in_5out: {
+        case _STORE_GLOBAL___CACHED_6in_5out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS6;
@@ -16034,7 +16706,7 @@
             break;
         }
 
-        case DELETE_GLOBAL___CACHED_1in_1out: {
+        case _DELETE_GLOBAL___CACHED_1in_1out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -16053,7 +16725,7 @@
             break;
         }
 
-        case DELETE_GLOBAL___CACHED_2in_2out: {
+        case _DELETE_GLOBAL___CACHED_2in_2out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -16072,7 +16744,7 @@
             break;
         }
 
-        case DELETE_GLOBAL___CACHED_3in_3out: {
+        case _DELETE_GLOBAL___CACHED_3in_3out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -16091,7 +16763,7 @@
             break;
         }
 
-        case DELETE_GLOBAL___CACHED_4in_4out: {
+        case _DELETE_GLOBAL___CACHED_4in_4out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -16110,7 +16782,7 @@
             break;
         }
 
-        case DELETE_GLOBAL___CACHED_5in_5out: {
+        case _DELETE_GLOBAL___CACHED_5in_5out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -16129,7 +16801,7 @@
             break;
         }
 
-        case DELETE_GLOBAL___CACHED_6in_6out: {
+        case _DELETE_GLOBAL___CACHED_6in_6out: {
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -16167,7 +16839,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_0in_1out: {
+        case _LOAD_LOCALS___CACHED_0in_1out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16184,7 +16856,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_1in_2out: {
+        case _LOAD_LOCALS___CACHED_1in_2out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16201,7 +16873,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_2in_3out: {
+        case _LOAD_LOCALS___CACHED_2in_3out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16218,7 +16890,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_3in_4out: {
+        case _LOAD_LOCALS___CACHED_3in_4out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16235,7 +16907,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_4in_5out: {
+        case _LOAD_LOCALS___CACHED_4in_5out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16252,7 +16924,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_5in_6out: {
+        case _LOAD_LOCALS___CACHED_5in_6out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16269,7 +16941,7 @@
             break;
         }
 
-        case LOAD_LOCALS___CACHED_6in_0out: {
+        case _LOAD_LOCALS___CACHED_6in_0out: {
             _PyStackRef locals;
             PyObject *l = LOCALS();
             if (l == NULL) {
@@ -16316,21 +16988,21 @@
             break;
         }
 
-        /* LOAD_FROM_DICT_OR_GLOBALS___CACHED_1in_1out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
+        /* _LOAD_FROM_DICT_OR_GLOBALS___CACHED_1in_1out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
-        /* LOAD_FROM_DICT_OR_GLOBALS___CACHED_2in_2out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
+        /* _LOAD_FROM_DICT_OR_GLOBALS___CACHED_2in_2out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
-        /* LOAD_FROM_DICT_OR_GLOBALS___CACHED_3in_3out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
+        /* _LOAD_FROM_DICT_OR_GLOBALS___CACHED_3in_3out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
-        /* LOAD_FROM_DICT_OR_GLOBALS___CACHED_4in_4out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
+        /* _LOAD_FROM_DICT_OR_GLOBALS___CACHED_4in_4out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
-        /* LOAD_FROM_DICT_OR_GLOBALS___CACHED_5in_5out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
+        /* _LOAD_FROM_DICT_OR_GLOBALS___CACHED_5in_5out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
-        /* LOAD_FROM_DICT_OR_GLOBALS___CACHED_6in_6out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
+        /* _LOAD_FROM_DICT_OR_GLOBALS___CACHED_6in_6out is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
         /* _LOAD_FROM_DICT_OR_GLOBALS is not a viable micro-op for tier 2 because it has both popping and not-popping errors */
 
-        case LOAD_NAME___CACHED_0in_1out: {
+        case _LOAD_NAME___CACHED_0in_1out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -16347,7 +17019,7 @@
             break;
         }
 
-        case LOAD_NAME___CACHED_1in_2out: {
+        case _LOAD_NAME___CACHED_1in_2out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -16364,7 +17036,7 @@
             break;
         }
 
-        case LOAD_NAME___CACHED_2in_3out: {
+        case _LOAD_NAME___CACHED_2in_3out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -16381,7 +17053,7 @@
             break;
         }
 
-        case LOAD_NAME___CACHED_3in_4out: {
+        case _LOAD_NAME___CACHED_3in_4out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -16398,7 +17070,7 @@
             break;
         }
 
-        case LOAD_NAME___CACHED_4in_5out: {
+        case _LOAD_NAME___CACHED_4in_5out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -16415,7 +17087,7 @@
             break;
         }
 
-        case LOAD_NAME___CACHED_5in_6out: {
+        case _LOAD_NAME___CACHED_5in_6out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -16432,7 +17104,7 @@
             break;
         }
 
-        case LOAD_NAME___CACHED_6in_0out: {
+        case _LOAD_NAME___CACHED_6in_0out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
@@ -17665,7 +18337,7 @@
             break;
         }
 
-        case DELETE_FAST___CACHED_1in_1out: {
+        case _DELETE_FAST___CACHED_1in_1out: {
             oparg = CURRENT_OPARG();
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -17685,7 +18357,7 @@
             break;
         }
 
-        case DELETE_FAST___CACHED_2in_2out: {
+        case _DELETE_FAST___CACHED_2in_2out: {
             oparg = CURRENT_OPARG();
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -17705,7 +18377,7 @@
             break;
         }
 
-        case DELETE_FAST___CACHED_3in_3out: {
+        case _DELETE_FAST___CACHED_3in_3out: {
             oparg = CURRENT_OPARG();
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -17725,7 +18397,7 @@
             break;
         }
 
-        case DELETE_FAST___CACHED_4in_4out: {
+        case _DELETE_FAST___CACHED_4in_4out: {
             oparg = CURRENT_OPARG();
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -17745,7 +18417,7 @@
             break;
         }
 
-        case DELETE_FAST___CACHED_5in_5out: {
+        case _DELETE_FAST___CACHED_5in_5out: {
             oparg = CURRENT_OPARG();
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -17765,7 +18437,7 @@
             break;
         }
 
-        case DELETE_FAST___CACHED_6in_6out: {
+        case _DELETE_FAST___CACHED_6in_6out: {
             oparg = CURRENT_OPARG();
             _PyStackRef v = GETLOCAL(oparg);
             if (PyStackRef_IsNull(v)) {
@@ -17805,7 +18477,7 @@
             break;
         }
 
-        case MAKE_CELL___CACHED_1in_1out: {
+        case _MAKE_CELL___CACHED_1in_1out: {
             oparg = CURRENT_OPARG();
             PyObject *initial = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *cell = PyCell_New(initial);
@@ -17820,7 +18492,7 @@
             break;
         }
 
-        case MAKE_CELL___CACHED_2in_2out: {
+        case _MAKE_CELL___CACHED_2in_2out: {
             oparg = CURRENT_OPARG();
             PyObject *initial = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *cell = PyCell_New(initial);
@@ -17835,7 +18507,7 @@
             break;
         }
 
-        case MAKE_CELL___CACHED_3in_3out: {
+        case _MAKE_CELL___CACHED_3in_3out: {
             oparg = CURRENT_OPARG();
             PyObject *initial = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *cell = PyCell_New(initial);
@@ -17850,7 +18522,7 @@
             break;
         }
 
-        case MAKE_CELL___CACHED_4in_4out: {
+        case _MAKE_CELL___CACHED_4in_4out: {
             oparg = CURRENT_OPARG();
             PyObject *initial = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *cell = PyCell_New(initial);
@@ -17865,7 +18537,7 @@
             break;
         }
 
-        case MAKE_CELL___CACHED_5in_5out: {
+        case _MAKE_CELL___CACHED_5in_5out: {
             oparg = CURRENT_OPARG();
             PyObject *initial = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *cell = PyCell_New(initial);
@@ -17880,7 +18552,7 @@
             break;
         }
 
-        case MAKE_CELL___CACHED_6in_6out: {
+        case _MAKE_CELL___CACHED_6in_6out: {
             oparg = CURRENT_OPARG();
             PyObject *initial = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *cell = PyCell_New(initial);
@@ -17910,7 +18582,7 @@
             break;
         }
 
-        case DELETE_DEREF___CACHED_1in_1out: {
+        case _DELETE_DEREF___CACHED_1in_1out: {
             oparg = CURRENT_OPARG();
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *oldobj = PyCell_SwapTakeRef((PyCellObject *)cell, NULL);
@@ -17926,7 +18598,7 @@
             break;
         }
 
-        case DELETE_DEREF___CACHED_2in_2out: {
+        case _DELETE_DEREF___CACHED_2in_2out: {
             oparg = CURRENT_OPARG();
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *oldobj = PyCell_SwapTakeRef((PyCellObject *)cell, NULL);
@@ -17942,7 +18614,7 @@
             break;
         }
 
-        case DELETE_DEREF___CACHED_3in_3out: {
+        case _DELETE_DEREF___CACHED_3in_3out: {
             oparg = CURRENT_OPARG();
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *oldobj = PyCell_SwapTakeRef((PyCellObject *)cell, NULL);
@@ -17958,7 +18630,7 @@
             break;
         }
 
-        case DELETE_DEREF___CACHED_4in_4out: {
+        case _DELETE_DEREF___CACHED_4in_4out: {
             oparg = CURRENT_OPARG();
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *oldobj = PyCell_SwapTakeRef((PyCellObject *)cell, NULL);
@@ -17974,7 +18646,7 @@
             break;
         }
 
-        case DELETE_DEREF___CACHED_5in_5out: {
+        case _DELETE_DEREF___CACHED_5in_5out: {
             oparg = CURRENT_OPARG();
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *oldobj = PyCell_SwapTakeRef((PyCellObject *)cell, NULL);
@@ -17990,7 +18662,7 @@
             break;
         }
 
-        case DELETE_DEREF___CACHED_6in_6out: {
+        case _DELETE_DEREF___CACHED_6in_6out: {
             oparg = CURRENT_OPARG();
             PyObject *cell = PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
             PyObject *oldobj = PyCell_SwapTakeRef((PyCellObject *)cell, NULL);
@@ -18022,7 +18694,7 @@
             break;
         }
 
-        case LOAD_FROM_DICT_OR_DEREF___CACHED_1in_1out: {
+        case _LOAD_FROM_DICT_OR_DEREF___CACHED_1in_1out: {
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -18061,7 +18733,7 @@
             break;
         }
 
-        case LOAD_FROM_DICT_OR_DEREF___CACHED_2in_2out: {
+        case _LOAD_FROM_DICT_OR_DEREF___CACHED_2in_2out: {
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -18100,7 +18772,7 @@
             break;
         }
 
-        case LOAD_FROM_DICT_OR_DEREF___CACHED_3in_3out: {
+        case _LOAD_FROM_DICT_OR_DEREF___CACHED_3in_3out: {
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -18139,7 +18811,7 @@
             break;
         }
 
-        case LOAD_FROM_DICT_OR_DEREF___CACHED_4in_4out: {
+        case _LOAD_FROM_DICT_OR_DEREF___CACHED_4in_4out: {
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -18178,7 +18850,7 @@
             break;
         }
 
-        case LOAD_FROM_DICT_OR_DEREF___CACHED_5in_5out: {
+        case _LOAD_FROM_DICT_OR_DEREF___CACHED_5in_5out: {
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -18217,7 +18889,7 @@
             break;
         }
 
-        case LOAD_FROM_DICT_OR_DEREF___CACHED_6in_6out: {
+        case _LOAD_FROM_DICT_OR_DEREF___CACHED_6in_6out: {
             _PyStackRef class_dict_st;
             _PyStackRef value;
             oparg = CURRENT_OPARG();
@@ -18295,7 +18967,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_0in_1out: {
+        case _LOAD_DEREF___CACHED_0in_1out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18317,7 +18989,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_1in_2out: {
+        case _LOAD_DEREF___CACHED_1in_2out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18339,7 +19011,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_2in_3out: {
+        case _LOAD_DEREF___CACHED_2in_3out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18361,7 +19033,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_3in_4out: {
+        case _LOAD_DEREF___CACHED_3in_4out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18383,7 +19055,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_4in_5out: {
+        case _LOAD_DEREF___CACHED_4in_5out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18405,7 +19077,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_5in_6out: {
+        case _LOAD_DEREF___CACHED_5in_6out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18427,7 +19099,7 @@
             break;
         }
 
-        case LOAD_DEREF___CACHED_6in_0out: {
+        case _LOAD_DEREF___CACHED_6in_0out: {
             _PyStackRef value;
             oparg = CURRENT_OPARG();
             PyCellObject *cell = (PyCellObject *)PyStackRef_AsPyObjectBorrow(GETLOCAL(oparg));
@@ -18484,7 +19156,7 @@
             break;
         }
 
-        case STORE_DEREF___CACHED_1in_0out: {
+        case _STORE_DEREF___CACHED_1in_0out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS1;
@@ -18500,7 +19172,7 @@
             break;
         }
 
-        case STORE_DEREF___CACHED_2in_1out: {
+        case _STORE_DEREF___CACHED_2in_1out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS2;
@@ -18513,7 +19185,7 @@
             break;
         }
 
-        case STORE_DEREF___CACHED_3in_2out: {
+        case _STORE_DEREF___CACHED_3in_2out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS3;
@@ -18526,7 +19198,7 @@
             break;
         }
 
-        case STORE_DEREF___CACHED_4in_3out: {
+        case _STORE_DEREF___CACHED_4in_3out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS4;
@@ -18539,7 +19211,7 @@
             break;
         }
 
-        case STORE_DEREF___CACHED_5in_4out: {
+        case _STORE_DEREF___CACHED_5in_4out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS5;
@@ -18552,7 +19224,7 @@
             break;
         }
 
-        case STORE_DEREF___CACHED_6in_5out: {
+        case _STORE_DEREF___CACHED_6in_5out: {
             _PyStackRef v;
             oparg = CURRENT_OPARG();
             v = __TOS6;
@@ -18578,7 +19250,7 @@
             break;
         }
 
-        case COPY_FREE_VARS___CACHED_1in_1out: {
+        case _COPY_FREE_VARS___CACHED_1in_1out: {
             oparg = CURRENT_OPARG();
             PyCodeObject *co = _PyFrame_GetCode(frame);
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
@@ -18593,7 +19265,7 @@
             break;
         }
 
-        case COPY_FREE_VARS___CACHED_2in_2out: {
+        case _COPY_FREE_VARS___CACHED_2in_2out: {
             oparg = CURRENT_OPARG();
             PyCodeObject *co = _PyFrame_GetCode(frame);
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
@@ -18608,7 +19280,7 @@
             break;
         }
 
-        case COPY_FREE_VARS___CACHED_3in_3out: {
+        case _COPY_FREE_VARS___CACHED_3in_3out: {
             oparg = CURRENT_OPARG();
             PyCodeObject *co = _PyFrame_GetCode(frame);
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
@@ -18623,7 +19295,7 @@
             break;
         }
 
-        case COPY_FREE_VARS___CACHED_4in_4out: {
+        case _COPY_FREE_VARS___CACHED_4in_4out: {
             oparg = CURRENT_OPARG();
             PyCodeObject *co = _PyFrame_GetCode(frame);
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
@@ -18638,7 +19310,7 @@
             break;
         }
 
-        case COPY_FREE_VARS___CACHED_5in_5out: {
+        case _COPY_FREE_VARS___CACHED_5in_5out: {
             oparg = CURRENT_OPARG();
             PyCodeObject *co = _PyFrame_GetCode(frame);
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
@@ -18653,7 +19325,7 @@
             break;
         }
 
-        case COPY_FREE_VARS___CACHED_6in_6out: {
+        case _COPY_FREE_VARS___CACHED_6in_6out: {
             oparg = CURRENT_OPARG();
             PyCodeObject *co = _PyFrame_GetCode(frame);
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
@@ -18776,7 +19448,7 @@
             break;
         }
 
-        case BUILD_TEMPLATE___CACHED_1in_0out: {
+        case _BUILD_TEMPLATE___CACHED_1in_0out: {
             _PyStackRef interpolations;
             _PyStackRef strings;
             _PyStackRef template;
@@ -18810,7 +19482,7 @@
             break;
         }
 
-        case BUILD_TEMPLATE___CACHED_2in_1out: {
+        case _BUILD_TEMPLATE___CACHED_2in_1out: {
             _PyStackRef interpolations;
             _PyStackRef strings;
             _PyStackRef template;
@@ -18841,7 +19513,7 @@
             break;
         }
 
-        case BUILD_TEMPLATE___CACHED_3in_2out: {
+        case _BUILD_TEMPLATE___CACHED_3in_2out: {
             _PyStackRef interpolations;
             _PyStackRef strings;
             _PyStackRef template;
@@ -18872,7 +19544,7 @@
             break;
         }
 
-        case BUILD_TEMPLATE___CACHED_4in_3out: {
+        case _BUILD_TEMPLATE___CACHED_4in_3out: {
             _PyStackRef interpolations;
             _PyStackRef strings;
             _PyStackRef template;
@@ -18903,7 +19575,7 @@
             break;
         }
 
-        case BUILD_TEMPLATE___CACHED_5in_4out: {
+        case _BUILD_TEMPLATE___CACHED_5in_4out: {
             _PyStackRef interpolations;
             _PyStackRef strings;
             _PyStackRef template;
@@ -18934,7 +19606,7 @@
             break;
         }
 
-        case BUILD_TEMPLATE___CACHED_6in_5out: {
+        case _BUILD_TEMPLATE___CACHED_6in_5out: {
             _PyStackRef interpolations;
             _PyStackRef strings;
             _PyStackRef template;
@@ -19189,7 +19861,7 @@
             break;
         }
 
-        case SETUP_ANNOTATIONS___CACHED_1in_1out: {
+        case _SETUP_ANNOTATIONS___CACHED_1in_1out: {
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -19228,7 +19900,7 @@
             break;
         }
 
-        case SETUP_ANNOTATIONS___CACHED_2in_2out: {
+        case _SETUP_ANNOTATIONS___CACHED_2in_2out: {
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -19267,7 +19939,7 @@
             break;
         }
 
-        case SETUP_ANNOTATIONS___CACHED_3in_3out: {
+        case _SETUP_ANNOTATIONS___CACHED_3in_3out: {
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -19306,7 +19978,7 @@
             break;
         }
 
-        case SETUP_ANNOTATIONS___CACHED_4in_4out: {
+        case _SETUP_ANNOTATIONS___CACHED_4in_4out: {
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -19345,7 +20017,7 @@
             break;
         }
 
-        case SETUP_ANNOTATIONS___CACHED_5in_5out: {
+        case _SETUP_ANNOTATIONS___CACHED_5in_5out: {
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -19384,7 +20056,7 @@
             break;
         }
 
-        case SETUP_ANNOTATIONS___CACHED_6in_6out: {
+        case _SETUP_ANNOTATIONS___CACHED_6in_6out: {
             PyObject *ann_dict;
             if (LOCALS() == NULL) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -19559,7 +20231,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_ATTR___CACHED_2in_0out: {
+        case _LOAD_SUPER_ATTR_ATTR___CACHED_2in_0out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -19622,7 +20294,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_ATTR___CACHED_3in_1out: {
+        case _LOAD_SUPER_ATTR_ATTR___CACHED_3in_1out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -19684,7 +20356,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_ATTR___CACHED_4in_2out: {
+        case _LOAD_SUPER_ATTR_ATTR___CACHED_4in_2out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -19750,7 +20422,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_ATTR___CACHED_5in_3out: {
+        case _LOAD_SUPER_ATTR_ATTR___CACHED_5in_3out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -19820,7 +20492,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_ATTR___CACHED_6in_4out: {
+        case _LOAD_SUPER_ATTR_ATTR___CACHED_6in_4out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -19944,7 +20616,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_METHOD___CACHED_1in_0out: {
+        case _LOAD_SUPER_ATTR_METHOD___CACHED_1in_0out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -20017,7 +20689,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_METHOD___CACHED_2in_1out: {
+        case _LOAD_SUPER_ATTR_METHOD___CACHED_2in_1out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -20091,7 +20763,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_METHOD___CACHED_3in_2out: {
+        case _LOAD_SUPER_ATTR_METHOD___CACHED_3in_2out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -20169,7 +20841,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_METHOD___CACHED_4in_3out: {
+        case _LOAD_SUPER_ATTR_METHOD___CACHED_4in_3out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -20251,7 +20923,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_METHOD___CACHED_5in_4out: {
+        case _LOAD_SUPER_ATTR_METHOD___CACHED_5in_4out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -20337,7 +21009,7 @@
             break;
         }
 
-        case LOAD_SUPER_ATTR_METHOD___CACHED_6in_5out: {
+        case _LOAD_SUPER_ATTR_METHOD___CACHED_6in_5out: {
             _PyStackRef self_st;
             _PyStackRef class_st;
             _PyStackRef global_super_st;
@@ -20553,6 +21225,8 @@
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20566,6 +21240,10 @@
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20579,6 +21257,12 @@
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20592,6 +21276,14 @@
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20605,6 +21297,16 @@
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20618,6 +21320,18 @@
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(tp->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -20644,6 +21358,8 @@
             assert(type_version != 0);
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
@@ -20651,6 +21367,8 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20665,6 +21383,10 @@
             assert(type_version != 0);
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
@@ -20672,6 +21394,10 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 2 */
+                    stack_pointer[-1] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20686,6 +21412,12 @@
             assert(type_version != 0);
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
@@ -20693,6 +21425,12 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 3 */
+                    stack_pointer[-1] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-2] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20707,6 +21445,14 @@
             assert(type_version != 0);
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
@@ -20714,6 +21460,14 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 4 */
+                    stack_pointer[-1] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-2] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-3] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20728,6 +21482,16 @@
             assert(type_version != 0);
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
@@ -20735,6 +21499,16 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 5 */
+                    stack_pointer[-1] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-2] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-3] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-4] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -20749,6 +21523,18 @@
             assert(type_version != 0);
             if (!LOCK_OBJECT(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             PyTypeObject *tp = Py_TYPE(owner_o);
@@ -20756,6 +21542,18 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 6 */
+                    stack_pointer[-1] = __TOS6;
+                    /* Flushing cache 5 */
+                    stack_pointer[-2] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-3] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-4] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-5] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-6] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -22778,11 +23576,15 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             if (!PyType_Check(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -22795,11 +23597,19 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             if (!PyType_Check(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -22812,11 +23622,23 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             if (!PyType_Check(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -22829,11 +23651,27 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             if (!PyType_Check(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -22846,11 +23684,31 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             if (!PyType_Check(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -22863,11 +23721,35 @@
             PyObject *owner_o = PyStackRef_AsPyObjectBorrow(owner);
             if (!PyType_Check(owner_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             assert(type_version != 0);
             if (FT_ATOMIC_LOAD_UINT_RELAXED(((PyTypeObject *)owner_o)->tp_version_tag) != type_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -23042,17 +23924,17 @@
             break;
         }
 
-        /* LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_1in_1out is not a viable micro-op for tier 2 because it has too many cache entries */
+        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_1in_1out is not a viable micro-op for tier 2 because it has too many cache entries */
 
-        /* LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_2in_2out is not a viable micro-op for tier 2 because it has too many cache entries */
+        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_2in_2out is not a viable micro-op for tier 2 because it has too many cache entries */
 
-        /* LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_3in_3out is not a viable micro-op for tier 2 because it has too many cache entries */
+        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_3in_3out is not a viable micro-op for tier 2 because it has too many cache entries */
 
-        /* LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_4in_4out is not a viable micro-op for tier 2 because it has too many cache entries */
+        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_4in_4out is not a viable micro-op for tier 2 because it has too many cache entries */
 
-        /* LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_5in_5out is not a viable micro-op for tier 2 because it has too many cache entries */
+        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_5in_5out is not a viable micro-op for tier 2 because it has too many cache entries */
 
-        /* LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_6in_6out is not a viable micro-op for tier 2 because it has too many cache entries */
+        /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN___CACHED_6in_6out is not a viable micro-op for tier 2 because it has too many cache entries */
 
         /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN is not a viable micro-op for tier 2 because it has too many cache entries */
 
@@ -23067,6 +23949,8 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23084,6 +23968,10 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 2 */
+                    stack_pointer[-1] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23101,6 +23989,12 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 3 */
+                    stack_pointer[-1] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-2] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23118,6 +24012,14 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 4 */
+                    stack_pointer[-1] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-2] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-3] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23135,6 +24037,16 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 5 */
+                    stack_pointer[-1] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-2] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-3] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-4] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -23152,6 +24064,18 @@
                 UNLOCK_OBJECT(owner_o);
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 6 */
+                    stack_pointer[-1] = __TOS6;
+                    /* Flushing cache 5 */
+                    stack_pointer[-2] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-3] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-4] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-5] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-6] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -25147,7 +26071,7 @@
             break;
         }
 
-        case IS_OP___CACHED_1in_0out: {
+        case _IS_OP___CACHED_1in_0out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -25177,7 +26101,7 @@
             break;
         }
 
-        case IS_OP___CACHED_2in_1out: {
+        case _IS_OP___CACHED_2in_1out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -25204,7 +26128,7 @@
             break;
         }
 
-        case IS_OP___CACHED_3in_2out: {
+        case _IS_OP___CACHED_3in_2out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -25231,7 +26155,7 @@
             break;
         }
 
-        case IS_OP___CACHED_4in_3out: {
+        case _IS_OP___CACHED_4in_3out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -25258,7 +26182,7 @@
             break;
         }
 
-        case IS_OP___CACHED_5in_4out: {
+        case _IS_OP___CACHED_5in_4out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -25285,7 +26209,7 @@
             break;
         }
 
-        case IS_OP___CACHED_6in_5out: {
+        case _IS_OP___CACHED_6in_5out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef b;
@@ -26167,7 +27091,7 @@
             break;
         }
 
-        case CHECK_EG_MATCH___CACHED_1in_1out: {
+        case _CHECK_EG_MATCH___CACHED_1in_1out: {
             _PyStackRef match_type_st;
             _PyStackRef exc_value_st;
             _PyStackRef rest;
@@ -26231,7 +27155,7 @@
             break;
         }
 
-        case CHECK_EG_MATCH___CACHED_2in_2out: {
+        case _CHECK_EG_MATCH___CACHED_2in_2out: {
             _PyStackRef match_type_st;
             _PyStackRef exc_value_st;
             _PyStackRef rest;
@@ -26295,7 +27219,7 @@
             break;
         }
 
-        case CHECK_EG_MATCH___CACHED_3in_3out: {
+        case _CHECK_EG_MATCH___CACHED_3in_3out: {
             _PyStackRef match_type_st;
             _PyStackRef exc_value_st;
             _PyStackRef rest;
@@ -26359,7 +27283,7 @@
             break;
         }
 
-        case CHECK_EG_MATCH___CACHED_4in_4out: {
+        case _CHECK_EG_MATCH___CACHED_4in_4out: {
             _PyStackRef match_type_st;
             _PyStackRef exc_value_st;
             _PyStackRef rest;
@@ -26423,7 +27347,7 @@
             break;
         }
 
-        case CHECK_EG_MATCH___CACHED_5in_5out: {
+        case _CHECK_EG_MATCH___CACHED_5in_5out: {
             _PyStackRef match_type_st;
             _PyStackRef exc_value_st;
             _PyStackRef rest;
@@ -26487,7 +27411,7 @@
             break;
         }
 
-        case CHECK_EG_MATCH___CACHED_6in_6out: {
+        case _CHECK_EG_MATCH___CACHED_6in_6out: {
             _PyStackRef match_type_st;
             _PyStackRef exc_value_st;
             _PyStackRef rest;
@@ -26615,7 +27539,7 @@
             break;
         }
 
-        case CHECK_EXC_MATCH___CACHED_1in_1out: {
+        case _CHECK_EXC_MATCH___CACHED_1in_1out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef left_st;
@@ -26648,7 +27572,7 @@
             break;
         }
 
-        case CHECK_EXC_MATCH___CACHED_2in_2out: {
+        case _CHECK_EXC_MATCH___CACHED_2in_2out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef left_st;
@@ -26681,7 +27605,7 @@
             break;
         }
 
-        case CHECK_EXC_MATCH___CACHED_3in_3out: {
+        case _CHECK_EXC_MATCH___CACHED_3in_3out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef left_st;
@@ -26714,7 +27638,7 @@
             break;
         }
 
-        case CHECK_EXC_MATCH___CACHED_4in_4out: {
+        case _CHECK_EXC_MATCH___CACHED_4in_4out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef left_st;
@@ -26747,7 +27671,7 @@
             break;
         }
 
-        case CHECK_EXC_MATCH___CACHED_5in_5out: {
+        case _CHECK_EXC_MATCH___CACHED_5in_5out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef left_st;
@@ -26780,7 +27704,7 @@
             break;
         }
 
-        case CHECK_EXC_MATCH___CACHED_6in_6out: {
+        case _CHECK_EXC_MATCH___CACHED_6in_6out: {
             _PyStackRef right;
             _PyStackRef left;
             _PyStackRef left_st;
@@ -26846,7 +27770,7 @@
             break;
         }
 
-        case IMPORT_NAME___CACHED_1in_0out: {
+        case _IMPORT_NAME___CACHED_1in_0out: {
             _PyStackRef fromlist;
             _PyStackRef level;
             _PyStackRef res;
@@ -26882,7 +27806,7 @@
             break;
         }
 
-        case IMPORT_NAME___CACHED_2in_1out: {
+        case _IMPORT_NAME___CACHED_2in_1out: {
             _PyStackRef fromlist;
             _PyStackRef level;
             _PyStackRef res;
@@ -26915,7 +27839,7 @@
             break;
         }
 
-        case IMPORT_NAME___CACHED_3in_2out: {
+        case _IMPORT_NAME___CACHED_3in_2out: {
             _PyStackRef fromlist;
             _PyStackRef level;
             _PyStackRef res;
@@ -26948,7 +27872,7 @@
             break;
         }
 
-        case IMPORT_NAME___CACHED_4in_3out: {
+        case _IMPORT_NAME___CACHED_4in_3out: {
             _PyStackRef fromlist;
             _PyStackRef level;
             _PyStackRef res;
@@ -26981,7 +27905,7 @@
             break;
         }
 
-        case IMPORT_NAME___CACHED_5in_4out: {
+        case _IMPORT_NAME___CACHED_5in_4out: {
             _PyStackRef fromlist;
             _PyStackRef level;
             _PyStackRef res;
@@ -27014,7 +27938,7 @@
             break;
         }
 
-        case IMPORT_NAME___CACHED_6in_5out: {
+        case _IMPORT_NAME___CACHED_6in_5out: {
             _PyStackRef fromlist;
             _PyStackRef level;
             _PyStackRef res;
@@ -27080,7 +28004,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_0in_1out: {
+        case _IMPORT_FROM___CACHED_0in_1out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27099,7 +28023,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_1in_2out: {
+        case _IMPORT_FROM___CACHED_1in_2out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27118,7 +28042,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_2in_3out: {
+        case _IMPORT_FROM___CACHED_2in_3out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27137,7 +28061,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_3in_4out: {
+        case _IMPORT_FROM___CACHED_3in_4out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27156,7 +28080,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_4in_5out: {
+        case _IMPORT_FROM___CACHED_4in_5out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27175,7 +28099,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_5in_6out: {
+        case _IMPORT_FROM___CACHED_5in_6out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27194,7 +28118,7 @@
             break;
         }
 
-        case IMPORT_FROM___CACHED_6in_0out: {
+        case _IMPORT_FROM___CACHED_6in_0out: {
             _PyStackRef from;
             _PyStackRef res;
             oparg = CURRENT_OPARG();
@@ -27413,7 +28337,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_0in_1out: {
+        case _GET_LEN___CACHED_0in_1out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = stack_pointer[-1];
@@ -27434,7 +28358,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_1in_2out: {
+        case _GET_LEN___CACHED_1in_2out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = __TOS1;
@@ -27455,7 +28379,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_2in_3out: {
+        case _GET_LEN___CACHED_2in_3out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = __TOS2;
@@ -27476,7 +28400,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_3in_4out: {
+        case _GET_LEN___CACHED_3in_4out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = __TOS3;
@@ -27497,7 +28421,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_4in_5out: {
+        case _GET_LEN___CACHED_4in_5out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = __TOS4;
@@ -27518,7 +28442,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_5in_6out: {
+        case _GET_LEN___CACHED_5in_6out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = __TOS5;
@@ -27539,7 +28463,7 @@
             break;
         }
 
-        case GET_LEN___CACHED_6in_0out: {
+        case _GET_LEN___CACHED_6in_0out: {
             _PyStackRef obj;
             _PyStackRef len;
             obj = __TOS6;
@@ -27594,7 +28518,7 @@
             break;
         }
 
-        case MATCH_CLASS___CACHED_2in_0out: {
+        case _MATCH_CLASS___CACHED_2in_0out: {
             _PyStackRef names;
             _PyStackRef type;
             _PyStackRef subject;
@@ -27645,7 +28569,7 @@
             break;
         }
 
-        case MATCH_CLASS___CACHED_3in_1out: {
+        case _MATCH_CLASS___CACHED_3in_1out: {
             _PyStackRef names;
             _PyStackRef type;
             _PyStackRef subject;
@@ -27691,7 +28615,7 @@
             break;
         }
 
-        case MATCH_CLASS___CACHED_4in_2out: {
+        case _MATCH_CLASS___CACHED_4in_2out: {
             _PyStackRef names;
             _PyStackRef type;
             _PyStackRef subject;
@@ -27737,7 +28661,7 @@
             break;
         }
 
-        case MATCH_CLASS___CACHED_5in_3out: {
+        case _MATCH_CLASS___CACHED_5in_3out: {
             _PyStackRef names;
             _PyStackRef type;
             _PyStackRef subject;
@@ -27783,7 +28707,7 @@
             break;
         }
 
-        case MATCH_CLASS___CACHED_6in_4out: {
+        case _MATCH_CLASS___CACHED_6in_4out: {
             _PyStackRef names;
             _PyStackRef type;
             _PyStackRef subject;
@@ -27875,7 +28799,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_0in_1out: {
+        case _MATCH_MAPPING___CACHED_0in_1out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = stack_pointer[-1];
@@ -27887,7 +28811,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_1in_2out: {
+        case _MATCH_MAPPING___CACHED_1in_2out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS1;
@@ -27899,7 +28823,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_2in_3out: {
+        case _MATCH_MAPPING___CACHED_2in_3out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS2;
@@ -27911,7 +28835,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_3in_4out: {
+        case _MATCH_MAPPING___CACHED_3in_4out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS3;
@@ -27923,7 +28847,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_4in_5out: {
+        case _MATCH_MAPPING___CACHED_4in_5out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS4;
@@ -27935,7 +28859,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_5in_6out: {
+        case _MATCH_MAPPING___CACHED_5in_6out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS5;
@@ -27947,7 +28871,7 @@
             break;
         }
 
-        case MATCH_MAPPING___CACHED_6in_0out: {
+        case _MATCH_MAPPING___CACHED_6in_0out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS6;
@@ -27984,7 +28908,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_0in_1out: {
+        case _MATCH_SEQUENCE___CACHED_0in_1out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = stack_pointer[-1];
@@ -27996,7 +28920,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_1in_2out: {
+        case _MATCH_SEQUENCE___CACHED_1in_2out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS1;
@@ -28008,7 +28932,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_2in_3out: {
+        case _MATCH_SEQUENCE___CACHED_2in_3out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS2;
@@ -28020,7 +28944,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_3in_4out: {
+        case _MATCH_SEQUENCE___CACHED_3in_4out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS3;
@@ -28032,7 +28956,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_4in_5out: {
+        case _MATCH_SEQUENCE___CACHED_4in_5out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS4;
@@ -28044,7 +28968,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_5in_6out: {
+        case _MATCH_SEQUENCE___CACHED_5in_6out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS5;
@@ -28056,7 +28980,7 @@
             break;
         }
 
-        case MATCH_SEQUENCE___CACHED_6in_0out: {
+        case _MATCH_SEQUENCE___CACHED_6in_0out: {
             _PyStackRef subject;
             _PyStackRef res;
             subject = __TOS6;
@@ -28093,7 +29017,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_0in_1out: {
+        case _MATCH_KEYS___CACHED_0in_1out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28113,7 +29037,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_1in_2out: {
+        case _MATCH_KEYS___CACHED_1in_2out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28133,7 +29057,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_2in_3out: {
+        case _MATCH_KEYS___CACHED_2in_3out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28153,7 +29077,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_3in_4out: {
+        case _MATCH_KEYS___CACHED_3in_4out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28173,7 +29097,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_4in_5out: {
+        case _MATCH_KEYS___CACHED_4in_5out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28193,7 +29117,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_5in_6out: {
+        case _MATCH_KEYS___CACHED_5in_6out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28213,7 +29137,7 @@
             break;
         }
 
-        case MATCH_KEYS___CACHED_6in_0out: {
+        case _MATCH_KEYS___CACHED_6in_0out: {
             _PyStackRef keys;
             _PyStackRef subject;
             _PyStackRef values_or_none;
@@ -28266,7 +29190,7 @@
             break;
         }
 
-        case GET_ITER___CACHED_1in_1out: {
+        case _GET_ITER___CACHED_1in_1out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS1;
@@ -28293,7 +29217,7 @@
             break;
         }
 
-        case GET_ITER___CACHED_2in_2out: {
+        case _GET_ITER___CACHED_2in_2out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS2;
@@ -28320,7 +29244,7 @@
             break;
         }
 
-        case GET_ITER___CACHED_3in_3out: {
+        case _GET_ITER___CACHED_3in_3out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS3;
@@ -28347,7 +29271,7 @@
             break;
         }
 
-        case GET_ITER___CACHED_4in_4out: {
+        case _GET_ITER___CACHED_4in_4out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS4;
@@ -28374,7 +29298,7 @@
             break;
         }
 
-        case GET_ITER___CACHED_5in_5out: {
+        case _GET_ITER___CACHED_5in_5out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS5;
@@ -28401,7 +29325,7 @@
             break;
         }
 
-        case GET_ITER___CACHED_6in_6out: {
+        case _GET_ITER___CACHED_6in_6out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS6;
@@ -28455,7 +29379,7 @@
             break;
         }
 
-        case GET_YIELD_FROM_ITER___CACHED_1in_1out: {
+        case _GET_YIELD_FROM_ITER___CACHED_1in_1out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS1;
@@ -28493,7 +29417,7 @@
             break;
         }
 
-        case GET_YIELD_FROM_ITER___CACHED_2in_2out: {
+        case _GET_YIELD_FROM_ITER___CACHED_2in_2out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS2;
@@ -28531,7 +29455,7 @@
             break;
         }
 
-        case GET_YIELD_FROM_ITER___CACHED_3in_3out: {
+        case _GET_YIELD_FROM_ITER___CACHED_3in_3out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS3;
@@ -28569,7 +29493,7 @@
             break;
         }
 
-        case GET_YIELD_FROM_ITER___CACHED_4in_4out: {
+        case _GET_YIELD_FROM_ITER___CACHED_4in_4out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS4;
@@ -28607,7 +29531,7 @@
             break;
         }
 
-        case GET_YIELD_FROM_ITER___CACHED_5in_5out: {
+        case _GET_YIELD_FROM_ITER___CACHED_5in_5out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS5;
@@ -28645,7 +29569,7 @@
             break;
         }
 
-        case GET_YIELD_FROM_ITER___CACHED_6in_6out: {
+        case _GET_YIELD_FROM_ITER___CACHED_6in_6out: {
             _PyStackRef iterable;
             _PyStackRef iter;
             iterable = __TOS6;
@@ -28793,6 +29717,8 @@
                 }
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -28826,6 +29752,10 @@
                 }
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 2 */
+                    stack_pointer[-1] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -28859,6 +29789,12 @@
                 }
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 3 */
+                    stack_pointer[-1] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-2] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -28892,6 +29828,14 @@
                 }
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 4 */
+                    stack_pointer[-1] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-2] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-3] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -28925,6 +29869,16 @@
                 }
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 5 */
+                    stack_pointer[-1] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-2] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-3] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-4] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -28958,6 +29912,18 @@
                 }
                 if (true) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 6 */
+                    stack_pointer[-1] = __TOS6;
+                    /* Flushing cache 5 */
+                    stack_pointer[-2] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-3] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-4] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-5] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-6] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29014,19 +29980,19 @@
             break;
         }
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_0in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_0in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_1in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_1in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_2in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_2in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_3in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_3in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_4in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_4in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_5in_6out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_5in_6out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_FOR_ITER___CACHED_6in_0out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_FOR_ITER___CACHED_6in_0out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_FOR_ITER is not a viable micro-op for tier 2 because it is instrumented */
 
@@ -29036,17 +30002,23 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyListIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29059,17 +30031,29 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyListIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29082,17 +30066,35 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyListIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29105,17 +30107,41 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyListIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29128,17 +30154,47 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyListIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29151,17 +30207,53 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyListIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             _PyListIterObject *it = (_PyListIterObject *)iter_o;
             if (!_Py_IsOwnedByCurrentThread((PyObject *)it->it_seq) ||
                     !_PyObject_GC_IS_SHARED(it->it_seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29215,12 +30307,16 @@
             PyListObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29238,12 +30334,20 @@
             PyListObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 2 */
+                    stack_pointer[-1] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29261,12 +30365,24 @@
             PyListObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 3 */
+                    stack_pointer[-1] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-2] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29284,12 +30400,28 @@
             PyListObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 4 */
+                    stack_pointer[-1] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-2] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-3] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29307,12 +30439,32 @@
             PyListObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 5 */
+                    stack_pointer[-1] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-2] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-3] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-4] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29330,12 +30482,36 @@
             PyListObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if ((size_t)it->it_index >= (size_t)PyList_GET_SIZE(seq)) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 6 */
+                    stack_pointer[-1] = __TOS6;
+                    /* Flushing cache 5 */
+                    stack_pointer[-2] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-3] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-4] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-5] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-6] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29440,12 +30616,16 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (result < 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (result == 0) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29479,12 +30659,20 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (result < 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (result == 0) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 2 */
+                    stack_pointer[-1] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29518,12 +30706,24 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (result < 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (result == 0) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 3 */
+                    stack_pointer[-1] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-2] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29557,12 +30757,28 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (result < 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (result == 0) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 4 */
+                    stack_pointer[-1] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-2] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-3] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29596,12 +30812,32 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (result < 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (result == 0) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 5 */
+                    stack_pointer[-1] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-2] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-3] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-4] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29635,12 +30871,36 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (result < 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (result == 0) {
                 it->it_index = -1;
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 6 */
+                    stack_pointer[-1] = __TOS6;
+                    /* Flushing cache 5 */
+                    stack_pointer[-2] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-3] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-4] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-5] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-6] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -29713,11 +30973,15 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29730,11 +30994,19 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29747,11 +31019,23 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29764,11 +31048,27 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29781,11 +31081,31 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29798,11 +31118,35 @@
             PyObject *iter_o = PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(iter_o) != &PyTupleIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced(iter_o)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -29852,10 +31196,14 @@
             PyTupleObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (it->it_index >= PyTuple_GET_SIZE(seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -29873,10 +31221,18 @@
             PyTupleObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (it->it_index >= PyTuple_GET_SIZE(seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -29894,10 +31250,22 @@
             PyTupleObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (it->it_index >= PyTuple_GET_SIZE(seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -29915,10 +31283,26 @@
             PyTupleObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (it->it_index >= PyTuple_GET_SIZE(seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -29936,10 +31320,30 @@
             PyTupleObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (it->it_index >= PyTuple_GET_SIZE(seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -29957,10 +31361,34 @@
             PyTupleObject *seq = it->it_seq;
             if (seq == NULL) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             if (it->it_index >= PyTuple_GET_SIZE(seq)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30166,11 +31594,15 @@
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(r) != &PyRangeIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -30183,11 +31615,19 @@
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(r) != &PyRangeIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -30200,11 +31640,23 @@
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(r) != &PyRangeIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -30217,11 +31669,27 @@
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(r) != &PyRangeIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -30234,11 +31702,31 @@
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(r) != &PyRangeIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -30251,11 +31739,35 @@
             _PyRangeIterObject *r = (_PyRangeIterObject *)PyStackRef_AsPyObjectBorrow(iter);
             if (Py_TYPE(r) != &PyRangeIter_Type) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #ifdef Py_GIL_DISABLED
             if (!_PyObject_IsUniquelyReferenced((PyObject *)r)) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             #endif
@@ -30300,6 +31812,8 @@
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             if (r->len <= 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30312,6 +31826,10 @@
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             if (r->len <= 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30324,6 +31842,12 @@
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             if (r->len <= 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30336,6 +31860,14 @@
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             if (r->len <= 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30348,6 +31880,16 @@
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             if (r->len <= 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30360,6 +31902,18 @@
             assert(Py_TYPE(r) == &PyRangeIter_Type);
             if (r->len <= 0) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -30656,7 +32210,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_0in_1out: {
+        case _WITH_EXCEPT_START___CACHED_0in_1out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30694,7 +32248,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_1in_2out: {
+        case _WITH_EXCEPT_START___CACHED_1in_2out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30732,7 +32286,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_2in_3out: {
+        case _WITH_EXCEPT_START___CACHED_2in_3out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30770,7 +32324,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_3in_4out: {
+        case _WITH_EXCEPT_START___CACHED_3in_4out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30808,7 +32362,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_4in_5out: {
+        case _WITH_EXCEPT_START___CACHED_4in_5out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30846,7 +32400,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_5in_6out: {
+        case _WITH_EXCEPT_START___CACHED_5in_6out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30884,7 +32438,7 @@
             break;
         }
 
-        case WITH_EXCEPT_START___CACHED_6in_0out: {
+        case _WITH_EXCEPT_START___CACHED_6in_0out: {
             _PyStackRef val;
             _PyStackRef lasti;
             _PyStackRef exit_self;
@@ -30973,7 +32527,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_0in_1out: {
+        case _PUSH_EXC_INFO___CACHED_0in_1out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -30995,7 +32549,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_1in_2out: {
+        case _PUSH_EXC_INFO___CACHED_1in_2out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -31017,7 +32571,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_2in_3out: {
+        case _PUSH_EXC_INFO___CACHED_2in_3out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -31039,7 +32593,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_3in_4out: {
+        case _PUSH_EXC_INFO___CACHED_3in_4out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -31061,7 +32615,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_4in_5out: {
+        case _PUSH_EXC_INFO___CACHED_4in_5out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -31083,7 +32637,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_5in_6out: {
+        case _PUSH_EXC_INFO___CACHED_5in_6out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -31105,7 +32659,7 @@
             break;
         }
 
-        case PUSH_EXC_INFO___CACHED_6in_0out: {
+        case _PUSH_EXC_INFO___CACHED_6in_0out: {
             _PyStackRef exc;
             _PyStackRef prev_exc;
             _PyStackRef new_exc;
@@ -32485,6 +34039,8 @@
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32497,6 +34053,10 @@
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32509,6 +34069,12 @@
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32521,6 +34087,14 @@
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32533,6 +34107,16 @@
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -32545,6 +34129,18 @@
             PyFunctionObject *func = (PyFunctionObject *)callable_o;
             if (func->func_version != func_version) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -34339,7 +35935,7 @@
             break;
         }
 
-        case EXIT_INIT_CHECK___CACHED_1in_0out: {
+        case _EXIT_INIT_CHECK___CACHED_1in_0out: {
             _PyStackRef should_be_none;
             should_be_none = __TOS1;
             if (!PyStackRef_IsNone(should_be_none)) {
@@ -34358,7 +35954,7 @@
             break;
         }
 
-        case EXIT_INIT_CHECK___CACHED_2in_1out: {
+        case _EXIT_INIT_CHECK___CACHED_2in_1out: {
             _PyStackRef should_be_none;
             should_be_none = __TOS2;
             if (!PyStackRef_IsNone(should_be_none)) {
@@ -34374,7 +35970,7 @@
             break;
         }
 
-        case EXIT_INIT_CHECK___CACHED_3in_2out: {
+        case _EXIT_INIT_CHECK___CACHED_3in_2out: {
             _PyStackRef should_be_none;
             should_be_none = __TOS3;
             if (!PyStackRef_IsNone(should_be_none)) {
@@ -34390,7 +35986,7 @@
             break;
         }
 
-        case EXIT_INIT_CHECK___CACHED_4in_3out: {
+        case _EXIT_INIT_CHECK___CACHED_4in_3out: {
             _PyStackRef should_be_none;
             should_be_none = __TOS4;
             if (!PyStackRef_IsNone(should_be_none)) {
@@ -34406,7 +36002,7 @@
             break;
         }
 
-        case EXIT_INIT_CHECK___CACHED_5in_4out: {
+        case _EXIT_INIT_CHECK___CACHED_5in_4out: {
             _PyStackRef should_be_none;
             should_be_none = __TOS5;
             if (!PyStackRef_IsNone(should_be_none)) {
@@ -34422,7 +36018,7 @@
             break;
         }
 
-        case EXIT_INIT_CHECK___CACHED_6in_5out: {
+        case _EXIT_INIT_CHECK___CACHED_6in_5out: {
             _PyStackRef should_be_none;
             should_be_none = __TOS6;
             if (!PyStackRef_IsNone(should_be_none)) {
@@ -35472,7 +37068,7 @@
             break;
         }
 
-        case CALL_LIST_APPEND___CACHED_3in_0out: {
+        case _CALL_LIST_APPEND___CACHED_3in_0out: {
             _PyStackRef arg;
             _PyStackRef self;
             _PyStackRef callable;
@@ -35555,7 +37151,7 @@
             break;
         }
 
-        case CALL_LIST_APPEND___CACHED_4in_1out: {
+        case _CALL_LIST_APPEND___CACHED_4in_1out: {
             _PyStackRef arg;
             _PyStackRef self;
             _PyStackRef callable;
@@ -35639,7 +37235,7 @@
             break;
         }
 
-        case CALL_LIST_APPEND___CACHED_5in_2out: {
+        case _CALL_LIST_APPEND___CACHED_5in_2out: {
             _PyStackRef arg;
             _PyStackRef self;
             _PyStackRef callable;
@@ -35731,7 +37327,7 @@
             break;
         }
 
-        case CALL_LIST_APPEND___CACHED_6in_3out: {
+        case _CALL_LIST_APPEND___CACHED_6in_3out: {
             _PyStackRef arg;
             _PyStackRef self;
             _PyStackRef callable;
@@ -36682,7 +38278,7 @@
 
         /* _DO_CALL_FUNCTION_EX is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        case MAKE_FUNCTION___CACHED_1in_1out: {
+        case _MAKE_FUNCTION___CACHED_1in_1out: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = __TOS1;
@@ -36708,7 +38304,7 @@
             break;
         }
 
-        case MAKE_FUNCTION___CACHED_2in_2out: {
+        case _MAKE_FUNCTION___CACHED_2in_2out: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = __TOS2;
@@ -36734,7 +38330,7 @@
             break;
         }
 
-        case MAKE_FUNCTION___CACHED_3in_3out: {
+        case _MAKE_FUNCTION___CACHED_3in_3out: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = __TOS3;
@@ -36760,7 +38356,7 @@
             break;
         }
 
-        case MAKE_FUNCTION___CACHED_4in_4out: {
+        case _MAKE_FUNCTION___CACHED_4in_4out: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = __TOS4;
@@ -36786,7 +38382,7 @@
             break;
         }
 
-        case MAKE_FUNCTION___CACHED_5in_5out: {
+        case _MAKE_FUNCTION___CACHED_5in_5out: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = __TOS5;
@@ -36812,7 +38408,7 @@
             break;
         }
 
-        case MAKE_FUNCTION___CACHED_6in_6out: {
+        case _MAKE_FUNCTION___CACHED_6in_6out: {
             _PyStackRef codeobj_st;
             _PyStackRef func;
             codeobj_st = __TOS6;
@@ -36864,7 +38460,7 @@
             break;
         }
 
-        case SET_FUNCTION_ATTRIBUTE___CACHED_1in_0out: {
+        case _SET_FUNCTION_ATTRIBUTE___CACHED_1in_0out: {
             _PyStackRef func_in;
             _PyStackRef attr_st;
             _PyStackRef func_out;
@@ -36889,7 +38485,7 @@
             break;
         }
 
-        case SET_FUNCTION_ATTRIBUTE___CACHED_2in_1out: {
+        case _SET_FUNCTION_ATTRIBUTE___CACHED_2in_1out: {
             _PyStackRef func_in;
             _PyStackRef attr_st;
             _PyStackRef func_out;
@@ -36911,7 +38507,7 @@
             break;
         }
 
-        case SET_FUNCTION_ATTRIBUTE___CACHED_3in_2out: {
+        case _SET_FUNCTION_ATTRIBUTE___CACHED_3in_2out: {
             _PyStackRef func_in;
             _PyStackRef attr_st;
             _PyStackRef func_out;
@@ -36933,7 +38529,7 @@
             break;
         }
 
-        case SET_FUNCTION_ATTRIBUTE___CACHED_4in_3out: {
+        case _SET_FUNCTION_ATTRIBUTE___CACHED_4in_3out: {
             _PyStackRef func_in;
             _PyStackRef attr_st;
             _PyStackRef func_out;
@@ -36955,7 +38551,7 @@
             break;
         }
 
-        case SET_FUNCTION_ATTRIBUTE___CACHED_5in_4out: {
+        case _SET_FUNCTION_ATTRIBUTE___CACHED_5in_4out: {
             _PyStackRef func_in;
             _PyStackRef attr_st;
             _PyStackRef func_out;
@@ -36977,7 +38573,7 @@
             break;
         }
 
-        case SET_FUNCTION_ATTRIBUTE___CACHED_6in_5out: {
+        case _SET_FUNCTION_ATTRIBUTE___CACHED_6in_5out: {
             _PyStackRef func_in;
             _PyStackRef attr_st;
             _PyStackRef func_out;
@@ -37021,7 +38617,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_0in_1out: {
+        case _RETURN_GENERATOR___CACHED_0in_1out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37053,7 +38649,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_1in_2out: {
+        case _RETURN_GENERATOR___CACHED_1in_2out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37085,7 +38681,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_2in_3out: {
+        case _RETURN_GENERATOR___CACHED_2in_3out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37117,7 +38713,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_3in_4out: {
+        case _RETURN_GENERATOR___CACHED_3in_4out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37149,7 +38745,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_4in_5out: {
+        case _RETURN_GENERATOR___CACHED_4in_5out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37181,7 +38777,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_5in_6out: {
+        case _RETURN_GENERATOR___CACHED_5in_6out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37213,7 +38809,7 @@
             break;
         }
 
-        case RETURN_GENERATOR___CACHED_6in_0out: {
+        case _RETURN_GENERATOR___CACHED_6in_0out: {
             _PyStackRef res;
             assert(PyStackRef_FunctionCheck(frame->f_funcobj));
             PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
@@ -37319,7 +38915,7 @@
             break;
         }
 
-        case CONVERT_VALUE___CACHED_1in_1out: {
+        case _CONVERT_VALUE___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG();
@@ -37345,7 +38941,7 @@
             break;
         }
 
-        case CONVERT_VALUE___CACHED_2in_2out: {
+        case _CONVERT_VALUE___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG();
@@ -37371,7 +38967,7 @@
             break;
         }
 
-        case CONVERT_VALUE___CACHED_3in_3out: {
+        case _CONVERT_VALUE___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG();
@@ -37397,7 +38993,7 @@
             break;
         }
 
-        case CONVERT_VALUE___CACHED_4in_4out: {
+        case _CONVERT_VALUE___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG();
@@ -37423,7 +39019,7 @@
             break;
         }
 
-        case CONVERT_VALUE___CACHED_5in_5out: {
+        case _CONVERT_VALUE___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG();
@@ -37449,7 +39045,7 @@
             break;
         }
 
-        case CONVERT_VALUE___CACHED_6in_6out: {
+        case _CONVERT_VALUE___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef result;
             oparg = CURRENT_OPARG();
@@ -37501,7 +39097,7 @@
             break;
         }
 
-        case FORMAT_SIMPLE___CACHED_1in_1out: {
+        case _FORMAT_SIMPLE___CACHED_1in_1out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS1;
@@ -37530,7 +39126,7 @@
             break;
         }
 
-        case FORMAT_SIMPLE___CACHED_2in_2out: {
+        case _FORMAT_SIMPLE___CACHED_2in_2out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS2;
@@ -37559,7 +39155,7 @@
             break;
         }
 
-        case FORMAT_SIMPLE___CACHED_3in_3out: {
+        case _FORMAT_SIMPLE___CACHED_3in_3out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS3;
@@ -37588,7 +39184,7 @@
             break;
         }
 
-        case FORMAT_SIMPLE___CACHED_4in_4out: {
+        case _FORMAT_SIMPLE___CACHED_4in_4out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS4;
@@ -37617,7 +39213,7 @@
             break;
         }
 
-        case FORMAT_SIMPLE___CACHED_5in_5out: {
+        case _FORMAT_SIMPLE___CACHED_5in_5out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS5;
@@ -37646,7 +39242,7 @@
             break;
         }
 
-        case FORMAT_SIMPLE___CACHED_6in_6out: {
+        case _FORMAT_SIMPLE___CACHED_6in_6out: {
             _PyStackRef value;
             _PyStackRef res;
             value = __TOS6;
@@ -37704,7 +39300,7 @@
             break;
         }
 
-        case FORMAT_WITH_SPEC___CACHED_1in_0out: {
+        case _FORMAT_WITH_SPEC___CACHED_1in_0out: {
             _PyStackRef fmt_spec;
             _PyStackRef value;
             _PyStackRef res;
@@ -37736,7 +39332,7 @@
             break;
         }
 
-        case FORMAT_WITH_SPEC___CACHED_2in_1out: {
+        case _FORMAT_WITH_SPEC___CACHED_2in_1out: {
             _PyStackRef fmt_spec;
             _PyStackRef value;
             _PyStackRef res;
@@ -37765,7 +39361,7 @@
             break;
         }
 
-        case FORMAT_WITH_SPEC___CACHED_3in_2out: {
+        case _FORMAT_WITH_SPEC___CACHED_3in_2out: {
             _PyStackRef fmt_spec;
             _PyStackRef value;
             _PyStackRef res;
@@ -37794,7 +39390,7 @@
             break;
         }
 
-        case FORMAT_WITH_SPEC___CACHED_4in_3out: {
+        case _FORMAT_WITH_SPEC___CACHED_4in_3out: {
             _PyStackRef fmt_spec;
             _PyStackRef value;
             _PyStackRef res;
@@ -37823,7 +39419,7 @@
             break;
         }
 
-        case FORMAT_WITH_SPEC___CACHED_5in_4out: {
+        case _FORMAT_WITH_SPEC___CACHED_5in_4out: {
             _PyStackRef fmt_spec;
             _PyStackRef value;
             _PyStackRef res;
@@ -37852,7 +39448,7 @@
             break;
         }
 
-        case FORMAT_WITH_SPEC___CACHED_6in_5out: {
+        case _FORMAT_WITH_SPEC___CACHED_6in_5out: {
             _PyStackRef fmt_spec;
             _PyStackRef value;
             _PyStackRef res;
@@ -38165,45 +39761,45 @@
             break;
         }
 
-        /* INSTRUMENTED_LINE___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_LINE___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_LINE___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_LINE___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_LINE___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_LINE___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_LINE___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_LINE___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_LINE___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_LINE___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_LINE___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_LINE___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_LINE is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_INSTRUCTION___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_INSTRUCTION___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_INSTRUCTION___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_INSTRUCTION___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_INSTRUCTION___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_INSTRUCTION___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_INSTRUCTION___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_INSTRUCTION___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_INSTRUCTION___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_INSTRUCTION___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_INSTRUCTION___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_INSTRUCTION___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_INSTRUCTION is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_JUMP_FORWARD___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_JUMP_FORWARD___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_JUMP_FORWARD___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_JUMP_FORWARD___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_JUMP_FORWARD___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_JUMP_FORWARD___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_JUMP_FORWARD___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_JUMP_FORWARD___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_JUMP_FORWARD___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_JUMP_FORWARD___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_JUMP_FORWARD___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_JUMP_FORWARD___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_JUMP_FORWARD is not a viable micro-op for tier 2 because it is instrumented */
 
@@ -38221,73 +39817,73 @@
 
         /* _MONITOR_JUMP_BACKWARD is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
-        /* INSTRUMENTED_NOT_TAKEN___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_NOT_TAKEN___CACHED_1in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_NOT_TAKEN___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_NOT_TAKEN___CACHED_2in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_NOT_TAKEN___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_NOT_TAKEN___CACHED_3in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_NOT_TAKEN___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_NOT_TAKEN___CACHED_4in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_NOT_TAKEN___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_NOT_TAKEN___CACHED_5in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_NOT_TAKEN___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_NOT_TAKEN___CACHED_6in_6out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_NOT_TAKEN is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_TRUE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_FALSE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_POP_JUMP_IF_FALSE is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NONE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_POP_JUMP_IF_NONE is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_1in_0out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_2in_1out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_3in_2out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_4in_3out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_5in_4out is not a viable micro-op for tier 2 because it is instrumented */
 
-        /* INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
+        /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE___CACHED_6in_5out is not a viable micro-op for tier 2 because it is instrumented */
 
         /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE is not a viable micro-op for tier 2 because it is instrumented */
 
@@ -38299,6 +39895,8 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             /* Cache spill */
@@ -38315,6 +39913,10 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38328,6 +39930,12 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38341,6 +39949,14 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38354,6 +39970,16 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38367,6 +39993,18 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_true) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38393,6 +40031,8 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             /* Cache spill */
@@ -38409,6 +40049,10 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38422,6 +40066,12 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38435,6 +40085,14 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38448,6 +40106,16 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38461,6 +40129,18 @@
             assert(WITHIN_STACK_BOUNDS());
             if (!is_false) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38491,6 +40171,8 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 1 */
+                    stack_pointer[-1] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -38514,6 +40196,10 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 2 */
+                    stack_pointer[-1] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-2] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -38534,6 +40220,12 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 3 */
+                    stack_pointer[-1] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-2] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-3] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -38554,6 +40246,14 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 4 */
+                    stack_pointer[-1] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-2] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-3] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-4] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -38574,6 +40274,16 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 5 */
+                    stack_pointer[-1] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-2] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-3] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-4] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-5] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -38594,6 +40304,18 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (1) {
                     UOP_STAT_INC(uopcode, miss);
+                    /* Flushing cache 6 */
+                    stack_pointer[-1] = __TOS6;
+                    /* Flushing cache 5 */
+                    stack_pointer[-2] = __TOS5;
+                    /* Flushing cache 4 */
+                    stack_pointer[-3] = __TOS4;
+                    /* Flushing cache 3 */
+                    stack_pointer[-4] = __TOS3;
+                    /* Flushing cache 2 */
+                    stack_pointer[-5] = __TOS2;
+                    /* Flushing cache 1 */
+                    stack_pointer[-6] = __TOS1;
                     JUMP_TO_JUMP_TARGET();
                 }
             }
@@ -38633,6 +40355,8 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 1 */
+                stack_pointer[-1] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             /* Cache spill */
@@ -38652,6 +40376,10 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 2 */
+                stack_pointer[-1] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-2] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38668,6 +40396,12 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 3 */
+                stack_pointer[-1] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-2] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-3] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38684,6 +40418,14 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 4 */
+                stack_pointer[-1] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-2] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-3] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-4] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38700,6 +40442,16 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 5 */
+                stack_pointer[-1] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-2] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-3] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-4] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-5] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;
@@ -38716,6 +40468,18 @@
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (is_none) {
                 UOP_STAT_INC(uopcode, miss);
+                /* Flushing cache 6 */
+                stack_pointer[-1] = __TOS6;
+                /* Flushing cache 5 */
+                stack_pointer[-2] = __TOS5;
+                /* Flushing cache 4 */
+                stack_pointer[-3] = __TOS4;
+                /* Flushing cache 3 */
+                stack_pointer[-4] = __TOS3;
+                /* Flushing cache 2 */
+                stack_pointer[-5] = __TOS2;
+                /* Flushing cache 1 */
+                stack_pointer[-6] = __TOS1;
                 JUMP_TO_JUMP_TARGET();
             }
             break;

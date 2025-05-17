@@ -1258,6 +1258,21 @@ int effective_trace_length(_PyUOpInstruction *buffer, int length)
 }
 #endif
 
+static void
+uop_regalloc(_PyUOpInstruction *buffer, int length)
+{
+    int curr_regs_in = 0;
+    for (int pc = 0; pc < length; pc++) {
+        int reged = buffer[pc].opcode;
+        switch (reged) {
+#include "regalloc_cases.c.h"
+        default:
+            break;
+        }
+        buffer[pc].opcode = reged;
+    }
+}
+
 static int
 uop_optimize(
     _PyInterpreterFrame *frame,
@@ -1288,6 +1303,7 @@ uop_optimize(
     }
     assert(length < UOP_MAX_TRACE_LENGTH);
     assert(length >= 1);
+    uop_regalloc(buffer, length);
     /* Fix up */
     for (int pc = 0; pc < length; pc++) {
         int opcode = buffer[pc].opcode;
