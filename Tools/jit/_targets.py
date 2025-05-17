@@ -114,23 +114,30 @@ class _Target(typing.Generic[_S, _R]):
     ) -> _stencils.Hole:
         raise NotImplementedError(type(self))
 
+    def _substitute_in_preserve_none_and_add_musttail(self, ll_file: pathlib.Path):
+        all = ll_file.read_text()
+        # Replace tail calls with musttail and correct calling convetion.
+        all = all.replace("tail call preserve_allcc", "musttail call preserve_nonecc")
+        all = all.replace("call preserve_allcc", "musttail call preserve_nonecc")
+        # Swap sentinel calling conv with the real one.
+        all = all.replace("preserve_allcc", "preserve_nonecc")
+
+        ll_file.write_text(all)
+        # with open("/home/ken/Documents/GitHub/cpython/hi.txt", "w") as sys.stdout:
+        #     print(all)
+
     async def _compile(
         self, opname: str, c: pathlib.Path, tempdir: pathlib.Path
     ) -> _stencils.StencilGroup:
         o = tempdir / f"{opname}.o"
-        args = [
+        ll = tempdir / f"{opname}.ll"
+        common_args = [
             f"--target={self.triple}",
             "-DPy_BUILD_CORE_MODULE",
             "-D_DEBUG" if self.debug else "-DNDEBUG",
             f"-D_JIT_OPCODE={opname}",
             "-D_PyJIT_ACTIVE",
             "-D_Py_JIT",
-            "-I.",
-            f"-I{CPYTHON / 'Include'}",
-            f"-I{CPYTHON / 'Include' / 'internal'}",
-            f"-I{CPYTHON / 'Include' / 'internal' / 'mimalloc'}",
-            f"-I{CPYTHON / 'Python'}",
-            f"-I{CPYTHON / 'Tools' / 'jit'}",
             "-O3",
             "-c",
             # Shorten full absolute file paths in the generated code (like the
@@ -151,11 +158,30 @@ class _Target(typing.Generic[_S, _R]):
             "-fno-stack-protector",
             "-std=c11",
             "-o",
-            f"{o}",
+        ]
+        ll_args = [
+            "-I.",
+            f"-I{CPYTHON / 'Include'}",
+            f"-I{CPYTHON / 'Include' / 'internal'}",
+            f"-I{CPYTHON / 'Include' / 'internal' / 'mimalloc'}",
+            f"-I{CPYTHON / 'Python'}",
+            f"-I{CPYTHON / 'Tools' / 'jit'}",
+            *common_args,
+            f"{ll}",
             f"{c}",
+            "-emit-llvm",
+            "-S",
             *self.args,
         ]
-        await _llvm.run("clang", args, echo=self.verbose)
+        o_args = [
+            *common_args,
+            f"{o}",
+            f"{ll}",
+            *self.args,
+        ]
+        await _llvm.run("clang", ll_args, echo=self.verbose)
+        self._substitute_in_preserve_none_and_add_musttail(ll)
+        await _llvm.run("clang", o_args, echo=self.verbose)
         return await self._parse(o)
 
     async def _build_stencils(self) -> dict[str, _stencils.StencilGroup]:
