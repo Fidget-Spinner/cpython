@@ -114,13 +114,65 @@ class _Target(typing.Generic[_S, _R]):
     ) -> _stencils.Hole:
         raise NotImplementedError(type(self))
 
-    def _substitute_in_preserve_none_and_add_musttail(self, ll_file: pathlib.Path):
+    def _substitute_in_real_registers_and_continuation(self, opname: str, ll_file: pathlib.Path):
+        """Adds in additional register parameters to the bytecode function, and additional register arguments to.
+        All done in LLVM IR.
+        """
         all = ll_file.read_text()
-        # Replace tail calls with musttail and correct calling convetion.
-        all = all.replace("tail call preserve_allcc", "musttail call preserve_nonecc")
-        all = all.replace("call preserve_allcc", "musttail call preserve_nonecc")
-        # Swap sentinel calling conv with the real one.
-        all = all.replace("preserve_allcc", "preserve_nonecc")
+        # Remove all extern mentions of TOS -- we are making it a local variable.
+        reg_pattern = "@(__TOS\d) =.*"
+        all = re.sub(reg_pattern, "", all)
+        input_cache_count, output_cache_count = self.parse_tos_cache_instr(opname)
+        input_registers = ""
+        # Create new parameters for the bytecode function.
+        for i in range(input_cache_count):
+            input_registers += f", i64 noundef %__TOS{i+1}_ARG"
+        # Substitute those new parameters in.
+        func_definition_pattern = "ptr @_JIT_ENTRY\((.*)\)(.*)"
+        bytecode_func_defs = re.findall(func_definition_pattern, all)
+        assert len(bytecode_func_defs) == 1, all
+        bytecode_func_def_params, bytecode_func_def_attributes = bytecode_func_defs[0]
+        all = re.sub(func_definition_pattern, f"ptr @_JIT_ENTRY({bytecode_func_def_params + input_registers}){bytecode_func_def_attributes}", all)
+        # "Allocate" the TOS registers in LLVM IR.
+        allocate = ""
+        for i in range(max(input_cache_count, output_cache_count)):
+            allocate += f"%__TOS{i+1} = alloca i64, align 8\n"
+        # Assign the TOS registers from the arguments.
+        assign = ""
+        for i in range(input_cache_count):
+            assign += f"store i64 %__TOS{i+1}_ARG, ptr %__TOS{i+1}, align 8\n"
+        all = re.sub("@_JIT_ENTRY(.*)\nentry:", fr"@_JIT_ENTRY\1\nentry:\n{allocate}\n{assign}", all)
+        # assert False, all
+        # Replace loads and stores of the registers with just a direct assignment
+        reg_load_pattern = "ptr @(__TOS\d)"
+        all = re.sub(reg_load_pattern, r"ptr %\1", all)
+        all = re.sub(reg_load_pattern, r"ptr %\1", all)
+        # assert False, all
+        # for load in all_loads:
+        # assert False, all
+        # "Load" from the TOS registers, and pass them to the continuation.
+        # This is just LLVM's infinite-register semantics.
+        load_continuations = ""
+        for output_register in range(output_cache_count):
+            load_continuations += f"%__TOS{output_register + 1}_CONT = load i64, ptr %__TOS{output_register + 1}, align 8"
+        continuation_pattern = "(.*)musttail call preserve_nonecc ptr @_JIT_CONTINUE\((.+)\) (.+)"
+        continuations = re.findall(continuation_pattern, all)
+        # Not continuations. Function returns (DEOPT or _EXIT_TRACE)
+        if len(continuations) == 0:
+            return
+        assert len(continuations) == 1, all
+        val, continuation_args, continuation_attribute = continuations[0]
+        for output_register in range(output_cache_count):
+            continuation_args += f", i64 noundef %__TOS{output_register + 1}_CONT"
+
+        all = re.sub(
+            continuation_pattern,
+            f"{load_continuations}\n{val}musttail call preserve_nonecc ptr @_JIT_CONTINUE({continuation_args}) {continuation_attribute}",
+            all
+        )
+
+        # if opname == "_ITER_NEXT_RANGE___CACHED_0in_1out":
+        #     assert False, all
 
         ll_file.write_text(all)
         # with open("/home/ken/Documents/GitHub/cpython/hi.txt", "w") as sys.stdout:
@@ -131,15 +183,20 @@ class _Target(typing.Generic[_S, _R]):
     ) -> _stencils.StencilGroup:
         o = tempdir / f"{opname}.o"
         ll = tempdir / f"{opname}.ll"
-        common_args = [
+        args = [
             f"--target={self.triple}",
             "-DPy_BUILD_CORE_MODULE",
-            "-D_DEBUG" if self.debug else "-DNDEBUG",
+            "-DNDEBUG",
             f"-D_JIT_OPCODE={opname}",
             "-D_PyJIT_ACTIVE",
             "-D_Py_JIT",
+            "-I.",
+            f"-I{CPYTHON / 'Include'}",
+            f"-I{CPYTHON / 'Include' / 'internal'}",
+            f"-I{CPYTHON / 'Include' / 'internal' / 'mimalloc'}",
+            f"-I{CPYTHON / 'Python'}",
+            f"-I{CPYTHON / 'Tools' / 'jit'}",
             "-O3",
-            "-c",
             # Shorten full absolute file paths in the generated code (like the
             # __FILE__ macro and assert failure messages) for reproducibility:
             f"-ffile-prefix-map={CPYTHON}=.",
@@ -156,17 +213,13 @@ class _Target(typing.Generic[_S, _R]):
             "-fno-plt",
             # Don't call stack-smashing canaries that we can't find or patch:
             "-fno-stack-protector",
+            "-fomit-frame-pointer",
             "-std=c11",
             "-o",
         ]
         ll_args = [
-            "-I.",
-            f"-I{CPYTHON / 'Include'}",
-            f"-I{CPYTHON / 'Include' / 'internal'}",
-            f"-I{CPYTHON / 'Include' / 'internal' / 'mimalloc'}",
-            f"-I{CPYTHON / 'Python'}",
-            f"-I{CPYTHON / 'Tools' / 'jit'}",
-            *common_args,
+            "-fno-discard-value-names",
+            *args,
             f"{ll}",
             f"{c}",
             "-emit-llvm",
@@ -174,15 +227,51 @@ class _Target(typing.Generic[_S, _R]):
             *self.args,
         ]
         o_args = [
-            *common_args,
+            "-Wno-unused-command-line-argument",
+            "-c",
+            *args,
             f"{o}",
             f"{ll}",
             *self.args,
         ]
+        # if opname == "_LOAD_FAST___CACHED_0in_1out":
+        #     assert False, c.read_text()
         await _llvm.run("clang", ll_args, echo=self.verbose)
-        self._substitute_in_preserve_none_and_add_musttail(ll)
+        before = ll.read_text()
+
+        if "___CACHED_" in opname:
+            self._substitute_in_real_registers_and_continuation(opname, ll)
+        # if opname == "_LOAD_FAST___CACHED_0in_1out":
+        #     assert False, ll.read_text()
         await _llvm.run("clang", o_args, echo=self.verbose)
         return await self._parse(o)
+
+    def parse_tos_cache_instr(self, opname: str) -> tuple[int, int]:
+        if "___CACHED_" not in opname:
+            return 0, 0
+        input_caches_str, output_caches_str = opname.split("___CACHED_")[1].split("in_")
+        input_caches_count = int(input_caches_str)
+        output_caches_count = int(output_caches_str[0])
+        return input_caches_count, output_caches_count
+
+    def replace_tos_cache_uses(self, opname: str, template: str, case: str) -> tuple[str, str]:
+        """Due to certain bugs and restrictions in the LLVM backend, we must compile a normal musttail function,
+        then substitute in the arguments we want. Note that the musttail actually affects the layout of the function
+        and hence its validity, hence we cannot simply remove the musttail in template.c and substitute it back in later
+        in LLVM IR.
+        """
+        if "___CACHED_" not in opname:
+            template = template.replace("REGISTER_BANK_DEF", "")
+            return template, case
+
+        input_caches_count, output_caches_count = self.parse_tos_cache_instr(opname)
+        additional_register_definitions = ""
+        for i in range(max(input_caches_count, output_caches_count)):
+            # The extern tells the register not to get optimized away.
+            additional_register_definitions += f'extern _PyStackRef __TOS{i+1};\n'
+
+        template = template.replace("REGISTER_BANK_DEF", additional_register_definitions)
+        return template, case
 
     async def _build_stencils(self) -> dict[str, _stencils.StencilGroup]:
         generated_cases = PYTHON_EXECUTOR_CASES_C_H.read_text()
@@ -197,15 +286,20 @@ class _Target(typing.Generic[_S, _R]):
             async with asyncio.TaskGroup() as group:
                 coro = self._compile("shim", TOOLS_JIT / "shim.c", work)
                 tasks.append(group.create_task(coro, name="shim"))
-                template = TOOLS_JIT_TEMPLATE_C.read_text()
+                old_template = TOOLS_JIT_TEMPLATE_C.read_text()
                 for case, opname in cases_and_opnames:
+                    # if "___CACHED_" in opname and opname != "_ITER_NEXT_RANGE___CACHED_0in_1out":
+                    #     continue
                     # Write out a copy of the template with *only* this case
                     # inserted. This is about twice as fast as #include'ing all
                     # of executor_cases.c.h each time we compile (since the C
                     # compiler wastes a bunch of time parsing the dead code for
                     # all of the other cases):
                     c = work / f"{opname}.c"
+                    template, case = self.replace_tos_cache_uses(opname, old_template, case)
                     c.write_text(template.replace("CASE", case))
+                    # if opname == "_BINARY_OP_ADD_INT___CACHED_2in_1out":
+                    #     assert False, c.read_text()
                     coro = self._compile(opname, c, work)
                     tasks.append(group.create_task(coro, name=opname))
         stencil_groups = {task.get_name(): task.result() for task in tasks}

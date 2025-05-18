@@ -25,6 +25,7 @@
 #include "pycore_template.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_uop_metadata.h"
 
 #include "pycore_jit.h"
 
@@ -563,7 +564,8 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     }
     // Protect against accidental buffer overrun into data:
     group = &stencil_groups[_FATAL_ERROR];
-    group->emit(code, data, executor, NULL, &state);
+    _PyUOpInstruction dummy;
+    group->emit(code, data, executor, &dummy, &state);
     code += group->code_size;
     data += group->data_size;
     assert(code == memory + code_size);

@@ -49,9 +49,9 @@ async def _run(tool: str, args: typing.Iterable[str], echo: bool = False) -> str
             )
         except FileNotFoundError:
             return None
-        out, _ = await process.communicate()
+        out, stderr = await process.communicate()
     if process.returncode:
-        raise RuntimeError(f"{tool} exited with return code {process.returncode}")
+        raise RuntimeError(f"{tool} exited with return code {process.returncode} {stderr}")
     return out.decode()
 
 
