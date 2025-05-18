@@ -82,102 +82,13 @@ do {                                                                     \
 } while (0)
 
 #undef JUMP_TO_JUMP_TARGET
-#define JUMP_TO_JUMP_TARGET() dump_stack(frame, stack_pointer); PATCH_JUMP(_JIT_JUMP_TARGET)
+#define JUMP_TO_JUMP_TARGET() PATCH_JUMP(_JIT_JUMP_TARGET)
 
 #undef JUMP_TO_ERROR
 #define JUMP_TO_ERROR() PATCH_JUMP(_JIT_ERROR_TARGET)
 
 #define TIER_TWO 2
 
-#ifdef Py_DEBUG
-static inline void
-_PyUOpPrint(const _PyUOpInstruction *uop)
-{
-    const char *name = _PyOpcode_uop_name[uop->opcode];
-    if (name == NULL) {
-        printf("<uop %d>", uop->opcode);
-    }
-    else {
-        printf("%s", name);
-    }
-    switch(uop->format) {
-        case UOP_FORMAT_TARGET:
-            printf(" (%d, target=%d, operand0=%#" PRIx64 ", operand1=%#" PRIx64,
-                uop->oparg,
-                uop->target,
-                (uint64_t)uop->operand0,
-                (uint64_t)uop->operand1);
-            break;
-        case UOP_FORMAT_JUMP:
-            printf(" (%d, jump_target=%d, operand0=%#" PRIx64 ", operand1=%#" PRIx64,
-                uop->oparg,
-                uop->jump_target,
-                (uint64_t)uop->operand0,
-                (uint64_t)uop->operand1);
-            break;
-        default:
-            printf(" (%d, Unknown format)", uop->oparg);
-    }
-    if (_PyUop_Flags[uop->opcode] & HAS_ERROR_FLAG) {
-        printf(", error_target=%d", uop->error_target);
-    }
-
-    printf(")");
-}
-
-static inline void
-dump_item(_PyStackRef item)
-{
-    if (PyStackRef_IsNull(item)) {
-        printf("<NULL>");
-        return;
-    }
-    if (PyStackRef_IsTaggedInt(item)) {
-        printf("%" PRId64, (int64_t)PyStackRef_UntagInt(item));
-        return;
-    }
-    PyObject *obj = PyStackRef_AsPyObjectBorrow(item);
-    if (obj == NULL) {
-        printf("<nil>");
-        return;
-    }
-    // Don't call __repr__(), it might recurse into the interpreter.
-    printf("<%s at %p>", Py_TYPE(obj)->tp_name, (void *)obj);
-}
-
-static inline void
-dump_stack(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer)
-{
-    _PyFrame_SetStackPointer(frame, stack_pointer);
-    _PyStackRef *locals_base = _PyFrame_GetLocalsArray(frame);
-    _PyStackRef *stack_base = _PyFrame_Stackbase(frame);
-    PyObject *exc = PyErr_GetRaisedException();
-    printf("    locals=[");
-    for (_PyStackRef *ptr = locals_base; ptr < stack_base; ptr++) {
-        if (ptr != locals_base) {
-            printf(", ");
-        }
-        dump_item(*ptr);
-    }
-    printf("]\n");
-    if (stack_pointer < stack_base) {
-        printf("    stack=%d\n", (int)(stack_pointer-stack_base));
-    }
-    else {
-        printf("    stack=[");
-        for (_PyStackRef *ptr = stack_base; ptr < stack_pointer; ptr++) {
-            if (ptr != stack_base) {
-                printf(", ");
-            }
-            dump_item(*ptr);
-        }
-        printf("]\n");
-    }
-    fflush(stdout);
-    PyErr_SetRaisedException(exc);
-    _PyFrame_GetStackPointer(frame);
-}
-#endif
 
 __attribute__((preserve_none)) _Py_CODEUNIT *
 _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate)
