@@ -3081,12 +3081,19 @@ JIT_DEPS = \
 jit_stencils.h: $(JIT_DEPS)
 	@REGEN_JIT_COMMAND@
 
+jit_ng_stencils.h: $(JIT_DEPS)
+	@REGEN_JIT_NG_COMMAND@
+
 Python/jit.o: $(srcdir)/Python/jit.c @JIT_STENCILS_H@
 	$(CC) -c $(PY_CORE_CFLAGS) -o $@ $<
 
 .PHONY: regen-jit
 regen-jit:
 	@REGEN_JIT_COMMAND@
+
+.PHONY: regen-jit-ng
+regen-jit-ng:
+	@REGEN_JIT_NG_COMMAND@
 
 # Some make's put the object file in the current directory
 .c.o:

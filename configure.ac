@@ -2781,9 +2781,18 @@ AS_VAR_IF([jit_flags],
            AS_VAR_IF([Py_DEBUG],
                      [true],
                      [AS_VAR_APPEND([REGEN_JIT_COMMAND], [" --debug"])],
+                     [])
+           AS_VAR_SET([REGEN_JIT_NG_COMMAND],
+                      ["\$(PYTHON_FOR_REGEN) \$(srcdir)/Tools/jit-ng/build.py ${ARCH_TRIPLES:-$host} --output-dir . --pyconfig-dir ."])
+           AS_VAR_SET([JIT_NG_STENCILS_H], ["jit_ng_stencils.h"])
+           AS_VAR_IF([Py_DEBUG],
+                     [true],
+                     [AS_VAR_APPEND([REGEN_JIT_NG_COMMAND], [" --debug"])],
                      [])])
 AC_SUBST([REGEN_JIT_COMMAND])
+AC_SUBST([REGEN_JIT_NG_COMMAND])
 AC_SUBST([JIT_STENCILS_H])
+AC_SUBST([JIT_NG_STENCILS_H])
 AC_MSG_RESULT([$tier2_flags $jit_flags])
 
 if test "$disable_gil" = "yes" -a "$enable_experimental_jit" != "no"; then
