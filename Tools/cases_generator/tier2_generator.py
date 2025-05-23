@@ -78,14 +78,14 @@ class Tier2Emitter(Emitter):
         storage: Storage,
         inst: Instruction | None,
     ) -> bool:
-        self.out.emit_at("if ", tkn)
+        self.out.emit_at("if (Py_UNLIKELY", tkn)
         lparen = next(tkn_iter)
         self.emit(lparen)
         assert lparen.kind == "LPAREN"
         first_tkn = tkn_iter.peek()
         emit_to(self.out, tkn_iter, "RPAREN")
         next(tkn_iter)  # Semi colon
-        self.emit(") {\n")
+        self.emit(")) {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")
@@ -99,13 +99,13 @@ class Tier2Emitter(Emitter):
         storage: Storage,
         inst: Instruction | None,
     ) -> bool:
-        self.out.emit_at("if ", tkn)
+        self.out.emit_at("if (Py_UNLIKELY", tkn)
         lparen = next(tkn_iter)
         self.emit(lparen)
         first_tkn = tkn_iter.peek()
         emit_to(self.out, tkn_iter, "RPAREN")
         next(tkn_iter)  # Semi colon
-        self.emit(") {\n")
+        self.emit(")) {\n")
         self.emit("UOP_STAT_INC(uopcode, miss);\n")
         self.emit("JUMP_TO_JUMP_TARGET();\n")
         self.emit("}\n")

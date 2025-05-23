@@ -425,3 +425,19 @@ do { \
     _PyObjectArray_Free(NAME - 1, NAME##_temp);
 
 #define CONVERSION_FAILED(NAME) ((NAME) == NULL)
+
+
+#if defined(__GNUC__) || defined(__clang__)
+#define Py_UNLIKELY(x)     (__builtin_expect(!!(x),false))
+#define Py_LIKELY(x)       (__builtin_expect(!!(x),true))
+#elif (defined(__cplusplus) && (__cplusplus >= 202002L)) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#define Py_UNLIKELY(x)     (x) [[unlikely]]
+#define Py_LIKELY(x)       (x) [[likely]]
+#else
+#define Py_UNLIKELY(x)     (x)
+#define Py_LIKELY(x)       (x)
+#endif
+
+#ifndef __has_builtin
+#define __has_builtin(x)  0
+#endif

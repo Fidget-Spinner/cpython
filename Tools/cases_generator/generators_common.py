@@ -194,10 +194,10 @@ class Emitter:
             next(tkn_iter)  # RPAREN
             self.out.start_line()
         else:
-            self.out.emit_at("if ", tkn)
+            self.out.emit_at("if (Py_UNLIKELY", tkn)
             self.emit(lparen)
             emit_to(self.out, tkn_iter, "RPAREN")
-            self.out.emit(") {\n")
+            self.out.emit(")) {\n")
         next(tkn_iter)  # Semi colon
         storage.clear_inputs("at ERROR_IF")
 
