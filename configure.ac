@@ -2783,7 +2783,7 @@ AS_VAR_IF([jit_flags],
                      [AS_VAR_APPEND([REGEN_JIT_COMMAND], [" --debug"])],
                      [])
            AS_VAR_SET([REGEN_JIT_NG_COMMAND],
-                      ["\$(PYTHON_FOR_REGEN) \$(srcdir)/Tools/jit-ng/build.py ${ARCH_TRIPLES:-$host} --output-dir . --pyconfig-dir ."])
+                      ["\$(PYTHON_FOR_REGEN) \$(srcdir)/Tools/jit-ng/build.py --output-dir . --pyconfig-dir ."])
            AS_VAR_SET([JIT_NG_STENCILS_H], ["jit_ng_stencils.h"])
            AS_VAR_IF([Py_DEBUG],
                      [true],

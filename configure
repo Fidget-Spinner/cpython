@@ -10871,7 +10871,7 @@ else case e in #(
 then :
   as_fn_append REGEN_JIT_COMMAND " --debug"
 fi
-           REGEN_JIT_NG_COMMAND="\$(PYTHON_FOR_REGEN) \$(srcdir)/Tools/jit-ng/build.py ${ARCH_TRIPLES:-$host} --output-dir . --pyconfig-dir ."
+           REGEN_JIT_NG_COMMAND="\$(PYTHON_FOR_REGEN) \$(srcdir)/Tools/jit-ng/build.py --output-dir . --pyconfig-dir ."
            JIT_NG_STENCILS_H="jit_ng_stencils.h"
            if test "x$Py_DEBUG" = xtrue
 then :

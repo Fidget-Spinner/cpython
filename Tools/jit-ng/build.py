@@ -11,12 +11,6 @@ if __name__ == "__main__":
     comment = f"$ {shlex.join([pathlib.Path(sys.executable).name] + sys.argv)}"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "target",
-        nargs="+",
-        type=_targets.get_target,
-        help="a PEP 11 target triple to compile for",
-    )
-    parser.add_argument(
         "-d", "--debug", action="store_true", help="compile for a debug build of Python"
     )
     parser.add_argument(
@@ -40,27 +34,8 @@ if __name__ == "__main__":
         "-v", "--verbose", action="store_true", help="echo commands as they are run"
     )
     args = parser.parse_args()
-    for target in args.target:
-        target.debug = args.debug
-        target.force = args.force
-        target.verbose = args.verbose
-        target.pyconfig_dir = args.pyconfig_dir
-        target.build(
-            comment=comment,
-            force=args.force,
-            jit_stencils=args.output_dir / f"jit_stencils-{target.triple}.h",
-        )
-    jit_stencils_h = args.output_dir / "jit_stencils.h"
-    lines = [f"// {comment}\n"]
-    guard = "#if"
-    for target in args.target:
-        lines.append(f"{guard} {target.condition}\n")
-        lines.append(f'#include "jit_stencils-{target.triple}.h"\n')
-        guard = "#elif"
-    lines.append("#else\n")
-    lines.append('#error "unexpected target"\n')
-    lines.append("#endif\n")
-    body = "".join(lines)
-    # Don't touch the file if it hasn't changed (so we don't trigger a rebuild):
-    if not jit_stencils_h.is_file() or jit_stencils_h.read_text() != body:
-        jit_stencils_h.write_text(body)
+    _targets.Target(debug=args.debug, pyconfig_dir=args.pyconfig_dir).build(
+        comment=comment,
+        force=args.force,
+        jit_stencils=args.output_dir / f"jit_ng_stencils.h",
+    )
