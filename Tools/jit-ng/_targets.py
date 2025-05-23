@@ -14,7 +14,6 @@ import typing
 import _llvm
 import _stencils
 import _writer
-import _ir
 
 if sys.version_info < (3, 11):
     raise RuntimeError("Building the JIT compiler requires Python 3.11 or newer!")
@@ -39,15 +38,14 @@ class Target:
     verbose: bool = False
 
 
-    async def _transform(self, path: pathlib.Path) -> None:
-        llvm_ir = path.read_text()
-        # First, replace all tail calls with
+    async def _parse(self, path: pathlib.Path) -> _stencils.Stencil:
+        pass
 
 
     async def _compile(
         self, opname: str, c: pathlib.Path, tempdir: pathlib.Path
     ) -> _stencils.Stencil:
-        ll = tempdir / f"{opname}.ll"
+        o = tempdir / f"{opname}.o"
         args = [
             "-DPy_BUILD_CORE_MODULE",
             "-D_DEBUG" if self.debug else "-DNDEBUG",
@@ -60,7 +58,7 @@ class Target:
             f"-I{CPYTHON / 'Include' / 'internal' / 'mimalloc'}",
             f"-I{CPYTHON / 'Python'}",
             f"-I{CPYTHON / 'Tools' / 'jit'}",
-            "-O3",
+            "-O2",
             "-fno-vectorize",
             "-fno-slp-vectorize",
             "-c",
@@ -81,20 +79,11 @@ class Target:
             # Don't call stack-smashing canaries that we can't find or patch:
             "-fno-stack-protector",
             "-std=c11",
-            "-S",
-            "-emit-llvm",
             "-o",
-            f"{ll}",
+            f"{o}",
             f"{c}",
         ]
         await _llvm.run("clang", args, echo=self.verbose)
-        # assert False, ll.read_text()
-        ir_args = [
-            "--llvm-asm",
-            f"{ll}",
-            "--save",
-        ]
-        await _ir.run(ir_args)
         return await self._parse(o)
 
     async def _build_stencils(self) -> dict[str, _stencils.Stencil]:
@@ -108,12 +97,10 @@ class Target:
         with tempfile.TemporaryDirectory() as tempdir:
             work = pathlib.Path(tempdir).resolve()
             async with asyncio.TaskGroup() as group:
-                # coro = self._compile("shim", TOOLS_JIT / "shim.c", work)
-                # tasks.append(group.create_task(coro, name="shim"))
+                coro = self._compile("shim", TOOLS_JIT / "shim.c", work)
+                tasks.append(group.create_task(coro, name="shim"))
                 template = TOOLS_JIT_TEMPLATE_C.read_text()
                 for case, opname in cases_and_opnames:
-                    if opname != "_BINARY_OP_ADD_INT":
-                        continue
                     # Write out a copy of the template with *only* this case
                     # inserted. This is about twice as fast as #include'ing all
                     # of executor_cases.c.h each time we compile (since the C
