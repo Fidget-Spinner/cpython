@@ -14,6 +14,7 @@ import typing
 import _llvm
 import _stencils
 import _writer
+import _ir
 
 if sys.version_info < (3, 11):
     raise RuntimeError("Building the JIT compiler requires Python 3.11 or newer!")
@@ -45,7 +46,8 @@ class Target:
     async def _compile(
         self, opname: str, c: pathlib.Path, tempdir: pathlib.Path
     ) -> _stencils.Stencil:
-        o = tempdir / f"{opname}.o"
+        ll = tempdir / f"{opname}.ll"
+        ir = tempdir / f"{opname}.ir"
         args = [
             "-DPy_BUILD_CORE_MODULE",
             "-D_DEBUG" if self.debug else "-DNDEBUG",
@@ -79,12 +81,24 @@ class Target:
             # Don't call stack-smashing canaries that we can't find or patch:
             "-fno-stack-protector",
             "-std=c11",
+            "-emit-llvm",
+            "-S",
             "-o",
-            f"{o}",
+            f"{ll}",
             f"{c}",
         ]
         await _llvm.run("clang", args, echo=self.verbose)
-        return await self._parse(o)
+        ir_args = [
+            "-fno-inline",
+            "--llvm-asm",
+            f"{ll}",
+            "--save",
+            f"{ir}"
+        ]
+        # assert False, c.read_text()
+        await _ir.run(ir_args)
+        assert False, ir.read_text()
+        # return await self._parse(o)
 
     async def _build_stencils(self) -> dict[str, _stencils.Stencil]:
         generated_cases = PYTHON_EXECUTOR_CASES_C_H.read_text()
@@ -97,10 +111,12 @@ class Target:
         with tempfile.TemporaryDirectory() as tempdir:
             work = pathlib.Path(tempdir).resolve()
             async with asyncio.TaskGroup() as group:
-                coro = self._compile("shim", TOOLS_JIT / "shim.c", work)
-                tasks.append(group.create_task(coro, name="shim"))
+                # coro = self._compile("shim", TOOLS_JIT / "shim.c", work)
+                # tasks.append(group.create_task(coro, name="shim"))
                 template = TOOLS_JIT_TEMPLATE_C.read_text()
                 for case, opname in cases_and_opnames:
+                    if opname != "_BINARY_OP_ADD_INT":
+                        continue
                     # Write out a copy of the template with *only* this case
                     # inserted. This is about twice as fast as #include'ing all
                     # of executor_cases.c.h each time we compile (since the C
