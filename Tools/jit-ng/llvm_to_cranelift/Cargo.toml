@@ -1,0 +1,10 @@
+[package]
+name = "llvm_to_cranelift"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+llvm-sys = "201.0.0-rc1"
+
+[env]
+LLVM_SYS_191_PREFIX="/usr/lib/llvm-19/"

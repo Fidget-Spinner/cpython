@@ -80,6 +80,12 @@ do {                                                                     \
     return jump(frame, stack_pointer, tstate); \
 } while (0)
 
+#define PATCH_CONTINUATION(ALIAS)                                                \
+do {                                                                     \
+    PATCH_VALUE(jit_func, jump, ALIAS);                    \
+    __attribute__((musttail)) return jump(frame, stack_pointer, tstate); \
+} while (0)
+
 #undef JUMP_TO_JUMP_TARGET
 #define JUMP_TO_JUMP_TARGET() PATCH_JUMP(_JIT_JUMP_TARGET)
 
@@ -119,5 +125,5 @@ _JIT_ENTRY(_PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState
         default:
             Py_UNREACHABLE();
     }
-    PATCH_JUMP(_JIT_CONTINUE);
+    PATCH_CONTINUATION(_JIT_CONTINUE);
 }

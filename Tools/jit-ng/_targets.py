@@ -39,9 +39,17 @@ class Target:
     verbose: bool = False
 
 
-    async def _parse(self, path: pathlib.Path) -> _stencils.Stencil:
-        pass
+    def transform_ir_file(self, opname, ir: pathlib.Path) -> None:
+        text = ir.read_text()
+        # Rename all identifiers to prefix with opname to make them globally unique.
 
+        # Rewrite the continuation to a fall-through.
+        jit_continues = re.findall("\w+ (.+) = sym\(_JIT_CONTINUE\)", text)
+        assert len(jit_continues) == 1
+        jit_continue_var = jit_continues[0]
+        # assert False, jit_continue_var
+        continuation_pattern = f"CALL/3(.*, {jit_continue_var}, .*, .*, .*);"
+        re.findall(continuation_pattern, )
 
     async def _compile(
         self, opname: str, c: pathlib.Path, tempdir: pathlib.Path
@@ -95,10 +103,11 @@ class Target:
             "--save",
             f"{ir}"
         ]
-        # assert False, c.read_text()
+        assert False, ll.read_text()
         await _ir.run(ir_args)
-        assert False, ir.read_text()
-        # return await self._parse(o)
+        # assert False, ir.read_text()
+        self.transform_ir_file(opname, ir)
+        return await self._parse(o)
 
     async def _build_stencils(self) -> dict[str, _stencils.Stencil]:
         generated_cases = PYTHON_EXECUTOR_CASES_C_H.read_text()
@@ -115,7 +124,7 @@ class Target:
                 # tasks.append(group.create_task(coro, name="shim"))
                 template = TOOLS_JIT_TEMPLATE_C.read_text()
                 for case, opname in cases_and_opnames:
-                    if opname != "_BINARY_OP_ADD_INT":
+                    if opname != "_BINARY_OP_SUBSCR_LIST_INT":
                         continue
                     # Write out a copy of the template with *only* this case
                     # inserted. This is about twice as fast as #include'ing all
