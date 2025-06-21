@@ -130,6 +130,12 @@
         }
 
         case _POP_TOP_INT: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (PyJitRef_IsBorrowed(value) ||
+                sym_is_immortal(PyJitRef_Unwrap(value))) {
+                REPLACE_OP(this_instr, _POP_TOP_NOP, 0, 0);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -386,28 +392,58 @@
         }
 
         case _BINARY_OP_MULTIPLY_INT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             res = sym_new_compact_int(ctx);
+            l = left;
+            r = right;
             stack_pointer[-2] = res;
-            stack_pointer += -1;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _BINARY_OP_ADD_INT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             res = sym_new_compact_int(ctx);
+            l = left;
+            r = right;
             stack_pointer[-2] = res;
-            stack_pointer += -1;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _BINARY_OP_SUBTRACT_INT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
             res = sym_new_compact_int(ctx);
+            l = left;
+            r = right;
             stack_pointer[-2] = res;
-            stack_pointer += -1;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }

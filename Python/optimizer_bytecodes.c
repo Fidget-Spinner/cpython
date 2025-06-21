@@ -235,16 +235,22 @@ dummy_func(void) {
         }
     }
 
-    op(_BINARY_OP_ADD_INT, (left, right -- res)) {
+    op(_BINARY_OP_ADD_INT, (left, right -- res, l , r)) {
         res = sym_new_compact_int(ctx);
+        l = left;
+        r = right;
     }
 
-    op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
+    op(_BINARY_OP_SUBTRACT_INT, (left, right -- res, l, r)) {
         res = sym_new_compact_int(ctx);
+        l = left;
+        r = right;
     }
 
-    op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
+    op(_BINARY_OP_MULTIPLY_INT, (left, right -- res, l, r)) {
         res = sym_new_compact_int(ctx);
+        l = left;
+        r = right;
     }
 
     op(_BINARY_OP_ADD_FLOAT, (left, right -- res)) {
@@ -577,6 +583,13 @@ dummy_func(void) {
         }
         else if (typ == &PyUnicode_Type) {
             REPLACE_OP(this_instr, _POP_TOP_UNICODE, 0, 0);
+        }
+    }
+
+    op(_POP_TOP_INT, (value -- )) {
+        if (PyJitRef_IsBorrowed(value) ||
+            sym_is_immortal(PyJitRef_Unwrap(value))) {
+            REPLACE_OP(this_instr, _POP_TOP_NOP, 0, 0);
         }
     }
 
