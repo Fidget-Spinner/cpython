@@ -726,9 +726,7 @@
                 }
                 Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
                 #ifdef Py_GIL_DISABLED
-                _PyFrame_SetStackPointer(frame, stack_pointer);
                 PyObject *res_o = _PyList_GetItemRef((PyListObject*)list, index);
-                stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (res_o == NULL) {
                     UPDATE_MISS_STATS(BINARY_OP);
                     assert(_PyOpcode_Deopt[opcode] == (BINARY_OP));

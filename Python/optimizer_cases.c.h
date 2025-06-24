@@ -652,6 +652,22 @@
         }
 
         case _BINARY_OP_SUBSCR_LIST_INT: {
+            JitOptRef sub_st;
+            JitOptRef list_st;
+            JitOptRef res;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            if (PyJitRef_IsBorrowed(list_st) && PyJitRef_IsBorrowed(sub_st)) {
+                REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT__NO_DECREF_INPUTS, oparg, 0);
+            }
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBSCR_LIST_INT__NO_DECREF_INPUTS: {
             JitOptRef res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
@@ -794,6 +810,19 @@
         }
 
         case _STORE_SUBSCR_LIST_INT: {
+            JitOptRef sub_st;
+            JitOptRef list_st;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            if (PyJitRef_IsBorrowed(list_st) && PyJitRef_IsBorrowed(sub_st)) {
+                REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT__NO_DECREF_INPUTS, oparg, 0);
+            }
+            stack_pointer += -3;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _STORE_SUBSCR_LIST_INT__NO_DECREF_INPUTS: {
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
