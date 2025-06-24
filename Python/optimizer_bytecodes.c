@@ -270,6 +270,19 @@ dummy_func(void) {
         }
     }
 
+    op(_STORE_SUBSCR_LIST_INT, (value, list_st, sub_st -- )) {
+        if (PyJitRef_IsBorrowed(list_st) && PyJitRef_IsBorrowed(sub_st)) {
+            REPLACE_OP(this_instr, _STORE_SUBSCR_LIST_INT__NO_DECREF_INPUTS, oparg, 0);
+        }
+    }
+
+    op(_BINARY_OP_SUBSCR_LIST_INT, (list_st, sub_st -- res)) {
+        if (PyJitRef_IsBorrowed(list_st) && PyJitRef_IsBorrowed(sub_st)) {
+            REPLACE_OP(this_instr, _BINARY_OP_SUBSCR_LIST_INT__NO_DECREF_INPUTS, oparg, 0);
+        }
+        res = sym_new_not_null(ctx);
+    }
+
     op(_BINARY_OP_SUBTRACT_FLOAT, (left, right -- res)) {
         if (sym_is_const(ctx, left) && sym_is_const(ctx, right)) {
             assert(PyFloat_CheckExact(sym_get_const(ctx, left)));

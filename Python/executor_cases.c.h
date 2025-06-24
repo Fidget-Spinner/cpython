@@ -3335,28 +3335,36 @@
             break;
         }
 
-        case _BINARY_OP_SUBSCR_LIST_INT_r01: {
-            CHECK_CURRENT_CACHED_VALUES(0);
+        case _BINARY_OP_SUBSCR_LIST_INT_r21: {
+            CHECK_CURRENT_CACHED_VALUES(2);
             _PyStackRef sub_st;
             _PyStackRef list_st;
             _PyStackRef res;
-            sub_st = stack_pointer[-1];
-            list_st = stack_pointer[-2];
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            sub_st = _stack_item_1;
+            list_st = _stack_item_0;
             PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
             PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
             assert(PyLong_CheckExact(sub));
             assert(PyList_CheckExact(list));
             if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+                stack_pointer[0] = list_st;
+                stack_pointer[1] = sub_st;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
                 UOP_STAT_INC(uopcode, miss);
                 SET_CURRENT_CACHED_VALUES(0);
                 JUMP_TO_JUMP_TARGET();
             }
             Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
             #ifdef Py_GIL_DISABLED
-            _PyFrame_SetStackPointer(frame, stack_pointer);
             PyObject *res_o = _PyList_GetItemRef((PyListObject*)list, index);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
             if (res_o == NULL) {
+                stack_pointer[0] = list_st;
+                stack_pointer[1] = sub_st;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
                 UOP_STAT_INC(uopcode, miss);
                 SET_CURRENT_CACHED_VALUES(0);
                 JUMP_TO_JUMP_TARGET();
@@ -3365,6 +3373,10 @@
             res = PyStackRef_FromPyObjectSteal(res_o);
             #else
             if (index >= PyList_GET_SIZE(list)) {
+                stack_pointer[0] = list_st;
+                stack_pointer[1] = sub_st;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
                 UOP_STAT_INC(uopcode, miss);
                 SET_CURRENT_CACHED_VALUES(0);
                 JUMP_TO_JUMP_TARGET();
@@ -3375,6 +3387,10 @@
             res = PyStackRef_FromPyObjectNew(res_o);
             #endif
             STAT_INC(BINARY_OP, hit);
+            stack_pointer[0] = list_st;
+            stack_pointer[1] = sub_st;
+            stack_pointer += 2;
+            assert(WITHIN_STACK_BOUNDS());
             _PyFrame_SetStackPointer(frame, stack_pointer);
             _PyStackRef tmp = list_st;
             list_st = res;
@@ -3390,6 +3406,63 @@
             _tos_cache0 = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            SET_CURRENT_CACHED_VALUES(1);
+            break;
+        }
+
+        case _BINARY_OP_SUBSCR_LIST_INT__NO_DECREF_INPUTS_r21: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            _PyStackRef sub_st;
+            _PyStackRef list_st;
+            _PyStackRef res;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            sub_st = _stack_item_1;
+            list_st = _stack_item_0;
+            PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
+            PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
+            assert(PyLong_CheckExact(sub));
+            assert(PyList_CheckExact(list));
+            if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+                stack_pointer[0] = list_st;
+                stack_pointer[1] = sub_st;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
+            #ifdef Py_GIL_DISABLED
+            PyObject *res_o = _PyList_GetItemRef((PyListObject*)list, index);
+            if (res_o == NULL) {
+                stack_pointer[0] = list_st;
+                stack_pointer[1] = sub_st;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(BINARY_OP, hit);
+            res = PyStackRef_FromPyObjectSteal(res_o);
+            #else
+            if (index >= PyList_GET_SIZE(list)) {
+                stack_pointer[0] = list_st;
+                stack_pointer[1] = sub_st;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            STAT_INC(BINARY_OP, hit);
+            PyObject *res_o = PyList_GET_ITEM(list, index);
+            assert(res_o != NULL);
+            res = PyStackRef_FromPyObjectNew(res_o);
+            #endif
+            STAT_INC(BINARY_OP, hit);
+            _tos_cache0 = res;
             SET_CURRENT_CACHED_VALUES(1);
             break;
         }
@@ -4065,6 +4138,68 @@
             PyStackRef_CLOSE_SPECIALIZED(sub_st, _PyLong_ExactDealloc);
             _PyFrame_SetStackPointer(frame, stack_pointer);
             PyStackRef_CLOSE(list_st);
+            Py_DECREF(old_value);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            SET_CURRENT_CACHED_VALUES(0);
+            break;
+        }
+
+        case _STORE_SUBSCR_LIST_INT__NO_DECREF_INPUTS_r30: {
+            CHECK_CURRENT_CACHED_VALUES(3);
+            _PyStackRef sub_st;
+            _PyStackRef list_st;
+            _PyStackRef value;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            _PyStackRef _stack_item_2 = _tos_cache2;
+            sub_st = _stack_item_2;
+            list_st = _stack_item_1;
+            value = _stack_item_0;
+            PyObject *sub = PyStackRef_AsPyObjectBorrow(sub_st);
+            PyObject *list = PyStackRef_AsPyObjectBorrow(list_st);
+            assert(PyLong_CheckExact(sub));
+            assert(PyList_CheckExact(list));
+            if (!_PyLong_IsNonNegativeCompact((PyLongObject *)sub)) {
+                stack_pointer[0] = value;
+                stack_pointer[1] = list_st;
+                stack_pointer[2] = sub_st;
+                stack_pointer += 3;
+                assert(WITHIN_STACK_BOUNDS());
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            Py_ssize_t index = ((PyLongObject*)sub)->long_value.ob_digit[0];
+            if (!LOCK_OBJECT(list)) {
+                stack_pointer[0] = value;
+                stack_pointer[1] = list_st;
+                stack_pointer[2] = sub_st;
+                stack_pointer += 3;
+                assert(WITHIN_STACK_BOUNDS());
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            if (index >= PyList_GET_SIZE(list)) {
+                UNLOCK_OBJECT(list);
+                if (true) {
+                    stack_pointer[0] = value;
+                    stack_pointer[1] = list_st;
+                    stack_pointer[2] = sub_st;
+                    stack_pointer += 3;
+                    assert(WITHIN_STACK_BOUNDS());
+                    UOP_STAT_INC(uopcode, miss);
+                    SET_CURRENT_CACHED_VALUES(0);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            STAT_INC(STORE_SUBSCR, hit);
+            PyObject *old_value = PyList_GET_ITEM(list, index);
+            FT_ATOMIC_STORE_PTR_RELEASE(_PyList_ITEMS(list)[index],
+                                        PyStackRef_AsPyObjectSteal(value));
+            assert(old_value != NULL);
+            UNLOCK_OBJECT(list);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
             Py_DECREF(old_value);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             SET_CURRENT_CACHED_VALUES(0);
