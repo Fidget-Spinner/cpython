@@ -12276,7 +12276,7 @@ _PySuper_Lookup(PyTypeObject *su_type, PyObject *su_obj, PyObject *name, int *me
 Py_NO_INLINE_MSVC_TAILCALL _PyCevalIntAndPyObject
 _PyCeval_Super_Lookup(PyTypeObject *su_type, PyObject *su_obj, PyObject *name)
 {
-    int method;
+    int method = 0;
     PyTypeObject *su_obj_type = supercheck(su_type, su_obj);
     if (su_obj_type == NULL) {
         return (_PyCevalIntAndPyObject){ 0, NULL};
