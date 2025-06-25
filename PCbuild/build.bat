@@ -36,7 +36,6 @@ echo.                 overrides -c and -d
 echo.  --disable-gil  Enable support for running without the GIL.
 echo.  --test-marker  Enable the test marker within the build.
 echo.  --regen        Regenerate all opcodes, grammar and tokens.
-echo.  --tail-call-interp          Enable the tail-calling interpreter.
 echo.  --experimental-jit          Enable the experimental just-in-time compiler.
 echo.  --experimental-jit-off      Ditto but off by default (PYTHON_JIT=1 enables).
 echo.  --experimental-jit-interpreter  Enable the experimental Tier 2 interpreter.

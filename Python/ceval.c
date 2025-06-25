@@ -972,7 +972,7 @@ _PyObjectArray_Free(PyObject **array, PyObject **scratch)
 #if (defined(_MSC_VER) && \
      (_MSC_VER < 1943) && \
      defined(_Py_USING_PGO))
-// #define DO_NOT_OPTIMIZE_INTERP_LOOP
+#define DO_NOT_OPTIMIZE_INTERP_LOOP
 #endif
 
 #ifdef DO_NOT_OPTIMIZE_INTERP_LOOP
