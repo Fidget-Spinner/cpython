@@ -2234,13 +2234,14 @@ dummy_func(
             }
             // we make no attempt to optimize here; specializations should
             // handle any case whose performance we care about
-            PyObject *super;
-            if (oparg & 2) {
-                super = PyObject_CallFunctionObjArgs(global_super, class, self, NULL);
-            }
-            else {
-                super = PyObject_CallNoArgs(global_super);
-            }
+            #if Py_TAIL_CALL_INTERP
+            PYOBJECT_SCRATCH[0] = class;
+            PYOBJECT_SCRATCH[1] = self;
+            PyObject **stack = PYOBJECT_SCRATCH;
+            #else
+            PyObject *stack[] = {class, self};
+            #endif
+            PyObject *super = PyObject_Vectorcall(global_super, stack, oparg & 2, NULL);
             if (opcode == INSTRUMENTED_LOAD_SUPER_ATTR) {
                 PyObject *arg = oparg & 2 ? class : &_PyInstrumentation_MISSING;
                 if (super == NULL) {
@@ -3534,14 +3535,19 @@ dummy_func(
             }
             assert(PyStackRef_IsTaggedInt(lasti));
             (void)lasti; // Shut up compiler warning if asserts are off
-            PyObject *res_o;
-            if (PyStackRef_IsNull(exit_self)) {
-                res_o = PyObject_CallFunctionObjArgs(exit_func_o, exc, val_o, tb, NULL);
-            }
-            else {
-                PyObject *exit_self_o = PyStackRef_AsPyObjectBorrow(exit_self);
-                res_o = PyObject_CallFunctionObjArgs(exit_func_o, exit_self_o, exc, val_o, tb, NULL);
-            }
+            #if Py_TAIL_CALL_INTERP
+            PYOBJECT_SCRATCH[0] = NULL;
+            PYOBJECT_SCRATCH[1] = PyStackRef_AsPyObjectBorrow(exit_self);
+            PYOBJECT_SCRATCH[2] = exc;
+            PYOBJECT_SCRATCH[3] = val_o;
+            PYOBJECT_SCRATCH[4] = tb;
+            PyObject **stack = PYOBJECT_SCRATCH; 
+            #else
+            PyObject *stack[5] = {NULL, PyStackRef_AsPyObjectBorrow(exit_self), exc, val_o, tb};
+            #endif
+            int has_self = !PyStackRef_IsNull(exit_self);
+            PyObject *res_o = PyObject_Vectorcall(exit_func_o, stack + 2 - has_self,
+                    (3 + has_self) | PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
             Py_XDECREF(original_tb);
             ERROR_IF(res_o == NULL);
             res = PyStackRef_FromPyObjectSteal(res_o);

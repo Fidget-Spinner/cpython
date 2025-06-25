@@ -1025,7 +1025,8 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     int oparg;         /* Current opcode argument, if any */
     assert(tstate->current_frame == NULL || tstate->current_frame->stackpointer != NULL);
 #else
-    PyObject *PYOBJECT_SCRATCH[MAX_STACKREF_SCRATCH + 1];
+    PyObject *temp_scratch[MAX_STACKREF_SCRATCH + 2];
+    PyObject **PYOBJECT_SCRATCH = temp_scratch + 1;
 #endif
     _PyEntryFrame entry;
 
