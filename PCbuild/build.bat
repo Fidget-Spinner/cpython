@@ -92,7 +92,6 @@ if "%~1"=="--disable-gil" (set UseDisableGil=true) & shift & goto CheckOpts
 if "%~1"=="--test-marker" (set UseTestMarker=true) & shift & goto CheckOpts
 if "%~1"=="-V" shift & goto Version
 if "%~1"=="--regen" (set Regen=true) & shift & goto CheckOpts
-if "%~1"=="--tail-call-interp" (set UseTailCalls=true) & shift & goto CheckOpts
 if "%~1"=="--experimental-jit" (set UseJIT=true) & (set UseTIER2=1) & shift & goto CheckOpts
 if "%~1"=="--experimental-jit-off" (set UseJIT=true) & (set UseTIER2=3) & shift & goto CheckOpts
 if "%~1"=="--experimental-jit-interpreter" (set UseTIER2=4) & shift & goto CheckOpts
@@ -199,7 +198,6 @@ echo on
  /p:IncludeSSL=%IncludeSSL% /p:IncludeTkinter=%IncludeTkinter%^
  /p:DisableGil=%UseDisableGil%^
  /p:UseTestMarker=%UseTestMarker% %GITProperty%^
- /p:UseTailCalls=%UseTailCalls%^
  /p:UseJIT=%UseJIT%^
  /p:UseTIER2=%UseTIER2%^
  /p:PyStats=%PyStats%^
