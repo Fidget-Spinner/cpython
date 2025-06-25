@@ -1024,6 +1024,8 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     uint8_t opcode;    /* Current opcode */
     int oparg;         /* Current opcode argument, if any */
     assert(tstate->current_frame == NULL || tstate->current_frame->stackpointer != NULL);
+#else
+    PyObject *PYOBJECT_SCRATCH[MAX_STACKREF_SCRATCH + 1];
 #endif
     _PyEntryFrame entry;
 
@@ -1094,9 +1096,9 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
         stack_pointer = _PyFrame_GetStackPointer(frame);
 #if Py_TAIL_CALL_INTERP
 #   if Py_STATS
-        return _TAIL_CALL_error(frame, stack_pointer, tstate, next_instr, 0, lastopcode);
+        return _TAIL_CALL_error(frame, stack_pointer, tstate, next_instr, 0, lastopcode MSVC_TAILCALL_SCRATCH_ARG);
 #   else
-        return _TAIL_CALL_error(frame, stack_pointer, tstate, next_instr, 0);
+        return _TAIL_CALL_error(frame, stack_pointer, tstate, next_instr, 0 MSVC_TAILCALL_SCRATCH_ARG);
 #   endif
 #else
         goto error;
@@ -1110,9 +1112,9 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 #endif
 #if Py_TAIL_CALL_INTERP
 #   if Py_STATS
-        return _TAIL_CALL_start_frame(frame, NULL, tstate, NULL, 0, lastopcode);
+        return _TAIL_CALL_start_frame(frame, NULL, tstate, NULL, 0, lastopcode MSVC_TAILCALL_SCRATCH_ARG);
 #   else
-        return _TAIL_CALL_start_frame(frame, NULL, tstate, NULL, 0);
+        return _TAIL_CALL_start_frame(frame, NULL, tstate, NULL, 0 MSVC_TAILCALL_SCRATCH_ARG);
 #   endif
 #else
     goto start_frame;

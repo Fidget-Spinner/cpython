@@ -12281,7 +12281,7 @@ _PyCeval_Super_Lookup(PyTypeObject *su_type, PyObject *su_obj, PyObject *name)
     if (su_obj_type == NULL) {
         return (_PyCevalIntAndPyObject){ 0, NULL};
     }
-    PyObject *res = do_super_lookup(NULL, su_type, su_obj, su_obj_type, name, method);
+    PyObject *res = do_super_lookup(NULL, su_type, su_obj, su_obj_type, name, &method);
     Py_DECREF(su_obj_type);
     return (_PyCevalIntAndPyObject) { method, res };
 }

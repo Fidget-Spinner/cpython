@@ -71,12 +71,13 @@
 #endif
 
 #ifdef Py_STATS
-#   define TAIL_CALL_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _Py_CODEUNIT *next_instr, int oparg, int lastopcode
-#   define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr, oparg, lastopcode
+#   define TAIL_CALL_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _Py_CODEUNIT *next_instr, int oparg, PyObject **PYOBJECT_SCRATCH, int lastopcode
+#   define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr, oparg, PYOBJECT_SCRATCH, lastopcode
 #else
-#   define TAIL_CALL_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _Py_CODEUNIT *next_instr, int oparg
-#   define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr, oparg
+#   define TAIL_CALL_PARAMS _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, _Py_CODEUNIT *next_instr, int oparg, PyObject **PYOBJECT_SCRATCH
+#   define TAIL_CALL_ARGS frame, stack_pointer, tstate, next_instr, oparg, PYOBJECT_SCRATCH
 #endif
+
 
 #if Py_TAIL_CALL_INTERP
 #   ifdef _MSC_VER
@@ -102,27 +103,30 @@
 #   ifdef Py_STATS
 #       define JUMP_TO_PREDICTED(name) \
             do { \
-                Py_MUSTTAIL return (_TAIL_CALL_##name)(frame, stack_pointer, tstate, this_instr, oparg, lastopcode); \
+                Py_MUSTTAIL return (_TAIL_CALL_##name)(frame, stack_pointer, tstate, this_instr, oparg, lastopcode, PYOBJECT_SCRATCH); \
             } while (0)
 #   else
 #       define JUMP_TO_PREDICTED(name) \
             do { \
-                Py_MUSTTAIL return (_TAIL_CALL_##name)(frame, stack_pointer, tstate, this_instr, oparg); \
+                Py_MUSTTAIL return (_TAIL_CALL_##name)(frame, stack_pointer, tstate, this_instr, oparg, PYOBJECT_SCRATCH); \
             } while (0)
 #   endif
 #    define LABEL(name) TARGET(name)
+#  define MSVC_TAILCALL_SCRATCH_ARG ,PYOBJECT_SCRATCH
 #elif USE_COMPUTED_GOTOS
 #  define TARGET(op) TARGET_##op:
 #  define DISPATCH_GOTO() goto *opcode_targets[opcode]
 #  define JUMP_TO_LABEL(name) goto name;
 #  define JUMP_TO_PREDICTED(name) goto PREDICTED_##name;
 #  define LABEL(name) name:
+#  define MSVC_TAILCALL_SCRATCH_ARG
 #else
 #  define TARGET(op) case op: TARGET_##op:
 #  define DISPATCH_GOTO() goto dispatch_opcode
 #  define JUMP_TO_LABEL(name) goto name;
 #  define JUMP_TO_PREDICTED(name) goto PREDICTED_##name;
 #  define LABEL(name) name:
+#  define MSVC_TAILCALL_SCRATCH_ARG
 #endif
 
 /* PRE_DISPATCH_GOTO() does lltrace if enabled. Normally a no-op */
@@ -421,10 +425,16 @@ do { \
 /* How much scratch space to give stackref to PyObject* conversion. */
 #define MAX_STACKREF_SCRATCH 10
 
+#if Py_TAIL_CALL_INTERP
 #define STACKREFS_TO_PYOBJECTS(ARGS, ARG_COUNT, NAME) \
     /* +1 because vectorcall might use -1 to write self */ \
-    PyObject *NAME##_temp[MAX_STACKREF_SCRATCH+1]; \
+    PyObject **NAME##_temp = PYOBJECT_SCRATCH; \
     PyObject **NAME = _PyObjectArray_FromStackRefArray(ARGS, ARG_COUNT, NAME##_temp + 1);
+#else
+#define STACKREFS_TO_PYOBJECTS(ARGS, ARG_COUNT, NAME) \
+    PyObject *NAME##_temp[MAX_STACKREF_SCRATCH + 1]; \
+    PyObject **NAME = _PyObjectArray_FromStackRefArray(ARGS, ARG_COUNT, NAME##_temp + 1);
+#endif
 
 #define STACKREFS_TO_PYOBJECTS_CLEANUP(NAME) \
     /* +1 because we +1 previously */ \
