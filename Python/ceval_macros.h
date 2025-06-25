@@ -90,7 +90,7 @@
 
     typedef PyObject* (Py_PRESERVE_NONE_CC *py_tail_call_funcptr)(TAIL_CALL_PARAMS);
 
-#   define TARGET(op) PyObject *Py_PRESERVE_NONE_CC _TAIL_CALL_##op(TAIL_CALL_PARAMS)
+#   define TARGET(op) Py_NO_INLINE_MSVC_TAILCALL PyObject *Py_PRESERVE_NONE_CC _TAIL_CALL_##op(TAIL_CALL_PARAMS)
 #   define DISPATCH_GOTO() \
         do { \
             Py_MUSTTAIL return (INSTRUCTION_TABLE[opcode])(TAIL_CALL_ARGS); \

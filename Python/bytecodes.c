@@ -1530,7 +1530,9 @@ dummy_func(
 
         inst(LOAD_BUILD_CLASS, ( -- bc)) {
             PyObject *bc_o;
-            int err = PyMapping_GetOptionalItem(BUILTINS(), &_Py_ID(__build_class__), &bc_o);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(BUILTINS(), &_Py_ID(__build_class__));
+            int err = pair.num;
+            bc_o = pair.obj;
             ERROR_IF(err < 0);
             if (bc_o == NULL) {
                 _PyErr_SetString(tstate, PyExc_NameError,
@@ -1734,7 +1736,10 @@ dummy_func(
         inst(LOAD_FROM_DICT_OR_GLOBALS, (mod_or_class_dict -- v)) {
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg);
             PyObject *v_o;
-            int err = PyMapping_GetOptionalItem(PyStackRef_AsPyObjectBorrow(mod_or_class_dict), name, &v_o);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(
+                PyStackRef_AsPyObjectBorrow(mod_or_class_dict), name);
+            int err = pair.num;
+            v_o = pair.obj;
             PyStackRef_CLOSE(mod_or_class_dict);
             ERROR_IF(err < 0);
             if (v_o == NULL) {
@@ -1757,11 +1762,15 @@ dummy_func(
                 else {
                     /* Slow-path if globals or builtins is not a dict */
                     /* namespace 1: globals */
-                    int err = PyMapping_GetOptionalItem(GLOBALS(), name, &v_o);
+                    _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(GLOBALS(), name);
+                    int err = pair.num;
+                    v_o = pair.obj;
                     ERROR_IF(err < 0);
                     if (v_o == NULL) {
                         /* namespace 2: builtins */
-                        int err = PyMapping_GetOptionalItem(BUILTINS(), name, &v_o);
+                        pair = _PyCeval_Mapping_GetOptionalItem(BUILTINS(), name);
+                        err = pair.num;
+                        v_o = pair.obj;
                         ERROR_IF(err < 0);
                         if (v_o == NULL) {
                             _PyEval_FormatExcCheckArg(
@@ -1927,7 +1936,9 @@ dummy_func(
             assert(class_dict);
             assert(oparg >= 0 && oparg < _PyFrame_GetCode(frame)->co_nlocalsplus);
             name = PyTuple_GET_ITEM(_PyFrame_GetCode(frame)->co_localsplusnames, oparg);
-            int err = PyMapping_GetOptionalItem(class_dict, name, &value_o);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(class_dict, name);
+            int err = pair.num;
+            value_o = pair.obj;
             if (err < 0) {
                 ERROR_NO_POP();
             }
@@ -2117,7 +2128,9 @@ dummy_func(
                 ERROR_IF(true);
             }
             /* check if __annotations__ in locals()... */
-            int err = PyMapping_GetOptionalItem(LOCALS(), &_Py_ID(__annotations__), &ann_dict);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(LOCALS(), &_Py_ID(__annotations__));
+            int err = pair.num;
+            ann_dict = pair.obj;
             ERROR_IF(err < 0);
             if (ann_dict == NULL) {
                 ann_dict = PyDict_New();
@@ -2221,8 +2234,13 @@ dummy_func(
             }
             // we make no attempt to optimize here; specializations should
             // handle any case whose performance we care about
-            PyObject *stack[] = {class, self};
-            PyObject *super = PyObject_Vectorcall(global_super, stack, oparg & 2, NULL);
+            PyObject *super;
+            if (oparg & 2) {
+                super = PyObject_CallFunctionObjArgs(global_super, class, self, NULL);
+            }
+            else {
+                super = PyObject_CallNoArgs(global_super);
+            }
             if (opcode == INSTRUMENTED_LOAD_SUPER_ATTR) {
                 PyObject *arg = oparg & 2 ? class : &_PyInstrumentation_MISSING;
                 if (super == NULL) {
@@ -2280,9 +2298,17 @@ dummy_func(
             STAT_INC(LOAD_SUPER_ATTR, hit);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
             PyTypeObject *cls = (PyTypeObject *)class;
+            PyObject *attr_o;
             int method_found = 0;
-            PyObject *attr_o = _PySuper_Lookup(cls, self, name,
-                                   Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr ? &method_found : NULL);
+            if (Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr) {
+                _PyCevalIntAndPyObject pair = _PyCeval_Super_Lookup(cls, self, name);
+                method_found = pair.num;
+                attr_o = pair.obj;
+            }
+            else {
+                attr_o = _PySuper_Lookup(cls, self, name, NULL);
+            }
+
             if (attr_o == NULL) {
                 ERROR_NO_POP();
             }
@@ -2327,19 +2353,18 @@ dummy_func(
             #endif  /* ENABLE_SPECIALIZATION_FT */
         }
 
-        op(_LOAD_ATTR, (owner -- attr, self_or_null[oparg&1])) {
+        op(_LOAD_ATTR, (owner -- attr[1], self_or_null[oparg&1])) {
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 1);
-            PyObject *attr_o;
             if (oparg & 1) {
                 /* Designed to work in tandem with CALL, pushes two values. */
-                attr_o = NULL;
-                int is_meth = _PyObject_GetMethod(PyStackRef_AsPyObjectBorrow(owner), name, &attr_o);
+                attr[0] = PyStackRef_NULL;
+                int is_meth = _PyObject_GetMethodStackRef(tstate, PyStackRef_AsPyObjectBorrow(owner), name, attr);
                 if (is_meth) {
                     /* We can bypass temporary bound method object.
                        meth is unbound method and obj is self.
                        meth | self | arg1 | ... | argN
                      */
-                    assert(attr_o != NULL);  // No errors on this branch
+                    assert(!PyStackRef_IsNull(attr[0]));  // No errors on this branch
                     self_or_null[0] = owner;  // Transfer ownership
                     DEAD(owner);
                 }
@@ -2351,17 +2376,19 @@ dummy_func(
                        meth | NULL | arg1 | ... | argN
                     */
                     PyStackRef_CLOSE(owner);
-                    ERROR_IF(attr_o == NULL);
+                    ERROR_IF(PyStackRef_IsNull(attr[0]));
                     self_or_null[0] = PyStackRef_NULL;
                 }
             }
             else {
+                PyObject *attr_o;
                 /* Classic, pushes one value. */
                 attr_o = PyObject_GetAttr(PyStackRef_AsPyObjectBorrow(owner), name);
                 PyStackRef_CLOSE(owner);
                 ERROR_IF(attr_o == NULL);
+                attr[0] = PyStackRef_FromPyObjectSteal(attr_o);
             }
-            attr = PyStackRef_FromPyObjectSteal(attr_o);
+            assert(!PyStackRef_IsNull(attr));
         }
 
         macro(LOAD_ATTR) =
@@ -3507,10 +3534,14 @@ dummy_func(
             }
             assert(PyStackRef_IsTaggedInt(lasti));
             (void)lasti; // Shut up compiler warning if asserts are off
-            PyObject *stack[5] = {NULL, PyStackRef_AsPyObjectBorrow(exit_self), exc, val_o, tb};
-            int has_self = !PyStackRef_IsNull(exit_self);
-            PyObject *res_o = PyObject_Vectorcall(exit_func_o, stack + 2 - has_self,
-                    (3 + has_self) | PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
+            PyObject *res_o;
+            if (PyStackRef_IsNull(exit_self)) {
+                res_o = PyObject_CallFunctionObjArgs(exit_func_o, exc, val_o, tb, NULL);
+            }
+            else {
+                PyObject *exit_self_o = PyStackRef_AsPyObjectBorrow(exit_self);
+                res_o = PyObject_CallFunctionObjArgs(exit_func_o, exit_self_o, exc, val_o, tb, NULL);
+            }
             Py_XDECREF(original_tb);
             ERROR_IF(res_o == NULL);
             res = PyStackRef_FromPyObjectSteal(res_o);

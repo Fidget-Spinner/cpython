@@ -222,6 +222,29 @@ PyMapping_GetOptionalItem(PyObject *obj, PyObject *key, PyObject **result)
     return 0;
 }
 
+// Same as PyMapping_GetOptionalItem, but for use within ceval.c
+Py_NO_INLINE_MSVC_TAILCALL _PyCevalIntAndPyObject
+_PyCeval_Mapping_GetOptionalItem(PyObject *obj, PyObject *key)
+{
+    PyObject *result;
+    int err;
+    if (PyDict_CheckExact(obj)) {
+        err = PyDict_GetItemRef(obj, key, &result);
+        return (_PyCevalIntAndPyObject) { err, result };
+    }
+
+    result = PyObject_GetItem(obj, key);
+    if (result) {
+        return (_PyCevalIntAndPyObject) { 1, result };
+    }
+    assert(PyErr_Occurred());
+    if (!PyErr_ExceptionMatches(PyExc_KeyError)) {
+        return (_PyCevalIntAndPyObject) { -1, result };
+    }
+    PyErr_Clear();
+    return (_PyCevalIntAndPyObject) { 0, result };
+}
+
 int
 PyObject_SetItem(PyObject *o, PyObject *key, PyObject *value)
 {

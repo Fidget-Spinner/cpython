@@ -10,7 +10,7 @@ extern "C" {
 
 #include "pycore_interp_structs.h" // managed_static_type_state
 #include "pycore_moduleobject.h"  // PyModuleObject
-
+#include "pycore_abstract.h" // _PyCevalIntAndPyObject
 
 /* state */
 
@@ -118,6 +118,7 @@ extern PyTypeObject _PyBufferWrapper_Type;
 
 PyAPI_FUNC(PyObject*) _PySuper_Lookup(PyTypeObject *su_type, PyObject *su_obj,
                                  PyObject *name, int *meth_found);
+PyAPI_FUNC(_PyCevalIntAndPyObject) _PyCeval_Super_Lookup(PyTypeObject *su_type, PyObject *su_obj, PyObject *name);
 
 extern PyObject* _PyType_GetFullyQualifiedName(PyTypeObject *type, char sep);
 

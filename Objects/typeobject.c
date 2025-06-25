@@ -12273,6 +12273,19 @@ _PySuper_Lookup(PyTypeObject *su_type, PyObject *su_obj, PyObject *name, int *me
     return res;
 }
 
+Py_NO_INLINE_MSVC_TAILCALL _PyCevalIntAndPyObject
+_PyCeval_Super_Lookup(PyTypeObject *su_type, PyObject *su_obj, PyObject *name)
+{
+    int method;
+    PyTypeObject *su_obj_type = supercheck(su_type, su_obj);
+    if (su_obj_type == NULL) {
+        return (_PyCevalIntAndPyObject){ 0, NULL};
+    }
+    PyObject *res = do_super_lookup(NULL, su_type, su_obj, su_obj_type, name, method);
+    Py_DECREF(su_obj_type);
+    return (_PyCevalIntAndPyObject) { method, res };
+}
+
 static PyObject *
 super_descr_get(PyObject *self, PyObject *obj, PyObject *type)
 {

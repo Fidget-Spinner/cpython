@@ -55,6 +55,14 @@ PyAPI_FUNC(int) _Py_convert_optional_to_ssize_t(PyObject *, void *);
 // Export for 'math' shared extension.
 PyAPI_FUNC(PyObject*) _PyNumber_Index(PyObject *o);
 
+typedef struct _PyCevalIntAndPyObject {
+  int num;
+  PyObject *obj;
+} _PyCevalIntAndPyObject;
+
+PyAPI_FUNC(_PyCevalIntAndPyObject)
+_PyCeval_Mapping_GetOptionalItem(PyObject *obj, PyObject *key);
+
 #ifdef __cplusplus
 }
 #endif

@@ -385,6 +385,12 @@ extern "C" {
 #  define Py_NO_INLINE
 #endif
 
+#if defined(_MSC_VER)
+#  define Py_NO_INLINE_MSVC_TAILCALL  __declspec(noinline)
+#else
+#  define Py_NO_INLINE
+#endif
+
 #include "exports.h"
 
 #ifdef Py_LIMITED_API

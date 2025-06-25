@@ -2140,8 +2140,10 @@
             _PyStackRef bc;
             PyObject *bc_o;
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            int err = PyMapping_GetOptionalItem(BUILTINS(), &_Py_ID(__build_class__), &bc_o);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(BUILTINS(), &_Py_ID(__build_class__));
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            int err = pair.num;
+            bc_o = pair.obj;
             if (err < 0) {
                 JUMP_TO_ERROR();
             }
@@ -2653,8 +2655,10 @@
             assert(oparg >= 0 && oparg < _PyFrame_GetCode(frame)->co_nlocalsplus);
             name = PyTuple_GET_ITEM(_PyFrame_GetCode(frame)->co_localsplusnames, oparg);
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            int err = PyMapping_GetOptionalItem(class_dict, name, &value_o);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(class_dict, name);
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            int err = pair.num;
+            value_o = pair.obj;
             if (err < 0) {
                 JUMP_TO_ERROR();
             }
@@ -3057,8 +3061,10 @@
                 JUMP_TO_ERROR();
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            int err = PyMapping_GetOptionalItem(LOCALS(), &_Py_ID(__annotations__), &ann_dict);
+            _PyCevalIntAndPyObject pair = _PyCeval_Mapping_GetOptionalItem(LOCALS(), &_Py_ID(__annotations__));
             stack_pointer = _PyFrame_GetStackPointer(frame);
+            int err = pair.num;
+            ann_dict = pair.obj;
             if (err < 0) {
                 JUMP_TO_ERROR();
             }
@@ -3258,11 +3264,20 @@
             STAT_INC(LOAD_SUPER_ATTR, hit);
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 2);
             PyTypeObject *cls = (PyTypeObject *)class;
+            PyObject *attr_o;
             int method_found = 0;
-            _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyObject *attr_o = _PySuper_Lookup(cls, self, name,
-                Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr ? &method_found : NULL);
-            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (Py_TYPE(self)->tp_getattro == PyObject_GenericGetAttr) {
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _PyCevalIntAndPyObject pair = _PyCeval_Super_Lookup(cls, self, name);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                method_found = pair.num;
+                attr_o = pair.obj;
+            }
+            else {
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                attr_o = _PySuper_Lookup(cls, self, name, NULL);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
             if (attr_o == NULL) {
                 JUMP_TO_ERROR();
             }
@@ -3301,20 +3316,20 @@
 
         case _LOAD_ATTR: {
             _PyStackRef owner;
-            _PyStackRef attr;
+            _PyStackRef *attr;
             _PyStackRef *self_or_null;
             oparg = CURRENT_OPARG();
             owner = stack_pointer[-1];
+            attr = &stack_pointer[-1];
             self_or_null = &stack_pointer[0];
             PyObject *name = GETITEM(FRAME_CO_NAMES, oparg >> 1);
-            PyObject *attr_o;
             if (oparg & 1) {
-                attr_o = NULL;
+                attr[0] = PyStackRef_NULL;
                 _PyFrame_SetStackPointer(frame, stack_pointer);
-                int is_meth = _PyObject_GetMethod(PyStackRef_AsPyObjectBorrow(owner), name, &attr_o);
+                int is_meth = _PyObject_GetMethodStackRef(tstate, PyStackRef_AsPyObjectBorrow(owner), name, attr);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
                 if (is_meth) {
-                    assert(attr_o != NULL);
+                    assert(!PyStackRef_IsNull(attr[0]));
                     self_or_null[0] = owner;
                 }
                 else {
@@ -3323,7 +3338,7 @@
                     _PyFrame_SetStackPointer(frame, stack_pointer);
                     PyStackRef_CLOSE(owner);
                     stack_pointer = _PyFrame_GetStackPointer(frame);
-                    if (attr_o == NULL) {
+                    if (PyStackRef_IsNull(attr[0])) {
                         JUMP_TO_ERROR();
                     }
                     self_or_null[0] = PyStackRef_NULL;
@@ -3331,6 +3346,7 @@
                 }
             }
             else {
+                PyObject *attr_o;
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 attr_o = PyObject_GetAttr(PyStackRef_AsPyObjectBorrow(owner), name);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -3342,10 +3358,10 @@
                 if (attr_o == NULL) {
                     JUMP_TO_ERROR();
                 }
+                attr[0] = PyStackRef_FromPyObjectSteal(attr_o);
                 stack_pointer += 1;
             }
-            attr = PyStackRef_FromPyObjectSteal(attr_o);
-            stack_pointer[-1] = attr;
+            assert(!PyStackRef_IsNull(attr));
             stack_pointer += (oparg&1);
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -4694,11 +4710,19 @@
             }
             assert(PyStackRef_IsTaggedInt(lasti));
             (void)lasti;
-            PyObject *stack[5] = {NULL, PyStackRef_AsPyObjectBorrow(exit_self), exc, val_o, tb};
-            int has_self = !PyStackRef_IsNull(exit_self);
+            PyObject *res_o;
+            if (PyStackRef_IsNull(exit_self)) {
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                res_o = PyObject_CallFunctionObjArgs(exit_func_o, exc, val_o, tb, NULL);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
+            else {
+                PyObject *exit_self_o = PyStackRef_AsPyObjectBorrow(exit_self);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                res_o = PyObject_CallFunctionObjArgs(exit_func_o, exit_self_o, exc, val_o, tb, NULL);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
             _PyFrame_SetStackPointer(frame, stack_pointer);
-            PyObject *res_o = PyObject_Vectorcall(exit_func_o, stack + 2 - has_self,
-                (3 + has_self) | PY_VECTORCALL_ARGUMENTS_OFFSET, NULL);
             Py_XDECREF(original_tb);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             if (res_o == NULL) {
