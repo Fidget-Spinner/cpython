@@ -8011,7 +8011,7 @@
                     attr[0] = PyStackRef_FromPyObjectSteal(attr_o);
                     stack_pointer += 1;
                 }
-                assert(!PyStackRef_IsNull(attr));
+                assert(!PyStackRef_IsNull(attr[0]));
             }
             stack_pointer += (oparg&1);
             assert(WITHIN_STACK_BOUNDS());

@@ -2389,7 +2389,7 @@ dummy_func(
                 ERROR_IF(attr_o == NULL);
                 attr[0] = PyStackRef_FromPyObjectSteal(attr_o);
             }
-            assert(!PyStackRef_IsNull(attr));
+            assert(!PyStackRef_IsNull(attr[0]));
         }
 
         macro(LOAD_ATTR) =
