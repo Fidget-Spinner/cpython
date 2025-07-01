@@ -2382,7 +2382,6 @@ dummy_func(
                 }
             }
             else {
-                PyObject *attr_o;
                 /* Classic, pushes one value. */
                 PyObject *attr_o = PyObject_GetAttr(PyStackRef_AsPyObjectBorrow(owner), name);
                 PyStackRef_CLOSE(owner);
