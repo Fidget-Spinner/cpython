@@ -373,7 +373,7 @@ do {                                                   \
     jit_func jitted = _executor->jit_code;             \
     /* Keep the shim frame alive via the executor: */  \
     Py_INCREF(_executor);                              \
-    next_instr = jitted(frame, stack_pointer, tstate); \
+    next_instr = jitted(frame, stack_pointer, tstate, PYOBJECT_SCRATCH); \
     Py_DECREF(_executor);                              \
     frame = tstate->current_frame;                     \
     stack_pointer = _PyFrame_GetStackPointer(frame);   \
