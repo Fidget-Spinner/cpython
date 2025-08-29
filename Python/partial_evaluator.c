@@ -184,7 +184,7 @@ copy_to_trace(
         printf("\n"); \
     }
 #else
-#define COPY_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
+#define COPY_TO_TRACE(SRC) \
     assert(trace_dest_length < UOP_MAX_TRACE_LENGTH); \
     trace_dest_length = copy_to_trace(trace_dest, trace_length, SRC);
 #endif
