@@ -249,9 +249,9 @@ class OptimizerEmitter(Emitter):
             # All new stackrefs are created from new references.
             # That's how the stackref contract works.
             if not outp.peek:
-                emitter.emit(f"{outp.name} = sym_new_const_steal(ctx, PyStackRef_AsPyObjectSteal({outp.name}_stackref));\n")
+                emitter.emit(f"{outp.name} = sym_new_const_steal(ctx, PyStackRef_AsPyObjectSteal({outp.name}_stackref), this_instr);\n")
             else:
-                emitter.emit(f"{outp.name} = sym_new_const(ctx, PyStackRef_AsPyObjectBorrow({outp.name}_stackref));\n")
+                emitter.emit(f"{outp.name} = sym_new_const_with_origin(ctx, PyStackRef_AsPyObjectBorrow({outp.name}_stackref), this_instr);\n")
 
         if len(used_stack_inputs) == 2 and len(self.original_uop.stack.outputs) == 1:
                 outp = self.original_uop.stack.outputs[0]

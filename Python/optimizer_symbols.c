@@ -540,12 +540,13 @@ _Py_uop_sym_new_const_with_origin(JitOptContext *ctx, PyObject *const_val, _PyUO
 }
 
 JitOptRef
-_Py_uop_sym_new_const_steal(JitOptContext *ctx, PyObject *const_val)
+_Py_uop_sym_new_const_steal(JitOptContext *ctx, PyObject *const_val, _PyUOpInstruction *origin_inst)
 {
     assert(const_val != NULL);
     JitOptRef res = _Py_uop_sym_new_const(ctx, const_val);
     // Decref once because sym_new_const increfs it.
     Py_DECREF(const_val);
+    _Py_uop_sym_set_origin_inst(ctx, res, origin_inst);
     return res;
 }
 
@@ -902,12 +903,37 @@ _Py_uop_abstractcontext_fini(JitOptContext *ctx)
     if (ctx == NULL) {
         return;
     }
+    // Hint that all of the current stack must be reboxed.
+    while (ctx->curr_frame_depth > 1) {
+        _Py_UOpsAbstractFrame *frame = ctx->frame;
+        for (int i = 0; i < frame->stack_len; i++) {
+            JitOptRef ref = frame->stack[i];
+            if (!PyJitRef_IsNull(ref)) {
+                _Py_uop_sym_hint_must_rebox(ref);
+            }
+        }
+        _Py_uop_frame_pop(ctx);
+    }
     ctx->curr_frame_depth = 0;
     int tys = ctx->t_arena.ty_curr_number;
     for (int i = 0; i < tys; i++) {
         JitOptSymbol *sym = &ctx->t_arena.arena[i];
-        if (sym->tag == JIT_SYM_KNOWN_VALUE_TAG) {
-            Py_CLEAR(sym->value.value);
+        // Mark all instructions that do not need reboxing
+        // as candidates for unboxing in the PE pass.
+        switch (sym->tag) {
+            case JIT_SYM_KNOWN_VALUE_TAG:
+                Py_CLEAR(sym->value.value);
+                if (sym->value.is_unbox_candidate && sym->value.originating_inst) {
+                    sym->value.originating_inst->is_pe_candidate = true;
+                }
+                break;
+            case JIT_SYM_COMPACT_INT:
+                if (sym->value.is_unbox_candidate && sym->value.originating_inst) {
+                    sym->value.originating_inst->is_pe_candidate = true;
+                }
+                break;
+            default:
+                break;
         }
     }
 }

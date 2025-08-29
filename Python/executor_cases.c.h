@@ -893,11 +893,31 @@
             break;
         }
 
+        case _GUARD_NOS_TAGGED_INT: {
+            _PyStackRef left;
+            left = stack_pointer[-2];
+            if (!PyStackRef_IsTaggedInt(left)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
         case _GUARD_TOS_INT: {
             _PyStackRef value;
             value = stack_pointer[-1];
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             if (!_PyLong_CheckExactAndCompact(value_o)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            break;
+        }
+
+        case _GUARD_TOS_TAGGED_INT: {
+            _PyStackRef value;
+            value = stack_pointer[-1];
+            if (!PyStackRef_IsTaggedInt(value)) {
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
@@ -972,6 +992,28 @@
             }
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_ADD_TAGGED_INT: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(PyStackRef_IsTaggedInt(left));
+            assert(PyStackRef_IsTaggedInt(right));
+            intptr_t left_i = PyStackRef_UntagInt(left);
+            intptr_t right_i = PyStackRef_UntagInt(right);
+            intptr_t res_i = left_i + right_i;
+            if (!PyStackRef_CanTagInt(res_i)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagInt(res_i);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -7131,6 +7173,16 @@
                 UOP_STAT_INC(uopcode, miss);
                 JUMP_TO_JUMP_TARGET();
             }
+            break;
+        }
+
+        case _LOAD_TAGGED_INT: {
+            _PyStackRef value;
+            PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
+            value = PyStackRef_TagInt((intptr_t)ptr);
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 

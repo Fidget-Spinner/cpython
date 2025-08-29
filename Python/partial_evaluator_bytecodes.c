@@ -47,6 +47,11 @@ dummy_func(void) {
         value = GETLOCAL(oparg);
     }
 
+    op(_LOAD_FAST_BORROW, (-- value)) {
+        COPY_TO_TRACE(this_instr);
+        value = GETLOCAL(oparg);
+    }
+
     op(_LOAD_FAST_AND_CLEAR, (-- value)) {
         COPY_TO_TRACE(this_instr);
         value = GETLOCAL(oparg);
@@ -58,6 +63,50 @@ dummy_func(void) {
         Py_UNREACHABLE();
         // Just to please the code generator that value is defined.
         value = NULL;
+    }
+
+    op(_LOAD_SMALL_INT, (-- value)) {
+        if (is_pe_candidate) {
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+            value = sym_new_tagged_int(ctx);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+            value = sym_new_not_null(ctx);
+        }
+    }
+
+    op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
+        if (is_pe_candidate) {
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+            value = sym_new_tagged_int(ctx);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+            value = sym_new_not_null(ctx);
+        }
+    }
+
+    op(_LOAD_CONST_INLINE_BORROW, (ptr/4 -- value)) {
+        if (is_pe_candidate) {
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+            value = sym_new_tagged_int(ctx);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+            value = sym_new_not_null(ctx);
+        }
+    }
+
+    op(_BINARY_OP_ADD_INT, (left, right -- res)) {
+        if (sym_is_tagged_int(left) && sym_is_tagged_int(right)) {
+            ADD_TO_TRACE(_BINARY_OP_ADD_TAGGED_INT, 0, oparg, this_instr->target);
+            res = sym_new_tagged_int(ctx);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+            res = sym_new_not_null(ctx);
+        }
     }
 
     op(_STORE_FAST, (value --)) {

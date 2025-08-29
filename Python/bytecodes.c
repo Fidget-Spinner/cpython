@@ -45,6 +45,7 @@
 
 #define USE_COMPUTED_GOTOS 0
 #include "ceval_macros.h"
+#include "../Include/internal/pycore_stackref.h"
 
 /* Flow control macros */
 
@@ -598,9 +599,17 @@ dummy_func(
             EXIT_IF(!_PyLong_CheckExactAndCompact(left_o));
         }
 
+        op(_GUARD_NOS_TAGGED_INT, (left, unused -- left, unused)) {
+            EXIT_IF(!PyStackRef_IsTaggedInt(left));
+        }
+
         op(_GUARD_TOS_INT, (value -- value)) {
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             EXIT_IF(!_PyLong_CheckExactAndCompact(value_o));
+        }
+
+        op(_GUARD_TOS_TAGGED_INT, (value -- value)) {
+            EXIT_IF(!PyStackRef_IsTaggedInt(value));
         }
 
         op(_GUARD_NOS_OVERFLOWED, (left, unused -- left, unused)) {
@@ -642,6 +651,21 @@ dummy_func(
             EXIT_IF(PyStackRef_IsNull(res));
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
+            INPUTS_DEAD();
+        }
+
+        tier2 pure op(_BINARY_OP_ADD_TAGGED_INT, (left, right -- res)) {
+            assert(PyStackRef_IsTaggedInt(left));
+            assert(PyStackRef_IsTaggedInt(right));
+
+            intptr_t left_i = PyStackRef_UntagInt(left);
+            intptr_t right_i = PyStackRef_UntagInt(right);
+
+            // It's not possible for this addition to overflow, as
+            // they both have 2 bits reserved from our tagging scheme.
+            intptr_t res_i = left_i + right_i;
+            EXIT_IF(!PyStackRef_CanTagInt(res_i));
+            res = PyStackRef_TagInt(res_i);
             INPUTS_DEAD();
         }
 
@@ -5262,6 +5286,10 @@ dummy_func(
 
         tier2 op(_CHECK_VALIDITY, (--)) {
             DEOPT_IF(!current_executor->vm_data.valid);
+        }
+
+        tier2 op(_LOAD_TAGGED_INT, (ptr/4 -- value)) {
+            value = PyStackRef_TagInt((intptr_t)ptr);
         }
 
         tier2 pure op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {

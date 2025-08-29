@@ -331,7 +331,7 @@ extern JitOptRef _Py_uop_sym_new_type(
 
 extern JitOptRef _Py_uop_sym_new_const(JitOptContext *ctx, PyObject *const_val);
 extern JitOptRef _Py_uop_sym_new_const_with_origin(JitOptContext *ctx, PyObject *const_val, _PyUOpInstruction *origin_inst);
-extern JitOptRef _Py_uop_sym_new_const_steal(JitOptContext *ctx, PyObject *const_val);
+extern JitOptRef _Py_uop_sym_new_const_steal(JitOptContext *ctx, PyObject *const_val, _PyUOpInstruction *origin_inst);
 bool _Py_uop_sym_is_safe_const(JitOptContext *ctx, JitOptRef sym);
 _PyStackRef _Py_uop_sym_get_const_as_stackref(JitOptContext *ctx, JitOptRef sym);
 extern JitOptRef _Py_uop_sym_new_null(JitOptContext *ctx);
@@ -453,6 +453,8 @@ extern bool _Py_uop_pe_sym_is_not_null(JitOptPESymbol *sym);
 extern JitOptPESymbol *_Py_uop_pe_sym_new_unknown(JitOptPEContext *ctx);
 extern JitOptPESymbol *_Py_uop_pe_sym_new_not_null(JitOptPEContext *ctx);
 extern JitOptPESymbol *_Py_uop_pe_sym_new_null(JitOptPEContext *ctx);
+extern JitOptPESymbol *_Py_uop_pe_sym_new_tagged_int(JitOptPEContext *ctx);
+extern bool _Py_uop_pe_sym_is_tagged_int(JitOptPESymbol *sym);
 extern void _Py_uop_pe_sym_set_null(JitOptPEContext *ctx, JitOptPESymbol *sym);
 extern void _Py_uop_pe_sym_set_non_null(JitOptPEContext *ctx, JitOptPESymbol *sym);
 extern bool _Py_uop_pe_sym_is_bottom(JitOptPESymbol *sym);

@@ -144,6 +144,22 @@ _Py_uop_pe_sym_new_not_null(JitOptPEContext *ctx)
     return res;
 }
 
+JitOptPESymbol *
+_Py_uop_pe_sym_new_tagged_int(JitOptPEContext *ctx)
+{
+    JitOptPESymbol *sym = sym_new(ctx);
+    if (sym == NULL) {
+        return out_of_space(ctx);
+    }
+    sym->tag = JIT_PE_TAGGED_INT_TAG;
+    return sym;
+}
+
+bool
+_Py_uop_pe_sym_is_tagged_int(JitOptPESymbol *sym)
+{
+    return (bool)(sym->tag == JIT_PE_TAGGED_INT_TAG);
+}
 
 // 0 on success, -1 on error.
 _Py_UOpsPEAbstractFrame *

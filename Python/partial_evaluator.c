@@ -119,17 +119,14 @@ get_code_with_logging(_PyUOpInstruction *op)
 #define sym_is_null _Py_uop_pe_sym_is_null
 #define sym_new_const _Py_uop_pe_sym_new_const
 #define sym_new_null _Py_uop_pe_sym_new_null
+#define sym_new_tagged_int _Py_uop_pe_sym_new_tagged_int
+#define sym_is_tagged_int _Py_uop_pe_sym_is_tagged_int
 #define sym_set_null(SYM) _Py_uop_pe_sym_set_null(ctx, SYM)
 #define sym_set_non_null(SYM) _Py_uop_pe_sym_set_non_null(ctx, SYM)
 #define sym_set_const(SYM, CNST) _Py_uop_pe_sym_set_const(ctx, SYM, CNST)
 #define sym_is_bottom _Py_uop_pe_sym_is_bottom
 #define frame_new _Py_uop_pe_frame_new
 #define frame_pop _Py_uop_pe_frame_pop
-
-#define MATERIALIZE_INST() (this_instr->is_virtual = false)
-#define sym_set_origin_inst_override _Py_uop_sym_set_origin_inst_override
-#define sym_is_virtual _Py_uop_sym_is_virtual
-#define sym_get_origin _Py_uop_sym_get_origin
 
 static inline int
 add_to_trace(
@@ -154,16 +151,16 @@ add_to_trace(
 
 #ifdef Py_DEBUG
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
-    assert(trace_dest_length < max_length); \
+    assert(trace_dest_length < UOP_MAX_TRACE_LENGTH); \
     trace_dest_length = add_to_trace(trace_dest, trace_dest_length, (OPCODE), (OPARG), (OPERAND), (TARGET)); \
-    if (lltrace >= 2) { \
+    if (get_lltrace() >= 2) { \
         printf("%4d ADD_TO_PE_TRACE: ", trace_dest_length); \
-        _PyUOpPrint(&trace[trace_dest_length-1]); \
+        _PyUOpPrint(&trace_dest[trace_dest_length-1]); \
         printf("\n"); \
     }
 #else
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \
-    assert(trace_dest_length < max_length); \
+    assert(trace_dest_length < UOP_MAX_TRACE_LENGTH); \
     trace_dest_length = add_to_trace(trace_dest, trace_dest_length, (OPCODE), (OPARG), (OPERAND), (TARGET));
 #endif
 
@@ -229,6 +226,7 @@ partial_evaluate_uops(
 
         int oparg = this_instr->oparg;
         opcode = this_instr->opcode;
+        int is_pe_candidate = this_instr->is_pe_candidate;
         JitOptPESymbol **stack_pointer = ctx->frame->stack_pointer;
 
 #ifdef Py_DEBUG
@@ -271,7 +269,8 @@ partial_evaluate_uops(
         COPY_TO_TRACE(this_instr);
         this_instr++;
     }
-
+    assert(trace_dest_length < UOP_MAX_TRACE_LENGTH);
+    mempcpy(trace, trace_dest, sizeof(_PyUOpInstruction) * trace_dest_length);
     _Py_uop_pe_abstractcontext_fini(ctx);
     return trace_dest_length;
 
@@ -299,7 +298,10 @@ _Py_uop_partial_evaluate(
     _PyBloomFilter *dependencies
 )
 {
-
+    if (sizeof(intptr_t) != 8) {
+        DPRINTF(1, "JIT PE pass disabled for 32-bit systems\n");
+        return length;
+    }
     length = partial_evaluate_uops(
         _PyFrame_GetCode(frame), buffer,
         length, curr_stacklen, dependencies);
