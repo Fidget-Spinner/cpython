@@ -186,7 +186,7 @@ copy_to_trace(
 #else
 #define COPY_TO_TRACE(SRC) \
     assert(trace_dest_length < UOP_MAX_TRACE_LENGTH); \
-    trace_dest_length = copy_to_trace(trace_dest, trace_length, SRC);
+    trace_dest_length = copy_to_trace(trace_dest, trace_dest_length, SRC);
 #endif
 
 
