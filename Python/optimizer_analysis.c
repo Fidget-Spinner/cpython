@@ -466,6 +466,7 @@ const uint16_t op_without_decref_inputs[MAX_UOP_ID + 1] = {
 };
 
 const uint16_t op_unboxed[MAX_UOP_ID + 1] = {
+    [_POP_TOP] = _POP_TOP_NOP,
 };
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */

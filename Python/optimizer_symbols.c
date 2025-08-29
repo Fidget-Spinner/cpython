@@ -84,7 +84,7 @@ allocation_base(JitOptContext *ctx)
     return ctx->t_arena.arena;
 }
 
-JitOptSymbol *
+static JitOptSymbol *
 out_of_space(JitOptContext *ctx)
 {
     ctx->done = true;
@@ -92,7 +92,7 @@ out_of_space(JitOptContext *ctx)
     return &NO_SPACE_SYMBOL;
 }
 
-JitOptRef
+static JitOptRef
 out_of_space_ref(JitOptContext *ctx)
 {
     return PyJitRef_Wrap(out_of_space(ctx));

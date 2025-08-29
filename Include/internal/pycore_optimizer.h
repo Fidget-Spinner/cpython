@@ -396,6 +396,80 @@ PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
 extern void _Py_ClearExecutorDeletionList(PyInterpreterState *interp);
 #endif
 
+// Partial evaluator.
+
+typedef enum JitPESymType {
+    JIT_PE_UNKNOWN_TAG = 1,
+    JIT_PE_NON_NULL_TAG = 2,
+    JIT_PE_NULL_TAG = 3,
+    JIT_PE_BOTTOM_TAG = 4,
+    JIT_PE_TAGGED_INT_TAG = 5,
+} JitPESymType;
+
+
+typedef union JitOptPESymbol {
+    uint8_t tag;
+} JitOptPESymbol;
+
+
+struct _Py_UOpsPEAbstractFrame {
+    // Max stacklen
+    int stack_len;
+    int locals_len;
+
+    JitOptPESymbol **stack_pointer;
+    JitOptPESymbol **stack;
+    JitOptPESymbol **locals;
+};
+
+typedef struct _Py_UOpsPEAbstractFrame _Py_UOpsPEAbstractFrame;
+
+typedef struct pe_arena {
+    int p_curr_number;
+    int p_max_number;
+    JitOptPESymbol arena[TY_ARENA_SIZE];
+} pe_arena;
+
+typedef struct JitOptPEContext {
+    char done;
+    char out_of_space;
+    bool contradiction;
+    // The current "executing" frame.
+    _Py_UOpsPEAbstractFrame *frame;
+    _Py_UOpsPEAbstractFrame frames[MAX_ABSTRACT_FRAME_DEPTH];
+    int curr_frame_depth;
+
+    // Arena for the symbolic information.
+    pe_arena p_arena;
+
+    JitOptPESymbol **n_consumed;
+    JitOptPESymbol **limit;
+    JitOptPESymbol *locals_and_stack[MAX_ABSTRACT_INTERP_SIZE];
+} JitOptPEContext;
+
+
+extern bool _Py_uop_pe_sym_is_null(JitOptPESymbol *sym);
+extern bool _Py_uop_pe_sym_is_not_null(JitOptPESymbol *sym);
+extern JitOptPESymbol *_Py_uop_pe_sym_new_unknown(JitOptPEContext *ctx);
+extern JitOptPESymbol *_Py_uop_pe_sym_new_not_null(JitOptPEContext *ctx);
+extern JitOptPESymbol *_Py_uop_pe_sym_new_null(JitOptPEContext *ctx);
+extern void _Py_uop_pe_sym_set_null(JitOptPEContext *ctx, JitOptPESymbol *sym);
+extern void _Py_uop_pe_sym_set_non_null(JitOptPEContext *ctx, JitOptPESymbol *sym);
+extern bool _Py_uop_pe_sym_is_bottom(JitOptPESymbol *sym);
+
+extern _Py_UOpsPEAbstractFrame *
+_Py_uop_pe_frame_new(
+    JitOptPEContext *ctx,
+    PyCodeObject *co,
+    int curr_stackentries,
+    JitOptPESymbol **args,
+    int arg_len);
+
+int _Py_uop_pe_frame_pop(JitOptPEContext *ctx);
+
+extern void _Py_uop_pe_abstractcontext_init(JitOptPEContext *ctx);
+extern void _Py_uop_pe_abstractcontext_fini(JitOptPEContext *ctx);
+
 #ifdef __cplusplus
 }
 #endif
