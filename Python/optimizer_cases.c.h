@@ -72,7 +72,7 @@
             JitOptRef value;
             PyObject *val = PyTuple_GET_ITEM(co->co_consts, oparg);
             REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
-            value = PyJitRef_Borrow(sym_new_const(ctx, val));
+            value = PyJitRef_Borrow(sym_new_const_with_origin(ctx, val, this_instr));
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -85,7 +85,7 @@
             assert(val);
             assert(_Py_IsImmortal(val));
             REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
-            value = PyJitRef_Borrow(sym_new_const(ctx, val));
+            value = PyJitRef_Borrow(sym_new_const_with_origin(ctx, val, this_instr));
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -95,6 +95,9 @@
         case _STORE_FAST: {
             JitOptRef value;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             GETLOCAL(oparg) = value;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -104,6 +107,9 @@
         case _POP_TOP: {
             JitOptRef value;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             PyTypeObject *typ = sym_get_type(value);
             if (PyJitRef_IsBorrowed(value) ||
                 sym_is_immortal(PyJitRef_Unwrap(value)) ||
@@ -125,30 +131,74 @@
         }
 
         case _POP_TOP_NOP: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_TOP_INT: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_TOP_FLOAT: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_TOP_UNICODE: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_TWO: {
+            JitOptRef tos;
+            JitOptRef nos;
+            tos = stack_pointer[-1];
+            nos = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+                sym_hint_must_rebox(nos);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+                sym_hint_must_rebox(nos);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -164,19 +214,51 @@
         }
 
         case _END_FOR: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_ITER: {
+            JitOptRef index_or_null;
+            JitOptRef iter;
+            index_or_null = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(index_or_null);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(index_or_null);
+                sym_hint_must_rebox(iter);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _END_SEND: {
+            JitOptRef value;
+            JitOptRef receiver;
             JitOptRef val;
+            value = stack_pointer[-1];
+            receiver = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+                sym_hint_must_rebox(receiver);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+                sym_hint_must_rebox(receiver);
+            }
             val = sym_new_not_null(ctx);
             stack_pointer[-2] = val;
             stack_pointer += -1;
@@ -188,8 +270,11 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             if (sym_is_compact_int(value)) {
-                res = sym_new_compact_int(ctx);
+                res = sym_new_compact_int(ctx, this_instr);
             }
             else {
                 PyTypeObject *type = sym_get_type(value);
@@ -208,6 +293,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             if (
                 sym_is_safe_const(ctx, value)
             ) {
@@ -233,6 +321,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             int already_bool = optimize_to_bool(this_instr, ctx, value, &res);
             if (!already_bool) {
                 res = sym_new_truthiness(ctx, value, true);
@@ -244,6 +335,9 @@
         case _TO_BOOL_BOOL: {
             JitOptRef value;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             int already_bool = optimize_to_bool(this_instr, ctx, value, &value);
             if (!already_bool) {
                 sym_set_type(value, &PyBool_Type);
@@ -257,6 +351,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             int already_bool = optimize_to_bool(this_instr, ctx, value, &res);
             if (!already_bool) {
                 sym_set_type(value, &PyLong_Type);
@@ -269,6 +366,9 @@
         case _GUARD_NOS_LIST: {
             JitOptRef nos;
             nos = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(nos);
+            }
             if (sym_matches_type(nos, &PyList_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -279,6 +379,9 @@
         case _GUARD_TOS_LIST: {
             JitOptRef tos;
             tos = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+            }
             if (sym_matches_type(tos, &PyList_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -287,6 +390,14 @@
         }
 
         case _GUARD_TOS_SLICE: {
+            JitOptRef tos;
+            tos = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+            }
             break;
         }
 
@@ -294,6 +405,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             int already_bool = optimize_to_bool(this_instr, ctx, value, &res);
             if (!already_bool) {
                 res = sym_new_type(ctx, &PyBool_Type);
@@ -306,6 +420,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             int already_bool = optimize_to_bool(this_instr, ctx, value, &res);
             if (!already_bool) {
                 sym_set_const(value, Py_None);
@@ -318,6 +435,9 @@
         case _GUARD_NOS_UNICODE: {
             JitOptRef nos;
             nos = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(nos);
+            }
             if (sym_matches_type(nos, &PyUnicode_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -328,6 +448,9 @@
         case _GUARD_TOS_UNICODE: {
             JitOptRef value;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             if (sym_matches_type(value, &PyUnicode_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -339,6 +462,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             int already_bool = optimize_to_bool(this_instr, ctx, value, &res);
             if (!already_bool) {
                 res = sym_new_truthiness(ctx, value, true);
@@ -348,7 +474,12 @@
         }
 
         case _REPLACE_WITH_TRUE: {
+            JitOptRef value;
             JitOptRef res;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             REPLACE_OP(this_instr, _POP_TOP_LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)Py_True);
             res = sym_new_const(ctx, Py_True);
             stack_pointer[-1] = res;
@@ -359,6 +490,9 @@
             JitOptRef value;
             JitOptRef res;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             if (sym_matches_type(value, &PyLong_Type)) {
                 res = sym_new_type(ctx, &PyLong_Type);
             }
@@ -372,6 +506,9 @@
         case _GUARD_NOS_INT: {
             JitOptRef left;
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(left);
+            }
             if (sym_is_compact_int(left)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -387,6 +524,9 @@
         case _GUARD_TOS_INT: {
             JitOptRef value;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             if (sym_is_compact_int(value)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -400,10 +540,26 @@
         }
 
         case _GUARD_NOS_OVERFLOWED: {
+            JitOptRef left;
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(left);
+            }
             break;
         }
 
         case _GUARD_TOS_OVERFLOWED: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             break;
         }
 
@@ -413,6 +569,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -451,7 +611,7 @@
                 assert(WITHIN_STACK_BOUNDS());
                 break;
             }
-            res = sym_new_compact_int(ctx);
+            res = sym_new_compact_int(ctx, this_instr);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -464,6 +624,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -502,7 +666,7 @@
                 assert(WITHIN_STACK_BOUNDS());
                 break;
             }
-            res = sym_new_compact_int(ctx);
+            res = sym_new_compact_int(ctx, this_instr);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -515,6 +679,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -553,7 +721,7 @@
                 assert(WITHIN_STACK_BOUNDS());
                 break;
             }
-            res = sym_new_compact_int(ctx);
+            res = sym_new_compact_int(ctx, this_instr);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -563,6 +731,9 @@
         case _GUARD_NOS_FLOAT: {
             JitOptRef left;
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(left);
+            }
             if (sym_matches_type(left, &PyFloat_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -573,6 +744,9 @@
         case _GUARD_TOS_FLOAT: {
             JitOptRef value;
             value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             if (sym_matches_type(value, &PyFloat_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -586,6 +760,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -639,6 +817,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -692,6 +874,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -740,7 +926,19 @@
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT__NO_DECREF_INPUTS: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -749,7 +947,19 @@
         }
 
         case _BINARY_OP_ADD_FLOAT__NO_DECREF_INPUTS: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -758,7 +968,19 @@
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT__NO_DECREF_INPUTS: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -772,6 +994,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -821,6 +1047,10 @@
             JitOptRef left;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             JitOptRef res;
             if (sym_is_const(ctx, left) && sym_is_const(ctx, right)) {
                 assert(PyUnicode_CheckExact(sym_get_const(ctx, left)));
@@ -842,11 +1072,35 @@
         }
 
         case _GUARD_BINARY_OP_EXTEND: {
+            JitOptRef right;
+            JitOptRef left;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             break;
         }
 
         case _BINARY_OP_EXTEND: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -855,9 +1109,18 @@
         }
 
         case _BINARY_SLICE: {
+            JitOptRef stop;
+            JitOptRef start;
             JitOptRef container;
             JitOptRef res;
+            stop = stack_pointer[-1];
+            start = stack_pointer[-2];
             container = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(stop);
+                sym_hint_must_rebox(start);
+                sym_hint_must_rebox(container);
+            }
             PyTypeObject *type = sym_get_type(container);
             if (type == &PyUnicode_Type ||
                 type == &PyList_Type ||
@@ -875,13 +1138,45 @@
         }
 
         case _STORE_SLICE: {
+            JitOptRef stop;
+            JitOptRef start;
+            JitOptRef container;
+            JitOptRef v;
+            stop = stack_pointer[-1];
+            start = stack_pointer[-2];
+            container = stack_pointer[-3];
+            v = stack_pointer[-4];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(stop);
+                sym_hint_must_rebox(start);
+                sym_hint_must_rebox(container);
+                sym_hint_must_rebox(v);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(stop);
+                sym_hint_must_rebox(start);
+                sym_hint_must_rebox(container);
+                sym_hint_must_rebox(v);
+            }
             stack_pointer += -4;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _BINARY_OP_SUBSCR_LIST_INT: {
+            JitOptRef sub_st;
+            JitOptRef list_st;
             JitOptRef res;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(list_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(list_st);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -890,7 +1185,19 @@
         }
 
         case _BINARY_OP_SUBSCR_LIST_SLICE: {
+            JitOptRef sub_st;
+            JitOptRef list_st;
             JitOptRef res;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(list_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(list_st);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -899,7 +1206,15 @@
         }
 
         case _BINARY_OP_SUBSCR_STR_INT: {
+            JitOptRef sub_st;
+            JitOptRef str_st;
             JitOptRef res;
+            sub_st = stack_pointer[-1];
+            str_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(str_st);
+            }
             res = sym_new_type(ctx, &PyUnicode_Type);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -910,6 +1225,9 @@
         case _GUARD_NOS_TUPLE: {
             JitOptRef nos;
             nos = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(nos);
+            }
             if (sym_matches_type(nos, &PyTuple_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -920,6 +1238,9 @@
         case _GUARD_TOS_TUPLE: {
             JitOptRef tos;
             tos = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+            }
             if (sym_matches_type(tos, &PyTuple_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -933,6 +1254,10 @@
             JitOptRef res;
             sub_st = stack_pointer[-1];
             tuple_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(tuple_st);
+            }
             assert(sym_matches_type(tuple_st, &PyTuple_Type));
             if (sym_is_const(ctx, sub_st)) {
                 assert(PyLong_CheckExact(sym_get_const(ctx, sub_st)));
@@ -959,6 +1284,9 @@
         case _GUARD_NOS_DICT: {
             JitOptRef nos;
             nos = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(nos);
+            }
             if (sym_matches_type(nos, &PyDict_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -969,6 +1297,9 @@
         case _GUARD_TOS_DICT: {
             JitOptRef tos;
             tos = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+            }
             if (sym_matches_type(tos, &PyDict_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -977,7 +1308,19 @@
         }
 
         case _BINARY_OP_SUBSCR_DICT: {
+            JitOptRef sub_st;
+            JitOptRef dict_st;
             JitOptRef res;
+            sub_st = stack_pointer[-1];
+            dict_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(dict_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(dict_st);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -986,7 +1329,15 @@
         }
 
         case _BINARY_OP_SUBSCR_CHECK_FUNC: {
+            JitOptRef container;
             JitOptRef getitem;
+            container = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(container);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(container);
+            }
             getitem = sym_new_not_null(ctx);
             stack_pointer[0] = getitem;
             stack_pointer += 1;
@@ -995,7 +1346,18 @@
         }
 
         case _BINARY_OP_SUBSCR_INIT_CALL: {
+            JitOptRef getitem;
+            JitOptRef sub;
+            JitOptRef container;
             JitOptRef new_frame;
+            getitem = stack_pointer[-1];
+            sub = stack_pointer[-2];
+            container = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(getitem);
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(container);
+            }
             new_frame = PyJitRef_NULL;
             ctx->done = true;
             stack_pointer[-3] = new_frame;
@@ -1005,50 +1367,154 @@
         }
 
         case _LIST_APPEND: {
+            JitOptRef v;
+            JitOptRef list;
+            v = stack_pointer[-1];
+            list = stack_pointer[-2 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+                sym_hint_must_rebox(list);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+                sym_hint_must_rebox(list);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _SET_ADD: {
+            JitOptRef v;
+            JitOptRef set;
+            v = stack_pointer[-1];
+            set = stack_pointer[-2 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+                sym_hint_must_rebox(set);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+                sym_hint_must_rebox(set);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_SUBSCR: {
+            JitOptRef sub;
+            JitOptRef container;
+            JitOptRef v;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            v = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(container);
+                sym_hint_must_rebox(v);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(container);
+                sym_hint_must_rebox(v);
+            }
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_SUBSCR_LIST_INT: {
+            JitOptRef sub_st;
+            JitOptRef list_st;
+            JitOptRef value;
+            sub_st = stack_pointer[-1];
+            list_st = stack_pointer[-2];
+            value = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(list_st);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub_st);
+                sym_hint_must_rebox(list_st);
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_SUBSCR_DICT: {
+            JitOptRef sub;
+            JitOptRef dict_st;
+            JitOptRef value;
+            sub = stack_pointer[-1];
+            dict_st = stack_pointer[-2];
+            value = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(dict_st);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(dict_st);
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _DELETE_SUBSCR: {
+            JitOptRef sub;
+            JitOptRef container;
+            sub = stack_pointer[-1];
+            container = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(container);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(sub);
+                sym_hint_must_rebox(container);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _CALL_INTRINSIC_1: {
+            JitOptRef value;
             JitOptRef res;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-1] = res;
             break;
         }
 
         case _CALL_INTRINSIC_2: {
+            JitOptRef value1_st;
+            JitOptRef value2_st;
             JitOptRef res;
+            value1_st = stack_pointer[-1];
+            value2_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value1_st);
+                sym_hint_must_rebox(value2_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value1_st);
+                sym_hint_must_rebox(value2_st);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -1060,6 +1526,9 @@
             JitOptRef retval;
             JitOptRef res;
             retval = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(retval);
+            }
             JitOptRef temp = PyJitRef_Wrap(PyJitRef_Unwrap(retval));
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
@@ -1084,14 +1553,30 @@
         }
 
         case _GET_AITER: {
+            JitOptRef obj;
             JitOptRef iter;
+            obj = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(obj);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(obj);
+            }
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
         }
 
         case _GET_ANEXT: {
+            JitOptRef aiter;
             JitOptRef awaitable;
+            aiter = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(aiter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(aiter);
+            }
             awaitable = sym_new_not_null(ctx);
             stack_pointer[0] = awaitable;
             stack_pointer += 1;
@@ -1100,7 +1585,15 @@
         }
 
         case _GET_AWAITABLE: {
+            JitOptRef iterable;
             JitOptRef iter;
+            iterable = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+            }
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
@@ -1110,6 +1603,8 @@
 
         case _SEND_GEN_FRAME: {
             JitOptRef gen_frame;
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             gen_frame = PyJitRef_NULL;
             ctx->done = true;
             stack_pointer[-1] = gen_frame;
@@ -1118,12 +1613,22 @@
 
         case _YIELD_VALUE: {
             JitOptRef value;
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             value = sym_new_unknown(ctx);
             stack_pointer[-1] = value;
             break;
         }
 
         case _POP_EXCEPT: {
+            JitOptRef exc_value;
+            exc_value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(exc_value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(exc_value);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1148,6 +1653,14 @@
         }
 
         case _STORE_NAME: {
+            JitOptRef v;
+            v = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1158,10 +1671,15 @@
         }
 
         case _UNPACK_SEQUENCE: {
+            JitOptRef seq;
             JitOptRef *values;
             JitOptRef *top;
+            seq = stack_pointer[-1];
             values = &stack_pointer[-1];
             top = &stack_pointer[-1 + oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(seq);
+            }
             (void)top;
             for (int i = 0; i < oparg; i++) {
                 values[i] = sym_new_unknown(ctx);
@@ -1176,6 +1694,9 @@
             JitOptRef val1;
             JitOptRef val0;
             seq = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(seq);
+            }
             val0 = sym_tuple_getitem(ctx, seq, 0);
             val1 = sym_tuple_getitem(ctx, seq, 1);
             stack_pointer[-1] = val1;
@@ -1190,6 +1711,9 @@
             JitOptRef *values;
             seq = stack_pointer[-1];
             values = &stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(seq);
+            }
             for (int i = 0; i < oparg; i++) {
                 values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
             }
@@ -1199,7 +1723,16 @@
         }
 
         case _UNPACK_SEQUENCE_LIST: {
+            JitOptRef seq;
             JitOptRef *values;
+            seq = stack_pointer[-1];
+            values = &stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(seq);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(seq);
+            }
             values = &stack_pointer[-1];
             for (int _i = oparg; --_i >= 0;) {
                 values[_i] = sym_new_not_null(ctx);
@@ -1210,10 +1743,15 @@
         }
 
         case _UNPACK_EX: {
+            JitOptRef seq;
             JitOptRef *values;
             JitOptRef *top;
+            seq = stack_pointer[-1];
             values = &stack_pointer[-1];
             top = &stack_pointer[(oparg & 0xFF) + (oparg >> 8)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(seq);
+            }
             (void)top;
             int totalargs = (oparg & 0xFF) + (oparg >> 8) + 1;
             for (int i = 0; i < totalargs; i++) {
@@ -1225,18 +1763,46 @@
         }
 
         case _STORE_ATTR: {
+            JitOptRef owner;
+            JitOptRef v;
+            owner = stack_pointer[-1];
+            v = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(v);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(v);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _DELETE_ATTR: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_GLOBAL: {
+            JitOptRef v;
+            v = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1268,6 +1834,7 @@
 
         case _LOAD_GLOBAL: {
             JitOptRef *res;
+            res = &stack_pointer[0];
             res = &stack_pointer[0];
             res[0] = sym_new_not_null(ctx);
             stack_pointer += 1;
@@ -1325,7 +1892,15 @@
         }
 
         case _LOAD_FROM_DICT_OR_DEREF: {
+            JitOptRef class_dict_st;
             JitOptRef value;
+            class_dict_st = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(class_dict_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(class_dict_st);
+            }
             value = sym_new_not_null(ctx);
             stack_pointer[-1] = value;
             break;
@@ -1341,6 +1916,14 @@
         }
 
         case _STORE_DEREF: {
+            JitOptRef v;
+            v = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(v);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
@@ -1351,7 +1934,14 @@
         }
 
         case _BUILD_STRING: {
+            JitOptRef *pieces;
             JitOptRef str;
+            pieces = &stack_pointer[-oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(pieces[_i]);
+                }
+            }
             str = sym_new_type(ctx, &PyUnicode_Type);
             stack_pointer[-oparg] = str;
             stack_pointer += 1 - oparg;
@@ -1360,7 +1950,27 @@
         }
 
         case _BUILD_INTERPOLATION: {
+            JitOptRef *format;
+            JitOptRef str;
+            JitOptRef value;
             JitOptRef interpolation;
+            format = &stack_pointer[-(oparg & 1)];
+            str = stack_pointer[-1 - (oparg & 1)];
+            value = stack_pointer[-2 - (oparg & 1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg & 1; --_i >= 0;) {
+                    sym_hint_must_rebox(format[_i]);
+                }
+                sym_hint_must_rebox(str);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg & 1; --_i >= 0;) {
+                    sym_hint_must_rebox(format[_i]);
+                }
+                sym_hint_must_rebox(str);
+                sym_hint_must_rebox(value);
+            }
             interpolation = sym_new_not_null(ctx);
             stack_pointer[-2 - (oparg & 1)] = interpolation;
             stack_pointer += -1 - (oparg & 1);
@@ -1369,7 +1979,19 @@
         }
 
         case _BUILD_TEMPLATE: {
+            JitOptRef interpolations;
+            JitOptRef strings;
             JitOptRef template;
+            interpolations = stack_pointer[-1];
+            strings = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(interpolations);
+                sym_hint_must_rebox(strings);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(interpolations);
+                sym_hint_must_rebox(strings);
+            }
             template = sym_new_not_null(ctx);
             stack_pointer[-2] = template;
             stack_pointer += -1;
@@ -1381,6 +2003,11 @@
             JitOptRef *values;
             JitOptRef tup;
             values = &stack_pointer[-oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(values[_i]);
+                }
+            }
             tup = sym_new_tuple(ctx, oparg, values);
             stack_pointer[-oparg] = tup;
             stack_pointer += 1 - oparg;
@@ -1389,7 +2016,14 @@
         }
 
         case _BUILD_LIST: {
+            JitOptRef *values;
             JitOptRef list;
+            values = &stack_pointer[-oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(values[_i]);
+                }
+            }
             list = sym_new_type(ctx, &PyList_Type);
             stack_pointer[-oparg] = list;
             stack_pointer += 1 - oparg;
@@ -1398,19 +2032,50 @@
         }
 
         case _LIST_EXTEND: {
+            JitOptRef iterable_st;
+            JitOptRef list_st;
+            iterable_st = stack_pointer[-1];
+            list_st = stack_pointer[-2 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable_st);
+                sym_hint_must_rebox(list_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable_st);
+                sym_hint_must_rebox(list_st);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _SET_UPDATE: {
+            JitOptRef iterable;
+            JitOptRef set;
+            iterable = stack_pointer[-1];
+            set = stack_pointer[-2 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+                sym_hint_must_rebox(set);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+                sym_hint_must_rebox(set);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _BUILD_SET: {
+            JitOptRef *values;
             JitOptRef set;
+            values = &stack_pointer[-oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(values[_i]);
+                }
+            }
             set = sym_new_type(ctx, &PySet_Type);
             stack_pointer[-oparg] = set;
             stack_pointer += 1 - oparg;
@@ -1419,7 +2084,14 @@
         }
 
         case _BUILD_MAP: {
+            JitOptRef *values;
             JitOptRef map;
+            values = &stack_pointer[-oparg*2];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg*2; --_i >= 0;) {
+                    sym_hint_must_rebox(values[_i]);
+                }
+            }
             map = sym_new_type(ctx, &PyDict_Type);
             stack_pointer[-oparg*2] = map;
             stack_pointer += 1 - oparg*2;
@@ -1432,25 +2104,85 @@
         }
 
         case _DICT_UPDATE: {
+            JitOptRef update;
+            JitOptRef dict;
+            update = stack_pointer[-1];
+            dict = stack_pointer[-2 - (oparg - 1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(update);
+                sym_hint_must_rebox(dict);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(update);
+                sym_hint_must_rebox(dict);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _DICT_MERGE: {
+            JitOptRef update;
+            JitOptRef dict;
+            JitOptRef callable;
+            update = stack_pointer[-1];
+            dict = stack_pointer[-2 - (oparg - 1)];
+            callable = stack_pointer[-5 - (oparg - 1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(update);
+                sym_hint_must_rebox(dict);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(update);
+                sym_hint_must_rebox(dict);
+                sym_hint_must_rebox(callable);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _MAP_ADD: {
+            JitOptRef value;
+            JitOptRef key;
+            JitOptRef dict_st;
+            value = stack_pointer[-1];
+            key = stack_pointer[-2];
+            dict_st = stack_pointer[-3 - (oparg - 1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+                sym_hint_must_rebox(key);
+                sym_hint_must_rebox(dict_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+                sym_hint_must_rebox(key);
+                sym_hint_must_rebox(dict_st);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _LOAD_SUPER_ATTR_ATTR: {
+            JitOptRef self_st;
+            JitOptRef class_st;
+            JitOptRef global_super_st;
             JitOptRef attr_st;
+            self_st = stack_pointer[-1];
+            class_st = stack_pointer[-2];
+            global_super_st = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_st);
+                sym_hint_must_rebox(class_st);
+                sym_hint_must_rebox(global_super_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_st);
+                sym_hint_must_rebox(class_st);
+                sym_hint_must_rebox(global_super_st);
+            }
             attr_st = sym_new_not_null(ctx);
             stack_pointer[-3] = attr_st;
             stack_pointer += -2;
@@ -1459,8 +2191,24 @@
         }
 
         case _LOAD_SUPER_ATTR_METHOD: {
+            JitOptRef self_st;
+            JitOptRef class_st;
+            JitOptRef global_super_st;
             JitOptRef attr;
             JitOptRef self_or_null;
+            self_st = stack_pointer[-1];
+            class_st = stack_pointer[-2];
+            global_super_st = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_st);
+                sym_hint_must_rebox(class_st);
+                sym_hint_must_rebox(global_super_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_st);
+                sym_hint_must_rebox(class_st);
+                sym_hint_must_rebox(global_super_st);
+            }
             attr = sym_new_not_null(ctx);
             self_or_null = sym_new_not_null(ctx);
             stack_pointer[-3] = attr;
@@ -1477,6 +2225,9 @@
             owner = stack_pointer[-1];
             attr = &stack_pointer[-1];
             self_or_null = &stack_pointer[0];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             (void)owner;
             *attr = sym_new_not_null(ctx);
             if (oparg & 1) {
@@ -1490,6 +2241,9 @@
         case _GUARD_TYPE_VERSION: {
             JitOptRef owner;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             uint32_t type_version = (uint32_t)this_instr->operand0;
             assert(type_version);
             if (sym_matches_type_version(owner, type_version)) {
@@ -1507,15 +2261,36 @@
         }
 
         case _GUARD_TYPE_VERSION_AND_LOCK: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             break;
         }
 
         case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             break;
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE: {
+            JitOptRef owner;
             JitOptRef attr;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             uint16_t offset = (uint16_t)this_instr->operand0;
             attr = sym_new_not_null(ctx);
             (void)offset;
@@ -1527,6 +2302,9 @@
             JitOptRef owner;
             JitOptRef attr;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             uint32_t dict_version = (uint32_t)this_instr->operand0;
             uint16_t index = (uint16_t)this_instr->operand0;
             (void)dict_version;
@@ -1559,7 +2337,12 @@
         }
 
         case _LOAD_ATTR_WITH_HINT: {
+            JitOptRef owner;
             JitOptRef attr;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             uint16_t hint = (uint16_t)this_instr->operand0;
             attr = sym_new_not_null(ctx);
             (void)hint;
@@ -1568,7 +2351,12 @@
         }
 
         case _LOAD_ATTR_SLOT: {
+            JitOptRef owner;
             JitOptRef attr;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             uint16_t index = (uint16_t)this_instr->operand0;
             attr = sym_new_not_null(ctx);
             (void)index;
@@ -1579,6 +2367,9 @@
         case _CHECK_ATTR_CLASS: {
             JitOptRef owner;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             uint32_t type_version = (uint32_t)this_instr->operand0;
             PyObject *type = (PyObject *)_PyType_LookupByVersion(type_version);
             if (type) {
@@ -1596,6 +2387,9 @@
             JitOptRef owner;
             JitOptRef attr;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *descr = (PyObject *)this_instr->operand0;
             (void)descr;
             PyTypeObject *type = (PyTypeObject *)sym_get_const(ctx, owner);
@@ -1608,7 +2402,12 @@
         }
 
         case _LOAD_ATTR_PROPERTY_FRAME: {
+            JitOptRef owner;
             JitOptRef new_frame;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *fget = (PyObject *)this_instr->operand0;
             (void)fget;
             new_frame = PyJitRef_NULL;
@@ -1620,29 +2419,81 @@
         /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN is not a viable micro-op for tier 2 */
 
         case _GUARD_DORV_NO_DICT: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             break;
         }
 
         case _STORE_ATTR_INSTANCE_VALUE: {
+            JitOptRef owner;
+            JitOptRef value;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_ATTR_WITH_HINT: {
+            JitOptRef owner;
+            JitOptRef value;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _STORE_ATTR_SLOT: {
+            JitOptRef owner;
+            JitOptRef value;
+            owner = stack_pointer[-1];
+            value = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+                sym_hint_must_rebox(value);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _COMPARE_OP: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (oparg & 16) {
                 res = sym_new_type(ctx, &PyBool_Type);
             }
@@ -1661,6 +2512,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -1708,6 +2563,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -1759,6 +2618,10 @@
             JitOptRef res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             if (
                 sym_is_safe_const(ctx, left) &&
                 sym_is_safe_const(ctx, right)
@@ -1803,7 +2666,15 @@
         }
 
         case _IS_OP: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             b = sym_new_type(ctx, &PyBool_Type);
             stack_pointer[-2] = b;
             stack_pointer += -1;
@@ -1812,7 +2683,15 @@
         }
 
         case _CONTAINS_OP: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             b = sym_new_type(ctx, &PyBool_Type);
             stack_pointer[-2] = b;
             stack_pointer += -1;
@@ -1823,6 +2702,9 @@
         case _GUARD_TOS_ANY_SET: {
             JitOptRef tos;
             tos = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(tos);
+            }
             if (sym_matches_type(tos, &PySet_Type) ||
                 sym_matches_type(tos, &PyFrozenSet_Type))
             {
@@ -1832,7 +2714,15 @@
         }
 
         case _CONTAINS_OP_SET: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             b = sym_new_type(ctx, &PyBool_Type);
             stack_pointer[-2] = b;
             stack_pointer += -1;
@@ -1841,7 +2731,15 @@
         }
 
         case _CONTAINS_OP_DICT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             b = sym_new_type(ctx, &PyBool_Type);
             stack_pointer[-2] = b;
             stack_pointer += -1;
@@ -1850,8 +2748,20 @@
         }
 
         case _CHECK_EG_MATCH: {
+            JitOptRef match_type_st;
+            JitOptRef exc_value_st;
             JitOptRef rest;
             JitOptRef match;
+            match_type_st = stack_pointer[-1];
+            exc_value_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(match_type_st);
+                sym_hint_must_rebox(exc_value_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(match_type_st);
+                sym_hint_must_rebox(exc_value_st);
+            }
             rest = sym_new_not_null(ctx);
             match = sym_new_not_null(ctx);
             stack_pointer[-2] = rest;
@@ -1860,14 +2770,38 @@
         }
 
         case _CHECK_EXC_MATCH: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef b;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
             b = sym_new_not_null(ctx);
             stack_pointer[-1] = b;
             break;
         }
 
         case _IMPORT_NAME: {
+            JitOptRef fromlist;
+            JitOptRef level;
             JitOptRef res;
+            fromlist = stack_pointer[-1];
+            level = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(fromlist);
+                sym_hint_must_rebox(level);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(fromlist);
+                sym_hint_must_rebox(level);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -1876,7 +2810,15 @@
         }
 
         case _IMPORT_FROM: {
+            JitOptRef from;
             JitOptRef res;
+            from = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(from);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(from);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1889,7 +2831,15 @@
         /* _POP_JUMP_IF_TRUE is not a viable micro-op for tier 2 */
 
         case _IS_NONE: {
+            JitOptRef value;
             JitOptRef b;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             b = sym_new_not_null(ctx);
             stack_pointer[-1] = b;
             break;
@@ -1899,6 +2849,9 @@
             JitOptRef obj;
             JitOptRef len;
             obj = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(obj);
+            }
             int tuple_length = sym_tuple_length(obj);
             if (tuple_length == -1) {
                 len = sym_new_type(ctx, &PyLong_Type);
@@ -1926,7 +2879,23 @@
         }
 
         case _MATCH_CLASS: {
+            JitOptRef names;
+            JitOptRef type;
+            JitOptRef subject;
             JitOptRef attrs;
+            names = stack_pointer[-1];
+            type = stack_pointer[-2];
+            subject = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(names);
+                sym_hint_must_rebox(type);
+                sym_hint_must_rebox(subject);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(names);
+                sym_hint_must_rebox(type);
+                sym_hint_must_rebox(subject);
+            }
             attrs = sym_new_not_null(ctx);
             stack_pointer[-3] = attrs;
             stack_pointer += -2;
@@ -1935,7 +2904,15 @@
         }
 
         case _MATCH_MAPPING: {
+            JitOptRef subject;
             JitOptRef res;
+            subject = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(subject);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(subject);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1944,7 +2921,15 @@
         }
 
         case _MATCH_SEQUENCE: {
+            JitOptRef subject;
             JitOptRef res;
+            subject = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(subject);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(subject);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1953,7 +2938,19 @@
         }
 
         case _MATCH_KEYS: {
+            JitOptRef keys;
+            JitOptRef subject;
             JitOptRef values_or_none;
+            keys = stack_pointer[-1];
+            subject = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(keys);
+                sym_hint_must_rebox(subject);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(keys);
+                sym_hint_must_rebox(subject);
+            }
             values_or_none = sym_new_not_null(ctx);
             stack_pointer[0] = values_or_none;
             stack_pointer += 1;
@@ -1966,6 +2963,9 @@
             JitOptRef iter;
             JitOptRef index_or_null;
             iterable = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+            }
             if (sym_matches_type(iterable, &PyTuple_Type) || sym_matches_type(iterable, &PyList_Type)) {
                 iter = iterable;
                 index_or_null = sym_new_not_null(ctx);
@@ -1982,7 +2982,15 @@
         }
 
         case _GET_YIELD_FROM_ITER: {
+            JitOptRef iterable;
             JitOptRef iter;
+            iterable = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(iterable);
+            }
             iter = sym_new_not_null(ctx);
             stack_pointer[-1] = iter;
             break;
@@ -1991,7 +2999,19 @@
         /* _FOR_ITER is not a viable micro-op for tier 2 */
 
         case _FOR_ITER_TIER_TWO: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
             JitOptRef next;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             next = sym_new_not_null(ctx);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -2002,19 +3022,55 @@
         /* _INSTRUMENTED_FOR_ITER is not a viable micro-op for tier 2 */
 
         case _ITER_CHECK_LIST: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             break;
         }
 
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             break;
         }
 
         /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 */
 
         case _ITER_NEXT_LIST_TIER_TWO: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
             JitOptRef next;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             next = sym_new_not_null(ctx);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -2023,8 +3079,14 @@
         }
 
         case _ITER_CHECK_TUPLE: {
+            JitOptRef null_or_index;
             JitOptRef iter;
+            null_or_index = stack_pointer[-1];
             iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             if (sym_matches_type(iter, &PyTuple_Type)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2035,11 +3097,35 @@
         /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             break;
         }
 
         case _ITER_NEXT_TUPLE: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
             JitOptRef next;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             next = sym_new_not_null(ctx);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -2048,17 +3134,49 @@
         }
 
         case _ITER_CHECK_RANGE: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             break;
         }
 
         /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             break;
         }
 
         case _ITER_NEXT_RANGE: {
+            JitOptRef null_or_index;
+            JitOptRef iter;
             JitOptRef next;
+            null_or_index = stack_pointer[-1];
+            iter = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(null_or_index);
+                sym_hint_must_rebox(iter);
+            }
             next = sym_new_type(ctx, &PyLong_Type);
             stack_pointer[0] = next;
             stack_pointer += 1;
@@ -2068,6 +3186,8 @@
 
         case _FOR_ITER_GEN_FRAME: {
             JitOptRef gen_frame;
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             gen_frame = PyJitRef_NULL;
             ctx->done = true;
             stack_pointer[0] = gen_frame;
@@ -2081,6 +3201,9 @@
             JitOptRef *method_and_self;
             self = stack_pointer[-1];
             method_and_self = &stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self);
+            }
             method_and_self[0] = sym_new_null(ctx);
             method_and_self[1] = self;
             stack_pointer += 1;
@@ -2091,13 +3214,38 @@
         case _LOAD_SPECIAL: {
             JitOptRef *method_and_self;
             method_and_self = &stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = 2; --_i >= 0;) {
+                    sym_hint_must_rebox(method_and_self[_i]);
+                }
+            }
             method_and_self[0] = sym_new_not_null(ctx);
             method_and_self[1] = sym_new_unknown(ctx);
             break;
         }
 
         case _WITH_EXCEPT_START: {
+            JitOptRef val;
+            JitOptRef lasti;
+            JitOptRef exit_self;
+            JitOptRef exit_func;
             JitOptRef res;
+            val = stack_pointer[-1];
+            lasti = stack_pointer[-3];
+            exit_self = stack_pointer[-4];
+            exit_func = stack_pointer[-5];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(val);
+                sym_hint_must_rebox(lasti);
+                sym_hint_must_rebox(exit_self);
+                sym_hint_must_rebox(exit_func);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(val);
+                sym_hint_must_rebox(lasti);
+                sym_hint_must_rebox(exit_self);
+                sym_hint_must_rebox(exit_func);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -2106,8 +3254,16 @@
         }
 
         case _PUSH_EXC_INFO: {
+            JitOptRef exc;
             JitOptRef prev_exc;
             JitOptRef new_exc;
+            exc = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(exc);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(exc);
+            }
             prev_exc = sym_new_not_null(ctx);
             new_exc = sym_new_not_null(ctx);
             stack_pointer[-1] = prev_exc;
@@ -2118,10 +3274,26 @@
         }
 
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             break;
         }
 
         case _GUARD_KEYS_VERSION: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             break;
         }
 
@@ -2130,6 +3302,9 @@
             JitOptRef attr;
             JitOptRef self;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *descr = (PyObject *)this_instr->operand0;
             (void)descr;
             PyTypeObject *type = sym_get_type(owner);
@@ -2150,6 +3325,9 @@
             JitOptRef attr;
             JitOptRef self;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *descr = (PyObject *)this_instr->operand0;
             (void)descr;
             PyTypeObject *type = sym_get_type(owner);
@@ -2169,6 +3347,9 @@
             JitOptRef owner;
             JitOptRef attr;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *descr = (PyObject *)this_instr->operand0;
             (void)descr;
             PyTypeObject *type = sym_get_type(owner);
@@ -2184,6 +3365,9 @@
             JitOptRef owner;
             JitOptRef attr;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *descr = (PyObject *)this_instr->operand0;
             (void)descr;
             PyTypeObject *type = sym_get_type(owner);
@@ -2196,6 +3380,14 @@
         }
 
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
+            JitOptRef owner;
+            owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             break;
         }
 
@@ -2204,6 +3396,9 @@
             JitOptRef attr;
             JitOptRef self;
             owner = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(owner);
+            }
             PyObject *descr = (PyObject *)this_instr->operand0;
             (void)descr;
             PyTypeObject *type = sym_get_type(owner);
@@ -2226,6 +3421,13 @@
             args = &stack_pointer[-oparg];
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             (void)args;
             callable = sym_new_not_null(ctx);
             self_or_null = sym_new_not_null(ctx);
@@ -2239,7 +3441,20 @@
         /* _MONITOR_CALL is not a viable micro-op for tier 2 */
 
         case _PY_FRAME_GENERAL: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef new_frame;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             PyCodeObject *co = NULL;
             assert((this_instr + 2)->opcode == _PUSH_FRAME);
             co = get_code_with_logging((this_instr + 2));
@@ -2255,8 +3470,14 @@
         }
 
         case _CHECK_FUNCTION_VERSION: {
+            JitOptRef self_or_null;
             JitOptRef callable;
+            self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             uint32_t func_version = (uint32_t)this_instr->operand0;
             if (sym_is_const(ctx, callable) && sym_matches_type(callable, &PyFunction_Type)) {
                 assert(PyFunction_Check(sym_get_const(ctx, callable)));
@@ -2272,8 +3493,14 @@
         }
 
         case _CHECK_METHOD_VERSION: {
+            JitOptRef null;
             JitOptRef callable;
+            null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             uint32_t func_version = (uint32_t)this_instr->operand0;
             if (sym_is_const(ctx, callable) && sym_matches_type(callable, &PyMethod_Type)) {
                 PyMethodObject *method = (PyMethodObject *)sym_get_const(ctx, callable);
@@ -2286,15 +3513,55 @@
         }
 
         case _EXPAND_METHOD: {
+            JitOptRef self_or_null;
+            JitOptRef callable;
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE: {
+            JitOptRef callable;
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         case _CALL_NON_PY_GENERAL: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2307,6 +3574,10 @@
             JitOptRef callable;
             null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             sym_set_null(null);
             sym_set_type(callable, &PyMethod_Type);
             break;
@@ -2317,6 +3588,10 @@
             JitOptRef callable;
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             callable = sym_new_not_null(ctx);
             self_or_null = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = callable;
@@ -2336,6 +3611,10 @@
             JitOptRef callable;
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             assert(sym_matches_type(callable, &PyFunction_Type));
             if (sym_is_const(ctx, callable)) {
                 if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
@@ -2350,6 +3629,8 @@
         }
 
         case _CHECK_STACK_SPACE: {
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             assert(corresponding_check_stack == NULL);
             corresponding_check_stack = this_instr;
             break;
@@ -2362,9 +3643,18 @@
         case _INIT_CALL_PY_EXACT_ARGS: {
             JitOptRef *args;
             JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef new_frame;
             args = &stack_pointer[-oparg];
             self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             int argcount = oparg;
             PyCodeObject *co = NULL;
             assert((this_instr + 2)->opcode == _PUSH_FRAME);
@@ -2393,6 +3683,9 @@
         case _PUSH_FRAME: {
             JitOptRef new_frame;
             new_frame = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(new_frame);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             ctx->frame->stack_pointer = stack_pointer;
@@ -2425,6 +3718,9 @@
         case _GUARD_NOS_NULL: {
             JitOptRef null;
             null = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+            }
             if (sym_is_null(null)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2435,6 +3731,9 @@
         case _GUARD_NOS_NOT_NULL: {
             JitOptRef nos;
             nos = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(nos);
+            }
             if (sym_is_not_null(nos)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2445,6 +3744,9 @@
         case _GUARD_THIRD_NULL: {
             JitOptRef null;
             null = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+            }
             if (sym_is_null(null)) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2455,6 +3757,9 @@
         case _GUARD_CALLABLE_TYPE_1: {
             JitOptRef callable;
             callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             if (sym_get_const(ctx, callable) == (PyObject *)&PyType_Type) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2466,6 +3771,9 @@
             JitOptRef arg;
             JitOptRef res;
             arg = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(arg);
+            }
             PyObject* type = (PyObject *)sym_get_type(arg);
             if (type) {
                 res = sym_new_const(ctx, type);
@@ -2484,6 +3792,9 @@
         case _GUARD_CALLABLE_STR_1: {
             JitOptRef callable;
             callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             if (sym_get_const(ctx, callable) == (PyObject *)&PyUnicode_Type) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2495,6 +3806,9 @@
             JitOptRef arg;
             JitOptRef res;
             arg = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(arg);
+            }
             if (sym_matches_type(arg, &PyUnicode_Type)) {
                 res = arg;
             }
@@ -2510,6 +3824,9 @@
         case _GUARD_CALLABLE_TUPLE_1: {
             JitOptRef callable;
             callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             if (sym_get_const(ctx, callable) == (PyObject *)&PyTuple_Type) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
             }
@@ -2519,8 +3836,17 @@
 
         case _CALL_TUPLE_1: {
             JitOptRef arg;
+            JitOptRef null;
+            JitOptRef callable;
             JitOptRef res;
             arg = stack_pointer[-1];
+            null = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(arg);
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             if (sym_matches_type(arg, &PyTuple_Type)) {
                 res = arg;
             }
@@ -2540,6 +3866,13 @@
             args = &stack_pointer[-oparg];
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             uint32_t type_version = (uint32_t)this_instr->operand0;
             (void)type_version;
             (void)args;
@@ -2551,7 +3884,20 @@
         }
 
         case _CREATE_INIT_FRAME: {
+            JitOptRef *args;
+            JitOptRef self;
+            JitOptRef init;
             JitOptRef init_frame;
+            args = &stack_pointer[-oparg];
+            self = stack_pointer[-1 - oparg];
+            init = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self);
+                sym_hint_must_rebox(init);
+            }
             init_frame = PyJitRef_NULL;
             ctx->done = true;
             stack_pointer[-2 - oparg] = init_frame;
@@ -2561,13 +3907,41 @@
         }
 
         case _EXIT_INIT_CHECK: {
+            JitOptRef should_be_none;
+            should_be_none = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(should_be_none);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(should_be_none);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _CALL_BUILTIN_CLASS: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2576,7 +3950,27 @@
         }
 
         case _CALL_BUILTIN_O: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2585,7 +3979,27 @@
         }
 
         case _CALL_BUILTIN_FAST: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2594,7 +4008,27 @@
         }
 
         case _CALL_BUILTIN_FAST_WITH_KEYWORDS: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2605,6 +4039,9 @@
         case _GUARD_CALLABLE_LEN: {
             JitOptRef callable;
             callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             PyObject *len = _PyInterpreterState_GET()->callable_cache.len;
             if (sym_get_const(ctx, callable) == len) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
@@ -2615,8 +4052,17 @@
 
         case _CALL_LEN: {
             JitOptRef arg;
+            JitOptRef null;
+            JitOptRef callable;
             JitOptRef res;
             arg = stack_pointer[-1];
+            null = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(arg);
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_type(ctx, &PyLong_Type);
             int tuple_length = sym_tuple_length(arg);
             if (tuple_length >= 0) {
@@ -2644,6 +4090,9 @@
         case _GUARD_CALLABLE_ISINSTANCE: {
             JitOptRef callable;
             callable = stack_pointer[-4];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             PyObject *isinstance = _PyInterpreterState_GET()->callable_cache.isinstance;
             if (sym_get_const(ctx, callable) == isinstance) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
@@ -2658,6 +4107,10 @@
             JitOptRef res;
             cls = stack_pointer[-1];
             instance = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(cls);
+                sym_hint_must_rebox(instance);
+            }
             res = sym_new_type(ctx, &PyBool_Type);
             PyTypeObject *inst_type = sym_get_type(instance);
             PyTypeObject *cls_o = (PyTypeObject *)sym_get_const(ctx, cls);
@@ -2678,6 +4131,9 @@
         case _GUARD_CALLABLE_LIST_APPEND: {
             JitOptRef callable;
             callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             PyObject *list_append = _PyInterpreterState_GET()->callable_cache.list_append;
             if (sym_get_const(ctx, callable) == list_append) {
                 REPLACE_OP(this_instr, _NOP, 0, 0);
@@ -2687,13 +4143,49 @@
         }
 
         case _CALL_LIST_APPEND: {
+            JitOptRef arg;
+            JitOptRef self;
+            JitOptRef callable;
+            arg = stack_pointer[-1];
+            self = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(arg);
+                sym_hint_must_rebox(self);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(arg);
+                sym_hint_must_rebox(self);
+                sym_hint_must_rebox(callable);
+            }
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _CALL_METHOD_DESCRIPTOR_O: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2702,7 +4194,27 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_FAST_WITH_KEYWORDS: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2711,7 +4223,27 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_NOARGS: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2720,7 +4252,27 @@
         }
 
         case _CALL_METHOD_DESCRIPTOR_FAST: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;
             stack_pointer += -1 - oparg;
@@ -2731,13 +4283,41 @@
         /* _MONITOR_CALL_KW is not a viable micro-op for tier 2 */
 
         case _MAYBE_EXPAND_METHOD_KW: {
+            JitOptRef self_or_null;
+            JitOptRef callable;
+            self_or_null = stack_pointer[-2 - oparg];
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         /* _DO_CALL_KW is not a viable micro-op for tier 2 */
 
         case _PY_FRAME_KW: {
+            JitOptRef kwnames;
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef new_frame;
+            kwnames = stack_pointer[-1];
+            args = &stack_pointer[-1 - oparg];
+            self_or_null = stack_pointer[-2 - oparg];
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(kwnames);
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             new_frame = PyJitRef_NULL;
             ctx->done = true;
             stack_pointer[-3 - oparg] = new_frame;
@@ -2747,23 +4327,87 @@
         }
 
         case _CHECK_FUNCTION_VERSION_KW: {
+            JitOptRef callable;
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         case _CHECK_METHOD_VERSION_KW: {
+            JitOptRef null;
+            JitOptRef callable;
+            null = stack_pointer[-2 - oparg];
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         case _EXPAND_METHOD_KW: {
+            JitOptRef self_or_null;
+            JitOptRef callable;
+            self_or_null = stack_pointer[-2 - oparg];
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE_KW: {
+            JitOptRef callable;
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(callable);
+            }
             break;
         }
 
         case _CALL_KW_NON_PY: {
+            JitOptRef kwnames;
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
             JitOptRef res;
+            kwnames = stack_pointer[-1];
+            args = &stack_pointer[-1 - oparg];
+            self_or_null = stack_pointer[-2 - oparg];
+            callable = stack_pointer[-3 - oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(kwnames);
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(kwnames);
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+                sym_hint_must_rebox(self_or_null);
+                sym_hint_must_rebox(callable);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-3 - oparg] = res;
             stack_pointer += -2 - oparg;
@@ -2772,20 +4416,56 @@
         }
 
         case _MAKE_CALLARGS_A_TUPLE: {
+            JitOptRef kwargs;
+            JitOptRef callargs;
+            JitOptRef func;
+            kwargs = stack_pointer[-1];
+            callargs = stack_pointer[-2];
+            func = stack_pointer[-4];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(kwargs);
+                sym_hint_must_rebox(callargs);
+                sym_hint_must_rebox(func);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(kwargs);
+                sym_hint_must_rebox(callargs);
+                sym_hint_must_rebox(func);
+            }
             break;
         }
 
         /* _DO_CALL_FUNCTION_EX is not a viable micro-op for tier 2 */
 
         case _MAKE_FUNCTION: {
+            JitOptRef codeobj_st;
             JitOptRef func;
+            codeobj_st = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(codeobj_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(codeobj_st);
+            }
             func = sym_new_not_null(ctx);
             stack_pointer[-1] = func;
             break;
         }
 
         case _SET_FUNCTION_ATTRIBUTE: {
+            JitOptRef func_in;
+            JitOptRef attr_st;
             JitOptRef func_out;
+            func_in = stack_pointer[-1];
+            attr_st = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(func_in);
+                sym_hint_must_rebox(attr_st);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(func_in);
+                sym_hint_must_rebox(attr_st);
+            }
             func_out = sym_new_not_null(ctx);
             stack_pointer[-2] = func_out;
             stack_pointer += -1;
@@ -2816,7 +4496,14 @@
         }
 
         case _BUILD_SLICE: {
+            JitOptRef *args;
             JitOptRef slice;
+            args = &stack_pointer[-oparg];
+            if (!op_unboxed[this_instr->opcode]) {
+                for (int _i = oparg; --_i >= 0;) {
+                    sym_hint_must_rebox(args[_i]);
+                }
+            }
             slice = sym_new_type(ctx, &PySlice_Type);
             stack_pointer[-oparg] = slice;
             stack_pointer += 1 - oparg;
@@ -2825,21 +4512,49 @@
         }
 
         case _CONVERT_VALUE: {
+            JitOptRef value;
             JitOptRef result;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             result = sym_new_not_null(ctx);
             stack_pointer[-1] = result;
             break;
         }
 
         case _FORMAT_SIMPLE: {
+            JitOptRef value;
             JitOptRef res;
+            value = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(value);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-1] = res;
             break;
         }
 
         case _FORMAT_WITH_SPEC: {
+            JitOptRef fmt_spec;
+            JitOptRef value;
             JitOptRef res;
+            fmt_spec = stack_pointer[-1];
+            value = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(fmt_spec);
+                sym_hint_must_rebox(value);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(fmt_spec);
+                sym_hint_must_rebox(value);
+            }
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
@@ -2851,6 +4566,9 @@
             JitOptRef bottom;
             JitOptRef top;
             bottom = stack_pointer[-1 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(bottom);
+            }
             assert(oparg > 0);
             top = bottom;
             stack_pointer[0] = top;
@@ -2865,6 +4583,10 @@
             JitOptRef res;
             rhs = stack_pointer[-1];
             lhs = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(rhs);
+                sym_hint_must_rebox(lhs);
+            }
             if (
                 sym_is_safe_const(ctx, lhs) &&
                 sym_is_safe_const(ctx, rhs)
@@ -2942,6 +4664,10 @@
             JitOptRef bottom;
             top = stack_pointer[-1];
             bottom = stack_pointer[-2 - (oparg-2)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(top);
+                sym_hint_must_rebox(bottom);
+            }
             JitOptRef temp = bottom;
             bottom = top;
             top = temp;
@@ -2972,6 +4698,9 @@
         case _GUARD_IS_TRUE_POP: {
             JitOptRef flag;
             flag = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(flag);
+            }
             if (sym_is_const(ctx, flag)) {
                 PyObject *value = sym_get_const(ctx, flag);
                 assert(value != NULL);
@@ -2986,6 +4715,9 @@
         case _GUARD_IS_FALSE_POP: {
             JitOptRef flag;
             flag = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(flag);
+            }
             if (sym_is_const(ctx, flag)) {
                 PyObject *value = sym_get_const(ctx, flag);
                 assert(value != NULL);
@@ -3000,6 +4732,9 @@
         case _GUARD_IS_NONE_POP: {
             JitOptRef val;
             val = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(val);
+            }
             if (sym_is_const(ctx, val)) {
                 PyObject *value = sym_get_const(ctx, val);
                 assert(value != NULL);
@@ -3018,6 +4753,9 @@
         case _GUARD_IS_NOT_NONE_POP: {
             JitOptRef val;
             val = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(val);
+            }
             if (sym_is_const(ctx, val)) {
                 PyObject *value = sym_get_const(ctx, val);
                 assert(value != NULL);
@@ -3066,7 +4804,7 @@
         case _LOAD_CONST_INLINE: {
             JitOptRef value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
-            value = sym_new_const(ctx, ptr);
+            value = sym_new_const_with_origin(ctx, ptr, this_instr);
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -3074,9 +4812,14 @@
         }
 
         case _POP_TOP_LOAD_CONST_INLINE: {
+            JitOptRef pop;
             JitOptRef value;
+            pop = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop);
+            }
             PyObject *ptr = (PyObject *)this_instr->operand0;
-            value = sym_new_const(ctx, ptr);
+            value = sym_new_const_with_origin(ctx, ptr, this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -3084,7 +4827,7 @@
         case _LOAD_CONST_INLINE_BORROW: {
             JitOptRef value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
-            value = PyJitRef_Borrow(sym_new_const(ctx, ptr));
+            value = PyJitRef_Borrow(sym_new_const_with_origin(ctx, ptr, this_instr));
             stack_pointer[0] = value;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -3092,25 +4835,78 @@
         }
 
         case _POP_CALL: {
+            JitOptRef null;
+            JitOptRef callable;
+            null = stack_pointer[-1];
+            callable = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             stack_pointer += -2;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_CALL_ONE: {
+            JitOptRef pop;
+            JitOptRef null;
+            JitOptRef callable;
+            pop = stack_pointer[-1];
+            null = stack_pointer[-2];
+            callable = stack_pointer[-3];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop);
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop);
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             stack_pointer += -3;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_CALL_TWO: {
+            JitOptRef pop2;
+            JitOptRef pop1;
+            JitOptRef null;
+            JitOptRef callable;
+            pop2 = stack_pointer[-1];
+            pop1 = stack_pointer[-2];
+            null = stack_pointer[-3];
+            callable = stack_pointer[-4];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop2);
+                sym_hint_must_rebox(pop1);
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop2);
+                sym_hint_must_rebox(pop1);
+                (void)null;
+                sym_hint_must_rebox(callable);
+            }
             stack_pointer += -4;
             assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
         case _POP_TOP_LOAD_CONST_INLINE_BORROW: {
+            JitOptRef pop;
             JitOptRef value;
+            pop = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop);
+            }
             PyObject *ptr = (PyObject *)this_instr->operand0;
             value = PyJitRef_Borrow(sym_new_const(ctx, ptr));
             stack_pointer[-1] = value;
@@ -3118,7 +4914,19 @@
         }
 
         case _POP_TWO_LOAD_CONST_INLINE_BORROW: {
+            JitOptRef pop2;
+            JitOptRef pop1;
             JitOptRef value;
+            pop2 = stack_pointer[-1];
+            pop1 = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop2);
+                sym_hint_must_rebox(pop1);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(pop2);
+                sym_hint_must_rebox(pop1);
+            }
             value = sym_new_not_null(ctx);
             stack_pointer[-2] = value;
             stack_pointer += -1;
@@ -3128,6 +4936,8 @@
 
         case _POP_CALL_LOAD_CONST_INLINE_BORROW: {
             JitOptRef value;
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             PyObject *ptr = (PyObject *)this_instr->operand0;
             value = PyJitRef_Borrow(sym_new_const(ctx, ptr));
             stack_pointer[-2] = value;
@@ -3138,6 +4948,8 @@
 
         case _POP_CALL_ONE_LOAD_CONST_INLINE_BORROW: {
             JitOptRef value;
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             PyObject *ptr = (PyObject *)this_instr->operand0;
             value = PyJitRef_Borrow(sym_new_const(ctx, ptr));
             stack_pointer[-3] = value;
@@ -3148,6 +4960,8 @@
 
         case _POP_CALL_TWO_LOAD_CONST_INLINE_BORROW: {
             JitOptRef value;
+            if (!op_unboxed[this_instr->opcode]) {
+            }
             PyObject *ptr = (PyObject *)this_instr->operand0;
             value = PyJitRef_Borrow(sym_new_const(ctx, ptr));
             stack_pointer[-4] = value;
@@ -3157,8 +4971,16 @@
         }
 
         case _LOAD_CONST_UNDER_INLINE: {
+            JitOptRef old;
             JitOptRef value;
             JitOptRef new;
+            old = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(old);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(old);
+            }
             value = sym_new_not_null(ctx);
             new = sym_new_not_null(ctx);
             stack_pointer[-1] = value;
@@ -3169,8 +4991,16 @@
         }
 
         case _LOAD_CONST_UNDER_INLINE_BORROW: {
+            JitOptRef old;
             JitOptRef value;
             JitOptRef new;
+            old = stack_pointer[-1];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(old);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(old);
+            }
             value = sym_new_not_null(ctx);
             new = sym_new_not_null(ctx);
             stack_pointer[-1] = value;

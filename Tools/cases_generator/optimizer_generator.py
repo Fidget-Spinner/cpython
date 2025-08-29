@@ -82,13 +82,12 @@ def stackref_type_name(var: StackItem) -> str:
     assert not var.is_array(), "Unsafe to convert a symbol to an array-like StackRef."
     return "_PyStackRef "
 
-def declare_variables(uop: Uop, out: CWriter, skip_inputs: bool) -> None:
+def declare_variables(uop: Uop, out: CWriter) -> None:
     variables = {"unused"}
-    if not skip_inputs:
-        for var in reversed(uop.stack.inputs):
-            if var.used and var.name not in variables:
-                variables.add(var.name)
-                out.emit(f"{type_name(var)}{var.name};\n")
+    for var in reversed(uop.stack.inputs):
+        if var.name not in variables:
+            variables.add(var.name)
+            out.emit(f"{type_name(var)}{var.name};\n")
     for var in uop.stack.outputs:
         if var.peek:
             continue
@@ -111,10 +110,31 @@ def decref_inputs(
     out.emit_at("", tkn)
 
 
-def emit_default(out: CWriter, uop: Uop, stack: Stack) -> None:
-    null = CWriter.null()
+def emit_must_rebox_hint_for_input(out: CWriter, uop: Uop):
+    # peeks need to be processed too, as they might be accessed by the guard
+    # or whatever inst is looking at it
+    if not uop.stack.inputs:
+        return
+    out.emit("if (!op_unboxed[this_instr->opcode]) {\n")
     for var in reversed(uop.stack.inputs):
-        stack.pop(var, null)
+        if var.name != "unused":
+            if var.is_array():
+                if var.size == "1":
+                    out.emit(f"sym_hint_must_rebox({var.name}[0]);\n")
+                else:
+                    out.emit(f"for (int _i = {var.size}; --_i >= 0;) {{\n")
+                    out.emit(f"sym_hint_must_rebox({var.name}[_i]);\n")
+                    out.emit("}\n")
+            elif var.name == "null":
+                out.emit("(void)null;\n")
+            else:
+                out.emit(f"sym_hint_must_rebox({var.name});\n")
+    out.emit("}\n")
+
+def emit_default(out: CWriter, uop: Uop, stack: Stack) -> None:
+    for var in reversed(uop.stack.inputs):
+        stack.pop(var, out)
+    emit_must_rebox_hint_for_input(out, uop)
     offset = stack.base_offset - stack.physical_sp
     for var in uop.stack.outputs:
         if var.is_array() and not var.peek and not var.name == "unused":
@@ -356,14 +376,12 @@ def write_uop(
     out: CWriter,
     stack: Stack,
     debug: bool,
-    skip_inputs: bool,
 ) -> None:
-    locals: dict[str, Local] = {}
     prototype = override if override else uop
     try:
         out.start_line()
-        if override:
-            storage = Storage.for_uop(stack, prototype, out, check_liveness=False)
+        storage = Storage.for_uop(stack, prototype, out, check_liveness=False, emit_unused=True)
+        emit_must_rebox_hint_for_input(out, prototype)
         if debug:
             args = []
             for input in prototype.stack.inputs:
@@ -430,12 +448,9 @@ def generate_abstract_interpreter(
             out.emit(f"/* {uop.name} is not a viable micro-op for tier 2 */\n\n")
             continue
         out.emit(f"case {uop.name}: {{\n")
-        if override:
-            declare_variables(override, out, skip_inputs=False)
-        else:
-            declare_variables(uop, out, skip_inputs=True)
+        declare_variables(override or uop, out)
         stack = Stack()
-        write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
+        write_uop(override, uop, out, stack, debug)
         out.start_line()
         out.emit("break;\n")
         out.emit("}")

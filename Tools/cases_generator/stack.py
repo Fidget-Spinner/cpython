@@ -231,7 +231,7 @@ class Stack:
         if check_liveness:
             raise StackError(f"Dropping live value '{var.name}'")
 
-    def pop(self, var: StackItem, out: CWriter) -> Local:
+    def pop(self, var: StackItem, out: CWriter, emit_unused: bool = False) -> Local:
         if self.variables:
             top = self.variables[-1]
             if var.is_array() != top.is_array() or top.size != var.size:
@@ -242,7 +242,7 @@ class Stack:
         if self.variables:
             popped = self.variables.pop()
             assert var.is_array() == popped.is_array() and popped.size == var.size
-            if not var.used:
+            if not var.used and not emit_unused:
                 return popped
             if popped.name != var.name:
                 rename = f"{var.name} = {popped.name};\n"
@@ -264,7 +264,7 @@ class Stack:
             out.emit(defn)
             return popped
         self.base_offset = self.logical_sp
-        if var.name in UNUSED or not var.used:
+        if var.name in UNUSED or (not var.used and not emit_unused):
             return Local.unused(var, self.base_offset)
         c_offset = (self.base_offset - self.physical_sp).to_c()
         assign = f"{var.name} = {indirect}stack_pointer[{c_offset}];\n"
@@ -529,11 +529,11 @@ class Storage:
             out.emit_reload()
 
     @staticmethod
-    def for_uop(stack: Stack, uop: Uop, out: CWriter, check_liveness: bool = True) -> "Storage":
+    def for_uop(stack: Stack, uop: Uop, out: CWriter, check_liveness: bool = True, emit_unused: bool = False) -> "Storage":
         inputs: list[Local] = []
         peeks: list[Local] = []
         for input in reversed(uop.stack.inputs):
-            local = stack.pop(input, out)
+            local = stack.pop(input, out, emit_unused=emit_unused)
             if input.peek:
                 peeks.append(local)
             inputs.append(local)

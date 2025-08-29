@@ -116,6 +116,24 @@ static void make_const(JitOptSymbol *sym, PyObject *val)
 {
     sym->tag = JIT_SYM_KNOWN_VALUE_TAG;
     sym->value.value = Py_NewRef(val);
+    sym->value.originating_inst = NULL;
+    sym->value.is_unbox_candidate = _PyLong_CheckExactAndCompact(val);
+}
+
+void
+_Py_uop_sym_hint_must_rebox(JitOptRef ref)
+{
+    JitOptSymbol *sym = PyJitRef_Unwrap(ref);
+    switch (sym->tag) {
+        case JIT_SYM_KNOWN_VALUE_TAG:
+            sym->value.is_unbox_candidate = false;
+            break;
+        case JIT_SYM_COMPACT_INT:
+            sym->compact.is_unbox_candidate = false;
+            break;
+        default:
+            break;
+    }
 }
 
 static inline void
@@ -498,6 +516,29 @@ _Py_uop_sym_new_const(JitOptContext *ctx, PyObject *const_val)
     return ref;
 }
 
+void
+_Py_uop_sym_set_origin_inst(JitOptContext *ctx, JitOptRef ref, _PyUOpInstruction *origin_inst)
+{
+    JitOptSymbol *sym = PyJitRef_Unwrap(ref);
+    if (sym->tag == JIT_SYM_COMPACT_INT) {
+        sym->compact.originating_inst = origin_inst;
+    }
+    else if (sym->tag == JIT_SYM_KNOWN_VALUE_TAG) {
+        sym->value.originating_inst = origin_inst;
+    }
+    else {
+        sym_set_bottom(ctx, sym);
+    }
+}
+
+JitOptRef
+_Py_uop_sym_new_const_with_origin(JitOptContext *ctx, PyObject *const_val, _PyUOpInstruction *origin_inst)
+{
+    JitOptRef sym = _Py_uop_sym_new_const(ctx, const_val);
+    _Py_uop_sym_set_origin_inst(ctx, sym, origin_inst);
+    return sym;
+}
+
 JitOptRef
 _Py_uop_sym_new_const_steal(JitOptContext *ctx, PyObject *const_val)
 {
@@ -799,13 +840,14 @@ _Py_uop_sym_new_truthiness(JitOptContext *ctx, JitOptRef ref, bool truthy)
 }
 
 JitOptRef
-_Py_uop_sym_new_compact_int(JitOptContext *ctx)
+_Py_uop_sym_new_compact_int(JitOptContext *ctx, _PyUOpInstruction *this_instr)
 {
     JitOptSymbol *sym = sym_new(ctx);
     if (sym == NULL) {
         return out_of_space_ref(ctx);
     }
     sym->tag = JIT_SYM_COMPACT_INT;
+    sym->compact.originating_inst = this_instr;
     return PyJitRef_Wrap(sym);
 }
 
@@ -1075,7 +1117,7 @@ _Py_uop_symbols_test(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(ignored))
 
     JitOptRef ref_42 = _Py_uop_sym_new_const(ctx, val_42);
     JitOptRef ref_big = _Py_uop_sym_new_const(ctx, val_big);
-    JitOptRef ref_int = _Py_uop_sym_new_compact_int(ctx);
+    JitOptRef ref_int = _Py_uop_sym_new_compact_int(ctx, NULL);
     TEST_PREDICATE(_Py_uop_sym_is_compact_int(ref_42), "42 is not a compact int");
     TEST_PREDICATE(!_Py_uop_sym_is_compact_int(ref_big), "(1 << 66) is a compact int");
     TEST_PREDICATE(_Py_uop_sym_is_compact_int(ref_int), "compact int is not a compact int");
@@ -1088,7 +1130,7 @@ _Py_uop_symbols_test(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(ignored))
     _Py_uop_sym_set_type(ctx, ref_int, &PyFloat_Type);  // Should make it bottom
     TEST_PREDICATE(_Py_uop_sym_is_bottom(ref_int), "compact int cast to float isn't bottom");
 
-    ref_int = _Py_uop_sym_new_compact_int(ctx);
+    ref_int = _Py_uop_sym_new_compact_int(ctx, NULL);
     _Py_uop_sym_set_const(ctx, ref_int, val_43);
     TEST_PREDICATE(_Py_uop_sym_is_compact_int(ref_int), "43 is not a compact int");
     TEST_PREDICATE(_Py_uop_sym_matches_type(ref_int, &PyLong_Type), "43 is not an int");

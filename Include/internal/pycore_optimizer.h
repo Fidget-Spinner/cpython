@@ -50,8 +50,9 @@ typedef struct {
  *    uint16_t error_target;
  */
 typedef struct {
-    uint16_t opcode:15;
+    uint16_t opcode:14;
     uint16_t format:1;
+    uint16_t is_pe_candidate:1;
     uint16_t oparg;
     union {
         uint32_t target;
@@ -127,6 +128,15 @@ int _Py_uop_analyze_and_optimize(_PyInterpreterFrame *frame,
     _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
     _PyBloomFilter *dependencies);
 
+int
+_Py_uop_partial_evaluate(
+    _PyInterpreterFrame *frame,
+    _PyUOpInstruction *buffer,
+    int length,
+    int curr_stacklen,
+    _PyBloomFilter *dependencies
+);
+
 extern PyTypeObject _PyUOpExecutor_Type;
 
 
@@ -195,7 +205,9 @@ typedef struct _jit_opt_known_version {
 
 typedef struct _jit_opt_known_value {
     uint8_t tag;
+    uint8_t is_unbox_candidate;
     PyObject *value;
+    _PyUOpInstruction *originating_inst;
 } JitOptKnownValue;
 
 #define MAX_SYMBOLIC_TUPLE_SIZE 7
@@ -214,6 +226,8 @@ typedef struct {
 
 typedef struct {
     uint8_t tag;
+    uint8_t is_unbox_candidate;
+    _PyUOpInstruction *originating_inst;
 } JitOptCompactInt;
 
 typedef union _jit_opt_symbol {
@@ -316,6 +330,7 @@ extern JitOptRef _Py_uop_sym_new_type(
     JitOptContext *ctx, PyTypeObject *typ);
 
 extern JitOptRef _Py_uop_sym_new_const(JitOptContext *ctx, PyObject *const_val);
+extern JitOptRef _Py_uop_sym_new_const_with_origin(JitOptContext *ctx, PyObject *const_val, _PyUOpInstruction *origin_inst);
 extern JitOptRef _Py_uop_sym_new_const_steal(JitOptContext *ctx, PyObject *const_val);
 bool _Py_uop_sym_is_safe_const(JitOptContext *ctx, JitOptRef sym);
 _PyStackRef _Py_uop_sym_get_const_as_stackref(JitOptContext *ctx, JitOptRef sym);
@@ -336,8 +351,9 @@ extern JitOptRef _Py_uop_sym_tuple_getitem(JitOptContext *ctx, JitOptRef sym, in
 extern int _Py_uop_sym_tuple_length(JitOptRef sym);
 extern JitOptRef _Py_uop_sym_new_truthiness(JitOptContext *ctx, JitOptRef value, bool truthy);
 extern bool _Py_uop_sym_is_compact_int(JitOptRef sym);
-extern JitOptRef _Py_uop_sym_new_compact_int(JitOptContext *ctx);
+extern JitOptRef _Py_uop_sym_new_compact_int(JitOptContext *ctx, _PyUOpInstruction *this_instr);
 extern void _Py_uop_sym_set_compact_int(JitOptContext *ctx,  JitOptRef sym);
+extern void _Py_uop_sym_hint_must_rebox(JitOptRef sym);
 
 extern void _Py_uop_abstractcontext_init(JitOptContext *ctx);
 extern void _Py_uop_abstractcontext_fini(JitOptContext *ctx);

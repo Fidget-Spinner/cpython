@@ -479,6 +479,7 @@ add_to_trace(
 {
     trace[trace_length].opcode = opcode;
     trace[trace_length].format = UOP_FORMAT_TARGET;
+    trace[trace_length].is_pe_candidate = false;
     trace[trace_length].target = target;
     trace[trace_length].oparg = oparg;
     trace[trace_length].operand0 = operand;

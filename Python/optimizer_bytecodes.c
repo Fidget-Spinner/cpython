@@ -237,17 +237,17 @@ dummy_func(void) {
 
     op(_BINARY_OP_ADD_INT, (left, right -- res)) {
         REPLACE_OPCODE_IF_EVALUATES_PURE(left, right);
-        res = sym_new_compact_int(ctx);
+        res = sym_new_compact_int(ctx, this_instr);
     }
 
     op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
         REPLACE_OPCODE_IF_EVALUATES_PURE(left, right);
-        res = sym_new_compact_int(ctx);
+        res = sym_new_compact_int(ctx, this_instr);
     }
 
     op(_BINARY_OP_MULTIPLY_INT, (left, right -- res)) {
         REPLACE_OPCODE_IF_EVALUATES_PURE(left, right);
-        res = sym_new_compact_int(ctx);
+        res = sym_new_compact_int(ctx, this_instr);
     }
 
     op(_BINARY_OP_ADD_FLOAT, (left, right -- res)) {
@@ -398,7 +398,7 @@ dummy_func(void) {
 
     op(_UNARY_NEGATIVE, (value -- res)) {
         if (sym_is_compact_int(value)) {
-            res = sym_new_compact_int(ctx);
+            res = sym_new_compact_int(ctx, this_instr);
         }
         else {
             PyTypeObject *type = sym_get_type(value);
@@ -463,7 +463,7 @@ dummy_func(void) {
     op(_LOAD_CONST, (-- value)) {
         PyObject *val = PyTuple_GET_ITEM(co->co_consts, oparg);
         REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
-        value = PyJitRef_Borrow(sym_new_const(ctx, val));
+        value = PyJitRef_Borrow(sym_new_const_with_origin(ctx, val, this_instr));
     }
 
     op(_LOAD_SMALL_INT, (-- value)) {
@@ -471,19 +471,19 @@ dummy_func(void) {
         assert(val);
         assert(_Py_IsImmortal(val));
         REPLACE_OP(this_instr, _LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)val);
-        value = PyJitRef_Borrow(sym_new_const(ctx, val));
+        value = PyJitRef_Borrow(sym_new_const_with_origin(ctx, val, this_instr));
     }
 
     op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
-        value = sym_new_const(ctx, ptr);
+        value = sym_new_const_with_origin(ctx, ptr, this_instr);
     }
 
     op(_LOAD_CONST_INLINE_BORROW, (ptr/4 -- value)) {
-        value = PyJitRef_Borrow(sym_new_const(ctx, ptr));
+        value = PyJitRef_Borrow(sym_new_const_with_origin(ctx, ptr, this_instr));
     }
 
     op(_POP_TOP_LOAD_CONST_INLINE, (ptr/4, pop -- value)) {
-        value = sym_new_const(ctx, ptr);
+        value = sym_new_const_with_origin(ctx, ptr, this_instr);
     }
 
     op(_POP_TOP_LOAD_CONST_INLINE_BORROW, (ptr/4, pop -- value)) {

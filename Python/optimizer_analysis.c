@@ -333,6 +333,7 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 #define sym_new_type _Py_uop_sym_new_type
 #define sym_is_null _Py_uop_sym_is_null
 #define sym_new_const _Py_uop_sym_new_const
+#define sym_new_const_with_origin _Py_uop_sym_new_const_with_origin
 #define sym_new_null _Py_uop_sym_new_null
 #define sym_has_type _Py_uop_sym_has_type
 #define sym_get_type _Py_uop_sym_get_type
@@ -355,6 +356,8 @@ remove_globals(_PyInterpreterFrame *frame, _PyUOpInstruction *buffer,
 #define sym_is_compact_int _Py_uop_sym_is_compact_int
 #define sym_new_compact_int _Py_uop_sym_new_compact_int
 #define sym_new_truthiness _Py_uop_sym_new_truthiness
+#define sym_set_origin_inst _Py_uop_sym_set_origin_inst
+#define sym_hint_must_rebox _Py_uop_sym_hint_must_rebox
 
 #define JUMP_TO_LABEL(label) goto label;
 
@@ -460,6 +463,9 @@ const uint16_t op_without_decref_inputs[MAX_UOP_ID + 1] = {
     [_BINARY_OP_MULTIPLY_FLOAT] = _BINARY_OP_MULTIPLY_FLOAT__NO_DECREF_INPUTS,
     [_BINARY_OP_ADD_FLOAT] = _BINARY_OP_ADD_FLOAT__NO_DECREF_INPUTS,
     [_BINARY_OP_SUBTRACT_FLOAT] = _BINARY_OP_SUBTRACT_FLOAT__NO_DECREF_INPUTS,
+};
+
+const uint16_t op_unboxed[MAX_UOP_ID + 1] = {
 };
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */

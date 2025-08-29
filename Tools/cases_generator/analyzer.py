@@ -38,6 +38,7 @@ class Properties:
     const_oparg: int = -1
     needs_prev: bool = False
     no_save_ip: bool = False
+    accepts_unboxed: bool = False
 
     def dump(self, indent: str) -> None:
         simple_properties = self.__dict__.copy()
@@ -75,6 +76,7 @@ class Properties:
             pure=all(p.pure for p in properties),
             needs_prev=any(p.needs_prev for p in properties),
             no_save_ip=all(p.no_save_ip for p in properties),
+            accepts_unboxed=all(p.accepts_unboxed for p in properties),
         )
 
     @property
@@ -102,6 +104,7 @@ SKIP_PROPERTIES = Properties(
     side_exit=False,
     pure=True,
     no_save_ip=False,
+    accepts_unboxed=True,
 )
 
 
@@ -909,6 +912,7 @@ def compute_properties(op: parser.CodeDef) -> Properties:
     escapes = stmt_escapes(op.block)
     pure = False if isinstance(op, parser.LabelDef) else "pure" in op.annotations
     no_save_ip = False if isinstance(op, parser.LabelDef) else "no_save_ip" in op.annotations
+    accepts_unboxed = False if isinstance(op, parser.LabelDef) else "accepts_unboxed" in op.annotations
     return Properties(
         escaping_calls=escaping_calls,
         escapes=escapes,
@@ -932,6 +936,7 @@ def compute_properties(op: parser.CodeDef) -> Properties:
         no_save_ip=no_save_ip,
         tier=tier_variable(op),
         needs_prev=variable_used(op, "prev_instr"),
+        accepts_unboxed=accepts_unboxed,
     )
 
 def expand(items: list[StackItem], oparg: int) -> list[StackItem]:
