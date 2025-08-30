@@ -909,7 +909,10 @@ dummy_func(
             PyObject *res_o = (PyObject*)&_Py_SINGLETON(strings).ascii[c];
             PyStackRef_CLOSE_SPECIALIZED(sub_st, _PyLong_ExactDealloc);
             DEAD(sub_st);
-            PyStackRef_CLOSE(str_st);
+            // Let's say I forgot to close this
+            // PyStackRef_CLOSE(str_st);
+            // ... Instead I mark it dead
+            DEAD(str_st);
             res = PyStackRef_FromPyObjectImmortal(res_o);
         }
 

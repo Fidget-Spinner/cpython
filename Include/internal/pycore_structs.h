@@ -55,7 +55,7 @@ typedef struct {
 #include "pycore_context.h"       // _PyContextTokenMissing
 
 // Define this to get precise tracking of stackrefs.
-// #define Py_STACKREF_DEBUG 1
+#define Py_STACKREF_DEBUG 1
 
 typedef union _PyStackRef {
 #if !defined(Py_GIL_DISABLED) && defined(Py_STACKREF_DEBUG)
