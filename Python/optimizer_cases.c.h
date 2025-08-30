@@ -4031,6 +4031,33 @@
             args = &stack_pointer[-oparg];
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
+            if (sym_get_const(ctx, callable) != ctx->the_unbox_sum) {
+                if (!op_unboxed[this_instr->opcode]) {
+                    for (int _i = oparg; --_i >= 0;) {
+                        sym_hint_must_rebox(args[_i]);
+                    }
+                    sym_hint_must_rebox(self_or_null);
+                    sym_hint_must_rebox(callable);
+                }
+                res = sym_new_not_null(ctx);
+            }
+            else {
+                res = sym_new_compact_int(ctx, this_instr);
+            }
+            stack_pointer[-2 - oparg] = res;
+            stack_pointer += -1 - oparg;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _CALL_BUILTIN_FAST_STACKREF: {
+            JitOptRef *args;
+            JitOptRef self_or_null;
+            JitOptRef callable;
+            JitOptRef res;
+            args = &stack_pointer[-oparg];
+            self_or_null = stack_pointer[-1 - oparg];
+            callable = stack_pointer[-2 - oparg];
             if (!op_unboxed[this_instr->opcode]) {
                 for (int _i = oparg; --_i >= 0;) {
                     sym_hint_must_rebox(args[_i]);

@@ -1675,6 +1675,66 @@ exit:
     return return_value;
 }
 
+PyDoc_STRVAR(sys__my_sum_with_ref_api__doc__,
+"_my_sum_with_ref_api($module, obj1, obj2, /)\n"
+"--\n"
+"\n");
+
+#define SYS__MY_SUM_WITH_REF_API_METHODDEF    \
+    {"_my_sum_with_ref_api", _PyCFunction_CAST(sys__my_sum_with_ref_api), METH_FASTCALL, sys__my_sum_with_ref_api__doc__},
+
+static PyObject *
+sys__my_sum_with_ref_api_impl(PyObject *module, PyObject *obj1,
+                              PyObject *obj2);
+
+static PyObject *
+sys__my_sum_with_ref_api(PyObject *module, PyObject *const *args, Py_ssize_t nargs)
+{
+    PyObject *return_value = NULL;
+    PyObject *obj1;
+    PyObject *obj2;
+
+    if (!_PyArg_CheckPositional("_my_sum_with_ref_api", nargs, 2, 2)) {
+        goto exit;
+    }
+    obj1 = args[0];
+    obj2 = args[1];
+    return_value = sys__my_sum_with_ref_api_impl(module, obj1, obj2);
+
+exit:
+    return return_value;
+}
+
+PyDoc_STRVAR(sys__my_sum_without_ref_api__doc__,
+"_my_sum_without_ref_api($module, obj1, obj2, /)\n"
+"--\n"
+"\n");
+
+#define SYS__MY_SUM_WITHOUT_REF_API_METHODDEF    \
+    {"_my_sum_without_ref_api", _PyCFunction_CAST(sys__my_sum_without_ref_api), METH_FASTCALL, sys__my_sum_without_ref_api__doc__},
+
+static PyObject *
+sys__my_sum_without_ref_api_impl(PyObject *module, PyObject *obj1,
+                                 PyObject *obj2);
+
+static PyObject *
+sys__my_sum_without_ref_api(PyObject *module, PyObject *const *args, Py_ssize_t nargs)
+{
+    PyObject *return_value = NULL;
+    PyObject *obj1;
+    PyObject *obj2;
+
+    if (!_PyArg_CheckPositional("_my_sum_without_ref_api", nargs, 2, 2)) {
+        goto exit;
+    }
+    obj1 = args[0];
+    obj2 = args[1];
+    return_value = sys__my_sum_without_ref_api_impl(module, obj1, obj2);
+
+exit:
+    return return_value;
+}
+
 PyDoc_STRVAR(sys__getframemodulename__doc__,
 "_getframemodulename($module, /, depth=0)\n"
 "--\n"
@@ -1948,4 +2008,4 @@ exit:
 #ifndef SYS_GETANDROIDAPILEVEL_METHODDEF
     #define SYS_GETANDROIDAPILEVEL_METHODDEF
 #endif /* !defined(SYS_GETANDROIDAPILEVEL_METHODDEF) */
-/*[clinic end generated code: output=449d16326e69dcf6 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=b5cc56ece0d4e1e4 input=a9049054013a1b77]*/

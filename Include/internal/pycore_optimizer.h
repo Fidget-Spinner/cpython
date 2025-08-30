@@ -315,6 +315,8 @@ typedef struct _JitOptContext {
     // Arena for the symbolic types.
     ty_arena t_arena;
 
+    PyObject *the_unbox_sum;
+
     JitOptRef *n_consumed;
     JitOptRef *limit;
     JitOptRef locals_and_stack[MAX_ABSTRACT_INTERP_SIZE];

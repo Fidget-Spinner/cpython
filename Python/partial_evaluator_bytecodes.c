@@ -295,6 +295,26 @@ dummy_func(void) {
         }
     }
 
+    op(_CALL_BUILTIN_FAST, (callable, self_or_null, args[oparg] -- res)) {
+        if (is_pe_candidate) {
+            ADD_TO_TRACE(_CALL_BUILTIN_FAST_STACKREF, oparg, 0, this_instr->target);
+            res = sym_new_tagged_int(ctx);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+            res = sym_new_not_null(ctx);
+        }
+    }
+
+    op(_POP_TOP_INT, (value --)) {
+        if (sym_is_tagged_int(value)) {
+            ADD_TO_TRACE(_POP_TOP_NOP, 0, 0, this_instr->target);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+        }
+    }
+
     op(_JUMP_TO_TOP, (--)) {
         COPY_TO_TRACE(this_instr);
         ctx->done = true;

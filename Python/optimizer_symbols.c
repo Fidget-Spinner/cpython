@@ -849,6 +849,7 @@ _Py_uop_sym_new_compact_int(JitOptContext *ctx, _PyUOpInstruction *this_instr)
     }
     sym->tag = JIT_SYM_COMPACT_INT;
     sym->compact.originating_inst = this_instr;
+    this_instr->is_pe_candidate = true;
     return PyJitRef_Wrap(sym);
 }
 
@@ -936,12 +937,14 @@ _Py_uop_abstractcontext_fini(JitOptContext *ctx)
                 break;
         }
     }
+    Py_CLEAR(ctx->the_unbox_sum);
 }
 
 void
 _Py_uop_abstractcontext_init(JitOptContext *ctx)
 {
     static_assert(sizeof(JitOptSymbol) <= 3 * sizeof(uint64_t), "JitOptSymbol has grown");
+    ctx->the_unbox_sum = NULL;
     ctx->limit = ctx->locals_and_stack + MAX_ABSTRACT_INTERP_SIZE;
     ctx->n_consumed = ctx->locals_and_stack;
 #ifdef Py_DEBUG // Aids debugging a little. There should never be NULL in the abstract interpreter.

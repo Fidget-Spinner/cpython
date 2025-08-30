@@ -126,9 +126,16 @@
         }
 
         case _POP_TOP_INT: {
+            JitOptPESymbol *value;
+            value = stack_pointer[-1];
+            if (sym_is_tagged_int(value)) {
+                ADD_TO_TRACE(_POP_TOP_NOP, 0, 0, this_instr->target);
+            }
+            else {
+                COPY_TO_TRACE(this_instr);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            COPY_TO_TRACE(this_instr);
             break;
         }
 
@@ -1874,6 +1881,22 @@
         }
 
         case _CALL_BUILTIN_FAST: {
+            JitOptPESymbol *res;
+            if (is_pe_candidate) {
+                ADD_TO_TRACE(_CALL_BUILTIN_FAST_STACKREF, oparg, 0, this_instr->target);
+                res = sym_new_tagged_int(ctx);
+            }
+            else {
+                COPY_TO_TRACE(this_instr);
+                res = sym_new_not_null(ctx);
+            }
+            stack_pointer[-2 - oparg] = res;
+            stack_pointer += -1 - oparg;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _CALL_BUILTIN_FAST_STACKREF: {
             JitOptPESymbol *res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2 - oparg] = res;

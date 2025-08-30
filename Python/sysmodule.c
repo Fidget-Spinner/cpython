@@ -2583,6 +2583,61 @@ sys__dump_tracelets_impl(PyObject *module, PyObject *outpath)
 
 
 /*[clinic input]
+sys._my_sum_with_ref_api
+
+    obj1: object
+    obj2: object
+    /
+
+[clinic start generated code]*/
+
+static PyObject *
+sys__my_sum_with_ref_api_impl(PyObject *module, PyObject *obj1,
+                              PyObject *obj2)
+/*[clinic end generated code: output=6bd2ae5a0e2acdaa input=9021a6e67e867c22]*/
+{
+
+    _PyStackRef left = {.bits = (uintptr_t)obj1};
+    _PyStackRef right = {.bits = (uintptr_t)obj2};
+    if (PyStackRef_IsTaggedInt(left) && PyStackRef_IsTaggedInt(right)) {
+        intptr_t left_i = PyStackRef_UntagInt(left);
+        intptr_t right_i = PyStackRef_UntagInt(right);
+
+        // It's not possible for this addition to overflow, as
+        // they both have 2 bits reserved from our tagging scheme.
+        intptr_t res_i = left_i + right_i;
+        if (!PyStackRef_CanTagInt(res_i)) {
+            goto fallback;
+        }
+        return (PyObject *)PyStackRef_TagInt(res_i).bits;
+    }
+fallback:
+    assert(PyLong_Check(obj1));
+    assert(PyLong_Check(obj2));
+    return PyNumber_Add(obj1, obj2);
+}
+
+
+/*[clinic input]
+sys._my_sum_without_ref_api
+
+    obj1: object
+    obj2: object
+    /
+
+[clinic start generated code]*/
+
+static PyObject *
+sys__my_sum_without_ref_api_impl(PyObject *module, PyObject *obj1,
+                                 PyObject *obj2)
+/*[clinic end generated code: output=8ad0241ace9de7f7 input=45c65aa5c7357430]*/
+{
+    assert(PyLong_Check(obj1));
+    assert(PyLong_Check(obj2));
+    return PyNumber_Add(obj1, obj2);
+}
+
+/*[clinic input]
 sys._getframemodulename
 
     depth: int = 0
@@ -2847,6 +2902,8 @@ static PyMethodDef sys_methods[] = {
     SYS__GET_CPU_COUNT_CONFIG_METHODDEF
     SYS__IS_GIL_ENABLED_METHODDEF
     SYS__DUMP_TRACELETS_METHODDEF
+    SYS__MY_SUM_WITH_REF_API_METHODDEF
+    SYS__MY_SUM_WITHOUT_REF_API_METHODDEF
     {NULL, NULL}  // sentinel
 };
 

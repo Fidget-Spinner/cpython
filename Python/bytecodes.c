@@ -4294,6 +4294,33 @@ dummy_func(
             res = PyStackRef_FromPyObjectSteal(res_o);
         }
 
+        op(_CALL_BUILTIN_FAST_STACKREF, (callable, self_or_null, args[oparg] -- res)) {
+            /* Builtin METH_FASTCALL functions, without keywords */
+            PyObject *callable_o = PyStackRef_AsPyObjectBorrow(callable);
+
+            int total_args = oparg;
+            _PyStackRef *arguments = args;
+            if (!PyStackRef_IsNull(self_or_null)) {
+                arguments--;
+                total_args++;
+            }
+            DEOPT_IF(!PyCFunction_CheckExact(callable_o));
+            DEOPT_IF(PyCFunction_GET_FLAGS(callable_o) != METH_FASTCALL);
+            STAT_INC(CALL, hit);
+            PyCFunction cfunc = PyCFunction_GET_FUNCTION(callable_o);
+            /* res = func(self, args, nargs) */
+            _PyStackRef res_s = {
+                .bits = _PyCFunctionFast_CAST(cfunc)(
+                            PyCFunction_GET_SELF(callable_o),
+                            arguments,
+                        total_args)
+            };
+            assert((!PyStackRef_IsNull(res_s) ^ (_PyErr_Occurred(tstate) != NULL)));
+            DECREF_INPUTS();
+            ERROR_IF(PyStackRef_IsNull(res_s));
+            res = res_s;;
+        }
+
         macro(CALL_BUILTIN_FAST) =
             unused/1 +
             unused/2 +

@@ -493,8 +493,17 @@ optimize_uops(
     _PyUOpInstruction *corresponding_check_stack = NULL;
 
     _Py_uop_abstractcontext_init(ctx);
+
+    PyObject *the_unbox_sum = PySys_GetAttrString("_my_sum_with_ref_api");
+    if (the_unbox_sum == NULL) {
+        return 0;
+    }
+
+    ctx->the_unbox_sum = the_unbox_sum;
+
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, co, curr_stacklen, NULL, 0);
     if (frame == NULL) {
+        _Py_uop_abstractcontext_fini(ctx);
         return 0;
     }
     ctx->curr_frame_depth++;
