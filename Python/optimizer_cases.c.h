@@ -761,6 +761,18 @@
             break;
         }
 
+        case _INT_TO_TAGGED_STACK: {
+            JitOptRef in;
+            in = stack_pointer[-1 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(in);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(in);
+            }
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_TAGGED_INT: {
             JitOptRef right;
             JitOptRef left;

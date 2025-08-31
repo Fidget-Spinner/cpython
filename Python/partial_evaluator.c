@@ -111,6 +111,35 @@ get_code_with_logging(_PyUOpInstruction *op)
     return co;
 }
 
+// Try converting the left originating inst back to its unboxed version first.
+// This is more efficient for "hot" instructions like _LOAD_TAGGED_INT -> _LOAD_CONST
+// As it will avoid a trip through PyLong_FromVoidPtr.
+// Note that to be safe, this MUST only operate on instructions that spawn temporary stack values
+// such as LOAD_TAGGED_INT and not things that could affect state elsewhere.
+// Furthermore, this is why we can't insert side exits in the same pass. A previously-inserted side exit
+// may now be wrong.
+static bool
+convert_op_to_unboxed(_PyUOpInstruction *src)
+{
+    int opcode = src->opcode;
+    switch (opcode) {
+        case _LOAD_TAGGED_INT: {
+            intptr_t i = PyStackRef_UntagInt(PyStackRef_Wrap((void *)src->operand0));
+            if (i < _PY_NSMALLPOSINTS && i >= 0) {
+                src->opcode = _LOAD_SMALL_INT;
+                src->oparg = i;
+            }
+            else {
+                src->opcode = src->oparg ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE;
+                src->operand0 = src->operand1;
+            }
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
 #define sym_is_not_null _Py_uop_pe_sym_is_not_null
 #define sym_is_const _Py_uop_pe_sym_is_const
 #define sym_get_const _Py_uop_pe_sym_get_const
@@ -148,6 +177,8 @@ add_to_trace(
 #endif
     return trace_length + 1;
 }
+
+#define CURRENT_DEST_INST() (&trace_dest[trace_dest_length-1])
 
 #ifdef Py_DEBUG
 #define ADD_TO_TRACE(OPCODE, OPARG, OPERAND, TARGET) \

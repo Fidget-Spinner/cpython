@@ -73,8 +73,8 @@ dummy_func(void) {
 
     op(_LOAD_SMALL_INT, (-- value)) {
         if (is_pe_candidate) {
-            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
-            value = sym_new_tagged_int(ctx);
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, PyStackRef_TagInt(oparg).bits, this_instr->target);
+            value = sym_new_tagged_int(ctx, CURRENT_DEST_INST());
         }
         else {
             COPY_TO_TRACE(this_instr);
@@ -86,8 +86,10 @@ dummy_func(void) {
         if (is_pe_candidate) {
             assert(_PyLong_CheckExactAndCompact(ptr));
             assert(PyStackRef_CanTagInt(_PyLong_CompactValue(ptr)));
-            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, _PyLong_CompactValue(ptr), this_instr->target);
-            value = sym_new_tagged_int(ctx);
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0,
+               PyStackRef_TagInt(_PyLong_CompactValue(ptr)).bits, this_instr->target);
+            CURRENT_DEST_INST()->operand1 = ptr;
+            value = sym_new_tagged_int(ctx, CURRENT_DEST_INST());
         }
         else {
             COPY_TO_TRACE(this_instr);
@@ -99,8 +101,10 @@ dummy_func(void) {
         if (is_pe_candidate) {
             assert(_PyLong_CheckExactAndCompact(ptr));
             assert(PyStackRef_CanTagInt(_PyLong_CompactValue(ptr)));
-            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, _PyLong_CompactValue(ptr), this_instr->target);
-            value = sym_new_tagged_int(ctx);
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 1,
+                PyStackRef_TagInt(_PyLong_CompactValue(ptr)).bits, this_instr->target);
+            CURRENT_DEST_INST()->operand1 = ptr;
+            value = sym_new_tagged_int(ctx, CURRENT_DEST_INST());
         }
         else {
             COPY_TO_TRACE(this_instr);
@@ -111,22 +115,41 @@ dummy_func(void) {
     op(_BINARY_OP_ADD_INT, (left, right -- res)) {
         bool left_tagged = sym_is_tagged_int(left);
         bool right_tagged = sym_is_tagged_int(right);
-        if (left_tagged && right_tagged) {
-            ADD_TO_TRACE(_BINARY_OP_ADD_TAGGED_INT, 0, oparg, this_instr->target);
-            res = sym_new_tagged_int(ctx);
+        // The heuristic is as follows:
+        // If it's a PE candidate, that means there's more unboxing opportunities after.
+        // So if any of the LHS or RHS are tagged, just unbox it.
+        // If it's not a PE candidate, but both are already tagged, no point to rebox both of them first.
+        // Just operate on both of them then rebox. This gets us some efficiency gains.
+        if (((left_tagged || right_tagged) && is_pe_candidate) || (left_tagged && right_tagged)) {
+            if (!right_tagged) {
+                ADD_TO_TRACE(_INT_TO_TAGGED_STACK, 1, 0, this_instr->target);
+            }
+            if (!left_tagged) {
+                ADD_TO_TRACE(_INT_TO_TAGGED_STACK, 2, 0, this_instr->target);
+            }
+            ADD_TO_TRACE(_BINARY_OP_ADD_TAGGED_INT, oparg, 0, this_instr->target);
             if (!is_pe_candidate) {
                 ADD_TO_TRACE(_BOX_TAGGED_INT_CURR_FRAME, 1, 0, this_instr->target);
+                res = sym_new_not_null(ctx);
             }
-        }
-        else if (!left_tagged && right_tagged) {
-
-        }
-        else if (left_tagged && !right_tagged) {
+            else {
+                res = sym_new_tagged_int(ctx, CURRENT_DEST_INST());
+            }
 
         }
         else {
-            assert(!left_tagged);
-            assert(!right_tagged);
+            if (left_tagged) {
+                if (!convert_op_to_unboxed(left->tagged_int.originating_inst)) {
+                    // Conversion failed, rebox time.
+                    ADD_TO_TRACE(_BOX_TAGGED_INT_CURR_FRAME, 2, 0, this_instr->target);
+                }
+            }
+            if (right_tagged) {
+                if (!convert_op_to_unboxed(right->tagged_int.originating_inst)) {
+                    // Conversion failed, rebox time.
+                    ADD_TO_TRACE(_BOX_TAGGED_INT_CURR_FRAME, 1, 0, this_instr->target);
+                }
+            }
             COPY_TO_TRACE(this_instr);
             res = sym_new_not_null(ctx);
         }

@@ -45,6 +45,7 @@
 
 #define USE_COMPUTED_GOTOS 0
 #include "ceval_macros.h"
+#include "../Include/internal/pycore_long.h"
 #include "../Include/internal/pycore_stackref.h"
 
 /* Flow control macros */
@@ -683,6 +684,16 @@ dummy_func(
             PyObject *res = PyLong_FromVoidPtr(res_i);
             ERROR_IF(res == NULL);
             in = PyStackRef_FromPyObjectSteal(res);
+        }
+
+        replicate(1:3) tier2 op(_INT_TO_TAGGED_STACK, (in, unused[oparg-1] -- in, unused[oparg-1])) {
+            assert(!PyStackRef_IsTaggedInt(in));
+            PyObject *in_o = PyStackRef_AsPyObjectBorrow(in);
+            EXIT_IF(!_PyLong_CheckExactAndCompact(in_o));
+            Py_ssize_t i = _PyLong_CompactValue(in_o);
+            EXIT_IF(!PyStackRef_CanTagInt(i));
+
+            in = PyStackRef_TagInt((intptr_t)i);
         }
 
         tier2 pure op(_BINARY_OP_MULTIPLY_TAGGED_INT, (left, right -- res)) {
@@ -5318,8 +5329,7 @@ dummy_func(
         }
 
         tier2 op(_LOAD_TAGGED_INT, (ptr/4 -- value)) {
-            assert(PyStackRef_CanTagInt((intptr_t)ptr));
-            value = PyStackRef_TagInt((intptr_t)ptr);
+            value = PyStackRef_Wrap(ptr);
         }
 
         tier2 pure op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {

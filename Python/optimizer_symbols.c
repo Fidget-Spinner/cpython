@@ -851,6 +851,7 @@ _Py_uop_sym_new_compact_int(JitOptContext *ctx, _PyUOpInstruction *this_instr)
     }
     sym->tag = JIT_SYM_COMPACT_INT;
     sym->compact.originating_inst = this_instr;
+    sym->compact.is_unbox_candidate = true;
     return PyJitRef_Wrap(sym);
 }
 
@@ -930,8 +931,8 @@ _Py_uop_abstractcontext_fini(JitOptContext *ctx)
                 }
                 break;
             case JIT_SYM_COMPACT_INT:
-                if (sym->value.is_unbox_candidate && sym->value.originating_inst) {
-                    sym->value.originating_inst->is_pe_candidate = true;
+                if (sym->compact.is_unbox_candidate && sym->compact.originating_inst) {
+                    sym->compact.originating_inst->is_pe_candidate = true;
                 }
                 break;
             default:

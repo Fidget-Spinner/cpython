@@ -145,13 +145,14 @@ _Py_uop_pe_sym_new_not_null(JitOptPEContext *ctx)
 }
 
 JitOptPESymbol *
-_Py_uop_pe_sym_new_tagged_int(JitOptPEContext *ctx)
+_Py_uop_pe_sym_new_tagged_int(JitOptPEContext *ctx, _PyUOpInstruction *origin)
 {
     JitOptPESymbol *sym = sym_new(ctx);
     if (sym == NULL) {
         return out_of_space(ctx);
     }
     sym->tag = JIT_PE_TAGGED_INT_TAG;
+    sym->tagged_int.originating_inst = origin;
     return sym;
 }
 

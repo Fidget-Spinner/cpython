@@ -406,9 +406,14 @@ typedef enum JitPESymType {
     JIT_PE_TAGGED_INT_TAG = 5,
 } JitPESymType;
 
+typedef struct _jit_pe_tagged_int {
+    uint8_t tag;
+    _PyUOpInstruction *originating_inst;
+} JitPETaggedInt;
 
 typedef union JitOptPESymbol {
     uint8_t tag;
+    JitPETaggedInt tagged_int;
 } JitOptPESymbol;
 
 
@@ -453,7 +458,7 @@ extern bool _Py_uop_pe_sym_is_not_null(JitOptPESymbol *sym);
 extern JitOptPESymbol *_Py_uop_pe_sym_new_unknown(JitOptPEContext *ctx);
 extern JitOptPESymbol *_Py_uop_pe_sym_new_not_null(JitOptPEContext *ctx);
 extern JitOptPESymbol *_Py_uop_pe_sym_new_null(JitOptPEContext *ctx);
-extern JitOptPESymbol *_Py_uop_pe_sym_new_tagged_int(JitOptPEContext *ctx);
+extern JitOptPESymbol *_Py_uop_pe_sym_new_tagged_int(JitOptPEContext *ctx, _PyUOpInstruction *origin);
 extern bool _Py_uop_pe_sym_is_tagged_int(JitOptPESymbol *sym);
 extern void _Py_uop_pe_sym_set_null(JitOptPEContext *ctx, JitOptPESymbol *sym);
 extern void _Py_uop_pe_sym_set_non_null(JitOptPEContext *ctx, JitOptPESymbol *sym);

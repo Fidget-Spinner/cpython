@@ -99,6 +99,9 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_BOX_TAGGED_INT_CURR_FRAME_1] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_BOX_TAGGED_INT_CURR_FRAME_2] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_BOX_TAGGED_INT_CURR_FRAME] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_INT_TO_TAGGED_STACK_1] = HAS_EXIT_FLAG,
+    [_INT_TO_TAGGED_STACK_2] = HAS_EXIT_FLAG,
+    [_INT_TO_TAGGED_STACK] = HAS_ARG_FLAG | HAS_EXIT_FLAG,
     [_BINARY_OP_MULTIPLY_TAGGED_INT] = HAS_EXIT_FLAG | HAS_PURE_FLAG,
     [_BINARY_OP_SUBTRACT_TAGGED_INT] = HAS_EXIT_FLAG | HAS_PURE_FLAG,
     [_GUARD_NOS_FLOAT] = HAS_EXIT_FLAG,
@@ -353,6 +356,7 @@ const ReplicationRange _PyUop_Replication[MAX_UOP_ID+1] = {
     [_LOAD_SMALL_INT] = { 0, 4 },
     [_STORE_FAST] = { 0, 8 },
     [_BOX_TAGGED_INT_CURR_FRAME] = { 1, 3 },
+    [_INT_TO_TAGGED_STACK] = { 1, 3 },
     [_INIT_CALL_PY_EXACT_ARGS] = { 0, 5 },
     [_COPY] = { 1, 4 },
     [_SWAP] = { 2, 4 },
@@ -527,6 +531,9 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_INIT_CALL_PY_EXACT_ARGS_3] = "_INIT_CALL_PY_EXACT_ARGS_3",
     [_INIT_CALL_PY_EXACT_ARGS_4] = "_INIT_CALL_PY_EXACT_ARGS_4",
     [_INSERT_NULL] = "_INSERT_NULL",
+    [_INT_TO_TAGGED_STACK] = "_INT_TO_TAGGED_STACK",
+    [_INT_TO_TAGGED_STACK_1] = "_INT_TO_TAGGED_STACK_1",
+    [_INT_TO_TAGGED_STACK_2] = "_INT_TO_TAGGED_STACK_2",
     [_IS_NONE] = "_IS_NONE",
     [_IS_OP] = "_IS_OP",
     [_ITER_CHECK_LIST] = "_ITER_CHECK_LIST",
@@ -845,6 +852,12 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _BOX_TAGGED_INT_CURR_FRAME_2:
             return 0;
         case _BOX_TAGGED_INT_CURR_FRAME:
+            return 0;
+        case _INT_TO_TAGGED_STACK_1:
+            return 0;
+        case _INT_TO_TAGGED_STACK_2:
+            return 0;
+        case _INT_TO_TAGGED_STACK:
             return 0;
         case _BINARY_OP_MULTIPLY_TAGGED_INT:
             return 2;
