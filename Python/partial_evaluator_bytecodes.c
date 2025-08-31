@@ -2,6 +2,8 @@
 #include "pycore_optimizer.h"
 #include "pycore_uops.h"
 #include "pycore_uop_ids.h"
+#include "../Include/internal/pycore_long.h"
+#include "../Include/internal/pycore_stackref.h"
 #include "internal/pycore_moduleobject.h"
 
 #define op(name, ...) /* NAME is ignored */
@@ -32,6 +34,10 @@ static int
 dummy_func(void) {
 
 // BEGIN BYTECODES //
+    op(_PUSH_NULL, (-- res)) {
+        COPY_TO_TRACE(this_instr);
+        res = sym_new_null(ctx);
+    }
 
     op(_LOAD_FAST_CHECK, (-- value)) {
         COPY_TO_TRACE(this_instr);
@@ -78,7 +84,9 @@ dummy_func(void) {
 
     op(_LOAD_CONST_INLINE, (ptr/4 -- value)) {
         if (is_pe_candidate) {
-            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+            assert(_PyLong_CheckExactAndCompact(ptr));
+            assert(PyStackRef_CanTagInt(_PyLong_CompactValue(ptr)));
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, _PyLong_CompactValue(ptr), this_instr->target);
             value = sym_new_tagged_int(ctx);
         }
         else {
@@ -89,7 +97,9 @@ dummy_func(void) {
 
     op(_LOAD_CONST_INLINE_BORROW, (ptr/4 -- value)) {
         if (is_pe_candidate) {
-            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+            assert(_PyLong_CheckExactAndCompact(ptr));
+            assert(PyStackRef_CanTagInt(_PyLong_CompactValue(ptr)));
+            ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, _PyLong_CompactValue(ptr), this_instr->target);
             value = sym_new_tagged_int(ctx);
         }
         else {
@@ -99,11 +109,24 @@ dummy_func(void) {
     }
 
     op(_BINARY_OP_ADD_INT, (left, right -- res)) {
-        if (sym_is_tagged_int(left) && sym_is_tagged_int(right)) {
+        bool left_tagged = sym_is_tagged_int(left);
+        bool right_tagged = sym_is_tagged_int(right);
+        if (left_tagged && right_tagged) {
             ADD_TO_TRACE(_BINARY_OP_ADD_TAGGED_INT, 0, oparg, this_instr->target);
             res = sym_new_tagged_int(ctx);
+            if (!is_pe_candidate) {
+                ADD_TO_TRACE(_BOX_TAGGED_INT_CURR_FRAME, 1, 0, this_instr->target);
+            }
+        }
+        else if (!left_tagged && right_tagged) {
+
+        }
+        else if (left_tagged && !right_tagged) {
+
         }
         else {
+            assert(!left_tagged);
+            assert(!right_tagged);
             COPY_TO_TRACE(this_instr);
             res = sym_new_not_null(ctx);
         }
@@ -114,8 +137,13 @@ dummy_func(void) {
         GETLOCAL(oparg) = value;
     }
 
-    op(_POP_TOP, (value --)) {
-        COPY_TO_TRACE(this_instr);
+    op(_POP_TOP_INT, (value --)) {
+        if (sym_is_tagged_int(value)) {
+            ADD_TO_TRACE(_POP_TOP_NOP, 0, oparg, this_instr->target);
+        }
+        else {
+            COPY_TO_TRACE(this_instr);
+        }
     }
 
     op(_BINARY_OP_SUBSCR_INIT_CALL, (container, sub, getitem  -- new_frame)) {

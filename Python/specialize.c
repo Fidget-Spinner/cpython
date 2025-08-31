@@ -2595,7 +2595,7 @@ _Py_Specialize_BinaryOp(_PyStackRef lhs_st, _PyStackRef rhs_st, _Py_CODEUNIT *in
                 specialize(instr, BINARY_OP_ADD_UNICODE);
                 return;
             }
-            if (PyLong_CheckExact(lhs)) {
+            if (_PyLong_CheckExactAndCompact(lhs) && _PyLong_CheckExactAndCompact(rhs)) {
                 specialize(instr, BINARY_OP_ADD_INT);
                 return;
             }

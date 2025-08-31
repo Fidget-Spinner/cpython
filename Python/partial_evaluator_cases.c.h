@@ -112,9 +112,9 @@
         }
 
         case _POP_TOP: {
-            COPY_TO_TRACE(this_instr);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            COPY_TO_TRACE(this_instr);
             break;
         }
 
@@ -126,9 +126,16 @@
         }
 
         case _POP_TOP_INT: {
+            JitOptPESymbol *value;
+            value = stack_pointer[-1];
+            if (sym_is_tagged_int(value)) {
+                ADD_TO_TRACE(_POP_TOP_NOP, 0, oparg, this_instr->target);
+            }
+            else {
+                COPY_TO_TRACE(this_instr);
+            }
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            COPY_TO_TRACE(this_instr);
             break;
         }
 
@@ -155,11 +162,11 @@
 
         case _PUSH_NULL: {
             JitOptPESymbol *res;
-            res = sym_new_not_null(ctx);
+            COPY_TO_TRACE(this_instr);
+            res = sym_new_null(ctx);
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
-            COPY_TO_TRACE(this_instr);
             break;
         }
 
@@ -325,11 +332,22 @@
             JitOptPESymbol *res;
             right = stack_pointer[-1];
             left = stack_pointer[-2];
-            if (sym_is_tagged_int(left) && sym_is_tagged_int(right)) {
+            bool left_tagged = sym_is_tagged_int(left);
+            bool right_tagged = sym_is_tagged_int(right);
+            if (left_tagged && right_tagged) {
                 ADD_TO_TRACE(_BINARY_OP_ADD_TAGGED_INT, 0, oparg, this_instr->target);
                 res = sym_new_tagged_int(ctx);
+                if (!is_pe_candidate) {
+                    ADD_TO_TRACE(_BOX_TAGGED_INT_CURR_FRAME, 1, 0, this_instr->target);
+                }
+            }
+            else if (!left_tagged && right_tagged) {
+            }
+            else if (left_tagged && !right_tagged) {
             }
             else {
+                assert(!left_tagged);
+                assert(!right_tagged);
                 COPY_TO_TRACE(this_instr);
                 res = sym_new_not_null(ctx);
             }
@@ -345,6 +363,21 @@
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            COPY_TO_TRACE(this_instr);
+            break;
+        }
+
+        case _BINARY_OP_ADD_TAGGED_INT: {
+            JitOptPESymbol *res;
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            COPY_TO_TRACE(this_instr);
+            break;
+        }
+
+        case _BOX_TAGGED_INT_CURR_FRAME: {
             COPY_TO_TRACE(this_instr);
             break;
         }
@@ -2228,7 +2261,9 @@
             JitOptPESymbol *value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
             if (is_pe_candidate) {
-                ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+                assert(_PyLong_CheckExactAndCompact(ptr));
+                assert(PyStackRef_CanTagInt(_PyLong_CompactValue(ptr)));
+                ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, _PyLong_CompactValue(ptr), this_instr->target);
                 value = sym_new_tagged_int(ctx);
             }
             else {
@@ -2253,7 +2288,9 @@
             JitOptPESymbol *value;
             PyObject *ptr = (PyObject *)this_instr->operand0;
             if (is_pe_candidate) {
-                ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, oparg, this_instr->target);
+                assert(_PyLong_CheckExactAndCompact(ptr));
+                assert(PyStackRef_CanTagInt(_PyLong_CompactValue(ptr)));
+                ADD_TO_TRACE(_LOAD_TAGGED_INT, 0, _PyLong_CompactValue(ptr), this_instr->target);
                 value = sym_new_tagged_int(ctx);
             }
             else {

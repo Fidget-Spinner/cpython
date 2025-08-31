@@ -188,6 +188,7 @@ _Py_uop_pe_frame_new(
 
     // Initialize with the initial state of all local variables
     for (int i = 0; i < arg_len; i++) {
+        // fprintf(stderr, "COPYING LOCAL %d %d\n", i, _Py_uop_pe_sym_is_tagged_int(args[i]));
         frame->locals[i] = args[i];
     }
 

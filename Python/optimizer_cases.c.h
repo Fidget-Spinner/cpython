@@ -728,6 +728,39 @@
             break;
         }
 
+        case _BINARY_OP_ADD_TAGGED_INT: {
+            JitOptRef right;
+            JitOptRef left;
+            JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BOX_TAGGED_INT_CURR_FRAME: {
+            JitOptRef in;
+            in = stack_pointer[-1 - (oparg-1)];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(in);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(in);
+            }
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_TAGGED_INT: {
             JitOptRef right;
             JitOptRef left;
@@ -3521,6 +3554,7 @@
                 sym_hint_must_rebox(callable);
             }
             uint32_t func_version = (uint32_t)this_instr->operand0;
+            sym_hint_must_rebox(callable);
             if (sym_is_const(ctx, callable) && sym_matches_type(callable, &PyFunction_Type)) {
                 assert(PyFunction_Check(sym_get_const(ctx, callable)));
                 REPLACE_OP(this_instr, _CHECK_FUNCTION_VERSION_INLINE, 0, func_version);

@@ -1003,6 +1003,77 @@
             break;
         }
 
+        case _BINARY_OP_ADD_TAGGED_INT: {
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            assert(PyStackRef_IsTaggedInt(left));
+            assert(PyStackRef_IsTaggedInt(right));
+            intptr_t left_i = PyStackRef_UntagInt(left);
+            intptr_t right_i = PyStackRef_UntagInt(right);
+            intptr_t res_i = left_i + right_i;
+            if (!PyStackRef_CanTagInt(res_i)) {
+                UOP_STAT_INC(uopcode, miss);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagInt(res_i);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BOX_TAGGED_INT_CURR_FRAME_1: {
+            _PyStackRef in;
+            in = stack_pointer[-1];
+            assert(PyStackRef_IsTaggedInt(in));
+            intptr_t res_i = PyStackRef_UntagInt(in);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyObject *res = PyLong_FromVoidPtr(res_i);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (res == NULL) {
+                JUMP_TO_ERROR();
+            }
+            in = PyStackRef_FromPyObjectSteal(res);
+            stack_pointer[-1] = in;
+            break;
+        }
+
+        case _BOX_TAGGED_INT_CURR_FRAME_2: {
+            _PyStackRef in;
+            in = stack_pointer[-2];
+            assert(PyStackRef_IsTaggedInt(in));
+            intptr_t res_i = PyStackRef_UntagInt(in);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyObject *res = PyLong_FromVoidPtr(res_i);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (res == NULL) {
+                JUMP_TO_ERROR();
+            }
+            in = PyStackRef_FromPyObjectSteal(res);
+            stack_pointer[-2] = in;
+            break;
+        }
+
+        case _BOX_TAGGED_INT_CURR_FRAME: {
+            _PyStackRef in;
+            oparg = CURRENT_OPARG();
+            in = stack_pointer[-1 - (oparg-1)];
+            assert(PyStackRef_IsTaggedInt(in));
+            intptr_t res_i = PyStackRef_UntagInt(in);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            PyObject *res = PyLong_FromVoidPtr(res_i);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (res == NULL) {
+                JUMP_TO_ERROR();
+            }
+            in = PyStackRef_FromPyObjectSteal(res);
+            stack_pointer[-1 - (oparg-1)] = in;
+            break;
+        }
+
         case _BINARY_OP_MULTIPLY_TAGGED_INT: {
             _PyStackRef right;
             _PyStackRef left;
@@ -7189,6 +7260,7 @@
         case _LOAD_TAGGED_INT: {
             _PyStackRef value;
             PyObject *ptr = (PyObject *)CURRENT_OPERAND0();
+            assert(PyStackRef_CanTagInt((intptr_t)ptr));
             value = PyStackRef_TagInt((intptr_t)ptr);
             stack_pointer[0] = value;
             stack_pointer += 1;

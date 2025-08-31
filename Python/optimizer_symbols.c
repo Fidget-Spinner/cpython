@@ -117,7 +117,7 @@ static void make_const(JitOptSymbol *sym, PyObject *val)
     sym->tag = JIT_SYM_KNOWN_VALUE_TAG;
     sym->value.value = Py_NewRef(val);
     sym->value.originating_inst = NULL;
-    sym->value.is_unbox_candidate = _PyLong_CheckExactAndCompact(val);
+    sym->value.is_unbox_candidate = _PyLong_CheckExactAndCompact(val) && PyStackRef_CanTagInt(_PyLong_CompactValue(val));
 }
 
 void
@@ -126,9 +126,11 @@ _Py_uop_sym_hint_must_rebox(JitOptRef ref)
     JitOptSymbol *sym = PyJitRef_Unwrap(ref);
     switch (sym->tag) {
         case JIT_SYM_KNOWN_VALUE_TAG:
+            DPRINTF(2, "Reboxing a const\n");
             sym->value.is_unbox_candidate = false;
             break;
         case JIT_SYM_COMPACT_INT:
+            DPRINTF(2, "Reboxing an int\n");
             sym->compact.is_unbox_candidate = false;
             break;
         default:

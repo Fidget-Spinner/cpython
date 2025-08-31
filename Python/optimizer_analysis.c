@@ -468,9 +468,17 @@ const uint16_t op_without_decref_inputs[MAX_UOP_ID + 1] = {
 const uint16_t op_unboxed[MAX_UOP_ID + 1] = {
     [_POP_TOP] = _POP_TOP_NOP,
     [_STORE_FAST] = STORE_FAST,
-    [_GUARD_NOS_INT] = _GUARD_NOS_TAGGED_INT,
-    [_GUARD_TOS_INT] = _GUARD_TOS_TAGGED_INT,
     [_BINARY_OP_ADD_INT] = _BINARY_OP_ADD_TAGGED_INT,
+    [_BINARY_OP_MULTIPLY_INT] = _BINARY_OP_MULTIPLY_TAGGED_INT,
+    [_BINARY_OP_SUBTRACT_INT] = _BINARY_OP_SUBTRACT_TAGGED_INT,
+    // Not really for the following, but we support this in the optimizer.
+    [_GUARD_TOS_INT] = _GUARD_TOS_INT,
+    [_GUARD_NOS_INT] = _GUARD_NOS_INT,
+    [_CHECK_FUNCTION_VERSION] = _CHECK_FUNCTION_VERSION,
+    [_CHECK_FUNCTION_EXACT_ARGS] = _CHECK_FUNCTION_EXACT_ARGS,
+    [_INIT_CALL_PY_EXACT_ARGS] = _INIT_CALL_PY_EXACT_ARGS,
+    [_PUSH_FRAME] = _PUSH_FRAME,
+    [_RETURN_VALUE] = _RETURN_VALUE,
 };
 
 /* 1 for success, 0 for not ready, cannot error at the moment. */

@@ -661,6 +661,30 @@ dummy_func(
             INPUTS_DEAD();
         }
 
+        tier2 pure op(_BINARY_OP_ADD_TAGGED_INT, (left, right -- res)) {
+            assert(PyStackRef_IsTaggedInt(left));
+            assert(PyStackRef_IsTaggedInt(right));
+
+            intptr_t left_i = PyStackRef_UntagInt(left);
+            intptr_t right_i = PyStackRef_UntagInt(right);
+
+            // It's not possible for this addition to overflow, as
+            // they both have 2 bits reserved from our tagging scheme.
+            intptr_t res_i = left_i + right_i;
+            EXIT_IF(!PyStackRef_CanTagInt(res_i));
+            res = PyStackRef_TagInt(res_i);
+            INPUTS_DEAD();
+        }
+
+        replicate(1:3) tier2 op(_BOX_TAGGED_INT_CURR_FRAME, (in, unused[oparg-1] -- in, unused[oparg-1])) {
+            assert(PyStackRef_IsTaggedInt(in));
+
+            intptr_t res_i = PyStackRef_UntagInt(in);
+            PyObject *res = PyLong_FromVoidPtr(res_i);
+            ERROR_IF(res == NULL);
+            in = PyStackRef_FromPyObjectSteal(res);
+        }
+
         tier2 pure op(_BINARY_OP_MULTIPLY_TAGGED_INT, (left, right -- res)) {
             assert(PyStackRef_IsTaggedInt(left));
             assert(PyStackRef_IsTaggedInt(right));
@@ -5294,6 +5318,7 @@ dummy_func(
         }
 
         tier2 op(_LOAD_TAGGED_INT, (ptr/4 -- value)) {
+            assert(PyStackRef_CanTagInt((intptr_t)ptr));
             value = PyStackRef_TagInt((intptr_t)ptr);
         }
 
