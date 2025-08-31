@@ -294,17 +294,7 @@
             break;
         }
 
-        case _GUARD_NOS_TAGGED_INT: {
-            COPY_TO_TRACE(this_instr);
-            break;
-        }
-
         case _GUARD_TOS_INT: {
-            COPY_TO_TRACE(this_instr);
-            break;
-        }
-
-        case _GUARD_TOS_TAGGED_INT: {
             COPY_TO_TRACE(this_instr);
             break;
         }
@@ -349,7 +339,7 @@
             break;
         }
 
-        case _BINARY_OP_ADD_TAGGED_INT: {
+        case _BINARY_OP_SUBTRACT_INT: {
             JitOptPESymbol *res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
@@ -359,7 +349,17 @@
             break;
         }
 
-        case _BINARY_OP_SUBTRACT_INT: {
+        case _BINARY_OP_MULTIPLY_TAGGED_INT: {
+            JitOptPESymbol *res;
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            COPY_TO_TRACE(this_instr);
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_TAGGED_INT: {
             JitOptPESymbol *res;
             res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;

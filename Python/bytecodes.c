@@ -599,17 +599,9 @@ dummy_func(
             EXIT_IF(!_PyLong_CheckExactAndCompact(left_o));
         }
 
-        op(_GUARD_NOS_TAGGED_INT, (left, unused -- left, unused)) {
-            EXIT_IF(!PyStackRef_IsTaggedInt(left));
-        }
-
         op(_GUARD_TOS_INT, (value -- value)) {
             PyObject *value_o = PyStackRef_AsPyObjectBorrow(value);
             EXIT_IF(!_PyLong_CheckExactAndCompact(value_o));
-        }
-
-        op(_GUARD_TOS_TAGGED_INT, (value -- value)) {
-            EXIT_IF(!PyStackRef_IsTaggedInt(value));
         }
 
         op(_GUARD_NOS_OVERFLOWED, (left, unused -- left, unused)) {
@@ -654,21 +646,6 @@ dummy_func(
             INPUTS_DEAD();
         }
 
-        tier2 pure op(_BINARY_OP_ADD_TAGGED_INT, (left, right -- res)) {
-            assert(PyStackRef_IsTaggedInt(left));
-            assert(PyStackRef_IsTaggedInt(right));
-
-            intptr_t left_i = PyStackRef_UntagInt(left);
-            intptr_t right_i = PyStackRef_UntagInt(right);
-
-            // It's not possible for this addition to overflow, as
-            // they both have 2 bits reserved from our tagging scheme.
-            intptr_t res_i = left_i + right_i;
-            EXIT_IF(!PyStackRef_CanTagInt(res_i));
-            res = PyStackRef_TagInt(res_i);
-            INPUTS_DEAD();
-        }
-
         pure op(_BINARY_OP_SUBTRACT_INT, (left, right -- res)) {
             PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
             PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
@@ -681,6 +658,34 @@ dummy_func(
             EXIT_IF(PyStackRef_IsNull(res));
             PyStackRef_CLOSE_SPECIALIZED(right, _PyLong_ExactDealloc);
             PyStackRef_CLOSE_SPECIALIZED(left, _PyLong_ExactDealloc);
+            INPUTS_DEAD();
+        }
+
+        tier2 pure op(_BINARY_OP_MULTIPLY_TAGGED_INT, (left, right -- res)) {
+            assert(PyStackRef_IsTaggedInt(left));
+            assert(PyStackRef_IsTaggedInt(right));
+
+            intptr_t left_i = PyStackRef_UntagInt(left);
+            intptr_t right_i = PyStackRef_UntagInt(right);
+
+            intptr_t res_i;
+            EXIT_IF(__builtin_mul_overflow(left_i, right_i, &res_i));
+            EXIT_IF(!PyStackRef_CanTagInt(res_i));
+            res = PyStackRef_TagInt(res_i);
+            INPUTS_DEAD();
+        }
+
+        tier2 pure op(_BINARY_OP_SUBTRACT_TAGGED_INT, (left, right -- res)) {
+            assert(PyStackRef_IsTaggedInt(left));
+            assert(PyStackRef_IsTaggedInt(right));
+
+            intptr_t left_i = PyStackRef_UntagInt(left);
+            intptr_t right_i = PyStackRef_UntagInt(right);
+
+            intptr_t res_i;
+            EXIT_IF(__builtin_sub_overflow(left_i, right_i, &res_i));
+            EXIT_IF(!PyStackRef_CanTagInt(res_i));
+            res = PyStackRef_TagInt(res_i);
             INPUTS_DEAD();
         }
 

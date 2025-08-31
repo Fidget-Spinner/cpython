@@ -521,18 +521,6 @@
             break;
         }
 
-        case _GUARD_NOS_TAGGED_INT: {
-            JitOptRef left;
-            left = stack_pointer[-2];
-            if (!op_unboxed[this_instr->opcode]) {
-                sym_hint_must_rebox(left);
-            }
-            if (!op_unboxed[this_instr->opcode]) {
-                sym_hint_must_rebox(left);
-            }
-            break;
-        }
-
         case _GUARD_TOS_INT: {
             JitOptRef value;
             value = stack_pointer[-1];
@@ -547,18 +535,6 @@
                     REPLACE_OP(this_instr, _GUARD_TOS_OVERFLOWED, 0, 0);
                 }
                 sym_set_compact_int(value);
-            }
-            break;
-        }
-
-        case _GUARD_TOS_TAGGED_INT: {
-            JitOptRef value;
-            value = stack_pointer[-1];
-            if (!op_unboxed[this_instr->opcode]) {
-                sym_hint_must_rebox(value);
-            }
-            if (!op_unboxed[this_instr->opcode]) {
-                sym_hint_must_rebox(value);
             }
             break;
         }
@@ -697,27 +673,6 @@
             break;
         }
 
-        case _BINARY_OP_ADD_TAGGED_INT: {
-            JitOptRef right;
-            JitOptRef left;
-            JitOptRef res;
-            right = stack_pointer[-1];
-            left = stack_pointer[-2];
-            if (!op_unboxed[this_instr->opcode]) {
-                sym_hint_must_rebox(right);
-                sym_hint_must_rebox(left);
-            }
-            if (!op_unboxed[this_instr->opcode]) {
-                sym_hint_must_rebox(right);
-                sym_hint_must_rebox(left);
-            }
-            res = sym_new_not_null(ctx);
-            stack_pointer[-2] = res;
-            stack_pointer += -1;
-            assert(WITHIN_STACK_BOUNDS());
-            break;
-        }
-
         case _BINARY_OP_SUBTRACT_INT: {
             JitOptRef right;
             JitOptRef left;
@@ -767,6 +722,48 @@
                 break;
             }
             res = sym_new_compact_int(ctx, this_instr);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_TAGGED_INT: {
+            JitOptRef right;
+            JitOptRef left;
+            JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            res = sym_new_not_null(ctx);
+            stack_pointer[-2] = res;
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_TAGGED_INT: {
+            JitOptRef right;
+            JitOptRef left;
+            JitOptRef res;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            if (!op_unboxed[this_instr->opcode]) {
+                sym_hint_must_rebox(right);
+                sym_hint_must_rebox(left);
+            }
+            res = sym_new_not_null(ctx);
             stack_pointer[-2] = res;
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());

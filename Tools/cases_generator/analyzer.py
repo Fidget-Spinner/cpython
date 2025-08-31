@@ -696,6 +696,8 @@ NON_ESCAPING_FUNCTIONS = (
     "PyStackRef_Wrap",
     "PyStackRef_Unwrap",
     "_PyLong_CheckExactAndCompact",
+    "__builtin_mul_overflow",
+    "__builtin_sub_overflow",
 )
 
 
