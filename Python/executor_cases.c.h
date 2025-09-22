@@ -3585,7 +3585,7 @@
             assert(next_instr->op.code == STORE_FAST);
             next_oparg = next_instr->op.arg;
             #else
-            next_oparg = CURRENT_OPERAND0();
+            next_oparg = (int)CURRENT_OPERAND0();
             #endif
             _PyStackRef *target_local = &GETLOCAL(next_oparg);
             assert(PyUnicode_CheckExact(left_o));
@@ -4444,7 +4444,7 @@
             _PyInterpreterFrame* pushed_frame = _PyFrame_PushUnchecked(tstate, getitem, 2, frame);
             pushed_frame->localsplus[0] = container;
             pushed_frame->localsplus[1] = sub;
-            frame->return_offset = 6 ;
+            frame->return_offset = 6u ;
             new_frame = PyStackRef_Wrap(pushed_frame);
             _tos_cache0 = new_frame;
             SET_CURRENT_CACHED_VALUES(1);
@@ -4947,8 +4947,8 @@
             gen->gi_frame_state = FRAME_EXECUTING;
             gen->gi_exc_state.previous_item = tstate->exc_info;
             tstate->exc_info = &gen->gi_exc_state;
-            assert( 2 + oparg <= UINT16_MAX);
-            frame->return_offset = (uint16_t)( 2 + oparg);
+            assert( 2u + oparg <= UINT16_MAX);
+            frame->return_offset = (uint16_t)( 2u + oparg);
             pushed_frame->previous = frame;
             gen_frame = PyStackRef_Wrap(pushed_frame);
             _tos_cache1 = gen_frame;
@@ -9412,7 +9412,7 @@
             gen->gi_exc_state.previous_item = tstate->exc_info;
             tstate->exc_info = &gen->gi_exc_state;
             pushed_frame->previous = frame;
-            frame->return_offset = (uint16_t)( 2 + oparg);
+            frame->return_offset = (uint16_t)( 2u + oparg);
             gen_frame = PyStackRef_Wrap(pushed_frame);
             _tos_cache2 = gen_frame;
             _tos_cache1 = _stack_item_1;
@@ -13675,7 +13675,7 @@
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(", exit %lu, temp %d, target %d -> %s]\n",
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
                        exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
                        _PyOpcode_OpName[target->op.code]);
@@ -13703,7 +13703,7 @@
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(", exit %lu, temp %d, target %d -> %s]\n",
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
                        exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
                        _PyOpcode_OpName[target->op.code]);
@@ -13737,7 +13737,7 @@
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(", exit %lu, temp %d, target %d -> %s]\n",
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
                        exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
                        _PyOpcode_OpName[target->op.code]);
@@ -13774,7 +13774,7 @@
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(", exit %lu, temp %d, target %d -> %s]\n",
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
                        exit - current_executor->exits, exit->temperature.value_and_backoff,
                        (int)(target - _PyFrame_GetBytecode(frame)),
                        _PyOpcode_OpName[target->op.code]);
@@ -14312,82 +14312,6 @@
             value = PyStackRef_FromPyObjectBorrow(ptr);
             _tos_cache2 = new;
             _tos_cache1 = value;
-            _tos_cache0 = _stack_item_0;
-            SET_CURRENT_CACHED_VALUES(3);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            break;
-        }
-
-        case _CHECK_FUNCTION_r00: {
-            CHECK_CURRENT_CACHED_VALUES(0);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
-            assert(PyStackRef_FunctionCheck(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
-            if (func->func_version != func_version) {
-                UOP_STAT_INC(uopcode, miss);
-                SET_CURRENT_CACHED_VALUES(0);
-                JUMP_TO_JUMP_TARGET();
-            }
-            SET_CURRENT_CACHED_VALUES(0);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            break;
-        }
-
-        case _CHECK_FUNCTION_r11: {
-            CHECK_CURRENT_CACHED_VALUES(1);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            _PyStackRef _stack_item_0 = _tos_cache0;
-            uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
-            assert(PyStackRef_FunctionCheck(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
-            if (func->func_version != func_version) {
-                UOP_STAT_INC(uopcode, miss);
-                SET_CURRENT_CACHED_VALUES(1);
-                JUMP_TO_JUMP_TARGET();
-            }
-            _tos_cache0 = _stack_item_0;
-            SET_CURRENT_CACHED_VALUES(1);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            break;
-        }
-
-        case _CHECK_FUNCTION_r22: {
-            CHECK_CURRENT_CACHED_VALUES(2);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            _PyStackRef _stack_item_0 = _tos_cache0;
-            _PyStackRef _stack_item_1 = _tos_cache1;
-            uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
-            assert(PyStackRef_FunctionCheck(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
-            if (func->func_version != func_version) {
-                UOP_STAT_INC(uopcode, miss);
-                SET_CURRENT_CACHED_VALUES(2);
-                JUMP_TO_JUMP_TARGET();
-            }
-            _tos_cache1 = _stack_item_1;
-            _tos_cache0 = _stack_item_0;
-            SET_CURRENT_CACHED_VALUES(2);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            break;
-        }
-
-        case _CHECK_FUNCTION_r33: {
-            CHECK_CURRENT_CACHED_VALUES(3);
-            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
-            _PyStackRef _stack_item_0 = _tos_cache0;
-            _PyStackRef _stack_item_1 = _tos_cache1;
-            _PyStackRef _stack_item_2 = _tos_cache2;
-            uint32_t func_version = (uint32_t)CURRENT_OPERAND0();
-            assert(PyStackRef_FunctionCheck(frame->f_funcobj));
-            PyFunctionObject *func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
-            if (func->func_version != func_version) {
-                UOP_STAT_INC(uopcode, miss);
-                SET_CURRENT_CACHED_VALUES(3);
-                JUMP_TO_JUMP_TARGET();
-            }
-            _tos_cache2 = _stack_item_2;
-            _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(3);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());

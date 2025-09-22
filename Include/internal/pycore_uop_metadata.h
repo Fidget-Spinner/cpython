@@ -342,7 +342,6 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_POP_CALL_TWO_LOAD_CONST_INLINE_BORROW] = HAS_ESCAPES_FLAG,
     [_LOAD_CONST_UNDER_INLINE] = 0,
     [_LOAD_CONST_UNDER_INLINE_BORROW] = 0,
-    [_CHECK_FUNCTION] = HAS_DEOPT_FLAG,
     [_START_EXECUTOR] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
     [_MAKE_WARM] = 0,
     [_FATAL_ERROR] = 0,
@@ -3110,15 +3109,6 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
             { -1, -1, -1 },
         },
     },
-    [_CHECK_FUNCTION] = {
-        .best = { 0, 1, 2, 3 },
-        .entries = {
-            { 0, 0, _CHECK_FUNCTION_r00 },
-            { 1, 1, _CHECK_FUNCTION_r11 },
-            { 2, 2, _CHECK_FUNCTION_r22 },
-            { 3, 3, _CHECK_FUNCTION_r33 },
-        },
-    },
     [_START_EXECUTOR] = {
         .best = { 0, 0, 0, 0 },
         .entries = {
@@ -3730,10 +3720,6 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_LOAD_CONST_UNDER_INLINE_BORROW_r12] = _LOAD_CONST_UNDER_INLINE_BORROW,
     [_LOAD_CONST_UNDER_INLINE_BORROW_r01] = _LOAD_CONST_UNDER_INLINE_BORROW,
     [_LOAD_CONST_UNDER_INLINE_BORROW_r23] = _LOAD_CONST_UNDER_INLINE_BORROW,
-    [_CHECK_FUNCTION_r00] = _CHECK_FUNCTION,
-    [_CHECK_FUNCTION_r11] = _CHECK_FUNCTION,
-    [_CHECK_FUNCTION_r22] = _CHECK_FUNCTION,
-    [_CHECK_FUNCTION_r33] = _CHECK_FUNCTION,
     [_START_EXECUTOR_r00] = _START_EXECUTOR,
     [_MAKE_WARM_r00] = _MAKE_WARM,
     [_MAKE_WARM_r11] = _MAKE_WARM,
@@ -3899,11 +3885,6 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_CHECK_EG_MATCH_r22] = "_CHECK_EG_MATCH_r22",
     [_CHECK_EXC_MATCH] = "_CHECK_EXC_MATCH",
     [_CHECK_EXC_MATCH_r22] = "_CHECK_EXC_MATCH_r22",
-    [_CHECK_FUNCTION] = "_CHECK_FUNCTION",
-    [_CHECK_FUNCTION_r00] = "_CHECK_FUNCTION_r00",
-    [_CHECK_FUNCTION_r11] = "_CHECK_FUNCTION_r11",
-    [_CHECK_FUNCTION_r22] = "_CHECK_FUNCTION_r22",
-    [_CHECK_FUNCTION_r33] = "_CHECK_FUNCTION_r33",
     [_CHECK_FUNCTION_EXACT_ARGS] = "_CHECK_FUNCTION_EXACT_ARGS",
     [_CHECK_FUNCTION_EXACT_ARGS_r00] = "_CHECK_FUNCTION_EXACT_ARGS_r00",
     [_CHECK_FUNCTION_VERSION] = "_CHECK_FUNCTION_VERSION",
@@ -5291,8 +5272,6 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _LOAD_CONST_UNDER_INLINE_BORROW:
             return 1;
-        case _CHECK_FUNCTION:
-            return 0;
         case _START_EXECUTOR:
             return 0;
         case _MAKE_WARM:
