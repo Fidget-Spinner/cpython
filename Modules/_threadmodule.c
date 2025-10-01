@@ -429,7 +429,7 @@ force_done(void *arg)
 
 static int
 ThreadHandle_start(ThreadHandle *self, PyObject *func, PyObject *args,
-                   PyObject *kwargs)
+                   PyObject *kwargs, int daemon)
 {
     // Mark the handle as starting to prevent any other threads from doing so
     PyMutex_Lock(&self->mutex);
@@ -453,7 +453,8 @@ ThreadHandle_start(ThreadHandle *self, PyObject *func, PyObject *args,
         goto start_failed;
     }
     PyInterpreterState *interp = _PyInterpreterState_GET();
-    boot->tstate = _PyThreadState_New(interp, _PyThreadState_WHENCE_THREADING);
+    uint8_t whence = daemon ? _PyThreadState_WHENCE_THREADING_DAEMON : _PyThreadState_WHENCE_THREADING;
+    boot->tstate = _PyThreadState_New(interp, whence);
     if (boot->tstate == NULL) {
         PyMem_RawFree(boot);
         if (!PyErr_Occurred()) {
@@ -659,7 +660,6 @@ static void
 PyThreadHandleObject_dealloc(PyObject *op)
 {
     PyThreadHandleObject *self = PyThreadHandleObject_CAST(op);
-    PyObject_GC_UnTrack(self);
     PyTypeObject *tp = Py_TYPE(self);
     ThreadHandle_decref(self->handle);
     tp->tp_free(self);
@@ -747,7 +747,6 @@ static PyType_Slot ThreadHandle_Type_slots[] = {
     {Py_tp_dealloc, PyThreadHandleObject_dealloc},
     {Py_tp_repr, PyThreadHandleObject_repr},
     {Py_tp_getset, ThreadHandle_getsetlist},
-    {Py_tp_traverse, _PyObject_VisitType},
     {Py_tp_methods, ThreadHandle_methods},
     {Py_tp_new, PyThreadHandleObject_tp_new},
     {0, 0}
@@ -757,7 +756,7 @@ static PyType_Spec ThreadHandle_Type_spec = {
     "_thread._ThreadHandle",
     sizeof(PyThreadHandleObject),
     0,
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IMMUTABLETYPE | Py_TPFLAGS_HAVE_GC,
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IMMUTABLETYPE,
     ThreadHandle_Type_slots,
 };
 
@@ -1916,7 +1915,7 @@ do_start_new_thread(thread_module_state *state, PyObject *func, PyObject *args,
         add_to_shutdown_handles(state, handle);
     }
 
-    if (ThreadHandle_start(handle, func, args, kwargs) < 0) {
+    if (ThreadHandle_start(handle, func, args, kwargs, daemon) < 0) {
         if (!daemon) {
             remove_from_shutdown_handles(handle);
         }
@@ -2428,10 +2427,8 @@ thread_shutdown(PyObject *self, PyObject *args)
         // Wait for the thread to finish. If we're interrupted, such
         // as by a ctrl-c we print the error and exit early.
         if (ThreadHandle_join(handle, -1) < 0) {
-            PyErr_FormatUnraisable("Exception ignored while joining a thread "
-                                   "in _thread._shutdown()");
             ThreadHandle_decref(handle);
-            Py_RETURN_NONE;
+            return NULL;
         }
 
         ThreadHandle_decref(handle);

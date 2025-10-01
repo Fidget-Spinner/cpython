@@ -117,6 +117,7 @@ _PyOptimizer_Optimize(
     PyInterpreterState *interp = _PyInterpreterState_GET();
     assert(interp->jit);
     assert(!interp->compiling);
+#ifndef Py_GIL_DISABLED
     interp->compiling = true;
     // The first executor in a chain and the MAX_CHAIN_DEPTH'th executor *must*
     // make progress in order to avoid infinite loops or excessively-long
@@ -158,6 +159,9 @@ _PyOptimizer_Optimize(
     assert((*executor_ptr)->vm_data.valid);
     interp->compiling = false;
     return 1;
+#else
+    return 0;
+#endif
 }
 
 static _PyExecutorObject *
