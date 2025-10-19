@@ -1305,7 +1305,7 @@ def get_uop_cache_depths(uop: Uop) -> Iterator[tuple[int, int, int]]:
                 if inputs != outputs:
                     yield inputs, outputs, inputs
         return
-    if uop.name in ("_DEOPT", "_HANDLE_PENDING_AND_DEOPT", "_EXIT_TRACE"):
+    if uop.name in ("_DEOPT", "_HANDLE_PENDING_AND_DEOPT", "_EXIT_TRACE", "_DYNAMIC_EXIT"):
         for i in range(MAX_CACHED_REGISTER+1):
             yield i, 0, 0
         return

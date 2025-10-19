@@ -878,10 +878,10 @@ _PyJIT_InitializeTracing(PyThreadState *tstate, _PyInterpreterFrame *frame, _Py_
         code->co_firstlineno,
         2 * INSTR_IP(next_instr, code));
 #endif
-    add_to_trace(tstate->interp->jit_state.jit_tracer_code_buffer, 0, _START_EXECUTOR, 0, (uintptr_t)next_instr, INSTR_IP(next_instr, code));
+    add_to_trace(tstate->interp->jit_state.jit_tracer_code_buffer, 0, _START_EXECUTOR, curr_stackdepth, (uintptr_t)next_instr, INSTR_IP(next_instr, code));
     add_to_trace(tstate->interp->jit_state.jit_tracer_code_buffer, 1, _MAKE_WARM, 0, 0, 0);
     tstate->interp->jit_state.jit_tracer_code_curr_size = 2;
-    tstate->interp->jit_state.jit_tracer_code_max_size = UOP_MAX_TRACE_LENGTH;
+    tstate->interp->jit_state.jit_tracer_code_max_size = UOP_MAX_TRACE_LENGTH / 2;
     tstate->interp->jit_state.jit_tracer_initial_instr = next_instr;
     tstate->interp->jit_state.jit_tracer_initial_code = (PyCodeObject *)Py_NewRef(code);
     tstate->interp->jit_state.jit_tracer_initial_func = (PyFunctionObject *)Py_NewRef(_PyFrame_GetFunction(frame));
@@ -992,23 +992,23 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
         uint16_t exit_flags = _PyUop_Flags[base_opcode] & (HAS_EXIT_FLAG | HAS_DEOPT_FLAG | HAS_PERIODIC_FLAG);
         if (exit_flags) {
             uint16_t base_exit_op = _EXIT_TRACE;
+            bool unique_target = false;
             if (exit_flags & HAS_DEOPT_FLAG) {
                 base_exit_op = _DEOPT;
             }
             else if (exit_flags & HAS_PERIODIC_FLAG) {
                 base_exit_op = _HANDLE_PENDING_AND_DEOPT;
             }
+            if (base_opcode == _FOR_ITER_TIER_TWO) {
+                base_exit_op = _DYNAMIC_EXIT;
+            }
+            else if (base_opcode == _GUARD_IP) {
+                base_exit_op = _DYNAMIC_EXIT;
+                unique_target = true;
+            }
             int exit_depth = get_cached_entries_for_side_exit(inst);
             uint16_t exit_op = _PyUop_Caching[base_exit_op].entries[exit_depth].opcode;
             int32_t jump_target = target;
-            bool unique_target = false;
-            if (base_opcode == _FOR_ITER_TIER_TWO) {
-                exit_op = _DYNAMIC_EXIT;
-            }
-            else if (base_opcode == _GUARD_IP) {
-                exit_op = _DYNAMIC_EXIT;
-                unique_target = true;
-            }
             if (is_for_iter_test[base_opcode]) {
                 /* Target the POP_TOP immediately after the END_FOR,
                  * leaving only the iterator on the stack. */
@@ -1127,7 +1127,8 @@ sanity_check(_PyExecutorObject *executor)
             base_opcode == _DEOPT ||
             base_opcode == _HANDLE_PENDING_AND_DEOPT ||
             base_opcode == _EXIT_TRACE ||
-            base_opcode == _ERROR_POP_N);
+            base_opcode == _ERROR_POP_N ||
+            base_opcode == _DYNAMIC_EXIT);
     }
 }
 
@@ -1165,7 +1166,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
         dest--;
         *dest = buffer[i];
         assert(base_opcode != _POP_JUMP_IF_FALSE && base_opcode != _POP_JUMP_IF_TRUE);
-        if (base_opcode == _EXIT_TRACE) {
+        if (base_opcode == _EXIT_TRACE || base_opcode == _DYNAMIC_EXIT) {
             _PyExitData *exit = &executor->exits[next_exit];
             exit->target = buffer[i].target;
             exit->executor = cold;

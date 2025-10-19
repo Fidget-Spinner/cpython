@@ -15019,4 +15019,205 @@
             }
         }
 
+        case _DYNAMIC_EXIT_r10: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
+            _Py_CODEUNIT *target = frame->instr_ptr;
+            _PyExitData *exit = (_PyExitData *)exit_p;
+            _Py_BackoffCounter temperature = exit->temperature;
+            #if defined(Py_DEBUG) && !defined(_Py_JIT)
+            OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
+            if (frame->lltrace >= 2) {
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                printf("DYNAMIC EXIT: [UOp ");
+                _PyUOpPrint(&next_uop[-1]);
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
+                       exit - current_executor->exits, exit->temperature.value_and_backoff,
+                       (int)(target - _PyFrame_GetBytecode(frame)),
+                       _PyOpcode_OpName[target->op.code]);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                stack_pointer += -1;
+            }
+            #endif
+            if (target->op.code == ENTER_EXECUTOR) {
+                PyCodeObject *code = _PyFrame_GetCode(frame);
+                _PyExecutorObject *executor = code->co_executors->executors[target->op.arg];
+                tstate->jit_exit = NULL;
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+                SET_CURRENT_CACHED_VALUES(0);
+                TIER2_TO_TIER2(executor);
+            }
+            else {
+                if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
+                    stack_pointer[0] = _stack_item_0;
+                    stack_pointer += 1;
+                    assert(WITHIN_STACK_BOUNDS());
+                    SET_CURRENT_CACHED_VALUES(0);
+                    GOTO_TIER_ONE(target, 0);
+                }
+                if (!backoff_counter_triggers(temperature)) {
+                    exit->temperature = advance_backoff_counter(temperature);
+                    stack_pointer[0] = _stack_item_0;
+                    stack_pointer += 1;
+                    assert(WITHIN_STACK_BOUNDS());
+                    SET_CURRENT_CACHED_VALUES(0);
+                    GOTO_TIER_ONE(target, 0);
+                }
+                exit->temperature = initial_temperature_backoff_counter();
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer += 1;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyJIT_InitializeTracing(tstate, frame, target, STACK_LEVEL(), 0, NULL);
+                SET_CURRENT_CACHED_VALUES(0);
+                GOTO_TIER_ONE(target, 1);
+            }
+        }
+
+        case _DYNAMIC_EXIT_r20: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
+            _Py_CODEUNIT *target = frame->instr_ptr;
+            _PyExitData *exit = (_PyExitData *)exit_p;
+            _Py_BackoffCounter temperature = exit->temperature;
+            #if defined(Py_DEBUG) && !defined(_Py_JIT)
+            OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
+            if (frame->lltrace >= 2) {
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer[1] = _stack_item_1;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                printf("DYNAMIC EXIT: [UOp ");
+                _PyUOpPrint(&next_uop[-1]);
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
+                       exit - current_executor->exits, exit->temperature.value_and_backoff,
+                       (int)(target - _PyFrame_GetBytecode(frame)),
+                       _PyOpcode_OpName[target->op.code]);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                stack_pointer += -2;
+            }
+            #endif
+            if (target->op.code == ENTER_EXECUTOR) {
+                PyCodeObject *code = _PyFrame_GetCode(frame);
+                _PyExecutorObject *executor = code->co_executors->executors[target->op.arg];
+                tstate->jit_exit = NULL;
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer[1] = _stack_item_1;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
+                SET_CURRENT_CACHED_VALUES(0);
+                TIER2_TO_TIER2(executor);
+            }
+            else {
+                if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
+                    stack_pointer[0] = _stack_item_0;
+                    stack_pointer[1] = _stack_item_1;
+                    stack_pointer += 2;
+                    assert(WITHIN_STACK_BOUNDS());
+                    SET_CURRENT_CACHED_VALUES(0);
+                    GOTO_TIER_ONE(target, 0);
+                }
+                if (!backoff_counter_triggers(temperature)) {
+                    exit->temperature = advance_backoff_counter(temperature);
+                    stack_pointer[0] = _stack_item_0;
+                    stack_pointer[1] = _stack_item_1;
+                    stack_pointer += 2;
+                    assert(WITHIN_STACK_BOUNDS());
+                    SET_CURRENT_CACHED_VALUES(0);
+                    GOTO_TIER_ONE(target, 0);
+                }
+                exit->temperature = initial_temperature_backoff_counter();
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer[1] = _stack_item_1;
+                stack_pointer += 2;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyJIT_InitializeTracing(tstate, frame, target, STACK_LEVEL(), 0, NULL);
+                SET_CURRENT_CACHED_VALUES(0);
+                GOTO_TIER_ONE(target, 1);
+            }
+        }
+
+        case _DYNAMIC_EXIT_r30: {
+            CHECK_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            _PyStackRef _stack_item_2 = _tos_cache2;
+            PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
+            _Py_CODEUNIT *target = frame->instr_ptr;
+            _PyExitData *exit = (_PyExitData *)exit_p;
+            _Py_BackoffCounter temperature = exit->temperature;
+            #if defined(Py_DEBUG) && !defined(_Py_JIT)
+            OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
+            if (frame->lltrace >= 2) {
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer[1] = _stack_item_1;
+                stack_pointer[2] = _stack_item_2;
+                stack_pointer += 3;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                printf("DYNAMIC EXIT: [UOp ");
+                _PyUOpPrint(&next_uop[-1]);
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
+                       exit - current_executor->exits, exit->temperature.value_and_backoff,
+                       (int)(target - _PyFrame_GetBytecode(frame)),
+                       _PyOpcode_OpName[target->op.code]);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                stack_pointer += -3;
+            }
+            #endif
+            if (target->op.code == ENTER_EXECUTOR) {
+                PyCodeObject *code = _PyFrame_GetCode(frame);
+                _PyExecutorObject *executor = code->co_executors->executors[target->op.arg];
+                tstate->jit_exit = NULL;
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer[1] = _stack_item_1;
+                stack_pointer[2] = _stack_item_2;
+                stack_pointer += 3;
+                assert(WITHIN_STACK_BOUNDS());
+                SET_CURRENT_CACHED_VALUES(0);
+                TIER2_TO_TIER2(executor);
+            }
+            else {
+                if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
+                    stack_pointer[0] = _stack_item_0;
+                    stack_pointer[1] = _stack_item_1;
+                    stack_pointer[2] = _stack_item_2;
+                    stack_pointer += 3;
+                    assert(WITHIN_STACK_BOUNDS());
+                    SET_CURRENT_CACHED_VALUES(0);
+                    GOTO_TIER_ONE(target, 0);
+                }
+                if (!backoff_counter_triggers(temperature)) {
+                    exit->temperature = advance_backoff_counter(temperature);
+                    stack_pointer[0] = _stack_item_0;
+                    stack_pointer[1] = _stack_item_1;
+                    stack_pointer[2] = _stack_item_2;
+                    stack_pointer += 3;
+                    assert(WITHIN_STACK_BOUNDS());
+                    SET_CURRENT_CACHED_VALUES(0);
+                    GOTO_TIER_ONE(target, 0);
+                }
+                exit->temperature = initial_temperature_backoff_counter();
+                stack_pointer[0] = _stack_item_0;
+                stack_pointer[1] = _stack_item_1;
+                stack_pointer[2] = _stack_item_2;
+                stack_pointer += 3;
+                assert(WITHIN_STACK_BOUNDS());
+                _PyJIT_InitializeTracing(tstate, frame, target, STACK_LEVEL(), 0, NULL);
+                SET_CURRENT_CACHED_VALUES(0);
+                GOTO_TIER_ONE(target, 1);
+            }
+        }
+
 #undef TIER_TWO

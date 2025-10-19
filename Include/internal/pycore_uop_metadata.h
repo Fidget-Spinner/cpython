@@ -352,7 +352,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_SPILL_OR_RELOAD] = 0,
     [_COLD_EXIT] = HAS_SYNC_SP_FLAG,
     [_GUARD_IP] = HAS_EXIT_FLAG,
-    [_DYNAMIC_EXIT] = HAS_ESCAPES_FLAG,
+    [_DYNAMIC_EXIT] = HAS_ESCAPES_FLAG | HAS_SYNC_SP_FLAG,
 };
 
 const ReplicationRange _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -3193,12 +3193,12 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
         },
     },
     [_DYNAMIC_EXIT] = {
-        .best = { 0, 0, 0, 0 },
+        .best = { 0, 1, 2, 3 },
         .entries = {
             { 0, 0, _DYNAMIC_EXIT_r00 },
-            { -1, -1, -1 },
-            { -1, -1, -1 },
-            { -1, -1, -1 },
+            { 0, 0, _DYNAMIC_EXIT_r10 },
+            { 0, 0, _DYNAMIC_EXIT_r20 },
+            { 0, 0, _DYNAMIC_EXIT_r30 },
         },
     },
 };
@@ -3780,6 +3780,9 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_GUARD_IP_r22] = _GUARD_IP,
     [_GUARD_IP_r33] = _GUARD_IP,
     [_DYNAMIC_EXIT_r00] = _DYNAMIC_EXIT,
+    [_DYNAMIC_EXIT_r10] = _DYNAMIC_EXIT,
+    [_DYNAMIC_EXIT_r20] = _DYNAMIC_EXIT,
+    [_DYNAMIC_EXIT_r30] = _DYNAMIC_EXIT,
 };
 
 const uint16_t _PyUop_SpillsAndReloads[4][4] = {
@@ -4015,6 +4018,9 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_DICT_UPDATE_r10] = "_DICT_UPDATE_r10",
     [_DYNAMIC_EXIT] = "_DYNAMIC_EXIT",
     [_DYNAMIC_EXIT_r00] = "_DYNAMIC_EXIT_r00",
+    [_DYNAMIC_EXIT_r10] = "_DYNAMIC_EXIT_r10",
+    [_DYNAMIC_EXIT_r20] = "_DYNAMIC_EXIT_r20",
+    [_DYNAMIC_EXIT_r30] = "_DYNAMIC_EXIT_r30",
     [_END_FOR] = "_END_FOR",
     [_END_FOR_r10] = "_END_FOR_r10",
     [_END_SEND] = "_END_SEND",

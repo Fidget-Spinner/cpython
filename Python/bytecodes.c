@@ -5496,19 +5496,27 @@ dummy_func(
                 PyCodeObject *code = _PyFrame_GetCode(frame);
                 _PyExecutorObject *executor = code->co_executors->executors[target->op.arg];
                 tstate->jit_exit = NULL;
+                SYNC_SP();
                 TIER2_TO_TIER2(executor);
+                Py_UNREACHABLE();
             }
             else {
                 if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
+                    SYNC_SP();
                     GOTO_TIER_ONE(target, 0);
+                    Py_UNREACHABLE();
                 }
                 if (!backoff_counter_triggers(temperature)) {
                     exit->temperature = advance_backoff_counter(temperature);
+                    SYNC_SP();
                     GOTO_TIER_ONE(target, 0);
+                    Py_UNREACHABLE();
                 }
                 exit->temperature = initial_temperature_backoff_counter();
+                SYNC_SP();
                 _PyJIT_InitializeTracing(tstate, frame, target, STACK_LEVEL(), 0, NULL);
                 GOTO_TIER_ONE(target, 1);
+                Py_UNREACHABLE();
             }
         }
 
