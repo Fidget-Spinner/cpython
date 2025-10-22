@@ -146,6 +146,28 @@ _PyErr_Format(tstate, PyExc_SystemError,
 JUMP_TO_LABEL(error);
 """
 
+TARGET_FOOTER = f"""
+            {INSTRUCTION_END_MARKER}
+#if !_Py_TAIL_CALL_INTERP
+#if USE_COMPUTED_GOTOS
+        _unknown_opcode:
+#else
+        EXTRA_CASES  // From pycore_opcode_metadata.h, a 'case' for each unused opcode
+#endif
+            /* Tell C compilers not to hold the opcode variable in the loop.
+               next_instr points the current instruction without TARGET(). */
+            opcode = next_instr->op.code;
+            {UNKNOWN_OPCODE_HANDLER}
+
+        }}
+
+        /* This should never be reached. Every opcode should end with DISPATCH()
+           or goto error. */
+        Py_UNREACHABLE();
+#endif /* _Py_TAIL_CALL_INTERP */
+        {LABEL_START_MARKER}
+"""
+
 def generate_tier1(
     filenames: list[str], analysis: Analysis, outfile: TextIO, lines: bool
 ) -> None:
@@ -170,41 +192,21 @@ def generate_tier1(
     out = CWriter(outfile, 2, lines)
     emitter = Emitter(out, analysis.labels)
     generate_tier1_cases(analysis, out, emitter)
-    outfile.write(f"""
-            {INSTRUCTION_END_MARKER}
-#if !_Py_TAIL_CALL_INTERP
-#if USE_COMPUTED_GOTOS
-        _unknown_opcode:
-#else
-        EXTRA_CASES  // From pycore_opcode_metadata.h, a 'case' for each unused opcode
-#endif
-            /* Tell C compilers not to hold the opcode variable in the loop.
-               next_instr points the current instruction without TARGET(). */
-            opcode = next_instr->op.code;
-            {UNKNOWN_OPCODE_HANDLER}
-
-        }}
-
-        /* This should never be reached. Every opcode should end with DISPATCH()
-           or goto error. */
-        Py_UNREACHABLE();
-#endif /* _Py_TAIL_CALL_INTERP */
-        {LABEL_START_MARKER}
-""")
+    outfile.write(TARGET_FOOTER)
     out = CWriter(outfile, 2, lines)
     emitter = Emitter(out, analysis.labels)
-    generate_tier1_labels(analysis, emitter)
+    generate_tier1_labels(analysis.labels, emitter)
     outfile.write(f"{LABEL_END_MARKER}\n")
     outfile.write(FOOTER)
 
 
 
 def generate_tier1_labels(
-    analysis: Analysis, emitter: Emitter
+    labels: dict[str, Label], emitter: Emitter
 ) -> None:
     emitter.emit("\n")
     # Emit tail-callable labels as function defintions
-    for name, label in analysis.labels.items():
+    for name, label in labels.items():
         emitter.emit(f"LABEL({name})\n")
         storage = Storage(Stack(), [], [], 0, False)
         if label.spilled:
@@ -223,7 +225,6 @@ def generate_tier1_cases(
     for name, inst in sorted(analysis.instructions.items()):
         out.emit("\n")
         out.emit(f"TARGET({name}) {{\n")
-        popped = get_popped(inst, analysis)
         # We need to ifdef it because this breaks platforms
         # without computed gotos/tail calling.
         out.emit(f"#if _Py_TAIL_CALL_INTERP\n")

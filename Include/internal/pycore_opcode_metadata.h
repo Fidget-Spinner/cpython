@@ -1188,7 +1188,7 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[267] = {
     [INTERPRETER_EXIT] = { true, INSTR_FMT_IX, HAS_ESCAPES_FLAG },
     [IS_OP] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_ESCAPES_FLAG },
     [JUMP_BACKWARD] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
-    [JUMP_BACKWARD_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
+    [JUMP_BACKWARD_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG },
     [JUMP_BACKWARD_NO_INTERRUPT] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_JUMP_FLAG },
     [JUMP_BACKWARD_NO_JIT] = { true, INSTR_FMT_IBC, HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [JUMP_FORWARD] = { true, INSTR_FMT_IB, HAS_ARG_FLAG | HAS_JUMP_FLAG },
@@ -2129,6 +2129,19 @@ is_pseudo_target(int pseudo, int target) {
     }
     return false;
 }
+
+#if _Py_TIER2
+typedef enum {
+    CEVAL_LABEL_error = 0,
+    CEVAL_LABEL_exception_unwind = 1,
+    CEVAL_LABEL_exit_unwind = 2,
+    CEVAL_LABEL_pop_1_error = 3,
+    CEVAL_LABEL_pop_2_error = 4,
+    CEVAL_LABEL_start_frame = 5,
+    CEVAL_LABEL_JIT_CONTINUE_TRACING = 6,
+    CEVAL_LABEL_JIT_DONE_TRACING = 6,
+} _PyCeval_LabelIds;
+#endif
 
 
 #ifdef __cplusplus

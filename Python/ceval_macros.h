@@ -84,12 +84,6 @@
 #   define Py_PRESERVE_NONE_CC __attribute__((preserve_none))
     Py_PRESERVE_NONE_CC typedef PyObject* (*py_tail_call_funcptr)(TAIL_CALL_PARAMS);
 
-#   define DISPATCH_TABLE_VAR instruction_funcptr_table
-#   define DISPATCH_TABLE instruction_funcptr_handler_table
-#   define TRACING_DISPATCH_TABLE instruction_funcptr_tracing_table
-#   define TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_##op(TAIL_CALL_PARAMS)
-#   define TRACING_TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_TRACING_##op(TAIL_CALL_PARAMS)
-
 #   define DISPATCH_GOTO() \
         do { \
             Py_MUSTTAIL return (((py_tail_call_funcptr *)instruction_funcptr_table)[opcode])(TAIL_CALL_ARGS); \
@@ -111,8 +105,6 @@
 #   endif
 #    define LABEL(name) TARGET(name)
 #elif USE_COMPUTED_GOTOS
-#  define DISPATCH_TABLE_VAR opcode_targets
-#  define DISPATCH_TABLE opcode_targets_table
 #  define TRACING_DISPATCH_TABLE opcode_tracing_targets_table
 #  define TARGET(op) TARGET_##op:
 #  define TRACING_TARGET(op) TARGET_TRACING_##op:
@@ -129,21 +121,21 @@
 #  define LABEL(name) name:
 #endif
 
-#define TRACING_JUMP_TO_LABEL(label) \
-    RECORD_DYNAMIC_JUMP_TAKEN() \
-    RECORD_TRACE_NO_DISPATCH() \
-    assert(!IS_JIT_TRACING()); \
-    JUMP_TO_LABEL(label);
 
-#if _Py_TAIL_CALL_INTERP || USE_COMPUTED_GOTOS
+#if _Py_TIER2
+#if _Py_TAIL_CALL_INTERP
+#   define DISPATCH_TABLE_VAR instruction_funcptr_table
+#   define DISPATCH_TABLE instruction_funcptr_handler_table
+#   define TRACING_DISPATCH_TABLE instruction_funcptr_tracing_table
+#   define ENTER_TRACING() DISPATCH_TABLE_VAR = TRACING_DISPATCH_TABLE
+#   define TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_##op(TAIL_CALL_PARAMS)
+#   define TRACING_TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_TRACING_##op(TAIL_CALL_PARAMS)
+
 #  define IS_JIT_TRACING() (DISPATCH_TABLE_VAR == TRACING_DISPATCH_TABLE)
 // tstate->interp->jit_state.last_specialized_instr != this_instr is required to not get stuck in infinite
 // specialization loops due to specialization failure.
 #  define IS_JIT_TRACING_MAKING_PROGRESS() (IS_JIT_TRACING() && tstate->interp->jit_state.last_specialized_instr != this_instr)
-#  define ENTER_TRACING() \
-    DISPATCH_TABLE_VAR = TRACING_DISPATCH_TABLE;
-#  define LEAVE_TRACING() \
-    DISPATCH_TABLE_VAR = DISPATCH_TABLE;
+#  define LEAVE_TRACING() DISPATCH_TABLE_VAR = DISPATCH_TABLE;
 #  define RECORD_TRACE_NO_DISPATCH() do { \
         int err = 0; \
         _PyFrame_SetStackPointer(frame, stack_pointer); \
@@ -158,8 +150,33 @@
         stack_pointer = _PyFrame_GetStackPointer(frame); \
         if (err < 0) { JUMP_TO_LABEL(error); }  \
     } while (0);
-#endif
+#define TRACING_JUMP_TO_LABEL(label) \
+    RECORD_DYNAMIC_JUMP_TAKEN() \
+    RECORD_TRACE_NO_DISPATCH() \
+    assert(!IS_JIT_TRACING()); \
+    JUMP_TO_LABEL(label);
 
+#else
+// Note: computed gotos interpreter slows down a lot with tracing.
+// So we can't use the same dispatch table technique the tail calling
+// interpreter uses.
+#  define ENTER_TRACING()
+#  define IS_JIT_TRACING() (is_tracing_flag)
+#  define IS_JIT_TRACING_MAKING_PROGRESS() (IS_JIT_TRACING() && tstate->interp->jit_state.last_specialized_instr != this_instr)
+#  define RECORD_TRACE_NO_ERR_CHECK() \
+        _PyFrame_SetStackPointer(frame, stack_pointer); \
+        _PyJitTracerReturnValue jit_status = record_trace(tstate, frame, old_code, old_func, _old_stack_level, this_instr, next_instr, opcode, oparg, _jump_taken); \
+        stack_pointer = _PyFrame_GetStackPointer(frame);
+#  define RECORD_TRACE_NO_DISPATCH() \
+        RECORD_TRACE_NO_ERR_CHECK(); \
+        if (jit_status.status != CEVAL_LABEL_JIT_CONTINUE_TRACING) { return jit_status; }
+#define TRACING_JUMP_TO_LABEL(label) \
+    RECORD_DYNAMIC_JUMP_TAKEN(); \
+    RECORD_TRACE_NO_ERR_CHECK(); \
+    (void)(jit_status); \
+    return ((_PyJitTracerReturnValue){CEVAL_LABEL_##label, next_instr});
+#endif
+#endif
 
 /* PRE_DISPATCH_GOTO() does lltrace if enabled. Normally a no-op */
 #ifdef Py_DEBUG
@@ -204,14 +221,6 @@ do { \
         DISPATCH_GOTO(); \
     }
 
-#define TRACING_SPECIALIZE_DISPATCH_SAME_OPARG() \
-{ \
-    tstate->interp->jit_state.last_specialized_instr = this_instr; \
-    opcode = next_instr->op.code; \
-    PRE_DISPATCH_GOTO(); \
-    DISPATCH_GOTO(); \
-}
-
 #define DISPATCH_INLINED(NEW_FRAME)                     \
     do {                                                \
         assert(tstate->interp->eval_frame == NULL);     \
@@ -221,6 +230,14 @@ do { \
         CALL_STAT_INC(inlined_py_calls);                \
         JUMP_TO_LABEL(start_frame);                      \
     } while (0)
+
+#define TRACING_SPECIALIZE_DISPATCH_SAME_OPARG() \
+{ \
+    tstate->interp->jit_state.last_specialized_instr = this_instr; \
+    opcode = next_instr->op.code; \
+    PRE_DISPATCH_GOTO(); \
+    DISPATCH_GOTO(); \
+}
 
 #define TRACING_DISPATCH_INLINED(NEW_FRAME) \
     tstate->interp->jit_state.last_specialized_instr = this_instr; \

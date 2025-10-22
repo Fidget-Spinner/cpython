@@ -366,6 +366,18 @@ def generate_pseudo_targets(analysis: Analysis, out: CWriter) -> None:
     out.emit(f"return false;\n")
     out.emit("}\n\n")
 
+def ceval_label_name(label: str) -> str:
+    return f"CEVAL_LABEL_{label}"
+
+def generate_labels_enum(analysis: Analysis, out: CWriter) -> None:
+    out.emit("#if _Py_TIER2\n")
+    out.emit("typedef enum {\n")
+    for id, label in enumerate(sorted(analysis.labels)):
+        out.emit(f"{ceval_label_name(label)} = {id},\n")
+    out.emit(f"{ceval_label_name('JIT_CONTINUE_TRACING')} = {len(analysis.labels)},\n")
+    out.emit(f"{ceval_label_name('JIT_DONE_TRACING')} = {len(analysis.labels)},\n")
+    out.emit("} _PyCeval_LabelIds;\n")
+    out.emit("#endif\n\n")
 
 def generate_opcode_metadata(
     filenames: list[str], analysis: Analysis, outfile: TextIO
@@ -396,6 +408,7 @@ def generate_opcode_metadata(
         generate_deopt_table(analysis, out)
         generate_extra_cases(analysis, out)
         generate_pseudo_targets(analysis, out)
+        generate_labels_enum(analysis, out)
 
 
 arg_parser = argparse.ArgumentParser(

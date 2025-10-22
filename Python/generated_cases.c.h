@@ -4602,7 +4602,7 @@
             last_sent_val = stack_pointer[-2];
             sub_iter = stack_pointer[-3];
             PyObject *exc_value = PyStackRef_AsPyObjectBorrow(exc_value_st);
-            #if !_Py_TAIL_CALL_INTERP
+            #if !_Py_TAIL_CALL_INTERP && !TRACING_JIT
             assert(throwflag);
             #endif
             assert(exc_value && PyExceptionInstance_Check(exc_value));
@@ -5495,9 +5495,9 @@
             tstate->jit_exit = NULL;
             #if TRACING_JIT
             RECORD_TRACE_NO_DISPATCH();
-            #endif
-            TIER1_TO_TIER2(executor);
             #else
+            TIER1_TO_TIER2(executor);
+            #endif
             Py_FatalError("ENTER_EXECUTOR is not supported in this build");
             #endif /* _Py_TIER2 */
             DISPATCH();
@@ -7535,7 +7535,7 @@
             tstate->current_frame = frame->previous;
             assert(!_PyErr_Occurred(tstate));
             PyObject *result = PyStackRef_AsPyObjectSteal(retval);
-            #if !_Py_TAIL_CALL_INTERP
+            #if !_Py_TAIL_CALL_INTERP && !TRACING_JIT
             assert(frame == &entry.frame);
             #endif
             #ifdef _Py_TIER2
@@ -7552,7 +7552,12 @@
             }
             #endif
             LLTRACE_RESUME_FRAME();
+            #if defined(TRACING_JIT) && !_Py_TAIL_CALL_INTERP
+
+            Py_UNREACHABLE();
+            #else
             return result;
+            #endif
         }
 
         TARGET(IS_OP) {
@@ -7638,6 +7643,7 @@
             frame->instr_ptr = next_instr;
             next_instr += 2;
             INSTRUCTION_STATS(JUMP_BACKWARD_JIT);
+            opcode = JUMP_BACKWARD_JIT;
             static_assert(1 == 1, "incorrect cache size");
             /* Skip 1 cache entry */
             // _CHECK_PERIODIC
@@ -7669,6 +7675,7 @@
                             DISPATCH();
                         }
                     }
+                    #ifndef TRACING_JIT
                     int _is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL);
                     if (!_is_sys_tracing) {
                         _Py_CODEUNIT *insert_exec_at = this_instr;
@@ -7678,12 +7685,43 @@
                         }
                         _PyJit_InitializeTracing(tstate, frame, insert_exec_at, next_instr, STACK_LEVEL(), 0, NULL);
                         ENTER_TRACING();
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        _PyJitTracerReturnValue retval = _PyEval_EvalFrameDefaultTracing(frame, tstate, next_instr, opcode, oparg);
+                        next_instr = retval.next_instr;
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        _PyCeval_LabelIds status = retval.status;
+                        if (status == CEVAL_LABEL_error) {
+                            JUMP_TO_LABEL(error);
+                        }
+                        else if (status == CEVAL_LABEL_exception_unwind) {
+                            _PyFrame_SetStackPointer(frame, stack_pointer);
+                            JUMP_TO_LABEL(exception_unwind);
+                        }
+                        else if (status == CEVAL_LABEL_exit_unwind) {
+                            _PyFrame_SetStackPointer(frame, stack_pointer);
+                            JUMP_TO_LABEL(exit_unwind);
+                        }
+                        else if (status == CEVAL_LABEL_pop_1_error) {
+                            JUMP_TO_LABEL(pop_1_error);
+                        }
+                        else if (status == CEVAL_LABEL_pop_2_error) {
+                            JUMP_TO_LABEL(pop_2_error);
+                        }
+                        else if (status == CEVAL_LABEL_start_frame) {
+                            _PyFrame_SetStackPointer(frame, stack_pointer);
+                            JUMP_TO_LABEL(start_frame);
+                        }
                     }
+                    #endif
+                    #if TRACING_JIT
                     int _jump_taken = false;
                     PyCodeObject *old_code = _PyFrame_GetCode(frame);
                     PyFunctionObject *old_func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
                     int _old_stack_level = 0;
                     TRACING_DISPATCH();
+                    #else
+                    DISPATCH();
+                    #endif
                 }
                 else {
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
@@ -12279,7 +12317,7 @@ JUMP_TO_LABEL(error);
                 JUMP_TO_LABEL(exit_unwind);
             }
             next_instr = frame->instr_ptr;
-            #ifdef Py_DEBUG
+            #if defined(Py_DEBUG) && !TRACING_JIT
             int lltrace = maybe_lltrace_resume_frame(frame, GLOBALS());
             if (lltrace < 0) {
                 JUMP_TO_LABEL(exit_unwind);

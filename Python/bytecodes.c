@@ -46,6 +46,7 @@
 #define USE_COMPUTED_GOTOS 0
 #include "ceval_macros.h"
 #include "../Include/internal/pycore_code.h"
+#include "../Include/internal/pycore_opcode_metadata.h"
 #include "../Include/internal/pycore_stackref.h"
 
 /* Flow control macros */
@@ -1221,7 +1222,7 @@ dummy_func(
             tstate->current_frame = frame->previous;
             assert(!_PyErr_Occurred(tstate));
             PyObject *result = PyStackRef_AsPyObjectSteal(retval);
-#if !_Py_TAIL_CALL_INTERP
+#if !_Py_TAIL_CALL_INTERP && !TRACING_JIT
             assert(frame == &entry.frame);
 #endif
 #ifdef _Py_TIER2
@@ -1233,7 +1234,13 @@ dummy_func(
             }
 #endif
             LLTRACE_RESUME_FRAME();
+#if defined(TRACING_JIT) && !_Py_TAIL_CALL_INTERP
+            // We should have exited the trace earlier once we hit
+            // the entry frame.
+            Py_UNREACHABLE();
+#else
             return result;
+#endif
         }
 
         // The stack effect here is a bit misleading.
@@ -1522,7 +1529,7 @@ dummy_func(
 
         tier1 inst(CLEANUP_THROW, (sub_iter, last_sent_val, exc_value_st -- none, value)) {
             PyObject *exc_value = PyStackRef_AsPyObjectBorrow(exc_value_st);
-            #if !_Py_TAIL_CALL_INTERP
+            #if !_Py_TAIL_CALL_INTERP && !TRACING_JIT
             assert(throwflag);
             #endif
             assert(exc_value && PyExceptionInstance_Check(exc_value));
@@ -2977,6 +2984,7 @@ dummy_func(
                         DISPATCH();
                     }
                 }
+            #ifndef TRACING_JIT
                 int _is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL);
                 if (!_is_sys_tracing) {
                     /* Back up over EXTENDED_ARGs so executor is inserted at the correct place */
@@ -2987,12 +2995,41 @@ dummy_func(
                     }
                     _PyJit_InitializeTracing(tstate, frame, insert_exec_at, next_instr, STACK_LEVEL(), 0, NULL);
                     ENTER_TRACING();
+                    SAVE_STACK();
+                    _PyJitTracerReturnValue retval = _PyEval_EvalFrameDefaultTracing(frame, tstate, next_instr, opcode, oparg);
+                    next_instr = retval.next_instr;
+                    RELOAD_STACK();
+                    _PyCeval_LabelIds status = retval.status;
+                    if (status == CEVAL_LABEL_error) {
+                        goto error;
+                    }
+                    else if (status == CEVAL_LABEL_exception_unwind) {
+                        goto exception_unwind;
+                    }
+                    else if (status == CEVAL_LABEL_exit_unwind) {
+                        goto exit_unwind;
+                    }
+                    else if (status == CEVAL_LABEL_pop_1_error) {
+                        goto pop_1_error;
+                    }
+                    else if (status == CEVAL_LABEL_pop_2_error) {
+                        goto pop_2_error;
+                    }
+                    else if (status == CEVAL_LABEL_start_frame) {
+                        goto start_frame;
+                    }
+
                 }
+            #endif
+            #if TRACING_JIT
                 int _jump_taken = false;
                 PyCodeObject *old_code = _PyFrame_GetCode(frame);
                 PyFunctionObject *old_func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
                 int _old_stack_level = 0;
                 TRACING_DISPATCH();
+            #else
+                DISPATCH();
+            #endif
             }
             else {
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
@@ -3059,9 +3096,10 @@ dummy_func(
             tstate->jit_exit = NULL;
             #if TRACING_JIT
             RECORD_TRACE_NO_DISPATCH();
-            #endif
-            TIER1_TO_TIER2(executor);
+            // We should have cut the executor here and ended the trace.
             #else
+            TIER1_TO_TIER2(executor);
+            #endif
             Py_FatalError("ENTER_EXECUTOR is not supported in this build");
             #endif /* _Py_TIER2 */
         }
@@ -5622,7 +5660,7 @@ dummy_func(
                 goto exit_unwind;
             }
             next_instr = frame->instr_ptr;
-        #ifdef Py_DEBUG
+        #if defined(Py_DEBUG) && !TRACING_JIT
             int lltrace = maybe_lltrace_resume_frame(frame, GLOBALS());
             if (lltrace < 0) {
                 JUMP_TO_LABEL(exit_unwind);

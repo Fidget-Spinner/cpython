@@ -28,7 +28,14 @@ from cwriter import CWriter
 from typing import TextIO
 from lexer import Token
 from stack import Local, Stack, StackError, get_stack_effect, Storage
-from tier1_generator import get_popped, declare_variables, write_uop
+from tier1_generator import (
+    declare_variables,
+    write_uop,
+    TARGET_FOOTER,
+    LABEL_END_MARKER,
+    generate_tier1_labels,
+)
+
 
 DEFAULT_OUTPUT = ROOT / "Python/generated_tracer_cases.c.h"
 
@@ -117,6 +124,12 @@ def generate_tier1_tracer_cases(
         out.emit("\n")
         out.emit(f"TRACING_TARGET({name}) {{\n")
         out.emit(f"assert(IS_JIT_TRACING());\n")
+        if name.startswith("INSTRUMENTED"):
+            out.start_line()
+            out.emit("return record_trace(tstate, frame, _PyFrame_GetCode(frame), _PyFrame_GetFunction(frame), 0, frame->instr_ptr, frame->instr_ptr, 0, 0, 1);\n")
+            out.emit("}\n")
+            out.start_line()
+            continue
         # We need to ifdef it because this breaks platforms
         # without computed gotos/tail calling.
         out.emit(f"#if _Py_TAIL_CALL_INTERP\n")
@@ -173,7 +186,11 @@ def generate_tracer_cases(
     analysis: Analysis, out: CWriter
 ) -> None:
     out.emit(f"#ifdef _Py_TIER2 /* BEGIN TRACING INSTRUCTIONS */\n")
-    generate_tier1_tracer_cases(analysis, out, TracerEmitter(out, analysis.labels))
+    emitter = TracerEmitter(out, analysis.labels)
+    generate_tier1_tracer_cases(analysis, out, emitter)
+    outfile.write(TARGET_FOOTER)
+    generate_tier1_labels({"start_frame": analysis.labels["start_frame"]}, emitter)
+    outfile.write(f"{LABEL_END_MARKER}\n")
     out.emit(f"#endif /* END TRACING INSTRUCTIONS */\n")
 
 def generate_tracer(

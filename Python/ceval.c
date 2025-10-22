@@ -1048,6 +1048,55 @@ typedef struct {
     _PyStackRef stack[1];
 } _PyEntryFrame;
 
+
+#if defined(_Py_TIER2) && !_Py_TAIL_CALL_INTERP
+
+typedef struct {
+    _PyCeval_LabelIds status;
+    _Py_CODEUNIT *next_instr;
+} _PyJitTracerReturnValue;
+
+static _PyJitTracerReturnValue
+record_trace(PyThreadState *tstate, _PyInterpreterFrame *frame, PyCodeObject *old_code, PyFunctionObject *old_func, int _old_stack_level, _Py_CODEUNIT *this_instr, _Py_CODEUNIT *next_instr, int opcode, int oparg, int _jump_taken)
+{
+    int full = add_to_code_trace(tstate, frame, old_code, old_func, _old_stack_level, this_instr, next_instr, opcode, oparg, _jump_taken);
+    if (full) {
+        int err = bail_tracing_and_jit(tstate, frame);
+        if (err < 0) {
+            return ((_PyJitTracerReturnValue){CEVAL_LABEL_error, next_instr});
+        }
+        return ((_PyJitTracerReturnValue){CEVAL_LABEL_JIT_DONE_TRACING, next_instr});
+    }
+    return ((_PyJitTracerReturnValue){CEVAL_LABEL_JIT_CONTINUE_TRACING, NULL});
+}
+
+_PyJitTracerReturnValue DONT_SLP_VECTORIZE
+_PyEval_EvalFrameDefaultTracing(_PyInterpreterFrame *frame,
+    PyThreadState *tstate, _Py_CODEUNIT *next_instr, int opcode, int oparg)
+{
+#if USE_COMPUTED_GOTOS
+#define USE_JIT_TARGETS
+    /* Import the static jump table */
+#include "opcode_targets.h"
+#undef USE_JIT_TARGETS
+    void **opcode_targets = opcode_tracing_targets_table;
+#endif
+    _Py_CODEUNIT *this_instr = frame->instr_ptr;
+    int _jump_taken = false;
+    PyCodeObject *old_code = _PyFrame_GetCode(frame);
+    PyFunctionObject *old_func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
+    int _old_stack_level = 0;
+    int is_tracing_flag = true;
+    _PyStackRef *stack_pointer = frame->stackpointer;
+    TRACING_DISPATCH();
+    {
+#include "generated_tracer_cases.c.h"
+    error:
+    return ((_PyJitTracerReturnValue){CEVAL_LABEL_error, next_instr});
+}
+
+#endif
+
 PyObject* _Py_HOT_FUNCTION DONT_SLP_VECTORIZE
 _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int throwflag)
 {
@@ -1068,6 +1117,7 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     uint8_t opcode;    /* Current opcode */
     int oparg;         /* Current opcode argument, if any */
     assert(tstate->current_frame == NULL || tstate->current_frame->stackpointer != NULL);
+    const bool is_tracing_flag = false;
 #endif
     _PyEntryFrame entry;
 
@@ -1154,7 +1204,6 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 #else
     goto start_frame;
 #   include "generated_cases.c.h"
-    #include "generated_tracer_cases.c.h"
 #endif
 
 
