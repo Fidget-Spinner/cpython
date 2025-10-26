@@ -471,7 +471,9 @@ register_side_exit(const _PyUOpInstruction *instruction, unsigned char *loc, con
     if (!(_PyUop_Flags[instruction->opcode] & HAS_EXIT_FLAG)) {
         return;
     }
-    assert(exit_trace->opcode == _EXIT_TRACE);
+    if (exit_trace->opcode != _EXIT_TRACE) {
+        return;
+    }
     _PyExitData *exit = (_PyExitData *)exit_trace->operand0;
     if (exit->num_side_locations_used >= UOP_MAX_SIDE_EXITS_PER_UOP) {
         return;
