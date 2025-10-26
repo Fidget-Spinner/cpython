@@ -25,6 +25,7 @@
 #include "pycore_template.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_uop_metadata.h"
 
 #include "pycore_jit.h"
 
@@ -124,6 +125,26 @@ mark_executable(unsigned char *memory, size_t size)
     return 0;
 }
 
+static int
+mark_read_writeable(unsigned char *memory, size_t size)
+{
+    if (size == 0) {
+        return 0;
+    }
+    assert(size % get_page_size() == 0);
+#ifdef MS_WINDOWS
+    int old;
+    int failed = !VirtualProtect(memory, size, PAGE_READWRITE, &old);
+#else
+    int failed = mprotect(memory, size, PROT_WRITE | PROT_READ);
+#endif
+    if (failed) {
+        jit_error("unable to protect executable memory");
+        return -1;
+    }
+    return 0;
+}
+
 // JIT compiler stuff: /////////////////////////////////////////////////////////
 
 #define SYMBOL_MASK_WORDS 4
@@ -138,6 +159,7 @@ typedef struct {
 
 typedef struct {
     trampoline_state trampolines;
+    _PyExecutorObject *executor;
     uintptr_t instruction_starts[UOP_MAX_TRACE_LENGTH];
 } jit_state;
 
@@ -443,6 +465,22 @@ patch_x86_64_32rx(unsigned char *location, uint64_t value)
     patch_32r(location, value);
 }
 
+static void
+register_side_exit(const _PyUOpInstruction *instruction, unsigned char *loc, const _PyUOpInstruction *exit_trace)
+{
+    if (!(_PyUop_Flags[instruction->opcode] & HAS_EXIT_FLAG)) {
+        return;
+    }
+    assert(exit_trace->opcode == _EXIT_TRACE);
+    _PyExitData *exit = (_PyExitData *)exit_trace->operand0;
+    if (exit->num_side_locations_used >= UOP_MAX_SIDE_EXITS_PER_UOP) {
+        return;
+    }
+    exit->exiting_uop_side_exit_locations[exit->num_side_locations_used] = (uintptr_t)loc;
+    exit->num_side_locations_used++;
+}
+
+
 void patch_aarch64_trampoline(unsigned char *location, int ordinal, jit_state *state);
 
 #include "jit_stencils.h"
@@ -519,6 +557,7 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     size_t code_size = 0;
     size_t data_size = 0;
     jit_state state = {0};
+    state.executor = executor;
     for (size_t i = 0; i < length; i++) {
         const _PyUOpInstruction *instruction = &trace[i];
         group = &stencil_groups[instruction->opcode];
@@ -662,6 +701,49 @@ _PyJIT_Free(_PyExecutorObject *executor)
                                    "freeing JIT memory");
         }
     }
+}
+
+#ifdef __x86_64__
+static void
+patch_side_exit(unsigned char *location, uint64_t value)
+{
+    uint64_t distance = (value - 0x4) - (uintptr_t)location;
+    // Cannot fit in a 32-bit PC-relative address.
+    if ((int64_t)distance < -(1LL << 31) || (int64_t)distance >= (1LL << 31)) {
+        return;
+    }
+    patch_32r(location, value - 0x4);
+}
+#else
+// TODO AArch64
+static void
+patch_side_exit(unsigned char *location, uint64_t value)
+{
+    (void)location;
+    (void)value;
+    return;
+}
+#endif
+
+int
+_PyJit_PatchSideExit(_PyExecutorObject *trunk_executor, _PyExitData *exit_p, _PyExecutorObject *side_exit)
+{
+    if (exit_p->num_side_locations_used > 0) {
+        if (mark_read_writeable(trunk_executor->jit_code, trunk_executor->jit_size) < 0) {
+            return -1;
+        }
+        uintptr_t new_target = (uintptr_t)side_exit->jit_code;
+        for (int i = 0; i < exit_p->num_side_locations_used; i++) {
+            uintptr_t loc = exit_p->exiting_uop_side_exit_locations[i];
+            assert(loc >= (uintptr_t)trunk_executor->jit_code);
+            assert(loc < (uintptr_t)((unsigned char *)trunk_executor->jit_code + trunk_executor->jit_size));
+            patch_side_exit((unsigned char *)loc, new_target);
+        }
+        if (mark_executable(trunk_executor->jit_code, trunk_executor->jit_size) < 0) {
+            return -1;
+        }
+    }
+    return 0;
 }
 
 #endif  // _Py_JIT

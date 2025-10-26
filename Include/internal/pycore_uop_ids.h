@@ -356,6 +356,7 @@ extern "C" {
 #define _WITH_EXCEPT_START WITH_EXCEPT_START
 #define _YIELD_VALUE YIELD_VALUE
 #define MAX_UOP_ID 549
+#define UOP_MAX_SIDE_EXITS_PER_UOP 5
 
 #ifdef __cplusplus
 }

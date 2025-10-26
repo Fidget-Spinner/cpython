@@ -7391,11 +7391,8 @@
             #ifndef _Py_JIT
             assert(current_executor == (_PyExecutorObject*)executor);
             #endif
-            assert(tstate->jit_exit == NULL || tstate->jit_exit->executor == current_executor);
             tstate->current_executor = (PyObject *)executor;
             if (!current_executor->vm_data.valid) {
-                assert(tstate->jit_exit->executor == current_executor);
-                assert(tstate->current_executor == executor);
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 _PyExecutor_ClearExit(tstate->jit_exit);
                 stack_pointer = _PyFrame_GetStackPointer(frame);
@@ -7488,6 +7485,15 @@
                     exit->temperature = restart_backoff_counter(temperature);
                     GOTO_TIER_ONE(optimized < 0 ? NULL : target);
                 }
+                #ifdef _Py_JIT
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                int err = _PyJit_PatchSideExit(previous_executor, exit, executor);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                if (err < 0) {
+                    exit->temperature = restart_backoff_counter(temperature);
+                    GOTO_TIER_ONE(NULL);
+                }
+                #endif
                 exit->temperature = initial_temperature_backoff_counter();
             }
             assert(tstate->jit_exit == exit);

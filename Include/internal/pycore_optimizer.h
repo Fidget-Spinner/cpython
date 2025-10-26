@@ -47,6 +47,12 @@ typedef struct _PyExitData {
     uint16_t index;
     _Py_BackoffCounter temperature;
     struct _PyExecutorObject *executor;
+    // Locations into the JIT code that contains
+    // the side exits pointing to this exit.
+    // This allows us to rewrite them to more efficient direct jumps
+    // to side traces.
+    uintptr_t exiting_uop_side_exit_locations[UOP_MAX_SIDE_EXITS_PER_UOP];
+    int num_side_locations_used;
 } _PyExitData;
 
 typedef struct _PyExecutorObject {

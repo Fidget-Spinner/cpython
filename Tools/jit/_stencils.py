@@ -171,6 +171,10 @@ class Hole:
     def as_c(self, where: str) -> str:
         """Dump this hole as a call to a patch_* function."""
         location = f"{where} + {self.offset:#x}"
+        register_jump_target = ""
+        if self.value == HoleValue.JUMP_TARGET and self.kind == "R_X86_64_PLT32":
+            assert self.func == "patch_32r"
+            register_jump_target = f"register_side_exit(instruction, {location}, &state->executor->trace[instruction->jump_target]);\n    "
         value = _HOLE_EXPRS[self.value]
         if self.symbol:
             if value:
@@ -182,7 +186,7 @@ class Hole:
             value += f"{_signed(self.addend):#x}"
         if self.need_state:
             return f"{self.func}({location}, {value}, state);"
-        return f"{self.func}({location}, {value});"
+        return f"{register_jump_target}{self.func}({location}, {value});"
 
 
 @dataclasses.dataclass

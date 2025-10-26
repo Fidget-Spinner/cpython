@@ -1209,6 +1209,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
         executor->exits[i].index = i;
         executor->exits[i].temperature = initial_temperature_backoff_counter();
         executor->exits[i].executor = cold;
+        executor->exits[i].num_side_locations_used = 0;
     }
     int next_exit = exit_count-1;
     _PyUOpInstruction *dest = (_PyUOpInstruction *)&executor->trace[length];
