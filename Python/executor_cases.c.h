@@ -7395,11 +7395,8 @@
             #ifndef _Py_JIT
             assert(current_executor == (_PyExecutorObject*)executor);
             #endif
-            assert(tstate->jit_exit == NULL || tstate->jit_exit->executor == current_executor);
             tstate->current_executor = (PyObject *)executor;
             if (!current_executor->vm_data.valid) {
-                assert(tstate->jit_exit->executor == current_executor);
-                assert(tstate->current_executor == executor);
                 _PyFrame_SetStackPointer(frame, stack_pointer);
                 _PyExecutor_ClearExit(tstate->jit_exit);
                 stack_pointer = _PyFrame_GetStackPointer(frame);

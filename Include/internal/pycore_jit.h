@@ -20,6 +20,8 @@ typedef _Py_CODEUNIT *(*jit_func)(_PyInterpreterFrame *frame, _PyStackRef *stack
 int _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction *trace, size_t length);
 void _PyJIT_Free(_PyExecutorObject *executor);
 
+PyAPI_DATA(int) _PyJit_PatchSideExit(_PyExecutorObject *trunk_executor, _PyExitData *exit_p, _PyExecutorObject *side_exit);
+
 #endif  // _Py_JIT
 
 #ifdef __cplusplus

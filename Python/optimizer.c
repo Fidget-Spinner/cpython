@@ -171,14 +171,22 @@ _PyOptimizer_Optimize(
     else {
         executor->vm_data.code = NULL;
     }
-    if (chain_depth > 0) {
-        _PyExitData *prev_exit = tstate->interp->jit_state.prev_exit;
-        assert(prev_exit != NULL);
+    _PyExitData *prev_exit = tstate->interp->jit_state.prev_exit;
+    if (prev_exit != NULL) {
         prev_exit->executor = executor;;
+#if _PY_JIT
+        _PyExecutorObject *prev_executor = _PyExecutor_FromExit(prev_exit);
+        if (_PyJit_PatchSideExit(prev_executor, prev_exit, executor)) {
+            return -1;
+        }
+#endif
     }
+
     executor->vm_data.chain_depth = chain_depth;
     assert(executor->vm_data.valid);
+
     interp->compiling = false;
+
     return 1;
 #else
     return 0;
@@ -1199,6 +1207,7 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
         executor->exits[i].index = i;
         executor->exits[i].temperature = initial_temperature_backoff_counter();
         executor->exits[i].executor = cold;
+        executor->exits[i].num_side_locations_used = 0;
     }
     int next_exit = exit_count-1;
     _PyUOpInstruction *dest = (_PyUOpInstruction *)&executor->trace[length];

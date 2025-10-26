@@ -21,6 +21,20 @@ from typing import TextIO
 DEFAULT_OUTPUT = ROOT / "Include/internal/pycore_uop_ids.h"
 
 
+def generate_max_side_exit_count(analysis: Analysis, out: CWriter) -> None:
+    max_side_exit_count = 1
+    for uop in analysis.uops.values():
+        if uop.is_viable() and uop.properties.tier != 1:
+            uop_side_exit_count = 0
+            for tok in uop.body.tokens():
+                # Note: this may be fewer than the actual max
+                # in the generated asm. However, it's a good enough estimate.
+                if tok.text == "EXIT_IF":
+                    uop_side_exit_count += 1
+            max_side_exit_count = max(max_side_exit_count, uop_side_exit_count)
+    out.emit(f"#define UOP_MAX_SIDE_EXITS_PER_UOP {max_side_exit_count}\n")
+
+
 def generate_uop_ids(
     filenames: list[str], analysis: Analysis, outfile: TextIO, distinct_namespace: bool
 ) -> None:
@@ -49,6 +63,7 @@ def generate_uop_ids(
                 next_id += 1
 
         out.emit(f"#define MAX_UOP_ID {next_id-1}\n")
+        generate_max_side_exit_count(analysis, out)
 
 
 arg_parser = argparse.ArgumentParser(
