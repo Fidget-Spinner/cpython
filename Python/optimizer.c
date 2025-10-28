@@ -958,7 +958,7 @@ _PyJit_TryInitializeTracing(PyThreadState *tstate, _PyInterpreterFrame *frame, _
     add_to_trace(tstate->interp->jit_state.code_buffer, 0, _START_EXECUTOR, curr_stackdepth, (uintptr_t)insert_exec_instr, INSTR_IP(insert_exec_instr, code));
     add_to_trace(tstate->interp->jit_state.code_buffer, 1, _MAKE_WARM, 0, 0, 0);
     tstate->interp->jit_state.code_curr_size = 2;
-    tstate->interp->jit_state.code_max_size = UOP_MAX_TRACE_LENGTH;
+    tstate->interp->jit_state.code_max_size = UOP_MAX_TRACE_LENGTH/2;
     tstate->interp->jit_state.insert_exec_instr = insert_exec_instr;
     tstate->interp->jit_state.close_loop_instr = close_loop_instr;
     tstate->interp->jit_state.initial_code = (PyCodeObject *)Py_NewRef(code);
