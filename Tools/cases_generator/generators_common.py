@@ -7,6 +7,7 @@ from analyzer import (
     analysis_error,
     Label,
     CodeSection,
+    Uop,
 )
 from cwriter import CWriter
 from typing import Callable, TextIO, Iterator, Iterable
@@ -107,9 +108,9 @@ class Emitter:
     labels: dict[str, Label]
     _replacers: dict[str, ReplacementFunctionType]
     cannot_escape: bool
-    tracing: str
+    jump_prefix: str
 
-    def __init__(self, out: CWriter, labels: dict[str, Label], cannot_escape: bool = False, is_tracing: bool = False):
+    def __init__(self, out: CWriter, labels: dict[str, Label], cannot_escape: bool = False, jump_prefix: str = ""):
         self._replacers = {
             "EXIT_IF": self.exit_if,
             "AT_END_EXIT_IF": self.exit_if_after,
@@ -128,16 +129,16 @@ class Emitter:
             "DISPATCH": self.dispatch,
             "INSTRUCTION_SIZE": self.instruction_size,
             "stack_pointer": self.stack_pointer,
-            "RECORD_JUMP_TAKEN": self.record_jump_taken,
             "Py_UNREACHABLE": self.unreachable,
             "TIER1_TO_TIER2": self.tier1_to_tier2,
             "TIER2_TO_TIER2": self.tier2_to_tier2,
-            "GOTO_TIER_ONE": self.goto_tier_one
+            "GOTO_TIER_ONE": self.goto_tier_one,
+            "DISPATCH_SAME_OPARG": self.dispatch_same_oparg,
         }
         self.out = out
         self.labels = labels
         self.cannot_escape = cannot_escape
-        self.tracing = "TRACING_" if is_tracing else ""
+        self.jump_prefix = jump_prefix
 
     def dispatch(
         self,
@@ -159,11 +160,31 @@ class Emitter:
         tkn_iter: TokenIterator,
         uop: CodeSection,
         storage: Storage,
-        inst: Instruction | None,
-    ) -> bool:
+        inst: Instruction | None
+    ):
         self.emit(tkn)
         emit_to(self.out, tkn_iter, "SEMI")
         self.emit(";\n")
+        return False
+
+    def dispatch_same_oparg(
+        self,
+        tkn: Token,
+        tkn_iter: TokenIterator,
+        uop: CodeSection,
+        storage: Storage,
+        inst: Instruction | None,
+    ) -> bool:
+        assert isinstance(uop, Uop)
+        assert "specializing" in uop.annotations, uop.name
+        self.out.start_line()
+        self.emit("#if _Py_TIER2\n")
+        self.emit("tstate->interp->jit_state.specialize_counter++;\n")
+        self.emit("#endif\n")
+        self.emit(tkn)
+        emit_to(self.out, tkn_iter, "SEMI")
+        self.emit(";\n")
+        self.out.start_line()
         return False
 
     def deopt_if(
@@ -187,7 +208,7 @@ class Emitter:
         family_name = inst.family.name
         self.emit(f"UPDATE_MISS_STATS({family_name});\n")
         self.emit(f"assert(_PyOpcode_Deopt[opcode] == ({family_name}));\n")
-        self.emit(f"JUMP_TO_PREDICTED({family_name});\n")
+        self.emit(f"JUMP_TO_PREDICTED({self.jump_prefix}{family_name});\n")
         self.emit("}\n")
         return not always_true(first_tkn)
 
@@ -226,10 +247,10 @@ class Emitter:
 
     def goto_error(self, offset: int, storage: Storage) -> str:
         if offset > 0:
-            return f"{self.tracing}JUMP_TO_LABEL(pop_{offset}_error);"
+            return f"{self.jump_prefix}JUMP_TO_LABEL(pop_{offset}_error);"
         if offset < 0:
             storage.copy().flush(self.out)
-        return f"{self.tracing}JUMP_TO_LABEL(error);"
+        return f"{self.jump_prefix}JUMP_TO_LABEL(error);"
 
     def error_if(
         self,
@@ -467,7 +488,7 @@ class Emitter:
         elif storage.spilled:
             raise analysis_error("Cannot jump from spilled label without reloading the stack pointer", goto)
         self.out.start_line()
-        self.out.emit(f"{self.tracing}JUMP_TO_LABEL(")
+        self.out.emit(f"{self.jump_prefix}JUMP_TO_LABEL(")
         self.out.emit(label)
         self.out.emit(")")
 
@@ -517,19 +538,6 @@ class Emitter:
         if uop.instruction_size is None:
             raise analysis_error("The INSTRUCTION_SIZE macro requires uop.instruction_size to be set", tkn)
         self.out.emit(f" {uop.instruction_size}u ")
-        return True
-
-    def record_jump_taken(
-        self,
-        tkn: Token,
-        tkn_iter: TokenIterator,
-        uop: CodeSection,
-        storage: Storage,
-        inst: Instruction | None,
-    ) -> bool:
-        next(tkn_iter);
-        next(tkn_iter);
-        next(tkn_iter);
         return True
 
     def _print_storage(self, reason:str, storage: Storage) -> None:
@@ -795,6 +803,8 @@ def cflags(p: Properties) -> str:
         flags.append("HAS_NO_SAVE_IP_FLAG")
     if p.sync_sp:
         flags.append("HAS_SYNC_SP_FLAG")
+    if p.unpredictable_jump:
+        flags.append("HAS_UNPREDICTABLE_JUMP_FLAG")
     if flags:
         return " | ".join(flags)
     else:

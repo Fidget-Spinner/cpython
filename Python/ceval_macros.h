@@ -88,11 +88,14 @@
 #   define DISPATCH_TABLE instruction_funcptr_handler_table
 #   define TRACING_DISPATCH_TABLE instruction_funcptr_tracing_table
 #   define TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_##op(TAIL_CALL_PARAMS)
-#   define TRACING_TARGET(op) Py_PRESERVE_NONE_CC PyObject *_TAIL_CALL_TRACING_##op(TAIL_CALL_PARAMS)
 
 #   define DISPATCH_GOTO() \
         do { \
             Py_MUSTTAIL return (((py_tail_call_funcptr *)instruction_funcptr_table)[opcode])(TAIL_CALL_ARGS); \
+        } while (0)
+#   define DISPATCH_GOTO_NON_TRACING() \
+        do { \
+            Py_MUSTTAIL return (((py_tail_call_funcptr *)DISPATCH_TABLE)[opcode])(TAIL_CALL_ARGS); \
         } while (0)
 #   define JUMP_TO_LABEL(name) \
         do { \
@@ -115,61 +118,33 @@
 #  define DISPATCH_TABLE opcode_targets_table
 #  define TRACING_DISPATCH_TABLE opcode_tracing_targets_table
 #  define TARGET(op) TARGET_##op:
-#  define TRACING_TARGET(op) TARGET_TRACING_##op:
 #  define DISPATCH_GOTO() goto *opcode_targets[opcode]
-
+#  define DISPATCH_GOTO_NON_TRACING() goto *DISPATCH_TABLE[opcode];
 #  define JUMP_TO_LABEL(name) goto name;
 #  define JUMP_TO_PREDICTED(name) goto PREDICTED_##name;
 #  define LABEL(name) name:
 #else
 #  define TARGET(op) case op: TARGET_##op:
 #  define DISPATCH_GOTO() goto dispatch_opcode
+#  define DISPATCH_GOTO_NON_TRACING() goto dispatch_opcode
 #  define JUMP_TO_LABEL(name) goto name;
 #  define JUMP_TO_PREDICTED(name) goto PREDICTED_##name;
 #  define LABEL(name) name:
 #endif
 
-#define TRACING_JUMP_TO_LABEL(label) \
-    RECORD_JUMP_TAKEN() \
-    RECORD_TRACE_NO_DISPATCH() \
-    assert(!IS_JIT_TRACING()); \
-    JUMP_TO_LABEL(label);
-
-#if _Py_TAIL_CALL_INTERP || USE_COMPUTED_GOTOS
+#if (_Py_TAIL_CALL_INTERP || USE_COMPUTED_GOTOS) && _Py_TIER2
 #  define IS_JIT_TRACING() (DISPATCH_TABLE_VAR == TRACING_DISPATCH_TABLE)
+#  define IS_JIT_TRACING_MAKING_PROGRESS() (IS_JIT_TRACING() && tstate->interp->jit_state.specialize_counter < MAX_SPECIALIZATION_TRIES)
 #  define ENTER_TRACING() \
     DISPATCH_TABLE_VAR = TRACING_DISPATCH_TABLE;
 #  define LEAVE_TRACING() \
     DISPATCH_TABLE_VAR = DISPATCH_TABLE;
-#  define BAIL_TRACING_NO_DISPATCH() \
-    do { \
-        LEAVE_TRACING(); \
-        if (!_PyErr_Occurred(tstate) && !_is_sys_tracing) { \
-            _PyFrame_SetStackPointer(frame, stack_pointer); \
-            int _err = _PyOptimizer_Optimize(frame, tstate); \
-            _PyJIT_FinalizeTracing(tstate); \
-            stack_pointer = _PyFrame_GetStackPointer(frame); \
-            if (_err < 0) { \
-                JUMP_TO_LABEL(error); \
-            } \
-        } \
-        else { \
-            _PyFrame_SetStackPointer(frame, stack_pointer); \
-            _PyJIT_FinalizeTracing(tstate); \
-            stack_pointer = _PyFrame_GetStackPointer(frame); \
-        } \
-    } while (0);
-#  define RECORD_TRACE_NO_DISPATCH() do { \
-        int _is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL); \
-        if (_is_sys_tracing) { \
-            LEAVE_TRACING(); \
-        } \
-        else if ((IS_JIT_TRACING() && add_to_code_trace(tstate, frame, old_code, old_func, this_instr, next_instr, opcode, oparg, _jump_taken))) { \
-            BAIL_TRACING_NO_DISPATCH(); \
-        } \
-    } while (0);
+#else
+#  define IS_JIT_TRACING() (0)
+#  define IS_JIT_TRACING_MAKING_PROGRESS() (0)
+#  define ENTER_TRACING()
+#  define LEAVE_TRACING()
 #endif
-
 
 /* PRE_DISPATCH_GOTO() does lltrace if enabled. Normally a no-op */
 #ifdef Py_DEBUG
@@ -207,11 +182,19 @@ do { \
         DISPATCH_GOTO(); \
     }
 
+#define DISPATCH_NON_TRACING() \
+    { \
+        assert(frame->stackpointer == NULL); \
+        NEXTOPARG(); \
+        PRE_DISPATCH_GOTO(); \
+        DISPATCH_GOTO_NON_TRACING(); \
+    }
+
 #define DISPATCH_SAME_OPARG() \
     { \
         opcode = next_instr->op.code; \
         PRE_DISPATCH_GOTO(); \
-        DISPATCH_GOTO(); \
+        DISPATCH_GOTO_NON_TRACING(); \
     }
 
 #define DISPATCH_INLINED(NEW_FRAME)                     \
@@ -223,19 +206,6 @@ do { \
         CALL_STAT_INC(inlined_py_calls);                \
         JUMP_TO_LABEL(start_frame);                      \
     } while (0)
-
-#define TRACING_DISPATCH_INLINED(NEW_FRAME) \
-    RECORD_TRACE_NO_DISPATCH(); \
-    DISPATCH_INLINED(NEW_FRAME);
-
-#define TRACING_DISPATCH() \
-    { \
-        assert(frame->stackpointer == NULL); \
-        RECORD_TRACE_NO_DISPATCH(); \
-        NEXTOPARG(); \
-        PRE_DISPATCH_GOTO(); \
-        DISPATCH_GOTO(); \
-    }
 
 /* Tuple access macros */
 
@@ -266,7 +236,6 @@ GETITEM(PyObject *v, Py_ssize_t i) {
  * and skipped instructions.
  */
 #define JUMPBY(x)       (next_instr += (x))
-#define TIER2_STORE_IP(x) (frame->instr_ptr += (x))
 #define SKIP_OVER(x)    (next_instr += (x))
 
 #define STACK_LEVEL()     ((int)(stack_pointer - _PyFrame_Stackbase(frame)))
@@ -344,8 +313,9 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 /* This takes a uint16_t instead of a _Py_BackoffCounter,
  * because it is used directly on the cache entry in generated code,
  * which is always an integral type. */
+// Force re-specialization when tracing a side exit to get good side exits.
 #define ADAPTIVE_COUNTER_TRIGGERS(COUNTER) \
-    backoff_counter_triggers(forge_backoff_counter((COUNTER)))
+    backoff_counter_triggers(forge_backoff_counter((COUNTER))) || IS_JIT_TRACING_MAKING_PROGRESS()
 
 #define ADVANCE_ADAPTIVE_COUNTER(COUNTER) \
     do { \
@@ -369,8 +339,6 @@ GETITEM(PyObject *v, Py_ssize_t i) {
 #else
 #define RECORD_BRANCH_TAKEN(bitset, flag)
 #endif
-
-#define RECORD_JUMP_TAKEN() _jump_taken = 1;
 
 #define UNBOUNDLOCAL_ERROR_MSG \
     "cannot access local variable '%s' where it is not associated with a value"
@@ -435,15 +403,18 @@ do {                                                   \
     frame = tstate->current_frame;                     \
     stack_pointer = _PyFrame_GetStackPointer(frame);   \
     int keep_tracing_bit = (uintptr_t)next_instr & 1;   \
-    next_instr = (_Py_CODEUNIT *)(((uintptr_t)next_instr) >> 1 << 1); \
+    next_instr = (_Py_CODEUNIT *)(((uintptr_t)next_instr) & (~1)); \
     if (next_instr == NULL) {                          \
-        next_instr = frame->instr_ptr;                 \
+        /* gh-140104: The exception handler expects frame->instr_ptr
+            to after this_instr, not this_instr! */ \
+        next_instr = frame->instr_ptr + 1;                 \
         JUMP_TO_LABEL(error);                          \
     }                                                  \
     if (keep_tracing_bit) { \
         assert(next_instr->op.code != ENTER_EXECUTOR); \
-        assert(tstate->interp->jit_state.jit_tracer_code_curr_size == 2); \
+        assert(tstate->interp->jit_state.code_curr_size == 2); \
         ENTER_TRACING(); \
+        DISPATCH_NON_TRACING(); \
     } \
     DISPATCH();                                        \
 } while (0)
@@ -455,13 +426,23 @@ do {                                                   \
     goto tier2_start; \
 } while (0)
 
-#define GOTO_TIER_ONE(TARGET, SHOULD_CONTINUE_TRACING)                \
-    do                                                                \
-    {                                                                 \
-        tstate->current_executor = NULL;                              \
-        OPT_HIST(trace_uop_execution_counter, trace_run_length_hist); \
-        _PyFrame_SetStackPointer(frame, stack_pointer);               \
-        return (_Py_CODEUNIT *)(((uintptr_t)(TARGET)) | SHOULD_CONTINUE_TRACING); \
+#define GOTO_TIER_ONE_SETUP \
+    tstate->current_executor = NULL;                              \
+    OPT_HIST(trace_uop_execution_counter, trace_run_length_hist); \
+    _PyFrame_SetStackPointer(frame, stack_pointer);
+
+#define GOTO_TIER_ONE(TARGET) \
+    do \
+    { \
+        GOTO_TIER_ONE_SETUP \
+        return (_Py_CODEUNIT *)(TARGET); \
+    } while (0)
+
+#define GOTO_TIER_ONE_CONTINUE_TRACING(TARGET) \
+    do \
+    { \
+        GOTO_TIER_ONE_SETUP \
+        return (_Py_CODEUNIT *)(((uintptr_t)(TARGET))| 1); \
     } while (0)
 
 #define CURRENT_OPARG()    (next_uop[-1].oparg)

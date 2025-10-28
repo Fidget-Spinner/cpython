@@ -12,7 +12,7 @@ extern "C" {
 #include <stdint.h>
 #include "pycore_uop_ids.h"
 #define MAX_CACHED_REGISTER 3
-extern const uint16_t _PyUop_Flags[MAX_UOP_ID+1];
+extern const uint32_t _PyUop_Flags[MAX_UOP_ID+1];
 typedef struct _rep_range { uint8_t start; uint8_t stop; } ReplicationRange;
 extern const ReplicationRange _PyUop_Replication[MAX_UOP_ID+1];
 extern const char * const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1];
@@ -351,7 +351,9 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_TIER2_RESUME_CHECK] = HAS_PERIODIC_FLAG,
     [_SPILL_OR_RELOAD] = 0,
     [_COLD_EXIT] = HAS_SYNC_SP_FLAG,
-    [_GUARD_IP] = HAS_EXIT_FLAG,
+    [_GUARD_IP_PUSH_FRAME] = HAS_EXIT_FLAG,
+    [_GUARD_IP_YIELD_VALUE] = HAS_EXIT_FLAG,
+    [_GUARD_IP_RETURN_VALUE] = HAS_EXIT_FLAG,
     [_DYNAMIC_EXIT] = HAS_ESCAPES_FLAG | HAS_SYNC_SP_FLAG,
 };
 
@@ -3183,13 +3185,31 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
             { -1, -1, -1 },
         },
     },
-    [_GUARD_IP] = {
+    [_GUARD_IP_PUSH_FRAME] = {
         .best = { 0, 1, 2, 3 },
         .entries = {
-            { 0, 0, _GUARD_IP_r00 },
-            { 1, 1, _GUARD_IP_r11 },
-            { 2, 2, _GUARD_IP_r22 },
-            { 3, 3, _GUARD_IP_r33 },
+            { 0, 0, _GUARD_IP_PUSH_FRAME_r00 },
+            { 1, 1, _GUARD_IP_PUSH_FRAME_r11 },
+            { 2, 2, _GUARD_IP_PUSH_FRAME_r22 },
+            { 3, 3, _GUARD_IP_PUSH_FRAME_r33 },
+        },
+    },
+    [_GUARD_IP_YIELD_VALUE] = {
+        .best = { 0, 1, 2, 3 },
+        .entries = {
+            { 0, 0, _GUARD_IP_YIELD_VALUE_r00 },
+            { 1, 1, _GUARD_IP_YIELD_VALUE_r11 },
+            { 2, 2, _GUARD_IP_YIELD_VALUE_r22 },
+            { 3, 3, _GUARD_IP_YIELD_VALUE_r33 },
+        },
+    },
+    [_GUARD_IP_RETURN_VALUE] = {
+        .best = { 0, 1, 2, 3 },
+        .entries = {
+            { 0, 0, _GUARD_IP_RETURN_VALUE_r00 },
+            { 1, 1, _GUARD_IP_RETURN_VALUE_r11 },
+            { 2, 2, _GUARD_IP_RETURN_VALUE_r22 },
+            { 3, 3, _GUARD_IP_RETURN_VALUE_r33 },
         },
     },
     [_DYNAMIC_EXIT] = {
@@ -3775,10 +3795,18 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_SPILL_OR_RELOAD_r31] = _SPILL_OR_RELOAD,
     [_SPILL_OR_RELOAD_r32] = _SPILL_OR_RELOAD,
     [_COLD_EXIT_r00] = _COLD_EXIT,
-    [_GUARD_IP_r00] = _GUARD_IP,
-    [_GUARD_IP_r11] = _GUARD_IP,
-    [_GUARD_IP_r22] = _GUARD_IP,
-    [_GUARD_IP_r33] = _GUARD_IP,
+    [_GUARD_IP_PUSH_FRAME_r00] = _GUARD_IP_PUSH_FRAME,
+    [_GUARD_IP_PUSH_FRAME_r11] = _GUARD_IP_PUSH_FRAME,
+    [_GUARD_IP_PUSH_FRAME_r22] = _GUARD_IP_PUSH_FRAME,
+    [_GUARD_IP_PUSH_FRAME_r33] = _GUARD_IP_PUSH_FRAME,
+    [_GUARD_IP_YIELD_VALUE_r00] = _GUARD_IP_YIELD_VALUE,
+    [_GUARD_IP_YIELD_VALUE_r11] = _GUARD_IP_YIELD_VALUE,
+    [_GUARD_IP_YIELD_VALUE_r22] = _GUARD_IP_YIELD_VALUE,
+    [_GUARD_IP_YIELD_VALUE_r33] = _GUARD_IP_YIELD_VALUE,
+    [_GUARD_IP_RETURN_VALUE_r00] = _GUARD_IP_RETURN_VALUE,
+    [_GUARD_IP_RETURN_VALUE_r11] = _GUARD_IP_RETURN_VALUE,
+    [_GUARD_IP_RETURN_VALUE_r22] = _GUARD_IP_RETURN_VALUE,
+    [_GUARD_IP_RETURN_VALUE_r33] = _GUARD_IP_RETURN_VALUE,
     [_DYNAMIC_EXIT_r00] = _DYNAMIC_EXIT,
     [_DYNAMIC_EXIT_r10] = _DYNAMIC_EXIT,
     [_DYNAMIC_EXIT_r20] = _DYNAMIC_EXIT,
@@ -4092,11 +4120,21 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_GUARD_GLOBALS_VERSION_r11] = "_GUARD_GLOBALS_VERSION_r11",
     [_GUARD_GLOBALS_VERSION_r22] = "_GUARD_GLOBALS_VERSION_r22",
     [_GUARD_GLOBALS_VERSION_r33] = "_GUARD_GLOBALS_VERSION_r33",
-    [_GUARD_IP] = "_GUARD_IP",
-    [_GUARD_IP_r00] = "_GUARD_IP_r00",
-    [_GUARD_IP_r11] = "_GUARD_IP_r11",
-    [_GUARD_IP_r22] = "_GUARD_IP_r22",
-    [_GUARD_IP_r33] = "_GUARD_IP_r33",
+    [_GUARD_IP_PUSH_FRAME] = "_GUARD_IP_PUSH_FRAME",
+    [_GUARD_IP_PUSH_FRAME_r00] = "_GUARD_IP_PUSH_FRAME_r00",
+    [_GUARD_IP_PUSH_FRAME_r11] = "_GUARD_IP_PUSH_FRAME_r11",
+    [_GUARD_IP_PUSH_FRAME_r22] = "_GUARD_IP_PUSH_FRAME_r22",
+    [_GUARD_IP_PUSH_FRAME_r33] = "_GUARD_IP_PUSH_FRAME_r33",
+    [_GUARD_IP_RETURN_VALUE] = "_GUARD_IP_RETURN_VALUE",
+    [_GUARD_IP_RETURN_VALUE_r00] = "_GUARD_IP_RETURN_VALUE_r00",
+    [_GUARD_IP_RETURN_VALUE_r11] = "_GUARD_IP_RETURN_VALUE_r11",
+    [_GUARD_IP_RETURN_VALUE_r22] = "_GUARD_IP_RETURN_VALUE_r22",
+    [_GUARD_IP_RETURN_VALUE_r33] = "_GUARD_IP_RETURN_VALUE_r33",
+    [_GUARD_IP_YIELD_VALUE] = "_GUARD_IP_YIELD_VALUE",
+    [_GUARD_IP_YIELD_VALUE_r00] = "_GUARD_IP_YIELD_VALUE_r00",
+    [_GUARD_IP_YIELD_VALUE_r11] = "_GUARD_IP_YIELD_VALUE_r11",
+    [_GUARD_IP_YIELD_VALUE_r22] = "_GUARD_IP_YIELD_VALUE_r22",
+    [_GUARD_IP_YIELD_VALUE_r33] = "_GUARD_IP_YIELD_VALUE_r33",
     [_GUARD_IS_FALSE_POP] = "_GUARD_IS_FALSE_POP",
     [_GUARD_IS_FALSE_POP_r10] = "_GUARD_IS_FALSE_POP_r10",
     [_GUARD_IS_FALSE_POP_r21] = "_GUARD_IS_FALSE_POP_r21",
@@ -5328,7 +5366,11 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 0;
         case _COLD_EXIT:
             return 0;
-        case _GUARD_IP:
+        case _GUARD_IP_PUSH_FRAME:
+            return 0;
+        case _GUARD_IP_YIELD_VALUE:
+            return 0;
+        case _GUARD_IP_RETURN_VALUE:
             return 0;
         case _DYNAMIC_EXIT:
             return 0;

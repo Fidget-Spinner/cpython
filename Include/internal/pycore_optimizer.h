@@ -37,7 +37,6 @@ typedef struct {
 typedef struct _PyExitData {
     uint32_t target;
     uint16_t index;
-    char is_dynamic;
     _Py_BackoffCounter temperature;
     struct _PyExecutorObject *executor;
 } _PyExitData;
@@ -83,8 +82,9 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 #endif
 
 // Used as the threshold to trigger executor invalidation when
-// trace_run_counter is greater than this value.
-#define JIT_CLEANUP_THRESHOLD 100000
+// executor_creation_counter is greater than this value.
+// This value is arbitrary and was not optimized.
+#define JIT_CLEANUP_THRESHOLD 1000
 
 #define TRACE_STACK_SIZE 5
 
@@ -251,6 +251,7 @@ struct _Py_UOpsAbstractFrame {
     int stack_len;
     int locals_len;
     PyFunctionObject *func;
+    PyCodeObject *code;
 
     JitOptRef *stack_pointer;
     JitOptRef *stack;
@@ -326,7 +327,7 @@ extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     int curr_stackentries,
     JitOptRef *args,
     int arg_len);
-extern int _Py_uop_frame_pop(JitOptContext *ctx);
+extern int _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co, int curr_stackentries);
 
 PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 
@@ -359,24 +360,17 @@ PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
 extern void _Py_ClearExecutorDeletionList(PyInterpreterState *interp);
 #endif
 
+int _PyJit_translate_single_bytecode_to_trace(PyThreadState *tstate, _PyInterpreterFrame *frame, _Py_CODEUNIT *next_instr);
+
 int
-_PyJIT_translate_single_bytecode_to_trace(
-    PyThreadState *tstate,
-    _PyInterpreterFrame *frame,
-    _Py_CODEUNIT *this_instr,
-    _Py_CODEUNIT *next_instr,
-    PyCodeObject *code,
-    PyFunctionObject *func,
-    int opcode,
-    int oparg,
-    int jump_taken);
+_PyJit_TryInitializeTracing(PyThreadState *tstate, _PyInterpreterFrame *frame,
+    _Py_CODEUNIT *curr_instr, _Py_CODEUNIT *insert_exec_instr,
+    _Py_CODEUNIT *close_loop_instr, int curr_stackdepth, int chain_depth, _PyExitData *exit,
+    _PyExecutorObject *prev_exec, int oparg);
 
-void
-_PyJIT_InitializeTracing(PyThreadState *tstate, _PyInterpreterFrame *frame, _Py_CODEUNIT *next_instr, int curr_stackdepth, int chain_depth, _PyExitData *exit);
+void _PyJit_FinalizeTracing(PyThreadState *tstate);
 
-void _PyJIT_FinalizeTracing(PyThreadState *tstate);
-
-void _Py_JITTracer_InvalidateDependency(PyThreadState *old_tstate, void *obj);
+void _PyJit_Tracer_InvalidateDependency(PyThreadState *old_tstate, void *obj);
 
 #ifdef __cplusplus
 }

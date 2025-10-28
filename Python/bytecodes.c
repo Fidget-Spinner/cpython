@@ -11,7 +11,6 @@
 #include "pycore_audit.h"         // _PySys_Audit()
 #include "pycore_backoff.h"
 #include "pycore_cell.h"          // PyCell_GetRef()
-#include "pycore_ceval.h"
 #include "pycore_code.h"
 #include "pycore_emscripten_signal.h"  // _Py_CHECK_EMSCRIPTEN_SIGNALS
 #include "pycore_function.h"
@@ -45,8 +44,6 @@
 
 #define USE_COMPUTED_GOTOS 0
 #include "ceval_macros.h"
-#include "../Include/internal/pycore_code.h"
-#include "../Include/internal/pycore_stackref.h"
 
 /* Flow control macros */
 
@@ -173,7 +170,9 @@ dummy_func(
 
         op(_QUICKEN_RESUME, (--)) {
             #if ENABLE_SPECIALIZATION_FT
-            if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
+            PyCodeObject *code = _PyFrame_GetCode(frame);
+            if (tstate->tracing == 0 && this_instr->op.code == RESUME &&
+                code != (PyCodeObject *)&_Py_InitCleanup && code != (PyCodeObject *)&_PyEntryFrameCode) {
                 FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
             }
             #endif  /* ENABLE_SPECIALIZATION_FT */
@@ -1221,19 +1220,33 @@ dummy_func(
             tstate->current_frame = frame->previous;
             assert(!_PyErr_Occurred(tstate));
             PyObject *result = PyStackRef_AsPyObjectSteal(retval);
+            if (IS_JIT_TRACING()) {
+#if _Py_TIER2
+                _PyJit_translate_single_bytecode_to_trace(tstate, frame, next_instr);
+                LEAVE_TRACING();
+                int err = bail_tracing_and_jit(tstate, frame);
+                if (err < 0) {
+                    Py_DECREF(result);
+                    ERROR_IF(true);
+                }
+                return result;
+#endif
+            }
+            else {
 #if !_Py_TAIL_CALL_INTERP
-            assert(frame == &entry.frame);
+                assert(frame == &entry.frame);
 #endif
 #ifdef _Py_TIER2
-            _PyStackRef executor = frame->localsplus[0];
-            assert(tstate->current_executor == NULL);
-            if (!PyStackRef_IsNull(executor)) {
-                tstate->current_executor = PyStackRef_AsPyObjectBorrow(executor);
-                PyStackRef_CLOSE(executor);
-            }
+                _PyStackRef executor = frame->localsplus[0];
+                assert(tstate->current_executor == NULL);
+                if (!PyStackRef_IsNull(executor)) {
+                    tstate->current_executor = PyStackRef_AsPyObjectBorrow(executor);
+                    PyStackRef_CLOSE(executor);
+                }
 #endif
-            LLTRACE_RESUME_FRAME();
-            return result;
+                LLTRACE_RESUME_FRAME();
+                return result;
+            }
         }
 
         // The stack effect here is a bit misleading.
@@ -1251,12 +1264,7 @@ dummy_func(
             frame = tstate->current_frame = dying->previous;
             _PyEval_FrameClearAndPop(tstate, dying);
             RELOAD_STACK();
-            #if TIER_ONE
             LOAD_IP(frame->return_offset);
-            #endif
-            #if TIER_TWO
-            TIER2_STORE_IP(frame->return_offset);
-            #endif
             res = temp;
             LLTRACE_RESUME_FRAME();
         }
@@ -1443,12 +1451,7 @@ dummy_func(
                    _PyOpcode_Deopt[frame->instr_ptr->op.code] == ENTER_EXECUTOR);
             #endif
             RELOAD_STACK();
-            #if TIER_ONE
             LOAD_IP(1 + INLINE_CACHE_ENTRIES_SEND);
-            #endif
-            #if TIER_TWO
-            TIER2_STORE_IP(1 + INLINE_CACHE_ENTRIES_SEND);
-            #endif
             value = PyStackRef_MakeHeapSafe(temp);
             LLTRACE_RESUME_FRAME();
         }
@@ -2954,8 +2957,8 @@ dummy_func(
             JUMP_BACKWARD_JIT,
         };
 
-        tier1 op(_SPECIALIZE_JUMP_BACKWARD, (--)) {
-        #if ENABLE_SPECIALIZATION_FT
+        specializing tier1 op(_SPECIALIZE_JUMP_BACKWARD, (--)) {
+        #if ENABLE_SPECIALIZATION
             if (this_instr->op.code == JUMP_BACKWARD) {
                 uint8_t desired = tstate->interp->jit ? JUMP_BACKWARD_JIT : JUMP_BACKWARD_NO_JIT;
                 FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, desired);
@@ -2972,20 +2975,26 @@ dummy_func(
             if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
                 this_instr->op.code == JUMP_BACKWARD_JIT &&
                 next_instr->op.code != ENTER_EXECUTOR) {
-                if (tstate->interp->jit_state.jit_tracer_code_buffer == NULL) {
-                    tstate->interp->jit_state.jit_tracer_code_buffer = (_PyUOpInstruction *)_PyObject_VirtualAlloc(UOP_BUFFER_SIZE);
-                    if (tstate->interp->jit_state.jit_tracer_code_buffer == NULL) {
+                if (tstate->interp->jit_state.code_buffer == NULL) {
+                    tstate->interp->jit_state.code_buffer = (_PyUOpInstruction *)_PyObject_VirtualAlloc(UOP_BUFFER_SIZE);
+                    if (tstate->interp->jit_state.code_buffer == NULL) {
                         // Don't error, just go to next instruction.
                         DISPATCH();
                     }
                 }
                 int _is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL);
                 if (!_is_sys_tracing) {
-                    _PyJIT_InitializeTracing(tstate, frame, this_instr, STACK_LEVEL(), 0, NULL);
-                    ENTER_TRACING();
+                    /* Back up over EXTENDED_ARGs so executor is inserted at the correct place */
+                    _Py_CODEUNIT *insert_exec_at = this_instr;
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        insert_exec_at--;
+                    }
+                    int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, insert_exec_at, next_instr, STACK_LEVEL(), 0, NULL, NULL, oparg);
+                    if (succ) {
+                        ENTER_TRACING();
+                    }
                 }
-                // Don't add the JUMP_BACKWARD_JIT instruction to the trace.
-                DISPATCH();
             }
             else {
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
@@ -3039,20 +3048,22 @@ dummy_func(
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
-            if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
+            if (IS_JIT_TRACING() || _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
                 opcode = executor->vm_data.opcode;
                 oparg = (oparg & ~255) | executor->vm_data.oparg;
                 next_instr = this_instr;
                 if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
                     PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 }
-                DISPATCH_GOTO();
+                if (IS_JIT_TRACING()) {
+                    DISPATCH_GOTO_NON_TRACING();
+                }
+                else {
+                    DISPATCH_GOTO();
+                }
             }
             assert(executor != tstate->interp->cold_executor);
             tstate->jit_exit = NULL;
-            #if TRACING_JIT
-            RECORD_TRACE_NO_DISPATCH();
-            #endif
             TIER1_TO_TIER2(executor);
             #else
             Py_FatalError("ENTER_EXECUTOR is not supported in this build");
@@ -3063,6 +3074,7 @@ dummy_func(
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsFalse(cond);
             DEAD(cond);
+            RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
@@ -3070,6 +3082,7 @@ dummy_func(
             assert(PyStackRef_BoolCheck(cond));
             int flag = PyStackRef_IsTrue(cond);
             DEAD(cond);
+            RECORD_BRANCH_TAKEN(this_instr[1].cache, flag);
             JUMPBY(flag ? oparg : next_instr->op.code == NOT_TAKEN);
         }
 
@@ -3232,22 +3245,20 @@ dummy_func(
                 }
                 // Jump forward by oparg and skip the following END_FOR
                 JUMPBY(oparg + 1);
-                RECORD_JUMP_TAKEN();
                 DISPATCH();
             }
             next = item;
         }
 
         op(_FOR_ITER_TIER_TWO, (iter, null_or_index -- iter, null_or_index, next)) {
-            TIER2_STORE_IP(1 + INLINE_CACHE_ENTRIES_FOR_ITER);
             _PyStackRef item = _PyForIter_VirtualIteratorNext(tstate, frame, iter, &null_or_index);
             if (!PyStackRef_IsValid(item)) {
                 if (PyStackRef_IsError(item)) {
                     ERROR_NO_POP();
                 }
                 /* iterator ended normally */
-                /* This just sets the IP to what it expects */
-                TIER2_STORE_IP(oparg + 1);
+                /* This just sets the IP to what it expects (see normal _FOR_ITER) */
+                frame->instr_ptr += (oparg + 2 + INLINE_CACHE_ENTRIES_FOR_ITER);
                 EXIT_IF(true);
             }
             next = item;
@@ -3294,7 +3305,6 @@ dummy_func(
                 null_or_index = PyStackRef_TagInt(-1);
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
-                RECORD_JUMP_TAKEN();
                 DISPATCH();
             }
 #endif
@@ -3372,7 +3382,6 @@ dummy_func(
                 null_or_index = PyStackRef_TagInt(-1);
                 /* Jump forward oparg, then skip following END_FOR instruction */
                 JUMPBY(oparg + 1);
-                RECORD_JUMP_TAKEN();
                 DISPATCH();
             }
         }
@@ -3417,7 +3426,6 @@ dummy_func(
             if (r->len <= 0) {
                 // Jump over END_FOR instruction.
                 JUMPBY(oparg + 1);
-                RECORD_JUMP_TAKEN();
                 DISPATCH();
             }
         }
@@ -4998,12 +5006,7 @@ dummy_func(
             _PyInterpreterFrame *prev = frame->previous;
             _PyThreadState_PopFrame(tstate, frame);
             frame = tstate->current_frame = prev;
-            #if TIER_ONE
             LOAD_IP(frame->return_offset);
-            #endif
-            #if TIER_TWO
-            frame->instr_ptr += (frame->return_offset);
-            #endif
             RELOAD_STACK();
             res = PyStackRef_FromPyObjectStealMortal((PyObject *)gen);
             LLTRACE_RESUME_FRAME();
@@ -5269,7 +5272,6 @@ dummy_func(
 
         tier2 op(_EXIT_TRACE, (exit_p/4 --)) {
             _PyExitData *exit = (_PyExitData *)exit_p;
-            assert(!exit->is_dynamic);
         #if defined(Py_DEBUG) && !defined(_Py_JIT)
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
@@ -5390,10 +5392,6 @@ dummy_func(
 
         tier2 op(_MAKE_WARM, (--)) {
             current_executor->vm_data.warm = true;
-            // It's okay if this ends up going negative.
-            if (--tstate->interp->trace_run_counter == 0) {
-                _Py_set_eval_breaker_bit(tstate, _PY_EVAL_JIT_INVALIDATE_COLD_BIT);
-            }
         }
 
         tier2 op(_FATAL_ERROR, (--)) {
@@ -5403,25 +5401,22 @@ dummy_func(
 
         tier2 op(_DEOPT, (--)) {
             SYNC_SP();
-            GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET(), 0);
+            GOTO_TIER_ONE(_PyFrame_GetBytecode(frame) + CURRENT_TARGET());
             Py_UNREACHABLE();
         }
 
         tier2 op(_HANDLE_PENDING_AND_DEOPT, (--)) {
             SYNC_SP();
             int err = _Py_HandlePending(tstate);
-            GOTO_TIER_ONE(err ? NULL : _PyFrame_GetBytecode(frame) + CURRENT_TARGET(), 0);
+            GOTO_TIER_ONE(err ? NULL : _PyFrame_GetBytecode(frame) + CURRENT_TARGET());
             Py_UNREACHABLE();
         }
 
         tier2 op(_ERROR_POP_N, (target/2 --)) {
             assert(oparg == 0);
-            _Py_CODEUNIT *current_instr = _PyFrame_GetBytecode(frame) + target;
-            _Py_CODEUNIT *next_instr = current_instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[current_instr->op.code]];
-            // gh-140104: The exception handler expects frame->instr_ptr to be pointing to next_instr, not this_instr!
-            frame->instr_ptr = next_instr;
+            frame->instr_ptr = _PyFrame_GetBytecode(frame) + target;
             SYNC_SP();
-            GOTO_TIER_ONE(NULL, 0);
+            GOTO_TIER_ONE(NULL);
         }
 
         /* Progress is guaranteed if we DEOPT on the eval breaker, because
@@ -5444,44 +5439,61 @@ dummy_func(
             assert(exit != NULL);
             _Py_CODEUNIT *target = _PyFrame_GetBytecode(frame) + exit->target;
             _Py_BackoffCounter temperature = exit->temperature;
-            if (!backoff_counter_triggers(temperature)) {
-                exit->temperature = advance_backoff_counter(temperature);
-                SYNC_SP();
-                GOTO_TIER_ONE(target, 0);
-                Py_UNREACHABLE();
-            }
-            _PyExecutorObject *executor = NULL;
+            _PyExecutorObject *executor;
             if (target->op.code == ENTER_EXECUTOR) {
                 PyCodeObject *code = _PyFrame_GetCode(frame);
                 executor = code->co_executors->executors[target->op.arg];
                 Py_INCREF(executor);
             }
             else {
+                if (!backoff_counter_triggers(temperature)) {
+                    exit->temperature = advance_backoff_counter(temperature);
+                    GOTO_TIER_ONE(target);
+                }
                 _PyExecutorObject *previous_executor = _PyExecutor_FromExit(exit);
                 assert(tstate->current_executor == (PyObject *)previous_executor);
                 int chain_depth = previous_executor->vm_data.chain_depth + 1;
-                _PyJIT_InitializeTracing(tstate, frame, target, STACK_LEVEL(), chain_depth, exit);
-                exit->temperature = initial_temperature_backoff_counter();
-                SYNC_SP();
-                GOTO_TIER_ONE(target, 1);
-                Py_UNREACHABLE();                
+                // Note: it's safe to use target->op.arg here instead of the oparg given by EXTENDED_ARG.
+                // The invariant in the optimizer is the deopt target always points back to the first EXTENDED_ARG.
+                // So setting it to anything else is wrong.
+                int succ = _PyJit_TryInitializeTracing(tstate, frame, target, target, target, STACK_LEVEL(), chain_depth, exit, previous_executor, target->op.arg);
+                SYNC_SP()                Py_UNREACHABLE(); 
+                if (succ) {
+                    GOTO_TIER_ONE_CONTINUE_TRACING(target);
+                    Py_UNREACHABLE(); 
+                }
+                GOTO_TIER_ONE(target);
+                Py_UNREACHABLE(); 
             }
             assert(tstate->jit_exit == exit);
             exit->executor = executor;
             TIER2_TO_TIER2(exit->executor);
         }
 
-        tier2 op(_GUARD_IP, (ip/4 --)) {
+        tier2 op(_GUARD_IP_PUSH_FRAME, (ip/4 --)) {
             EXIT_IF(frame->instr_ptr != (_Py_CODEUNIT *)ip);
+        }
+
+        tier2 op(_GUARD_IP_YIELD_VALUE, (ip/4 --)) {
+            if (frame->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND != (_Py_CODEUNIT *)ip) {
+                frame->instr_ptr += 1 + INLINE_CACHE_ENTRIES_SEND;
+                EXIT_IF(true);
+            }
+        }
+
+        tier2 op(_GUARD_IP_RETURN_VALUE, (ip/4 --)) {
+            if (frame->instr_ptr + frame->return_offset != (_Py_CODEUNIT *)ip) {
+                frame->instr_ptr += frame->return_offset;
+                EXIT_IF(true);
+            }
         }
 
         // Note: this is different than _COLD_EXIT/_EXIT_TRACE, as it may lead to multiple executors
         // from a single exit!
         tier2 op(_DYNAMIC_EXIT, (exit_p/4 --)) {
             _Py_CODEUNIT *target = frame->instr_ptr;
-            _PyExitData *exit = (_PyExitData *)exit_p;
-            _Py_BackoffCounter temperature = exit->temperature;
 #if defined(Py_DEBUG) && !defined(_Py_JIT)
+            _PyExitData *exit = (_PyExitData *)exit_p;
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 2) {
                 printf("DYNAMIC EXIT: [UOp ");
@@ -5501,21 +5513,8 @@ dummy_func(
                 Py_UNREACHABLE();
             }
             else {
-                if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
-                    SYNC_SP();
-                    GOTO_TIER_ONE(target, 0);
-                    Py_UNREACHABLE();
-                }
-                if (!backoff_counter_triggers(temperature)) {
-                    exit->temperature = advance_backoff_counter(temperature);
-                    SYNC_SP();
-                    GOTO_TIER_ONE(target, 0);
-                    Py_UNREACHABLE();
-                }
-                exit->temperature = initial_temperature_backoff_counter();
                 SYNC_SP();
-                _PyJIT_InitializeTracing(tstate, frame, target, STACK_LEVEL(), 0, NULL);
-                GOTO_TIER_ONE(target, 1);
+                GOTO_TIER_ONE(target);
                 Py_UNREACHABLE();
             }
         }
@@ -5664,6 +5663,42 @@ dummy_func(
             DISPATCH();
         }
 
+        label(record_previous_inst) {
+#if _Py_TIER2
+            assert(IS_JIT_TRACING());
+            int opcode = next_instr->op.code;
+            int full = !_PyJit_translate_single_bytecode_to_trace(tstate, frame, next_instr);
+            if (full) {
+                LEAVE_TRACING();
+                int err = bail_tracing_and_jit(tstate, frame);
+                ERROR_IF(err < 0);
+                DISPATCH_GOTO_NON_TRACING();
+            }
+            // Super instructions. Instruction deopted. There's a mismatch in what the stack expects
+            // in the optimizer. So we have to reflect in the trace correctly.
+            if ((tstate->interp->jit_state.prev_instr->op.code == CALL_LIST_APPEND &&
+                opcode == POP_TOP) ||
+                (tstate->interp->jit_state.prev_instr->op.code == BINARY_OP_INPLACE_ADD_UNICODE &&
+                opcode == STORE_FAST)) {
+                tstate->interp->jit_state.prev_instr_is_super = true;
+            }
+            else {
+                tstate->interp->jit_state.prev_instr = next_instr;
+            }
+            tstate->interp->jit_state.specialize_counter = 0;
+            PyCodeObject *prev_code = (PyCodeObject *)Py_NewRef(_PyFrame_GetCode(frame));
+            if (tstate->interp->jit_state.prev_instr_code != prev_code) {
+                Py_SETREF(tstate->interp->jit_state.prev_instr_code, prev_code);
+            }
+
+            tstate->interp->jit_state.prev_instr_frame = frame;
+            tstate->interp->jit_state.prev_instr_oparg = oparg;
+            tstate->interp->jit_state.prev_instr_stacklevel = STACK_LEVEL();
+            DISPATCH_GOTO_NON_TRACING();
+#else
+            Py_FatalError("JIT label executed in non-jit build.");
+#endif
+        }
 
 
 // END BYTECODES //

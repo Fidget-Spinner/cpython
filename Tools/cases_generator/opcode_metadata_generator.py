@@ -57,6 +57,7 @@ FLAGS = [
     "ERROR_NO_POP",
     "NO_SAVE_IP",
     "PERIODIC",
+    "UNPREDICTABLE_JUMP",
 ]
 
 

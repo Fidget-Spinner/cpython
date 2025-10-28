@@ -167,9 +167,7 @@ def generate_tier1(
             {INSTRUCTION_START_MARKER}
 """
     )
-    out = CWriter(outfile, 2, lines)
-    emitter = Emitter(out, analysis.labels)
-    generate_tier1_cases(analysis, out, emitter)
+    generate_tier1_cases(analysis, outfile, lines)
     outfile.write(f"""
             {INSTRUCTION_END_MARKER}
 #if !_Py_TAIL_CALL_INTERP
@@ -217,15 +215,14 @@ def get_popped(inst: Instruction, analysis: Analysis) -> str:
     return (-stack.base_offset).to_c()
 
 def generate_tier1_cases(
-    analysis: Analysis, out: CWriter, emitter: Emitter, is_tracing: bool = False
+    analysis: Analysis, outfile: TextIO, lines: bool
 ) -> None:
-    tracing_prepend = "TRACING_" if is_tracing else ""
+    out = CWriter(outfile, 2, lines)
+    emitter = Emitter(out, analysis.labels)
     out.emit("\n")
     for name, inst in sorted(analysis.instructions.items()):
         out.emit("\n")
-        out.emit(f"{tracing_prepend}TARGET({name}) {{\n")
-        if is_tracing:
-            out.emit(f"assert(IS_JIT_TRACING());\n")
+        out.emit(f"TARGET({name}) {{\n")
         popped = get_popped(inst, analysis)
         # We need to ifdef it because this breaks platforms
         # without computed gotos/tail calling.
@@ -233,7 +230,7 @@ def generate_tier1_cases(
         out.emit(f"int opcode = {name};\n")
         out.emit(f"(void)(opcode);\n")
         out.emit(f"#endif\n")
-        needs_this = is_tracing or uses_this(inst)
+        needs_this = uses_this(inst)
         unused_guard = "(void)this_instr;\n"
         if inst.properties.needs_prev:
             out.emit(f"_Py_CODEUNIT* const prev_instr = frame->instr_ptr;\n")
@@ -247,19 +244,10 @@ def generate_tier1_cases(
         out.emit(f"next_instr += {inst.size};\n")
         out.emit(f"INSTRUCTION_STATS({name});\n")
         if inst.is_target:
-            out.emit(f"PREDICTED_{tracing_prepend}{name}:;\n")
+            out.emit(f"PREDICTED_{name}:;\n")
             if needs_this:
                 out.emit(f"_Py_CODEUNIT* const this_instr = next_instr - {inst.size};\n")
                 out.emit(unused_guard)
-        if is_tracing:
-            # This is required so that the predicted ops reflect the correct opcode.
-            out.emit(f"opcode = {name};\n")
-            out.emit(f"PyCodeObject *old_code = (PyCodeObject *)PyStackRef_AsPyObjectBorrow(frame->f_executable);\n")
-            out.emit(f"(void)old_code;\n")
-            out.emit(f"PyFunctionObject *old_func = (PyFunctionObject *)PyStackRef_AsPyObjectBorrow(frame->f_funcobj);\n")
-            out.emit(f"(void)old_func;\n")
-            out.emit(f"int _jump_taken = false;\n")
-            out.emit(f"(void)_jump_taken;\n")
         if inst.properties.uses_opcode:
             out.emit(f"opcode = {name};\n")
         if inst.family is not None:
@@ -277,7 +265,7 @@ def generate_tier1_cases(
         out.start_line()
         if reachable: # type: ignore[possibly-undefined]
             stack.flush(out)
-            out.emit(f"{tracing_prepend}DISPATCH();\n")
+            out.emit("DISPATCH();\n")
         out.start_line()
         out.emit("}")
         out.emit("\n")

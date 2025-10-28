@@ -17,7 +17,6 @@
 
 #include "frameobject.h"          // PyFrameLocalsProxyObject
 #include "opcode.h"               // EXTENDED_ARG
-#include "../Include/pytypedefs.h"
 #include "pycore_optimizer.h"
 
 #include "clinic/frameobject.c.h"
@@ -263,8 +262,8 @@ framelocalsproxy_setitem(PyObject *self, PyObject *key, PyObject *value)
         }
 
 #if _Py_TIER2
-        _Py_Executors_InvalidateDependency(PyInterpreterState_Get(), co, 1);
-        _Py_JITTracer_InvalidateDependency(PyThreadState_GET(), co);
+        _Py_Executors_InvalidateDependency(_PyInterpreterState_GET(), co, 1);
+        _PyJit_Tracer_InvalidateDependency(_PyThreadState_GET(), co);
 #endif
 
         _PyLocals_Kind kind = _PyLocals_GetKind(co->co_localspluskinds, i);

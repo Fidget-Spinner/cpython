@@ -1116,18 +1116,18 @@
             JitOptRef temp = PyJitRef_StripReferenceInfo(retval);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
-            PyCodeObject *co = get_current_code_object(ctx);
             ctx->frame->stack_pointer = stack_pointer;
-            if (frame_pop(ctx)) {
+            PyCodeObject *returning_code = get_code_with_logging(this_instr);
+            if (returning_code == NULL) {
+                ctx->done = true;
+                break;
+            }
+            _Py_BloomFilter_Add(dependencies, returning_code);
+            int returning_stacklevel = this_instr->operand1;
+            if (frame_pop(ctx, returning_code, returning_stacklevel)) {
                 break;
             }
             stack_pointer = ctx->frame->stack_pointer;
-            assert(corresponding_check_stack == NULL);
-            assert(co != NULL);
-            int framesize = co->co_framesize;
-            assert(framesize > 0);
-            assert(framesize <= curr_space);
-            curr_space -= framesize;
             res = temp;
             stack_pointer[0] = res;
             stack_pointer += 1;
@@ -1169,11 +1169,27 @@
         }
 
         case _YIELD_VALUE: {
+            JitOptRef retval;
             JitOptRef value;
-            value = sym_new_unknown(ctx);
-            ctx->done = true;
-            ctx->out_of_space = true;
-            stack_pointer[-1] = value;
+            retval = stack_pointer[-1];
+            JitOptRef temp = PyJitRef_StripReferenceInfo(retval);
+            stack_pointer += -1;
+            assert(WITHIN_STACK_BOUNDS());
+            PyCodeObject *returning_code = get_code_with_logging(this_instr);
+            if (returning_code == NULL) {
+                ctx->done = true;
+                break;
+            }
+            _Py_BloomFilter_Add(dependencies, returning_code);
+            int returning_stacklevel = this_instr->operand1;
+            if (frame_pop(ctx, returning_code, returning_stacklevel)) {
+                break;
+            }
+            stack_pointer = ctx->frame->stack_pointer;
+            value = temp;
+            stack_pointer[0] = value;
+            stack_pointer += 1;
+            assert(WITHIN_STACK_BOUNDS());
             break;
         }
 
@@ -2563,8 +2579,6 @@
         }
 
         case _CHECK_STACK_SPACE: {
-            assert(corresponding_check_stack == NULL);
-            corresponding_check_stack = this_instr;
             break;
         }
 
@@ -2618,23 +2632,9 @@
             }
             PyFunctionObject *func = (PyFunctionObject *)operand;
             PyCodeObject *co = (PyCodeObject *)func->func_code;
+            _Py_BloomFilter_Add(dependencies, co);
             assert(PyFunction_Check(func));
             ctx->frame->func = func;
-            int framesize = co->co_framesize;
-            assert(framesize > 0);
-            curr_space += framesize;
-            if (curr_space < 0 || curr_space > INT32_MAX) {
-                ctx->done = true;
-                break;
-            }
-            max_space = curr_space > max_space ? curr_space : max_space;
-            if (first_valid_check_stack == NULL) {
-                first_valid_check_stack = corresponding_check_stack;
-            }
-            else if (corresponding_check_stack) {
-                corresponding_check_stack->opcode = _NOP;
-            }
-            corresponding_check_stack = NULL;
             break;
         }
 
@@ -3011,10 +3011,19 @@
 
         case _RETURN_GENERATOR: {
             JitOptRef res;
+            ctx->frame->stack_pointer = stack_pointer;
+            PyCodeObject *returning_code = get_code_with_logging(this_instr);
+            if (returning_code == NULL) {
+                ctx->done = true;
+                break;
+            }
+            _Py_BloomFilter_Add(dependencies, returning_code);
+            int returning_stacklevel = this_instr->operand1;
+            if (frame_pop(ctx, returning_code, returning_stacklevel)) {
+                break;
+            }
             stack_pointer = ctx->frame->stack_pointer;
             res = sym_new_unknown(ctx);
-            ctx->done = true;
-            ctx->out_of_space = true;
             stack_pointer[0] = res;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
@@ -3421,7 +3430,15 @@
             break;
         }
 
-        case _GUARD_IP: {
+        case _GUARD_IP_PUSH_FRAME: {
+            break;
+        }
+
+        case _GUARD_IP_YIELD_VALUE: {
+            break;
+        }
+
+        case _GUARD_IP_RETURN_VALUE: {
             break;
         }
 

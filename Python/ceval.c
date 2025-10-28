@@ -160,6 +160,10 @@ dump_item(_PyStackRef item)
         printf("<NULL>");
         return;
     }
+    if (PyStackRef_IsMalformed(item)) {
+        printf("<INVALID>");
+        return;
+    }
     if (PyStackRef_IsTaggedInt(item)) {
         printf("%" PRId64, (int64_t)PyStackRef_UntagInt(item));
         return;
@@ -949,14 +953,39 @@ int _Py_CheckRecursiveCallPy(
     return 0;
 }
 
-static const _Py_CODEUNIT _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS[] = {
-    /* Put a NOP at the start, so that the IP points into
-    * the code, rather than before it */
-    { .op.code = NOP, .op.arg = 0 },
-    { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on return */
-    { .op.code = NOP, .op.arg = 0 },
-    { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on yield */
-    { .op.code = RESUME, .op.arg = RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START }
+
+#ifdef Py_GIL_DISABLED
+static _PyCodeArray emtry_cleanup_tlbc = {
+    .size = 1,
+    .entries = {(char*) &_PyEntryFrameCode.co_code_adaptive},
+};
+#endif
+
+const struct _PyCode12 _PyEntryFrameCode = {
+    _PyVarObject_HEAD_INIT(&PyCode_Type, 5),
+    .co_consts = (PyObject *)&_Py_SINGLETON(tuple_empty),
+    .co_names = (PyObject *)&_Py_SINGLETON(tuple_empty),
+    .co_exceptiontable = (PyObject *)&_Py_SINGLETON(bytes_empty),
+    .co_flags = CO_OPTIMIZED | CO_NO_MONITORING_EVENTS,
+    .co_localsplusnames = (PyObject *)&_Py_SINGLETON(tuple_empty),
+    .co_localspluskinds = (PyObject *)&_Py_SINGLETON(bytes_empty),
+    .co_filename = &_Py_ID(_PyEval_EvalFrameDefault),
+    .co_name = &_Py_ID(_PyEval_EvalFrameDefault),
+    .co_qualname = &_Py_ID(_PyEval_EvalFrameDefault),
+    .co_linetable = (PyObject *)&no_location,
+    ._co_firsttraceable = 4,
+    .co_stacksize = 2,
+    .co_framesize = 2 + FRAME_SPECIALS_SIZE,
+#ifdef Py_GIL_DISABLED
+    .co_tlbc = &emtry_cleanup_tlbc,
+#endif
+    .co_code_adaptive = {
+        NOP, 0,
+        INTERPRETER_EXIT, 0, /* reached on return */
+        NOP, 0,
+        INTERPRETER_EXIT, 0, /* reached on yield */
+        RESUME, RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START
+    }
 };
 
 #ifdef Py_DEBUG
@@ -1007,13 +1036,45 @@ _PyObjectArray_Free(PyObject **array, PyObject **scratch)
 }
 
 #if _Py_TIER2
-// 1 for trace full, 0 for successful write.
+// 0 for success, -1  for error.
 static int
-add_to_code_trace(PyThreadState *tstate, _PyInterpreterFrame *frame, PyCodeObject *old_code, PyFunctionObject *old_func, _Py_CODEUNIT *this_instr, _Py_CODEUNIT *next_instr, int opcode, int oparg, int jump_taken)
+bail_tracing_and_jit(PyThreadState *tstate, _PyInterpreterFrame *frame)
 {
-    assert(frame != NULL);
-    assert(tstate->interp->jit_state.jit_tracer_code_curr_size < UOP_MAX_TRACE_LENGTH);
-    return !_PyJIT_translate_single_bytecode_to_trace(tstate, frame, this_instr, next_instr, old_code, old_func, opcode, oparg, jump_taken);
+    int _is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL);
+    int err = 0;
+    if (!_PyErr_Occurred(tstate) && !_is_sys_tracing) {
+        err = _PyOptimizer_Optimize(frame, tstate);
+    }
+    // Deal with backoffs
+    _PyExitData *exit = tstate->interp->jit_state.prev_exit;
+    if (exit == NULL) {
+        // We hold a strong reference to the code object, so the instruction won't be freed.
+        if (err <= 0) {
+            _Py_BackoffCounter counter = tstate->interp->jit_state.jump_backward_instr[1].counter;
+            tstate->interp->jit_state.jump_backward_instr[1].counter = restart_backoff_counter(counter);
+        }
+        else {
+            tstate->interp->jit_state.jump_backward_instr[1].counter = initial_jump_backoff_counter();
+        }
+    }
+    else {
+        // Likewise, we hold a strong reference to the executor containing this exit, so the exit is guaranteed
+        // to be valid to access.
+        if (err <= 0) {
+            // Some opcodes will forever be unchanged. Don't ever bother specializing for them ever again.
+            if (tstate->interp->jit_state.prev_instr->op.code == INTERPRETER_EXIT) {
+                exit->temperature = initial_unreachable_backoff_counter();
+            }
+            else {
+                exit->temperature = restart_backoff_counter(exit->temperature);
+            }
+        }
+        else {
+            exit->temperature = initial_temperature_backoff_counter();
+        }
+    }
+    _PyJit_FinalizeTracing(tstate);
+    return err;
 }
 #endif
 
@@ -1033,7 +1094,6 @@ add_to_code_trace(PyThreadState *tstate, _PyInterpreterFrame *frame, PyCodeObjec
 #if _Py_TAIL_CALL_INTERP
 #include "opcode_targets.h"
 #include "generated_cases.c.h"
-#include "generated_tracer_cases.c.h"
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 10 && !defined(__clang__)) && defined(__x86_64__)
@@ -1098,8 +1158,8 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
     entry.frame.f_globals = (PyObject*)0xaaa3;
     entry.frame.f_builtins = (PyObject*)0xaaa4;
 #endif
-    entry.frame.f_executable = PyStackRef_None;
-    entry.frame.instr_ptr = (_Py_CODEUNIT *)_Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS + 1;
+    entry.frame.f_executable = PyStackRef_FromPyObjectBorrow((PyObject *)&_PyEntryFrameCode);
+    entry.frame.instr_ptr = ((_Py_CODEUNIT *)_PyEntryFrameCode.co_code_adaptive) + 1;
     entry.frame.stackpointer = entry.stack;
     entry.frame.owner = FRAME_OWNED_BY_INTERPRETER;
     entry.frame.visited = 0;
@@ -1162,7 +1222,6 @@ _PyEval_EvalFrameDefault(PyThreadState *tstate, _PyInterpreterFrame *frame, int 
 #else
     goto start_frame;
 #   include "generated_cases.c.h"
-    #include "generated_tracer_cases.c.h"
 #endif
 
 
@@ -3321,17 +3380,9 @@ int
 _Py_Check_ArgsIterable(PyThreadState *tstate, PyObject *func, PyObject *args)
 {
     if (Py_TYPE(args)->tp_iter == NULL && !PySequence_Check(args)) {
-        /* _Py_Check_ArgsIterable() may be called with a live exception:
-         * clear it to prevent calling _PyObject_FunctionStr() with an
-         * exception set. */
-        _PyErr_Clear(tstate);
-        PyObject *funcstr = _PyObject_FunctionStr(func);
-        if (funcstr != NULL) {
-            _PyErr_Format(tstate, PyExc_TypeError,
-                          "%U argument after * must be an iterable, not %.200s",
-                          funcstr, Py_TYPE(args)->tp_name);
-            Py_DECREF(funcstr);
-        }
+        _PyErr_Format(tstate, PyExc_TypeError,
+                      "Value after * must be an iterable, not %.200s",
+                      Py_TYPE(args)->tp_name);
         return -1;
     }
     return 0;
@@ -3347,15 +3398,10 @@ _PyEval_FormatKwargsError(PyThreadState *tstate, PyObject *func, PyObject *kwarg
      * is not a mapping.
      */
     if (_PyErr_ExceptionMatches(tstate, PyExc_AttributeError)) {
-        _PyErr_Clear(tstate);
-        PyObject *funcstr = _PyObject_FunctionStr(func);
-        if (funcstr != NULL) {
-            _PyErr_Format(
-                tstate, PyExc_TypeError,
-                "%U argument after ** must be a mapping, not %.200s",
-                funcstr, Py_TYPE(kwargs)->tp_name);
-            Py_DECREF(funcstr);
-        }
+        _PyErr_Format(
+            tstate, PyExc_TypeError,
+            "Value after ** must be a mapping, not %.200s",
+            Py_TYPE(kwargs)->tp_name);
     }
     else if (_PyErr_ExceptionMatches(tstate, PyExc_KeyError)) {
         PyObject *exc = _PyErr_GetRaisedException(tstate);
