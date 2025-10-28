@@ -5457,7 +5457,7 @@ dummy_func(
                 // The invariant in the optimizer is the deopt target always points back to the first EXTENDED_ARG.
                 // So setting it to anything else is wrong.
                 int succ = _PyJit_TryInitializeTracing(tstate, frame, target, target, target, STACK_LEVEL(), chain_depth, exit, previous_executor, target->op.arg);
-                SYNC_SP()                Py_UNREACHABLE(); 
+                SYNC_SP();
                 if (succ) {
                     GOTO_TIER_ONE_CONTINUE_TRACING(target);
                     Py_UNREACHABLE(); 

@@ -1066,7 +1066,7 @@ enum InstructionFormat {
 struct opcode_metadata {
     uint8_t valid_entry;
     uint8_t instr_format;
-    uint16_t flags;
+    uint32_t flags;
 };
 
 extern const struct opcode_metadata _PyOpcode_opcode_metadata[267];

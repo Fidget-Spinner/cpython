@@ -32,11 +32,11 @@ typedef struct _PyUopCachingInfo {
 } _PyUopCachingInfo;
 
 extern const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1];
-extern const uint16_t _PyUop_SpillsAndReloads[4][4];
-extern const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1];
+extern const uint32_t _PyUop_SpillsAndReloads[4][4];
+extern const uint32_t _PyUop_Uncached[MAX_UOP_REGS_ID+1];
 
 #ifdef NEED_OPCODE_METADATA
-const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
+const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_NOP] = HAS_PURE_FLAG,
     [_CHECK_PERIODIC] = HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = HAS_ARG_FLAG | HAS_EVAL_BREAK_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
@@ -3223,7 +3223,7 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
     },
 };
 
-const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
+const uint32_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_NOP_r00] = _NOP,
     [_NOP_r11] = _NOP,
     [_NOP_r22] = _NOP,
@@ -3813,7 +3813,7 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_DYNAMIC_EXIT_r30] = _DYNAMIC_EXIT,
 };
 
-const uint16_t _PyUop_SpillsAndReloads[4][4] = {
+const uint32_t _PyUop_SpillsAndReloads[4][4] = {
     [0][1] = _SPILL_OR_RELOAD_r01,
     [0][2] = _SPILL_OR_RELOAD_r02,
     [0][3] = _SPILL_OR_RELOAD_r03,

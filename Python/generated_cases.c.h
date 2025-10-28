@@ -7562,6 +7562,7 @@
                     JUMP_TO_LABEL(error);
                 }
                 return result;
+                stack_pointer += 1;
                 #endif
             }
             else {
