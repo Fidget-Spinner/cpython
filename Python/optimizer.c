@@ -1104,12 +1104,6 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             int exit_depth = get_cached_entries_for_side_exit(inst);
             uint16_t exit_op = _PyUop_Caching[base_exit_op].entries[exit_depth].opcode;
             int32_t jump_target = target;
-            if (is_for_iter_test[base_opcode]) {
-                /* Target the POP_TOP immediately after the END_FOR,
-                 * leaving only the iterator on the stack. */
-                int32_t next_inst = target + 1 + INLINE_CACHE_ENTRIES_FOR_ITER;
-                jump_target = next_inst + inst->oparg + 1;
-            }
             if (unique_target || jump_target != current_jump_target || current_exit_op != exit_op) {
                 make_exit(&buffer[next_spare], exit_op, jump_target);
                 current_exit_op = exit_op;
