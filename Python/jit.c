@@ -124,6 +124,26 @@ mark_executable(unsigned char *memory, size_t size)
     return 0;
 }
 
+static int
+mark_read_writeable(unsigned char *memory, size_t size)
+{
+    if (size == 0) {
+        return 0;
+    }
+    assert(size % get_page_size() == 0);
+#ifdef MS_WINDOWS
+    int old;
+    int failed = !VirtualProtect(memory, size, PAGE_READWRITE, &old);
+#else
+    int failed = mprotect(memory, size, PROT_WRITE | PROT_READ);
+#endif
+    if (failed) {
+        jit_error("unable to protect executable memory");
+        return -1;
+    }
+    return 0;
+}
+
 // JIT compiler stuff: /////////////////////////////////////////////////////////
 
 #define SYMBOL_MASK_WORDS 4
@@ -563,6 +583,10 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     assert(trace[0].opcode == _START_EXECUTOR || trace[0].opcode == _COLD_EXIT);
     for (size_t i = 0; i < length; i++) {
         const _PyUOpInstruction *instruction = &trace[i];
+        if (instruction->opcode == _EXIT_TRACE) {
+            _PyExitData *exit = (_PyExitData *)instruction->operand0;
+            exit->jit_code_for_exit = code;
+        }
         group = &stencil_groups[instruction->opcode];
         group->emit(code, data, executor, instruction, &state);
         code += group->code_size;
@@ -662,6 +686,45 @@ _PyJIT_Free(_PyExecutorObject *executor)
                                    "freeing JIT memory");
         }
     }
+}
+
+void
+emit__EXIT_TRACE_REWRITTEN(
+    unsigned char *code, _PyExitData *exit_p, uintptr_t jumpto)
+{
+    //
+    // _EXIT_TRACE_REWRITTEN.o:       file format elf64-x86-64
+    //
+    // Disassembly of section .text:
+    //
+    // 0000000000000000 <_JIT_ENTRY>:
+    // 0: 48 b8 00 00 00 00 00 00 00 00 movabsq $0x0, %rax
+    // 0000000000000002:  R_X86_64_64  _JIT_OPERAND0
+    // a: 49 89 86 18 01 00 00          movq    %rax, 0x118(%r14)
+    // 11: e9 00 00 00 00                jmp     0x16 <_JIT_ENTRY+0x16>
+    // 0000000000000012:  R_X86_64_PLT32       _JIT_JUMP_TARGET-0x4
+    const unsigned char code_body[22] = {
+        0x48, 0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x49, 0x89, 0x86, 0x18, 0x01, 0x00,
+        0x00, 0xe9,
+    };
+    memcpy(code, code_body, sizeof(code_body));
+    patch_64(code + 0x2, (uint64_t)exit_p);
+    patch_32r(code + 0x12, jumpto + -0x4);
+}
+
+int
+_PyJit_PatchSideExit(_PyExecutorObject *trunk_executor, _PyExitData *exit_p, _PyExecutorObject *side_exit)
+{
+    assert(exit_p->jit_code_for_exit);
+    if (mark_read_writeable(trunk_executor->jit_code, trunk_executor->jit_size) < 0) {
+        return -1;
+    }
+    emit__EXIT_TRACE_REWRITTEN(exit_p->jit_code_for_exit, exit_p, (uintptr_t)side_exit->jit_code);
+    if (mark_executable(trunk_executor->jit_code, trunk_executor->jit_size) < 0) {
+        return -1;
+    }
+    return 0;
 }
 
 #endif  // _Py_JIT

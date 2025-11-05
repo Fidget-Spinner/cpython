@@ -170,6 +170,7 @@ _PyOptimizer_Optimize(
     _PyExitData *prev_exit = tstate->interp->jit_state.prev_exit;
     if (prev_exit != NULL) {
         prev_exit->executor = executor;
+        _PyJit_PatchSideExit(tstate->interp->jit_state.prev_executor, prev_exit, executor);
     }
     executor->vm_data.chain_depth = chain_depth;
     assert(executor->vm_data.valid);

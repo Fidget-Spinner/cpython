@@ -39,6 +39,7 @@ typedef struct _PyExitData {
     uint16_t index;
     _Py_BackoffCounter temperature;
     struct _PyExecutorObject *executor;
+    unsigned char *jit_code_for_exit;
 } _PyExitData;
 
 typedef struct _PyExecutorObject {
