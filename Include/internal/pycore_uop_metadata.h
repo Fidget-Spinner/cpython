@@ -338,7 +338,10 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_ERROR_POP_N] = HAS_ARG_FLAG,
     [_TIER2_RESUME_CHECK] = HAS_PERIODIC_FLAG,
     [_COLD_EXIT] = 0,
-    [_COLD_DYNAMIC_EXIT] = 0,
+    [_START_DYNAMIC_EXECUTOR] = HAS_DEOPT_FLAG,
+    [_DYNAMIC_DEOPT] = 0,
+    [_COLD_DYNAMIC_EXIT] = HAS_ESCAPES_FLAG,
+    [_GUARD_EXECUTOR_IP] = HAS_EXIT_FLAG,
     [_GUARD_IP__PUSH_FRAME] = HAS_EXIT_FLAG,
     [_GUARD_IP_YIELD_VALUE] = HAS_EXIT_FLAG,
     [_GUARD_IP_RETURN_VALUE] = HAS_EXIT_FLAG,
@@ -450,6 +453,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_DEOPT] = "_DEOPT",
     [_DICT_MERGE] = "_DICT_MERGE",
     [_DICT_UPDATE] = "_DICT_UPDATE",
+    [_DYNAMIC_DEOPT] = "_DYNAMIC_DEOPT",
     [_DYNAMIC_EXIT] = "_DYNAMIC_EXIT",
     [_END_FOR] = "_END_FOR",
     [_END_SEND] = "_END_SEND",
@@ -478,6 +482,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_GUARD_CALLABLE_TYPE_1] = "_GUARD_CALLABLE_TYPE_1",
     [_GUARD_DORV_NO_DICT] = "_GUARD_DORV_NO_DICT",
     [_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT] = "_GUARD_DORV_VALUES_INST_ATTR_FROM_DICT",
+    [_GUARD_EXECUTOR_IP] = "_GUARD_EXECUTOR_IP",
     [_GUARD_GLOBALS_VERSION] = "_GUARD_GLOBALS_VERSION",
     [_GUARD_IP_RETURN_GENERATOR] = "_GUARD_IP_RETURN_GENERATOR",
     [_GUARD_IP_RETURN_VALUE] = "_GUARD_IP_RETURN_VALUE",
@@ -636,6 +641,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_SET_FUNCTION_ATTRIBUTE] = "_SET_FUNCTION_ATTRIBUTE",
     [_SET_IP] = "_SET_IP",
     [_SET_UPDATE] = "_SET_UPDATE",
+    [_START_DYNAMIC_EXECUTOR] = "_START_DYNAMIC_EXECUTOR",
     [_START_EXECUTOR] = "_START_EXECUTOR",
     [_STORE_ATTR] = "_STORE_ATTR",
     [_STORE_ATTR_INSTANCE_VALUE] = "_STORE_ATTR_INSTANCE_VALUE",
@@ -1319,7 +1325,13 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 0;
         case _COLD_EXIT:
             return 0;
+        case _START_DYNAMIC_EXECUTOR:
+            return 0;
+        case _DYNAMIC_DEOPT:
+            return 0;
         case _COLD_DYNAMIC_EXIT:
+            return 0;
+        case _GUARD_EXECUTOR_IP:
             return 0;
         case _GUARD_IP__PUSH_FRAME:
             return 0;

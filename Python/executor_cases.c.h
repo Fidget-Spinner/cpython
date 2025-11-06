@@ -7133,9 +7133,9 @@
 
         case _DYNAMIC_EXIT: {
             PyObject *exit_p = (PyObject *)CURRENT_OPERAND0();
-            #if defined(Py_DEBUG) && !defined(_Py_JIT)
             _PyExitData *exit = (_PyExitData *)exit_p;
             _Py_CODEUNIT *target = frame->instr_ptr;
+            #if defined(Py_DEBUG) && !defined(_Py_JIT)
             OPT_HIST(trace_uop_execution_counter, trace_run_length_hist);
             if (frame->lltrace >= 2) {
                 _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -7148,8 +7148,8 @@
                 stack_pointer = _PyFrame_GetStackPointer(frame);
             }
             #endif
-
-            GOTO_TIER_ONE(frame->instr_ptr);
+            tstate->jit_exit = exit;
+            TIER2_TO_TIER2(exit->executor);
             break;
         }
 
@@ -7520,9 +7520,80 @@
             break;
         }
 
+        case _START_DYNAMIC_EXECUTOR: {
+            PyObject *executor = (PyObject *)CURRENT_OPERAND0();
+            #ifndef _Py_JIT
+            assert(current_executor == (_PyExecutorObject*)executor);
+            #endif
+            assert(tstate->jit_exit == NULL || tstate->jit_exit->executor == current_executor);
+            tstate->current_executor = (PyObject *)executor;
+            assert(!_PyErr_Occurred(tstate));
+            if (!current_executor->vm_data.valid) {
+                assert(tstate->jit_exit->executor == current_executor);
+                assert(tstate->current_executor == executor);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _PyExecutor_ClearExit(tstate->jit_exit);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
+            break;
+        }
+
+        case _DYNAMIC_DEOPT: {
+            GOTO_TIER_ONE(frame->instr_ptr);
+            break;
+        }
+
         case _COLD_DYNAMIC_EXIT: {
+            _PyExitData *exit = tstate->jit_exit;
+            assert(exit != NULL);
             _Py_CODEUNIT *target = frame->instr_ptr;
+            _Py_BackoffCounter temperature = exit->temperature;
+            _PyExecutorObject *executor;
+            if (target->op.code == ENTER_EXECUTOR) {
+                PyCodeObject *code = _PyFrame_GetCode(frame);
+                executor = code->co_executors->executors[target->op.arg];
+                if (executor->trace[0].opcode == _START_DYNAMIC_EXECUTOR) {
+                    Py_INCREF(executor);
+                    assert(tstate->jit_exit == exit);
+                    exit->executor = executor;
+                    assert(executor->trace[2].opcode == _GUARD_EXECUTOR_IP);
+                    TIER2_TO_TIER2(exit->executor);
+                }
+                TIER2_TO_TIER2(executor);
+            }
+            if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
+                GOTO_TIER_ONE(target);
+            }
+            if (!backoff_counter_triggers(temperature)) {
+                exit->temperature = advance_backoff_counter(temperature);
+                GOTO_TIER_ONE(target);
+            }
+            _PyExecutorObject *previous_executor = _PyExecutor_FromExit(exit);
+            assert(tstate->current_executor == (PyObject *)previous_executor);
+            int chain_depth = previous_executor->vm_data.chain_depth + 1;
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            int succ = _PyJit_TryInitializeTracingDynamic(tstate, frame, target, target, target, STACK_LEVEL(), chain_depth, exit, previous_executor, target->op.arg);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            exit->temperature = restart_backoff_counter(exit->temperature);
+            if (succ) {
+                GOTO_TIER_ONE_CONTINUE_TRACING(target);
+            }
             GOTO_TIER_ONE(target);
+            break;
+        }
+
+        case _GUARD_EXECUTOR_IP: {
+            PyObject *ip = (PyObject *)CURRENT_OPERAND0();
+            if (frame->instr_ptr != (_Py_CODEUNIT*)ip) {
+                if (true) {
+                    UOP_STAT_INC(uopcode, miss);
+                    JUMP_TO_JUMP_TARGET();
+                }
+            }
             break;
         }
 

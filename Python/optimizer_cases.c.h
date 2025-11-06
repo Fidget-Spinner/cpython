@@ -3431,7 +3431,19 @@
             break;
         }
 
+        case _START_DYNAMIC_EXECUTOR: {
+            break;
+        }
+
+        case _DYNAMIC_DEOPT: {
+            break;
+        }
+
         case _COLD_DYNAMIC_EXIT: {
+            break;
+        }
+
+        case _GUARD_EXECUTOR_IP: {
             break;
         }
 

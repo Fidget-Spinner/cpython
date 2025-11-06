@@ -406,6 +406,14 @@ do {                                                   \
         ENTER_TRACING(); \
         DISPATCH_NON_TRACING(); \
     } \
+    if (next_instr == this_instr) { \
+        opcode = executor->vm_data.opcode; \
+        oparg = (oparg & ~255) | executor->vm_data.oparg; \
+        if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) { \
+            PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter); \
+        } \
+        DISPATCH_NON_TRACING(); \
+    } \
     DISPATCH();                                        \
 } while (0)
 
