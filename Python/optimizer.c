@@ -1655,14 +1655,14 @@ _PyExecutor_GetColdDynamicExecutor(void)
 {
     PyInterpreterState *interp = _PyInterpreterState_GET();
     if (interp->cold_dynamic_executor != NULL) {
-        assert(interp->cold_dynamic_executor->trace[0].opcode == _COLD_DYNAMIC_EXIT);
+        assert(interp->cold_dynamic_executor->trace[0].opcode == _COLD_DYNAMIC_EXIT_r00);
         return interp->cold_dynamic_executor;
     }
     _PyExecutorObject *cold = allocate_executor(0, 1);
     if (cold == NULL) {
         Py_FatalError("Cannot allocate core JIT code");
     }
-    ((_PyUOpInstruction *)cold->trace)->opcode = _COLD_DYNAMIC_EXIT;
+    ((_PyUOpInstruction *)cold->trace)->opcode = _COLD_DYNAMIC_EXIT_r00;
 #ifdef _Py_JIT
     cold->jit_code = NULL;
     cold->jit_size = 0;

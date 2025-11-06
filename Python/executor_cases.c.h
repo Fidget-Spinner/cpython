@@ -13850,10 +13850,10 @@
                 stack_pointer += -1;
             }
             #endif
-            SET_CURRENT_CACHED_VALUES(0);
             stack_pointer[0] = _stack_item_0;
             stack_pointer += 1;
             assert(WITHIN_STACK_BOUNDS());
+            SET_CURRENT_CACHED_VALUES(0);
             GOTO_TIER_ONE(frame->instr_ptr);
         }
 
@@ -13883,11 +13883,11 @@
                 stack_pointer += -2;
             }
             #endif
-            SET_CURRENT_CACHED_VALUES(0);
             stack_pointer[0] = _stack_item_0;
             stack_pointer[1] = _stack_item_1;
             stack_pointer += 2;
             assert(WITHIN_STACK_BOUNDS());
+            SET_CURRENT_CACHED_VALUES(0);
             GOTO_TIER_ONE(frame->instr_ptr);
         }
 
@@ -13919,12 +13919,12 @@
                 stack_pointer += -3;
             }
             #endif
-            SET_CURRENT_CACHED_VALUES(0);
             stack_pointer[0] = _stack_item_0;
             stack_pointer[1] = _stack_item_1;
             stack_pointer[2] = _stack_item_2;
             stack_pointer += 3;
             assert(WITHIN_STACK_BOUNDS());
+            SET_CURRENT_CACHED_VALUES(0);
             GOTO_TIER_ONE(frame->instr_ptr);
         }
 

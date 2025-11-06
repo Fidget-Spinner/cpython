@@ -5307,7 +5307,9 @@ dummy_func(
     #endif
             // Disabled for now (gh-139109) as it slows down dynamic code tremendously.
             // Compile and jump to the cold dynamic executors in the future.
+            SYNC_SP();
             GOTO_TIER_ONE(frame->instr_ptr);
+            Py_UNREACHABLE();
         }
 
         tier2 op(_CHECK_VALIDITY, (--)) {
@@ -5470,14 +5472,19 @@ dummy_func(
                 assert(tstate->jit_exit == exit);
                 exit->executor = executor;
                 TIER2_TO_TIER2(exit->executor);
+                Py_UNREACHABLE();
             }
             else {
                 if (frame->owner >= FRAME_OWNED_BY_INTERPRETER) {
+                    SYNC_SP();
                     GOTO_TIER_ONE(target);
+                    Py_UNREACHABLE();
                 }
                 if (!backoff_counter_triggers(temperature)) {
                     exit->temperature = advance_backoff_counter(temperature);
+                    SYNC_SP();
                     GOTO_TIER_ONE(target);
+                    Py_UNREACHABLE();
                 }
                 _PyExecutorObject *previous_executor = _PyExecutor_FromExit(exit);
                 assert(tstate->current_executor == (PyObject *)previous_executor);
