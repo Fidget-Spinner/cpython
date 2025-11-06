@@ -276,6 +276,8 @@ def generate_tier2(
                 out.emit(f"#define OFFSET_OF_{name_offset_pair[0]} ({name_offset_pair[1]})\n")            
             reachable, stack = write_uop(uop, emitter, stack, outputs)
             out.start_line()
+            if name_offset_pair:
+                out.emit(f"#undef OFFSET_OF_{name_offset_pair[0]}\n")
             if reachable:
                 out.emit("assert(WITHIN_STACK_BOUNDS_WITH_CACHE());\n")
                 if not uop.properties.always_exits:
@@ -283,8 +285,6 @@ def generate_tier2(
             out.start_line()
             out.emit("}")
             out.emit("\n\n")
-    for name, offset_str in offset_strs.values():
-        out.emit(f"#undef OFFSET_OF{name}\n")
     out.emit("\n")
     outfile.write("#undef TIER_TWO\n")
 

@@ -15037,6 +15037,7 @@
                 }
             }
             SET_CURRENT_CACHED_VALUES(0);
+            #undef OFFSET_OF__PUSH_FRAME
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15058,6 +15059,7 @@
             }
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(1);
+            #undef OFFSET_OF__PUSH_FRAME
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15081,6 +15083,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(2);
+            #undef OFFSET_OF__PUSH_FRAME
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15106,6 +15109,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(3);
+            #undef OFFSET_OF__PUSH_FRAME
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15125,6 +15129,7 @@
                 }
             }
             SET_CURRENT_CACHED_VALUES(0);
+            #undef OFFSET_OF_YIELD_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15146,6 +15151,7 @@
             }
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(1);
+            #undef OFFSET_OF_YIELD_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15169,6 +15175,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(2);
+            #undef OFFSET_OF_YIELD_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15194,6 +15201,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(3);
+            #undef OFFSET_OF_YIELD_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15213,6 +15221,7 @@
                 }
             }
             SET_CURRENT_CACHED_VALUES(0);
+            #undef OFFSET_OF_RETURN_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15234,6 +15243,7 @@
             }
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(1);
+            #undef OFFSET_OF_RETURN_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15257,6 +15267,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(2);
+            #undef OFFSET_OF_RETURN_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15282,6 +15293,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(3);
+            #undef OFFSET_OF_RETURN_VALUE
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15301,6 +15313,7 @@
                 }
             }
             SET_CURRENT_CACHED_VALUES(0);
+            #undef OFFSET_OF_RETURN_GENERATOR
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15322,6 +15335,7 @@
             }
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(1);
+            #undef OFFSET_OF_RETURN_GENERATOR
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15345,6 +15359,7 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(2);
+            #undef OFFSET_OF_RETURN_GENERATOR
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
@@ -15370,13 +15385,10 @@
             _tos_cache1 = _stack_item_1;
             _tos_cache0 = _stack_item_0;
             SET_CURRENT_CACHED_VALUES(3);
+            #undef OFFSET_OF_RETURN_GENERATOR
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             break;
         }
 
-        #undef OFFSET_OFRETURN_VALUE
-        #undef OFFSET_OFYIELD_VALUE
-        #undef OFFSET_OF_PUSH_FRAME
-        #undef OFFSET_OFRETURN_GENERATOR
 
 #undef TIER_TWO
