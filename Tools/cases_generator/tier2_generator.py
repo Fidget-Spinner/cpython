@@ -229,7 +229,7 @@ def generate_tier2(
     out = CWriter(outfile, 2, lines)
 
     out.emit("\n")
-    offset_strs: list[tuple[str, str]] = []
+    offset_strs: dict[str, tuple[str, str]] = {}
     for name, uop in analysis.uops.items():
         if not f"_GUARD_IP_{name}" in analysis.uops:
             continue
@@ -248,8 +248,7 @@ def generate_tier2(
                 offset_str = "".join(offset[1:])
                 found = True
         assert offset_str
-        out.emit(f"#define OFFSET_OF_{name} ({offset_str})\n")
-        offset_strs.append((name, offset_str))
+        offset_strs[f"_GUARD_IP_{name}"] = (name, offset_str)
 
     out.emit("\n")
 
@@ -273,6 +272,8 @@ def generate_tier2(
             stack = Stack()
             stack.push_cache([f"_tos_cache{i}" for i in range(inputs)], out)
             stack._print(out)
+            if name_offset_pair := offset_strs.get(name):
+                out.emit(f"#define OFFSET_OF_{name_offset_pair[0]} ({name_offset_pair[1]})\n")            
             reachable, stack = write_uop(uop, emitter, stack, outputs)
             out.start_line()
             if reachable:
@@ -282,7 +283,7 @@ def generate_tier2(
             out.start_line()
             out.emit("}")
             out.emit("\n\n")
-    for name, offset_str in offset_strs:
+    for name, offset_str in offset_strs.values():
         out.emit(f"#undef OFFSET_OF{name}\n")
     out.emit("\n")
     outfile.write("#undef TIER_TWO\n")

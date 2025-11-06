@@ -8,10 +8,6 @@
 #endif
 #define TIER_TWO 2
 
-        #define OFFSET_OF_RETURN_VALUE ((frame->return_offset))
-        #define OFFSET_OF_YIELD_VALUE ((1+INLINE_CACHE_ENTRIES_SEND))
-        #define OFFSET_OF__PUSH_FRAME ((0))
-        #define OFFSET_OF_RETURN_GENERATOR ((frame->return_offset))
 
         case _NOP_r00: {
             CHECK_CURRENT_CACHED_VALUES(0);
@@ -15029,6 +15025,7 @@
         case _GUARD_IP__PUSH_FRAME_r00: {
             CHECK_CURRENT_CACHED_VALUES(0);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            #define OFFSET_OF__PUSH_FRAME ((0))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF__PUSH_FRAME;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15048,6 +15045,7 @@
             CHECK_CURRENT_CACHED_VALUES(1);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
+            #define OFFSET_OF__PUSH_FRAME ((0))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF__PUSH_FRAME;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15069,6 +15067,7 @@
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
+            #define OFFSET_OF__PUSH_FRAME ((0))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF__PUSH_FRAME;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15092,6 +15091,7 @@
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
             _PyStackRef _stack_item_2 = _tos_cache2;
+            #define OFFSET_OF__PUSH_FRAME ((0))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF__PUSH_FRAME;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15113,6 +15113,7 @@
         case _GUARD_IP_YIELD_VALUE_r00: {
             CHECK_CURRENT_CACHED_VALUES(0);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            #define OFFSET_OF_YIELD_VALUE ((1+INLINE_CACHE_ENTRIES_SEND))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_YIELD_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15132,6 +15133,7 @@
             CHECK_CURRENT_CACHED_VALUES(1);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
+            #define OFFSET_OF_YIELD_VALUE ((1+INLINE_CACHE_ENTRIES_SEND))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_YIELD_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15153,6 +15155,7 @@
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
+            #define OFFSET_OF_YIELD_VALUE ((1+INLINE_CACHE_ENTRIES_SEND))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_YIELD_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15176,6 +15179,7 @@
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
             _PyStackRef _stack_item_2 = _tos_cache2;
+            #define OFFSET_OF_YIELD_VALUE ((1+INLINE_CACHE_ENTRIES_SEND))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_YIELD_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15197,6 +15201,7 @@
         case _GUARD_IP_RETURN_VALUE_r00: {
             CHECK_CURRENT_CACHED_VALUES(0);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            #define OFFSET_OF_RETURN_VALUE ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15216,6 +15221,7 @@
             CHECK_CURRENT_CACHED_VALUES(1);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
+            #define OFFSET_OF_RETURN_VALUE ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15237,6 +15243,7 @@
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
+            #define OFFSET_OF_RETURN_VALUE ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15260,6 +15267,7 @@
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
             _PyStackRef _stack_item_2 = _tos_cache2;
+            #define OFFSET_OF_RETURN_VALUE ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_VALUE;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15281,6 +15289,7 @@
         case _GUARD_IP_RETURN_GENERATOR_r00: {
             CHECK_CURRENT_CACHED_VALUES(0);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
+            #define OFFSET_OF_RETURN_GENERATOR ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_GENERATOR;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15300,6 +15309,7 @@
             CHECK_CURRENT_CACHED_VALUES(1);
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
+            #define OFFSET_OF_RETURN_GENERATOR ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_GENERATOR;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15321,6 +15331,7 @@
             assert(WITHIN_STACK_BOUNDS_WITH_CACHE());
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
+            #define OFFSET_OF_RETURN_GENERATOR ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_GENERATOR;
             if (target != (_Py_CODEUNIT *)ip) {
@@ -15344,6 +15355,7 @@
             _PyStackRef _stack_item_0 = _tos_cache0;
             _PyStackRef _stack_item_1 = _tos_cache1;
             _PyStackRef _stack_item_2 = _tos_cache2;
+            #define OFFSET_OF_RETURN_GENERATOR ((frame->return_offset))
             PyObject *ip = (PyObject *)CURRENT_OPERAND0();
             _Py_CODEUNIT *target = frame->instr_ptr + OFFSET_OF_RETURN_GENERATOR;
             if (target != (_Py_CODEUNIT *)ip) {
