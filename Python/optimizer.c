@@ -1106,10 +1106,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             else if (exit_flags & HAS_PERIODIC_FLAG) {
                 base_exit_op = _HANDLE_PENDING_AND_DEOPT;
             }
-            if (base_opcode == _FOR_ITER_TIER_TWO) {
-                base_exit_op = _DYNAMIC_EXIT;
-            }
-            else if (
+            if (
                 base_opcode == _GUARD_IP__PUSH_FRAME ||
                 base_opcode == _GUARD_IP_RETURN_VALUE ||
                 base_opcode == _GUARD_IP_YIELD_VALUE ||
