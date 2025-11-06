@@ -1110,7 +1110,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 base_exit_op = _DYNAMIC_EXIT;
             }
             else if (
-                base_opcode == _GUARD_IP_PUSH_FRAME ||
+                base_opcode == _GUARD_IP__PUSH_FRAME ||
                 base_opcode == _GUARD_IP_RETURN_VALUE ||
                 base_opcode == _GUARD_IP_YIELD_VALUE ||
                 base_opcode == _GUARD_IP_RETURN_GENERATOR
@@ -1118,7 +1118,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 base_exit_op = _DYNAMIC_EXIT;
                 unique_target = true;
             }
-            bool is_control_flow = (opcode == _GUARD_IS_FALSE_POP || opcode == _GUARD_IS_TRUE_POP || is_for_iter_test[opcode]);
+            bool is_control_flow = (base_opcode == _GUARD_IS_FALSE_POP || base_opcode == _GUARD_IS_TRUE_POP || is_for_iter_test[base_opcode]);
             int exit_depth = get_cached_entries_for_side_exit(inst);
             uint16_t exit_op = _PyUop_Caching[base_exit_op].entries[exit_depth].opcode;
             int32_t jump_target = target;
@@ -1279,8 +1279,8 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
             exit->target = buffer[i].target;
             exit->executor = cold;
             dest->operand0 = (uint64_t)exit;
-            exit->executor = opcode == _EXIT_TRACE ? cold : cold_dynamic;
-            exit->is_dynamic = (char)(opcode == _DYNAMIC_EXIT);
+            exit->executor = base_opcode == _EXIT_TRACE ? cold : cold_dynamic;
+            exit->is_dynamic = (char)(base_opcode == _DYNAMIC_EXIT);
             exit->is_control_flow = (char)buffer[i].operand1;
             next_exit--;
         }
@@ -1642,6 +1642,14 @@ _PyExecutor_FreeColdExecutor(_PyExecutorObject *cold)
     free_executor(cold);
 }
 
+void
+_PyExecutor_FreeColdDynamicExecutor(_PyExecutorObject *cold)
+{
+    assert(_PyInterpreterState_GET()->cold_dynamic_executor != cold);
+    free_executor(cold);
+}
+
+
 _PyExecutorObject *
 _PyExecutor_GetColdDynamicExecutor(void)
 {
@@ -1988,6 +1996,13 @@ _PyDumpExecutors(FILE *out)
 
 void
 _PyExecutor_FreeColdExecutor(struct _PyExecutorObject *cold)
+{
+    /* This should never be called */
+    Py_UNREACHABLE();
+}
+
+void
+_PyExecutor_FreeColdDynamicExecutor(struct _PyExecutorObject *cold)
 {
     /* This should never be called */
     Py_UNREACHABLE();

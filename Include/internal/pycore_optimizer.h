@@ -357,6 +357,7 @@ static inline int is_terminator(const _PyUOpInstruction *uop)
 }
 
 extern void _PyExecutor_FreeColdExecutor(_PyExecutorObject *cold);
+extern void _PyExecutor_FreeColdDynamicExecutor(_PyExecutorObject *cold);
 
 PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
 #ifdef _Py_TIER2
