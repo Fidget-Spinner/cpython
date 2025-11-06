@@ -66,8 +66,6 @@ class Tier2Emitter(Emitter):
     def __init__(self, out: CWriter, labels: dict[str, Label], exit_cache_depth: int):
         super().__init__(out, labels)
         self._replacers["oparg"] = self.oparg
-        self._replacers["JUMPBY"] = self.jumpby
-        self._replacers["DISPATCH"] = self.dispatch
         self.exit_cache_depth = exit_cache_depth
 
     def goto_error(self, offset: int, storage: Storage) -> str:
@@ -123,39 +121,6 @@ class Tier2Emitter(Emitter):
         self.out.emit_at(uop.name[-1], tkn)
         return True
 
-    def jumpby(
-        self,
-        tkn: Token,
-        tkn_iter: TokenIterator,
-        uop: CodeSection,
-        storage: Storage,
-        inst: Instruction | None,
-    ) -> bool:
-        if storage.spilled:
-            raise analysis_error("stack_pointer needs reloading before dispatch", tkn)
-        storage.stack.flush(self.out)
-        self.emit("TIER2_STORE_IP")
-        emit_to(self.out, tkn_iter, "SEMI")
-        self.emit(";\n")
-        return True
-
-    def dispatch(
-        self,
-        tkn: Token,
-        tkn_iter: TokenIterator,
-        uop: CodeSection,
-        storage: Storage,
-        inst: Instruction | None,
-    ) -> bool:
-        if storage.spilled:
-            raise analysis_error("stack_pointer needs reloading before dispatch", tkn)
-        storage.stack.flush(self.out)
-        self.emit("break;\n")
-        next(tkn_iter)
-        next(tkn_iter)
-        next(tkn_iter)
-        return False
-
     def tier2_to_tier2(
         self,
         tkn: Token,
@@ -176,6 +141,7 @@ class Tier2Emitter(Emitter):
         return False
 
     goto_tier_one = tier2_to_tier2
+
 
 def cache_items(emitter: Emitter, stack: Stack, cached_items: int, zero_regs: bool) -> None:
     emitter.out.start_line()
@@ -233,6 +199,33 @@ def is_for_iter_test(uop: Uop) -> bool:
         "_GUARD_NOT_EXHAUSTED_TUPLE", "_FOR_ITER_TIER_TWO"
     )
 
+def generate_guard_ips(
+    analysis: Analysis,
+    emitter: Tier2Emitter,
+) -> None:
+    for name, uop in analysis.uops.items():
+        for stmt in uop.body.body:
+            tkn_iter = iter(stmt.tokens())
+            for token in tkn_iter:
+                if token.kind == "IDENTIFIER" and token.text == "LOAD_IP":
+                    offset = []
+                    while token.kind != "SEMI":
+                        offset.append(token.text)
+                        token = next(tkn_iter)
+                    # 1: to remove the LOAD_IP text
+                    offset_str = "".join(offset[1:])
+                    emitter.emit(f"case _GUARD_IP_{name}: {{\n")
+                    emitter.emit("PyObject *ip = (PyObject *)CURRENT_OPERAND0();\n")
+                    emitter.emit(f"if (frame->instr_ptr + {offset_str} != (_Py_CODEUNIT *)ip) {{\n")
+                    emitter.emit(f"frame->instr_ptr += {offset_str};\n")
+                    emitter.emit(f"UOP_STAT_INC(uopcode, miss);\n")
+                    emitter.emit("JUMP_TO_JUMP_TARGET();\n")
+                    emitter.emit("}\n")
+                    emitter.emit("break;\n")
+                    emitter.emit("}\n")
+                    emitter.emit("\n")
+
+
 def generate_tier2(
     filenames: list[str], analysis: Analysis, outfile: TextIO, lines: bool
 ) -> None:
@@ -252,6 +245,8 @@ def generate_tier2(
         if uop.properties.tier == 1:
             continue
         if uop.is_super():
+            continue
+        if name.startswith("_GUARD_IP"):
             continue
         why_not_viable = uop.why_not_viable()
         if why_not_viable is not None:
@@ -277,6 +272,7 @@ def generate_tier2(
             out.start_line()
             out.emit("}")
             out.emit("\n\n")
+    generate_guard_ips(analysis, emitter)
     outfile.write("#undef TIER_TWO\n")
 
 

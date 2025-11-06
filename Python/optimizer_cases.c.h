@@ -1175,6 +1175,7 @@
             JitOptRef temp = PyJitRef_StripReferenceInfo(retval);
             stack_pointer += -1;
             assert(WITHIN_STACK_BOUNDS());
+            ctx->frame->stack_pointer = stack_pointer;
             PyCodeObject *returning_code = get_code_with_logging(this_instr);
             if (returning_code == NULL) {
                 ctx->done = true;
@@ -3273,6 +3274,10 @@
             break;
         }
 
+        case _DYNAMIC_EXIT: {
+            break;
+        }
+
         case _CHECK_VALIDITY: {
             break;
         }
@@ -3430,7 +3435,11 @@
             break;
         }
 
-        case _GUARD_IP_PUSH_FRAME: {
+        case _COLD_DYNAMIC_EXIT: {
+            break;
+        }
+
+        case _GUARD_IP__PUSH_FRAME: {
             break;
         }
 
@@ -3442,7 +3451,7 @@
             break;
         }
 
-        case _DYNAMIC_EXIT: {
+        case _GUARD_IP_RETURN_GENERATOR: {
             break;
         }
 

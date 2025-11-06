@@ -410,9 +410,12 @@ do {                                                   \
         next_instr = frame->instr_ptr + 1;                 \
         JUMP_TO_LABEL(error);                          \
     }                                                  \
+    /* Progress made */ \
+    if (next_instr != this_instr) { \
+        _Py_unset_eval_breaker_bit(tstate, _PY_EVAL_JIT_DO_NOT_REENTER); \
+    } \
     if (keep_tracing_bit) { \
-        assert(next_instr->op.code != ENTER_EXECUTOR); \
-        assert(tstate->interp->jit_state.code_curr_size == 2); \
+        assert(tstate->interp->jit_state.code_curr_size == 2 || tstate->interp->jit_state.code_curr_size == 3); \
         ENTER_TRACING(); \
         DISPATCH_NON_TRACING(); \
     } \

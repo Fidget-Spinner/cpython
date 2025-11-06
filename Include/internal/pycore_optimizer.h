@@ -37,6 +37,8 @@ typedef struct {
 typedef struct _PyExitData {
     uint32_t target;
     uint16_t index;
+    char is_dynamic:4;
+    char is_control_flow:4;
     _Py_BackoffCounter temperature;
     struct _PyExecutorObject *executor;
 } _PyExitData;
@@ -340,6 +342,7 @@ static inline _PyExecutorObject *_PyExecutor_FromExit(_PyExitData *exit)
 }
 
 extern _PyExecutorObject *_PyExecutor_GetColdExecutor(void);
+extern _PyExecutorObject *_PyExecutor_GetColdDynamicExecutor(void);
 
 PyAPI_FUNC(void) _PyExecutor_ClearExit(_PyExitData *exit);
 

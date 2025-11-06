@@ -67,9 +67,6 @@ to avoid the expense of doing their own locking).
    For each of these functions, the GIL must be held by the current thread.
  */
 
-#ifndef HAVE_THREAD_LOCAL
-#  error "no supported thread-local variable storage classifier"
-#endif
 
 /* The attached thread state for the current thread. */
 _Py_thread_local PyThreadState *_Py_tss_tstate = NULL;
@@ -827,6 +824,14 @@ interpreter_clear(PyInterpreterState *interp, PyThreadState *tstate)
     if (cold != NULL) {
         interp->cold_executor = NULL;
         _PyExecutor_FreeColdExecutor(cold);
+    }
+
+    struct _PyExecutorObject *cold_dynamic = interp->cold_dynamic_executor;
+    if (cold_dynamic != NULL) {
+        interp->cold_dynamic_executor = NULL;
+        assert(cold_dynamic->vm_data.valid);
+        assert(cold_dynamic->vm_data.warm);
+        _PyExecutor_Free(cold_dynamic);
     }
     /* We don't clear sysdict and builtins until the end of this function.
        Because clearing other attributes can execute arbitrary Python code
