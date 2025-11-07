@@ -1003,7 +1003,7 @@ _PyObjectArray_Free(PyObject **array, PyObject **scratch)
 #include "generated_cases.c.h"
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 10 && !defined(__clang__)) && defined(__x86_64__)
+#if (defined(__GNUC__) && __GNUC__ >= 10 && !defined(__clang__)) && defined(__x86_64__) && !_Py_TAIL_CALL_INTERP
 /*
  * gh-129987: The SLP autovectorizer can cause poor code generation for
  * opcode dispatch in some GCC versions (observed in GCCs 12 through 15,
