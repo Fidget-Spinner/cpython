@@ -69,7 +69,7 @@ jobs:
           - true
           - false
         llvm:
-          - 21
+          - 19
         include:
 # To re-enable later when we support these.
 #          - target: i686-pc-windows-msvc/msvc
@@ -140,7 +140,7 @@ jobs:
       fail-fast: false
       matrix:
         llvm:
-          - 21
+          - 19
     steps:
       - uses: actions/checkout@v4
         with:
@@ -168,7 +168,7 @@ jobs:
       fail-fast: false
       matrix:
         llvm:
-          - 21
+          - 19
     steps:
       - uses: actions/checkout@v4
         with:
