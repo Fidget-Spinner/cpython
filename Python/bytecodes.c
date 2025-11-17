@@ -2941,7 +2941,7 @@ dummy_func(
         specializing tier1 op(_SPECIALIZE_JUMP_BACKWARD, (--)) {
         #if ENABLE_SPECIALIZATION_FT
             if (this_instr->op.code == JUMP_BACKWARD) {
-                uint8_t desired = FT_ATOMIC_LOAD_CHAR_RELAXED(((_PyThreadStateImpl*)tstate)->jit_executor_state.jit) ? JUMP_BACKWARD_JIT : JUMP_BACKWARD_NO_JIT;
+                uint8_t desired = FT_ATOMIC_LOAD_UINT8(tstate->interp->jit) ? JUMP_BACKWARD_JIT : JUMP_BACKWARD_NO_JIT;
                 FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, desired);
                 // Need to re-dispatch so the warmup counter isn't off by one:
                 next_instr = this_instr;
@@ -3018,21 +3018,11 @@ dummy_func(
                 goto stop_tracing;
             }
             PyCodeObject *code = _PyFrame_GetCode(frame);
-
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
-            // We are responsible for cleaning up after ourselves.
-            if (!executor->vm_data.valid) {
-                opcode = executor->vm_data.opcode;
-                oparg = (oparg & ~255) | executor->vm_data.oparg;
-                next_instr = this_instr;
-                Py_BEGIN_CRITICAL_SECTION(code);
-                _Py_ExecutorDetach(executor);
-                Py_END_CRITICAL_SECTION();
-                DISPATCH_GOTO();
-            }
-            assert(tstate->current_executor == NULL);
             assert(executor->vm_data.index == INSTR_OFFSET() - 1);
             assert(executor->vm_data.code == code);
+            assert(executor->vm_data.valid);
+            assert(tstate->current_executor == NULL);
             /* If the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
@@ -3045,7 +3035,7 @@ dummy_func(
                 }
                 DISPATCH_GOTO();
             }
-            assert(executor != ((_PyThreadStateImpl *)tstate)->jit_executor_state.cold_executor);
+            assert(executor != tstate->interp->cold_executor);
             tstate->jit_exit = NULL;
             TIER1_TO_TIER2(executor);
             #else

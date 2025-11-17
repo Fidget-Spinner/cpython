@@ -24,11 +24,7 @@ typedef struct _PyExecutorLinkListNode {
 typedef struct {
     uint8_t opcode;
     uint8_t oparg;
-#ifdef Py_GIL_DISABLED
-    uint8_t valid;
-#else
     uint8_t valid:1;
-#endif
     uint8_t linked:1;
     uint8_t chain_depth:6;  // Must be big enough for MAX_CHAIN_DEPTH - 1.
     bool warm;
@@ -49,7 +45,6 @@ typedef struct _PyExitData {
 
 typedef struct _PyExecutorObject {
     PyObject_VAR_HEAD
-    PyThreadState *tstate;
     const _PyUOpInstruction *trace;
     _PyVMData vm_data; /* Used by the VM, but opaque to the optimizer */
     uint32_t exit_count;
@@ -78,16 +73,14 @@ PyAPI_FUNC(void) _Py_Executor_DependsOn(_PyExecutorObject *executor, void *obj);
 
 #ifdef _Py_TIER2
 PyAPI_FUNC(void) _Py_Executors_InvalidateDependency(PyInterpreterState *interp, void *obj, int is_invalidation);
-PyAPI_FUNC(void) _Py_Executors_InvalidateDependencyLockHeld(PyInterpreterState *interp, void *obj, int is_invalidation);
 PyAPI_FUNC(void) _Py_Executors_InvalidateAll(PyInterpreterState *interp, int is_invalidation);
-PyAPI_FUNC(void) _Py_Executors_InvalidateAllLockHeld(PyInterpreterState *interp, int is_invalidation);
-PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyThreadState *tstate);
-PyAPI_FUNC(void) _Py_Executors_InvalidateColdGC(PyInterpreterState *interp);
+PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
+
 #else
 #  define _Py_Executors_InvalidateDependency(A, B, C) ((void)0)
 #  define _Py_Executors_InvalidateAll(A, B) ((void)0)
 #  define _Py_Executors_InvalidateCold(A) ((void)0)
-#  define _Py_Executors_InvalidateColdGC(A) ((void)0)
+
 #endif
 
 // Used as the threshold to trigger executor invalidation when
@@ -365,7 +358,9 @@ static inline int is_terminator(const _PyUOpInstruction *uop)
 extern void _PyExecutor_Free(_PyExecutorObject *self);
 
 PyAPI_FUNC(int) _PyDumpExecutors(FILE *out);
-
+#ifdef _Py_TIER2
+extern void _Py_ClearExecutorDeletionList(PyInterpreterState *interp);
+#endif
 
 int _PyJit_translate_single_bytecode_to_trace(PyThreadState *tstate, _PyInterpreterFrame *frame, _Py_CODEUNIT *next_instr, int stop_tracing_opcode);
 

@@ -1785,7 +1785,7 @@ force_instrument_lock_held(PyCodeObject *code, PyInterpreterState *interp)
     if (code->co_executors != NULL) {
         _PyCode_Clear_Executors(code);
     }
-    _Py_Executors_InvalidateDependencyLockHeld(interp, code, 1);
+    _Py_Executors_InvalidateDependency(interp, code, 1);
 #endif
     int code_len = (int)Py_SIZE(code);
     /* Exit early to avoid creating instrumentation
@@ -1928,9 +1928,7 @@ _Py_Instrument(PyCodeObject *code, PyInterpreterState *interp)
 {
     int res;
     LOCK_CODE(code);
-    HEAD_LOCK(interp->runtime);
     res = instrument_lock_held(code, interp);
-    HEAD_UNLOCK(interp->runtime);
     UNLOCK_CODE();
     return res;
 }
@@ -2030,7 +2028,7 @@ _PyMonitoring_SetEvents(int tool_id, _PyMonitoringEventSet events)
     }
     set_global_version(tstate, new_version);
 #ifdef _Py_TIER2
-    _Py_Executors_InvalidateAllLockHeld(interp, 1);
+    _Py_Executors_InvalidateAll(interp, 1);
 #endif
     return instrument_all_executing_code_objects(interp);
 }
@@ -2064,10 +2062,7 @@ _PyMonitoring_SetLocalEvents(PyCodeObject *code, int tool_id, _PyMonitoringEvent
     }
     set_local_events(local, tool_id, events);
 
-    HEAD_LOCK(interp->runtime);
-    int res = force_instrument_lock_held(code, interp);
-    HEAD_UNLOCK(interp->runtime);
-    return res;
+    return force_instrument_lock_held(code, interp);
 }
 
 int
