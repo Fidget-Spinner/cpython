@@ -418,7 +418,7 @@ optimize_uops(
     /* Either reached the end or cannot optimize further, but there
      * would be no benefit in retrying later */
     _Py_uop_abstractcontext_fini(ctx);
-    return i + 1;
+    return i + 1 > trace_len ? i + 1 : trace_len;
 
 error:
     DPRINTF(3, "\n");
