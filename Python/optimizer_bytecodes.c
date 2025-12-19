@@ -2,6 +2,7 @@
 #include "pycore_optimizer.h"
 #include "pycore_uops.h"
 #include "pycore_uop_ids.h"
+#include "../Include/internal/pycore_uop_ids.h"
 #include "internal/pycore_moduleobject.h"
 
 #define op(name, ...) /* NAME is ignored */
@@ -870,7 +871,8 @@ dummy_func(void) {
         if (ctx->curr_frame_depth >= 2) {
             PyCodeObject *expected_code = ctx->frames[ctx->curr_frame_depth - 2].code;
             if (expected_code == returning_code) {
-                assert((this_instr + 1)->opcode == _GUARD_IP_RETURN_VALUE);
+                assert((this_instr + 1)->opcode == _GUARD_IP_RETURN_VALUE ||
+                    (this_instr+1)->opcode == _NOP);
                 REPLACE_OP((this_instr + 1), _NOP, 0, 0);
             }
         }
@@ -976,7 +978,8 @@ dummy_func(void) {
         // Fixed calls don't need IP guards.
         if ((this_instr-1)->opcode == _SAVE_RETURN_OFFSET ||
             (this_instr-1)->opcode == _CREATE_INIT_FRAME) {
-            assert((this_instr+1)->opcode == _GUARD_IP__PUSH_FRAME);
+            assert((this_instr+1)->opcode == _GUARD_IP__PUSH_FRAME ||
+                (this_instr+1)->opcode == _NOP);
             REPLACE_OP(this_instr+1, _NOP, 0, 0);
         }
     }
@@ -1153,6 +1156,27 @@ dummy_func(void) {
     }
 
     op(_JUMP_TO_TOP, (--)) {
+        // Already peeling, check if we can rejoin the peeled context.
+        if (ctx->in_peeled_iteration) {
+            if (_Py_uop_unrollcontext_more_general_than_curr_context(ctx)) {
+                REPLACE_OP(this_instr, _JUMP_TO_PEELED_LOOP, 0, 0);
+            }
+            // Can't rejoin :(
+        }
+        // Plenty of space left, time to peel!
+        else {
+            if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
+                ctx->in_peeled_iteration = true;
+                _Py_uop_abstractcontext_store_unroll_context(ctx);
+                // 1 to skip the _START_EXECUTOR
+                // + 1 to copy the current instruction too.
+                for (int x = 1; x < i + 1; x++) {
+                    trace[i + x] = trace[x];
+                }
+                REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
+                break;
+            }
+        }
         ctx->done = true;
     }
 

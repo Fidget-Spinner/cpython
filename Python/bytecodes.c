@@ -5160,6 +5160,15 @@ dummy_func(
             JUMP_TO_JUMP_TARGET();
         }
 
+        op(_PEELED_LOOP_START, (--)) {
+            SYNC_SP();
+        }
+
+        op(_JUMP_TO_PEELED_LOOP, (--)) {
+            SYNC_SP();
+            JUMP_TO_JUMP_TARGET();
+        }
+
         tier2 op(_SET_IP, (instr_ptr/4 --)) {
             frame->instr_ptr = (_Py_CODEUNIT *)instr_ptr;
         }

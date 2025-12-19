@@ -596,7 +596,8 @@ is_terminator(const _PyUOpInstruction *uop)
         opcode == _EXIT_TRACE ||
         opcode == _DEOPT ||
         opcode == _JUMP_TO_TOP ||
-        opcode == _DYNAMIC_EXIT
+        opcode == _DYNAMIC_EXIT ||
+        opcode == _JUMP_TO_PEELED_LOOP
     );
 }
 
@@ -1174,6 +1175,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
         }
     }
     length = (int)(copy_to - buffer);
+    int peeled_loop_header_index = -1;
     int next_spare = length;
     for (int i = 0; i < length; i++) {
         _PyUOpInstruction *inst = &buffer[i];
@@ -1233,6 +1235,14 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             assert(_PyUop_Uncached[buffer[0].opcode] == _START_EXECUTOR);
             buffer[i].format = UOP_FORMAT_JUMP;
             buffer[i].jump_target = 1;
+        }
+        if (base_opcode == _JUMP_TO_PEELED_LOOP) {
+            buffer[i].format = UOP_FORMAT_JUMP;
+            assert(peeled_loop_header_index > 0);
+            buffer[i].jump_target = peeled_loop_header_index;
+        }
+        if (base_opcode == _PEELED_LOOP_START) {
+            peeled_loop_header_index = i;
         }
     }
     return next_spare;
@@ -1968,7 +1978,7 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
 #else
         fprintf(out, "        <tr><td port=\"i%d\" border=\"1\" >%s op0=%" PRIu64 "</td></tr>\n", i, opname, inst->operand0);
 #endif
-        if (base_opcode == _EXIT_TRACE || base_opcode == _JUMP_TO_TOP) {
+        if (is_terminator(inst)) {
             break;
         }
     }
@@ -1996,7 +2006,7 @@ executor_to_gv(_PyExecutorObject *executor, FILE *out)
         if (exit != NULL && exit->executor != cold && exit->executor != cold_dynamic) {
             fprintf(out, "executor_%p:i%d -> executor_%p:start\n", executor, i, exit->executor);
         }
-        if (base_opcode == _EXIT_TRACE || base_opcode == _JUMP_TO_TOP) {
+        if (is_terminator(inst)) {
             break;
         }
     }

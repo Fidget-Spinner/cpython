@@ -261,10 +261,20 @@ typedef struct ty_arena {
     JitOptSymbol arena[TY_ARENA_SIZE];
 } ty_arena;
 
+// A "compressed" version of _JitOptContext
+// used to store information at a loop header.
+typedef struct _JitOptUnrollContext {
+    _Py_UOpsAbstractFrame frames[MAX_ABSTRACT_FRAME_DEPTH];
+    int curr_frame_depth;
+    int n_consumed;
+    JitOptRef locals_and_stack[MAX_ABSTRACT_INTERP_SIZE];
+} JitOptUnrollContext;
+
 typedef struct _JitOptContext {
     char done;
     char out_of_space;
     bool contradiction;
+    bool in_peeled_iteration;
      // Has the builtins dict been watched?
     bool builtins_watched;
     // The current "executing" frame.
@@ -274,6 +284,8 @@ typedef struct _JitOptContext {
 
     // Arena for the symbolic types.
     ty_arena t_arena;
+
+    JitOptUnrollContext unroll;
 
     JitOptRef *n_consumed;
     JitOptRef *limit;
@@ -323,7 +335,8 @@ extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     JitOptRef *args,
     int arg_len);
 extern int _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co, int curr_stackentries);
-
+bool _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx);
+bool _Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx);
 PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 
 PyAPI_FUNC(int) _PyOptimizer_Optimize(_PyInterpreterFrame *frame, PyThreadState *tstate);

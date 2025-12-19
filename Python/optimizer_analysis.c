@@ -362,8 +362,9 @@ optimize_uops(
     _PyUOpInstruction *this_instr = NULL;
     JitOptRef *stack_pointer = ctx->frame->stack_pointer;
 
-    for (int i = 0; !ctx->done; i++) {
-        assert(i < trace_len);
+    int i = 0;
+    for (;!ctx->done; i++) {
+        assert(i < UOP_MAX_TRACE_LENGTH);
         this_instr = &trace[i];
 
         int oparg = this_instr->oparg;
@@ -417,7 +418,7 @@ optimize_uops(
     /* Either reached the end or cannot optimize further, but there
      * would be no benefit in retrying later */
     _Py_uop_abstractcontext_fini(ctx);
-    return trace_len;
+    return i + 1;
 
 error:
     DPRINTF(3, "\n");
@@ -559,6 +560,7 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
             case _JUMP_TO_TOP:
             case _DYNAMIC_EXIT:
             case _DEOPT:
+            case _JUMP_TO_PEELED_LOOP:
                 return pc + 1;
         }
     }

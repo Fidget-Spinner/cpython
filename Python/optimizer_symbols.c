@@ -907,6 +907,7 @@ _Py_uop_abstractcontext_init(JitOptContext *ctx)
     ctx->out_of_space = false;
     ctx->contradiction = false;
     ctx->builtins_watched = false;
+    ctx->in_peeled_iteration = false;
 }
 
 int
@@ -949,6 +950,152 @@ _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co, int curr_stackentries)
 
     return 0;
 }
+
+
+// Checks if `parent` is more general than `child`.
+// Ie. `parent` must be able to contain `child` without contradictions.
+// In CPython, the contain operation usually corresponds to the superclass relation.
+// E.g. `unknown` can contain `int`.
+// `int` can contain `int`.
+// However, `str` cannot contain `int`!
+static bool
+sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
+{
+    JitOptSymbol *parent_sym = PyJitRef_Unwrap(parent);
+    JitSymType parent_tag = parent_sym->tag;
+
+    JitOptSymbol *child_sym = PyJitRef_Unwrap(child);
+    JitSymType child_tag = child_sym->tag;
+    switch(parent_tag) {
+        case JIT_SYM_KNOWN_CLASS_TAG:
+            return _Py_uop_sym_matches_type(child, parent_sym->cls.type);
+        case JIT_SYM_TYPE_VERSION_TAG:
+            return _Py_uop_sym_get_type_version(parent) == _Py_uop_sym_get_type_version(child);
+        case JIT_SYM_KNOWN_VALUE_TAG:
+            return (child_tag == JIT_SYM_KNOWN_VALUE_TAG &&
+                _Py_uop_sym_get_const(ctx, child) == _Py_uop_sym_get_const(ctx, parent));
+        // For tuples, their items must all be superclassed by the parent tuple.
+        case JIT_SYM_TUPLE_TAG:
+            switch (child_tag) {
+                case JIT_SYM_TUPLE_TAG: {
+                    int len = _Py_uop_sym_tuple_length(child);
+                    if (len != _Py_uop_sym_tuple_length(parent)) {
+                        return false;
+                    }
+                    for (int i = 0; i < len; i++) {
+                        JitOptRef child_item = _Py_uop_sym_tuple_getitem(ctx, child, i);
+                        JitOptRef parent_item = _Py_uop_sym_tuple_getitem(ctx, parent, i);
+                        if (!sym_is_more_general(ctx, parent_item, child_item)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                default:
+                    return false;
+            }
+        case JIT_SYM_TRUTHINESS_TAG:
+            return _Py_uop_sym_truthiness(ctx, child) == 1;
+        // Compact int is simple --- just check if the child is also a compact int.
+        case JIT_SYM_COMPACT_INT:
+            switch (child_tag) {
+                case JIT_SYM_KNOWN_VALUE_TAG: {
+                    PyObject *obj = _Py_uop_sym_get_const(ctx, child);
+                    return obj != NULL && _PyLong_CheckExactAndCompact(obj);
+                }
+                case JIT_SYM_COMPACT_INT:
+                    return true;
+            default:
+                    return false;
+            }
+        // This can't contain unknown and null.
+        case JIT_SYM_NON_NULL_TAG:
+            switch (child_tag) {
+                case JIT_SYM_UNKNOWN_TAG:
+                case JIT_SYM_NULL_TAG:
+                    return false;
+                default:
+                    return true;
+            }
+        // This can't contain unknown and not-null.
+        case JIT_SYM_NULL_TAG:
+            switch (child_tag) {
+            case JIT_SYM_UNKNOWN_TAG:
+            case JIT_SYM_NON_NULL_TAG:
+                    return false;
+            default:
+                    return true;
+            }
+        // Unknown type is the superclass of every type.
+        case JIT_SYM_UNKNOWN_TAG:
+            return true;
+        // This can't contain anything.
+        case JIT_SYM_BOTTOM_TAG:
+            return false;
+    }
+}
+
+
+
+bool
+_Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
+{
+    JitOptUnrollContext *unroll = &ctx->unroll;
+    int n_consumed = (int)(ctx->n_consumed - ctx->locals_and_stack);
+    memcpy(unroll->locals_and_stack, ctx->locals_and_stack, sizeof(JitOptRef) * n_consumed);
+    memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
+    unroll->n_consumed = n_consumed;
+    unroll->curr_frame_depth = ctx->curr_frame_depth;
+    // No need to incref the type values, they are kept alive by the original context.
+}
+
+// Checks if our peeled header (unroll) context can contain our current ctx.
+bool
+_Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx)
+{
+    JitOptUnrollContext *unroll = &ctx->unroll;
+    // For each frame, check they are the same
+    if (ctx->curr_frame_depth != unroll->curr_frame_depth) {
+        return false;
+    }
+    for (int i = 0; i < ctx->curr_frame_depth; i++) {
+        _Py_UOpsAbstractFrame *curr = &unroll->frames[i];
+        _Py_UOpsAbstractFrame *from = &ctx->frames[i];
+        if (curr->code != from->code) {
+            return false;
+        }
+        if (curr->func != from->func) {
+            return false;
+        }
+        // If we're truly at the same state,
+        // these values should be pointing to the old values
+        // we saw in the peeled loop header.
+        if (curr->stack_pointer != from->stack_pointer) {
+            return false;
+        }
+        if (curr->stack != from->stack) {
+            return false;
+        }
+        if (curr->locals != from->locals) {
+            return false;
+        }
+    }
+    _Py_UOpsAbstractFrame *ctx_curr_frame = &ctx->frames[ctx->curr_frame_depth - 1];
+    _Py_UOpsAbstractFrame *unroll_curr_frame = &unroll->frames[unroll->curr_frame_depth - 1];
+    int ctx_n_locals_consumed = (int)(ctx->n_consumed - ctx->locals_and_stack);
+    int unroll_n_locals_consumed = unroll->n_consumed;
+    if (ctx_n_locals_consumed != unroll_n_locals_consumed) {
+        return false;
+    }
+    // For all locals and stack values, check they do not contradict
+    for (int i = 0; i < ctx_n_locals_consumed; i++) {
+        if (!sym_is_more_general(ctx, unroll->locals_and_stack[i], ctx->locals_and_stack[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 #define TEST_PREDICATE(PRED, MSG) \
 do { \
