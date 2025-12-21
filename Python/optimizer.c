@@ -949,8 +949,10 @@ _PyJit_translate_single_bytecode_to_trace(
                             _Py_BloomFilter_Add(dependencies, new_code);
                         }
                     }
-                    ADD_TO_TRACE(uop, oparg, operand, target);
-                    trace[trace_length - 1].operand1 = PyStackRef_IsNone(frame->f_executable) ? 2 : ((int)(frame->stackpointer - _PyFrame_Stackbase(frame)));
+                    ADD_TO_TRACE(uop, 0, operand, target);
+                    trace[trace_length - 1].operand1 = (uintptr_t)old_code & 1;
+                    trace[trace_length - 1].jump_target = PyStackRef_IsNone(frame->f_executable) ? 2 : ((int)(frame->stackpointer - _PyFrame_Stackbase(frame)));
+                    trace[trace_length - 1].error_target = old_stack_level;
                     break;
                 }
                 if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
@@ -982,7 +984,8 @@ _PyJit_translate_single_bytecode_to_trace(
         if (needs_guard_ip) {
             ADD_TO_TRACE(_SET_IP, 0, (uintptr_t)next_instr, 0);
         }
-        ADD_TO_TRACE(_JUMP_TO_TOP, 0, 0, 0);
+        int stack_level = ((int)(frame->stackpointer - _PyFrame_Stackbase(frame)));
+        ADD_TO_TRACE(_JUMP_TO_TOP, 0, stack_level, 0);
         goto done;
     }
     DPRINTF(2, "Trace continuing\n");

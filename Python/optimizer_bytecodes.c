@@ -837,7 +837,7 @@ dummy_func(void) {
             ctx->done = true;
             break;
         }
-        int returning_stacklevel = this_instr->operand1;
+        int returning_stacklevel = this_instr->jump_target;
         if (ctx->curr_frame_depth >= 2) {
             PyCodeObject *expected_code = ctx->frames[ctx->curr_frame_depth - 2].code;
             if (expected_code == returning_code) {
@@ -863,7 +863,7 @@ dummy_func(void) {
             break;
         }
         _Py_BloomFilter_Add(dependencies, returning_code);
-        int returning_stacklevel = this_instr->operand1;
+        int returning_stacklevel = this_instr->jump_target;
         if (frame_pop(ctx, returning_code, returning_stacklevel)) {
             break;
         }
@@ -883,7 +883,7 @@ dummy_func(void) {
             break;
         }
         _Py_BloomFilter_Add(dependencies, returning_code);
-        int returning_stacklevel = this_instr->operand1;
+        int returning_stacklevel = this_instr->jump_target;
         if (frame_pop(ctx, returning_code, returning_stacklevel)) {
             break;
         }

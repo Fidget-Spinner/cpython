@@ -547,10 +547,10 @@ class Storage:
             out.emit_reload()
 
     @staticmethod
-    def for_uop(stack: Stack, uop: Uop, out: CWriter, check_liveness: bool = True) -> "Storage":
+    def _for_uop_inputs_outputs(stack: Stack, stack_inputs: list[StackItem], stack_outputs: list[StackItem], out: CWriter, check_liveness: bool):
         inputs: list[Local] = []
         peeks: list[Local] = []
-        for input in reversed(uop.stack.inputs):
+        for input in reversed(stack_inputs):
             local = stack.pop(input, out)
             if input.peek:
                 peeks.append(local)
@@ -558,15 +558,22 @@ class Storage:
         inputs.reverse()
         peeks.reverse()
         offset = stack.logical_sp - stack.physical_sp
-        for ouput in uop.stack.outputs:
+        for ouput in stack_outputs:
             if ouput.is_array() and ouput.used and not ouput.peek:
                 c_offset = offset.to_c()
                 out.emit(f"{ouput.name} = &stack_pointer[{c_offset}];\n")
             offset = offset.push(ouput)
         for var in inputs:
             stack.push(var)
-        outputs = peeks + [ Local.undefined(var) for var in uop.stack.outputs if not var.peek ]
+        outputs = peeks + [ Local.undefined(var) for var in stack_outputs if not var.peek ]
         return Storage(stack, inputs, outputs, len(peeks), check_liveness)
+    @staticmethod
+    def for_uop(stack: Stack, uop: Uop, out: CWriter, check_liveness: bool = True) -> "Storage":
+        return Storage._for_uop_inputs_outputs(stack, uop.stack.inputs, uop.stack.outputs, out, check_liveness)
+
+    @staticmethod
+    def for_uop_backwards(stack: Stack, uop: Uop, out: CWriter, check_liveness: bool = True) -> "Storage":
+        return Storage._for_uop_inputs_outputs(stack, uop.stack.outputs, uop.stack.inputs, out, check_liveness)
 
     @staticmethod
     def copy_list(arg: list[Local]) -> list[Local]:

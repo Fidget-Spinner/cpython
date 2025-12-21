@@ -261,10 +261,9 @@ lookup_attr(JitOptContext *ctx, _PyBloomFilter *dependencies, _PyUOpInstruction 
 }
 
 static PyCodeObject *
-get_code_with_logging(_PyUOpInstruction *op)
+get_code_from_operand(uint64_t push_operand)
 {
     PyCodeObject *co = NULL;
-    uint64_t push_operand = op->operand0;
     if (push_operand & 1) {
         co = (PyCodeObject *)(push_operand & ~1);
         DPRINTF(3, "code=%p ", co);
@@ -282,6 +281,18 @@ get_code_with_logging(_PyUOpInstruction *op)
         DPRINTF(3, "code=%p ", co);
     }
     return co;
+}
+
+static PyCodeObject *
+get_code_with_logging(_PyUOpInstruction *op)
+{
+    return get_code_from_operand(op->operand0);
+}
+
+static PyCodeObject *
+get_code_with_logging_backwards(_PyUOpInstruction *op)
+{
+    return get_code_from_operand(op->operand1);
 }
 
 static
@@ -395,6 +406,106 @@ optimize_uops(
             ctx->frame->stack_pointer = stack_pointer;
             assert(STACK_LEVEL() >= 0);
         }
+    }
+    if (ctx->out_of_space) {
+        DPRINTF(3, "\n");
+        DPRINTF(1, "Out of space in abstract interpreter\n");
+    }
+    if (ctx->contradiction) {
+        // Attempted to push a "bottom" (contradiction) symbol onto the stack.
+        // This means that the abstract interpreter has optimized to trace
+        // to an unreachable estate.
+        // We *could* generate an _EXIT_TRACE or _FATAL_ERROR here, but hitting
+        // bottom usually indicates an optimizer bug, so we are probably better off
+        // retrying later.
+        DPRINTF(3, "\n");
+        DPRINTF(1, "Hit bottom in abstract interpreter\n");
+        _Py_uop_abstractcontext_fini(ctx);
+        OPT_STAT_INC(optimizer_contradiction);
+        return 0;
+    }
+
+    /* Either reached the end or cannot optimize further, but there
+     * would be no benefit in retrying later */
+    _Py_uop_abstractcontext_fini(ctx);
+    return trace_len;
+
+error:
+    DPRINTF(3, "\n");
+    DPRINTF(1, "Encountered error in abstract interpreter\n");
+    if (opcode <= MAX_UOP_ID) {
+        OPT_ERROR_IN_OPCODE(opcode);
+    }
+    _Py_uop_abstractcontext_fini(ctx);
+
+    assert(PyErr_Occurred());
+    PyErr_Clear();
+
+    return 0;
+
+}
+
+
+/* >0 (length) for success, 0 for not ready, clears all possible errors. */
+static int
+optimize_backwards_uops(
+    PyFunctionObject *func,
+    _PyUOpInstruction *trace,
+    int trace_len
+)
+{
+    // For now, the backward pass is only worth it for complete loops.
+    // This can be revisited later when we have inter-trace optimization
+    // state.
+    if (trace[trace_len-1].opcode != _JUMP_TO_TOP) {
+        return trace_len;
+    }
+    assert(!PyErr_Occurred());
+    assert(trace[trace_len-1].opcode == _JUMP_TO_TOP);
+
+    JitOptContext context;
+    JitOptContext *ctx = &context;
+    uint32_t opcode = UINT16_MAX;
+
+    _Py_uop_abstractcontext_init(ctx);
+    _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, (PyCodeObject *)func->func_code,
+        trace[trace_len-1].operand0, NULL, 0);
+    if (frame == NULL) {
+        return 0;
+    }
+    ctx->curr_frame_depth++;
+    ctx->frame = frame;
+
+    _PyUOpInstruction *this_instr = NULL;
+    JitOptRef *stack_pointer = ctx->frame->stack_pointer;
+    // -2 to skip the terminator.
+    for (int i = trace_len - 2; i >= 0 && !ctx->done; i--) {
+        assert(i < trace_len);
+        this_instr = &trace[i];
+
+        int oparg = this_instr->oparg;
+        opcode = this_instr->opcode;
+
+#ifdef Py_DEBUG
+        if (get_lltrace() >= 3) {
+            printf("%4d backward abs: ", (int)(this_instr - trace));
+            _PyUOpPrint(this_instr);
+            printf(" ");
+        }
+#endif
+
+        switch (opcode) {
+
+#include "optimizer_backwards_cases.c.h"
+
+            default:
+                DPRINTF(1, "\nUnknown opcode in abstract interpreter\n");
+                Py_UNREACHABLE();
+        }
+        assert(ctx->frame != NULL);
+        DPRINTF(3, " stack_level %d\n", STACK_LEVEL());
+        ctx->frame->stack_pointer = stack_pointer;
+        assert(STACK_LEVEL() >= 0);
     }
     if (ctx->out_of_space) {
         DPRINTF(3, "\n");
@@ -579,6 +690,16 @@ _Py_uop_analyze_and_optimize(
 
     if (length == 0) {
         return length;
+    }
+
+    int res = optimize_backwards_uops(func, buffer, length);
+
+    // We don't care if the backwards pass fails.
+    // Just running the forward pass is enough to get
+    // a fast trace.
+    // The backwards pass is just additional optimizations.
+    if (res > 0) {
+        length = res;
     }
 
     assert(length > 0);

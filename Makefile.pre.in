@@ -2196,6 +2196,15 @@ regen-optimizer-cases:
 	    $(srcdir)/Python/bytecodes.c
 	$(UPDATE_FILE) $(srcdir)/Python/optimizer_cases.c.h $(srcdir)/Python/optimizer_cases.c.h.new
 
+.PHONY: regen-optimizer-backwards-cases
+regen-optimizer-cases:
+	$(PYTHON_FOR_REGEN) $(srcdir)/Tools/cases_generator/optimizer_backwards_generator.py \
+	    -o $(srcdir)/Python/optimizer_backwards_cases.c.h.new \
+	    $(srcdir)/Python/optimizer_backwards_bytecodes.c \
+	    $(srcdir)/Python/bytecodes.c
+	$(UPDATE_FILE) $(srcdir)/Python/optimizer_backwards_cases.c.h $(srcdir)/Python/optimizer_backwards_cases.c.h.new
+
+
 .PHONY: regen-opcode-metadata
 regen-opcode-metadata:
 	$(PYTHON_FOR_REGEN) $(srcdir)/Tools/cases_generator/opcode_metadata_generator.py \
