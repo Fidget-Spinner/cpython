@@ -1846,6 +1846,10 @@ tstate_delete_common(PyThreadState *tstate, int release_gil)
         _PyObject_VirtualFree(_tstate->jit_tracer_state.code_buffer, UOP_BUFFER_SIZE);
         _tstate->jit_tracer_state.code_buffer = NULL;
     }
+    if (_tstate->jit_tracer_state.opt_code_buffer != NULL) {
+        _PyObject_VirtualFree(_tstate->jit_tracer_state.opt_code_buffer, UOP_BUFFER_SIZE);
+        _tstate->jit_tracer_state.opt_code_buffer = NULL;
+    }
 #endif
 
     HEAD_UNLOCK(runtime);

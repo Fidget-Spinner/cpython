@@ -4,16 +4,19 @@
 // Do not edit!
 
         case _NOP: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_PERIODIC: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         /* _CHECK_PERIODIC_AT_END is not a viable micro-op for tier 2 */
 
         case _CHECK_PERIODIC_IF_NOT_YIELD_FROM: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -22,6 +25,7 @@
         /* _LOAD_BYTECODE is not a viable micro-op for tier 2 */
 
         case _RESUME_CHECK: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -30,6 +34,7 @@
         case _LOAD_FAST_CHECK: {
             JitOptRef value;
             value = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             if (sym_is_null(value)) {
                 ctx->done = true;
             }
@@ -43,6 +48,7 @@
         case _LOAD_FAST: {
             JitOptRef value;
             value = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             GETLOCAL(oparg) = value;
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
@@ -53,6 +59,7 @@
         case _LOAD_FAST_BORROW: {
             JitOptRef value;
             value = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             GETLOCAL(oparg) = value;
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
@@ -63,6 +70,7 @@
         case _LOAD_FAST_AND_CLEAR: {
             JitOptRef value;
             value = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             GETLOCAL(oparg) = value;
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
@@ -71,6 +79,7 @@
         }
 
         case _LOAD_CONST: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -78,6 +87,7 @@
         }
 
         case _LOAD_SMALL_INT: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -86,6 +96,7 @@
 
         case _STORE_FAST: {
             JitOptRef value;
+            EMIT_OP_FROM_INST(this_instr);
             value = GETLOCAL(oparg);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
@@ -97,6 +108,7 @@
         case _POP_TOP: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -107,6 +119,7 @@
         case _POP_TOP_NOP: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -117,6 +130,7 @@
         case _POP_TOP_INT: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -127,6 +141,7 @@
         case _POP_TOP_FLOAT: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -137,6 +152,7 @@
         case _POP_TOP_UNICODE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -149,6 +165,7 @@
             JitOptRef tos;
             nos = sym_new_not_null(ctx);
             tos = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = nos;
             stack_pointer[1] = tos;
@@ -158,6 +175,7 @@
         }
 
         case _PUSH_NULL: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -167,6 +185,7 @@
         case _END_FOR: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = value;
             stack_pointer += 1;
@@ -179,6 +198,7 @@
             JitOptRef index_or_null;
             iter = sym_new_not_null(ctx);
             index_or_null = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = iter;
             stack_pointer[1] = index_or_null;
@@ -192,6 +212,7 @@
             JitOptRef value;
             receiver = sym_new_not_null(ctx);
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = receiver;
             stack_pointer[0] = value;
@@ -203,6 +224,7 @@
         case _UNARY_NEGATIVE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -210,6 +232,7 @@
         case _UNARY_NOT: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -217,36 +240,43 @@
         case _TO_BOOL: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
 
         case _TO_BOOL_BOOL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _TO_BOOL_INT: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
 
         case _GUARD_NOS_LIST: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_LIST: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_SLICE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _TO_BOOL_LIST: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -254,21 +284,25 @@
         case _TO_BOOL_NONE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
 
         case _GUARD_NOS_UNICODE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_UNICODE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _TO_BOOL_STR: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -276,6 +310,7 @@
         case _REPLACE_WITH_TRUE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -283,23 +318,28 @@
         case _UNARY_INVERT: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
 
         case _GUARD_NOS_INT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_INT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_NOS_OVERFLOWED: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_OVERFLOWED: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -308,6 +348,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -321,6 +362,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -334,6 +376,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -343,10 +386,12 @@
         }
 
         case _GUARD_NOS_FLOAT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_FLOAT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -355,6 +400,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -368,6 +414,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -381,6 +428,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -394,6 +442,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -407,6 +456,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = left;
             stack_pointer[1] = right;
@@ -416,6 +466,7 @@
         }
 
         case _GUARD_BINARY_OP_EXTEND: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -424,6 +475,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -439,6 +491,7 @@
             container = sym_new_not_null(ctx);
             start = sym_new_not_null(ctx);
             stop = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = container;
             stack_pointer[0] = start;
@@ -457,6 +510,7 @@
             container = sym_new_not_null(ctx);
             start = sym_new_not_null(ctx);
             stop = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(4);
             stack_pointer[0] = v;
             stack_pointer[1] = container;
@@ -472,6 +526,7 @@
             JitOptRef sub_st;
             list_st = sym_new_not_null(ctx);
             sub_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = list_st;
             stack_pointer[-2] = sub_st;
@@ -485,6 +540,7 @@
             JitOptRef sub_st;
             list_st = sym_new_not_null(ctx);
             sub_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = list_st;
             stack_pointer[0] = sub_st;
@@ -498,6 +554,7 @@
             JitOptRef sub_st;
             str_st = sym_new_not_null(ctx);
             sub_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = str_st;
             stack_pointer[-2] = sub_st;
@@ -507,10 +564,12 @@
         }
 
         case _GUARD_NOS_TUPLE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_TUPLE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -519,6 +578,7 @@
             JitOptRef sub_st;
             tuple_st = sym_new_not_null(ctx);
             sub_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = tuple_st;
             stack_pointer[0] = sub_st;
@@ -528,10 +588,12 @@
         }
 
         case _GUARD_NOS_DICT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TOS_DICT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -540,6 +602,7 @@
             JitOptRef sub_st;
             dict_st = sym_new_not_null(ctx);
             sub_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = dict_st;
             stack_pointer[0] = sub_st;
@@ -549,6 +612,7 @@
         }
 
         case _BINARY_OP_SUBSCR_CHECK_FUNC: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -562,6 +626,7 @@
             container = sym_new_not_null(ctx);
             sub = sym_new_not_null(ctx);
             getitem = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = container;
             stack_pointer[0] = sub;
@@ -574,6 +639,7 @@
         case _LIST_APPEND: {
             JitOptRef v;
             v = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = v;
             stack_pointer += 1;
@@ -584,6 +650,7 @@
         case _SET_ADD: {
             JitOptRef v;
             v = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = v;
             stack_pointer += 1;
@@ -598,6 +665,7 @@
             v = sym_new_not_null(ctx);
             container = sym_new_not_null(ctx);
             sub = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(3);
             stack_pointer[0] = v;
             stack_pointer[1] = container;
@@ -614,6 +682,7 @@
             value = sym_new_not_null(ctx);
             list_st = sym_new_not_null(ctx);
             sub_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = value;
             stack_pointer[-1] = list_st;
@@ -630,6 +699,7 @@
             value = sym_new_not_null(ctx);
             dict_st = sym_new_not_null(ctx);
             sub = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = value;
             stack_pointer[0] = dict_st;
@@ -644,6 +714,7 @@
             JitOptRef sub;
             container = sym_new_not_null(ctx);
             sub = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = container;
             stack_pointer[1] = sub;
@@ -655,6 +726,7 @@
         case _CALL_INTRINSIC_1: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -664,6 +736,7 @@
             JitOptRef value1_st;
             value2_st = sym_new_not_null(ctx);
             value1_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = value2_st;
             stack_pointer[0] = value1_st;
@@ -676,6 +749,7 @@
             JitOptRef res;
             JitOptRef retval;
             res = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             JitOptRef temp = PyJitRef_StripReferenceInfo(res);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
@@ -704,11 +778,13 @@
         case _GET_AITER: {
             JitOptRef obj;
             obj = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = obj;
             break;
         }
 
         case _GET_ANEXT: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -718,6 +794,7 @@
         case _GET_AWAITABLE: {
             JitOptRef iterable;
             iterable = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = iterable;
             break;
         }
@@ -727,6 +804,7 @@
         case _SEND_GEN_FRAME: {
             JitOptRef gen_frame;
             gen_frame = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             gen_frame = PyJitRef_NULL;
             ctx->done = true;
             break;
@@ -736,6 +814,7 @@
             JitOptRef value;
             JitOptRef retval;
             value = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             retval = value;
             ctx->done = true;
             stack_pointer[-1] = retval;
@@ -745,6 +824,7 @@
         case _POP_EXCEPT: {
             JitOptRef exc_value;
             exc_value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = exc_value;
             stack_pointer += 1;
@@ -753,6 +833,7 @@
         }
 
         case _LOAD_COMMON_CONSTANT: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -760,6 +841,7 @@
         }
 
         case _LOAD_BUILD_CLASS: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -769,6 +851,7 @@
         case _STORE_NAME: {
             JitOptRef v;
             v = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = v;
             stack_pointer += 1;
@@ -777,12 +860,14 @@
         }
 
         case _DELETE_NAME: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _UNPACK_SEQUENCE: {
             JitOptRef seq;
             seq = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 - oparg);
             stack_pointer[-oparg] = seq;
             stack_pointer += 1 - oparg;
@@ -793,6 +878,7 @@
         case _UNPACK_SEQUENCE_TWO_TUPLE: {
             JitOptRef seq;
             seq = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = seq;
             stack_pointer += -1;
@@ -803,6 +889,7 @@
         case _UNPACK_SEQUENCE_TUPLE: {
             JitOptRef seq;
             seq = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 - oparg);
             stack_pointer[-oparg] = seq;
             stack_pointer += 1 - oparg;
@@ -813,6 +900,7 @@
         case _UNPACK_SEQUENCE_LIST: {
             JitOptRef seq;
             seq = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 - oparg);
             stack_pointer[-oparg] = seq;
             stack_pointer += 1 - oparg;
@@ -823,6 +911,7 @@
         case _UNPACK_EX: {
             JitOptRef seq;
             seq = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-(oparg & 0xFF) - (oparg >> 8));
             stack_pointer[-1 - (oparg & 0xFF) - (oparg >> 8)] = seq;
             stack_pointer += -(oparg & 0xFF) - (oparg >> 8);
@@ -835,6 +924,7 @@
             JitOptRef owner;
             v = sym_new_not_null(ctx);
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = v;
             stack_pointer[1] = owner;
@@ -846,6 +936,7 @@
         case _DELETE_ATTR: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = owner;
             stack_pointer += 1;
@@ -856,6 +947,7 @@
         case _STORE_GLOBAL: {
             JitOptRef v;
             v = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = v;
             stack_pointer += 1;
@@ -864,10 +956,12 @@
         }
 
         case _DELETE_GLOBAL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_LOCALS: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -877,6 +971,7 @@
         /* _LOAD_FROM_DICT_OR_GLOBALS is not a viable micro-op for tier 2 */
 
         case _LOAD_NAME: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -884,6 +979,7 @@
         }
 
         case _LOAD_GLOBAL: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -891,6 +987,7 @@
         }
 
         case _PUSH_NULL_CONDITIONAL: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-(oparg & 1));
             stack_pointer += -(oparg & 1);
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -898,10 +995,12 @@
         }
 
         case _GUARD_GLOBALS_VERSION: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_GLOBAL_MODULE: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -909,6 +1008,7 @@
         }
 
         case _LOAD_GLOBAL_BUILTINS: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -916,25 +1016,30 @@
         }
 
         case _DELETE_FAST: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _MAKE_CELL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _DELETE_DEREF: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_FROM_DICT_OR_DEREF: {
             JitOptRef class_dict_st;
             class_dict_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = class_dict_st;
             break;
         }
 
         case _LOAD_DEREF: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -944,6 +1049,7 @@
         case _STORE_DEREF: {
             JitOptRef v;
             v = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = v;
             stack_pointer += 1;
@@ -952,6 +1058,7 @@
         }
 
         case _COPY_FREE_VARS: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -961,6 +1068,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 pieces[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer += -1 + oparg;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -977,6 +1085,7 @@
             for (int _i = oparg & 1; --_i >= 0;) {
                 format[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + (oparg & 1));
             stack_pointer[-1] = value;
             stack_pointer[0] = str;
@@ -990,6 +1099,7 @@
             JitOptRef interpolations;
             strings = sym_new_not_null(ctx);
             interpolations = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = strings;
             stack_pointer[0] = interpolations;
@@ -1004,6 +1114,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 values[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer += -1 + oparg;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1016,6 +1127,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 values[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer += -1 + oparg;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1025,6 +1137,7 @@
         case _LIST_EXTEND: {
             JitOptRef iterable_st;
             iterable_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = iterable_st;
             stack_pointer += 1;
@@ -1035,6 +1148,7 @@
         case _SET_UPDATE: {
             JitOptRef iterable;
             iterable = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = iterable;
             stack_pointer += 1;
@@ -1048,6 +1162,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 values[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer += -1 + oparg;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1060,6 +1175,7 @@
             for (int _i = oparg*2; --_i >= 0;) {
                 values[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg*2);
             stack_pointer += -1 + oparg*2;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1067,12 +1183,14 @@
         }
 
         case _SETUP_ANNOTATIONS: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _DICT_UPDATE: {
             JitOptRef update;
             update = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = update;
             stack_pointer += 1;
@@ -1083,6 +1201,7 @@
         case _DICT_MERGE: {
             JitOptRef update;
             update = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = update;
             stack_pointer += 1;
@@ -1095,6 +1214,7 @@
             JitOptRef value;
             key = sym_new_not_null(ctx);
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = key;
             stack_pointer[1] = value;
@@ -1110,6 +1230,7 @@
             global_super_st = sym_new_not_null(ctx);
             class_st = sym_new_not_null(ctx);
             self_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = global_super_st;
             stack_pointer[0] = class_st;
@@ -1126,6 +1247,7 @@
             global_super_st = sym_new_not_null(ctx);
             class_st = sym_new_not_null(ctx);
             self_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = global_super_st;
             stack_pointer[-1] = class_st;
@@ -1138,6 +1260,7 @@
         case _LOAD_ATTR: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-(oparg&1));
             stack_pointer[-1 - (oparg&1)] = owner;
             stack_pointer += -(oparg&1);
@@ -1146,20 +1269,24 @@
         }
 
         case _GUARD_TYPE_VERSION: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_TYPE_VERSION_AND_LOCK: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_MANAGED_OBJECT_HAS_VALUES: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_ATTR_INSTANCE_VALUE: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = owner;
             stack_pointer += -1;
@@ -1170,6 +1297,7 @@
         case _LOAD_ATTR_MODULE: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
@@ -1177,6 +1305,7 @@
         case _LOAD_ATTR_WITH_HINT: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
@@ -1184,17 +1313,20 @@
         case _LOAD_ATTR_SLOT: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
 
         case _CHECK_ATTR_CLASS: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_ATTR_CLASS: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
@@ -1202,6 +1334,7 @@
         case _LOAD_ATTR_PROPERTY_FRAME: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
@@ -1209,6 +1342,7 @@
         /* _LOAD_ATTR_GETATTRIBUTE_OVERRIDDEN is not a viable micro-op for tier 2 */
 
         case _GUARD_DORV_NO_DICT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1217,6 +1351,7 @@
             JitOptRef owner;
             value = sym_new_not_null(ctx);
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = value;
             stack_pointer[0] = owner;
@@ -1230,6 +1365,7 @@
             JitOptRef owner;
             value = sym_new_not_null(ctx);
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = value;
             stack_pointer[0] = owner;
@@ -1243,6 +1379,7 @@
             JitOptRef owner;
             value = sym_new_not_null(ctx);
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = value;
             stack_pointer[0] = owner;
@@ -1256,6 +1393,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1269,6 +1407,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1282,6 +1421,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-3] = left;
             stack_pointer[-2] = right;
@@ -1295,6 +1435,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1308,6 +1449,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1321,6 +1463,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1330,6 +1473,7 @@
         }
 
         case _GUARD_TOS_ANY_SET: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1338,6 +1482,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1351,6 +1496,7 @@
             JitOptRef right;
             left = sym_new_not_null(ctx);
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = left;
             stack_pointer[0] = right;
@@ -1364,6 +1510,7 @@
             JitOptRef match_type_st;
             exc_value_st = sym_new_not_null(ctx);
             match_type_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-2] = exc_value_st;
             stack_pointer[-1] = match_type_st;
             break;
@@ -1372,6 +1519,7 @@
         case _CHECK_EXC_MATCH: {
             JitOptRef right;
             right = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = right;
             break;
         }
@@ -1381,6 +1529,7 @@
             JitOptRef fromlist;
             level = sym_new_not_null(ctx);
             fromlist = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = level;
             stack_pointer[0] = fromlist;
@@ -1390,6 +1539,7 @@
         }
 
         case _IMPORT_FROM: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1403,6 +1553,7 @@
         case _IS_NONE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -1410,6 +1561,7 @@
         /* _JUMP_BACKWARD_NO_INTERRUPT is not a viable micro-op for tier 2 */
 
         case _GET_LEN: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1423,6 +1575,7 @@
             subject = sym_new_not_null(ctx);
             type = sym_new_not_null(ctx);
             names = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = subject;
             stack_pointer[0] = type;
@@ -1433,6 +1586,7 @@
         }
 
         case _MATCH_MAPPING: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1440,6 +1594,7 @@
         }
 
         case _MATCH_SEQUENCE: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1447,6 +1602,7 @@
         }
 
         case _MATCH_KEYS: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1456,6 +1612,7 @@
         case _GET_ITER: {
             JitOptRef iterable;
             iterable = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = iterable;
             stack_pointer += -1;
@@ -1466,6 +1623,7 @@
         case _GET_YIELD_FROM_ITER: {
             JitOptRef iterable;
             iterable = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = iterable;
             break;
         }
@@ -1473,6 +1631,7 @@
         /* _FOR_ITER is not a viable micro-op for tier 2 */
 
         case _FOR_ITER_TIER_TWO: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1482,18 +1641,21 @@
         /* _INSTRUMENTED_FOR_ITER is not a viable micro-op for tier 2 */
 
         case _ITER_CHECK_LIST: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         /* _ITER_JUMP_LIST is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_LIST: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         /* _ITER_NEXT_LIST is not a viable micro-op for tier 2 */
 
         case _ITER_NEXT_LIST_TIER_TWO: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1501,16 +1663,19 @@
         }
 
         case _ITER_CHECK_TUPLE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         /* _ITER_JUMP_TUPLE is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_TUPLE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _ITER_NEXT_TUPLE: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1518,16 +1683,19 @@
         }
 
         case _ITER_CHECK_RANGE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         /* _ITER_JUMP_RANGE is not a viable micro-op for tier 2 */
 
         case _GUARD_NOT_EXHAUSTED_RANGE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _ITER_NEXT_RANGE: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1537,6 +1705,7 @@
         case _FOR_ITER_GEN_FRAME: {
             JitOptRef gen_frame;
             gen_frame = stack_pointer[-1];
+            EMIT_OP_FROM_INST(this_instr);
             gen_frame = PyJitRef_NULL;
             ctx->done = true;
             CHECK_STACK_BOUNDS(-1);
@@ -1548,6 +1717,7 @@
         case _INSERT_NULL: {
             JitOptRef self;
             self = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = self;
             stack_pointer += -1;
@@ -1556,10 +1726,12 @@
         }
 
         case _LOAD_SPECIAL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _WITH_EXCEPT_START: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -1569,6 +1741,7 @@
         case _PUSH_EXC_INFO: {
             JitOptRef exc;
             exc = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = exc;
             stack_pointer += -1;
@@ -1577,16 +1750,19 @@
         }
 
         case _GUARD_DORV_VALUES_INST_ATTR_FROM_DICT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_KEYS_VERSION: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_ATTR_METHOD_WITH_VALUES: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = owner;
             stack_pointer += -1;
@@ -1597,6 +1773,7 @@
         case _LOAD_ATTR_METHOD_NO_DICT: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = owner;
             stack_pointer += -1;
@@ -1607,6 +1784,7 @@
         case _LOAD_ATTR_NONDESCRIPTOR_WITH_VALUES: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
@@ -1614,17 +1792,20 @@
         case _LOAD_ATTR_NONDESCRIPTOR_NO_DICT: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = owner;
             break;
         }
 
         case _CHECK_ATTR_METHOD_LAZY_DICT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_ATTR_METHOD_LAZY_DICT: {
             JitOptRef owner;
             owner = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = owner;
             stack_pointer += -1;
@@ -1633,6 +1814,7 @@
         }
 
         case _MAYBE_EXPAND_METHOD: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1650,6 +1832,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -1659,22 +1842,27 @@
         }
 
         case _CHECK_FUNCTION_VERSION: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_FUNCTION_VERSION_INLINE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_METHOD_VERSION: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _EXPAND_METHOD: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1688,6 +1876,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -1697,26 +1886,32 @@
         }
 
         case _CHECK_CALL_BOUND_METHOD_EXACT_ARGS: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _INIT_CALL_BOUND_METHOD_EXACT_ARGS: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_PEP_523: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_FUNCTION_EXACT_ARGS: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_STACK_SPACE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_RECURSION_REMAINING: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1730,6 +1925,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -1740,6 +1936,7 @@
 
         case _PUSH_FRAME: {
             JitOptRef new_frame;
+            EMIT_OP_FROM_INST(this_instr);
             int returning_stacklevel = this_instr->error_target;
             PyCodeObject *returning_code = get_code_with_logging_backwards(this_instr);
             if (returning_code == NULL) {
@@ -1759,18 +1956,22 @@
         }
 
         case _GUARD_NOS_NULL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_NOS_NOT_NULL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_THIRD_NULL: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_CALLABLE_TYPE_1: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1781,6 +1982,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             arg = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = callable;
             stack_pointer[0] = null;
@@ -1791,6 +1993,7 @@
         }
 
         case _GUARD_CALLABLE_STR_1: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1801,6 +2004,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             arg = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = callable;
             stack_pointer[-1] = null;
@@ -1811,6 +2015,7 @@
         }
 
         case _GUARD_CALLABLE_TUPLE_1: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1821,6 +2026,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             arg = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = callable;
             stack_pointer[-1] = null;
@@ -1831,6 +2037,7 @@
         }
 
         case _CHECK_AND_ALLOCATE_OBJECT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1839,6 +2046,7 @@
             JitOptRef self;
             JitOptRef *args;
             args = &stack_pointer[1];
+            EMIT_OP_FROM_INST(this_instr);
             ctx->done = true;
             init = sym_new_unknown(ctx);
             self = sym_new_unknown(ctx);
@@ -1856,6 +2064,7 @@
         case _EXIT_INIT_CHECK: {
             JitOptRef should_be_none;
             should_be_none = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = should_be_none;
             stack_pointer += 1;
@@ -1873,6 +2082,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -1891,6 +2101,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer[-3] = callable;
             stack_pointer[-2] = self_or_null;
@@ -1909,6 +2120,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -1927,6 +2139,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -1936,6 +2149,7 @@
         }
 
         case _GUARD_CALLABLE_LEN: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1946,6 +2160,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             arg = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-3] = callable;
             stack_pointer[-2] = null;
             stack_pointer[-1] = arg;
@@ -1953,6 +2168,7 @@
         }
 
         case _GUARD_CALLABLE_ISINSTANCE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1965,6 +2181,7 @@
             null = sym_new_null(ctx);
             instance = sym_new_not_null(ctx);
             cls = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(3);
             stack_pointer[-1] = callable;
             stack_pointer[0] = null;
@@ -1976,6 +2193,7 @@
         }
 
         case _GUARD_CALLABLE_LIST_APPEND: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -1986,6 +2204,7 @@
             callable = sym_new_not_null(ctx);
             self = sym_new_not_null(ctx);
             arg = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = callable;
             stack_pointer[-1] = self;
@@ -2005,6 +2224,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -2023,6 +2243,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -2041,6 +2262,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -2059,6 +2281,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -2070,6 +2293,7 @@
         /* _MONITOR_CALL_KW is not a viable micro-op for tier 2 */
 
         case _MAYBE_EXPAND_METHOD_KW: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -2087,6 +2311,7 @@
                 args[_i] = sym_new_not_null(ctx);
             }
             kwnames = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -2097,18 +2322,22 @@
         }
 
         case _CHECK_FUNCTION_VERSION_KW: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_METHOD_VERSION_KW: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _EXPAND_METHOD_KW: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_IS_NOT_PY_CALLABLE_KW: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -2124,6 +2353,7 @@
                 args[_i] = sym_new_not_null(ctx);
             }
             kwnames = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2 + oparg);
             stack_pointer[-1] = callable;
             stack_pointer[0] = self_or_null;
@@ -2134,6 +2364,7 @@
         }
 
         case _MAKE_CALLARGS_A_TUPLE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -2142,6 +2373,7 @@
         case _MAKE_FUNCTION: {
             JitOptRef codeobj_st;
             codeobj_st = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = codeobj_st;
             break;
         }
@@ -2151,6 +2383,7 @@
             JitOptRef func_in;
             attr_st = sym_new_not_null(ctx);
             func_in = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = attr_st;
             stack_pointer[0] = func_in;
@@ -2160,6 +2393,7 @@
         }
 
         case _RETURN_GENERATOR: {
+            EMIT_OP_FROM_INST(this_instr);
             ctx->done = true;
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
@@ -2173,6 +2407,7 @@
             for (int _i = oparg; --_i >= 0;) {
                 args[_i] = sym_new_not_null(ctx);
             }
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer += -1 + oparg;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -2182,6 +2417,7 @@
         case _CONVERT_VALUE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -2189,6 +2425,7 @@
         case _FORMAT_SIMPLE: {
             JitOptRef value;
             value = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = value;
             break;
         }
@@ -2198,6 +2435,7 @@
             JitOptRef fmt_spec;
             value = sym_new_not_null(ctx);
             fmt_spec = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = value;
             stack_pointer[0] = fmt_spec;
@@ -2207,6 +2445,7 @@
         }
 
         case _COPY: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -2218,6 +2457,7 @@
             JitOptRef rhs;
             lhs = sym_new_not_null(ctx);
             rhs = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = lhs;
             stack_pointer[0] = rhs;
@@ -2227,6 +2467,7 @@
         }
 
         case _SWAP: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
@@ -2251,6 +2492,7 @@
         case _GUARD_IS_TRUE_POP: {
             JitOptRef flag;
             flag = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = flag;
             stack_pointer += 1;
@@ -2261,6 +2503,7 @@
         case _GUARD_IS_FALSE_POP: {
             JitOptRef flag;
             flag = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = flag;
             stack_pointer += 1;
@@ -2271,6 +2514,7 @@
         case _GUARD_IS_NONE_POP: {
             JitOptRef val;
             val = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = val;
             stack_pointer += 1;
@@ -2281,6 +2525,7 @@
         case _GUARD_IS_NOT_NONE_POP: {
             JitOptRef val;
             val = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[0] = val;
             stack_pointer += 1;
@@ -2289,34 +2534,42 @@
         }
 
         case _JUMP_TO_TOP: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _SET_IP: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_STACK_SPACE_OPERAND: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _SAVE_RETURN_OFFSET: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _EXIT_TRACE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _DYNAMIC_EXIT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _CHECK_VALIDITY: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _LOAD_CONST_INLINE: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -2326,11 +2579,13 @@
         case _POP_TOP_LOAD_CONST_INLINE: {
             JitOptRef pop;
             pop = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = pop;
             break;
         }
 
         case _LOAD_CONST_INLINE_BORROW: {
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -2342,6 +2597,7 @@
             JitOptRef null;
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[0] = callable;
             stack_pointer[1] = null;
@@ -2357,6 +2613,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             pop = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(3);
             stack_pointer[0] = callable;
             stack_pointer[1] = null;
@@ -2375,6 +2632,7 @@
             null = sym_new_null(ctx);
             pop1 = sym_new_not_null(ctx);
             pop2 = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(4);
             stack_pointer[0] = callable;
             stack_pointer[1] = null;
@@ -2388,6 +2646,7 @@
         case _POP_TOP_LOAD_CONST_INLINE_BORROW: {
             JitOptRef pop;
             pop = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-1] = pop;
             break;
         }
@@ -2397,6 +2656,7 @@
             JitOptRef pop2;
             pop1 = sym_new_not_null(ctx);
             pop2 = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = pop1;
             stack_pointer[0] = pop2;
@@ -2410,6 +2670,7 @@
             JitOptRef null;
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-1] = callable;
             stack_pointer[0] = null;
@@ -2425,6 +2686,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             pop = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(2);
             stack_pointer[-1] = callable;
             stack_pointer[0] = null;
@@ -2441,6 +2703,7 @@
             callable = sym_new_not_null(ctx);
             null = sym_new_null(ctx);
             arg = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             stack_pointer[-3] = callable;
             stack_pointer[-2] = null;
             stack_pointer[-1] = arg;
@@ -2456,6 +2719,7 @@
             null = sym_new_null(ctx);
             pop1 = sym_new_not_null(ctx);
             pop2 = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(3);
             stack_pointer[-1] = callable;
             stack_pointer[0] = null;
@@ -2469,6 +2733,7 @@
         case _LOAD_CONST_UNDER_INLINE: {
             JitOptRef old;
             old = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = old;
             stack_pointer += -1;
@@ -2479,6 +2744,7 @@
         case _LOAD_CONST_UNDER_INLINE_BORROW: {
             JitOptRef old;
             old = sym_new_not_null(ctx);
+            EMIT_OP_FROM_INST(this_instr);
             CHECK_STACK_BOUNDS(-1);
             stack_pointer[-2] = old;
             stack_pointer += -1;
@@ -2487,58 +2753,72 @@
         }
 
         case _START_EXECUTOR: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _MAKE_WARM: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _FATAL_ERROR: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _DEOPT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _HANDLE_PENDING_AND_DEOPT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _ERROR_POP_N: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _SPILL_OR_RELOAD: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _TIER2_RESUME_CHECK: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _COLD_EXIT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _COLD_DYNAMIC_EXIT: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_IP__PUSH_FRAME: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_IP_YIELD_VALUE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_IP_RETURN_VALUE: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 
         case _GUARD_IP_RETURN_GENERATOR: {
+            EMIT_OP_FROM_INST(this_instr);
             break;
         }
 

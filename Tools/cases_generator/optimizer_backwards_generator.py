@@ -63,6 +63,8 @@ class OptimizerEmitter(Emitter):
         self.out.emit(goto)
         self.out.emit(label)
 
+def write_emit_op(out: CWriter) -> None:
+    out.emit("EMIT_OP_FROM_INST(this_instr);\n")
 
 def write_uop(
     override: Uop | None,
@@ -95,8 +97,10 @@ def write_uop(
             out.start_line()
         else:
             emit_default(out, uop.stack.outputs, uop.stack.inputs, stack)
+            write_emit_op(out)
             out.start_line()
             stack.flush(out)
+
     except StackError as ex:
         raise analysis_error(ex.args[0], prototype.body.open) # from None
 

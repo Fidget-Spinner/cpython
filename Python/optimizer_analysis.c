@@ -445,12 +445,41 @@ error:
 
 }
 
+static inline void
+emit_op(JitOptContext *ctx, int opcode, int oparg, uint64_t operand0, uint64_t operand1, uint32_t target)
+{
+    if (ctx->opt_buffer_i - 1 < 0) {
+        ctx->done = true;
+        return;
+    }
+    _PyUOpInstruction *inst = &ctx->opt_buffer[ctx->opt_buffer_i];
+    inst->opcode = opcode;
+    inst->oparg = oparg;
+    inst->operand0 = operand0;
+    inst->operand1 = operand1;
+    inst->target = target;
+#ifdef Py_DEBUG
+    if (get_lltrace() >= 3) {
+        printf("%4d emitted op: ", ctx->opt_buffer_i);
+        _PyUOpPrint(inst);
+        printf("\n");
+    }
+#endif
+    ctx->opt_buffer_i--;
+}
+
+#define EMIT_OP(OPCODE, OPARG, OPERAND0, OPERAND1, TARGET) \
+    emit_op(ctx, opcode, oparg, operand0, operand1, TARGET)
+
+#define EMIT_OP_FROM_INST(INST) \
+    emit_op(ctx, (INST)->opcode, (INST)->oparg, (INST)->operand0, (INST)->operand1, (INST)->target)
 
 /* >0 (length) for success, 0 for not ready, clears all possible errors. */
 static int
 optimize_backwards_uops(
     PyFunctionObject *func,
     _PyUOpInstruction *trace,
+    _PyUOpInstruction *opt_buffer,
     int trace_len
 )
 {
@@ -466,20 +495,23 @@ optimize_backwards_uops(
     JitOptContext context;
     JitOptContext *ctx = &context;
     uint32_t opcode = UINT16_MAX;
-
+    const int start_opt_buffer_i = UOP_MAX_TRACE_LENGTH / 3 - 1;
     _Py_uop_abstractcontext_init(ctx);
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, (PyCodeObject *)func->func_code,
-        trace[trace_len-1].operand0, NULL, 0);
+        (int)trace[trace_len-1].operand0, NULL, 0);
     if (frame == NULL) {
         return 0;
     }
     ctx->curr_frame_depth++;
     ctx->frame = frame;
+    // Leave some headroom for TOS caching and side exits.
+    ctx->opt_buffer_i = start_opt_buffer_i;
+    ctx->opt_buffer = opt_buffer;
 
     _PyUOpInstruction *this_instr = NULL;
     JitOptRef *stack_pointer = ctx->frame->stack_pointer;
-    // -2 to skip the terminator.
-    for (int i = trace_len - 2; i >= 0 && !ctx->done; i--) {
+    int i = trace_len - 1;
+    for (; i >= 0 && !ctx->done; i--) {
         assert(i < trace_len);
         this_instr = &trace[i];
 
@@ -525,11 +557,14 @@ optimize_backwards_uops(
         return 0;
     }
 
+    int n_ops_emitted = start_opt_buffer_i - ctx->opt_buffer_i + 1;
+    // Copy the rest of the remaining trace in.
+    memcpy(trace + i + 1, &opt_buffer[ctx->opt_buffer_i+1], sizeof(_PyUOpInstruction) * n_ops_emitted);
+
     /* Either reached the end or cannot optimize further, but there
      * would be no benefit in retrying later */
     _Py_uop_abstractcontext_fini(ctx);
-    return trace_len;
-
+    return i + 1 + n_ops_emitted;
 error:
     DPRINTF(3, "\n");
     DPRINTF(1, "Encountered error in abstract interpreter\n");
@@ -677,6 +712,7 @@ int
 _Py_uop_analyze_and_optimize(
     PyFunctionObject *func,
     _PyUOpInstruction *buffer,
+    _PyUOpInstruction *opt_buffer,
     int length,
     int curr_stacklen,
     _PyBloomFilter *dependencies
@@ -692,7 +728,7 @@ _Py_uop_analyze_and_optimize(
         return length;
     }
 
-    int res = optimize_backwards_uops(func, buffer, length);
+    int res = optimize_backwards_uops(func, buffer, opt_buffer, length);
 
     // We don't care if the backwards pass fails.
     // Just running the forward pass is enough to get

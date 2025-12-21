@@ -1037,6 +1037,13 @@ _PyJit_TryInitializeTracing(
             return 0;
         }
     }
+    if (_tstate->jit_tracer_state.opt_code_buffer == NULL) {
+        _tstate->jit_tracer_state.opt_code_buffer = (_PyUOpInstruction *)_PyObject_VirtualAlloc(UOP_BUFFER_SIZE);
+        if (_tstate->jit_tracer_state.opt_code_buffer == NULL) {
+            // Don't error, just go to next instruction.
+            return 0;
+        }
+    }
     PyObject *func = PyStackRef_AsPyObjectBorrow(frame->f_funcobj);
     if (func == NULL) {
         return 0;
@@ -1490,7 +1497,9 @@ uop_optimize(
     if (!is_noopt) {
         length = _Py_uop_analyze_and_optimize(
             _tstate->jit_tracer_state.initial_state.func,
-            buffer,length,
+            buffer,
+            _tstate->jit_tracer_state.opt_code_buffer,
+            length,
             curr_stackentries, dependencies);
         if (length <= 0) {
             return length;

@@ -88,6 +88,7 @@ dummy_func(void) {
 // BEGIN BYTECODES //
 
     op(_LOAD_FAST_CHECK, (-- value)) {
+        EMIT_OP_FROM_INST(this_instr);
         // We guarantee this will error - just bail and don't optimize it.
         if (sym_is_null(value)) {
             ctx->done = true;
@@ -96,22 +97,27 @@ dummy_func(void) {
     }
 
     op(_LOAD_FAST, (-- value)) {
+        EMIT_OP_FROM_INST(this_instr);
         GETLOCAL(oparg) = value;
     }
 
     op(_LOAD_FAST_BORROW, (-- value)) {
+        EMIT_OP_FROM_INST(this_instr);
         GETLOCAL(oparg) = value;
     }
 
     op(_LOAD_FAST_AND_CLEAR, (-- value)) {
+        EMIT_OP_FROM_INST(this_instr);
         GETLOCAL(oparg) = value;
     }
 
     op(_STORE_FAST, (value --)) {
+        EMIT_OP_FROM_INST(this_instr);
         value = GETLOCAL(oparg);
     }
 
     op(_CREATE_INIT_FRAME, (init, self, args[oparg] -- init_frame)) {
+        EMIT_OP_FROM_INST(this_instr);
         ctx->done = true;
         init = sym_new_unknown(ctx);
         self = sym_new_unknown(ctx);
@@ -121,6 +127,7 @@ dummy_func(void) {
     }
 
     op(_RETURN_VALUE, (retval -- res)) {
+        EMIT_OP_FROM_INST(this_instr);
         // Mimics PyStackRef_MakeHeapSafe in the interpreter.
         JitOptRef temp = PyJitRef_StripReferenceInfo(res);
         DEAD(res);
@@ -143,27 +150,32 @@ dummy_func(void) {
     }
 
     op(_RETURN_GENERATOR, ( -- res)) {
+        EMIT_OP_FROM_INST(this_instr);
         ctx->done = true;
     }
 
     op(_YIELD_VALUE, (retval -- value)) {
+        EMIT_OP_FROM_INST(this_instr);
         retval = value;
         ctx->done = true;
     }
 
     op(_FOR_ITER_GEN_FRAME, (unused, unused -- unused, unused, gen_frame)) {
+        EMIT_OP_FROM_INST(this_instr);
         gen_frame = PyJitRef_NULL;
         /* We are about to hit the end of the trace */
         ctx->done = true;
     }
 
     op(_SEND_GEN_FRAME, (unused, unused -- unused, gen_frame)) {
+        EMIT_OP_FROM_INST(this_instr);
         gen_frame = PyJitRef_NULL;
         // We are about to hit the end of the trace:
         ctx->done = true;
     }
 
     op(_PUSH_FRAME, (new_frame -- )) {
+        EMIT_OP_FROM_INST(this_instr);
         SYNC_SP();
         int returning_stacklevel = this_instr->error_target;
         PyCodeObject *returning_code = get_code_with_logging_backwards(this_instr);

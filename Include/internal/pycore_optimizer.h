@@ -84,7 +84,8 @@ PyAPI_FUNC(void) _Py_Executors_InvalidateCold(PyInterpreterState *interp);
 
 int _Py_uop_analyze_and_optimize(
     PyFunctionObject *func,
-    _PyUOpInstruction *trace, int trace_len, int curr_stackentries,
+    _PyUOpInstruction *trace, _PyUOpInstruction *opt_buffer,
+    int trace_len, int curr_stackentries,
     _PyBloomFilter *dependencies);
 
 extern PyTypeObject _PyUOpExecutor_Type;
@@ -193,6 +194,7 @@ typedef union {
 } JitOptRef;
 
 #define REF_IS_BORROWED 1
+#define REF_IS_UNBOXED 3
 
 #define JIT_BITS_TO_PTR_MASKED(REF) ((JitOptSymbol *)(((REF).bits) & (~REF_IS_BORROWED)))
 
@@ -224,6 +226,12 @@ PyJitRef_Borrow(JitOptRef ref)
 }
 
 static const JitOptRef PyJitRef_NULL = {.bits = REF_IS_BORROWED};
+
+static inline JitOptRef
+PyJitRef_SetUnbox(JitOptRef ref)
+{
+    return (JitOptRef){ .bits = ref.bits | REF_IS_UNBOXED };
+}
 
 static inline bool
 PyJitRef_IsNull(JitOptRef ref)
@@ -277,6 +285,9 @@ typedef struct _JitOptContext {
     JitOptRef *n_consumed;
     JitOptRef *limit;
     JitOptRef locals_and_stack[MAX_ABSTRACT_INTERP_SIZE];
+
+    int opt_buffer_i;
+    _PyUOpInstruction *opt_buffer;
 } JitOptContext;
 
 extern bool _Py_uop_sym_is_null(JitOptRef sym);
