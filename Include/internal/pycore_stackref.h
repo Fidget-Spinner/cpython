@@ -13,6 +13,9 @@ extern "C" {
 
 #include <stdbool.h>              // bool
 
+#if SIZEOF_VOID_P == 8
+#   define HAVE_TAGGED_DOUBLE 1
+#endif
 
 /*
   This file introduces a new API for handling references on the stack, called
@@ -53,9 +56,14 @@ extern "C" {
 #define Py_INT_TAG 3
 #define Py_TAG_INVALID 2
 #define Py_TAG_REFCNT 1
-#define Py_TAG_BITS 3
-
-#define Py_TAGGED_SHIFT 2
+#if HAVE_TAGGED_DOUBLE
+#   define Py_DOUBLE_TAG 7
+#   define Py_TAG_BITS 7
+#   define Py_TAGGED_SHIFT 3
+#else
+#   define Py_TAG_BITS 3
+#   define Py_TAGGED_SHIFT 2
+#endif
 
 #if !defined(Py_GIL_DISABLED) && defined(Py_STACKREF_DEBUG)
 
@@ -837,6 +845,59 @@ _Py_TryXGetStackRef(PyObject **src, _PyStackRef *out)
                 return vret;                                            \
         }                                                               \
     } while (0)
+
+#if HAVE_TAGGED_DOUBLE
+// Tagged doubles:
+// We use the same bit representation as Fig 4 of this paper:
+// https://arxiv.org/abs/2411.16544
+// Float Self-Tagging by Olivier Melançon, Manuel Serrano, Marc Feeley
+// In short, we steal the 3 highest bits from the 11-bit exponent in doubles for the tag.
+// In practice, this means we can still represent most doubles that occur in the wild.
+// This requires a 4-bit right rotation when encoding (double to StackRef).
+// Also there's a 4-bit left rotation needed when decoding (StackRef to double).
+
+static inline bool
+PyStackRef_IsTaggedDouble(_PyStackRef i)
+{
+    return (i.bits & Py_TAG_BITS) == Py_DOUBLE_TAG;
+}
+
+static inline bool
+PyStackRef_CanRepresentDouble(double d)
+{
+    assert(sizeof(double) == sizeof(uintptr_t));
+    assert(sizeof(double) == sizeof(uint64_t));
+    const uintptr_t mask = (uintptr_t)7 << 60;
+    uintptr_t bits;
+    // On optimizing compilers, this memcpy gets eliminated away.
+    memcpy(&bits, &d, sizeof(double));
+    return (bits & mask) == 0;
+}
+
+static inline _PyStackRef
+PyStackRef_TagDouble(double d)
+{
+    assert(PyStackRef_CanRepresentDouble(d));
+    uintptr_t bits;
+    memcpy(&bits, &d, sizeof(double));
+    // Rotate 4 bits left.
+    const uintptr_t result = (bits << 4) | (bits >> 60);
+    return (_PyStackRef){ .bits = result | Py_DOUBLE_TAG };
+}
+
+static inline double
+PyStackRef_UntagDouble(_PyStackRef i)
+{
+    assert(PyStackRef_IsTaggedDouble(i));
+    const uintptr_t bits = i.bits & (~Py_DOUBLE_TAG);
+    // Rotate 4 bits right.
+    const uintptr_t result = (bits >> 4) | (bits << 60);
+    double d;
+    memcpy(&d, &result, sizeof(uintptr_t));
+    assert(PyStackRef_CanRepresentDouble(d));
+    return d;
+}
+#endif
 
 #ifdef __cplusplus
 }
