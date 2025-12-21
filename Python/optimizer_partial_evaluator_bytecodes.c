@@ -1,19 +1,7 @@
-// This file is the backwards pass of optimizer_bytecodes.c. Essentially,
-// everything here is done in reverse. This means the outputs and inputs of the
-// bytecodes DSL is swapped as well.
-// For example:
-// op(_LOAD_FAST, (-- value))
-// actually means _LOAD_FAST takes in a single intput --- `value`!.
-// Instead of a forward pass where we gain information to see what we can deduce
-// about the world to produce a set of outputs, the backward pass gains
-// information about what is *required* of the world for a given set of
-// inputs. It is the dual of the forward pass!
-// Instructions are also emitted in reverse order.
 #include "Python.h"
 #include "pycore_optimizer.h"
 #include "pycore_uops.h"
 #include "pycore_uop_ids.h"
-#include "internal/pycore_moduleobject.h"
 
 #define op(name, ...) /* NAME is ignored */
 

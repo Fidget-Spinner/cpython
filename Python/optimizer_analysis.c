@@ -475,14 +475,7 @@ partial_evaluate_uops(
     int trace_len
 )
 {
-    // For now, the backward pass is only worth it for complete loops.
-    // This can be revisited later when we have inter-trace optimization
-    // state.
-    if (trace[trace_len-1].opcode != _JUMP_TO_TOP) {
-        return trace_len;
-    }
     assert(!PyErr_Occurred());
-    assert(trace[trace_len-1].opcode == _JUMP_TO_TOP);
 
     JitOptContext context;
     JitOptContext *ctx = &context;
@@ -723,10 +716,10 @@ _Py_uop_analyze_and_optimize(
 
     int res = partial_evaluate_uops(func, buffer, opt_buffer, length);
 
-    // We don't care if the backwards pass fails.
+    // We don't care if the pe pass fails.
     // Just running the forward pass is enough to get
     // a fast trace.
-    // The backwards pass is just additional optimizations.
+    // The pe pass is just additional optimizations.
     if (res > 0) {
         length = res;
     }
