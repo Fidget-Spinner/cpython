@@ -5514,6 +5514,55 @@ dummy_func(
             INPUTS_DEAD();
         }
 
+        pure op(_BINARY_OP_MULTIPLY_FLOAT_OUT_TAGGED_DOUBLE, (left, right -- res, l, r)) {
+            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
+            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            assert(PyFloat_CheckExact(left_o));
+            assert(PyFloat_CheckExact(right_o));
+
+            double dres =
+                ((PyFloatObject *)left_o)->ob_fval *
+                ((PyFloatObject *)right_o)->ob_fval;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            INPUTS_DEAD();
+        }
+
+        pure op(_BINARY_OP_ADD_FLOAT_OUT_TAGGED_DOUBLE, (left, right -- res, l, r)) {
+            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
+            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            assert(PyFloat_CheckExact(left_o));
+            assert(PyFloat_CheckExact(right_o));
+
+            double dres =
+                ((PyFloatObject *)left_o)->ob_fval +
+                ((PyFloatObject *)right_o)->ob_fval;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            INPUTS_DEAD();
+        }
+
+        pure op(_BINARY_OP_SUBTRACT_FLOAT_OUT_TAGGED_DOUBLE, (left, right -- res, l, r)) {
+            PyObject *left_o = PyStackRef_AsPyObjectBorrow(left);
+            PyObject *right_o = PyStackRef_AsPyObjectBorrow(right);
+            assert(PyFloat_CheckExact(left_o));
+            assert(PyFloat_CheckExact(right_o));
+
+            double dres =
+                ((PyFloatObject *)left_o)->ob_fval -
+                ((PyFloatObject *)right_o)->ob_fval;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            INPUTS_DEAD();
+        }
+
+
         label(pop_2_error) {
             stack_pointer -= 2;
             assert(WITHIN_STACK_BOUNDS());

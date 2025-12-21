@@ -138,7 +138,14 @@
         }
 
         case _POP_TOP_FLOAT: {
-            EMIT_OP_FROM_INST(this_instr);
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (PyJitRef_IsUnboxed(value)) {
+                EMIT_OP(_POP_TOP_NOP, 0, 0, 0, 0);
+            }
+            else {
+                EMIT_OP_FROM_INST(this_instr);
+            }
             CHECK_STACK_BOUNDS(-1);
             stack_pointer += -1;
             ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
@@ -383,13 +390,28 @@
         }
 
         case _BINARY_OP_MULTIPLY_FLOAT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
             JitOptRef l;
             JitOptRef r;
-            EMIT_OP_FROM_INST(this_instr);
-            res = sym_new_not_null(ctx);
-            l = sym_new_not_null(ctx);
-            r = sym_new_not_null(ctx);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (PyJitRef_IsUnboxed(left) || PyJitRef_IsUnboxed(right)) {
+                if (!PyJitRef_IsUnboxed(left)) {
+                    EMIT_OP(_NOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+                }
+                if (!PyJitRef_IsUnboxed(right)) {
+                    EMIT_OP(_TOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+                }
+                EMIT_OP(_BINARY_OP_MULTIPLY_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            else {
+                EMIT_OP(_BINARY_OP_MULTIPLY_FLOAT_OUT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            res = PyJitRef_SetUnbox(sym_new_type(ctx, &PyFloat_Type));
+            l = left;
+            r = right;
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = res;
             stack_pointer[-1] = l;
@@ -400,13 +422,28 @@
         }
 
         case _BINARY_OP_ADD_FLOAT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
             JitOptRef l;
             JitOptRef r;
-            EMIT_OP_FROM_INST(this_instr);
-            res = sym_new_not_null(ctx);
-            l = sym_new_not_null(ctx);
-            r = sym_new_not_null(ctx);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (PyJitRef_IsUnboxed(left) || PyJitRef_IsUnboxed(right)) {
+                if (!PyJitRef_IsUnboxed(left)) {
+                    EMIT_OP(_NOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+                }
+                if (!PyJitRef_IsUnboxed(right)) {
+                    EMIT_OP(_TOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+                }
+                EMIT_OP(_BINARY_OP_ADD_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            else {
+                EMIT_OP(_BINARY_OP_ADD_FLOAT_OUT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            res = PyJitRef_SetUnbox(sym_new_type(ctx, &PyFloat_Type));
+            l = left;
+            r = right;
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = res;
             stack_pointer[-1] = l;
@@ -417,13 +454,28 @@
         }
 
         case _BINARY_OP_SUBTRACT_FLOAT: {
+            JitOptRef right;
+            JitOptRef left;
             JitOptRef res;
             JitOptRef l;
             JitOptRef r;
-            EMIT_OP_FROM_INST(this_instr);
-            res = sym_new_not_null(ctx);
-            l = sym_new_not_null(ctx);
-            r = sym_new_not_null(ctx);
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            if (PyJitRef_IsUnboxed(left) || PyJitRef_IsUnboxed(right)) {
+                if (!PyJitRef_IsUnboxed(left)) {
+                    EMIT_OP(_NOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+                }
+                if (!PyJitRef_IsUnboxed(right)) {
+                    EMIT_OP(_TOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+                }
+                EMIT_OP(_BINARY_OP_SUBTRACT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            else {
+                EMIT_OP(_BINARY_OP_SUBTRACT_FLOAT_OUT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            res = PyJitRef_SetUnbox(sym_new_type(ctx, &PyFloat_Type));
+            l = left;
+            r = right;
             CHECK_STACK_BOUNDS(1);
             stack_pointer[-2] = res;
             stack_pointer[-1] = l;
@@ -2616,6 +2668,57 @@
         }
 
         case _BINARY_OP_SUBTRACT_TAGGED_DOUBLE: {
+            JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            EMIT_OP_FROM_INST(this_instr);
+            res = sym_new_not_null(ctx);
+            l = sym_new_not_null(ctx);
+            r = sym_new_not_null(ctx);
+            CHECK_STACK_BOUNDS(1);
+            stack_pointer[-2] = res;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_FLOAT_OUT_TAGGED_DOUBLE: {
+            JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            EMIT_OP_FROM_INST(this_instr);
+            res = sym_new_not_null(ctx);
+            l = sym_new_not_null(ctx);
+            r = sym_new_not_null(ctx);
+            CHECK_STACK_BOUNDS(1);
+            stack_pointer[-2] = res;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
+        case _BINARY_OP_ADD_FLOAT_OUT_TAGGED_DOUBLE: {
+            JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            EMIT_OP_FROM_INST(this_instr);
+            res = sym_new_not_null(ctx);
+            l = sym_new_not_null(ctx);
+            r = sym_new_not_null(ctx);
+            CHECK_STACK_BOUNDS(1);
+            stack_pointer[-2] = res;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_FLOAT_OUT_TAGGED_DOUBLE: {
             JitOptRef res;
             JitOptRef l;
             JitOptRef r;

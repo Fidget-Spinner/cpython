@@ -157,7 +157,68 @@ dummy_func(void) {
         ctx->done = true;
     }
 
+    op(_POP_TOP_FLOAT, (value --)) {
+        if (PyJitRef_IsUnboxed(value)) {
+            EMIT_OP(_POP_TOP_NOP, 0, 0, 0, 0);
+        }
+        else {
+            EMIT_OP_FROM_INST(this_instr);
+        }
+    }
 
+    op(_BINARY_OP_ADD_FLOAT, (left, right -- res, l, r)) {
+        if (PyJitRef_IsUnboxed(left) || PyJitRef_IsUnboxed(right)) {
+            if (!PyJitRef_IsUnboxed(left)) {
+                EMIT_OP(_NOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            if (!PyJitRef_IsUnboxed(right)) {
+                EMIT_OP(_TOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            EMIT_OP(_BINARY_OP_ADD_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+        }
+        else {
+            EMIT_OP(_BINARY_OP_ADD_FLOAT_OUT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+        }
+        res = PyJitRef_SetUnbox(sym_new_type(ctx, &PyFloat_Type));
+        l = left;
+        r = right;
+    }
+
+    op(_BINARY_OP_SUBTRACT_FLOAT, (left, right -- res, l, r)) {
+        if (PyJitRef_IsUnboxed(left) || PyJitRef_IsUnboxed(right)) {
+            if (!PyJitRef_IsUnboxed(left)) {
+                EMIT_OP(_NOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            if (!PyJitRef_IsUnboxed(right)) {
+                EMIT_OP(_TOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            EMIT_OP(_BINARY_OP_SUBTRACT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+        }
+        else {
+            EMIT_OP(_BINARY_OP_SUBTRACT_FLOAT_OUT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+        }
+        res = PyJitRef_SetUnbox(sym_new_type(ctx, &PyFloat_Type));
+        l = left;
+        r = right;
+    }
+
+    op(_BINARY_OP_MULTIPLY_FLOAT, (left, right -- res, l, r)) {
+        if (PyJitRef_IsUnboxed(left) || PyJitRef_IsUnboxed(right)) {
+            if (!PyJitRef_IsUnboxed(left)) {
+                EMIT_OP(_NOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            if (!PyJitRef_IsUnboxed(right)) {
+                EMIT_OP(_TOS_TO_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+            }
+            EMIT_OP(_BINARY_OP_MULTIPLY_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+        }
+        else {
+            EMIT_OP(_BINARY_OP_MULTIPLY_FLOAT_OUT_TAGGED_DOUBLE, 0, 0, 0, this_instr->target);
+        }
+        res = PyJitRef_SetUnbox(sym_new_type(ctx, &PyFloat_Type));
+        l = left;
+        r = right;
+    }
 
 // END BYTECODES //
 
