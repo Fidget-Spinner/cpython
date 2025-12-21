@@ -8,6 +8,7 @@
 // about the world to produce a set of outputs, the backward pass gains
 // information about what is *required* of the world for a given set of
 // inputs. It is the dual of the forward pass!
+// Instructions are also emitted in reverse order.
 #include "Python.h"
 #include "pycore_optimizer.h"
 #include "pycore_uops.h"
@@ -93,70 +94,55 @@ dummy_func(void) {
         if (sym_is_null(value)) {
             ctx->done = true;
         }
-        GETLOCAL(oparg) = value;
+        value = GETLOCAL(oparg);
     }
 
     op(_LOAD_FAST, (-- value)) {
         EMIT_OP_FROM_INST(this_instr);
-        GETLOCAL(oparg) = value;
+        value = GETLOCAL(oparg);
     }
 
     op(_LOAD_FAST_BORROW, (-- value)) {
         EMIT_OP_FROM_INST(this_instr);
-        GETLOCAL(oparg) = value;
+        value = GETLOCAL(oparg);
     }
 
     op(_LOAD_FAST_AND_CLEAR, (-- value)) {
         EMIT_OP_FROM_INST(this_instr);
-        GETLOCAL(oparg) = value;
+        value = GETLOCAL(oparg);
+        JitOptRef temp = sym_new_null(ctx);
+        GETLOCAL(oparg) = temp;
     }
 
     op(_STORE_FAST, (value --)) {
         EMIT_OP_FROM_INST(this_instr);
-        value = GETLOCAL(oparg);
+        GETLOCAL(oparg) = value;
     }
 
     op(_CREATE_INIT_FRAME, (init, self, args[oparg] -- init_frame)) {
         EMIT_OP_FROM_INST(this_instr);
         ctx->done = true;
-        init = sym_new_unknown(ctx);
-        self = sym_new_unknown(ctx);
-        for (int x = 0; x < oparg; x++) {
-            args[x] = sym_new_unknown(ctx);
-        }
+        init_frame = PyJitRef_NULL;
     }
 
     op(_RETURN_VALUE, (retval -- res)) {
         EMIT_OP_FROM_INST(this_instr);
-        // Mimics PyStackRef_MakeHeapSafe in the interpreter.
-        JitOptRef temp = PyJitRef_StripReferenceInfo(res);
-        DEAD(res);
-        SAVE_STACK();
-        PyCodeObject *pushing_code = get_code_with_logging_backwards(this_instr);
-        if (pushing_code == NULL) {
-            ctx->done = true;
-            break;
-        }
-        _Py_UOpsAbstractFrame *new_frame = frame_new(ctx, pushing_code, 1, NULL, 0);
-        if (new_frame == NULL) {
-            ctx->done = true;
-            break;
-        }
-        ctx->frame = new_frame;
-        ctx->curr_frame_depth++;
-        stack_pointer = ctx->frame->stack_pointer;
-        RELOAD_STACK();
-        retval = temp;
+        res = PyJitRef_StripReferenceInfo(retval);
+        // For now, reconstruction with multiple frames is
+        // hard to reason about efficiently.
+        // So we leave that for later.
+        ctx->done = true;
     }
 
     op(_RETURN_GENERATOR, ( -- res)) {
         EMIT_OP_FROM_INST(this_instr);
+        res = sym_new_unknown(ctx);
         ctx->done = true;
     }
 
     op(_YIELD_VALUE, (retval -- value)) {
         EMIT_OP_FROM_INST(this_instr);
-        retval = value;
+        value = PyJitRef_StripReferenceInfo(retval);
         ctx->done = true;
     }
 
@@ -176,19 +162,13 @@ dummy_func(void) {
 
     op(_PUSH_FRAME, (new_frame -- )) {
         EMIT_OP_FROM_INST(this_instr);
-        SYNC_SP();
-        int returning_stacklevel = this_instr->error_target;
-        PyCodeObject *returning_code = get_code_with_logging_backwards(this_instr);
-        if (returning_code == NULL) {
-            ctx->done = true;
-            break;
-        }
-        if (frame_pop(ctx, returning_code, returning_stacklevel)) {
-            break;
-        }
-        stack_pointer = ctx->frame->stack_pointer;
         new_frame = sym_new_unknown(ctx);
+        // For now, reconstruction with multiple frames is
+        // hard to reason about efficiently.
+        // So we leave that for later.
+        ctx->done = true;
     }
+
 
 
 // END BYTECODES //

@@ -245,6 +245,12 @@ PyJitRef_IsBorrowed(JitOptRef ref)
     return (ref.bits & REF_IS_BORROWED) == REF_IS_BORROWED;
 }
 
+static inline int
+PyJitRef_IsUnboxed(JitOptRef ref)
+{
+    return (ref.bits & REF_IS_UNBOXED) == REF_IS_UNBOXED;
+}
+
 struct _Py_UOpsAbstractFrame {
     bool globals_watched;
      // The version number of the globals dicts, once checked. 0 if unchecked.

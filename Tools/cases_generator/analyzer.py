@@ -711,6 +711,10 @@ NON_ESCAPING_FUNCTIONS = (
     "_Py_set_eval_breaker_bit",
     "trigger_backoff_counter",
     "_PyThreadState_PopCStackRefSteal",
+    "PyStackRef_IsTaggedDouble",
+    "PyStackRef_CanRepresentDouble",
+    "PyStackRef_TagDouble",
+    "PyStackRef_UntagDouble",
 )
 
 

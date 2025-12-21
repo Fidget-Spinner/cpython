@@ -3549,5 +3549,96 @@
             break;
         }
 
+        case _THIRD_TO_FLOAT: {
+            JitOptRef st;
+            JitOptRef nos2;
+            JitOptRef tos2;
+            st = sym_new_not_null(ctx);
+            nos2 = sym_new_not_null(ctx);
+            tos2 = sym_new_not_null(ctx);
+            stack_pointer[-3] = st;
+            stack_pointer[-2] = nos2;
+            stack_pointer[-1] = tos2;
+            break;
+        }
+
+        case _TOS_TO_TAGGED_DOUBLE: {
+            JitOptRef dbl;
+            dbl = sym_new_not_null(ctx);
+            stack_pointer[-1] = dbl;
+            break;
+        }
+
+        case _NOS_TO_TAGGED_DOUBLE: {
+            JitOptRef dbl;
+            JitOptRef tos2;
+            dbl = sym_new_not_null(ctx);
+            tos2 = sym_new_not_null(ctx);
+            stack_pointer[-2] = dbl;
+            stack_pointer[-1] = tos2;
+            break;
+        }
+
+        case _THIRD_TO_TAGGED_DOUBLE: {
+            JitOptRef dbl;
+            JitOptRef nos2;
+            JitOptRef tos2;
+            dbl = sym_new_not_null(ctx);
+            nos2 = sym_new_not_null(ctx);
+            tos2 = sym_new_not_null(ctx);
+            stack_pointer[-3] = dbl;
+            stack_pointer[-2] = nos2;
+            stack_pointer[-1] = tos2;
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_TAGGED_DOUBLE: {
+            JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            res = sym_new_not_null(ctx);
+            l = sym_new_not_null(ctx);
+            r = sym_new_not_null(ctx);
+            CHECK_STACK_BOUNDS(1);
+            stack_pointer[-2] = res;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
+        case _BINARY_OP_ADD_TAGGED_DOUBLE: {
+            JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            res = sym_new_not_null(ctx);
+            l = sym_new_not_null(ctx);
+            r = sym_new_not_null(ctx);
+            CHECK_STACK_BOUNDS(1);
+            stack_pointer[-2] = res;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_TAGGED_DOUBLE: {
+            JitOptRef res;
+            JitOptRef l;
+            JitOptRef r;
+            res = sym_new_not_null(ctx);
+            l = sym_new_not_null(ctx);
+            r = sym_new_not_null(ctx);
+            CHECK_STACK_BOUNDS(1);
+            stack_pointer[-2] = res;
+            stack_pointer[-1] = l;
+            stack_pointer[0] = r;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
         /* _TRACE_RECORD is not a viable micro-op for tier 2 */
 

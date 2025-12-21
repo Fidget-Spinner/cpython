@@ -29,8 +29,8 @@ from typing import TextIO
 from lexer import Token
 from stack import Local, Stack, StackError, Storage
 
-DEFAULT_OUTPUT = ROOT / "Python/optimizer_backwards_cases.c.h"
-DEFAULT_ABSTRACT_INPUT = (ROOT / "Python/optimizer_backwards_bytecodes.c").absolute().as_posix()
+DEFAULT_OUTPUT = ROOT / "Python/optimizer_partial_evaluator_cases.c.h"
+DEFAULT_ABSTRACT_INPUT = (ROOT / "Python/optimizer_partial_evaluator_bytecodes.c").absolute().as_posix()
 
 def decref_inputs(
     out: CWriter,
@@ -79,13 +79,22 @@ def write_uop(
     try:
         out.start_line()
         if override:
-            storage = Storage.for_uop_backwards(stack, prototype, out, check_liveness=False)
+            storage = Storage.for_uop(stack, prototype, out, check_liveness=False)
         if debug:
             args = []
-            for input in prototype.stack.outputs:
+            for input in prototype.stack.inputs:
                 if not input.peek or override:
                     args.append(input.name)
             out.emit(f'DEBUG_PRINTF({", ".join(args)});\n')
+        if override:
+            for cache in uop.caches:
+                if cache.name != "unused":
+                    if cache.size == 4:
+                        type = cast = "PyObject *"
+                    else:
+                        type = f"uint{cache.size*16}_t "
+                        cast = f"uint{cache.size*16}_t"
+                    out.emit(f"{type}{cache.name} = ({cast})this_instr->operand0;\n")
         if override:
             emitter = OptimizerEmitter(out, {}, uop, stack.copy())
             # No reference management of inputs needed.
@@ -96,8 +105,8 @@ def write_uop(
             storage.flush(out)
             out.start_line()
         else:
-            emit_default(out, uop.stack.outputs, uop.stack.inputs, stack)
             write_emit_op(out)
+            emit_default(out, uop, stack)
             out.start_line()
             stack.flush(out)
 
@@ -140,9 +149,9 @@ def generate_abstract_interpreter(
             continue
         out.emit(f"case {uop.name}: {{\n")
         if override:
-            declare_variables(override.stack.outputs, override.stack.inputs, out, skip_inputs=False)
+            declare_variables(uop, out, skip_inputs=False)
         else:
-            declare_variables(uop.stack.outputs, uop.stack.inputs, out, skip_inputs=True)
+            declare_variables(uop, out, skip_inputs=True)
         stack = Stack(check_stack_bounds=True)
         write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
         out.start_line()

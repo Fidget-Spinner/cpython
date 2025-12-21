@@ -82,14 +82,14 @@ def stackref_type_name(var: StackItem) -> str:
     assert not var.is_array(), "Unsafe to convert a symbol to an array-like StackRef."
     return "_PyStackRef "
 
-def declare_variables(stack_inputs: list[StackItem], stack_outputs: list[StackItem], out: CWriter, skip_inputs: bool) -> None:
+def declare_variables(uop: Uop, out: CWriter, skip_inputs: bool) -> None:
     variables = {"unused"}
     if not skip_inputs:
-        for var in reversed(stack_inputs):
+        for var in reversed(uop.stack.inputs):
             if var.used and var.name not in variables:
                 variables.add(var.name)
                 out.emit(f"{type_name(var)}{var.name};\n")
-    for var in stack_outputs:
+    for var in uop.stack.outputs:
         if var.peek:
             continue
         if var.name not in variables:
@@ -111,17 +111,17 @@ def decref_inputs(
     out.emit_at("", tkn)
 
 
-def emit_default(out: CWriter, stack_inputs: list[StackItem], stack_outputs: list[StackItem], stack: Stack) -> None:
+def emit_default(out: CWriter, uop: Uop, stack: Stack) -> None:
     null = CWriter.null()
-    for var in reversed(stack_inputs):
+    for var in reversed(uop.stack.inputs):
         stack.pop(var, null)
     offset = stack.base_offset - stack.physical_sp
-    for var in stack_outputs:
+    for var in uop.stack.outputs:
         if var.is_array() and not var.peek and not var.name == "unused":
             c_offset = offset.to_c()
             out.emit(f"{var.name} = &stack_pointer[{c_offset}];\n")
         offset = offset.push(var)
-    for var in stack_outputs:
+    for var in uop.stack.outputs:
         local = Local.undefined(var)
         stack.push(local)
         if var.name != "unused" and not var.peek:
@@ -400,7 +400,7 @@ def write_uop(
             storage.flush(out)
             out.start_line()
         else:
-            emit_default(out, uop.stack.inputs, uop.stack.outputs, stack)
+            emit_default(out, uop, stack)
             out.start_line()
             stack.flush(out)
     except StackError as ex:
@@ -424,7 +424,7 @@ def generate_abstract_interpreter(
     for abstract_uop_name in abstract.uops:
         if abstract_uop_name not in base_uop_names:
             raise ValueError(f"All abstract uops should override base uops, "
-                                 "but {abstract_uop_name} is not.")
+                             "but {abstract_uop_name} is not.")
 
     for uop in base.uops.values():
         override: Uop | None = None
@@ -442,9 +442,9 @@ def generate_abstract_interpreter(
             continue
         out.emit(f"case {uop.name}: {{\n")
         if override:
-            declare_variables(override.stack.inputs, override.stack.outputs, out, skip_inputs=False)
+            declare_variables(override, out, skip_inputs=False)
         else:
-            declare_variables(uop.stack.inputs, uop.stack.outputs, out, skip_inputs=True)
+            declare_variables(uop, out, skip_inputs=True)
         stack = Stack(check_stack_bounds=True)
         write_uop(override, uop, out, stack, debug, skip_inputs=(override is None))
         out.start_line()

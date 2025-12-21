@@ -17817,6 +17817,791 @@
             break;
         }
 
+        case _THIRD_TO_FLOAT_r03: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef dbl;
+            _PyStackRef st;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            tos1 = stack_pointer[-1];
+            nos1 = stack_pointer[-2];
+            dbl = stack_pointer[-3];
+            double dres = PyStackRef_UntagDouble(dbl);
+            nos2 = nos1;
+            tos2 = tos1;
+            PyObject *res = PyFloat_FromDouble(dres);
+            if (res == NULL) {
+                stack_pointer += -3;
+                ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_ERROR();
+            }
+            st = PyStackRef_FromPyObjectSteal(res);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = st;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -3;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_FLOAT_r13: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef dbl;
+            _PyStackRef st;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            tos1 = _stack_item_0;
+            nos1 = stack_pointer[-1];
+            dbl = stack_pointer[-2];
+            double dres = PyStackRef_UntagDouble(dbl);
+            nos2 = nos1;
+            tos2 = tos1;
+            PyObject *res = PyFloat_FromDouble(dres);
+            if (res == NULL) {
+                stack_pointer += -2;
+                ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_ERROR();
+            }
+            st = PyStackRef_FromPyObjectSteal(res);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = st;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -2;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_FLOAT_r23: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef dbl;
+            _PyStackRef st;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            tos1 = _stack_item_1;
+            nos1 = _stack_item_0;
+            dbl = stack_pointer[-1];
+            double dres = PyStackRef_UntagDouble(dbl);
+            nos2 = nos1;
+            tos2 = tos1;
+            PyObject *res = PyFloat_FromDouble(dres);
+            if (res == NULL) {
+                stack_pointer += -1;
+                ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_ERROR();
+            }
+            st = PyStackRef_FromPyObjectSteal(res);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = st;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_FLOAT_r33: {
+            CHECK_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef dbl;
+            _PyStackRef st;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            _PyStackRef _stack_item_2 = _tos_cache2;
+            tos1 = _stack_item_2;
+            nos1 = _stack_item_1;
+            dbl = _stack_item_0;
+            double dres = PyStackRef_UntagDouble(dbl);
+            nos2 = nos1;
+            tos2 = tos1;
+            PyObject *res = PyFloat_FromDouble(dres);
+            if (res == NULL) {
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_ERROR();
+            }
+            st = PyStackRef_FromPyObjectSteal(res);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = st;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _TOS_TO_TAGGED_DOUBLE_r01: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef st;
+            _PyStackRef dbl;
+            st = stack_pointer[-1];
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(1);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _TOS_TO_TAGGED_DOUBLE_r11: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            st = _stack_item_0;
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache0 = stack_pointer[0];
+                SET_CURRENT_CACHED_VALUES(1);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _TOS_TO_TAGGED_DOUBLE_r22: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            st = _stack_item_1;
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache1 = stack_pointer[1];
+                _tos_cache0 = _stack_item_0;
+                SET_CURRENT_CACHED_VALUES(2);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache1 = dbl;
+            _tos_cache0 = _stack_item_0;
+            SET_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _TOS_TO_TAGGED_DOUBLE_r33: {
+            CHECK_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            _PyStackRef _stack_item_2 = _tos_cache2;
+            st = _stack_item_2;
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache2 = stack_pointer[2];
+                _tos_cache1 = _stack_item_1;
+                _tos_cache0 = _stack_item_0;
+                SET_CURRENT_CACHED_VALUES(3);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache2 = dbl;
+            _tos_cache1 = _stack_item_1;
+            _tos_cache0 = _stack_item_0;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _NOS_TO_TAGGED_DOUBLE_r02: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef tos2;
+            tos1 = stack_pointer[-1];
+            st = stack_pointer[-2];
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            tos2 = tos1;
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache1 = tos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(2);
+            stack_pointer += -2;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _NOS_TO_TAGGED_DOUBLE_r12: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            tos1 = _stack_item_0;
+            st = stack_pointer[-1];
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            tos2 = tos1;
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache0 = stack_pointer[0];
+                SET_CURRENT_CACHED_VALUES(1);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache1 = tos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(2);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _NOS_TO_TAGGED_DOUBLE_r22: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            tos1 = _stack_item_1;
+            st = _stack_item_0;
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            tos2 = tos1;
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache1 = stack_pointer[1];
+                _tos_cache0 = stack_pointer[0];
+                SET_CURRENT_CACHED_VALUES(2);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache1 = tos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _NOS_TO_TAGGED_DOUBLE_r33: {
+            CHECK_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            _PyStackRef _stack_item_2 = _tos_cache2;
+            tos1 = _stack_item_2;
+            st = _stack_item_1;
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            tos2 = tos1;
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache2 = stack_pointer[2];
+                _tos_cache1 = stack_pointer[1];
+                _tos_cache0 = _stack_item_0;
+                SET_CURRENT_CACHED_VALUES(3);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache2 = tos2;
+            _tos_cache1 = dbl;
+            _tos_cache0 = _stack_item_0;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_TAGGED_DOUBLE_r03: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            tos1 = stack_pointer[-1];
+            nos1 = stack_pointer[-2];
+            st = stack_pointer[-3];
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            nos2 = nos1;
+            tos2 = tos1;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -3;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_TAGGED_DOUBLE_r13: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            tos1 = _stack_item_0;
+            nos1 = stack_pointer[-1];
+            st = stack_pointer[-2];
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            nos2 = nos1;
+            tos2 = tos1;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache0 = stack_pointer[0];
+                SET_CURRENT_CACHED_VALUES(1);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -2;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_TAGGED_DOUBLE_r23: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            tos1 = _stack_item_1;
+            nos1 = _stack_item_0;
+            st = stack_pointer[-1];
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            nos2 = nos1;
+            tos2 = tos1;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache1 = stack_pointer[1];
+                _tos_cache0 = stack_pointer[0];
+                SET_CURRENT_CACHED_VALUES(2);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _THIRD_TO_TAGGED_DOUBLE_r33: {
+            CHECK_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef tos1;
+            _PyStackRef nos1;
+            _PyStackRef st;
+            _PyStackRef dbl;
+            _PyStackRef nos2;
+            _PyStackRef tos2;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            _PyStackRef _stack_item_2 = _tos_cache2;
+            tos1 = _stack_item_2;
+            nos1 = _stack_item_1;
+            st = _stack_item_0;
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            nos2 = nos1;
+            tos2 = tos1;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache2 = stack_pointer[2];
+                _tos_cache1 = stack_pointer[1];
+                _tos_cache0 = stack_pointer[0];
+                SET_CURRENT_CACHED_VALUES(3);
+                JUMP_TO_JUMP_TARGET();
+            }
+            dbl = PyStackRef_TagDouble(dres);
+            _tos_cache2 = tos2;
+            _tos_cache1 = nos2;
+            _tos_cache0 = dbl;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_TAGGED_DOUBLE_r03: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d * right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -2;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_TAGGED_DOUBLE_r13: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            right = _stack_item_0;
+            left = stack_pointer[-1];
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d * right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache0 = right;
+                SET_CURRENT_CACHED_VALUES(1);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_MULTIPLY_TAGGED_DOUBLE_r23: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            right = _stack_item_1;
+            left = _stack_item_0;
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d * right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache1 = right;
+                _tos_cache0 = left;
+                SET_CURRENT_CACHED_VALUES(2);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_ADD_TAGGED_DOUBLE_r03: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d + right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -2;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_ADD_TAGGED_DOUBLE_r13: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            right = _stack_item_0;
+            left = stack_pointer[-1];
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d + right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache0 = right;
+                SET_CURRENT_CACHED_VALUES(1);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_ADD_TAGGED_DOUBLE_r23: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            right = _stack_item_1;
+            left = _stack_item_0;
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d + right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache1 = right;
+                _tos_cache0 = left;
+                SET_CURRENT_CACHED_VALUES(2);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_TAGGED_DOUBLE_r03: {
+            CHECK_CURRENT_CACHED_VALUES(0);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            right = stack_pointer[-1];
+            left = stack_pointer[-2];
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d - right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                SET_CURRENT_CACHED_VALUES(0);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -2;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_TAGGED_DOUBLE_r13: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            right = _stack_item_0;
+            left = stack_pointer[-1];
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d - right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache0 = right;
+                SET_CURRENT_CACHED_VALUES(1);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
+        case _BINARY_OP_SUBTRACT_TAGGED_DOUBLE_r23: {
+            CHECK_CURRENT_CACHED_VALUES(2);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef right;
+            _PyStackRef left;
+            _PyStackRef res;
+            _PyStackRef l;
+            _PyStackRef r;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            _PyStackRef _stack_item_1 = _tos_cache1;
+            right = _stack_item_1;
+            left = _stack_item_0;
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d - right_d;
+            if (!PyStackRef_CanRepresentDouble(dres)) {
+                UOP_STAT_INC(uopcode, miss);
+                _tos_cache1 = right;
+                _tos_cache0 = left;
+                SET_CURRENT_CACHED_VALUES(2);
+                JUMP_TO_JUMP_TARGET();
+            }
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            _tos_cache2 = r;
+            _tos_cache1 = l;
+            _tos_cache0 = res;
+            SET_CURRENT_CACHED_VALUES(3);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            break;
+        }
+
         /* _TRACE_RECORD is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
 

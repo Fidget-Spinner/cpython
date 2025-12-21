@@ -5443,6 +5443,77 @@ dummy_func(
             }
         }
 
+        tier2 op(_THIRD_TO_FLOAT, (dbl, nos1, tos1 -- st, nos2, tos2)) {
+            double dres = PyStackRef_UntagDouble(dbl);
+            nos2 = nos1;
+            tos2 = tos1;
+            INPUTS_DEAD();
+            PyObject *res = PyFloat_FromDouble(dres);
+            ERROR_IF(res == NULL);
+            st = PyStackRef_FromPyObjectSteal(res);
+        }
+
+        tier2 op(_TOS_TO_TAGGED_DOUBLE, (st -- dbl)) {
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            dbl = PyStackRef_TagDouble(dres);
+        }
+
+        tier2 op(_NOS_TO_TAGGED_DOUBLE, (st, tos1 -- dbl, tos2)) {
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            tos2 = tos1;
+            INPUTS_DEAD();
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            dbl = PyStackRef_TagDouble(dres);
+        }
+
+        tier2 op(_THIRD_TO_TAGGED_DOUBLE, (st, nos1, tos1 -- dbl, nos2, tos2)) {
+            PyObject *st_o = PyStackRef_AsPyObjectBorrow(st);
+            double dres = ((PyFloatObject *)st_o)->ob_fval;
+            PyStackRef_CLOSE_SPECIALIZED(st, _PyFloat_ExactDealloc);
+            nos2 = nos1;
+            tos2 = tos1;
+            INPUTS_DEAD();
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            dbl = PyStackRef_TagDouble(dres);
+        }
+
+        pure op(_BINARY_OP_MULTIPLY_TAGGED_DOUBLE, (left, right -- res, l, r)) {
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d * right_d;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            INPUTS_DEAD();
+        }
+
+        pure op(_BINARY_OP_ADD_TAGGED_DOUBLE, (left, right -- res, l, r)) {
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d + right_d;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            INPUTS_DEAD();
+        }
+
+        pure op(_BINARY_OP_SUBTRACT_TAGGED_DOUBLE, (left, right -- res, l, r)) {
+            double left_d = PyStackRef_UntagDouble(left);
+            double right_d = PyStackRef_UntagDouble(right);
+            double dres = left_d - right_d;
+            EXIT_IF(!PyStackRef_CanRepresentDouble(dres));
+            res = PyStackRef_TagDouble(dres);
+            l = left;
+            r = right;
+            INPUTS_DEAD();
+        }
+
         label(pop_2_error) {
             stack_pointer -= 2;
             assert(WITHIN_STACK_BOUNDS());
