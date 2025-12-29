@@ -15,7 +15,7 @@ from test.support import (script_helper, requires_specialization,
 
 _testinternalcapi = import_helper.import_module("_testinternalcapi")
 
-from _testinternalcapi import _PY_NSMALLPOSINTS, TIER2_THRESHOLD
+from _testinternalcapi import _PY_NSMALLPOSINTS, TIER2_THRESHOLD, TIER2_RESUME_THRESHOLD
 
 #For test of issue 136154
 GLOBAL_136154 = 42
@@ -290,6 +290,18 @@ class TestUops(unittest.TestCase):
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
         self.assertIn("_JUMP_TO_TOP", uops)
+
+    def test_resume(self):
+        def testfunc(x):
+            if x <= 1:
+                return 1
+            return testfunc(x-1)
+
+        sys.setrecursionlimit(TIER2_RESUME_THRESHOLD * 2)
+        testfunc(TIER2_RESUME_THRESHOLD)
+
+        ex = get_first_executor(testfunc)
+        self.assertIsNotNone(ex)
 
     def test_jump_forward(self):
         def testfunc(n):

@@ -27,12 +27,15 @@ struct _gc_thread_state {
 typedef struct _PyJitTracerInitialState {
     int stack_depth;
     int chain_depth;
+    // This is different from start_instr, which may
+    // point to EXTENDED_ARG.
+    int trace_origin_opcode;
     struct _PyExitData *exit;
     PyCodeObject *code; // Strong
     PyFunctionObject *func; // Strong
     _Py_CODEUNIT *start_instr;
     _Py_CODEUNIT *close_loop_instr;
-    _Py_CODEUNIT *jump_backward_instr;
+    _Py_CODEUNIT *trace_enter_instr;
 } _PyJitTracerInitialState;
 
 typedef struct _PyJitTracerPreviousState {

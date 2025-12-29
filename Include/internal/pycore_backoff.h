@@ -133,7 +133,7 @@ initial_jump_backoff_counter(void)
                                 JUMP_BACKWARD_INITIAL_BACKOFF);
 }
 
-// Set this to slightly higher than JUMP_BACKWARD_INITIAL_VALUE
+// Set this to slightly (~25%) higher than JUMP_BACKWARD_INITIAL_VALUE
 #define RESUME_INITIAL_VALUE 5002
 #define RESUME_INITIAL_BACKOFF 6
 static inline _Py_BackoffCounter

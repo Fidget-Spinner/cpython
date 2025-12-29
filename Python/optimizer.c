@@ -677,6 +677,13 @@ _PyJit_translate_single_bytecode_to_trace(
         }
         assert(!OPCODE_HAS_EXIT(opcode));
         assert(!OPCODE_HAS_DEOPT(opcode));
+        // First instruction is a RESUME_CHECK_JIT and we are an ENTER_EXECUTOR.
+        // This might cause no progress
+        // and interfere with instrumentation. Skip the RESUME_CHECK_JIT
+        // Skip this instruction.
+        if (opcode == RESUME) {
+            return 1;
+        }
     }
 
     bool needs_guard_ip = OPCODE_HAS_NEEDS_GUARD_IP(opcode);
@@ -1014,7 +1021,7 @@ Py_NO_INLINE int
 _PyJit_TryInitializeTracing(
     PyThreadState *tstate, _PyInterpreterFrame *frame, _Py_CODEUNIT *curr_instr,
     _Py_CODEUNIT *start_instr, _Py_CODEUNIT *close_loop_instr, int curr_stackdepth, int chain_depth,
-    _PyExitData *exit, int oparg)
+    _PyExitData *exit, int opcode, int oparg)
 {
     _PyThreadStateImpl *_tstate = (_PyThreadStateImpl *)tstate;
     // A recursive trace.
@@ -1071,12 +1078,10 @@ _PyJit_TryInitializeTracing(
     _tstate->jit_tracer_state.prev_state.instr_frame = frame;
     _tstate->jit_tracer_state.prev_state.instr_oparg = oparg;
     _tstate->jit_tracer_state.prev_state.instr_stacklevel = curr_stackdepth;
-    assert(curr_instr->op.code == JUMP_BACKWARD_JIT || (exit != NULL));
-    _tstate->jit_tracer_state.initial_state.jump_backward_instr = curr_instr;
+    assert(curr_instr->op.code == JUMP_BACKWARD_JIT || curr_instr->op.code == RESUME_CHECK_JIT || (exit != NULL));
+    _tstate->jit_tracer_state.initial_state.trace_enter_instr = curr_instr;
+    _tstate->jit_tracer_state.initial_state.trace_origin_opcode = opcode;
 
-    if (_PyOpcode_Caches[_PyOpcode_Deopt[close_loop_instr->op.code]]) {
-        close_loop_instr[1].counter = trigger_backoff_counter();
-    }
     _Py_BloomFilter_Init(&_tstate->jit_tracer_state.prev_state.dependencies);
     return 1;
 }

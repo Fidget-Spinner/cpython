@@ -1394,7 +1394,8 @@ static const _Py_CODEUNIT _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS[] = {
     { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on return */
     { .op.code = NOP, .op.arg = 0 },
     { .op.code = INTERPRETER_EXIT, .op.arg = 0 },  /* reached on yield */
-    { .op.code = RESUME, .op.arg = RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START }
+    { .op.code = RESUME, .op.arg = RESUME_OPARG_DEPTH1_MASK | RESUME_AT_FUNC_START },
+    { .op.code = CACHE, .op.arg = 0 } /* RESUME's CACHE */
 };
 
 const _Py_CODEUNIT *_Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS_PTR = (_Py_CODEUNIT*)&_Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS;
@@ -1455,7 +1456,7 @@ _PyObjectArray_Free(PyObject **array, PyObject **scratch)
 
 #if _Py_TIER2
 // 0 for success, -1  for error.
-static int
+static Py_NO_INLINE int
 stop_tracing_and_jit(PyThreadState *tstate, _PyInterpreterFrame *frame)
 {
     int _is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL);
@@ -1469,11 +1470,14 @@ stop_tracing_and_jit(PyThreadState *tstate, _PyInterpreterFrame *frame)
     if (exit == NULL) {
         // We hold a strong reference to the code object, so the instruction won't be freed.
         if (err <= 0) {
-            _Py_BackoffCounter counter = _tstate->jit_tracer_state.initial_state.jump_backward_instr[1].counter;
-            _tstate->jit_tracer_state.initial_state.jump_backward_instr[1].counter = restart_backoff_counter(counter);
+            _Py_BackoffCounter counter = _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter;
+            _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter = restart_backoff_counter(counter);
         }
         else {
-            _tstate->jit_tracer_state.initial_state.jump_backward_instr[1].counter = initial_jump_backoff_counter();
+            int origin_opcode = _tstate->jit_tracer_state.initial_state.trace_origin_opcode;
+            assert(origin_opcode == JUMP_BACKWARD_JIT || origin_opcode == RESUME_CHECK_JIT);
+            _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter = origin_opcode == JUMP_BACKWARD_JIT
+                ? initial_jump_backoff_counter() : initial_resume_backoff_counter();
         }
     }
     else {

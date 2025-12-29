@@ -2691,6 +2691,12 @@ module_exec(PyObject *module)
         return 1;
     }
 
+    if (PyModule_Add(module, "TIER2_RESUME_THRESHOLD",
+        // + 1 more due to one loop spent on tracing.
+                    PyLong_FromLong(RESUME_INITIAL_VALUE + 2)) < 0) {
+        return 1;
+    }
+
     if (PyModule_Add(module, "SPECIALIZATION_THRESHOLD",
                         PyLong_FromLong(ADAPTIVE_WARMUP_VALUE + 1)) < 0) {
         return 1;

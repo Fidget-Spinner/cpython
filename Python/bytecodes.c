@@ -147,6 +147,7 @@ dummy_func(
 
         family(RESUME, 1) = {
             RESUME_CHECK,
+            RESUME_CHECK_JIT,
         };
 
         macro(NOT_TAKEN) = NOP;
@@ -171,7 +172,8 @@ dummy_func(
         op(_QUICKEN_RESUME, (--)) {
             #if ENABLE_SPECIALIZATION_FT
             if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                uint8_t desired = tstate->interp->jit ? RESUME_CHECK_JIT : RESUME_CHECK;
+                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, desired);
             }
             #endif  /* ENABLE_SPECIALIZATION_FT */
         }
@@ -224,7 +226,11 @@ dummy_func(
             _QUICKEN_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
-        inst(RESUME_CHECK, (unused/1 --)) {
+        macro(RESUME_CHECK) =
+            unused/1 +
+            _RESUME_CHECK;
+
+        op(_RESUME_CHECK, (--)) {
 #if defined(__EMSCRIPTEN__)
             DEOPT_IF(_Py_emscripten_signal_clock == 0);
             _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
@@ -239,6 +245,11 @@ dummy_func(
             #endif
         }
 
+        macro(RESUME_CHECK_JIT) =
+            unused/1 +
+            _RESUME_CHECK +
+            _JIT;
+
         op(_MONITOR_RESUME, (--)) {
             int err = _Py_call_instrumentation(
                     tstate, oparg == 0 ? PY_MONITORING_EVENT_PY_START : PY_MONITORING_EVENT_PY_RESUME, frame, this_instr);
@@ -250,6 +261,7 @@ dummy_func(
         }
 
         macro(INSTRUMENTED_RESUME) =
+            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM +
@@ -2953,7 +2965,8 @@ dummy_func(
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
             if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                this_instr->op.code == JUMP_BACKWARD_JIT &&
+                (this_instr->op.code == JUMP_BACKWARD_JIT ||
+                    this_instr->op.code == RESUME_CHECK_JIT) &&
                 next_instr->op.code != ENTER_EXECUTOR) {
                 /* Back up over EXTENDED_ARGs so executor is inserted at the correct place */
                 _Py_CODEUNIT *insert_exec_at = this_instr;
@@ -2961,7 +2974,8 @@ dummy_func(
                     oparg >>= 8;
                     insert_exec_at--;
                 }
-                int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, insert_exec_at, next_instr, STACK_LEVEL(), 0, NULL, oparg);
+                int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, insert_exec_at, next_instr,
+                    STACK_LEVEL(), 0, NULL, opcode, oparg);
                 if (succ) {
                     ENTER_TRACING();
                 }
@@ -5390,7 +5404,8 @@ dummy_func(
                 // Note: it's safe to use target->op.arg here instead of the oparg given by EXTENDED_ARG.
                 // The invariant in the optimizer is the deopt target always points back to the first EXTENDED_ARG.
                 // So setting it to anything else is wrong.
-                int succ = _PyJit_TryInitializeTracing(tstate, frame, target, target, target, STACK_LEVEL(), chain_depth, exit, target->op.arg);
+                int succ = _PyJit_TryInitializeTracing(tstate, frame, target, target, target, STACK_LEVEL(),
+                    chain_depth, exit, target->op.code, target->op.arg);
                 exit->temperature = restart_backoff_counter(exit->temperature);
                 if (succ) {
                     GOTO_TIER_ONE_CONTINUE_TRACING(target);
