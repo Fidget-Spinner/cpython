@@ -96,6 +96,9 @@ _cache_format = {
     "SEND": {
         "counter": 1,
     },
+    "RESUME": {
+        "counter": 1,
+    },
     "JUMP_BACKWARD": {
         "counter": 1,
     },
