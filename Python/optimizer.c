@@ -645,11 +645,28 @@ _PyJit_translate_single_bytecode_to_trace(
     // We must point to the first EXTENDED_ARG when deopting.
     int oparg = _tstate->jit_tracer_state.prev_state.instr_oparg;
     int opcode = this_instr->op.code;
+
+    if (opcode == ENTER_EXECUTOR) {
+        _PyExecutorObject *executor = old_code->co_executors->executors[oparg & 255];
+        opcode = executor->vm_data.opcode;
+        oparg = (oparg & ~255) | executor->vm_data.oparg;
+        // To create longer traces, peek under and continue tracing
+        // function entry executors.
+        // For all other executors, we want to link to them.
+        if (opcode != RESUME_CHECK_JIT) {
+            ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+            goto full;
+        }
+    }
+
     int rewind_oparg = oparg;
     while (rewind_oparg > 255) {
         rewind_oparg >>= 8;
         target--;
     }
+
+    DPRINTF(2, "%p %d: %s(%d) %d\n", old_code, target,
+    _PyOpcode_OpName[opcode], oparg,  _tstate->jit_tracer_state.prev_state.instr_stacklevel);
 
     if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]] > 0) {
         uint16_t backoff = (this_instr + 1)->counter.value_and_backoff;
@@ -673,19 +690,6 @@ _PyJit_translate_single_bytecode_to_trace(
     // Strange control-flow
     bool has_dynamic_jump_taken = OPCODE_HAS_UNPREDICTABLE_JUMP(opcode) &&
         (next_instr != this_instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]]);
-
-    if (opcode == ENTER_EXECUTOR) {
-        _PyExecutorObject *executor = old_code->co_executors->executors[oparg & 255];
-        opcode = executor->vm_data.opcode;
-        oparg = (oparg & ~255) | executor->vm_data.oparg;
-        // To create longer traces, peek under and continue tracing
-        // function entry executors.
-        // For all other executors, we want to link to them.
-        if (opcode != RESUME_CHECK_JIT) {
-            ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
-            goto full;
-        }
-    }
 
     /* Special case the first instruction,
     * so that we can guarantee forward progress */
@@ -720,9 +724,6 @@ _PyJit_translate_single_bytecode_to_trace(
         ADD_TO_TRACE(stop_tracing_opcode, 0, 0, target);
         goto done;
     }
-
-    DPRINTF(2, "%p %d: %s(%d) %d %d\n", old_code, target,
-        _PyOpcode_OpName[opcode], oparg, needs_guard_ip,  _tstate->jit_tracer_state.prev_state.instr_stacklevel);
 
 #ifdef Py_DEBUG
     if (oparg > 255) {
