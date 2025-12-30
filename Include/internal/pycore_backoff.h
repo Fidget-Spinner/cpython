@@ -133,8 +133,11 @@ initial_jump_backoff_counter(void)
                                 JUMP_BACKWARD_INITIAL_BACKOFF);
 }
 
-// Set this to slightly (~25%) higher than JUMP_BACKWARD_INITIAL_VALUE
-#define RESUME_INITIAL_VALUE 5002
+// This needs to be around 2-4x of JUMP_BACKWARD_INITIAL_VALUE
+// The reasoning is that we always want loop traces to form and inline
+// functions before functions themselves warm up and link to them instead
+// of inlining.
+#define RESUME_INITIAL_VALUE 7917
 #define RESUME_INITIAL_BACKOFF 6
 static inline _Py_BackoffCounter
 initial_resume_backoff_counter(void)
