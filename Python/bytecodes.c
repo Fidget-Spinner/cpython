@@ -247,7 +247,8 @@ dummy_func(
 
         macro(RESUME_CHECK_JIT) =
             unused/1 +
-            _RESUME_CHECK;
+            _RESUME_CHECK +
+            _JIT;
 
         op(_MONITOR_RESUME, (--)) {
             int err = _Py_call_instrumentation(
@@ -2964,8 +2965,7 @@ dummy_func(
         #ifdef _Py_TIER2
             _Py_BackoffCounter counter = this_instr[1].counter;
             if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                (this_instr->op.code == JUMP_BACKWARD_JIT ||
-                    this_instr->op.code == RESUME_CHECK_JIT) &&
+                (this_instr->op.code == JUMP_BACKWARD_JIT) &&
                 next_instr->op.code != ENTER_EXECUTOR) {
                 /* Back up over EXTENDED_ARGs so executor is inserted at the correct place */
                 _Py_CODEUNIT *insert_exec_at = this_instr;

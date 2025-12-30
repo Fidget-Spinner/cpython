@@ -7306,8 +7306,7 @@
                 #ifdef _Py_TIER2
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                    (this_instr->op.code == JUMP_BACKWARD_JIT ||
-                        this_instr->op.code == RESUME_CHECK_JIT) &&
+                    (this_instr->op.code == JUMP_BACKWARD_JIT) &&
                     next_instr->op.code != ENTER_EXECUTOR) {
                     _Py_CODEUNIT *insert_exec_at = this_instr;
                     while (oparg > 255) {
@@ -10030,32 +10029,62 @@
             frame->instr_ptr = next_instr;
             next_instr += 2;
             INSTRUCTION_STATS(RESUME_CHECK_JIT);
+            opcode = RESUME_CHECK_JIT;
             static_assert(1 == 1, "incorrect cache size");
             /* Skip 1 cache entry */
-            #if defined(__EMSCRIPTEN__)
-            if (_Py_emscripten_signal_clock == 0) {
-                UPDATE_MISS_STATS(RESUME);
-                assert(_PyOpcode_Deopt[opcode] == (RESUME));
-                JUMP_TO_PREDICTED(RESUME);
+            // _RESUME_CHECK
+            {
+                #if defined(__EMSCRIPTEN__)
+                if (_Py_emscripten_signal_clock == 0) {
+                    UPDATE_MISS_STATS(RESUME);
+                    assert(_PyOpcode_Deopt[opcode] == (RESUME));
+                    JUMP_TO_PREDICTED(RESUME);
+                }
+                _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
+                #endif
+                uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
+                uintptr_t version = FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version);
+                assert((version & _PY_EVAL_EVENTS_MASK) == 0);
+                if (eval_breaker != version) {
+                    UPDATE_MISS_STATS(RESUME);
+                    assert(_PyOpcode_Deopt[opcode] == (RESUME));
+                    JUMP_TO_PREDICTED(RESUME);
+                }
+                #ifdef Py_GIL_DISABLED
+                if (frame->tlbc_index !=
+                    ((_PyThreadStateImpl *)tstate)->tlbc_index) {
+                    UPDATE_MISS_STATS(RESUME);
+                    assert(_PyOpcode_Deopt[opcode] == (RESUME));
+                    JUMP_TO_PREDICTED(RESUME);
+                }
+                #endif
             }
-            _Py_emscripten_signal_clock -= Py_EMSCRIPTEN_SIGNAL_HANDLING;
-            #endif
-            uintptr_t eval_breaker = _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker);
-            uintptr_t version = FT_ATOMIC_LOAD_UINTPTR_ACQUIRE(_PyFrame_GetCode(frame)->_co_instrumentation_version);
-            assert((version & _PY_EVAL_EVENTS_MASK) == 0);
-            if (eval_breaker != version) {
-                UPDATE_MISS_STATS(RESUME);
-                assert(_PyOpcode_Deopt[opcode] == (RESUME));
-                JUMP_TO_PREDICTED(RESUME);
+            // _JIT
+            {
+                #ifdef _Py_TIER2
+                _Py_BackoffCounter counter = this_instr[1].counter;
+                if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
+                    (this_instr->op.code == JUMP_BACKWARD_JIT) &&
+                    next_instr->op.code != ENTER_EXECUTOR) {
+                    _Py_CODEUNIT *insert_exec_at = this_instr;
+                    while (oparg > 255) {
+                        oparg >>= 8;
+                        insert_exec_at--;
+                    }
+                    int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, insert_exec_at, next_instr,
+                        STACK_LEVEL(), 0, NULL, opcode, oparg);
+                    if (succ) {
+                        ENTER_TRACING();
+                    }
+                    else {
+                        this_instr[1].counter = restart_backoff_counter(counter);
+                    }
+                }
+                else {
+                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                #endif
             }
-            #ifdef Py_GIL_DISABLED
-            if (frame->tlbc_index !=
-                ((_PyThreadStateImpl *)tstate)->tlbc_index) {
-                UPDATE_MISS_STATS(RESUME);
-                assert(_PyOpcode_Deopt[opcode] == (RESUME));
-                JUMP_TO_PREDICTED(RESUME);
-            }
-            #endif
             DISPATCH();
         }
 
