@@ -589,15 +589,22 @@ add_to_trace(
     }
 
 static int
-is_terminator(const _PyUOpInstruction *uop)
+opcode_is_terminator(int opcode)
 {
-    int opcode = _PyUop_Uncached[uop->opcode];
     return (
         opcode == _EXIT_TRACE ||
         opcode == _DEOPT ||
         opcode == _JUMP_TO_TOP ||
         opcode == _DYNAMIC_EXIT
     );
+}
+
+static int
+is_terminator(const _PyUOpInstruction *uop)
+{
+    int opcode = uop->opcode;
+    int base_opcode = _PyUop_Uncached[uop->opcode];
+    return opcode_is_terminator(opcode) || opcode_is_terminator(base_opcode);
 }
 
 /* Returns 1 on success (added to trace), 0 on trace end.
@@ -663,11 +670,22 @@ _PyJit_translate_single_bytecode_to_trace(
         }
     }
 
-    int old_stack_level = _tstate->jit_tracer_state.prev_state.instr_stacklevel;
-
     // Strange control-flow
     bool has_dynamic_jump_taken = OPCODE_HAS_UNPREDICTABLE_JUMP(opcode) &&
         (next_instr != this_instr + 1 + _PyOpcode_Caches[_PyOpcode_Deopt[opcode]]);
+
+    if (opcode == ENTER_EXECUTOR) {
+        _PyExecutorObject *executor = old_code->co_executors->executors[oparg & 255];
+        opcode = executor->vm_data.opcode;
+        oparg = (oparg & ~255) | executor->vm_data.oparg;
+        // To create longer traces, peek under and continue tracing
+        // function entry executors.
+        // For all other executors, we want to link to them.
+        if (opcode != RESUME_CHECK_JIT) {
+            ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+            goto full;
+        }
+    }
 
     /* Special case the first instruction,
     * so that we can guarantee forward progress */
@@ -677,13 +695,6 @@ _PyJit_translate_single_bytecode_to_trace(
         }
         assert(!OPCODE_HAS_EXIT(opcode));
         assert(!OPCODE_HAS_DEOPT(opcode));
-        // First instruction is a RESUME_CHECK_JIT and we are an ENTER_EXECUTOR.
-        // This might cause no progress
-        // and interfere with instrumentation. Skip the RESUME_CHECK_JIT
-        // Skip this instruction.
-        if (opcode == RESUME) {
-            return 1;
-        }
     }
 
     bool needs_guard_ip = OPCODE_HAS_NEEDS_GUARD_IP(opcode);
@@ -710,7 +721,8 @@ _PyJit_translate_single_bytecode_to_trace(
         goto done;
     }
 
-    DPRINTF(2, "%p %d: %s(%d) %d %d\n", old_code, target, _PyOpcode_OpName[opcode], oparg, needs_guard_ip, old_stack_level);
+    DPRINTF(2, "%p %d: %s(%d) %d %d\n", old_code, target,
+        _PyOpcode_OpName[opcode], oparg, needs_guard_ip,  _tstate->jit_tracer_state.prev_state.instr_stacklevel);
 
 #ifdef Py_DEBUG
     if (oparg > 255) {
@@ -836,7 +848,6 @@ _PyJit_translate_single_bytecode_to_trace(
                 // inner loop might start and let the traces rejoin.
                 OPT_STAT_INC(inner_loop);
                 ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
-                trace[trace_length-1].operand1 = true; // is_control_flow
                 DPRINTF(2, "JUMP_BACKWARD not to top ends trace %p %p %p\n", next_instr,
                     _tstate->jit_tracer_state.initial_state.close_loop_instr, _tstate->jit_tracer_state.initial_state.start_instr);
                 goto done;
@@ -846,6 +857,7 @@ _PyJit_translate_single_bytecode_to_trace(
 
         case RESUME:
         case RESUME_CHECK:
+        case RESUME_CHECK_JIT:
             /* Use a special tier 2 version of RESUME_CHECK to allow traces to
              *  start with RESUME_CHECK */
             ADD_TO_TRACE(_TIER2_RESUME_CHECK, 0, 0, target);
@@ -1008,7 +1020,6 @@ full:
         // We previously reversed one.
         max_length += 1;
         ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
-        trace[trace_length-1].operand1 = true; // is_control_flow
     }
     _tstate->jit_tracer_state.prev_state.code_curr_size = trace_length;
     _tstate->jit_tracer_state.prev_state.code_max_size = max_length;
@@ -1142,7 +1153,7 @@ get_cached_entries_for_side_exit(_PyUOpInstruction *inst)
     Py_UNREACHABLE();
 }
 
-static void make_exit(_PyUOpInstruction *inst, int opcode, int target, bool is_control_flow)
+static void make_exit(_PyUOpInstruction *inst, int opcode, int target)
 {
     assert(opcode > MAX_UOP_ID && opcode <= MAX_UOP_REGS_ID);
     inst->opcode = opcode;
@@ -1150,7 +1161,6 @@ static void make_exit(_PyUOpInstruction *inst, int opcode, int target, bool is_c
     inst->operand0 = 0;
     inst->format = UOP_FORMAT_TARGET;
     inst->target = target;
-    inst->operand1 = is_control_flow;
 #ifdef Py_STATS
     inst->execution_count = 0;
 #endif
@@ -1206,9 +1216,8 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             int exit_depth = get_cached_entries_for_side_exit(inst);
             assert(_PyUop_Caching[base_exit_op].entries[exit_depth].opcode > 0);
             int16_t exit_op = _PyUop_Caching[base_exit_op].entries[exit_depth].opcode;
-            bool is_control_flow = (base_opcode == _GUARD_IS_FALSE_POP || base_opcode == _GUARD_IS_TRUE_POP || is_for_iter_test[base_opcode]);
             if (jump_target != current_jump_target || current_exit_op != exit_op) {
-                make_exit(&buffer[next_spare], exit_op, jump_target, is_control_flow);
+                make_exit(&buffer[next_spare], exit_op, jump_target);
                 current_exit_op = exit_op;
                 current_jump_target = jump_target;
                 current_jump = next_spare;
@@ -1224,7 +1233,7 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 current_popped = popped;
                 current_error = next_spare;
                 current_error_target = target;
-                make_exit(&buffer[next_spare], _ERROR_POP_N_r00, 0, false);
+                make_exit(&buffer[next_spare], _ERROR_POP_N_r00, 0);
                 buffer[next_spare].operand0 = target;
                 next_spare++;
             }
@@ -1363,7 +1372,6 @@ make_executor_from_uops(_PyUOpInstruction *buffer, int length, const _PyBloomFil
             dest->operand0 = (uint64_t)exit;
             exit->executor = base_opcode == _EXIT_TRACE ? cold : cold_dynamic;
             exit->is_dynamic = (char)(base_opcode == _DYNAMIC_EXIT);
-            exit->is_control_flow = (char)buffer[i].operand1;
             next_exit--;
         }
     }

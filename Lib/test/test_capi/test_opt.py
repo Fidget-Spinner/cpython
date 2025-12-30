@@ -44,9 +44,25 @@ def get_all_executors(func):
     code = func.__code__
     co_code = code.co_code
     executors = []
+    seen = set()
     for i in range(0, len(co_code), 2):
         try:
-            executors.append(_opcode.get_executor(code, i))
+            exec = _opcode.get_executor(code, i)
+            if id(exec) in seen:
+                continue
+            executors.append(exec)
+            seen.add(id(exec))
+            # Add the side exit executors as well.
+            ops = get_ops(exec)
+            for idx, op in enumerate(ops):
+                opname = op[0]
+                if opname == "_EXIT_TRACE":
+                    exit = op[3]
+                    link_to = _testinternalcapi.get_exit_executor(exit)
+                    if id(link_to) in seen:
+                        continue
+                    executors.append(link_to)
+                    seen.add(id(link_to))
         except ValueError:
             pass
     return executors

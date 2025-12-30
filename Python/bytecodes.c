@@ -3026,27 +3026,24 @@ dummy_func(
 
         tier1 inst(ENTER_EXECUTOR, (--)) {
             #ifdef _Py_TIER2
-            if (IS_JIT_TRACING()) {
-                next_instr = this_instr;
-                goto stop_tracing;
-            }
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
             assert(executor->vm_data.index == INSTR_OFFSET() - 1);
             assert(executor->vm_data.code == code);
             assert(executor->vm_data.valid);
             assert(tstate->current_executor == NULL);
-            /* If the eval breaker is set then stay in tier 1.
+            /* If we are tracing or
+             * the eval breaker is set then stay in tier 1.
              * This avoids any potentially infinite loops
              * involving _RESUME_CHECK */
-            if (_Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
+            if (IS_JIT_TRACING() || _Py_atomic_load_uintptr_relaxed(&tstate->eval_breaker) & _PY_EVAL_EVENTS_MASK) {
                 opcode = executor->vm_data.opcode;
                 oparg = (oparg & ~255) | executor->vm_data.oparg;
                 next_instr = this_instr;
                 if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
                     PAUSE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 }
-                DISPATCH_GOTO();
+                DISPATCH_GOTO_NON_TRACING();
             }
             assert(executor != tstate->interp->cold_executor);
             tstate->jit_exit = NULL;
@@ -5188,10 +5185,10 @@ dummy_func(
             if (frame->lltrace >= 3) {
                 printf("SIDE EXIT: [UOp ");
                 _PyUOpPrint(&next_uop[-1]);
-                printf(", exit %tu, temp %d, target %d -> %s, is_control_flow %d]\n",
+                printf(", exit %tu, temp %d, target %d -> %s]\n",
                     exit - current_executor->exits, exit->temperature.value_and_backoff,
                     (int)(target - _PyFrame_GetBytecode(frame)),
-                    _PyOpcode_OpName[target->op.code], exit->is_control_flow);
+                    _PyOpcode_OpName[target->op.code]);
             }
         #endif
             tstate->jit_exit = exit;
@@ -5398,9 +5395,7 @@ dummy_func(
                 }
                 _PyExecutorObject *previous_executor = _PyExecutor_FromExit(exit);
                 assert(tstate->current_executor == (PyObject *)previous_executor);
-                // For control-flow guards, we don't want to increase the chain depth, as those don't actually
-                // represent deopts but rather just normal programs!
-                int chain_depth = previous_executor->vm_data.chain_depth + !exit->is_control_flow;
+                int chain_depth = previous_executor->vm_data.chain_depth + 1;
                 // Note: it's safe to use target->op.arg here instead of the oparg given by EXTENDED_ARG.
                 // The invariant in the optimizer is the deopt target always points back to the first EXTENDED_ARG.
                 // So setting it to anything else is wrong.
@@ -5618,7 +5613,9 @@ dummy_func(
                 LEAVE_TRACING();
                 int err = stop_tracing_and_jit(tstate, frame);
                 ERROR_IF(err < 0);
-                DISPATCH();
+                // We can't use DISPATCH() here, as it may clobber oparg,
+                // which may have been set by a previous EXTENDED_ARG.
+                DISPATCH_GOTO_NON_TRACING();
             }
             // Super instructions. Instruction deopted. There's a mismatch in what the stack expects
             // in the optimizer. So we have to reflect in the trace correctly.
@@ -5644,19 +5641,6 @@ dummy_func(
 #endif
         }
 
-        label(stop_tracing) {
-#if _Py_TIER2
-            assert(IS_JIT_TRACING());
-            int opcode = next_instr->op.code;
-            _PyJit_translate_single_bytecode_to_trace(tstate, frame, NULL, _EXIT_TRACE);
-            LEAVE_TRACING();
-            int err = stop_tracing_and_jit(tstate, frame);
-            ERROR_IF(err < 0);
-            DISPATCH_GOTO_NON_TRACING();
-#else
-            Py_FatalError("JIT label executed in non-jit build.");
-#endif
-        }
 
 
 // END BYTECODES //
