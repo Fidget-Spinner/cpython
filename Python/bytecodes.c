@@ -247,8 +247,7 @@ dummy_func(
 
         macro(RESUME_CHECK_JIT) =
             unused/1 +
-            _RESUME_CHECK +
-            _JIT;
+            _RESUME_CHECK;
 
         op(_MONITOR_RESUME, (--)) {
             int err = _Py_call_instrumentation(
@@ -3026,6 +3025,10 @@ dummy_func(
 
         tier1 inst(ENTER_EXECUTOR, (--)) {
             #ifdef _Py_TIER2
+            if (IS_JIT_TRACING()) {
+                next_instr = this_instr;
+                goto stop_tracing;
+            }
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
             assert(executor->vm_data.index == INSTR_OFFSET() - 1);
@@ -5641,7 +5644,19 @@ dummy_func(
 #endif
         }
 
-
+        label(stop_tracing) {
+#if _Py_TIER2
+            assert(IS_JIT_TRACING());
+            int opcode = next_instr->op.code;
+            _PyJit_translate_single_bytecode_to_trace(tstate, frame, NULL, _EXIT_TRACE);
+            LEAVE_TRACING();
+            int err = stop_tracing_and_jit(tstate, frame);
+            ERROR_IF(err < 0);
+            DISPATCH_GOTO_NON_TRACING();
+#else
+            Py_FatalError("JIT label executed in non-jit build.");
+#endif
+        }
 
 // END BYTECODES //
 
