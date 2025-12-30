@@ -647,16 +647,7 @@ _PyJit_translate_single_bytecode_to_trace(
     int opcode = this_instr->op.code;
 
     if (opcode == ENTER_EXECUTOR) {
-        _PyExecutorObject *executor = old_code->co_executors->executors[oparg & 255];
-        opcode = executor->vm_data.opcode;
-        oparg = (oparg & ~255) | executor->vm_data.oparg;
-        // To create longer traces, peek under and continue tracing
-        // function entry executors.
-        // For all other executors, we want to link to them.
-        if (opcode != RESUME_CHECK_JIT) {
-            ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
-            goto full;
-        }
+        goto full;
     }
 
     int rewind_oparg = oparg;
