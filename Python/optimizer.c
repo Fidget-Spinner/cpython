@@ -1085,6 +1085,9 @@ _PyJit_TryInitializeTracing(
     _tstate->jit_tracer_state.initial_state.trace_enter_instr = curr_instr;
     _tstate->jit_tracer_state.initial_state.trace_origin_opcode = opcode;
 
+    if (_PyOpcode_Caches[_PyOpcode_Deopt[close_loop_instr->op.code]]) {
+        close_loop_instr[1].counter = trigger_backoff_counter();
+    }
     _Py_BloomFilter_Init(&_tstate->jit_tracer_state.prev_state.dependencies);
     return 1;
 }
