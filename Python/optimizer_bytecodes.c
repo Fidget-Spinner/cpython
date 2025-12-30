@@ -966,6 +966,12 @@ dummy_func(void) {
             // handled by the tracer.
             ctx->frame->func = func;
         }
+        // Fixed calls don't need IP guards.
+        if ((this_instr-2)->opcode == _INIT_CALL_PY_EXACT_ARGS ||
+            (this_instr-1)->opcode == _CREATE_INIT_FRAME) {
+            assert((this_instr+1)->opcode == _GUARD_IP__PUSH_FRAME);
+            REPLACE_OP(this_instr+1, _NOP, 0, 0);
+            }
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg], top[0])) {
