@@ -646,6 +646,18 @@ _PyJit_translate_single_bytecode_to_trace(
     int oparg = _tstate->jit_tracer_state.prev_state.instr_oparg;
     int opcode = this_instr->op.code;
 
+
+    // Peek under the executor to form a longer trace.
+    if (opcode == ENTER_EXECUTOR) {
+        _PyExecutorObject *executor = old_code->co_executors->executors[this_instr->op.arg];
+        opcode = executor->vm_data.opcode;
+        oparg = (oparg & ~255) | executor->vm_data.oparg;
+        // Except for when it's a backwards jump executor, we want to link to those.
+        if (opcode == JUMP_BACKWARD_JIT) {
+            goto full;
+        }
+    }
+
     int rewind_oparg = oparg;
     while (rewind_oparg > 255) {
         rewind_oparg >>= 8;
@@ -1212,8 +1224,6 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
             int exit_depth = get_cached_entries_for_side_exit(inst);
             assert(_PyUop_Caching[base_exit_op].entries[exit_depth].opcode > 0);
             int16_t exit_op = _PyUop_Caching[base_exit_op].entries[exit_depth].opcode;
-            // Note: The for loop guards are not in here, as we don't want to interfere with other loop tracing the
-            // exhausted iteration.
             bool is_control_flow = (base_opcode == _GUARD_IS_FALSE_POP || base_opcode == _GUARD_IS_TRUE_POP ||
                 base_opcode == _GUARD_IS_NONE_POP || base_opcode == _GUARD_IS_NOT_NONE_POP || is_for_iter_test[base_opcode]);
             if (jump_target != current_jump_target || current_exit_op != exit_op) {
