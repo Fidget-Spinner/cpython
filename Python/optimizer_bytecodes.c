@@ -970,7 +970,7 @@ dummy_func(void) {
         if ((this_instr-1)->opcode == _CREATE_INIT_FRAME) {
             assert((this_instr+1)->opcode == _GUARD_IP__PUSH_FRAME);
             REPLACE_OP(this_instr+1, _NOP, 0, 0);
-            }
+        }
     }
 
     op(_UNPACK_SEQUENCE, (seq -- values[oparg], top[0])) {
