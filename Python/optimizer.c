@@ -646,18 +646,6 @@ _PyJit_translate_single_bytecode_to_trace(
     int oparg = _tstate->jit_tracer_state.prev_state.instr_oparg;
     int opcode = this_instr->op.code;
 
-
-    // Peek under the executor to form a longer trace.
-    if (opcode == ENTER_EXECUTOR) {
-        _PyExecutorObject *executor = old_code->co_executors->executors[this_instr->op.arg];
-        opcode = executor->vm_data.opcode;
-        oparg = (oparg & ~255) | executor->vm_data.oparg;
-        // Except for when it's a backwards jump executor, we want to link to those.
-        if (opcode == JUMP_BACKWARD_JIT) {
-            goto full;
-        }
-    }
-
     int rewind_oparg = oparg;
     while (rewind_oparg > 255) {
         rewind_oparg >>= 8;
