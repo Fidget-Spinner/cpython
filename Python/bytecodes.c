@@ -5616,7 +5616,7 @@ dummy_func(
             if (full) {
                 LEAVE_TRACING();
                 int err = stop_tracing_and_jit(tstate, frame);
-                ERROR_IF(err < 0);.
+                ERROR_IF(err < 0);
                 DISPATCH();
             }
             // Super instructions. Instruction deopted. There's a mismatch in what the stack expects
