@@ -11538,7 +11538,7 @@
                 if (err < 0) {
                     JUMP_TO_LABEL(error);
                 }
-                DISPATCH_GOTO_NON_TRACING();
+                DISPATCH();
             }
             _PyThreadStateImpl *_tstate = (_PyThreadStateImpl *)tstate;
             _tstate->jit_tracer_state.prev_state.instr = next_instr;

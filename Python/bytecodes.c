@@ -5616,10 +5616,8 @@ dummy_func(
             if (full) {
                 LEAVE_TRACING();
                 int err = stop_tracing_and_jit(tstate, frame);
-                ERROR_IF(err < 0);
-                // We can't use DISPATCH() here, as it may clobber oparg,
-                // which may have been set by a previous EXTENDED_ARG.
-                DISPATCH_GOTO_NON_TRACING();
+                ERROR_IF(err < 0);.
+                DISPATCH();
             }
             // Super instructions. Instruction deopted. There's a mismatch in what the stack expects
             // in the optimizer. So we have to reflect in the trace correctly.
