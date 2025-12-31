@@ -2992,6 +2992,7 @@ dummy_func(
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
             }
             // For some reason, RESUME_CHECK_JIT is quite expensive compared to RESUME.
+            // It's enough to show up as a 10-20% slowdown in some benchmarks!
             // For that reason, we replace it back with RESUME immediately.
             // In JIT builds, we thus stick only to RESUME and wait for it to specialize to RESUME_CHECK_JIT.
             // This amkes RESUME slightly slower, but since the JIT is faster it makes up for it.
