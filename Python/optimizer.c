@@ -981,6 +981,30 @@ _PyJit_translate_single_bytecode_to_trace(
                     }
                     ADD_TO_TRACE(uop, oparg, operand, target);
                     trace[trace_length - 1].operand1 = PyStackRef_IsNone(frame->f_executable) ? 2 : ((int)(frame->stackpointer - _PyFrame_Stackbase(frame)));
+                    // If this is a function trace, terminate when we underflow.
+                    // Otherwise this leads to trace explosion
+                    // when we trace the underflow especially for recursion which
+                    // hurts performance.
+                    bool is_resume_trace = _PyOpcode_Deopt[_tstate->jit_tracer_state.initial_state.trace_origin_opcode] == RESUME;
+                    if (is_resume_trace &&
+                        (uop == _RETURN_VALUE || uop == _RETURN_GENERATOR || uop == _YIELD_VALUE)) {
+                        if (_tstate->jit_tracer_state.prev_state.instr_frame == _tstate->jit_tracer_state.initial_state.frame) {
+                            uint16_t guard_ip = guard_ip_uop[trace[trace_length-1].opcode];
+                            assert(guard_ip != 0);
+                            ADD_TO_TRACE(guard_ip, 0, (uintptr_t)next_instr, 0);
+                            uint32_t new_target = Py_IsNone((PyObject*)new_code)
+                                ? (uint32_t)(next_instr - _Py_INTERPRETER_TRAMPOLINE_INSTRUCTIONS_PTR)
+                                : INSTR_IP(next_instr, new_code);
+                            // Can't exit in the middle of an init frame. Deopt instead.
+                            if (new_code == (PyCodeObject *)&_Py_InitCleanup) {
+                                ADD_TO_TRACE(_DEOPT, 0, 0, new_target);
+                            }
+                            else {
+                                ADD_TO_TRACE(_EXIT_TRACE, 0, 0, new_target);
+                            }
+                            goto done;
+                        }
+                    }
                     break;
                 }
                 if (uop == _BINARY_OP_INPLACE_ADD_UNICODE) {
@@ -1102,14 +1126,14 @@ _PyJit_TryInitializeTracing(
     _tstate->jit_tracer_state.initial_state.exit = exit;
     _tstate->jit_tracer_state.initial_state.stack_depth = curr_stackdepth;
     _tstate->jit_tracer_state.initial_state.chain_depth = chain_depth;
-    _tstate->jit_tracer_state.prev_state.instr_frame = frame;
+    _tstate->jit_tracer_state.initial_state.frame = frame;
     _tstate->jit_tracer_state.prev_state.dependencies_still_valid = true;
     _tstate->jit_tracer_state.prev_state.instr_code = (PyCodeObject *)Py_NewRef(_PyFrame_GetCode(frame));
     _tstate->jit_tracer_state.prev_state.instr = curr_instr;
     _tstate->jit_tracer_state.prev_state.instr_frame = frame;
     _tstate->jit_tracer_state.prev_state.instr_oparg = oparg;
     _tstate->jit_tracer_state.prev_state.instr_stacklevel = curr_stackdepth;
-    assert(curr_instr->op.code == JUMP_BACKWARD_JIT || curr_instr->op.code == RESUME_CHECK_JIT || (exit != NULL));
+    assert(curr_instr->op.code == JUMP_BACKWARD_JIT || _PyOpcode_Deopt[curr_instr->op.code] == RESUME || (exit != NULL));
     _tstate->jit_tracer_state.initial_state.trace_enter_instr = curr_instr;
     _tstate->jit_tracer_state.initial_state.trace_origin_opcode = opcode;
 

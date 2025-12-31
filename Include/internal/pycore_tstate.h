@@ -36,6 +36,7 @@ typedef struct _PyJitTracerInitialState {
     _Py_CODEUNIT *start_instr;
     _Py_CODEUNIT *close_loop_instr;
     _Py_CODEUNIT *trace_enter_instr;
+    struct _PyInterpreterFrame *frame;
 } _PyJitTracerInitialState;
 
 typedef struct _PyJitTracerPreviousState {

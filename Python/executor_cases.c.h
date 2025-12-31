@@ -253,6 +253,8 @@
             break;
         }
 
+        /* _QUICKEN_TO_RESUME_CHECK is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
+
         /* _MONITOR_RESUME is not a viable micro-op for tier 2 because it uses the 'this_instr' variable */
 
         case _LOAD_FAST_CHECK_r01: {

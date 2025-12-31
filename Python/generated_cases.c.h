@@ -7306,10 +7306,11 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
-                bool is_resume = this_instr->op.code == RESUME_CHECK_JIT;
+                bool is_resume = this_instr->op.code == RESUME_CHECK;
                 _Py_BackoffCounter counter = this_instr[1].counter;
-                if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                    (this_instr->op.code == JUMP_BACKWARD_JIT || is_resume) &&
+                if (!IS_JIT_TRACING() &&
+                    (backoff_counter_triggers(counter) &&
+                        this_instr->op.code == JUMP_BACKWARD_JIT) &&
                     next_instr->op.code != ENTER_EXECUTOR) {
                     _Py_CODEUNIT *insert_exec_at = this_instr;
                     while (oparg > 255) {
@@ -7327,12 +7328,6 @@
                 }
                 else {
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                }
-                if (is_resume) {
-                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
-                    FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_resume_backoff_counter());
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
                 }
                 #endif
             }
@@ -10079,36 +10074,21 @@
                 }
                 #endif
             }
-            // _JIT
+            // _QUICKEN_TO_RESUME_CHECK
+            {
+                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_unreachable_backoff_counter());
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
+            // _JIT_RESUME
             {
                 #ifdef _Py_TIER2
-                bool is_resume = this_instr->op.code == RESUME_CHECK_JIT;
-                _Py_BackoffCounter counter = this_instr[1].counter;
-                if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                    (this_instr->op.code == JUMP_BACKWARD_JIT || is_resume) &&
-                    next_instr->op.code != ENTER_EXECUTOR) {
-                    _Py_CODEUNIT *insert_exec_at = this_instr;
-                    while (oparg > 255) {
-                        oparg >>= 8;
-                        insert_exec_at--;
-                    }
-                    int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, insert_exec_at, next_instr,
-                        STACK_LEVEL(), 0, NULL, opcode, oparg);
-                    if (succ) {
-                        ENTER_TRACING();
-                    }
-                    else {
-                        this_instr[1].counter = restart_backoff_counter(counter);
-                    }
-                }
-                else {
-                    ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-                }
-                if (is_resume) {
-                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
-                    _PyFrame_SetStackPointer(frame, stack_pointer);
-                    FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_resume_backoff_counter());
-                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                assert(this_instr->op.code == RESUME_CHECK);
+                int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, this_instr, this_instr,
+                    STACK_LEVEL(), 0, NULL, opcode, oparg);
+                if (succ) {
+                    ENTER_TRACING();
                 }
                 #endif
             }
@@ -12173,10 +12153,7 @@ JUMP_TO_LABEL(error);
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
             int orig_opcode = executor->vm_data.opcode;
-            if (orig_opcode != JUMP_BACKWARD_JIT &&
-                orig_opcode != JUMP_BACKWARD &&
-                orig_opcode != JUMP_BACKWARD_NO_INTERRUPT &&
-                orig_opcode != JUMP_BACKWARD_NO_JIT) {
+            if (orig_opcode == RESUME_CHECK_JIT || orig_opcode == RESUME) {
                 assert(executor->vm_data.index == INSTR_OFFSET());
                 assert(executor->vm_data.code == code);
                 assert(executor->vm_data.valid);

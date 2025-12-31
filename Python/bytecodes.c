@@ -253,7 +253,31 @@ dummy_func(
         macro(RESUME_CHECK_JIT) =
             unused/1 +
             _RESUME_CHECK +
-            _JIT;
+            _QUICKEN_TO_RESUME_CHECK +
+            _JIT_RESUME;
+
+        op(_QUICKEN_TO_RESUME_CHECK, (--)) {
+            // For some reason, RESUME_CHECK_JIT is quite expensive compared to RESUME.
+            // Even without the _JIT uop!
+            // It's enough to show up as a 10-20% slowdown in some benchmarks
+            // For that reason, we replace it back with RESUME_CHECK immediately.
+            // This also means that function entry tracing is practically a single attempt.
+            // In JIT builds, we thus stick only to RESUME and wait for it to specialize to RESUME_CHECK_JIT.
+            // This makes RESUME slightly slower on JIT builds, but since the JIT is faster it makes up for it.
+            FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+            FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_unreachable_backoff_counter());
+        }
+
+        tier1 op(_JIT_RESUME, (--)) {
+        #ifdef _Py_TIER2
+            assert(this_instr->op.code == RESUME_CHECK);
+            int succ = _PyJit_TryInitializeTracing(tstate, frame, this_instr, this_instr, this_instr,
+                STACK_LEVEL(), 0, NULL, opcode, oparg);
+            if (succ) {
+                ENTER_TRACING();
+            }
+        #endif
+        }
 
         op(_MONITOR_RESUME, (--)) {
             int err = _Py_call_instrumentation(
@@ -2968,10 +2992,11 @@ dummy_func(
 
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
-            bool is_resume = this_instr->op.code == RESUME_CHECK_JIT;
+            bool is_resume = this_instr->op.code == RESUME_CHECK;
             _Py_BackoffCounter counter = this_instr[1].counter;
-            if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                (this_instr->op.code == JUMP_BACKWARD_JIT || is_resume) &&
+            if (!IS_JIT_TRACING() &&
+                (backoff_counter_triggers(counter) &&
+                this_instr->op.code == JUMP_BACKWARD_JIT) &&
                 next_instr->op.code != ENTER_EXECUTOR) {
                 /* Back up over EXTENDED_ARGs so executor is inserted at the correct place */
                 _Py_CODEUNIT *insert_exec_at = this_instr;
@@ -2990,16 +3015,6 @@ dummy_func(
             }
             else {
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
-            }
-            // For some reason, RESUME_CHECK_JIT is quite expensive compared to RESUME.
-            // It's enough to show up as a 10-20% slowdown in some benchmarks!
-            // For that reason, we replace it back with RESUME_CHECK immediately.
-            // This also means that function entry tracing is practically a single attempt.
-            // In JIT builds, we thus stick only to RESUME and wait for it to specialize to RESUME_CHECK_JIT.
-            // This makes RESUME slightly slower on JIT builds, but since the JIT is faster it makes up for it.
-            if (is_resume) {
-                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
-                FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_resume_backoff_counter());
             }
         #endif
         }
@@ -5669,10 +5684,7 @@ dummy_func(
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
             int orig_opcode = executor->vm_data.opcode;
             // Not backwards jump, trace over it to form a longer trace.
-            if (orig_opcode != JUMP_BACKWARD_JIT &&
-                orig_opcode != JUMP_BACKWARD &&
-                orig_opcode != JUMP_BACKWARD_NO_INTERRUPT &&
-                orig_opcode != JUMP_BACKWARD_NO_JIT) {
+            if (orig_opcode == RESUME_CHECK_JIT || orig_opcode == RESUME) {
                 assert(executor->vm_data.index == INSTR_OFFSET());
                 assert(executor->vm_data.code == code);
                 assert(executor->vm_data.valid);
