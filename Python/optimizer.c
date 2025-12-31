@@ -1006,6 +1006,15 @@ _PyJit_translate_single_bytecode_to_trace(
         ADD_TO_TRACE(guard_ip, 0, (uintptr_t)next_instr, 0);
     }
     if (is_first_instr && _tstate->jit_tracer_state.prev_state.code_curr_size > CODE_SIZE_NO_PROGRESS) {
+        // If this is a trunk function trace and we end with a _JUMP_TO_TOP, and
+        // we push a frame at the end, that indicates we are unrolling recursion which is bad news.
+        // We need dynamic exit stitching to support such cases, but for now, this is disabled.
+        if (_PyOpcode_Deopt[_tstate->jit_tracer_state.initial_state.trace_origin_opcode] == RESUME &&
+            _tstate->jit_tracer_state.initial_state.exit == NULL && needs_guard_ip) {
+            trace_length = 0;
+            DPRINTF(2, "Trace is a function trace and heuristics indicate it's not likely worth it.\n");
+            goto done;
+        }
         if (needs_guard_ip) {
             ADD_TO_TRACE(_SET_IP, 0, (uintptr_t)next_instr, 0);
         }
