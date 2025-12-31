@@ -5247,7 +5247,7 @@
             #ifdef _Py_TIER2
             if (IS_JIT_TRACING()) {
                 next_instr = this_instr;
-                JUMP_TO_LABEL(stop_tracing);
+                JUMP_TO_LABEL(consider_stop_tracing);
             }
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
@@ -12159,11 +12159,19 @@ JUMP_TO_LABEL(error);
             DISPATCH();
         }
 
-        LABEL(stop_tracing)
+        LABEL(consider_stop_tracing)
         {
             #if _Py_TIER2
             assert(IS_JIT_TRACING());
             int opcode = next_instr->op.code;
+            PyCodeObject *code = _PyFrame_GetCode(frame);
+            _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
+            int orig_opcode = executor->vm_data.opcode;
+            if (orig_opcode == RESUME_CHECK_JIT || orig_opcode == RESUME) {
+                oparg = (oparg & ~255) | executor->vm_data.oparg;
+                opcode = orig_opcode;
+                DISPATCH_GOTO_NON_TRACING();
+            }
             _PyFrame_SetStackPointer(frame, stack_pointer);
             _PyJit_translate_single_bytecode_to_trace(tstate, frame, NULL, _EXIT_TRACE);
             stack_pointer = _PyFrame_GetStackPointer(frame);

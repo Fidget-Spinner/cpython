@@ -646,6 +646,29 @@ _PyJit_translate_single_bytecode_to_trace(
     int oparg = _tstate->jit_tracer_state.prev_state.instr_oparg;
     int opcode = this_instr->op.code;
 
+    if (stop_tracing_opcode == _DEOPT) {
+        // gh-143183: It's important we rewind to the last known proper target.
+        // The current target might be garbage as stop tracing usually indicates
+        // we are in something that we can't trace.
+        DPRINTF(2, "Told to stop tracing\n");
+        goto unsupported;
+    }
+    else if (stop_tracing_opcode != 0) {
+        assert(stop_tracing_opcode == _EXIT_TRACE);
+        ADD_TO_TRACE(stop_tracing_opcode, 0, 0, target);
+        goto done;
+    }
+
+    // Function entry executor, trace over it to form a longer trace.
+    // Otherwise, we end up with fragmented loop traces that have bad performance.
+    if (opcode == ENTER_EXECUTOR) {
+        _PyExecutorObject *executor = old_code->co_executors->executors[oparg & 255];
+        int orig_opcode = executor->vm_data.opcode;
+        assert(orig_opcode == RESUME_CHECK_JIT || orig_opcode == RESUME);
+        oparg = (oparg & ~255) | executor->vm_data.oparg;
+        opcode = orig_opcode;
+    }
+
     int rewind_oparg = oparg;
     while (rewind_oparg > 255) {
         rewind_oparg >>= 8;
@@ -697,19 +720,6 @@ _PyJit_translate_single_bytecode_to_trace(
     int is_sys_tracing = (tstate->c_tracefunc != NULL) || (tstate->c_profilefunc != NULL);
     if (is_sys_tracing) {
         goto full;
-    }
-
-    if (stop_tracing_opcode == _DEOPT) {
-        // gh-143183: It's important we rewind to the last known proper target.
-        // The current target might be garbage as stop tracing usually indicates
-        // we are in something that we can't trace.
-        DPRINTF(2, "Told to stop tracing\n");
-        goto unsupported;
-    }
-    else if (stop_tracing_opcode != 0) {
-        assert(stop_tracing_opcode == _EXIT_TRACE);
-        ADD_TO_TRACE(stop_tracing_opcode, 0, 0, target);
-        goto done;
     }
 
     assert(stop_tracing_opcode == 0);
