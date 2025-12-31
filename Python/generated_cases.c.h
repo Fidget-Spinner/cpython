@@ -12167,9 +12167,18 @@ JUMP_TO_LABEL(error);
             PyCodeObject *code = _PyFrame_GetCode(frame);
             _PyExecutorObject *executor = code->co_executors->executors[oparg & 255];
             int orig_opcode = executor->vm_data.opcode;
-            if (orig_opcode == RESUME_CHECK_JIT || orig_opcode == RESUME) {
+            if (orig_opcode != JUMP_BACKWARD_JIT &&
+                orig_opcode != JUMP_BACKWARD &&
+                orig_opcode != JUMP_BACKWARD_NO_INTERRUPT &&
+                orig_opcode != JUMP_BACKWARD_NO_JIT) {
+                assert(executor->vm_data.index == INSTR_OFFSET());
+                assert(executor->vm_data.code == code);
+                assert(executor->vm_data.valid);
                 oparg = (oparg & ~255) | executor->vm_data.oparg;
                 opcode = orig_opcode;
+                if (_PyOpcode_Caches[_PyOpcode_Deopt[opcode]]) {
+                    PAUSE_ADAPTIVE_COUNTER(next_instr[1].counter);
+                }
                 DISPATCH_GOTO_NON_TRACING();
             }
             _PyFrame_SetStackPointer(frame, stack_pointer);

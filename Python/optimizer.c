@@ -646,25 +646,38 @@ _PyJit_translate_single_bytecode_to_trace(
     int oparg = _tstate->jit_tracer_state.prev_state.instr_oparg;
     int opcode = this_instr->op.code;
 
+    // Loop back to the start
+    int is_first_instr = _tstate->jit_tracer_state.initial_state.close_loop_instr == next_instr ||
+        _tstate->jit_tracer_state.initial_state.start_instr == next_instr;
     if (stop_tracing_opcode == _DEOPT) {
         // gh-143183: It's important we rewind to the last known proper target.
         // The current target might be garbage as stop tracing usually indicates
         // we are in something that we can't trace.
-        DPRINTF(2, "Told to stop tracing\n");
+        DPRINTF(2, "Told to stop tracing. Reason: %s\n", _PyOpcode_OpName[next_instr->op.code]);
         goto unsupported;
     }
-    else if (stop_tracing_opcode != 0) {
+    if (stop_tracing_opcode != 0) {
         assert(stop_tracing_opcode == _EXIT_TRACE);
-        ADD_TO_TRACE(stop_tracing_opcode, 0, 0, target);
+        if (is_first_instr) {
+            ADD_TO_TRACE(_JUMP_TO_TOP, 0, 0, target);
+        }
+        else {
+            ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+        }
         goto done;
     }
 
-    // Function entry executor, trace over it to form a longer trace.
+    // Executor, trace over it to form a longer trace.
     // Otherwise, we end up with fragmented loop traces that have bad performance.
+    // The only exception is if we see another loop trace. In that case, we link to it.
     if (opcode == ENTER_EXECUTOR) {
+        DPRINTF(2, "ENTER_EXECUTOR seen\n");
         _PyExecutorObject *executor = old_code->co_executors->executors[oparg & 255];
         int orig_opcode = executor->vm_data.opcode;
-        assert(orig_opcode == RESUME_CHECK_JIT || orig_opcode == RESUME);
+        assert(orig_opcode != JUMP_BACKWARD_JIT &&
+                        orig_opcode != JUMP_BACKWARD &&
+                        orig_opcode != JUMP_BACKWARD_NO_INTERRUPT &&
+                        orig_opcode != JUMP_BACKWARD_NO_JIT);
         oparg = (oparg & ~255) | executor->vm_data.oparg;
         opcode = orig_opcode;
     }
@@ -822,7 +835,6 @@ _PyJit_translate_single_bytecode_to_trace(
             _Py_CODEUNIT *computed_jump_instr = computed_next_instr_without_modifiers + oparg;
             assert(next_instr == computed_next_instr || next_instr == computed_jump_instr);
             int jump_happened = computed_jump_instr == next_instr;
-            assert(jump_happened == (target_instr[1].cache & 1));
             uint32_t uopcode = BRANCH_TO_GUARD[opcode - POP_JUMP_IF_FALSE][jump_happened];
             ADD_TO_TRACE(uopcode, 0, 0, INSTR_IP(jump_happened ? computed_next_instr : computed_jump_instr, old_code));
             break;
@@ -993,9 +1005,6 @@ _PyJit_translate_single_bytecode_to_trace(
         }
         ADD_TO_TRACE(guard_ip, 0, (uintptr_t)next_instr, 0);
     }
-    // Loop back to the start
-    int is_first_instr = _tstate->jit_tracer_state.initial_state.close_loop_instr == next_instr ||
-        _tstate->jit_tracer_state.initial_state.start_instr == next_instr;
     if (is_first_instr && _tstate->jit_tracer_state.prev_state.code_curr_size > CODE_SIZE_NO_PROGRESS) {
         if (needs_guard_ip) {
             ADD_TO_TRACE(_SET_IP, 0, (uintptr_t)next_instr, 0);
@@ -1764,7 +1773,7 @@ _Py_ExecutorDetach(_PyExecutorObject *executor)
     assert(instruction->op.code == ENTER_EXECUTOR);
     int index = instruction->op.arg;
     assert(code->co_executors->executors[index] == executor);
-    instruction->op.code = executor->vm_data.opcode;
+    instruction->op.code = _PyOpcode_Deopt[executor->vm_data.opcode];
     instruction->op.arg = executor->vm_data.oparg;
     executor->vm_data.code = NULL;
     code->co_executors->executors[index] = NULL;
