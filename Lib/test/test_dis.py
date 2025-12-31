@@ -885,7 +885,7 @@ def load_test(x, y=0):
     return a, b
 
 dis_load_test_quickened_code = """\
-%3d           RESUME_CHECK{: <6}       0
+%3d           RESUME{: <6}             0
 
 %3d           LOAD_FAST_LOAD_FAST      1 (x, y)
               STORE_FAST_STORE_FAST   50 (b, a)
@@ -902,7 +902,7 @@ def loop_test():
         load_test(i)
 
 dis_loop_test_quickened_code = """\
-%3d           RESUME_CHECK{: <6}       0
+%3d           RESUME{: <6}             0
 
 %3d           BUILD_LIST               0
               LOAD_CONST               2 ((1, 2, 3))
@@ -1300,14 +1300,14 @@ class DisTests(DisTestBase):
         self.code_quicken(lambda: load_test(0, 0))
         got = self.get_disassembly(load_test, adaptive=True)
         jit = sys._jit.is_enabled()
-        expected = dis_load_test_quickened_code.format("_JIT" if jit else "")
+        expected = dis_load_test_quickened_code.format("" if jit else "_CHECK")
         self.do_disassembly_compare(got, expected)
 
     @cpython_only
     @requires_specialization
     def test_load_attr_specialize(self):
         load_attr_quicken = """\
-  0           RESUME_CHECK{: <6}       0
+  0           RESUME{: <6}             0
 
   1           LOAD_CONST               0 ('a')
               LOAD_ATTR_SLOT           0 (__class__)
@@ -1317,14 +1317,14 @@ class DisTests(DisTestBase):
         self.code_quicken(lambda: exec(co, {}, {}))
         got = self.get_disassembly(co, adaptive=True)
         jit = sys._jit.is_enabled()
-        expected = load_attr_quicken.format("_JIT" if jit else "")
+        expected = load_attr_quicken.format("" if jit else "_CHECK")
         self.do_disassembly_compare(got, expected)
 
     @cpython_only
     @requires_specialization
     def test_call_specialize(self):
         call_quicken = """\
-  0           RESUME_CHECK{: <6}       0
+  0           RESUME{: <6}             0
 
   1           LOAD_NAME                0 (str)
               PUSH_NULL
@@ -1336,7 +1336,7 @@ class DisTests(DisTestBase):
         self.code_quicken(lambda: exec(co, {}, {}))
         got = self.get_disassembly(co, adaptive=True)
         jit = sys._jit.is_enabled()
-        expected = call_quicken.format("_JIT" if jit else "")
+        expected = call_quicken.format("" if jit else "_CHECK")
         self.do_disassembly_compare(got, expected)
 
     @cpython_only
@@ -1346,8 +1346,9 @@ class DisTests(DisTestBase):
         self.code_quicken(loop_test)
         got = self.get_disassembly(loop_test, adaptive=True)
         jit = sys._jit.is_enabled()
+        resume_str = "" if jit else "_CHECK"
         jit_str = "_JIT" if jit else "NO_JIT"
-        expected = dis_loop_test_quickened_code.format(jit_str, jit_str)
+        expected = dis_loop_test_quickened_code.format(resume_str, jit_str)
         self.do_disassembly_compare(got, expected)
 
     @cpython_only

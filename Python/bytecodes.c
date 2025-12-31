@@ -169,13 +169,19 @@ dummy_func(
             }
         }
 
-        op(_QUICKEN_RESUME, (--)) {
-            #if ENABLE_SPECIALIZATION_FT
-            if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                uint8_t desired = tstate->interp->jit ? RESUME_CHECK_JIT : RESUME_CHECK;
-                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, desired);
+        specializing op(_SPECIALIZE_RESUME, (counter/1 --)) {
+#if ENABLE_SPECIALIZATION_FT
+    #if _Py_TIER2
+            if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
+                next_instr = this_instr;
+                _Py_Specialize_Resume(next_instr, tstate);
+                DISPATCH_SAME_OPARG();
             }
-            #endif  /* ENABLE_SPECIALIZATION_FT */
+            ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+    #else
+            _Py_Specialize_Resume(next_instr, tstate);
+    #endif
+#endif  /* ENABLE_SPECIALIZATION_FT */
         }
 
         tier1 op(_MAYBE_INSTRUMENT, (--)) {
@@ -220,10 +226,9 @@ dummy_func(
         }
 
         macro(RESUME) =
-            unused/1 +
             _LOAD_BYTECODE +
             _MAYBE_INSTRUMENT +
-            _QUICKEN_RESUME +
+            _SPECIALIZE_RESUME +
             _CHECK_PERIODIC_IF_NOT_YIELD_FROM;
 
         macro(RESUME_CHECK) =
@@ -2963,9 +2968,10 @@ dummy_func(
 
         tier1 op(_JIT, (--)) {
         #ifdef _Py_TIER2
+            bool is_resume = this_instr->op.code == RESUME_CHECK_JIT;
             _Py_BackoffCounter counter = this_instr[1].counter;
             if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                (this_instr->op.code == JUMP_BACKWARD_JIT || this_instr->op.code == RESUME_CHECK_JIT) &&
+                (this_instr->op.code == JUMP_BACKWARD_JIT || is_resume) &&
                 next_instr->op.code != ENTER_EXECUTOR) {
                 /* Back up over EXTENDED_ARGs so executor is inserted at the correct place */
                 _Py_CODEUNIT *insert_exec_at = this_instr;
@@ -2984,6 +2990,13 @@ dummy_func(
             }
             else {
                 ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+            }
+            // For some reason, RESUME_CHECK_JIT is quite expensive compared to RESUME.
+            // For that reason, we replace it back with RESUME immediately.
+            // In JIT builds, we thus stick only to RESUME and wait for it to specialize to RESUME_CHECK_JIT.
+            // This amkes RESUME slightly slower, but since the JIT is faster it makes up for it.
+            if (is_resume) {
+                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME);
             }
         #endif
         }

@@ -7304,9 +7304,10 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
+                bool is_resume = this_instr->op.code == RESUME_CHECK_JIT;
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                    (this_instr->op.code == JUMP_BACKWARD_JIT || this_instr->op.code == RESUME_CHECK_JIT) &&
+                    (this_instr->op.code == JUMP_BACKWARD_JIT || is_resume) &&
                     next_instr->op.code != ENTER_EXECUTOR) {
                     _Py_CODEUNIT *insert_exec_at = this_instr;
                     while (oparg > 255) {
@@ -7324,6 +7325,9 @@
                 }
                 else {
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                if (is_resume) {
+                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME);
                 }
                 #endif
             }
@@ -9913,7 +9917,6 @@
             PREDICTED_RESUME:;
             _Py_CODEUNIT* const this_instr = next_instr - 2;
             (void)this_instr;
-            /* Skip 1 cache entry */
             // _LOAD_BYTECODE
             {
                 #ifdef Py_GIL_DISABLED
@@ -9957,13 +9960,25 @@
                     }
                 }
             }
-            // _QUICKEN_RESUME
+            // _SPECIALIZE_RESUME
             {
+                uint16_t counter = read_u16(&this_instr[1].cache);
+                (void)counter;
                 #if ENABLE_SPECIALIZATION_FT
-                if (tstate->tracing == 0 && this_instr->op.code == RESUME) {
-                    uint8_t desired = tstate->interp->jit ? RESUME_CHECK_JIT : RESUME_CHECK;
-                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, desired);
+                #if _Py_TIER2
+                if (ADAPTIVE_COUNTER_TRIGGERS(counter)) {
+                    next_instr = this_instr;
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    _Py_Specialize_Resume(next_instr, tstate);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    DISPATCH_SAME_OPARG();
                 }
+                ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                #else
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                _Py_Specialize_Resume(next_instr, tstate);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                #endif
                 #endif  /* ENABLE_SPECIALIZATION_FT */
             }
             // _CHECK_PERIODIC_IF_NOT_YIELD_FROM
@@ -10062,9 +10077,10 @@
             // _JIT
             {
                 #ifdef _Py_TIER2
+                bool is_resume = this_instr->op.code == RESUME_CHECK_JIT;
                 _Py_BackoffCounter counter = this_instr[1].counter;
                 if (!IS_JIT_TRACING() && backoff_counter_triggers(counter) &&
-                    (this_instr->op.code == JUMP_BACKWARD_JIT || this_instr->op.code == RESUME_CHECK_JIT) &&
+                    (this_instr->op.code == JUMP_BACKWARD_JIT || is_resume) &&
                     next_instr->op.code != ENTER_EXECUTOR) {
                     _Py_CODEUNIT *insert_exec_at = this_instr;
                     while (oparg > 255) {
@@ -10082,6 +10098,9 @@
                 }
                 else {
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
+                }
+                if (is_resume) {
+                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME);
                 }
                 #endif
             }

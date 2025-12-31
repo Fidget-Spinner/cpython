@@ -56,6 +56,7 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
         adaptive_counter = initial_unreachable_backoff_counter();
         resume_counter = initial_unreachable_backoff_counter();
     }
+    (void)resume_counter;
     int opcode = 0;
     int oparg = 0;
     /* The last code unit cannot have a cache, so we don't need to check it */
@@ -69,9 +70,11 @@ _PyCode_Quicken(_Py_CODEUNIT *instructions, Py_ssize_t size, int enable_counters
                 case JUMP_BACKWARD:
                     instructions[i + 1].counter = jump_counter;
                     break;
+            #ifdef _Py_TIER2
                 case RESUME:
                     instructions[i + 1].counter = resume_counter;
                     break;
+            #endif
                 case POP_JUMP_IF_FALSE:
                 case POP_JUMP_IF_TRUE:
                 case POP_JUMP_IF_NONE:
@@ -2720,6 +2723,23 @@ _Py_Specialize_ContainsOp(_PyStackRef value_st, _Py_CODEUNIT *instr)
     }
 
     SPECIALIZATION_FAIL(CONTAINS_OP, containsop_fail_kind(value));
+    unspecialize(instr);
+    return;
+}
+
+
+void
+_Py_Specialize_Resume(_Py_CODEUNIT *instr, PyThreadState *tstate)
+{
+    if (tstate->tracing == 0 && instr->op.code == RESUME) {
+        if (tstate->interp->jit) {
+            specialize(instr, RESUME_CHECK_JIT);
+            set_counter((_Py_BackoffCounter *)instr + 1, trigger_backoff_counter());
+            return;
+        }
+        specialize(instr, RESUME_CHECK);
+        return;
+    }
     unspecialize(instr);
     return;
 }
