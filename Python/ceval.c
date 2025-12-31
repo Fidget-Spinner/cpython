@@ -1468,16 +1468,16 @@ stop_tracing_and_jit(PyThreadState *tstate, _PyInterpreterFrame *frame)
     // Deal with backoffs
     _PyExitData *exit = _tstate->jit_tracer_state.initial_state.exit;
     if (exit == NULL) {
-        // We hold a strong reference to the code object, so the instruction won't be freed.
-        if (err <= 0) {
-            _Py_BackoffCounter counter = _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter;
-            _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter = restart_backoff_counter(counter);
-        }
-        else {
-            int origin_opcode = _tstate->jit_tracer_state.initial_state.trace_origin_opcode;
-            assert(origin_opcode == JUMP_BACKWARD_JIT || origin_opcode == RESUME_CHECK_JIT);
-            _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter = origin_opcode == JUMP_BACKWARD_JIT
-                ? initial_jump_backoff_counter() : initial_resume_backoff_counter();
+        int origin_opcode = _tstate->jit_tracer_state.initial_state.trace_origin_opcode;
+        if (origin_opcode == JUMP_BACKWARD_JIT) {
+            // We hold a strong reference to the code object, so the instruction won't be freed.
+            if (err <= 0) {
+                _Py_BackoffCounter counter = _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter;
+                _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter = restart_backoff_counter(counter);
+            }
+            else {
+                _tstate->jit_tracer_state.initial_state.trace_enter_instr[1].counter = initial_jump_backoff_counter();
+            }
         }
     }
     else {

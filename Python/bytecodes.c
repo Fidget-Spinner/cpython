@@ -2993,11 +2993,13 @@ dummy_func(
             }
             // For some reason, RESUME_CHECK_JIT is quite expensive compared to RESUME.
             // It's enough to show up as a 10-20% slowdown in some benchmarks!
-            // For that reason, we replace it back with RESUME immediately.
+            // For that reason, we replace it back with RESUME_CHECK immediately.
+            // This also means that function entry tracing is practically a single attempt.
             // In JIT builds, we thus stick only to RESUME and wait for it to specialize to RESUME_CHECK_JIT.
-            // This amkes RESUME slightly slower, but since the JIT is faster it makes up for it.
+            // This makes RESUME slightly slower on JIT builds, but since the JIT is faster it makes up for it.
             if (is_resume) {
-                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME);
+                FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_resume_backoff_counter());
             }
         #endif
         }

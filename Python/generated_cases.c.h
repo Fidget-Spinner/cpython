@@ -7329,7 +7329,10 @@
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 }
                 if (is_resume) {
-                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME);
+                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_resume_backoff_counter());
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
                 }
                 #endif
             }
@@ -10102,7 +10105,10 @@
                     ADVANCE_ADAPTIVE_COUNTER(this_instr[1].counter);
                 }
                 if (is_resume) {
-                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME);
+                    FT_ATOMIC_STORE_UINT8_RELAXED(this_instr->op.code, RESUME_CHECK);
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    FT_ATOMIC_STORE_UINT16_RELAXED(this_instr[1].counter, initial_resume_backoff_counter());
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
                 }
                 #endif
             }
