@@ -1168,22 +1168,6 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIsNotNone(ex)
         self.assertIn("_FOR_ITER_TIER_TWO", get_opnames(ex))
 
-    @unittest.skip("Tracing into generators currently isn't supported.")
-    def test_for_iter_gen(self):
-        def gen(n):
-            for i in range(n):
-                yield i
-        def testfunc(n):
-            g = gen(n)
-            s = 0
-            for i in g:
-                s += i
-            return s
-        res, ex = self._run_with_optimizer(testfunc, TIER2_THRESHOLD)
-        self.assertEqual(res, sum(range(TIER2_THRESHOLD)))
-        self.assertIsNotNone(ex)
-        self.assertIn("_FOR_ITER_GEN_FRAME", get_opnames(ex))
-
     def test_modified_local_is_seen_by_optimized_code(self):
         l = sys._getframe().f_locals
         a = 1
@@ -3344,6 +3328,53 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIn("_IS_OP", uops)
         self.assertIn("_POP_TOP_NOP", uops)
         self.assertLessEqual(count_ops(ex, "_POP_TOP"), 2)
+
+    def test_for_iter_gen_frame(self):
+        def f(n):
+            for i in range(n):
+                # Should be optimized to POP_TOP_NOP
+                yield i + i
+        def testfunc(n):
+            for _ in f(n):
+                pass
+
+        res, ex = self._run_with_optimizer(testfunc, TIER2_THRESHOLD*2)
+        self.assertIsNotNone(ex)
+        uops = get_opnames(ex)
+
+        self.assertIn("_FOR_ITER_GEN_FRAME", uops)
+        self.assertIn("_YIELD_VALUE", uops)
+        # It's essential for performance that the trace loops around.
+        self.assertIn("_JUMP_TO_TOP", uops)
+        # _POP_TOP_NOP is a sign the optimizer ran and didn't hit bottom.
+        self.assertGreaterEqual(count_ops(ex, "_POP_TOP_NOP"), 3)
+
+    def test_send_gen_frame(self):
+
+        def gen(n):
+            for i in range(n):
+                yield i + i
+        def send_gen(n):
+            yield from gen(n)
+        def testfunc(n):
+            for _ in send_gen(n):
+                pass
+
+        for _ in range(_testinternalcapi.SPECIALIZATION_THRESHOLD):
+            # Ensure SEND is specialized to SEND_GEN
+            send_gen(10)
+
+        res, ex = self._run_with_optimizer(testfunc, TIER2_THRESHOLD*2)
+        self.assertIsNotNone(ex)
+        uops = get_opnames(ex)
+
+        self.assertIn("_FOR_ITER_GEN_FRAME", uops)
+        self.assertIn("_YIELD_VALUE", uops)
+        self.assertIn("_SEND_GEN_FRAME", uops)
+        # It's essential for performance that the trace loops around.
+        self.assertIn("_JUMP_TO_TOP", uops)
+        # _POP_TOP_NOP is a sign the optimizer ran and didn't hit bottom.
+        self.assertGreaterEqual(count_ops(ex, "_POP_TOP_NOP"), 2)
 
     def test_143026(self):
         # https://github.com/python/cpython/issues/143026
