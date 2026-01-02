@@ -1184,6 +1184,9 @@ dummy_func(void) {
         }
         else {
             // Plenty of space left, time to peel!
+            // Note: it's often not worth it to peel an already large trace.
+            // We just end up blowing up the icache. This can be observed in
+            // the nbody benchmark.
             if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
                 OPT_STAT_INC(peeled_loop_attempts);
                 ctx->in_peeled_iteration = true;

@@ -40,7 +40,7 @@ typedef struct _PyUOpInstruction{
     // With asserts, the stencils are a lot larger
 #define UOP_MAX_TRACE_LENGTH 2000
 #else
-#define UOP_MAX_TRACE_LENGTH 10000
+#define UOP_MAX_TRACE_LENGTH 5000
 #endif
 #define UOP_BUFFER_SIZE (UOP_MAX_TRACE_LENGTH * sizeof(_PyUOpInstruction))
 
