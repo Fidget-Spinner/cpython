@@ -857,7 +857,7 @@ _Py_uop_frame_new(
 
 
     // Initialize the stack as well
-    for (int i = 0; i < co->co_stacksize; i++) {
+    for (int i = 0; i < curr_stackentries; i++) {
         JitOptRef stackvar = _Py_uop_sym_new_unknown(ctx);
         frame->stack[i] = stackvar;
     }
@@ -1033,6 +1033,7 @@ sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
         case JIT_SYM_BOTTOM_TAG:
             return false;
     }
+    Py_UNREACHABLE();
 }
 
 
@@ -1041,17 +1042,24 @@ bool
 _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
 {
     JitOptUnrollContext *unroll = &ctx->unroll;
-    int n_consumed = (int)(ctx->n_consumed - ctx->locals_and_stack);
-    memcpy(unroll->locals_and_stack, ctx->locals_and_stack, sizeof(JitOptRef) * n_consumed);
-#ifdef Py_DEBUG
+    int n_consumed = (int)(ctx->frame->stack_pointer - ctx->locals_and_stack);
     for (int i = 0; i < n_consumed; i++) {
         assert(!PyJitRef_IsNull(ctx->locals_and_stack[i]));
+        // We can't just copy it over, because it might be mutated later.
+        // We need to do a deep copy.
+        JitOptRef dst = _Py_uop_sym_new_unknown(ctx);
+        if (ctx->done) {
+            return false;
+        }
+        JitOptSymbol *dst_sym = PyJitRef_Unwrap(dst);
+        memcpy(dst_sym, PyJitRef_Unwrap(ctx->locals_and_stack[i]), sizeof(JitOptSymbol));
+        unroll->locals_and_stack[i] = dst;
     }
-#endif
     memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
     unroll->n_consumed = n_consumed;
     unroll->curr_frame_depth = ctx->curr_frame_depth;
     // No need to incref the type values, they are kept alive by the original context.
+    return true;
 }
 
 // Checks if our peeled header (unroll) context can contain our current ctx.
@@ -1085,9 +1093,7 @@ _Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx)
             return false;
         }
     }
-    _Py_UOpsAbstractFrame *ctx_curr_frame = &ctx->frames[ctx->curr_frame_depth - 1];
-    _Py_UOpsAbstractFrame *unroll_curr_frame = &unroll->frames[unroll->curr_frame_depth - 1];
-    int ctx_n_locals_consumed = (int)(ctx->n_consumed - ctx->locals_and_stack);
+    int ctx_n_locals_consumed = (int)(ctx->frame->stack_pointer - ctx->locals_and_stack);
     int unroll_n_locals_consumed = unroll->n_consumed;
     if (ctx_n_locals_consumed != unroll_n_locals_consumed) {
         return false;
@@ -1097,6 +1103,7 @@ _Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx)
         JitOptRef parent = unroll->locals_and_stack[i];
         JitOptRef child = ctx->locals_and_stack[i];
         assert(!PyJitRef_IsNull(child));
+        assert(!PyJitRef_IsNull(parent));
         if (!sym_is_more_general(ctx, parent, child)) {
             return false;
         }

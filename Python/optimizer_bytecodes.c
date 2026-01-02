@@ -161,6 +161,21 @@ dummy_func(void) {
         }
     }
 
+    op(_GUARD_NOS_OVERFLOWED, (left, unused -- left, unused)) {
+        if (sym_is_compact_int(left)) {
+            REPLACE_OP(this_instr, _NOP, 0, 0);
+        }
+        sym_set_compact_int(left);
+    }
+
+    op(_GUARD_TOS_OVERFLOWED, (value -- value)) {
+        if (sym_is_compact_int(value)) {
+            REPLACE_OP(this_instr, _NOP, 0, 0);
+        }
+        sym_set_compact_int(value);
+    }
+
+
     op(_CHECK_ATTR_CLASS, (type_version/2, owner -- owner)) {
         PyObject *type = (PyObject *)_PyType_LookupByVersion(type_version);
         if (type) {
@@ -1172,7 +1187,10 @@ dummy_func(void) {
             if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
                 OPT_STAT_INC(peeled_loop_attempts);
                 ctx->in_peeled_iteration = true;
-                _Py_uop_abstractcontext_store_unroll_context(ctx);
+                if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                    ctx->done = true;
+                    break;
+                }
                 // 1 to skip the _START_EXECUTOR
                 // + 1 to copy the current instruction too.
                 for (int x = 1; x < i + 1; x++) {

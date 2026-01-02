@@ -499,10 +499,22 @@
         }
 
         case _GUARD_NOS_OVERFLOWED: {
+            JitOptRef left;
+            left = stack_pointer[-2];
+            if (sym_is_compact_int(left)) {
+                REPLACE_OP(this_instr, _NOP, 0, 0);
+            }
+            sym_set_compact_int(left);
             break;
         }
 
         case _GUARD_TOS_OVERFLOWED: {
+            JitOptRef value;
+            value = stack_pointer[-1];
+            if (sym_is_compact_int(value)) {
+                REPLACE_OP(this_instr, _NOP, 0, 0);
+            }
+            sym_set_compact_int(value);
             break;
         }
 
@@ -3334,12 +3346,17 @@
                 }
                 else {
                     DPRINTF(2, "Can't rejoin peeled loop.\n");
+                    OPT_STAT_INC(peeled_loop_failed_to_rejoin);
                 }
             }
             else {
                 if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
+                    OPT_STAT_INC(peeled_loop_attempts);
                     ctx->in_peeled_iteration = true;
-                    _Py_uop_abstractcontext_store_unroll_context(ctx);
+                    if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                        ctx->done = true;
+                        break;
+                    }
                     for (int x = 1; x < i + 1; x++) {
                         trace[i + x] = trace[x];
                     }
