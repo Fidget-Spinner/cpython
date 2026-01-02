@@ -2437,7 +2437,7 @@
                 ctx->done = true;
                 break;
             }
-            new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
+            new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
             CHECK_STACK_BOUNDS(-1 - oparg);
             stack_pointer[-2 - oparg] = new_frame;
             stack_pointer += -1 - oparg;
@@ -2569,9 +2569,9 @@
                 argcount++;
             }
             if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-                new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, args, argcount));
+                new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, args, argcount));
             } else {
-                new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
+                new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
             }
             CHECK_STACK_BOUNDS(-1 - oparg);
             stack_pointer[-2 - oparg] = new_frame;
@@ -2768,7 +2768,7 @@
             ctx->curr_frame_depth++;
             assert((this_instr + 1)->opcode == _PUSH_FRAME);
             PyCodeObject *co = get_code_with_logging((this_instr + 1));
-            init_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, args-1, oparg+1));
+            init_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, args-1, oparg+1));
             CHECK_STACK_BOUNDS(-1 - oparg);
             stack_pointer[-2 - oparg] = init_frame;
             stack_pointer += -1 - oparg;
@@ -3034,7 +3034,7 @@
                 ctx->done = true;
                 break;
             }
-            new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
+            new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
             CHECK_STACK_BOUNDS(-2 - oparg);
             stack_pointer[-3 - oparg] = new_frame;
             stack_pointer += -2 - oparg;
@@ -3350,15 +3350,17 @@
                 }
             }
             else {
-                OPT_STAT_INC(peeled_loop_attempts);
-                ctx->in_peeled_iteration = true;
-                if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
-                    ctx->done = true;
+                if (ctx->try_to_peel) {
+                    OPT_STAT_INC(peeled_loop_attempts);
+                    if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                        ctx->done = true;
+                        break;
+                    }
+                    DPRINTF(2, "Peeling loop\n");
+                    ctx->in_peeled_iteration = true;
+                    REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
                     break;
                 }
-                DPRINTF(2, "Peeling loop\n");
-                REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
-                break;
             }
             ctx->done = true;
             break;

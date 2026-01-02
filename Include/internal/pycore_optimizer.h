@@ -194,8 +194,10 @@ typedef union {
 } JitOptRef;
 
 #define REF_IS_BORROWED 1
+#define REF_IS_INVALID  2
+#define REF_MASK 3
 
-#define JIT_BITS_TO_PTR_MASKED(REF) ((JitOptSymbol *)(((REF).bits) & (~REF_IS_BORROWED)))
+#define JIT_BITS_TO_PTR_MASKED(REF) ((JitOptSymbol *)(((REF).bits) & (~REF_MASK)))
 
 static inline JitOptSymbol *
 PyJitRef_Unwrap(JitOptRef ref)
@@ -210,6 +212,12 @@ static inline JitOptRef
 PyJitRef_Wrap(JitOptSymbol *sym)
 {
     return (JitOptRef){.bits=(uintptr_t)sym};
+}
+
+static inline JitOptRef
+PyJitRef_WrapInvalid(JitOptSymbol *sym)
+{
+    return (JitOptRef){.bits=(uintptr_t)sym | REF_IS_INVALID};
 }
 
 static inline JitOptRef
@@ -236,6 +244,12 @@ static inline int
 PyJitRef_IsBorrowed(JitOptRef ref)
 {
     return (ref.bits & REF_IS_BORROWED) == REF_IS_BORROWED;
+}
+
+static inline bool
+PyJitRef_IsInvalid(JitOptRef ref)
+{
+    return (ref.bits & REF_IS_INVALID) == REF_IS_INVALID;
 }
 
 struct _Py_UOpsAbstractFrame {
@@ -274,6 +288,7 @@ typedef struct _JitOptContext {
     char done;
     char out_of_space;
     bool contradiction;
+    bool try_to_peel;
     bool in_peeled_iteration;
      // Has the builtins dict been watched?
     bool builtins_watched;

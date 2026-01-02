@@ -855,7 +855,6 @@ _Py_uop_frame_new(
         frame->locals[i] = local;
     }
 
-
     // Initialize the stack as well
     for (int i = 0; i < curr_stackentries; i++) {
         JitOptRef stackvar = _Py_uop_sym_new_unknown(ctx);
@@ -913,6 +912,7 @@ _Py_uop_abstractcontext_init(JitOptContext *ctx)
     ctx->contradiction = false;
     ctx->builtins_watched = false;
     ctx->in_peeled_iteration = false;
+    ctx->try_to_peel = false;
 }
 
 int
@@ -943,6 +943,7 @@ _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co, int curr_stackentries)
 
     // This handles swapping out frames.
     assert(curr_stackentries >= 1);
+    ctx->n_consumed = ctx->locals_and_stack;
     // -1 to stackentries as we push to the stack our return value after this.
     _Py_UOpsAbstractFrame *new_frame = _Py_uop_frame_new(ctx, co, curr_stackentries - 1, NULL, 0);
     if (new_frame == NULL) {
@@ -1047,7 +1048,22 @@ sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
     Py_UNREACHABLE();
 }
 
-
+static JitOptRef
+sym_copy(JitOptContext *ctx, JitOptRef src)
+{
+    JitOptRef dst = _Py_uop_sym_new_unknown(ctx);
+    if (ctx->done) {
+        return dst;
+    }
+    JitOptSymbol *src_sym = PyJitRef_Unwrap(src);
+    assert(src_sym->tag >= 1);
+    JitOptSymbol *dst_sym = PyJitRef_Unwrap(dst);
+    memcpy(dst_sym, src_sym, sizeof(JitOptSymbol));
+    // Transfer ownership (we decref all constants at the end).
+    PyObject *maybe_const = _Py_uop_sym_get_const(ctx, dst);
+    Py_XINCREF(maybe_const);
+    return PyJitRef_IsBorrowed(src) ? PyJitRef_Borrow(dst) : dst;
+}
 
 bool
 _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
@@ -1056,18 +1072,13 @@ _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
     int n_consumed = (int)(ctx->frame->stack_pointer - ctx->locals_and_stack);
     for (int i = 0; i < n_consumed; i++) {
         assert(!PyJitRef_IsNull(ctx->locals_and_stack[i]));
-        // We can't just copy it over, because it might be mutated later.
-        // We need to do a deep copy.
-        JitOptRef dst = _Py_uop_sym_new_unknown(ctx);
-        if (ctx->done) {
+        if (PyJitRef_IsInvalid(ctx->locals_and_stack[i])) {
             return false;
         }
-        JitOptSymbol *dst_sym = PyJitRef_Unwrap(dst);
-        memcpy(dst_sym, PyJitRef_Unwrap(ctx->locals_and_stack[i]), sizeof(JitOptSymbol));
-        unroll->locals_and_stack[i] = dst;
-        PyObject *maybe_const = _Py_uop_sym_get_const(ctx, dst);
-        // Transfer ownership (we decref all constants at the end).
-        Py_XINCREF(maybe_const);
+        // We can't just copy it over, because it might be mutated later.
+        // We need to do a deep copy.
+        unroll->locals_and_stack[i] = sym_copy(ctx, ctx->locals_and_stack[i]);
+
     }
     memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
     unroll->n_consumed = n_consumed;

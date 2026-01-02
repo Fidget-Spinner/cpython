@@ -350,6 +350,8 @@ optimize_uops(
         interp->type_watchers[TYPE_WATCHER_ID] = type_watcher_callback;
     }
 
+    _Py_uop_abstractcontext_init(ctx);
+
     // Plenty of space and it's a loop, try to peel it.
     if (trace[trace_len - 1].opcode == _JUMP_TO_TOP && trace_len < (UOP_MAX_TRACE_LENGTH / 4)) {
         // 1 to skip the _START_EXECUTOR
@@ -359,9 +361,9 @@ optimize_uops(
         }
         // The end of a loop trace points back to the start.
         trace[trace_len - 1].target = trace[0].target;
+        ctx->try_to_peel = true;
     }
 
-    _Py_uop_abstractcontext_init(ctx);
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, (PyCodeObject *)func->func_code, curr_stacklen, NULL, 0);
     if (frame == NULL) {
         return 0;

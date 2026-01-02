@@ -813,9 +813,9 @@ dummy_func(void) {
         }
 
         if (sym_is_null(self_or_null) || sym_is_not_null(self_or_null)) {
-            new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, args, argcount));
+            new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, args, argcount));
         } else {
-            new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
+            new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
         }
     }
 
@@ -833,7 +833,7 @@ dummy_func(void) {
             break;
         }
 
-        new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
+        new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
     }
 
     op(_PY_FRAME_KW, (callable, self_or_null, args[oparg], kwnames -- new_frame)) {
@@ -844,7 +844,7 @@ dummy_func(void) {
             break;
         }
 
-        new_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
+        new_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, NULL, 0));
     }
 
     op(_CHECK_AND_ALLOCATE_OBJECT, (type_version/2, callable, self_or_null, args[oparg] -- callable, self_or_null, args[oparg])) {
@@ -868,7 +868,7 @@ dummy_func(void) {
         ctx->curr_frame_depth++;
         assert((this_instr + 1)->opcode == _PUSH_FRAME);
         PyCodeObject *co = get_code_with_logging((this_instr + 1));
-        init_frame = PyJitRef_Wrap((JitOptSymbol *)frame_new(ctx, co, 0, args-1, oparg+1));
+        init_frame = PyJitRef_WrapInvalid((JitOptSymbol *)frame_new(ctx, co, 0, args-1, oparg+1));
     }
 
     op(_RETURN_VALUE, (retval -- res)) {
@@ -1183,19 +1183,21 @@ dummy_func(void) {
             }
         }
         else {
-            // Plenty of space left, time to peel!
-            // Note: it's often not worth it to peel an already large trace.
-            // We just end up blowing up the icache. This can be observed in
-            // the nbody benchmark.
-            OPT_STAT_INC(peeled_loop_attempts);
-            ctx->in_peeled_iteration = true;
-            if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
-                ctx->done = true;
+            if (ctx->try_to_peel) {
+                // Plenty of space left, time to peel!
+                // Note: it's often not worth it to peel an already large trace.
+                // We just end up blowing up the icache. This can be observed in
+                // the nbody benchmark.
+                OPT_STAT_INC(peeled_loop_attempts);
+                if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                    ctx->done = true;
+                    break;
+                }
+                DPRINTF(2, "Peeling loop\n");
+                ctx->in_peeled_iteration = true;
+                REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
                 break;
             }
-            DPRINTF(2, "Peeling loop\n");
-            REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
-            break;
         }
         ctx->done = true;
     }
