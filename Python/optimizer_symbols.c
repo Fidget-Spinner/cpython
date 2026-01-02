@@ -961,6 +961,12 @@ _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co, int curr_stackentries)
 static bool
 sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
 {
+
+    // Non-borrowed values can take borrowed values, but not the other way around.
+    if (PyJitRef_IsBorrowed(parent) && !PyJitRef_IsBorrowed(child)) {
+        return false;
+    }
+
     JitOptSymbol *parent_sym = PyJitRef_Unwrap(parent);
     JitSymType parent_tag = parent_sym->tag;
 
@@ -1054,11 +1060,13 @@ _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
         JitOptSymbol *dst_sym = PyJitRef_Unwrap(dst);
         memcpy(dst_sym, PyJitRef_Unwrap(ctx->locals_and_stack[i]), sizeof(JitOptSymbol));
         unroll->locals_and_stack[i] = dst;
+        PyObject *maybe_const = _Py_uop_sym_get_const(ctx, dst);
+        // Transfer ownership (we decref all constants at the end).
+        Py_XINCREF(maybe_const);
     }
     memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
     unroll->n_consumed = n_consumed;
     unroll->curr_frame_depth = ctx->curr_frame_depth;
-    // No need to incref the type values, they are kept alive by the original context.
     return true;
 }
 

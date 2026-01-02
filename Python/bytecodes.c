@@ -5162,6 +5162,7 @@ dummy_func(
 
         op(_PEELED_LOOP_START, (--)) {
             SYNC_SP();
+            DEOPT_IF(!current_executor->vm_data.valid);
         }
 
         op(_JUMP_TO_PEELED_LOOP, (--)) {

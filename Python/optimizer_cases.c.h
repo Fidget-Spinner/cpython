@@ -1371,7 +1371,7 @@
             }
             else if (interp->rare_events.builtin_dict >= _Py_MAX_ALLOWED_BUILTINS_MODIFICATIONS) {
             }
-            else if (!ctx->in_peeled_iteration) {
+            else {
                 if (!ctx->builtins_watched) {
                     PyDict_Watch(BUILTINS_WATCHER_ID, builtins);
                     ctx->builtins_watched = true;
@@ -1643,7 +1643,7 @@
             (void)dict_version;
             (void)index;
             attr = PyJitRef_NULL;
-            if (sym_is_const(ctx, owner) && !ctx->in_peeled_iteration) {
+            if (sym_is_const(ctx, owner)) {
                 PyModuleObject *mod = (PyModuleObject *)sym_get_const(ctx, owner);
                 if (PyModule_CheckExact(mod)) {
                     PyObject *dict = mod->md_dict;
@@ -3350,20 +3350,15 @@
                 }
             }
             else {
-                if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
-                    OPT_STAT_INC(peeled_loop_attempts);
-                    ctx->in_peeled_iteration = true;
-                    if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
-                        ctx->done = true;
-                        break;
-                    }
-                    for (int x = 1; x < i + 1; x++) {
-                        trace[i + x] = trace[x];
-                    }
-                    DPRINTF(2, "Peeling loop\n");
-                    REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
+                OPT_STAT_INC(peeled_loop_attempts);
+                ctx->in_peeled_iteration = true;
+                if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                    ctx->done = true;
                     break;
                 }
+                DPRINTF(2, "Peeling loop\n");
+                REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
+                break;
             }
             ctx->done = true;
             break;

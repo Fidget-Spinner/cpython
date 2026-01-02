@@ -634,7 +634,7 @@ dummy_func(void) {
         (void)dict_version;
         (void)index;
         attr = PyJitRef_NULL;
-        if (sym_is_const(ctx, owner) && !ctx->in_peeled_iteration) {
+        if (sym_is_const(ctx, owner)) {
             PyModuleObject *mod = (PyModuleObject *)sym_get_const(ctx, owner);
             if (PyModule_CheckExact(mod)) {
                 PyObject *dict = mod->md_dict;
@@ -1187,22 +1187,15 @@ dummy_func(void) {
             // Note: it's often not worth it to peel an already large trace.
             // We just end up blowing up the icache. This can be observed in
             // the nbody benchmark.
-            if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
-                OPT_STAT_INC(peeled_loop_attempts);
-                ctx->in_peeled_iteration = true;
-                if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
-                    ctx->done = true;
-                    break;
-                }
-                // 1 to skip the _START_EXECUTOR
-                // + 1 to copy the current instruction too.
-                for (int x = 1; x < i + 1; x++) {
-                    trace[i + x] = trace[x];
-                }
-                DPRINTF(2, "Peeling loop\n");
-                REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
+            OPT_STAT_INC(peeled_loop_attempts);
+            ctx->in_peeled_iteration = true;
+            if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                ctx->done = true;
                 break;
             }
+            DPRINTF(2, "Peeling loop\n");
+            REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
+            break;
         }
         ctx->done = true;
     }
@@ -1474,7 +1467,7 @@ dummy_func(void) {
         else if (interp->rare_events.builtin_dict >= _Py_MAX_ALLOWED_BUILTINS_MODIFICATIONS) {
             /* Do nothing */
         }
-        else if (!ctx->in_peeled_iteration) {
+        else {
             if (!ctx->builtins_watched) {
                 PyDict_Watch(BUILTINS_WATCHER_ID, builtins);
                 ctx->builtins_watched = true;
