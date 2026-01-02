@@ -862,6 +862,11 @@ _Py_uop_frame_new(
         frame->stack[i] = stackvar;
     }
 
+    for (int i = curr_stackentries; i < co->co_stacksize; i++) {
+        JitOptRef stackvar = _Py_uop_sym_new_null(ctx);
+        frame->stack[i] = stackvar;
+    }
+
     return frame;
 }
 
