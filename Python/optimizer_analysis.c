@@ -353,7 +353,10 @@ optimize_uops(
     _Py_uop_abstractcontext_init(ctx);
 
     // Plenty of space and it's a loop, try to peel it.
-    if (trace[trace_len - 1].opcode == _JUMP_TO_TOP && trace_len < (UOP_MAX_TRACE_LENGTH / 4)) {
+    // Note: loop peeling only seems to be beneficial at the moment
+    // for smaller tight loops.
+    // Bigger loops tend to produce too much jitted code and blow the icache.
+    if (trace[trace_len - 1].opcode == _JUMP_TO_TOP && trace_len < (UOP_MAX_TRACE_LENGTH / 10)) {
         // 1 to skip the _START_EXECUTOR
         // + 1 to copy the current instruction too.
         for (int x = 1; x < trace_len + 1; x++) {
