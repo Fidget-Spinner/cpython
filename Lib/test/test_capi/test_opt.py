@@ -1486,11 +1486,12 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertEqual(trace, list("ABCDEFG") * TIER2_THRESHOLD)
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
-        # Only one guard remains:
-        self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 1)
+        # Only one guard remains (+1 due to loop peeling):
+        self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 2)
         self.assertEqual(uops.count("_GUARD_IS_TRUE_POP"), 0)
         # But all of the appends we care about are still there:
-        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG"))
+        # Doubled due to loop peeling.
+        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG") * 2)
 
     def test_narrow_type_to_constant_bool_true(self):
         def f(n):
@@ -1517,11 +1518,12 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertEqual(trace, list("ABCDEFG") * TIER2_THRESHOLD)
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
-        # Only one guard remains:
+        # Only one guard remains (+1 due to loop peeling):
         self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 0)
-        self.assertEqual(uops.count("_GUARD_IS_TRUE_POP"), 1)
+        self.assertEqual(uops.count("_GUARD_IS_TRUE_POP"), 2)
         # But all of the appends we care about are still there:
-        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG"))
+        # Doubled due to loop peeling.
+        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG") * 2)
 
     def test_narrow_type_to_constant_int_zero(self):
         def f(n):
@@ -1549,11 +1551,12 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertEqual(trace, list("ABCDEFG") * TIER2_THRESHOLD)
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
-        # Only one guard remains:
-        self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 1)
+        # Only one guard remains (+1 due to loop peeling):
+        self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 2)
         self.assertEqual(uops.count("_GUARD_IS_TRUE_POP"), 0)
         # But all of the appends we care about are still there:
-        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG"))
+        # Doubled due to loop peeling.
+        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG") * 2)
 
     def test_narrow_type_to_constant_str_empty(self):
         def f(n):
@@ -1582,11 +1585,12 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertEqual(trace, list("ABCDEFG") * TIER2_THRESHOLD)
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
-        # Only one guard remains:
-        self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 1)
+        # Only one guard remains (+1 due to loop peeling):
+        self.assertEqual(uops.count("_GUARD_IS_FALSE_POP"), 2)
         self.assertEqual(uops.count("_GUARD_IS_TRUE_POP"), 0)
         # But all of the appends we care about are still there:
-        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG"))
+        # Doubled due to loop peeling.
+        self.assertEqual(uops.count("_CALL_LIST_APPEND"), len("ABCDEFG") * 2)
 
     def test_unary_negative_pop_top_load_const_inline_borrow(self):
         def testfunc(n):
@@ -3111,7 +3115,7 @@ class TestUopsOptimization(unittest.TestCase):
                     link_to = _testinternalcapi.get_exit_executor(exit)
                     self.assertIn(id(link_to), executor_ids)
                     break
-                elif opname == "_JUMP_TO_TOP":
+                elif opname == "_JUMP_TO_TOP" or opname == "_JUMP_TO_PEELED_LOOP":
                     break
                 elif opname == "_DEOPT":
                     self.fail(f"_DEOPT encountered first at executor"

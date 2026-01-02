@@ -357,6 +357,8 @@ optimize_uops(
         for (int x = 1; x < trace_len + 1; x++) {
             trace[trace_len + x - 1] = trace[x];
         }
+        // The end of a loop trace points back to the start.
+        trace[trace_len - 1].target = trace[0].target;
     }
 
     _Py_uop_abstractcontext_init(ctx);
