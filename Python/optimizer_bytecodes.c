@@ -619,7 +619,7 @@ dummy_func(void) {
         (void)dict_version;
         (void)index;
         attr = PyJitRef_NULL;
-        if (sym_is_const(ctx, owner)) {
+        if (sym_is_const(ctx, owner) && !ctx->in_peeled_iteration) {
             PyModuleObject *mod = (PyModuleObject *)sym_get_const(ctx, owner);
             if (PyModule_CheckExact(mod)) {
                 PyObject *dict = mod->md_dict;
@@ -1159,13 +1159,18 @@ dummy_func(void) {
         // Already peeling, check if we can rejoin the peeled context.
         if (ctx->in_peeled_iteration) {
             if (_Py_uop_unrollcontext_more_general_than_curr_context(ctx)) {
+                DPRINTF(2, "Successfully rejoined peeled loop\n");
                 REPLACE_OP(this_instr, _JUMP_TO_PEELED_LOOP, 0, 0);
             }
-            // Can't rejoin :(
+            else {
+                DPRINTF(2, "Can't rejoin peeled loop.\n");
+                OPT_STAT_INC(peeled_loop_failed_to_rejoin);
+            }
         }
-        // Plenty of space left, time to peel!
         else {
+            // Plenty of space left, time to peel!
             if (i < (UOP_MAX_TRACE_LENGTH / 4)) {
+                OPT_STAT_INC(peeled_loop_attempts);
                 ctx->in_peeled_iteration = true;
                 _Py_uop_abstractcontext_store_unroll_context(ctx);
                 // 1 to skip the _START_EXECUTOR
@@ -1173,6 +1178,7 @@ dummy_func(void) {
                 for (int x = 1; x < i + 1; x++) {
                     trace[i + x] = trace[x];
                 }
+                DPRINTF(2, "Peeling loop\n");
                 REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
                 break;
             }
@@ -1447,7 +1453,7 @@ dummy_func(void) {
         else if (interp->rare_events.builtin_dict >= _Py_MAX_ALLOWED_BUILTINS_MODIFICATIONS) {
             /* Do nothing */
         }
-        else {
+        else if (!ctx->in_peeled_iteration) {
             if (!ctx->builtins_watched) {
                 PyDict_Watch(BUILTINS_WATCHER_ID, builtins);
                 ctx->builtins_watched = true;

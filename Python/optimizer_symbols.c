@@ -857,7 +857,7 @@ _Py_uop_frame_new(
 
 
     // Initialize the stack as well
-    for (int i = 0; i < curr_stackentries; i++) {
+    for (int i = 0; i < co->co_stacksize; i++) {
         JitOptRef stackvar = _Py_uop_sym_new_unknown(ctx);
         frame->stack[i] = stackvar;
     }
@@ -1043,6 +1043,11 @@ _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
     JitOptUnrollContext *unroll = &ctx->unroll;
     int n_consumed = (int)(ctx->n_consumed - ctx->locals_and_stack);
     memcpy(unroll->locals_and_stack, ctx->locals_and_stack, sizeof(JitOptRef) * n_consumed);
+#ifdef Py_DEBUG
+    for (int i = 0; i < n_consumed; i++) {
+        assert(!PyJitRef_IsNull(ctx->locals_and_stack[i]));
+    }
+#endif
     memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
     unroll->n_consumed = n_consumed;
     unroll->curr_frame_depth = ctx->curr_frame_depth;
@@ -1068,7 +1073,7 @@ _Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx)
             return false;
         }
         // If we're truly at the same state,
-        // these values should be pointing to the old values
+        // these values should be pointing to the old address
         // we saw in the peeled loop header.
         if (curr->stack_pointer != from->stack_pointer) {
             return false;
@@ -1089,7 +1094,10 @@ _Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx)
     }
     // For all locals and stack values, check they do not contradict
     for (int i = 0; i < ctx_n_locals_consumed; i++) {
-        if (!sym_is_more_general(ctx, unroll->locals_and_stack[i], ctx->locals_and_stack[i])) {
+        JitOptRef parent = unroll->locals_and_stack[i];
+        JitOptRef child = ctx->locals_and_stack[i];
+        assert(!PyJitRef_IsNull(child));
+        if (!sym_is_more_general(ctx, parent, child)) {
             return false;
         }
     }

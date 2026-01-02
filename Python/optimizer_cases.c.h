@@ -1359,7 +1359,7 @@
             }
             else if (interp->rare_events.builtin_dict >= _Py_MAX_ALLOWED_BUILTINS_MODIFICATIONS) {
             }
-            else {
+            else if (!ctx->in_peeled_iteration) {
                 if (!ctx->builtins_watched) {
                     PyDict_Watch(BUILTINS_WATCHER_ID, builtins);
                     ctx->builtins_watched = true;
@@ -1631,7 +1631,7 @@
             (void)dict_version;
             (void)index;
             attr = PyJitRef_NULL;
-            if (sym_is_const(ctx, owner)) {
+            if (sym_is_const(ctx, owner) && !ctx->in_peeled_iteration) {
                 PyModuleObject *mod = (PyModuleObject *)sym_get_const(ctx, owner);
                 if (PyModule_CheckExact(mod)) {
                     PyObject *dict = mod->md_dict;
@@ -3329,7 +3329,11 @@
         case _JUMP_TO_TOP: {
             if (ctx->in_peeled_iteration) {
                 if (_Py_uop_unrollcontext_more_general_than_curr_context(ctx)) {
+                    DPRINTF(2, "Successfully rejoined peeled loop\n");
                     REPLACE_OP(this_instr, _JUMP_TO_PEELED_LOOP, 0, 0);
+                }
+                else {
+                    DPRINTF(2, "Can't rejoin peeled loop.\n");
                 }
             }
             else {
@@ -3339,6 +3343,7 @@
                     for (int x = 1; x < i + 1; x++) {
                         trace[i + x] = trace[x];
                     }
+                    DPRINTF(2, "Peeling loop\n");
                     REPLACE_OP(this_instr, _PEELED_LOOP_START, 0, 0);
                     break;
                 }

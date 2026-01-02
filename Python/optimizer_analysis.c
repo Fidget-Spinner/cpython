@@ -401,6 +401,20 @@ optimize_uops(
         DPRINTF(3, "\n");
         DPRINTF(1, "Out of space in abstract interpreter\n");
     }
+    // We failed to peel (and might have hit a contradiction).
+    // Unwind back to the peeled loop, and close that.
+    if (ctx->in_peeled_iteration && trace[i-1].opcode != _JUMP_TO_PEELED_LOOP) {
+        DPRINTF(2, "Undoing peeled loop.\n");
+        for (int x = 0; x < i; x++) {
+            if (trace[x].opcode == _PEELED_LOOP_START) {
+                trace[x].opcode = _JUMP_TO_TOP;
+                _Py_uop_abstractcontext_fini(ctx);
+                return x + 1;
+            }
+        }
+        // _PEELED_LOOP_START should always be found if we are peeling!
+        Py_UNREACHABLE();
+    }
     if (ctx->contradiction) {
         // Attempted to push a "bottom" (contradiction) symbol onto the stack.
         // This means that the abstract interpreter has optimized to trace

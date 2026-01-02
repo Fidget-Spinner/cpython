@@ -156,6 +156,8 @@ typedef struct _optimization_stats {
     uint64_t optimizer_failure_reason_no_memory;
     uint64_t remove_globals_builtins_changed;
     uint64_t remove_globals_incorrect_keys;
+    uint64_t peeled_loop_attempts;
+    uint64_t peeled_loop_failed_to_rejoin;
     uint64_t error_in_opcode[PYSTATS_MAX_UOP_ID + 1];
     // JIT memory stats
     uint64_t jit_total_memory_size;

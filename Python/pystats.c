@@ -475,6 +475,8 @@ merge_optimization_stats(OptimizationStats *dest, const OptimizationStats *src)
     dest->optimizer_failure_reason_no_memory += src->optimizer_failure_reason_no_memory;
     dest->remove_globals_builtins_changed += src->remove_globals_builtins_changed;
     dest->remove_globals_incorrect_keys += src->remove_globals_incorrect_keys;
+    dest->peeled_loop_attempts += src->peeled_loop_attempts;
+    dest->peeled_loop_failed_to_rejoin += src->peeled_loop_failed_to_rejoin;
     dest->jit_total_memory_size += src->jit_total_memory_size;
     dest->jit_code_size += src->jit_code_size;
     dest->jit_trampoline_size += src->jit_trampoline_size;

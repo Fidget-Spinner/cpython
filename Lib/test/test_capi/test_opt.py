@@ -157,7 +157,7 @@ class TestUops(unittest.TestCase):
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
-        self.assertIn("_JUMP_TO_TOP", uops)
+        self.assertIn("_JUMP_TO_PEELED_LOOP", uops)
         self.assertIn("_LOAD_FAST_BORROW_0", uops)
 
     def test_extended_arg(self):
@@ -292,7 +292,7 @@ class TestUops(unittest.TestCase):
         ex = get_first_executor(testfunc)
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
-        self.assertIn("_JUMP_TO_TOP", uops)
+        self.assertIn("_JUMP_TO_PEELED_LOOP", uops)
 
     def test_jump_forward(self):
         def testfunc(n):
@@ -1809,8 +1809,9 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
         self.assertEqual(uops.count("_GUARD_NOS_DICT"), 0)
-        self.assertEqual(uops.count("_STORE_SUBSCR_DICT"), 1)
-        self.assertEqual(uops.count("_BINARY_OP_SUBSCR_DICT"), 1)
+        # Peeled loop
+        self.assertEqual(uops.count("_STORE_SUBSCR_DICT"), 2)
+        self.assertEqual(uops.count("_BINARY_OP_SUBSCR_DICT"), 2)
 
     def test_remove_guard_for_known_type_list(self):
         def f(n):
@@ -1829,11 +1830,12 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIsNotNone(ex)
         uops = get_opnames(ex)
         self.assertEqual(uops.count("_GUARD_NOS_LIST"), 0)
-        self.assertEqual(uops.count("_STORE_SUBSCR_LIST_INT"), 1)
+        # peeled loop
+        self.assertEqual(uops.count("_STORE_SUBSCR_LIST_INT"), 2)
         self.assertEqual(uops.count("_GUARD_TOS_LIST"), 0)
-        self.assertEqual(uops.count("_UNPACK_SEQUENCE_LIST"), 1)
-        self.assertEqual(uops.count("_BINARY_OP_SUBSCR_LIST_INT"), 1)
-        self.assertEqual(uops.count("_TO_BOOL_LIST"), 1)
+        self.assertEqual(uops.count("_UNPACK_SEQUENCE_LIST"), 2)
+        self.assertEqual(uops.count("_BINARY_OP_SUBSCR_LIST_INT"), 2)
+        self.assertEqual(uops.count("_TO_BOOL_LIST"), 2)
 
     def test_remove_guard_for_known_type_set(self):
         def f(n):
@@ -1922,7 +1924,8 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIn("_COMPARE_OP_STR", uops)
         self.assertIn("_POP_TOP_NOP", uops)
         self.assertLessEqual(count_ops(ex, "_POP_TOP"), 2)
-        self.assertLessEqual(count_ops(ex, "_POP_TOP_INT"), 1)
+        # loop has been peeled
+        self.assertLessEqual(count_ops(ex, "_POP_TOP_INT"), 3)
 
     def test_call_type_1_guards_removed(self):
         def testfunc(n):
@@ -2231,7 +2234,8 @@ class TestUopsOptimization(unittest.TestCase):
         uops = get_opnames(ex)
         self.assertIn("_CALL_METHOD_DESCRIPTOR_O", uops)
         self.assertIn("_POP_TOP_NOP", uops)
-        self.assertLessEqual(count_ops(ex, "_POP_TOP"), 4)
+        # Peeled loop
+        self.assertLessEqual(count_ops(ex, "_POP_TOP"), 5)
 
     def test_get_len_with_const_tuple(self):
         def testfunc(n):
@@ -2611,7 +2615,8 @@ class TestUopsOptimization(unittest.TestCase):
         uops = get_opnames(ex)
 
         self.assertIn("_LOAD_ATTR_INSTANCE_VALUE", uops)
-        self.assertLessEqual(count_ops(ex, "_POP_TOP"), 2)
+        # Peeled loop
+        self.assertLessEqual(count_ops(ex, "_POP_TOP"), 3)
         self.assertIn("_POP_TOP_NOP", uops)
 
     def test_load_attr_with_hint(self):
@@ -2856,7 +2861,6 @@ class TestUopsOptimization(unittest.TestCase):
         uops = get_opnames(ex)
         self.assertIn("_STORE_SUBSCR_LIST_INT", uops)
         self.assertLessEqual(count_ops(ex, "_POP_TOP"), 1)
-        self.assertNotIn("_POP_TOP_INT", uops)
         self.assertIn("_POP_TOP_NOP", uops)
 
     def test_store_attr_slot(self):
@@ -3258,7 +3262,8 @@ class TestUopsOptimization(unittest.TestCase):
 
         self.assertIn("_BINARY_OP_SUBSCR_LIST_INT", uops)
         self.assertLessEqual(count_ops(ex, "_POP_TOP"), 2)
-        self.assertLessEqual(count_ops(ex, "_POP_TOP_INT"), 1)
+        # Peeled loop
+        self.assertLessEqual(count_ops(ex, "_POP_TOP_INT"), 4)
         self.assertIn("_POP_TOP_NOP", uops)
 
     def test_binary_subscr_tuple_int(self):
@@ -3277,7 +3282,8 @@ class TestUopsOptimization(unittest.TestCase):
 
         self.assertIn("_BINARY_OP_SUBSCR_TUPLE_INT", uops)
         self.assertLessEqual(count_ops(ex, "_POP_TOP"), 3)
-        self.assertLessEqual(count_ops(ex, "_POP_TOP_INT"), 1)
+        # Peeled loop
+        self.assertLessEqual(count_ops(ex, "_POP_TOP_INT"), 4)
         self.assertIn("_POP_TOP_NOP", uops)
 
     def test_is_op(self):

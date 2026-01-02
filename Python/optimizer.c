@@ -1057,7 +1057,7 @@ _PyJit_TryInitializeTracing(
     add_to_trace(_tstate->jit_tracer_state.code_buffer, 1, _MAKE_WARM, 0, 0, 0);
     _tstate->jit_tracer_state.prev_state.code_curr_size = CODE_SIZE_EMPTY;
 
-    _tstate->jit_tracer_state.prev_state.code_max_size = UOP_MAX_TRACE_LENGTH/2;
+    _tstate->jit_tracer_state.prev_state.code_max_size = UOP_MAX_TRACE_LENGTH/4;
     _tstate->jit_tracer_state.initial_state.start_instr = start_instr;
     _tstate->jit_tracer_state.initial_state.close_loop_instr = close_loop_instr;
     _tstate->jit_tracer_state.initial_state.code = (PyCodeObject *)Py_NewRef(code);
@@ -1090,7 +1090,7 @@ _PyJit_FinalizeTracing(PyThreadState *tstate)
     Py_CLEAR(_tstate->jit_tracer_state.initial_state.func);
     Py_CLEAR(_tstate->jit_tracer_state.prev_state.instr_code);
     _tstate->jit_tracer_state.prev_state.code_curr_size = CODE_SIZE_EMPTY;
-    _tstate->jit_tracer_state.prev_state.code_max_size = UOP_MAX_TRACE_LENGTH/2 - 1;
+    _tstate->jit_tracer_state.prev_state.code_max_size = UOP_MAX_TRACE_LENGTH/4 - 1;
 }
 
 
