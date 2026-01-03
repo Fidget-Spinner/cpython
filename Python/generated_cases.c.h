@@ -10516,6 +10516,87 @@
             DISPATCH();
         }
 
+        TARGET(SEND_GEN_NON_PY_GENERAL) {
+            #if _Py_TAIL_CALL_INTERP
+            int opcode = SEND_GEN_NON_PY_GENERAL;
+            (void)(opcode);
+            #endif
+            _Py_CODEUNIT* const this_instr = next_instr;
+            (void)this_instr;
+            frame->instr_ptr = next_instr;
+            next_instr += 2;
+            INSTRUCTION_STATS(SEND_GEN_NON_PY_GENERAL);
+            static_assert(INLINE_CACHE_ENTRIES_SEND == 1, "incorrect cache size");
+            _PyStackRef receiver;
+            _PyStackRef v;
+            _PyStackRef retval;
+            /* Skip 1 cache entry */
+            // _CHECK_RECEIVER_NOT_PY_GEN
+            {
+                receiver = stack_pointer[-2];
+                PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
+                assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
+                if (Py_TYPE(receiver_o) == &PyGen_Type || Py_TYPE(receiver_o) == &PyCoro_Type) {
+                    UPDATE_MISS_STATS(SEND);
+                    assert(_PyOpcode_Deopt[opcode] == (SEND));
+                    JUMP_TO_PREDICTED(SEND);
+                }
+            }
+            // _SEND_NON_PY_GENERAL
+            {
+                v = stack_pointer[-1];
+                PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
+                PyObject *retval_o;
+                assert(Py_TYPE(receiver_o) != &PyGen_Type && Py_TYPE(receiver_o) != &PyCoro_Type);
+                assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
+                if (PyStackRef_IsNone(v) && PyIter_Check(receiver_o)) {
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    retval_o = Py_TYPE(receiver_o)->tp_iternext(receiver_o);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                }
+                else {
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    retval_o = PyObject_CallMethodOneArg(receiver_o,
+                        &_Py_ID(send),
+                        PyStackRef_AsPyObjectBorrow(v));
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                }
+                if (retval_o == NULL) {
+                    _PyFrame_SetStackPointer(frame, stack_pointer);
+                    int err = _PyGen_FetchStopIterationValue(&retval_o);
+                    stack_pointer = _PyFrame_GetStackPointer(frame);
+                    if (err == 0) {
+                        assert(retval_o != NULL);
+                        #if TIER_ONE
+                        JUMPBY(oparg);
+                        #endif
+                        #if TIER_TWO
+                        frame->instr_ptr += (oparg + INLINE_CACHE_ENTRIES_SEND + 1);
+                        #endif
+
+                    }
+                    else {
+                        stack_pointer += -1;
+                        ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                        _PyFrame_SetStackPointer(frame, stack_pointer);
+                        PyStackRef_CLOSE(v);
+                        stack_pointer = _PyFrame_GetStackPointer(frame);
+                        JUMP_TO_LABEL(error);
+                    }
+                }
+                stack_pointer += -1;
+                ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyStackRef_CLOSE(v);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+                retval = PyStackRef_FromPyObjectSteal(retval_o);
+            }
+            stack_pointer[0] = retval;
+            stack_pointer += 1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            DISPATCH();
+        }
+
         TARGET(SETUP_ANNOTATIONS) {
             #if _Py_TAIL_CALL_INTERP
             int opcode = SETUP_ANNOTATIONS;

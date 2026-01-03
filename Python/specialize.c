@@ -2571,8 +2571,10 @@ _Py_Specialize_Send(_PyStackRef receiver_st, _Py_CODEUNIT *instr)
         specialize(instr, SEND_GEN);
         return;
     }
-    SPECIALIZATION_FAIL(SEND,
-                        _PySpecialization_ClassifyIterator(receiver));
+    else {
+        specialize(instr, SEND_GEN_NON_PY_GENERAL);
+        return;
+    }
 failure:
     unspecialize(instr);
 }

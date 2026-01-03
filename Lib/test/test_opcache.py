@@ -1587,6 +1587,19 @@ class TestSpecializer(TestBase):
 
     @cpython_only
     @requires_specialization_ft
+    def test_send_yield_from_non_py(self):
+
+        def send_yield_from():
+            yield from range(10)
+
+        for _ in range(_testinternalcapi.SPECIALIZATION_THRESHOLD):
+            list(send_yield_from())
+
+        self.assert_specialized(send_yield_from, "SEND_GEN_NON_PY_GENERAL")
+        self.assert_no_opcode(send_yield_from, "SEND")
+
+    @cpython_only
+    @requires_specialization_ft
     def test_send_yield_from(self):
         def g():
             yield None

@@ -143,6 +143,8 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GET_ANEXT] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
     [_GET_AWAITABLE] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_SEND_GEN_FRAME] = HAS_ARG_FLAG | HAS_DEOPT_FLAG,
+    [_CHECK_RECEIVER_NOT_PY_GEN] = HAS_EXIT_FLAG,
+    [_SEND_NON_PY_GENERAL] = HAS_ARG_FLAG | HAS_JUMP_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG | HAS_UNPREDICTABLE_JUMP_FLAG | HAS_NEEDS_GUARD_IP_FLAG,
     [_YIELD_VALUE] = HAS_ARG_FLAG | HAS_NEEDS_GUARD_IP_FLAG,
     [_POP_EXCEPT] = HAS_ESCAPES_FLAG,
     [_LOAD_COMMON_CONSTANT] = HAS_ARG_FLAG,
@@ -359,6 +361,7 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_GUARD_IP_YIELD_VALUE] = HAS_EXIT_FLAG,
     [_GUARD_IP_RETURN_VALUE] = HAS_EXIT_FLAG,
     [_GUARD_IP_RETURN_GENERATOR] = HAS_EXIT_FLAG,
+    [_GUARD_IP_SEND_NON_PY_GENERAL] = HAS_EXIT_FLAG,
 };
 
 const ReplicationRange _PyUop_Replication[MAX_UOP_ID+1] = {
@@ -1341,6 +1344,24 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
             { -1, -1, -1 },
             { -1, -1, -1 },
             { 2, 2, _SEND_GEN_FRAME_r22 },
+            { -1, -1, -1 },
+        },
+    },
+    [_CHECK_RECEIVER_NOT_PY_GEN] = {
+        .best = { 0, 1, 2, 3 },
+        .entries = {
+            { 2, 0, _CHECK_RECEIVER_NOT_PY_GEN_r02 },
+            { 2, 1, _CHECK_RECEIVER_NOT_PY_GEN_r12 },
+            { 2, 2, _CHECK_RECEIVER_NOT_PY_GEN_r22 },
+            { 3, 3, _CHECK_RECEIVER_NOT_PY_GEN_r33 },
+        },
+    },
+    [_SEND_NON_PY_GENERAL] = {
+        .best = { 2, 2, 2, 2 },
+        .entries = {
+            { -1, -1, -1 },
+            { -1, -1, -1 },
+            { 2, 2, _SEND_NON_PY_GENERAL_r22 },
             { -1, -1, -1 },
         },
     },
@@ -3279,6 +3300,15 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
             { 3, 3, _GUARD_IP_RETURN_GENERATOR_r33 },
         },
     },
+    [_GUARD_IP_SEND_NON_PY_GENERAL] = {
+        .best = { 0, 1, 2, 3 },
+        .entries = {
+            { 0, 0, _GUARD_IP_SEND_NON_PY_GENERAL_r00 },
+            { 1, 1, _GUARD_IP_SEND_NON_PY_GENERAL_r11 },
+            { 2, 2, _GUARD_IP_SEND_NON_PY_GENERAL_r22 },
+            { 3, 3, _GUARD_IP_SEND_NON_PY_GENERAL_r33 },
+        },
+    },
 };
 
 const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
@@ -3568,6 +3598,11 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_GET_ANEXT_r12] = _GET_ANEXT,
     [_GET_AWAITABLE_r11] = _GET_AWAITABLE,
     [_SEND_GEN_FRAME_r22] = _SEND_GEN_FRAME,
+    [_CHECK_RECEIVER_NOT_PY_GEN_r02] = _CHECK_RECEIVER_NOT_PY_GEN,
+    [_CHECK_RECEIVER_NOT_PY_GEN_r12] = _CHECK_RECEIVER_NOT_PY_GEN,
+    [_CHECK_RECEIVER_NOT_PY_GEN_r22] = _CHECK_RECEIVER_NOT_PY_GEN,
+    [_CHECK_RECEIVER_NOT_PY_GEN_r33] = _CHECK_RECEIVER_NOT_PY_GEN,
+    [_SEND_NON_PY_GENERAL_r22] = _SEND_NON_PY_GENERAL,
     [_YIELD_VALUE_r11] = _YIELD_VALUE,
     [_POP_EXCEPT_r10] = _POP_EXCEPT,
     [_LOAD_COMMON_CONSTANT_r01] = _LOAD_COMMON_CONSTANT,
@@ -4005,6 +4040,10 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_GUARD_IP_RETURN_GENERATOR_r11] = _GUARD_IP_RETURN_GENERATOR,
     [_GUARD_IP_RETURN_GENERATOR_r22] = _GUARD_IP_RETURN_GENERATOR,
     [_GUARD_IP_RETURN_GENERATOR_r33] = _GUARD_IP_RETURN_GENERATOR,
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r00] = _GUARD_IP_SEND_NON_PY_GENERAL,
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r11] = _GUARD_IP_SEND_NON_PY_GENERAL,
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r22] = _GUARD_IP_SEND_NON_PY_GENERAL,
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r33] = _GUARD_IP_SEND_NON_PY_GENERAL,
 };
 
 const uint16_t _PyUop_SpillsAndReloads[4][4] = {
@@ -4194,6 +4233,11 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_CHECK_PERIODIC_r00] = "_CHECK_PERIODIC_r00",
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM] = "_CHECK_PERIODIC_IF_NOT_YIELD_FROM",
     [_CHECK_PERIODIC_IF_NOT_YIELD_FROM_r00] = "_CHECK_PERIODIC_IF_NOT_YIELD_FROM_r00",
+    [_CHECK_RECEIVER_NOT_PY_GEN] = "_CHECK_RECEIVER_NOT_PY_GEN",
+    [_CHECK_RECEIVER_NOT_PY_GEN_r02] = "_CHECK_RECEIVER_NOT_PY_GEN_r02",
+    [_CHECK_RECEIVER_NOT_PY_GEN_r12] = "_CHECK_RECEIVER_NOT_PY_GEN_r12",
+    [_CHECK_RECEIVER_NOT_PY_GEN_r22] = "_CHECK_RECEIVER_NOT_PY_GEN_r22",
+    [_CHECK_RECEIVER_NOT_PY_GEN_r33] = "_CHECK_RECEIVER_NOT_PY_GEN_r33",
     [_CHECK_RECURSION_REMAINING] = "_CHECK_RECURSION_REMAINING",
     [_CHECK_RECURSION_REMAINING_r00] = "_CHECK_RECURSION_REMAINING_r00",
     [_CHECK_RECURSION_REMAINING_r11] = "_CHECK_RECURSION_REMAINING_r11",
@@ -4387,6 +4431,11 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_GUARD_IP_RETURN_VALUE_r11] = "_GUARD_IP_RETURN_VALUE_r11",
     [_GUARD_IP_RETURN_VALUE_r22] = "_GUARD_IP_RETURN_VALUE_r22",
     [_GUARD_IP_RETURN_VALUE_r33] = "_GUARD_IP_RETURN_VALUE_r33",
+    [_GUARD_IP_SEND_NON_PY_GENERAL] = "_GUARD_IP_SEND_NON_PY_GENERAL",
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r00] = "_GUARD_IP_SEND_NON_PY_GENERAL_r00",
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r11] = "_GUARD_IP_SEND_NON_PY_GENERAL_r11",
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r22] = "_GUARD_IP_SEND_NON_PY_GENERAL_r22",
+    [_GUARD_IP_SEND_NON_PY_GENERAL_r33] = "_GUARD_IP_SEND_NON_PY_GENERAL_r33",
     [_GUARD_IP_YIELD_VALUE] = "_GUARD_IP_YIELD_VALUE",
     [_GUARD_IP_YIELD_VALUE_r00] = "_GUARD_IP_YIELD_VALUE_r00",
     [_GUARD_IP_YIELD_VALUE_r11] = "_GUARD_IP_YIELD_VALUE_r11",
@@ -4904,6 +4953,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_SAVE_RETURN_OFFSET_r33] = "_SAVE_RETURN_OFFSET_r33",
     [_SEND_GEN_FRAME] = "_SEND_GEN_FRAME",
     [_SEND_GEN_FRAME_r22] = "_SEND_GEN_FRAME_r22",
+    [_SEND_NON_PY_GENERAL] = "_SEND_NON_PY_GENERAL",
+    [_SEND_NON_PY_GENERAL_r22] = "_SEND_NON_PY_GENERAL_r22",
     [_SETUP_ANNOTATIONS] = "_SETUP_ANNOTATIONS",
     [_SETUP_ANNOTATIONS_r00] = "_SETUP_ANNOTATIONS_r00",
     [_SET_ADD] = "_SET_ADD",
@@ -5289,6 +5340,10 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _GET_AWAITABLE:
             return 1;
         case _SEND_GEN_FRAME:
+            return 1;
+        case _CHECK_RECEIVER_NOT_PY_GEN:
+            return 0;
+        case _SEND_NON_PY_GENERAL:
             return 1;
         case _YIELD_VALUE:
             return 1;
@@ -5721,6 +5776,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _GUARD_IP_RETURN_VALUE:
             return 0;
         case _GUARD_IP_RETURN_GENERATOR:
+            return 0;
+        case _GUARD_IP_SEND_NON_PY_GENERAL:
             return 0;
         default:
             return -1;

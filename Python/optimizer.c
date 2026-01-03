@@ -527,6 +527,7 @@ guard_ip_uop[MAX_UOP_ID + 1] = {
     [_RETURN_GENERATOR] = _GUARD_IP_RETURN_GENERATOR,
     [_RETURN_VALUE] = _GUARD_IP_RETURN_VALUE,
     [_YIELD_VALUE] = _GUARD_IP_YIELD_VALUE,
+    [_SEND_NON_PY_GENERAL] = _GUARD_IP_SEND_NON_PY_GENERAL,
 };
 
 
@@ -1204,7 +1205,8 @@ prepare_for_execution(_PyUOpInstruction *buffer, int length)
                 base_opcode == _GUARD_IP__PUSH_FRAME ||
                 base_opcode == _GUARD_IP_RETURN_VALUE ||
                 base_opcode == _GUARD_IP_YIELD_VALUE ||
-                base_opcode == _GUARD_IP_RETURN_GENERATOR
+                base_opcode == _GUARD_IP_RETURN_GENERATOR ||
+                base_opcode == _GUARD_IP_SEND_NON_PY_GENERAL
             ) {
                 base_exit_op = _DYNAMIC_EXIT;
             }

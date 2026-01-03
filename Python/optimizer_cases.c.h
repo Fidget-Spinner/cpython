@@ -1073,6 +1073,17 @@
             break;
         }
 
+        case _CHECK_RECEIVER_NOT_PY_GEN: {
+            break;
+        }
+
+        case _SEND_NON_PY_GENERAL: {
+            JitOptRef retval;
+            retval = sym_new_not_null(ctx);
+            stack_pointer[-1] = retval;
+            break;
+        }
+
         case _YIELD_VALUE: {
             JitOptRef retval;
             JitOptRef value;
@@ -3622,6 +3633,10 @@
         }
 
         case _GUARD_IP_RETURN_GENERATOR: {
+            break;
+        }
+
+        case _GUARD_IP_SEND_NON_PY_GENERAL: {
             break;
         }
 
