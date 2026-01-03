@@ -1309,6 +1309,7 @@ dummy_func(
 
         family(SEND, INLINE_CACHE_ENTRIES_SEND) = {
             SEND_GEN,
+            SEND_GEN_NON_PY_GENERAL,
         };
 
         specializing op(_SPECIALIZE_SEND, (counter/1, receiver, unused -- receiver, unused)) {
@@ -1394,6 +1395,51 @@ dummy_func(
             _CHECK_PEP_523 +
             _SEND_GEN_FRAME +
             _PUSH_FRAME;
+
+        op(_CHECK_RECEIVER_NOT_PY_GEN, (receiver, v -- receiver, v)) {
+            PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
+            assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
+            EXIT_IF(Py_TYPE(receiver_o) == &PyGen_Type || Py_TYPE(receiver_o) == &PyCoro_Type);
+        }
+
+        op(_SEND_NON_PY_GENERAL, (receiver, v -- receiver, retval)) {
+            PyObject *receiver_o = PyStackRef_AsPyObjectBorrow(receiver);
+            PyObject *retval_o;
+            assert(Py_TYPE(receiver_o) != &PyGen_Type && Py_TYPE(receiver_o) != &PyCoro_Type);
+            assert(frame->owner != FRAME_OWNED_BY_INTERPRETER);
+            if (PyStackRef_IsNone(v) && PyIter_Check(receiver_o)) {
+                retval_o = Py_TYPE(receiver_o)->tp_iternext(receiver_o);
+            }
+            else {
+                retval_o = PyObject_CallMethodOneArg(receiver_o,
+                                                     &_Py_ID(send),
+                                                     PyStackRef_AsPyObjectBorrow(v));
+            }
+            if (retval_o == NULL) {
+                int err = _PyGen_FetchStopIterationValue(&retval_o);
+                if (err == 0) {
+                    assert(retval_o != NULL);
+                    #if TIER_ONE
+                    JUMPBY(oparg);
+                    #endif
+                    #if TIER_TWO
+                    frame->instr_ptr += (oparg + INLINE_CACHE_ENTRIES_SEND + 1);
+                    #endif
+
+                }
+                else {
+                    PyStackRef_CLOSE(v);
+                    ERROR_IF(true);
+                }
+            }
+            PyStackRef_CLOSE(v);
+            retval = PyStackRef_FromPyObjectSteal(retval_o);
+        }
+
+        macro(SEND_GEN_NON_PY_GENERAL) =
+            unused/1 +
+            _CHECK_RECEIVER_NOT_PY_GEN +
+            _SEND_NON_PY_GENERAL;
 
         inst(YIELD_VALUE, (retval -- value)) {
             // NOTE: It's important that YIELD_VALUE never raises an exception!
@@ -5451,6 +5497,13 @@ dummy_func(
             _Py_CODEUNIT *target = frame->instr_ptr +  IP_OFFSET_OF(RETURN_GENERATOR);
             if (target != (_Py_CODEUNIT *)ip) {
                 frame->instr_ptr += IP_OFFSET_OF(RETURN_GENERATOR);
+                EXIT_IF(true);
+            }
+        }
+
+        tier2 op(_GUARD_IP_SEND_NON_PY_GENERAL, (ip/4 --)) {
+            _Py_CODEUNIT *target = frame->instr_ptr + 1 + INLINE_CACHE_ENTRIES_SEND;
+            if (target != (_Py_CODEUNIT *)ip) {
                 EXIT_IF(true);
             }
         }

@@ -1157,6 +1157,20 @@ class TestUopsOptimization(unittest.TestCase):
         self.assertIsNotNone(ex)
         self.assertIn("_RETURN_GENERATOR", get_opnames(ex))
 
+    def test_send_gen(self):
+        def gen():
+            yield from range(3)
+        def testfunc(n):
+            for i in range(n):
+                for _ in gen():
+                    pass
+            return i
+        res, ex = self._run_with_optimizer(testfunc, TIER2_THRESHOLD)
+        self.assertEqual(res, TIER2_THRESHOLD - 1)
+        self.assertIsNotNone(ex)
+        self.assertIn("_SEND_NON_PY_GENERAL", get_opnames(ex))
+        self.assertIn("_GUARD_IP_SEND_NON_PY_GENERAL", get_opnames(ex))
+
     def test_for_iter(self):
         def testfunc(n):
             t = 0
