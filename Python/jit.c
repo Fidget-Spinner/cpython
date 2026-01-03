@@ -26,6 +26,7 @@
 #include "pycore_template.h"
 #include "pycore_tuple.h"
 #include "pycore_unicodeobject.h"
+#include "pycore_genobject.h"
 
 #include "pycore_jit.h"
 
