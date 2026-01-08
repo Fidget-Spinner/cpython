@@ -5514,7 +5514,7 @@ dummy_func(
                 assert(tstate->current_executor == (PyObject *)previous_executor);
                 // For control-flow guards, we don't want to increase the chain depth, as those don't actually
                 // represent deopts but rather just normal programs!
-                int chain_depth = previous_executor->vm_data.chain_depth + !exit->is_control_flow;
+                int chain_depth = exit->is_control_flow ? 0 : previous_executor->vm_data.chain_depth + 1;
                 // Note: it's safe to use target->op.arg here instead of the oparg given by EXTENDED_ARG.
                 // The invariant in the optimizer is the deopt target always points back to the first EXTENDED_ARG.
                 // So setting it to anything else is wrong.

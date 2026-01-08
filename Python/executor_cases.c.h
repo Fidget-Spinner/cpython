@@ -18922,7 +18922,7 @@
                 }
                 _PyExecutorObject *previous_executor = _PyExecutor_FromExit(exit);
                 assert(tstate->current_executor == (PyObject *)previous_executor);
-                int chain_depth = previous_executor->vm_data.chain_depth + !exit->is_control_flow;
+                int chain_depth = exit->is_control_flow ? 0 : previous_executor->vm_data.chain_depth + 1;
                 int succ = _PyJit_TryInitializeTracing(tstate, frame, target, target, target, STACK_LEVEL(), chain_depth, exit, target->op.arg);
                 exit->temperature = restart_backoff_counter(exit->temperature);
                 if (succ) {
