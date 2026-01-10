@@ -112,8 +112,15 @@ dummy_func(void) {
 
     op(_SWAP_FAST, (value -- trash)) {
         JitOptRef tmp = GETLOCAL(oparg);
-        GETLOCAL(oparg) = value;
-        trash = tmp;
+        // The values are the exact same, this op is useless.
+        if (value.bits == tmp.bits) {
+            REPLACE_OP(this_instr, _NOP, 0, 0);
+            trash = value;
+        }
+        else {
+            GETLOCAL(oparg) = value;
+            trash = tmp;
+        }
     }
 
     op(_STORE_SUBSCR_LIST_INT, (value, list_st, sub_st -- ls, ss)) {
@@ -1245,8 +1252,24 @@ dummy_func(void) {
     }
 
     op(_UNPACK_SEQUENCE_TUPLE, (seq -- values[oparg])) {
-        for (int i = 0; i < oparg; i++) {
-            values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
+        // Tuples are immutable, hence if they're the same (by ID), it's safe
+        // to CSE them away.
+        JitOptExpr *prev = find_expr(ctx, this_instr, seq, PyJitRef_NULL);
+        if (prev != NULL) {
+            seq = prev->args[0];
+            for (int i = 0; i < oparg; i++) {
+                values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
+            }
+        }
+        else {
+            seq = seq;
+            add_expr(ctx, this_instr, seq, PyJitRef_NULL);
+            for (int i = 0; i < oparg; i++) {
+                values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
+            }
+            // After this op, we know seq is a tuple, so set it as such.
+            JitOptRef temp = sym_new_tuple(ctx, oparg, values);
+            sym_set_known_tuple_if_generic_tuple(seq, temp);
         }
     }
 

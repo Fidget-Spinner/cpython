@@ -7,6 +7,8 @@
 #include "pycore_long.h"
 #include "pycore_optimizer.h"
 #include "pycore_stats.h"
+#include "pycore_opcode_metadata.h"
+#include "pycore_uop_metadata.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -55,6 +57,27 @@ BOTTOM (indicating that the code is unreachable).
 
 INT* is a limited range int, currently a "compact" int.
 
+Expressions
+===========
+
+We also perform common subexpression elimination (CSE).
+https://en.wikipedia.org/wiki/Common_subexpression_elimination
+
+To achieve this, we append non-side-effecting uops and their args
+to a linked list in the context. Each uop ID has their own linked list,
+allowing for fast searches, as we are now bounded by the number of
+same-type expressions previously seen.
+
+When a uop matches, we replace the expression with the one found in
+the linked list. we store the result of the previous subexpression
+in the frame at runtime.
+
+Care must be taken to not CSE away certain side-effecting operations,
+or operations that might hold onto a lot of memory. Pure operations
+in Python are usually fine, as they usually operate on things like
+ints, floats, etc. which don't take up much memory, and have no
+side effects by definition. Operations that are side-effecting only
+be virtue of calling Py_DECREF/PyStackRef_CLOSE are also fine.
 */
 
 #ifdef Py_DEBUG
@@ -103,7 +126,7 @@ sym_new(JitOptContext *ctx)
     JitOptSymbol *self = &ctx->t_arena.arena[ctx->t_arena.ty_curr_number];
     if (ctx->t_arena.ty_curr_number >= ctx->t_arena.ty_max_number) {
         OPT_STAT_INC(optimizer_failure_reason_no_memory);
-        DPRINTF(1, "out of space for symbolic expression type\n");
+        DPRINTF(1, "out of space for symbolic type\n");
         return NULL;
     }
     ctx->t_arena.ty_curr_number++;
@@ -333,6 +356,23 @@ _Py_uop_sym_set_type_version(JitOptContext *ctx, JitOptRef ref, unsigned int ver
             return true;
     }
     Py_UNREACHABLE();
+}
+
+void
+_Py_uop_sym_set_known_tuple_if_generic_tuple(JitOptRef ref, JitOptRef src)
+{
+    JitOptSymbol *sym = PyJitRef_Unwrap(ref);
+    JitOptSymbol *src_tuple = PyJitRef_Unwrap(src);
+    if (src_tuple->tag != JIT_SYM_TUPLE_TAG) {
+        return;
+    }
+    if (sym->tag == JIT_SYM_KNOWN_CLASS_TAG && (sym->cls.type == &PyTuple_Type)) {
+        sym->tag = JIT_SYM_TUPLE_TAG;
+        sym->tuple.length = src_tuple->tuple.length;
+        for (int i = 0; i < MAX_SYMBOLIC_TUPLE_SIZE; i++) {
+            sym->tuple.items[i] = src_tuple->tuple.items[i];
+        }
+    }
 }
 
 void
@@ -865,6 +905,57 @@ _Py_uop_frame_new(
     return frame;
 }
 
+static JitOptExpr *
+make_expr(JitOptContext *ctx)
+{
+    JitOptExpr *self = &ctx->e_arena.arena[ctx->e_arena.expr_curr_number];
+    if (ctx->e_arena.expr_curr_number >= EXPR_ARENA_SIZE) {
+        OPT_STAT_INC(optimizer_failure_reason_no_memory);
+        DPRINTF(1, "out of space for symbolic expression\n");
+        return NULL;
+    }
+    ctx->e_arena.expr_curr_number++;
+    return self;
+}
+
+JitOptExpr *
+_Py_uop_add_expr(JitOptContext *ctx, _PyUOpInstruction *this_instr, JitOptRef arg0, JitOptRef arg1)
+{
+    JitOptExpr *expr = make_expr(ctx);
+    if (expr == NULL) {
+        ctx->out_of_space = true;
+        ctx->done = true;
+        return NULL;
+    }
+    expr->inst = this_instr;
+    expr->args[0] = arg0;
+    expr->args[1] = arg1;
+    // Attach to linked list.
+    expr->next = ctx->exprs[this_instr->opcode];
+    ctx->exprs[this_instr->opcode] = expr;
+    return expr;
+}
+
+JitOptExpr *
+_Py_uop_find_expr(JitOptContext *ctx, _PyUOpInstruction *this_instr, JitOptRef arg0, JitOptRef arg1)
+{
+    JitOptExpr *expr = ctx->exprs[this_instr->opcode];
+    while (expr != NULL) {
+        // Note: we ignore the target here
+        if (expr->inst->opcode == this_instr->opcode &&
+            expr->inst->oparg == this_instr->oparg &&
+            expr->inst->operand0 == this_instr->operand0 &&
+            expr->inst->operand1 == this_instr->operand1 &&
+            expr->args[0].bits == arg0.bits &&
+            expr->args[1].bits == arg1.bits) {
+            return expr;
+        }
+        expr = expr->next;
+    }
+    return NULL;
+}
+
+
 void
 _Py_uop_abstractcontext_fini(JitOptContext *ctx)
 {
@@ -893,9 +984,15 @@ _Py_uop_abstractcontext_init(JitOptContext *ctx)
     }
 #endif
 
-    // Setup the arena for sym expressions.
+    // Setup the arena for symbolic  types.
     ctx->t_arena.ty_curr_number = 0;
     ctx->t_arena.ty_max_number = TY_ARENA_SIZE;
+
+    // Setup the arena for symbolic expressions.
+    ctx->e_arena.expr_curr_number = 0;
+    for (int i = 0; i < MAX_UOP_ID + 1; i++) {
+        ctx->exprs[i] = NULL;
+    }
 
     // Frame setup
     ctx->curr_frame_depth = 0;
@@ -1134,6 +1231,30 @@ _Py_uop_symbols_test(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(ignored))
     TEST_PREDICATE(_Py_uop_sym_is_compact_int(ref_int), "43 is not a compact int");
     TEST_PREDICATE(_Py_uop_sym_matches_type(ref_int, &PyLong_Type), "43 is not an int");
     TEST_PREDICATE(_Py_uop_sym_get_const(ctx, ref_int) == val_43, "43 isn't 43");
+
+    i1 = _Py_uop_sym_new_type(ctx, &PyTuple_Type);
+    i2 = _Py_uop_sym_new_const(ctx, val_43);
+    JitOptRef array_2[2] = { i1, i2 };
+    ref = _Py_uop_sym_new_tuple(ctx, 2, array_2);
+    _Py_uop_sym_set_known_tuple_if_generic_tuple(i1, ref);
+    TEST_PREDICATE(
+        _Py_uop_sym_tuple_getitem(ctx, ref, 0).bits == i1.bits,
+        "tuple item does not match value used to create tuple"
+    );
+    TEST_PREDICATE(
+        _Py_uop_sym_tuple_getitem(ctx, ref, 1).bits == i2.bits,
+        "tuple item does not match value used to create tuple"
+    );
+
+    _PyUOpInstruction test_instr = {.opcode = BINARY_OP_ADD_INT, .oparg = 5, .operand0=1, .operand1=2};
+    _PyUOpInstruction match_instr = {.opcode = BINARY_OP_ADD_INT, .oparg = 5, .operand0=1, .operand1=2};
+    _PyUOpInstruction non_match_instr = {.opcode = BINARY_OP_ADD_FLOAT, .oparg = 5, .operand0=1, .operand1=2};
+    _Py_uop_add_expr(ctx, &test_instr, PyJitRef_NULL, PyJitRef_NULL);
+    JitOptExpr *found = _Py_uop_find_expr(ctx, &match_instr, PyJitRef_NULL, PyJitRef_NULL);
+    TEST_PREDICATE(found != NULL, "same op not found in previous expressions");
+    JitOptExpr *not_found = _Py_uop_find_expr(ctx, &non_match_instr, PyJitRef_NULL, PyJitRef_NULL);
+    TEST_PREDICATE(not_found == NULL, "different op found in previous expressions");
+
 
     _Py_uop_abstractcontext_fini(ctx);
     Py_DECREF(val_42);

@@ -104,8 +104,14 @@
             JitOptRef trash;
             value = stack_pointer[-1];
             JitOptRef tmp = GETLOCAL(oparg);
-            GETLOCAL(oparg) = value;
-            trash = tmp;
+            if (value.bits == tmp.bits) {
+                REPLACE_OP(this_instr, _NOP, 0, 0);
+                trash = value;
+            }
+            else {
+                GETLOCAL(oparg) = value;
+                trash = tmp;
+            }
             stack_pointer[-1] = trash;
             break;
         }
@@ -1340,8 +1346,22 @@
             JitOptRef *values;
             seq = stack_pointer[-1];
             values = &stack_pointer[-1];
-            for (int i = 0; i < oparg; i++) {
-                values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
+            JitOptExpr *prev = find_expr(ctx, this_instr, seq, PyJitRef_NULL);
+            if (prev != NULL) {
+                seq = prev->args[0];
+                for (int i = 0; i < oparg; i++) {
+                    values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
+                }
+            }
+            else {
+                seq = seq;
+                stack_pointer[-1] = seq;
+                add_expr(ctx, this_instr, seq, PyJitRef_NULL);
+                for (int i = 0; i < oparg; i++) {
+                    values[i] = sym_tuple_getitem(ctx, seq, oparg - i - 1);
+                }
+                JitOptRef temp = sym_new_tuple(ctx, oparg, values);
+                sym_set_known_tuple_if_generic_tuple(seq, temp);
             }
             CHECK_STACK_BOUNDS(-1 + oparg);
             stack_pointer += -1 + oparg;

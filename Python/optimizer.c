@@ -561,6 +561,7 @@ add_to_trace(
     trace[trace_length].target = target;
     trace[trace_length].oparg = oparg;
     trace[trace_length].operand0 = operand;
+    trace[trace_length].operand1 = 0;
 #ifdef Py_STATS
     trace[trace_length].execution_count = 0;
 #endif

@@ -182,10 +182,13 @@ incorrect_keys(PyObject *obj, uint32_t version)
 #define sym_new_tuple _Py_uop_sym_new_tuple
 #define sym_tuple_getitem _Py_uop_sym_tuple_getitem
 #define sym_tuple_length _Py_uop_sym_tuple_length
+#define sym_set_known_tuple_if_generic_tuple _Py_uop_sym_set_known_tuple_if_generic_tuple
 #define sym_is_immortal _Py_uop_symbol_is_immortal
 #define sym_is_compact_int _Py_uop_sym_is_compact_int
 #define sym_new_compact_int _Py_uop_sym_new_compact_int
 #define sym_new_truthiness _Py_uop_sym_new_truthiness
+#define add_expr _Py_uop_add_expr
+#define find_expr _Py_uop_find_expr
 
 #define JUMP_TO_LABEL(label) goto label;
 

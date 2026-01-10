@@ -9,11 +9,14 @@ extern "C" {
 #endif
 
 #include "pycore_uop.h"  // UOP_MAX_TRACE_LENGTH
+#include "pycore_uop_ids.h"
 
 // Holds locals, stack, locals, stack ... (in that order)
 #define MAX_ABSTRACT_INTERP_SIZE 512
 
 #define TY_ARENA_SIZE (UOP_MAX_TRACE_LENGTH * 5)
+
+#define EXPR_ARENA_SIZE (UOP_MAX_TRACE_LENGTH / 4)
 
 // Need extras for root frame and for overflow frame (see TRACE_STACK_PUSH())
 #define MAX_ABSTRACT_FRAME_DEPTH (16)
@@ -57,7 +60,7 @@ typedef struct _jit_opt_known_value {
     PyObject *value;
 } JitOptKnownValue;
 
-#define MAX_SYMBOLIC_TUPLE_SIZE 7
+#define MAX_SYMBOLIC_TUPLE_SIZE 10
 
 typedef struct _jit_opt_tuple {
     uint8_t tag;
@@ -111,6 +114,21 @@ typedef struct ty_arena {
     JitOptSymbol arena[TY_ARENA_SIZE];
 } ty_arena;
 
+// For now, we only support up to binary expressions
+#define EXPR_MAX_NUM_OPERANDS_SUPPORTED 2
+
+typedef struct JitOptExpr {
+    _PyUOpInstruction *inst;
+    JitOptRef args[EXPR_MAX_NUM_OPERANDS_SUPPORTED];
+    // Next expression of the same kind in the linked list.
+    struct JitOptExpr *next;
+} JitOptExpr;
+
+typedef struct expr_arena {
+    int expr_curr_number;
+    JitOptExpr arena[EXPR_ARENA_SIZE];
+} expr_arena;
+
 typedef struct _JitOptContext {
     char done;
     char out_of_space;
@@ -124,6 +142,14 @@ typedef struct _JitOptContext {
 
     // Arena for the symbolic types.
     ty_arena t_arena;
+
+    // Arena for symbolic expressions.
+    // For each uop ID, we point to a linked list entry in e_arena.
+    // When searching up an expression, we thus only need to find
+    // the previous expressions in that slot for that uop.
+    // This follows LuaJIT 2's design.
+    JitOptExpr *exprs[MAX_UOP_ID + 1];
+    expr_arena e_arena;
 
     JitOptRef *n_consumed;
     JitOptRef *limit;

@@ -186,6 +186,7 @@ extern int _Py_uop_sym_truthiness(JitOptContext *ctx, JitOptRef sym);
 extern PyTypeObject *_Py_uop_sym_get_type(JitOptRef sym);
 extern JitOptRef _Py_uop_sym_new_tuple(JitOptContext *ctx, int size, JitOptRef *args);
 extern JitOptRef _Py_uop_sym_tuple_getitem(JitOptContext *ctx, JitOptRef sym, Py_ssize_t item);
+extern void  _Py_uop_sym_set_known_tuple_if_generic_tuple(JitOptRef ref, JitOptRef src);
 extern Py_ssize_t _Py_uop_sym_tuple_length(JitOptRef sym);
 extern JitOptRef _Py_uop_sym_new_truthiness(JitOptContext *ctx, JitOptRef value, bool truthy);
 extern bool _Py_uop_sym_is_compact_int(JitOptRef sym);
@@ -202,6 +203,10 @@ extern _Py_UOpsAbstractFrame *_Py_uop_frame_new(
     JitOptRef *args,
     int arg_len);
 extern int _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co, int curr_stackentries);
+
+extern JitOptExpr * _Py_uop_add_expr(JitOptContext *ctx, _PyUOpInstruction *this_instr, JitOptRef arg0, JitOptRef arg1);
+
+extern JitOptExpr * _Py_uop_find_expr(JitOptContext *ctx, _PyUOpInstruction *this_instr, JitOptRef arg0, JitOptRef arg1);
 
 PyAPI_FUNC(PyObject *) _Py_uop_symbols_test(PyObject *self, PyObject *ignored);
 

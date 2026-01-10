@@ -3573,6 +3573,19 @@ class TestUopsOptimization(unittest.TestCase):
         """), PYTHON_JIT="1")
         self.assertEqual(result[0].rc, 0, result)
 
+    def test_unpack_sequence_tuple_common_expression(self):
+        def testfunc(a):
+            tup = range(5)
+            for i in range(a):
+                a, b, c, d, e = tup
+                # The assignments here should be CSE'd away.
+                a, b, c, d, e = tup
+
+        res, ex = self._run_with_optimizer(testfunc, TIER2_THRESHOLD*2)
+        self.assertIsNotNone(ex)
+        self.assertLessEqual(count_ops(ex, "_SWAP_FAST_2"), 1)
+        self.assertGreater(count_ops(ex, "_SWAP_FAST_2"), 0)
+
 def global_identity(x):
     return x
 
