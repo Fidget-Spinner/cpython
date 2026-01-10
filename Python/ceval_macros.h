@@ -408,18 +408,20 @@ _PyFrame_SetStackPointer(frame, stack_pointer)
 #define TIER1_TO_TIER2(EXECUTOR)                        \
 do {                                                   \
     OPT_STAT_INC(traces_executed);                     \
-    next_instr = _Py_jit_entry((EXECUTOR), frame, stack_pointer, tstate); \
+    _PyJitReturnValue jit_status = _Py_jit_entry((EXECUTOR), frame, stack_pointer, tstate); \
+    if (jit_status.status == JIT_STATUS_INTERPRETER_EXIT) { \
+        return (PyObject *)jit_status.next_instr; \
+    } \
     frame = tstate->current_frame;                     \
     stack_pointer = _PyFrame_GetStackPointer(frame);   \
-    int keep_tracing_bit = (uintptr_t)next_instr & 1;   \
-    next_instr = (_Py_CODEUNIT *)(((uintptr_t)next_instr) & (~1)); \
+    next_instr = jit_status.next_instr; \
     if (next_instr == NULL) {                          \
         /* gh-140104: The exception handler expects frame->instr_ptr
             to after this_instr, not this_instr! */ \
         next_instr = frame->instr_ptr + 1;                 \
         JUMP_TO_LABEL(error);                          \
     }                                                  \
-    if (keep_tracing_bit) { \
+    if (jit_status.status == JIT_STATUS_KEEP_TRACING) { \
         assert(((_PyThreadStateImpl *)tstate)->jit_tracer_state->prev_state.code_curr_size == 2); \
         ENTER_TRACING(); \
         DISPATCH_NON_TRACING(); \
@@ -443,14 +445,14 @@ do {                                                   \
     do \
     { \
         GOTO_TIER_ONE_SETUP \
-        return (_Py_CODEUNIT *)(TARGET); \
+        return (_PyJitReturnValue){.next_instr=(TARGET), .status=0}; \
     } while (0)
 
 #define GOTO_TIER_ONE_CONTINUE_TRACING(TARGET) \
     do \
     { \
         GOTO_TIER_ONE_SETUP \
-        return (_Py_CODEUNIT *)(((uintptr_t)(TARGET))| 1); \
+        return (_PyJitReturnValue){.next_instr=(TARGET), .status=JIT_STATUS_KEEP_TRACING}; \
     } while (0)
 
 #define CURRENT_OPARG()    (next_uop[-1].oparg)

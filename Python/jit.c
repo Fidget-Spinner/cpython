@@ -726,7 +726,7 @@ compile_shim(void)
 
 static PyMutex lazy_jit_mutex = { 0 };
 
-_Py_CODEUNIT *
+_PyJitReturnValue
 _Py_LazyJitShim(
     _PyExecutorObject *executor, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate
 ) {

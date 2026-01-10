@@ -118,7 +118,7 @@ do {                                                                      \
 #define ASSERT_WITHIN_STACK_BOUNDS(F, L) (void)0
 #endif
 
-__attribute__((preserve_none)) _Py_CODEUNIT *
+__attribute__((preserve_none)) _PyJitReturnValue
 _JIT_ENTRY(
     _PyExecutorObject *executor, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate,
     _PyStackRef _tos_cache0, _PyStackRef _tos_cache1, _PyStackRef _tos_cache2

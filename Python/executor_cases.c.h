@@ -6568,6 +6568,31 @@
             break;
         }
 
+        case _TIER2_INTERPRETER_EXIT_r10: {
+            CHECK_CURRENT_CACHED_VALUES(1);
+            assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());
+            _PyStackRef retval;
+            _PyStackRef _stack_item_0 = _tos_cache0;
+            retval = _stack_item_0;
+            assert(frame->owner == FRAME_OWNED_BY_INTERPRETER);
+            assert(_PyFrame_IsIncomplete(frame));
+            tstate->current_frame = frame->previous;
+            assert(!_PyErr_Occurred(tstate));
+            PyObject *result = PyStackRef_AsPyObjectSteal(retval);
+            tstate->current_executor = NULL;
+            _PyStackRef executor = frame->localsplus[0];
+            if (!PyStackRef_IsNull(executor)) {
+                tstate->current_executor = PyStackRef_AsPyObjectBorrow(executor);
+                _PyFrame_SetStackPointer(frame, stack_pointer);
+                PyStackRef_CLOSE(executor);
+                stack_pointer = _PyFrame_GetStackPointer(frame);
+            }
+            else {
+                tstate->current_executor = NULL;
+            }
+            return (_PyJitReturnValue){.next_instr=(_Py_CODEUNIT*)result, .status=JIT_STATUS_INTERPRETER_EXIT};
+        }
+
         case _RETURN_VALUE_r11: {
             CHECK_CURRENT_CACHED_VALUES(1);
             assert(WITHIN_STACK_BOUNDS_IGNORING_CACHE());

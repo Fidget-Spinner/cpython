@@ -602,7 +602,8 @@ is_terminator(const _PyUOpInstruction *uop)
         opcode == _EXIT_TRACE ||
         opcode == _DEOPT ||
         opcode == _JUMP_TO_TOP ||
-        opcode == _DYNAMIC_EXIT
+        opcode == _DYNAMIC_EXIT ||
+        opcode == _TIER2_INTERPRETER_EXIT
     );
 }
 
@@ -697,17 +698,19 @@ _PyJit_translate_single_bytecode_to_trace(
         goto full;
     }
 
-    if (stop_tracing_opcode == _DEOPT) {
-        // gh-143183: It's important we rewind to the last known proper target.
-        // The current target might be garbage as stop tracing usually indicates
-        // we are in something that we can't trace.
-        DPRINTF(2, "Told to stop tracing\n");
-        goto unsupported;
-    }
-    else if (stop_tracing_opcode != 0) {
-        assert(stop_tracing_opcode == _EXIT_TRACE);
-        ADD_TO_TRACE(stop_tracing_opcode, 0, 0, target);
-        goto done;
+    switch (stop_tracing_opcode) {
+        case _DEOPT:
+            // gh-143183: It's important we rewind to the last known proper target.
+            // The current target might be garbage as stop tracing usually indicates
+            // we are in something that we can't trace.
+            DPRINTF(2, "Told to stop tracing\n");
+            goto unsupported;
+        case _EXIT_TRACE:
+            ADD_TO_TRACE(_EXIT_TRACE, 0, 0, target);
+            goto done;
+        case _TIER2_INTERPRETER_EXIT:
+            ADD_TO_TRACE(_TIER2_INTERPRETER_EXIT, 0, 0, 0);
+            goto done;
     }
 
     DPRINTF(2, "%p %d: %s(%d) %d %d\n", old_code, target, _PyOpcode_OpName[opcode], oparg, needs_guard_ip, old_stack_level);

@@ -1200,6 +1200,11 @@ dummy_func(void) {
         ctx->done = true;
     }
 
+    op(_TIER2_INTERPRETER_EXIT, (retval --)) {
+        (void)retval;
+        ctx->done = true;
+    }
+
     op(_EXIT_TRACE, (exit_p/4 --)) {
         (void)exit_p;
         ctx->done = true;

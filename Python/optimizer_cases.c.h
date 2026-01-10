@@ -1158,6 +1158,17 @@
             break;
         }
 
+        case _TIER2_INTERPRETER_EXIT: {
+            JitOptRef retval;
+            retval = stack_pointer[-1];
+            (void)retval;
+            ctx->done = true;
+            CHECK_STACK_BOUNDS(-1);
+            stack_pointer += -1;
+            ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+            break;
+        }
+
         case _RETURN_VALUE: {
             JitOptRef retval;
             JitOptRef res;

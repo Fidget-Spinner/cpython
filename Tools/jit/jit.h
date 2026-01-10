@@ -8,6 +8,6 @@ typedef jit_func __attribute__((preserve_none)) jit_func_preserve_none;
     TYPE NAME = (TYPE)(uintptr_t)&ALIAS;
 
 #define DECLARE_TARGET(NAME)                     \
-    _Py_CODEUNIT *__attribute__((preserve_none, visibility("hidden"))) \
+    _PyJitReturnValue __attribute__((preserve_none, visibility("hidden"))) \
     NAME(_PyExecutorObject *executor, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate, \
     _PyStackRef _tos_cache0, _PyStackRef _tos_cache1, _PyStackRef _tos_cache2);

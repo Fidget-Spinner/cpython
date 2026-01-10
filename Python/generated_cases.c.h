@@ -7515,6 +7515,11 @@
             INSTRUCTION_STATS(INTERPRETER_EXIT);
             _PyStackRef retval;
             retval = stack_pointer[-1];
+            #if _Py_TIER2
+            if (IS_JIT_TRACING()) {
+                JUMP_TO_LABEL(stop_tracing_interpreter_exit);
+            }
+            #endif
             assert(frame->owner == FRAME_OWNED_BY_INTERPRETER);
             assert(_PyFrame_IsIncomplete(frame));
             tstate->current_frame = frame->previous;
@@ -11811,7 +11816,6 @@
                                  opcode == RERAISE ||
                                  opcode == CLEANUP_THROW ||
                                  opcode == PUSH_EXC_INFO ||
-                                 opcode == INTERPRETER_EXIT ||
                                  (opcode >= MIN_INSTRUMENTED_OPCODE && opcode != ENTER_EXECUTOR)
             );
             _PyFrame_SetStackPointer(frame, stack_pointer);
@@ -12434,6 +12438,28 @@ JUMP_TO_LABEL(error);
             int opcode = next_instr->op.code;
             _PyFrame_SetStackPointer(frame, stack_pointer);
             _PyJit_translate_single_bytecode_to_trace(tstate, frame, NULL, _EXIT_TRACE);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            LEAVE_TRACING();
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            int err = stop_tracing_and_jit(tstate, frame);
+            stack_pointer = _PyFrame_GetStackPointer(frame);
+            if (err < 0) {
+                JUMP_TO_LABEL(error);
+            }
+            DISPATCH_GOTO_NON_TRACING();
+            #else
+            Py_FatalError("JIT label executed in non-jit build.");
+            #endif
+        }
+
+        LABEL(stop_tracing_interpreter_exit)
+        {
+            #if _Py_TIER2
+            assert(IS_JIT_TRACING());
+            int opcode = (next_instr-1)->op.code;
+            assert(opcode == INTERPRETER_EXIT);
+            _PyFrame_SetStackPointer(frame, stack_pointer);
+            _PyJit_translate_single_bytecode_to_trace(tstate, frame, NULL, _TIER2_INTERPRETER_EXIT);
             stack_pointer = _PyFrame_GetStackPointer(frame);
             LEAVE_TRACING();
             _PyFrame_SetStackPointer(frame, stack_pointer);

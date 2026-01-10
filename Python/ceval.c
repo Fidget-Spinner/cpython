@@ -1667,7 +1667,7 @@ _PyJitEntryFuncPtr _Py_jit_entry = _PyTier2Interpreter;
 
 #if defined(_Py_TIER2) && !defined(_Py_JIT)
 
-_Py_CODEUNIT *
+_PyJitReturnValue
 _PyTier2Interpreter(
     _PyExecutorObject *current_executor, _PyInterpreterFrame *frame,
     _PyStackRef *stack_pointer, PyThreadState *tstate

@@ -18,7 +18,7 @@ extern "C" {
 
 #ifdef _Py_JIT
 
-typedef _Py_CODEUNIT *(*jit_func)(
+typedef _PyJitReturnValue (*jit_func)(
     _PyExecutorObject *executor, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate,
     _PyStackRef _tos_cache0, _PyStackRef _tos_cache1, _PyStackRef _tos_cache2
 );

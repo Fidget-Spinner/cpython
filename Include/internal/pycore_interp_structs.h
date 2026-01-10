@@ -766,7 +766,15 @@ struct _Py_unique_id_pool {
 
 #endif
 
-typedef _Py_CODEUNIT *(*_PyJitEntryFuncPtr)(struct _PyExecutorObject *exec, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate);
+#define JIT_STATUS_KEEP_TRACING 1
+#define JIT_STATUS_INTERPRETER_EXIT 2
+
+typedef struct {
+    const _Py_CODEUNIT *next_instr;
+    uint8_t status;
+} _PyJitReturnValue;
+
+typedef _PyJitReturnValue (*_PyJitEntryFuncPtr)(struct _PyExecutorObject *exec, _PyInterpreterFrame *frame, _PyStackRef *stack_pointer, PyThreadState *tstate);
 
 /* PyInterpreterState holds the global state for one of the runtime's
    interpreters.  Typically the initial (main) interpreter is the only one.

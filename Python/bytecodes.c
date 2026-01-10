@@ -1226,6 +1226,11 @@ dummy_func(
         }
 
         tier1 inst(INTERPRETER_EXIT, (retval --)) {
+#if _Py_TIER2
+            if (IS_JIT_TRACING()) {
+                goto stop_tracing_interpreter_exit;
+            }
+#endif
             assert(frame->owner == FRAME_OWNED_BY_INTERPRETER);
             assert(_PyFrame_IsIncomplete(frame));
             /* Restore previous frame and return. */
@@ -1245,6 +1250,25 @@ dummy_func(
 #endif
             LLTRACE_RESUME_FRAME();
             return result;
+        }
+
+        tier2 op(_TIER2_INTERPRETER_EXIT, (retval --)) {
+            assert(frame->owner == FRAME_OWNED_BY_INTERPRETER);
+            assert(_PyFrame_IsIncomplete(frame));
+            /* Restore previous frame and return. */
+            tstate->current_frame = frame->previous;
+            assert(!_PyErr_Occurred(tstate));
+            PyObject *result = PyStackRef_AsPyObjectSteal(retval);
+            tstate->current_executor = NULL;
+            _PyStackRef executor = frame->localsplus[0];
+            if (!PyStackRef_IsNull(executor)) {
+                tstate->current_executor = PyStackRef_AsPyObjectBorrow(executor);
+                PyStackRef_CLOSE(executor);
+            }
+            else {
+                tstate->current_executor = NULL;
+            }
+            return (_PyJitReturnValue){.next_instr=(_Py_CODEUNIT*)result, .status=JIT_STATUS_INTERPRETER_EXIT};
         }
 
         // The stack effect here is a bit misleading.
@@ -5730,7 +5754,6 @@ dummy_func(
                 opcode == RERAISE ||
                 opcode == CLEANUP_THROW ||
                 opcode == PUSH_EXC_INFO ||
-                opcode == INTERPRETER_EXIT ||
                 (opcode >= MIN_INSTRUMENTED_OPCODE && opcode != ENTER_EXECUTOR)
             );
             int full = !_PyJit_translate_single_bytecode_to_trace(tstate, frame, next_instr, stop_tracing ? _DEOPT : 0);
@@ -5780,6 +5803,21 @@ dummy_func(
 #endif
         }
 
+        label(stop_tracing_interpreter_exit) {
+#if _Py_TIER2
+            assert(IS_JIT_TRACING());
+            // Jump back to the INTERPRETER_EXIT
+            int opcode = (next_instr-1)->op.code;
+            assert(opcode == INTERPRETER_EXIT);
+            _PyJit_translate_single_bytecode_to_trace(tstate, frame, NULL, _TIER2_INTERPRETER_EXIT);
+            LEAVE_TRACING();
+            int err = stop_tracing_and_jit(tstate, frame);
+            ERROR_IF(err < 0);
+            DISPATCH_GOTO_NON_TRACING();
+#else
+            Py_FatalError("JIT label executed in non-jit build.");
+#endif
+        }
 
 // END BYTECODES //
 

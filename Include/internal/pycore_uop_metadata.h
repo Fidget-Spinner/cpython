@@ -139,6 +139,7 @@ const uint32_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_DELETE_SUBSCR] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CALL_INTRINSIC_1] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_CALL_INTRINSIC_2] = HAS_ARG_FLAG | HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
+    [_TIER2_INTERPRETER_EXIT] = HAS_ESCAPES_FLAG,
     [_RETURN_VALUE] = HAS_ESCAPES_FLAG | HAS_NEEDS_GUARD_IP_FLAG,
     [_GET_AITER] = HAS_ERROR_FLAG | HAS_ESCAPES_FLAG,
     [_GET_ANEXT] = HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG,
@@ -1309,6 +1310,15 @@ const _PyUopCachingInfo _PyUop_Caching[MAX_UOP_ID+1] = {
             { -1, -1, -1 },
             { -1, -1, -1 },
             { 1, 2, _CALL_INTRINSIC_2_r21 },
+            { -1, -1, -1 },
+        },
+    },
+    [_TIER2_INTERPRETER_EXIT] = {
+        .best = { 1, 1, 1, 1 },
+        .entries = {
+            { -1, -1, -1 },
+            { 0, 1, _TIER2_INTERPRETER_EXIT_r10 },
+            { -1, -1, -1 },
             { -1, -1, -1 },
         },
     },
@@ -3608,6 +3618,7 @@ const uint16_t _PyUop_Uncached[MAX_UOP_REGS_ID+1] = {
     [_DELETE_SUBSCR_r20] = _DELETE_SUBSCR,
     [_CALL_INTRINSIC_1_r11] = _CALL_INTRINSIC_1,
     [_CALL_INTRINSIC_2_r21] = _CALL_INTRINSIC_2,
+    [_TIER2_INTERPRETER_EXIT_r10] = _TIER2_INTERPRETER_EXIT,
     [_RETURN_VALUE_r11] = _RETURN_VALUE,
     [_GET_AITER_r11] = _GET_AITER,
     [_GET_ANEXT_r12] = _GET_ANEXT,
@@ -5096,6 +5107,8 @@ const char *const _PyOpcode_uop_name[MAX_UOP_REGS_ID+1] = {
     [_SWAP_FAST_7_r11] = "_SWAP_FAST_7_r11",
     [_SWAP_FAST_7_r22] = "_SWAP_FAST_7_r22",
     [_SWAP_FAST_7_r33] = "_SWAP_FAST_7_r33",
+    [_TIER2_INTERPRETER_EXIT] = "_TIER2_INTERPRETER_EXIT",
+    [_TIER2_INTERPRETER_EXIT_r10] = "_TIER2_INTERPRETER_EXIT_r10",
     [_TIER2_RESUME_CHECK] = "_TIER2_RESUME_CHECK",
     [_TIER2_RESUME_CHECK_r00] = "_TIER2_RESUME_CHECK_r00",
     [_TIER2_RESUME_CHECK_r11] = "_TIER2_RESUME_CHECK_r11",
@@ -5356,6 +5369,8 @@ int _PyUop_num_popped(int opcode, int oparg)
             return 1;
         case _CALL_INTRINSIC_2:
             return 2;
+        case _TIER2_INTERPRETER_EXIT:
+            return 1;
         case _RETURN_VALUE:
             return 1;
         case _GET_AITER:

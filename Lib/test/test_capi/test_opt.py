@@ -3446,6 +3446,22 @@ class TestUopsOptimization(unittest.TestCase):
         # _POP_TOP_NOP is a sign the optimizer ran and didn't hit bottom.
         self.assertGreaterEqual(count_ops(ex, "_POP_TOP_NOP"), 1)
 
+    def test_interpreter_exit(self):
+        def f(n):
+            for i in range(n):
+                # Should be optimized to POP_TOP_NOP
+                yield i + i
+        def testfunc(n):
+            # This only works while max is a C function,
+            # which may change in the future.
+            max(f(n))
+
+        self._run_with_optimizer(testfunc, TIER2_THRESHOLD*2)
+        ex = get_first_executor(f)
+        uops = get_opnames(ex)
+
+        self.assertIn("_TIER2_INTERPRETER_EXIT", uops)
+
     def test_send_gen_frame(self):
 
         def gen(n):
