@@ -80,13 +80,18 @@ EXCLUDED = format_conf_lines([
     'Python/generated_cases.c.h',
     'Python/executor_cases.c.h',
     'Python/optimizer_cases.c.h',
+    'Python/record_functions.c.h',
     'Python/opcode_targets.h',
+    'Modules/_testinternalcapi/test_targets.h',
+    'Modules/_testinternalcapi/test_cases.c.h',
+    'Modules/_testinternalcapi/interpreter.c',
     # XXX: Throws errors if PY_VERSION_HEX is not mocked out
     'Modules/clinic/_testclinic_depr.c.h',
 
     # not actually source
     'Python/bytecodes.c',
     'Python/optimizer_bytecodes.c',
+    'Modules/_testinternalcapi/testbytecodes.c',
 
     # mimalloc
     'Objects/mimalloc/*.c',
@@ -321,6 +326,7 @@ MAX_SIZES = {
     _abs('Python/compile.c'): (20_000, 500),
     _abs('Python/optimizer.c'): (100_000, 5_000),
     _abs('Python/parking_lot.c'): (40_000, 1000),
+    _abs('Python/perf_jit_trampoline.c'): (40_000, 1000),
     _abs('Python/pylifecycle.c'): (750_000, 5000),
     _abs('Python/pystate.c'): (750_000, 5000),
     _abs('Python/initconfig.c'): (50_000, 500),
@@ -339,6 +345,7 @@ MAX_SIZES = {
     _abs('Modules/_ssl_data_300.h'): (80_000, 10_000),
     _abs('Modules/_ssl_data_111.h'): (80_000, 10_000),
     _abs('Modules/cjkcodecs/mappings_*.h'): (160_000, 2_000),
+    _abs('Modules/clinic/_testclinic.c.h'): (120_000, 5_000),
     _abs('Modules/unicodedata_db.h'): (180_000, 3_000),
     _abs('Modules/unicodename_db.h'): (1_200_000, 15_000),
     _abs('Objects/unicodetype_db.h'): (240_000, 3_000),

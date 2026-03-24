@@ -11,9 +11,12 @@
 #include "pycore_floatobject.h"
 #include "pycore_frame.h"
 #include "pycore_function.h"
+#include "pycore_import.h"
 #include "pycore_interpframe.h"
 #include "pycore_interpolation.h"
 #include "pycore_intrinsics.h"
+#include "pycore_jit_unwind.h"
+#include "pycore_lazyimportobject.h"
 #include "pycore_list.h"
 #include "pycore_long.h"
 #include "pycore_mmap.h"
@@ -56,6 +59,88 @@ jit_error(const char *message)
     int hint = errno;
 #endif
     PyErr_Format(PyExc_RuntimeWarning, "JIT %s (%d)", message, hint);
+}
+
+static void
+jit_record_code(const void *code_addr, size_t code_size,
+                const char *entry, const char *filename)
+{
+#ifdef PY_HAVE_PERF_TRAMPOLINE
+    _PyPerf_Callbacks callbacks;
+    _PyPerfTrampoline_GetCallbacks(&callbacks);
+    if (callbacks.write_state == _Py_perfmap_jit_callbacks.write_state) {
+        _PyPerfJit_WriteNamedCode(
+            code_addr, (unsigned int)code_size, entry, filename);
+        return;
+    }
+    _PyJitUnwind_GdbRegisterCode(
+        code_addr, (unsigned int)code_size, entry, filename);
+#else
+    (void)code_addr;
+    (void)code_size;
+    (void)entry;
+    (void)filename;
+#endif
+}
+
+static size_t _Py_jit_shim_size = 0;
+
+static int
+address_in_executor_array(_PyExecutorObject **ptrs, size_t count, uintptr_t addr)
+{
+    for (size_t i = 0; i < count; i++) {
+        _PyExecutorObject *exec = ptrs[i];
+        if (exec->jit_code == NULL || exec->jit_size == 0) {
+            continue;
+        }
+        uintptr_t start = (uintptr_t)exec->jit_code;
+        uintptr_t end = start + exec->jit_size;
+        if (addr >= start && addr < end) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int
+address_in_executor_list(_PyExecutorObject *head, uintptr_t addr)
+{
+    for (_PyExecutorObject *exec = head;
+         exec != NULL;
+         exec = exec->vm_data.links.next)
+    {
+        if (exec->jit_code == NULL || exec->jit_size == 0) {
+            continue;
+        }
+        uintptr_t start = (uintptr_t)exec->jit_code;
+        uintptr_t end = start + exec->jit_size;
+        if (addr >= start && addr < end) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+PyAPI_FUNC(int)
+_PyJIT_AddressInJitCode(PyInterpreterState *interp, uintptr_t addr)
+{
+    if (interp == NULL) {
+        return 0;
+    }
+    if (_Py_jit_entry != _Py_LazyJitShim && _Py_jit_shim_size != 0) {
+        uintptr_t start = (uintptr_t)_Py_jit_entry;
+        uintptr_t end = start + _Py_jit_shim_size;
+        if (addr >= start && addr < end) {
+            return 1;
+        }
+    }
+    if (address_in_executor_array(interp->executor_ptrs, interp->executor_count, addr)) {
+        return 1;
+    }
+    if (address_in_executor_list(interp->executor_deletion_list_head, addr)) {
+        return 1;
+    }
+    return 0;
 }
 
 static unsigned char *
@@ -119,7 +204,7 @@ mark_executable(unsigned char *memory, size_t size)
         jit_error("unable to flush instruction cache");
         return -1;
     }
-    int old;
+    DWORD old;
     int failed = !VirtualProtect(memory, size, PAGE_EXECUTE_READ, &old);
 #else
     __builtin___clear_cache((char *)memory, (char *)memory + size);
@@ -150,8 +235,6 @@ typedef struct {
     symbol_state got_symbols;
     uintptr_t instruction_starts[UOP_MAX_TRACE_LENGTH];
 } jit_state;
-
-static size_t _Py_jit_shim_size = 0;
 
 // Warning! AArch64 requires you to get your hands dirty. These are your gloves:
 
@@ -671,6 +754,10 @@ _PyJIT_Compile(_PyExecutorObject *executor, const _PyUOpInstruction trace[], siz
     }
     executor->jit_code = memory;
     executor->jit_size = total_size;
+    jit_record_code(memory,
+                    code_size + state.trampolines.size,
+                    "jit_executor",
+                    "<jit>");
     return 0;
 }
 
@@ -721,6 +808,10 @@ compile_shim(void)
         return NULL;
     }
     _Py_jit_shim_size = total_size;
+    jit_record_code(memory,
+                    code_size + state.trampolines.size,
+                    "jit_shim",
+                    "<jit>");
     return (_PyJitEntryFuncPtr)memory;
 }
 
