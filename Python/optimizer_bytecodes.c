@@ -235,6 +235,9 @@ dummy_func(void) {
                 }
             }
         }
+        // Guarding on a probable type's type version transitively promotes it to a known type.
+        PyTypeObject *probable_type = sym_get_probable_type(owner);
+        sym_set_type(owner, probable_type);
     }
 
     op(_GUARD_TOS_FLOAT, (value -- value)) {

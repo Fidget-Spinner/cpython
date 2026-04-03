@@ -2268,6 +2268,8 @@
                     }
                 }
             }
+            PyTypeObject *probable_type = sym_get_probable_type(owner);
+            sym_set_type(owner, probable_type);
             break;
         }
 
