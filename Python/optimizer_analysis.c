@@ -508,7 +508,7 @@ optimize_uops(
         interp->type_watchers[TYPE_WATCHER_ID] = type_watcher_callback;
     }
 
-    _Py_uop_abstractcontext_init(ctx);
+    _Py_uop_abstractcontext_init(ctx, dependencies);
 
     // Plenty of space and it's a loop, try to peel it.
     // Note: loop peeling only seems to be beneficial at the moment

@@ -27,6 +27,17 @@ typedef struct _JitOptRefBuffer {
     JitOptRef *end;
 } _JitOptRefBuffer;
 
+// A "compressed" version of _JitOptContext
+// used to store information at a loop header.
+typedef struct _JitOptUnrollContext {
+    _Py_UOpsAbstractFrame frames[MAX_ABSTRACT_FRAME_DEPTH];
+    int curr_frame_depth;
+    _JitOptRefBuffer locals;
+    _JitOptRefBuffer stack;
+    JitOptRef locals_array[ABSTRACT_INTERP_LOCALS_SIZE];
+    JitOptRef stack_array[ABSTRACT_INTERP_STACK_SIZE];
+} JitOptUnrollContext;
+
 typedef struct _JitOptContext {
     char done;
     char out_of_space;
@@ -50,6 +61,10 @@ typedef struct _JitOptContext {
     JitOptRef stack_array[ABSTRACT_INTERP_STACK_SIZE];
     _PyJitUopBuffer out_buffer;
     _PyBloomFilter *dependencies;
+
+    JitOptUnrollContext unroll;
+    bool try_to_peel;
+    bool in_peeled_iteration;
 } JitOptContext;
 
 
@@ -380,12 +395,6 @@ static inline int
 PyJitRef_IsBorrowed(JitOptRef ref)
 {
     return REF_GET_TAG(ref.bits) == REF_IS_BORROWED;
-}
-
-static inline bool
-PyJitRef_IsInvalid(JitOptRef ref)
-{
-    return (ref.bits & REF_IS_INVALID) == REF_IS_INVALID;
 }
 
 extern bool _Py_uop_sym_is_null(JitOptRef sym);

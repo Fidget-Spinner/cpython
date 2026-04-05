@@ -1551,13 +1551,8 @@ _Py_uop_frame_new(
     }
 
     // Initialize the stack as well
-    for (int i = 0; i < curr_stackentries; i++) {
+    for (int i = 0; i < co->co_stacksize; i++) {
         JitOptRef stackvar = _Py_uop_sym_new_unknown(ctx);
-        frame->stack[i] = stackvar;
-    }
-
-    for (int i = curr_stackentries; i < co->co_stacksize; i++) {
-        JitOptRef stackvar = _Py_uop_sym_new_null(ctx);
         frame->stack[i] = stackvar;
     }
 
@@ -1630,6 +1625,11 @@ _Py_uop_abstractcontext_init(JitOptContext *ctx, _PyBloomFilter *dependencies)
     ctx->stack.end = &ctx->stack_array[ABSTRACT_INTERP_STACK_SIZE-STACK_HEADROOM];
     ctx->locals.used = ctx->locals_array;
     ctx->locals.end = &ctx->locals_array[ABSTRACT_INTERP_LOCALS_SIZE-STACK_HEADROOM];
+
+    ctx->unroll.stack.used = ctx->unroll.stack_array;
+    ctx->unroll.stack.end = &ctx->unroll.stack_array[ABSTRACT_INTERP_STACK_SIZE-STACK_HEADROOM];
+    ctx->unroll.locals.used = ctx->unroll.locals_array;
+    ctx->unroll.locals.end = &ctx->unroll.locals_array[ABSTRACT_INTERP_LOCALS_SIZE-STACK_HEADROOM];
 #ifdef Py_DEBUG // Aids debugging a little. There should never be NULL in the abstract interpreter.
     for (int i = 0 ; i < ABSTRACT_INTERP_STACK_SIZE; i++) {
         ctx->stack_array[i] = PyJitRef_NULL;
@@ -1710,6 +1710,10 @@ _Py_uop_frame_pop(JitOptContext *ctx, PyCodeObject *co)
 static bool
 sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
 {
+
+    if (PyJitRef_IsInvalid(parent) && PyJitRef_IsInvalid(child)) {
+        return true;
+    }
 
     // Non-borrowed values can take borrowed values, but not the other way around.
     if (PyJitRef_IsBorrowed(parent) && !PyJitRef_IsBorrowed(child)) {
@@ -1809,23 +1813,50 @@ sym_copy(JitOptContext *ctx, JitOptRef src)
 }
 
 bool
-_Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
+copy_jitoptref_buffer(JitOptContext *ctx, _JitOptRefBuffer *src_info, JitOptRef *src_buffer,
+    _JitOptRefBuffer *dst_info, JitOptRef *dst_buffer)
 {
-    JitOptUnrollContext *unroll = &ctx->unroll;
-    int n_consumed = (int)(ctx->frame->stack_pointer - ctx->locals_and_stack);
-    for (int i = 0; i < n_consumed; i++) {
-        assert(!PyJitRef_IsNull(ctx->locals_and_stack[i]));
-        if (PyJitRef_IsInvalid(ctx->locals_and_stack[i])) {
+    for (JitOptRef *local = src_buffer; local < src_info->used; local++) {
+        assert(!PyJitRef_IsNull(*local));
+        if (PyJitRef_IsInvalid(*local)) {
             return false;
         }
         // We can't just copy it over, because it might be mutated later.
         // We need to do a deep copy.
-        unroll->locals_and_stack[i] = sym_copy(ctx, ctx->locals_and_stack[i]);
+        *dst_buffer = sym_copy(ctx, *local);
+        dst_buffer++;
+    }
+    dst_info->used = dst_buffer;
+    return true;
+}
 
+bool
+_Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
+{
+    JitOptUnrollContext *unroll = &ctx->unroll;
+    // Copy locals
+    if (copy_jitoptref_buffer(ctx, &ctx->locals, ctx->locals_array, &unroll->locals, unroll->locals_array)) {
+        return false;
+    }
+    // Copy stack
+    if (copy_jitoptref_buffer(ctx, &ctx->stack, ctx->stack_array, &unroll->stack, unroll->stack_array)) {
+        return false;
     }
     memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
-    unroll->n_consumed = n_consumed;
     unroll->curr_frame_depth = ctx->curr_frame_depth;
+    return true;
+}
+
+bool
+check_jitoptref_buffer(JitOptContext *ctx, _JitOptRefBuffer *parent_info, JitOptRef *parent_buffer,
+    JitOptRef *child_buffer)
+{
+    for (JitOptRef *parent = parent_buffer; parent < parent_info->used; parent++) {
+        if (!sym_is_more_general(ctx, *parent, *child_buffer)) {
+            return false;
+        }
+        child_buffer++;
+    }
     return true;
 }
 
@@ -1860,20 +1891,17 @@ _Py_uop_unrollcontext_more_general_than_curr_context(JitOptContext *ctx)
             return false;
         }
     }
-    int ctx_n_locals_consumed = (int)(ctx->frame->stack_pointer - ctx->locals_and_stack);
-    int unroll_n_locals_consumed = unroll->n_consumed;
-    if (ctx_n_locals_consumed != unroll_n_locals_consumed) {
+    if ((ctx->locals.used - ctx->locals_array) != (unroll->locals.used - unroll->locals_array)) {
         return false;
     }
-    // For all locals and stack values, check they do not contradict
-    for (int i = 0; i < ctx_n_locals_consumed; i++) {
-        JitOptRef parent = unroll->locals_and_stack[i];
-        JitOptRef child = ctx->locals_and_stack[i];
-        assert(!PyJitRef_IsNull(child));
-        assert(!PyJitRef_IsNull(parent));
-        if (!sym_is_more_general(ctx, parent, child)) {
-            return false;
-        }
+    if ((ctx->stack.used - ctx->stack_array) != (unroll->stack.used - unroll->stack_array)) {
+        return false;
+    }
+    if (!check_jitoptref_buffer(ctx, &unroll->locals, unroll->locals_array, ctx->locals_array)) {
+        return false;
+    }
+    if (!check_jitoptref_buffer(ctx, &unroll->stack, unroll->stack_array, ctx->stack_array)) {
+        return false;
     }
     return true;
 }
