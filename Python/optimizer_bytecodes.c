@@ -1624,6 +1624,7 @@ dummy_func(void) {
                 // the nbody benchmark.
                 OPT_STAT_INC(peeled_loop_attempts);
                 if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                    DPRINTF(2, "Could not store context\n");
                     ctx->done = true;
                     break;
                 }

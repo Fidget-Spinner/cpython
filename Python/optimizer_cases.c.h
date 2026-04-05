@@ -4829,6 +4829,7 @@
                 if (ctx->try_to_peel) {
                     OPT_STAT_INC(peeled_loop_attempts);
                     if (!_Py_uop_abstractcontext_store_unroll_context(ctx)) {
+                        DPRINTF(2, "Could not store context\n");
                         ctx->done = true;
                         break;
                     }

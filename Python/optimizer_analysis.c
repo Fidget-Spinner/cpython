@@ -218,7 +218,8 @@ is_terminator_uop(const _PyUOpInstruction *uop)
         opcode == _EXIT_TRACE ||
         opcode == _JUMP_TO_TOP ||
         opcode == _DYNAMIC_EXIT ||
-        opcode == _DEOPT
+        opcode == _DEOPT ||
+        opcode == _JUMP_TO_PEELED_LOOP
     );
 }
 
@@ -514,19 +515,27 @@ optimize_uops(
     // Note: loop peeling only seems to be beneficial at the moment
     // for smaller tight loops.
     // Bigger loops tend to produce too much jitted code and blow the icache.
-    if (trace[trace_len - 1].opcode == _JUMP_TO_TOP && trace_len < (UOP_MAX_TRACE_LENGTH / 10)) {
+    if (trace[trace_len - 2].opcode == _JUMP_TO_TOP && trace_len < (UOP_MAX_TRACE_LENGTH / 4)) {
+        assert(is_terminator_uop(&trace[trace_len - 1]));
+        // Remove the _EXIT_TRACE at the end.
+        trace_len--;
         // 1 to skip the _START_EXECUTOR
         // + 1 to copy the current instruction too.
         for (int x = 1; x < trace_len + 1; x++) {
             trace[trace_len + x - 1] = trace[x];
+            // Duplicate ownership of record ops.
+            if (trace[x].opcode & HAS_RECORDS_VALUE_FLAG) {
+                Py_XINCREF(trace[x].operand0);
+            }
         }
         // The end of a loop trace points back to the start.
         trace[trace_len - 1].target = trace[0].target;
         ctx->try_to_peel = true;
         trace_len *= 2;
+        trace_len--;
+        DPRINTF(2, "Attempting to unroll.\n");
     }
 
-    _Py_uop_abstractcontext_init(ctx, dependencies);
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, (PyCodeObject *)func->func_code, NULL, 0);
     if (frame == NULL) {
         return 0;
@@ -589,17 +598,15 @@ optimize_uops(
     }
     // We failed to peel (and might have hit a contradiction).
     // Unwind back to the peeled loop, and close that.
-    if (ctx->in_peeled_iteration && trace[i-1].opcode != _JUMP_TO_PEELED_LOOP) {
+    if (ctx->in_peeled_iteration && uop_buffer_last(&ctx->out_buffer)->opcode != _JUMP_TO_PEELED_LOOP) {
         DPRINTF(2, "Undoing peeled loop.\n");
-        for (int x = 0; x < i; x++) {
-            if (trace[x].opcode == _PEELED_LOOP_START) {
-                trace[x].opcode = _JUMP_TO_TOP;
-                _Py_uop_abstractcontext_fini(ctx);
-                return x + 1;
+        while (uop_buffer_length(&ctx->out_buffer)) {
+            if (uop_buffer_last(&ctx->out_buffer)->opcode == _PEELED_LOOP_START) {
+                uop_buffer_last(&ctx->out_buffer)->opcode = _JUMP_TO_TOP;
+                break;
             }
+            ctx->out_buffer.next--;
         }
-        // _PEELED_LOOP_START should always be found if we are peeling!
-        Py_UNREACHABLE();
     }
     if (ctx->contradiction) {
         // Attempted to push a "bottom" (contradiction) symbol onto the stack.

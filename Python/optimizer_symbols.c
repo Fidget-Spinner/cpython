@@ -1814,9 +1814,10 @@ sym_copy(JitOptContext *ctx, JitOptRef src)
     assert(src_sym->tag >= 1);
     JitOptSymbol *dst_sym = PyJitRef_Unwrap(dst);
     memcpy(dst_sym, src_sym, sizeof(JitOptSymbol));
-    // Transfer ownership (we decref all constants at the end).
-    PyObject *maybe_const = _Py_uop_sym_get_const(ctx, dst);
-    Py_XINCREF(maybe_const);
+    // Copy ownership (we decref all constants at the end).
+    if (src_sym->tag == JIT_SYM_KNOWN_VALUE_TAG) {
+        Py_XINCREF(src_sym->value.value);
+    }
     return PyJitRef_IsBorrowed(src) ? PyJitRef_Borrow(dst) : dst;
 }
 
@@ -1843,11 +1844,11 @@ _Py_uop_abstractcontext_store_unroll_context(JitOptContext *ctx)
 {
     JitOptUnrollContext *unroll = &ctx->unroll;
     // Copy locals
-    if (copy_jitoptref_buffer(ctx, &ctx->locals, ctx->locals_array, &unroll->locals, unroll->locals_array)) {
+    if (!copy_jitoptref_buffer(ctx, &ctx->locals, ctx->locals_array, &unroll->locals, unroll->locals_array)) {
         return false;
     }
     // Copy stack
-    if (copy_jitoptref_buffer(ctx, &ctx->stack, ctx->stack_array, &unroll->stack, unroll->stack_array)) {
+    if (!copy_jitoptref_buffer(ctx, &ctx->stack, ctx->stack_array, &unroll->stack, unroll->stack_array)) {
         return false;
     }
     memcpy(unroll->frames, ctx->frames, sizeof(_Py_UOpsAbstractFrame) * MAX_ABSTRACT_FRAME_DEPTH);
