@@ -1730,6 +1730,8 @@ sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
             return _Py_uop_sym_matches_type(child, parent_sym->cls.type);
         case JIT_SYM_TYPE_VERSION_TAG:
             return _Py_uop_sym_get_type_version(parent) == _Py_uop_sym_get_type_version(child);
+        case JIT_SYM_FUNC_VERSION_TAG:
+            return _Py_uop_sym_get_func_version(parent) == _Py_uop_sym_get_func_version(child);
         case JIT_SYM_KNOWN_VALUE_TAG:
             return (child_tag == JIT_SYM_KNOWN_VALUE_TAG &&
                 _Py_uop_sym_get_const(ctx, child) == _Py_uop_sym_get_const(ctx, parent));
@@ -1753,8 +1755,9 @@ sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
                 default:
                     return false;
             }
+        case JIT_SYM_PREDICATE_TAG:
         case JIT_SYM_TRUTHINESS_TAG:
-            return _Py_uop_sym_truthiness(ctx, child) == 1;
+            return _Py_uop_sym_truthiness(ctx, child) == _Py_uop_sym_truthiness(ctx, parent);
         // Compact int is simple --- just check if the child is also a compact int.
         case JIT_SYM_COMPACT_INT:
             switch (child_tag) {
@@ -1791,6 +1794,11 @@ sym_is_more_general(JitOptContext *ctx, JitOptRef parent, JitOptRef child)
         // This can't contain anything.
         case JIT_SYM_BOTTOM_TAG:
             return false;
+        // Recorded types don't matter, they're just repeated.
+        case JIT_SYM_RECORDED_VALUE_TAG:
+        case JIT_SYM_RECORDED_TYPE_TAG:
+        case JIT_SYM_RECORDED_GEN_FUNC_TAG:
+            return true;
     }
     Py_UNREACHABLE();
 }
