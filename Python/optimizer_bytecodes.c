@@ -881,7 +881,14 @@ dummy_func(void) {
     }
 
     op(_LOAD_ATTR, (owner -- attr, self_or_null[oparg&1])) {
+        attr = sym_new_not_null(ctx);
+        if (oparg & 1) {
+            self_or_null[0] = sym_new_unknown(ctx);
+        }
         PyObject *value = sym_get_probable_value(owner);
+        if (value == NULL) {
+            break;
+        }
         PyTypeObject *type = NULL;
         bool is_class = PyType_Check(value);
         if (value != NULL && is_class) {

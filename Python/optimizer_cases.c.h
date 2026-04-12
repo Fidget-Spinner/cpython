@@ -2409,7 +2409,14 @@
             JitOptRef *self_or_null;
             owner = stack_pointer[-1];
             self_or_null = &stack_pointer[0];
+            attr = sym_new_not_null(ctx);
+            if (oparg & 1) {
+                self_or_null[0] = sym_new_unknown(ctx);
+            }
             PyObject *value = sym_get_probable_value(owner);
+            if (value == NULL) {
+                break;
+            }
             PyTypeObject *type = NULL;
             bool is_class = PyType_Check(value);
             if (value != NULL && is_class) {
@@ -2419,6 +2426,10 @@
                 type = sym_get_probable_type(owner);
             }
             if (oparg & 1 && type != NULL) {
+                CHECK_STACK_BOUNDS((oparg&1));
+                stack_pointer[-1] = attr;
+                stack_pointer += (oparg&1);
+                ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
                 PyObject *name = get_co_name(ctx, oparg >> 1);
                 PyObject *descr = _PyType_Lookup(type, name);
                 bool class_method = descr && Py_IS_TYPE(descr, &PyClassMethod_Type);
@@ -2450,10 +2461,6 @@
                         ADD_OP(_PUSH_NULL, 0, 0);
                         self_or_null[0] = sym_new_null(ctx);
                         attr = sym_new_const(ctx, callable);
-                        CHECK_STACK_BOUNDS((oparg&1));
-                        stack_pointer[-1] = attr;
-                        stack_pointer += (oparg&1);
-                        ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
                         PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
                         _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                     }
@@ -2470,10 +2477,6 @@
                             self_or_null[0] = sym_new_null(ctx);
                         }
                         attr = sym_new_const(ctx, callable);
-                        CHECK_STACK_BOUNDS((oparg&1));
-                        stack_pointer[-1] = attr;
-                        stack_pointer += (oparg&1);
-                        ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
                         PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
                         _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                     }
@@ -2481,7 +2484,6 @@
                 else {
                     attr = sym_new_not_null(ctx);
                     self_or_null[0] = sym_new_unknown(ctx);
-                    stack_pointer += (oparg&1);
                 }
             }
             else {
