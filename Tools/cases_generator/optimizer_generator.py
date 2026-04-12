@@ -244,17 +244,22 @@ class OptimizerEmitter(Emitter):
                          "0, (uintptr_t)result")],
                     # (left -- res, left)
                     # usually for unary ops with passthrough references
-                    1: [("_INSERT_1_LOAD_CONST_INLINE_BORROW",
-                         "0, (uintptr_t)result")],
+                    1: [("_LOAD_CONST_INLINE_BORROW",
+                         "0, (uintptr_t)result"),
+                        ("_SWAP", "2, 0")],
                 },
                 2: {
                     # (a, b -- res), usually for binary ops
-                    0: [("_POP_TWO_LOAD_CONST_INLINE_BORROW",
+                    0: [("_POP_TOP", "0, 0"),
+                        ("_POP_TOP", "0, 0"),
+                        ("_LOAD_CONST_INLINE_BORROW",
                          "0, (uintptr_t)result")],
                     # (left, right -- res, left, right)
                     # usually for binary ops with passthrough references
-                    2: [("_INSERT_2_LOAD_CONST_INLINE_BORROW",
-                         "0, (uintptr_t)result")],
+                    2: [("_LOAD_CONST_INLINE_BORROW",
+                         "0, (uintptr_t)result"),
+                        ("_SWAP", "3, 0"),
+                        ("_SWAP", "2, 0")],
                 },
             }
 
@@ -274,7 +279,7 @@ class OptimizerEmitter(Emitter):
 
                 emitter.emit(f"if (sym_is_const(ctx, {output_identifier.text})) {{\n")
                 emitter.emit(f"PyObject *result = sym_get_const(ctx, {output_identifier.text});\n")
-                emitter.emit(f"if (_Py_IsImmortal(result)) {{\n")
+                emitter.emit(f"if (_Py_uop_promote_to_constant_pool(ctx, result) == 0) {{\n")
                 emitter.emit(f"// Replace with {ops_desc} since we have {input_desc} and an immortal result\n")
                 for op, args in ops:
                     emitter.emit(f"ADD_OP({op}, {args});\n")

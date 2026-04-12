@@ -156,8 +156,7 @@ type_watcher_callback(PyTypeObject* type)
 }
 
 static PyObject *
-convert_global_to_const(_PyUOpInstruction *inst, PyObject *obj,
-                        uint16_t immortal_op, uint16_t mortal_op)
+convert_global_to_const(_PyUOpInstruction *inst, PyObject *obj)
 {
     assert(inst->opcode == _LOAD_GLOBAL_MODULE || inst->opcode == _LOAD_GLOBAL_BUILTINS || inst->opcode == _LOAD_ATTR_MODULE);
     assert(PyDict_CheckExact(obj));
@@ -178,15 +177,9 @@ convert_global_to_const(_PyUOpInstruction *inst, PyObject *obj,
         return NULL;
     }
     if (_Py_IsImmortal(res)) {
-        inst->opcode = immortal_op;
+        inst->opcode = _LOAD_CONST_INLINE_BORROW;
     } else {
-        inst->opcode = mortal_op;
-    }
-    if (inst->opcode == _LOAD_CONST_INLINE_BORROW || inst->opcode == _LOAD_CONST_INLINE) {
-        if (inst->oparg & 1) {
-            assert(inst[1].opcode == _PUSH_NULL_CONDITIONAL);
-            assert(inst[1].oparg & 1);
-        }
+        inst->opcode = _LOAD_CONST_INLINE;
     }
     inst->operand0 = (uint64_t)res;
     return res;
@@ -243,6 +236,8 @@ add_op(JitOptContext *ctx, _PyUOpInstruction *this_instr,
     out->operand1 = this_instr->operand1;
     ctx->out_buffer.next++;
 }
+
+#define sym_promote_to_constant_pool _Py_uop_promote_to_constant_pool
 
 /* Shortened forms for convenience, used in optimizer_bytecodes.c */
 #define sym_is_not_null _Py_uop_sym_is_not_null
@@ -326,7 +321,7 @@ optimize_to_bool(
     JitOptContext *ctx,
     JitOptRef value,
     JitOptRef *result_ptr,
-    uint16_t prefix, uint16_t load_op)
+    uint16_t prefix, uint16_t suffix)
 {
     if (sym_matches_type(value, &PyBool_Type)) {
         ADD_OP(_NOP, 0, 0);
@@ -339,7 +334,10 @@ optimize_to_bool(
         if (prefix != _NOP) {
             ADD_OP(prefix, 0, 0);
         }
-        ADD_OP(load_op, 0, (uintptr_t)load);
+        ADD_OP(_LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)load);
+        if (suffix != _NOP) {
+            ADD_OP(suffix, 2, 0);
+        }
         *result_ptr = sym_new_const(ctx, load);
         return 1;
     }
@@ -386,7 +384,7 @@ eliminate_pop_guard(_PyUOpInstruction *this_instr, JitOptContext *ctx, bool exit
 static JitOptRef
 lookup_attr(JitOptContext *ctx, _PyBloomFilter *dependencies, _PyUOpInstruction *this_instr,
             PyTypeObject *type, PyObject *name,
-            uint16_t prefix, uint16_t immortal_op, uint16_t mortal_op)
+            uint16_t prefix, uint16_t suffix)
 {
     // The cached value may be dead, so we need to do the lookup again... :(
     if (type && PyType_Check(type)) {
@@ -396,13 +394,42 @@ lookup_attr(JitOptContext *ctx, _PyBloomFilter *dependencies, _PyUOpInstruction 
             if (prefix != _NOP) {
                 ADD_OP(prefix, 0, 0);
             }
-            ADD_OP(immortal ? immortal_op : mortal_op, 0, (uintptr_t)lookup);
-            PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
-            _Py_BloomFilter_Add(dependencies, type);
+            ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE,
+                   0, (uintptr_t)lookup);
+            if (suffix != _NOP) {
+                ADD_OP(suffix, 2, 0);
+            }
+            if ((type->tp_flags & Py_TPFLAGS_IMMUTABLETYPE) == 0) {
+                PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
+                _Py_BloomFilter_Add(dependencies, type);
+            }
             return sym_new_const(ctx, lookup);
         }
     }
     return sym_new_not_null(ctx);
+}
+
+static void
+optimize_pop_top(JitOptContext *ctx, _PyUOpInstruction *this_instr, JitOptRef value)
+{
+    PyTypeObject *typ = sym_get_type(value);
+    if (PyJitRef_IsBorrowed(value) ||
+        sym_is_immortal(PyJitRef_Unwrap(value)) ||
+        sym_is_null(value)) {
+        ADD_OP(_POP_TOP_NOP, 0, 0);
+    }
+    else if (typ == &PyLong_Type) {
+        ADD_OP(_POP_TOP_INT, 0, 0);
+    }
+    else if (typ == &PyFloat_Type) {
+        ADD_OP(_POP_TOP_FLOAT, 0, 0);
+    }
+    else if (typ == &PyUnicode_Type) {
+        ADD_OP(_POP_TOP_UNICODE, 0, 0);
+    }
+    else {
+        ADD_OP(_POP_TOP, 0, 0);
+    }
 }
 
 /* Look up name via super (normal case from supercheck where
@@ -411,7 +438,8 @@ static JitOptRef
 lookup_super_attr(JitOptContext *ctx, _PyBloomFilter *dependencies,
                   _PyUOpInstruction *this_instr,
                   PyTypeObject *su_type, PyTypeObject *obj_type,
-                  PyObject *name, uint16_t immortal, uint16_t mortal)
+                  PyObject *name,
+                  uint16_t immortal, uint16_t mortal, uint16_t suffix)
 {
     if (su_type == NULL || obj_type == NULL) {
         return sym_new_not_null(ctx);
@@ -439,10 +467,16 @@ lookup_super_attr(JitOptContext *ctx, _PyBloomFilter *dependencies,
     ADD_OP(_POP_TOP, 0, 0);
     ADD_OP(_POP_TOP, 0, 0);
     ADD_OP(opcode, 0, (uintptr_t)lookup);
-    PyType_Watch(TYPE_WATCHER_ID, (PyObject *)su_type);
-    _Py_BloomFilter_Add(dependencies, su_type);
-    PyType_Watch(TYPE_WATCHER_ID, (PyObject *)obj_type);
-    _Py_BloomFilter_Add(dependencies, obj_type);
+    if (suffix != _NOP) {
+        ADD_OP(suffix, 2, 0);
+    }
+    // if obj_type is immutable, then all its superclasses are immutable
+    if ((obj_type->tp_flags & Py_TPFLAGS_IMMUTABLETYPE) == 0) {
+        PyType_Watch(TYPE_WATCHER_ID, (PyObject *)su_type);
+        _Py_BloomFilter_Add(dependencies, su_type);
+        PyType_Watch(TYPE_WATCHER_ID, (PyObject *)obj_type);
+        _Py_BloomFilter_Add(dependencies, obj_type);
+    }
     return sym_new_const_steal(ctx, lookup);
 }
 
@@ -525,7 +559,8 @@ optimize_uops(
     int trace_len,
     int curr_stacklen,
     _PyUOpInstruction *output,
-    _PyBloomFilter *dependencies
+    _PyBloomFilter *dependencies,
+    PyObject **constant_pool_ptr
 )
 {
     assert(!PyErr_Occurred());
@@ -544,9 +579,15 @@ optimize_uops(
         interp->type_watchers[TYPE_WATCHER_ID] = type_watcher_callback;
     }
 
-    _Py_uop_abstractcontext_init(ctx, dependencies);
+    if (_Py_uop_abstractcontext_init(ctx, dependencies)) {
+        assert(PyErr_Occurred());
+        PyErr_Clear();
+        return 0;
+    }
+
     _Py_UOpsAbstractFrame *frame = _Py_uop_frame_new(ctx, (PyCodeObject *)func->func_code, NULL, 0);
     if (frame == NULL) {
+        _Py_uop_abstractcontext_fini(ctx);
         return 0;
     }
     frame->func = func;
@@ -620,6 +661,7 @@ optimize_uops(
 
     /* Either reached the end or cannot optimize further, but there
      * would be no benefit in retrying later */
+    *constant_pool_ptr = Py_NewRef(ctx->constant_pool);
     _Py_uop_abstractcontext_fini(ctx);
     // Check that the trace ends with a proper terminator
     if (uop_buffer_length(&ctx->out_buffer) > 0) {
@@ -647,17 +689,10 @@ const uint16_t op_without_push[MAX_UOP_ID + 1] = {
     [_COPY] = _NOP,
     [_LOAD_CONST_INLINE] = _NOP,
     [_LOAD_CONST_INLINE_BORROW] = _NOP,
-    [_INSERT_1_LOAD_CONST_INLINE] = _POP_TOP_LOAD_CONST_INLINE,
-    [_INSERT_1_LOAD_CONST_INLINE_BORROW] = _POP_TOP_LOAD_CONST_INLINE_BORROW,
     [_LOAD_FAST] = _NOP,
     [_LOAD_FAST_BORROW] = _NOP,
     [_LOAD_SMALL_INT] = _NOP,
-    [_POP_TOP_LOAD_CONST_INLINE] = _POP_TOP,
-    [_POP_TOP_LOAD_CONST_INLINE_BORROW] = _POP_TOP,
-    [_POP_TWO_LOAD_CONST_INLINE_BORROW] = _POP_TWO,
-    [_POP_CALL_ONE_LOAD_CONST_INLINE_BORROW] = _POP_CALL_ONE,
-    [_POP_CALL_TWO_LOAD_CONST_INLINE_BORROW] = _POP_CALL_TWO,
-    [_SHUFFLE_2_LOAD_CONST_INLINE_BORROW] = _POP_CALL_ONE_LOAD_CONST_INLINE_BORROW,
+    [_PUSH_NULL] = _NOP,
 };
 
 const bool op_skip[MAX_UOP_ID + 1] = {
@@ -673,19 +708,6 @@ const uint16_t op_without_pop[MAX_UOP_ID + 1] = {
     [_POP_TOP_INT] = _NOP,
     [_POP_TOP_FLOAT] = _NOP,
     [_POP_TOP_UNICODE] = _NOP,
-    [_POP_TOP_LOAD_CONST_INLINE] = _LOAD_CONST_INLINE,
-    [_POP_TOP_LOAD_CONST_INLINE_BORROW] = _LOAD_CONST_INLINE_BORROW,
-    [_POP_TWO] = _POP_TOP,
-    [_POP_TWO_LOAD_CONST_INLINE_BORROW] = _POP_TOP_LOAD_CONST_INLINE_BORROW,
-    [_POP_CALL_TWO_LOAD_CONST_INLINE_BORROW] = _POP_CALL_ONE_LOAD_CONST_INLINE_BORROW,
-    [_POP_CALL_ONE_LOAD_CONST_INLINE_BORROW] = _POP_CALL_LOAD_CONST_INLINE_BORROW,
-    [_POP_CALL_TWO] = _POP_CALL_ONE,
-    [_POP_CALL_ONE] = _POP_CALL,
-};
-
-const uint16_t op_without_pop_null[MAX_UOP_ID + 1] = {
-    [_POP_CALL] = _POP_TOP,
-    [_POP_CALL_LOAD_CONST_INLINE_BORROW] = _POP_TOP_LOAD_CONST_INLINE_BORROW,
 };
 
 
@@ -720,10 +742,10 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
             default:
             {
                 // Cancel out pushes and pops, repeatedly. So:
-                //     _LOAD_FAST + _POP_TWO_LOAD_CONST_INLINE_BORROW + _POP_TOP
+                //     _LOAD_FAST + _POP_TOP + _POP_TOP + _LOAD_CONST_INLINE_BORROW + _POP_TOP
                 // ...becomes:
-                //     _NOP + _POP_TOP + _NOP
-                while (op_without_pop[opcode] || op_without_pop_null[opcode]) {
+                //     _NOP + _NOP + _POP_TOP + _NOP + _NOP
+                while (op_without_pop[opcode]) {
                     _PyUOpInstruction *last = &buffer[pc - 1];
                     while (op_skip[last->opcode]) {
                         last--;
@@ -735,14 +757,6 @@ remove_unneeded_uops(_PyUOpInstruction *buffer, int buffer_size)
                             opcode = last->opcode;
                             pc = (int)(last - buffer);
                         }
-                    }
-                    else if (last->opcode == _PUSH_NULL) {
-                        // Handle _POP_CALL and _POP_CALL_LOAD_CONST_INLINE_BORROW separately.
-                        // This looks for a preceding _PUSH_NULL instruction and
-                        // simplifies to _POP_TOP(_LOAD_CONST_INLINE_BORROW).
-                        last->opcode = _NOP;
-                        opcode = buffer[pc].opcode = op_without_pop_null[opcode];
-                        assert(opcode);
                     }
                     else {
                         break;
@@ -784,13 +798,15 @@ _Py_uop_analyze_and_optimize(
     int length,
     int curr_stacklen,
     _PyUOpInstruction *output,
-    _PyBloomFilter *dependencies
+    _PyBloomFilter *dependencies,
+    PyObject **constant_pool_ptr
 )
 {
     OPT_STAT_INC(optimizer_attempts);
 
     length = optimize_uops(
-        tstate, buffer, length, curr_stacklen, output, dependencies);
+        tstate, buffer, length, curr_stacklen, output,
+        dependencies, constant_pool_ptr);
 
     if (length == 0) {
         return length;
