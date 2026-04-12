@@ -2411,7 +2411,8 @@
             self_or_null = &stack_pointer[0];
             PyObject *value = sym_get_probable_value(owner);
             PyTypeObject *type = NULL;
-            if (value != NULL && PyType_Check(value)) {
+            bool is_class = PyType_Check(value);
+            if (value != NULL && is_class) {
                 type = (PyTypeObject *)value;
             }
             else {
@@ -2432,30 +2433,50 @@
                         callable = _PyStaticMethod_GetFunc(descr);
                     }
                     assert(callable);
+                    if (is_class && class_method) {
+                        PyObject *meth = PyMethod_New(callable, value);
+                        if (meth == NULL || sym_promote_to_constant_pool(ctx, meth) != 0) {
+                            ctx->done = true;
+                            ctx->out_of_space = true;
+                            break;
+                        }
+                        callable = meth;
+                    }
                     bool immortal = _Py_IsImmortal(callable) || (type->tp_flags & Py_TPFLAGS_IMMUTABLETYPE);
-                    if (PyType_Check(value)) {
+                    if (is_class && class_method) {
                         ADD_OP(_CHECK_ATTR_CLASS, 0, type->tp_version_tag);
+                        ADD_OP(_POP_TOP, 0, 0);
+                        ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uintptr_t)callable);
+                        ADD_OP(_PUSH_NULL, 0, 0);
+                        self_or_null[0] = sym_new_null(ctx);
+                        attr = sym_new_const(ctx, callable);
+                        CHECK_STACK_BOUNDS((oparg&1));
+                        stack_pointer[-1] = attr;
+                        stack_pointer += (oparg&1);
+                        ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                        PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
+                        _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                     }
                     else {
                         ADD_OP(_GUARD_TYPE_VERSION, 0, type->tp_version_tag);
+                        ADD_OP(_POP_TOP, 0, 0);
+                        ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uintptr_t)callable);
+                        if (class_method) {
+                            ADD_OP(_LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)type);
+                            self_or_null[0] = sym_new_const(ctx, (PyObject *)type);
+                        }
+                        else {
+                            ADD_OP(_PUSH_NULL, 0, 0);
+                            self_or_null[0] = sym_new_null(ctx);
+                        }
+                        attr = sym_new_const(ctx, callable);
+                        CHECK_STACK_BOUNDS((oparg&1));
+                        stack_pointer[-1] = attr;
+                        stack_pointer += (oparg&1);
+                        ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
+                        PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
+                        _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                     }
-                    ADD_OP(_POP_TOP, 0, 0);
-                    ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uintptr_t)callable);
-                    if (class_method) {
-                        ADD_OP(_LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)type);
-                        self_or_null[0] = sym_new_const(ctx, (PyObject *)type);
-                    }
-                    else {
-                        ADD_OP(_PUSH_NULL, 0, 0);
-                        self_or_null[0] = sym_new_null(ctx);
-                    }
-                    attr = sym_new_const(ctx, callable);
-                    CHECK_STACK_BOUNDS((oparg&1));
-                    stack_pointer[-1] = attr;
-                    stack_pointer += (oparg&1);
-                    ASSERT_WITHIN_STACK_BOUNDS(__FILE__, __LINE__);
-                    PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
-                    _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                 }
                 else {
                     attr = sym_new_not_null(ctx);
@@ -3725,8 +3746,15 @@
             JitOptRef callable;
             self_or_null = stack_pointer[-1 - oparg];
             callable = stack_pointer[-2 - oparg];
-            callable = sym_new_not_null(ctx);
-            self_or_null = sym_new_not_null(ctx);
+            PyObject *meth = sym_get_const(ctx, callable);
+            if (meth != NULL) {
+                callable = sym_new_const(ctx, ((PyMethodObject *)meth)->im_func);
+                self_or_null = sym_new_const(ctx, ((PyMethodObject *)meth)->im_self);
+            }
+            else {
+                callable = sym_new_not_null(ctx);
+                self_or_null = sym_new_not_null(ctx);
+            }
             stack_pointer[-2 - oparg] = callable;
             stack_pointer[-1 - oparg] = self_or_null;
             break;

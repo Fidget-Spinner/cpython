@@ -1421,7 +1421,9 @@ _Py_uop_sym_set_recorded_type(JitOptContext *ctx, JitOptRef ref, PyTypeObject *t
     if (type == NULL) {
         return;
     }
-    assert(PyType_Check((PyObject *)type));
+    if (!PyType_Check((PyObject *)type)) {
+        return;
+    }
     JitOptSymbol *sym = PyJitRef_Unwrap(ref);
     JitSymType tag = sym->tag;
     switch(tag) {

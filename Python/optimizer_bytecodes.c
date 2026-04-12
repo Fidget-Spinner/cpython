@@ -883,7 +883,8 @@ dummy_func(void) {
     op(_LOAD_ATTR, (owner -- attr, self_or_null[oparg&1])) {
         PyObject *value = sym_get_probable_value(owner);
         PyTypeObject *type = NULL;
-        if (value != NULL && PyType_Check(value)) {
+        bool is_class = PyType_Check(value);
+        if (value != NULL && is_class) {
             type = (PyTypeObject *)value;
         }
         else {
@@ -905,26 +906,42 @@ dummy_func(void) {
                     callable = _PyStaticMethod_GetFunc(descr);
                 }
                 assert(callable);
+                if (is_class && class_method) {
+                    PyObject *meth = PyMethod_New(callable, value);
+                    if (meth == NULL || sym_promote_to_constant_pool(ctx, meth) != 0) {
+                        ctx->done = true;
+                        ctx->out_of_space = true;
+                        break;
+                    }
+                    callable = meth;
+                }
                 bool immortal = _Py_IsImmortal(callable) || (type->tp_flags & Py_TPFLAGS_IMMUTABLETYPE);
-                if (PyType_Check(value)) {
+                if (is_class && class_method) {
                     ADD_OP(_CHECK_ATTR_CLASS, 0, type->tp_version_tag);
+                    ADD_OP(_POP_TOP, 0, 0);
+                    ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uintptr_t)callable);
+                    ADD_OP(_PUSH_NULL, 0, 0);
+                    self_or_null[0] = sym_new_null(ctx);
+                    attr = sym_new_const(ctx, callable);
+                    PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
+                    _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                 }
                 else {
                     ADD_OP(_GUARD_TYPE_VERSION, 0, type->tp_version_tag);
+                    ADD_OP(_POP_TOP, 0, 0);
+                    ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uintptr_t)callable);
+                    if (class_method) {
+                        ADD_OP(_LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)type);
+                        self_or_null[0] = sym_new_const(ctx, (PyObject *)type);
+                    }
+                    else {
+                        ADD_OP(_PUSH_NULL, 0, 0);
+                        self_or_null[0] = sym_new_null(ctx);
+                    }
+                    attr = sym_new_const(ctx, callable);
+                    PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
+                    _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
                 }
-                ADD_OP(_POP_TOP, 0, 0);
-                ADD_OP(immortal ? _LOAD_CONST_INLINE_BORROW : _LOAD_CONST_INLINE, 0, (uintptr_t)callable);
-                if (class_method) {
-                    ADD_OP(_LOAD_CONST_INLINE_BORROW, 0, (uintptr_t)type);
-                    self_or_null[0] = sym_new_const(ctx, (PyObject *)type);
-                }
-                else {
-                    ADD_OP(_PUSH_NULL, 0, 0);
-                    self_or_null[0] = sym_new_null(ctx);
-                }
-                attr = sym_new_const(ctx, callable);
-                PyType_Watch(TYPE_WATCHER_ID, (PyObject *)type);
-                _Py_BloomFilter_Add(dependencies, (PyTypeObject *)type);
             }
             else {
                 attr = sym_new_not_null(ctx);
@@ -1040,8 +1057,15 @@ dummy_func(void) {
     }
 
     op(_INIT_CALL_BOUND_METHOD_EXACT_ARGS, (callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
-        callable = sym_new_not_null(ctx);
-        self_or_null = sym_new_not_null(ctx);
+        PyObject *meth = sym_get_const(ctx, callable);
+        if (meth != NULL) {
+            callable = sym_new_const(ctx, ((PyMethodObject *)meth)->im_func);
+            self_or_null = sym_new_const(ctx, ((PyMethodObject *)meth)->im_self);
+        }
+        else {
+            callable = sym_new_not_null(ctx);
+            self_or_null = sym_new_not_null(ctx);
+        }
     }
 
     op(_CHECK_FUNCTION_VERSION, (func_version/2, callable, self_or_null, unused[oparg] -- callable, self_or_null, unused[oparg])) {
