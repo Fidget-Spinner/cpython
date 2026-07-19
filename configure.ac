@@ -7466,7 +7466,7 @@ then
     AC_MSG_RESULT([$reserve_frame_pointer_for_opcodes])
 
     if test "$reserve_frame_pointer_for_opcodes" = yes; then
-      CFLAGS_CEVAL_TAILCALL="-mreserve-frame-pointer-reg"
+      CFLAGS_CEVAL_TAILCALL="-fomit-frame-pointer -momit-leaf-frame-pointer -mreserve-frame-pointer-reg"
     fi
   fi
 fi
