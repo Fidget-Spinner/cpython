@@ -31936,7 +31936,7 @@ fi
 printf "%s\n" "$reserve_frame_pointer_for_opcodes" >&6; }
 
     if test "$reserve_frame_pointer_for_opcodes" = yes; then
-      CFLAGS_CEVAL_TAILCALL="-fomit-frame-pointer -momit-leaf-frame-pointer -mreserve-frame-pointer-reg"
+      CFLAGS_CEVAL_TAILCALL="-fomit-frame-pointer -momit-leaf-frame-pointer -Xclang -mframe-pointer=reserved"
     fi
   fi
 fi
